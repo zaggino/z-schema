@@ -1,0 +1,35 @@
+{
+    "name": "z-schema",
+    "description": "JSON schema validator",
+    "homepage": "https://github.com/zaggino/z-schema",
+    "keywords": ["json", "schema", "validator"],
+    "license": "MIT",
+    "author": {
+        "name": "Martin Zagora",
+        "email": "zaggino@gmail.com",
+        "url": "https://github.com/zaggino"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/zaggino/z-schema.git"
+    },
+    "main": "./src/zSchema.js",
+    "files": ["./src/zSchema.js", "LICENSE"],
+    "version": "1.0.0",
+    "dependencies": {
+        "q": ">= 0.9.6"
+    },
+    "devDependencies": {
+        "mocha": ">= 1.12.0",
+        "chai": ">= 1.7.2",
+        "uglify-js": ">= 2.3.6"
+    },
+    "bugs": {
+        "url": "https://github.com/zaggino/z-schema/issues",
+        "email": "zaggino@gmail.com"
+    },
+    "scripts": {
+        "compress": "uglifyjs ./src/zSchema.js --output ./src/zSchema.min.js --compress --mangle --comments",
+        "test": "mocha ./test"
+    }
+}
