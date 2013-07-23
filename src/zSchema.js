@@ -374,7 +374,9 @@
             'IS_NOT_REGEXP': 'Following string is not valid regExp: {1}.',
             'KEYWORD_SCHEMA_EXPECTED': 'Keyword "{1}" is expected to be a valid schema.',
             'KEYWORD_SCHEMA_EXPECTED_IN_ARRAY': 'Keyword "{1}" is expected to be an array of valid schemas.',
-            'KEYWORD_SCHEMA_EXPECTED_IN_OBJECT': 'Keyword "{1}" is expected to be an object of valid schemas.'
+            'KEYWORD_SCHEMA_EXPECTED_IN_OBJECT': 'Keyword "{1}" is expected to be an object of valid schemas.',
+            'E001': 'Some properties are not expected to appear on this object ({1}).',
+            'E002': 'Instance failed to validate against schemas in "{1}".'
         },
         fail: function (msg) {
             if (this.messages[msg]) {
@@ -383,6 +385,11 @@
             throw new Error(msg);
         },
         expect: {
+            boolean: function (what) {
+                if (!Utils.isBoolean(what)) {
+                    throw new Error(E.getMessage('TYPE_EXPECTED', 'boolean', Utils.whatIs(what)));
+                }
+            },
             string: function (what) {
                 if (!Utils.isString(what)) {
                     throw new Error(E.getMessage('TYPE_EXPECTED', 'string', Utils.whatIs(what)));
@@ -414,14 +421,14 @@
     Report.prototype = {
         addWarning: function (message) {
             this.warnings.push({
-                error: message,
+                message: message,
                 path: '#/' + this.path.join('/')
             });
             return true;
         },
         addError: function (message) {
             this.errors.push({
-                error: message,
+                message: message,
                 path: '#/' + this.path.join('/')
             });
             return false;
@@ -526,6 +533,40 @@
             console.error(err);
             throw err;
         }).done();
+    };
+
+    zSchema.prototype.compileSchema = function (schema, callback) {
+        var self = this;
+        var report = new Report();
+        this._compileSchema(report, schema).then(function (compiledSchema) {
+            self._validateSchema(report, compiledSchema);
+            if (report.isValid()) {
+                callback(undefined, compiledSchema);
+            } else {
+                callback(report.toJSON().errors, undefined);
+            }
+        }).done();
+    };
+
+    zSchema.prototype.validateWithCompiled = function (json, compiledSchema, callback) {
+        if (compiledSchema.__compiled !== true) {
+            console.warn('Schema is not compiled and might provide unexpected results.');
+        }
+
+        var report = new Report();
+        this._validateObject(report, compiledSchema, json);
+
+        var r = report.toJSON();
+
+        if (callback) {
+            if (report.isValid()) {
+                callback(undefined, true, r);
+            } else {
+                callback(r.errors, false, r);
+            }
+        }
+
+        return r;
     };
 
     zSchema.prototype._compileSchema = function (report, schema) {
@@ -734,8 +775,9 @@
                 s.push(additionalProperties);
             }
 
+            // we are passing tests even without this assert because this is covered by properties check
             // if s is empty in this stage, no additionalProperties are allowed
-            report.expect(s.length !== 0, 'Property is not expected by schema on this object. (' + m + ')');
+            // report.expect(s.length !== 0, 'E001', m);
 
             // Instance property value must pass all schemas from s
             s.forEach(function (sch) {
@@ -1023,6 +1065,10 @@
         },
         'default': function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.6.2   
+        },
+        // ---- custom keys used by zSchema
+        __compiled: function (report, schema) {
+            E.expect.boolean(schema.__compiled);
         }
     };
 
@@ -1177,7 +1223,7 @@
                     }
                 }, this);
                 // Validation of the instance succeeds if, after these two steps, set "s" is empty.
-                report.expect(s.length === 0, 'Some properties are not expected to appear on this object (' + s.join(',') + ').');
+                report.expect(s.length === 0, 'E001', s.join(','));
             }
         },
         patternProperties: function (report, schema, instance) {
@@ -1244,7 +1290,7 @@
                     break;
                 }
             }
-            report.expect(passes >= 1, 'Instance failed to validate against a schemas in "anyOf".');
+            report.expect(passes >= 1, 'E002', 'anyOf');
         },
         oneOf: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.2
@@ -1256,7 +1302,7 @@
                     passes++;
                 }
             }
-            report.expect(passes > 0, 'Instance failed to validate against a schemas in "oneOf".');
+            report.expect(passes > 0, 'E002', 'oneOf');
             report.expect(passes < 2, 'Instance validated against more than one schema in "oneOf".');
         },
         not: function (report, schema, instance) {

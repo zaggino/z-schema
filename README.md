@@ -36,3 +36,36 @@ The report object will look something like:
     ]
 }
 ```
+
+## Advanced (Server) Usage
+
+You can pre-compile schemas (for example on your server startup) so your application is not
+bothered by schema compilation and validation when validating ingoing / outgoing objects.
+
+```javascript
+var validator = new zSchema();
+validator.compileSchema(schema, function (err, compiledSchema) {
+    assert.isUndefined(err);
+    ...
+});
+```
+
+Then you can re-use compiled schemas easily with sync-async validation API.
+
+```javascript
+var report = validator.validateWithCompiled(json, compiledSchema);
+assert.isTrue(report.valid);
+...
+```
+
+```javascript
+validator.validateWithCompiled(json, compiledSchema, function(err, success, report) {
+    assert.isTrue(success);
+    ...
+});
+```
+
+Note:
+
+Most basic schemas don't have to be compiled for validation to work (although recommended).
+Async compilation was mostly created to work with schemas that contain references to other files.
