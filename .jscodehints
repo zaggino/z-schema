@@ -1,0 +1,9 @@
+{
+    "excluded-directories": [
+        "/node_modules",
+        "/zapp-ui/vendor"
+    ],
+    "excluded-files": [],
+    "max-file-count": 1,
+    "max-file-size": 1
+}
