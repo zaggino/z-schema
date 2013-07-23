@@ -110,6 +110,7 @@
                     main[key] = val;
                 }
             });
+            return main;
         },
         uniq: function (arr) {
             var rv = [];
@@ -376,7 +377,8 @@
             'KEYWORD_SCHEMA_EXPECTED_IN_ARRAY': 'Keyword "{1}" is expected to be an array of valid schemas.',
             'KEYWORD_SCHEMA_EXPECTED_IN_OBJECT': 'Keyword "{1}" is expected to be an object of valid schemas.',
             'E001': 'Some properties are not expected to appear on this object ({1}).',
-            'E002': 'Instance failed to validate against schemas in "{1}".'
+            'E002': 'Instance failed to validate against schemas in "{1}".',
+            'EC01': 'Keyword "{1}" must always be defined when using strict mode.'
         },
         fail: function (msg) {
             if (this.messages[msg]) {
@@ -465,7 +467,7 @@
      */
     function zSchema(options) {
         this.options = Utils.defaults(options || {}, {
-
+            strict: false // forces not to leave out some keys on schemas (additionalProperties, additionalItems)
         });
     }
 
@@ -861,15 +863,19 @@
             var isObject = Utils.isObject(schema.items);
             report.expect(isArray || isObject, 'KEYWORD_TYPE_EXPECTED', 'items', ['array', 'object']);
             if (isObject) {
-                var subReport = new Report(report);
-                this._validateSchema(subReport, schema.items);
-                report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED', 'items');
+                report.goDown('items');
+                this._validateSchema(report, schema.items);
+                report.goUp();
             } else if (isArray) {
                 schema.items.forEach(function (obj) {
                     var subReport = new Report(report);
                     this._validateSchema(subReport, obj);
                     report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED_IN_ARRAY', 'items');
                 }, this);
+            }
+            // custom - strict mode
+            if (this.options.strict === true) {
+                report.expect(schema.additionalItems !== undefined, 'EC01', 'additionalItems');
             }
         },
         maxItems: function (report, schema) {
@@ -927,6 +933,10 @@
                 this._validateSchema(subReport, val);
                 report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED_IN_OBJECT', 'properties');
             }, this);
+            // custom - strict mode
+            if (this.options.strict === true) {
+                report.expect(schema.additionalProperties !== undefined, 'EC01', 'additionalProperties');
+            }
         },
         patternProperties: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.1

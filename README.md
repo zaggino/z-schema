@@ -16,7 +16,8 @@ Passing all tests here (even optional, except zeroTerminatedFloats):
 
 Will try to maintain this as much as possible, all bug reports welcome.
 
-## Basic Usage
+Basic Usage
+-----------
 
 ```javascript
 var report = zSchema.validate(json, schema, function(report) {
@@ -37,7 +38,8 @@ The report object will look something like:
 }
 ```
 
-## Advanced (Server) Usage
+Advanced (Server) Usage
+-----------------------
 
 You can pre-compile schemas (for example on your server startup) so your application is not
 bothered by schema compilation and validation when validating ingoing / outgoing objects.
@@ -69,3 +71,34 @@ Note:
 
 Most basic schemas don't have to be compiled for validation to work (although recommended).
 Async compilation was mostly created to work with schemas that contain references to other files.
+
+Customization
+-------------
+
+You can add validation for your own custom string formats like this:
+(these are added to all validator instances, because it would never make sense to have multiple 
+functions to validate format with the same name)
+
+```javascript
+zSchema.registerFormat('xstring', function (str) {
+    return str === 'xxx';
+});
+zSchema.validate('xxx', {
+    'type': 'string',
+    'format': 'xstring'
+}, function (report) {
+    // report.valid will be true
+}
+```
+
+When creating new instance of validator, you can specify some options that will alter the validator behaviour.
+
+* strict: ```true/false```
+
+if strict mode is turned on, you are not able to leave properties "addtionalItems" and "additionalProperties" to default
+
+```javascript
+var validator = new zSchema({
+    strict: true
+});
+```
