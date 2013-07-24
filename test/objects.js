@@ -249,4 +249,30 @@ describe('Validations for object type:', function () {
             done();
         });
     });
+    it('should fail on invalid use of required #1', function (done) {
+        var schema = {
+            'type': 'string',
+            'required': true
+        };
+        zSchema.validate({}, schema, function (report) {
+            assert.isFalse(report.valid);
+            done();
+        });
+    });
+    it('should fail on invalid use of required #2', function (done) {
+        var schema = {
+            'type': 'object',
+            'properties': {
+                'password_current': {
+                    'type': 'string',
+                    'required': true
+                }
+            },
+            'additionalProperties': false
+        };
+        zSchema.validate({}, schema, function (report) {
+            assert.isFalse(report.valid);
+            done();
+        });
+    });
 });

@@ -806,7 +806,8 @@
         },
         multipleOf: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.1.1
-            report.expect(Utils.isNumber(schema.multipleOf), 'KEYWORD_TYPE_EXPECTED', 'multipleOf', 'number');
+            var fine = report.expect(Utils.isNumber(schema.multipleOf), 'KEYWORD_TYPE_EXPECTED', 'multipleOf', 'number');
+            if (!fine) return;
             report.expect(schema.multipleOf > 0, 'KEYWORD_MUST_BE', 'multipleOf', 'strictly greater than 0');
         },
         maximum: function (report, schema) {
@@ -815,7 +816,8 @@
         },
         exclusiveMaximum: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.2.1
-            report.expect(Utils.isBoolean(schema.exclusiveMaximum), 'KEYWORD_TYPE_EXPECTED', 'exclusiveMaximum', 'boolean');
+            var fine = report.expect(Utils.isBoolean(schema.exclusiveMaximum), 'KEYWORD_TYPE_EXPECTED', 'exclusiveMaximum', 'boolean');
+            if (!fine) return;
             report.expect(schema.maximum !== undefined, 'IF_ONE_PRESENT_THEN_ALSO_OTHER', 'exclusiveMaximum', 'maximum');
         },
         minimum: function (report, schema) {
@@ -824,22 +826,26 @@
         },
         exclusiveMinimum: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.1
-            report.expect(Utils.isBoolean(schema.exclusiveMinimum), 'KEYWORD_TYPE_EXPECTED', 'exclusiveMinimum', 'boolean');
+            var fine = report.expect(Utils.isBoolean(schema.exclusiveMinimum), 'KEYWORD_TYPE_EXPECTED', 'exclusiveMinimum', 'boolean');
+            if (!fine) return;
             report.expect(schema.minimum !== undefined, 'IF_ONE_PRESENT_THEN_ALSO_OTHER', 'exclusiveMinimum', 'minimum');
         },
         maxLength: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.1.1
-            report.expect(Utils.isInteger(schema.maxLength), 'KEYWORD_TYPE_EXPECTED', 'maxLength', 'integer');
+            var fine = report.expect(Utils.isInteger(schema.maxLength), 'KEYWORD_TYPE_EXPECTED', 'maxLength', 'integer');
+            if (!fine) return;
             report.expect(schema.maxLength >= 0, 'KEYWORD_MUST_BE', 'maxLength', 'greater than, or equal to 0');
         },
         minLength: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.2.1
-            report.expect(Utils.isInteger(schema.minLength), 'KEYWORD_TYPE_EXPECTED', 'minLength', 'integer');
+            var fine = report.expect(Utils.isInteger(schema.minLength), 'KEYWORD_TYPE_EXPECTED', 'minLength', 'integer');
+            if (!fine) return;
             report.expect(schema.minLength >= 0, 'KEYWORD_MUST_BE', 'minLength', 'greater than, or equal to 0');
         },
         pattern: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.3.1
-            report.expect(Utils.isString(schema.pattern), 'KEYWORD_TYPE_EXPECTED', 'pattern', 'string');
+            var fine = report.expect(Utils.isString(schema.pattern), 'KEYWORD_TYPE_EXPECTED', 'pattern', 'string');
+            if (!fine) return;
             try {
                 Utils.getRegExp(schema.pattern);
             } catch (e) {
@@ -850,27 +856,29 @@
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.1
             var isBoolean = Utils.isBoolean(schema.additionalItems);
             var isObject = Utils.isObject(schema.additionalItems);
-            report.expect(isBoolean || isObject, 'KEYWORD_TYPE_EXPECTED', 'additionalItems', ['boolean', 'object']);
+            var fine = report.expect(isBoolean || isObject, 'KEYWORD_TYPE_EXPECTED', 'additionalItems', ['boolean', 'object']);
+            if (!fine) return;
             if (isObject) {
-                var subReport = new Report(report);
-                this._validateSchema(subReport, schema.additionalItems);
-                report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED', 'additionalItems');
+                report.goDown('additionalItems');
+                this._validateSchema(report, schema.additionalItems);
+                report.goUp();
             }
         },
         items: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.1
             var isArray = Utils.isArray(schema.items);
             var isObject = Utils.isObject(schema.items);
-            report.expect(isArray || isObject, 'KEYWORD_TYPE_EXPECTED', 'items', ['array', 'object']);
+            var fine = report.expect(isArray || isObject, 'KEYWORD_TYPE_EXPECTED', 'items', ['array', 'object']);
+            if (!fine) return;
             if (isObject) {
                 report.goDown('items');
                 this._validateSchema(report, schema.items);
                 report.goUp();
             } else if (isArray) {
-                schema.items.forEach(function (obj) {
-                    var subReport = new Report(report);
-                    this._validateSchema(subReport, obj);
-                    report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED_IN_ARRAY', 'items');
+                schema.items.forEach(function (obj, index) {
+                    report.goDown('items[' + index + ']');
+                    this._validateSchema(report, obj);
+                    report.goUp();
                 }, this);
             }
             // custom - strict mode
@@ -880,12 +888,14 @@
         },
         maxItems: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.2.1
-            report.expect(Utils.isInteger(schema.maxItems), 'KEYWORD_TYPE_EXPECTED', 'maxItems', 'integer');
+            var fine = report.expect(Utils.isInteger(schema.maxItems), 'KEYWORD_TYPE_EXPECTED', 'maxItems', 'integer');
+            if (!fine) return;
             report.expect(schema.maxItems >= 0, 'KEYWORD_MUST_BE', 'maxItems', 'greater than, or equal to 0');
         },
         minItems: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.3.1
-            report.expect(Utils.isInteger(schema.minItems), 'KEYWORD_TYPE_EXPECTED', 'minItems', 'integer');
+            var fine = report.expect(Utils.isInteger(schema.minItems), 'KEYWORD_TYPE_EXPECTED', 'minItems', 'integer');
+            if (!fine) return;
             report.expect(schema.minItems >= 0, 'KEYWORD_MUST_BE', 'minItems', 'greater than, or equal to 0');
         },
         uniqueItems: function (report, schema) {
@@ -894,12 +904,14 @@
         },
         maxProperties: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.1.1
-            report.expect(Utils.isInteger(schema.maxProperties), 'KEYWORD_TYPE_EXPECTED', 'maxProperties', 'integer');
+            var fine = report.expect(Utils.isInteger(schema.maxProperties), 'KEYWORD_TYPE_EXPECTED', 'maxProperties', 'integer');
+            if (!fine) return;
             report.expect(schema.maxProperties >= 0, 'KEYWORD_MUST_BE', 'maxProperties', 'greater than, or equal to 0');
         },
         minProperties: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.2.1
-            report.expect(Utils.isInteger(schema.minProperties), 'KEYWORD_TYPE_EXPECTED', 'minProperties', 'integer');
+            var fine = report.expect(Utils.isInteger(schema.minProperties), 'KEYWORD_TYPE_EXPECTED', 'minProperties', 'integer');
+            if (!fine) return;
             report.expect(schema.minProperties >= 0, 'KEYWORD_MUST_BE', 'minProperties', 'greater than, or equal to 0');
         },
         required: function (report, schema) {
@@ -918,20 +930,22 @@
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.1
             var isBoolean = Utils.isBoolean(schema.additionalProperties);
             var isObject = Utils.isObject(schema.additionalProperties);
-            report.expect(isBoolean || isObject, 'KEYWORD_TYPE_EXPECTED', 'additionalProperties', ['boolean', 'object']);
+            var fine = report.expect(isBoolean || isObject, 'KEYWORD_TYPE_EXPECTED', 'additionalProperties', ['boolean', 'object']);
+            if (!fine) return;
             if (isObject) {
-                var subReport = new Report(report);
-                this._validateSchema(subReport, schema.additionalProperties);
-                report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED', 'additionalProperties');
+                report.goDown('additionalProperties');
+                this._validateSchema(report, schema.additionalProperties);
+                report.goUp();
             }
         },
         properties: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.1
-            report.expect(Utils.isObject(schema.properties), 'KEYWORD_TYPE_EXPECTED', 'properties', 'object');
-            Utils.forEach(report, function (val) {
-                var subReport = new Report(report);
-                this._validateSchema(subReport, val);
-                report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED_IN_OBJECT', 'properties');
+            var fine = report.expect(Utils.isObject(schema.properties), 'KEYWORD_TYPE_EXPECTED', 'properties', 'object');
+            if (!fine) return;
+            Utils.forEach(schema.properties, function (val, propName) {
+                report.goDown('properties[' + propName + ']');
+                this._validateSchema(report, val);
+                report.goUp();
             }, this);
             // custom - strict mode
             if (this.options.strict === true) {
@@ -940,29 +954,31 @@
         },
         patternProperties: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.1
-            report.expect(Utils.isObject(schema.patternProperties), 'KEYWORD_TYPE_EXPECTED', 'patternProperties', 'object');
-            Utils.forEach(report, function (val, key) {
+            var fine = report.expect(Utils.isObject(schema.patternProperties), 'KEYWORD_TYPE_EXPECTED', 'patternProperties', 'object');
+            if (!fine) return;
+            Utils.forEach(schema.patternProperties, function (val, propName) {
                 try {
-                    Utils.getRegExp(key);
+                    Utils.getRegExp(propName);
                 } catch (e) {
-                    report.addError('IS_NOT_REGEXP', key);
+                    report.addError('IS_NOT_REGEXP', propName);
                 }
-                var subReport = new Report(report);
-                this._validateSchema(subReport, val);
-                report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED_IN_OBJECT', 'properties');
+                report.goDown('patternProperties[' + propName + ']');
+                this._validateSchema(report, val);
+                report.goUp();
             }, this);
         },
         dependencies: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.5.1
-            report.expect(Utils.isObject(schema.dependencies), 'KEYWORD_TYPE_EXPECTED', 'dependencies', 'object');
-            Utils.forEach(schema.dependencies, function (schemaDependency) {
+            var fine = report.expect(Utils.isObject(schema.dependencies), 'KEYWORD_TYPE_EXPECTED', 'dependencies', 'object');
+            if (!fine) return;
+            Utils.forEach(schema.dependencies, function (schemaDependency, schemaKey) {
                 var isObject = Utils.isObject(schemaDependency);
                 var isArray = Utils.isArray(schemaDependency);
                 report.expect(isObject || isArray, 'Each value of "dependencies" must be either an object or an array.');
                 if (isObject) {
-                    var subReport = new Report(report);
-                    this._validateSchema(subReport, schemaDependency);
-                    report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED_IN_OBJECT', 'dependencies');
+                    report.goDown('dependencies[' + schemaKey + ']');
+                    this._validateSchema(report, schemaDependency);
+                    report.goUp();
                 } else if (isArray) {
                     report.expect(schemaDependency.length > 0, '"dependencies" array must have at least one element.');
                     schemaDependency.forEach(function (el) {
@@ -1006,10 +1022,10 @@
             if (!fine) return;
             fine = report.expect(schema.allOf.length > 0, 'KEYWORD_MUST_BE', 'allOf', 'an array with at least one element.');
             if (!fine) return;
-            schema.allOf.forEach(function (obj) {
-                var subReport = new Report(report);
-                this._validateSchema(subReport, obj);
-                report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED_IN_ARRAY', 'allOf');
+            schema.allOf.forEach(function (sch, index) {
+                report.goDown('allOf[' + index + ']');
+                this._validateSchema(report, sch);
+                report.goUp();
             }, this);
         },
         anyOf: function (report, schema) {
@@ -1019,10 +1035,10 @@
             if (!fine) return;
             fine = report.expect(schema.anyOf.length > 0, 'KEYWORD_MUST_BE', 'anyOf', 'an array with at least one element.');
             if (!fine) return;
-            schema.anyOf.forEach(function (obj) {
-                var subReport = new Report(report);
-                this._validateSchema(subReport, obj);
-                report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED_IN_ARRAY', 'anyOf');
+            schema.anyOf.forEach(function (sch, index) {
+                report.goDown('anyOf[' + index + ']');
+                this._validateSchema(report, sch);
+                report.goUp();
             }, this);
         },
         oneOf: function (report, schema) {
@@ -1032,10 +1048,10 @@
             if (!fine) return;
             fine = report.expect(schema.oneOf.length > 0, 'KEYWORD_MUST_BE', 'oneOf', 'an array with at least one element.');
             if (!fine) return;
-            schema.oneOf.forEach(function (obj) {
-                var subReport = new Report(report);
-                this._validateSchema(subReport, obj);
-                report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED_IN_ARRAY', 'oneOf');
+            schema.oneOf.forEach(function (sch, index) {
+                report.goDown('oneOf[' + index + ']');
+                this._validateSchema(report, sch);
+                report.goUp();
             }, this);
         },
         not: function (report, schema) {
@@ -1043,19 +1059,19 @@
             var fine;
             fine = report.expect(Utils.isObject(schema.not), 'KEYWORD_TYPE_EXPECTED', 'not', 'object');
             if (!fine) return;
-            var subReport = new Report(report);
-            this._validateSchema(subReport, schema.not);
-            report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED', 'not');
+            report.goDown('not');
+            this._validateSchema(report, schema.not);
+            report.goUp();
         },
         definitions: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.1
             var fine;
             fine = report.expect(Utils.isObject(schema.definitions), 'KEYWORD_TYPE_EXPECTED', 'definitions', 'object');
             if (!fine) return;
-            Utils.forEach(schema.definitions, function (obj) {
-                var subReport = new Report(report);
-                this._validateSchema(subReport, obj);
-                report.expect(subReport.isValid(), 'KEYWORD_SCHEMA_EXPECTED_IN_OBJECT', 'definitions');
+            Utils.forEach(schema.definitions, function (obj, index) {
+                report.goDown('definitions[' + index + ']');
+                this._validateSchema(report, obj);
+                report.goUp();
             }, this);
         },
         format: function (report, schema) {
