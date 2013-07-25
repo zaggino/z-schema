@@ -716,8 +716,10 @@
         // If items is a schema, then the child instance must be valid against this schema, 
         // regardless of its index, and regardless of the value of "additionalItems".
         if (Utils.isObject(schema.items)) {
-            instance.forEach(function (val) {
+            instance.forEach(function (val, index) {
+                report.goDown('[' + index + ']');
                 this._validateObject(report, schema.items, val);
+                report.goUp();
             }, this);
         }
 
@@ -730,11 +732,15 @@
 
                 // equal to doesnt make sense here
                 if (index < schema.items.length) {
+                    report.goDown('[' + index + ']');
                     this._validateObject(report, schema.items[index], val);
+                    report.goUp();
                 } else {
                     // might be boolean
                     if (Utils.isObject(schema.additionalItems)) {
+                        report.goDown('[' + index + ']');
                         this._validateObject(report, schema.additionalItems, val);
+                        report.goUp();
                     }
                 }
 
