@@ -467,7 +467,8 @@
      */
     function zSchema(options) {
         this.options = Utils.defaults(options || {}, {
-            strict: false // forces not to leave out some keys on schemas (additionalProperties, additionalItems)
+            strict: false, // when on, forces not to leave out some keys on schemas (additionalProperties, additionalItems)
+            noZeroLengthStrings: false // when on, always adds minLength: 1 to schemas where type is string
         });
     }
 
@@ -1019,6 +1020,13 @@
                 report.expect(Utils.isUniqueArray(schema.type), 'Elements in "type" array must be unique.');
             } else {
                 report.expect(primitiveTypes.indexOf(schema.type) !== -1, '"type" string must be one of ' + primitiveTypeStr + '.');
+            }
+            if (this.options.noZeroLengthStrings === true) {
+                if (schema.type === 'string' || isArray && schema.type.indexOf('string') !== -1) {
+                    if (schema.minLength === undefined) {
+                        schema.minLength = 1;
+                    }
+                }
             }
         },
         allOf: function (report, schema) {

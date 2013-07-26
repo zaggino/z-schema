@@ -102,3 +102,14 @@ var validator = new zSchema({
     strict: true
 });
 ```
+
+* noZeroLengthStrings: ```true/false```
+
+if noZeroLengthStrings are turned on, all defnitions of type ```string``` will assume minLength for this type is 1,
+so you can avoid having empty strings in your objects instead of null
+
+```javascript
+var validator = new zSchema({
+    noZeroLengthStrings: true
+});
+```
