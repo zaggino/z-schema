@@ -5,9 +5,9 @@ var assert = require('chai').assert;
 
 describe('Custom functionality validation:', function () {
 
-    it('should fail validating in strict mode', function (done) {
+    it('should fail validating in forceAdditional mode', function (done) {
         var validator = new zSchema({
-            strict: true
+            forceAdditional: true
         });
         var schema = {
             'type': 'array',
@@ -69,6 +69,41 @@ describe('Custom functionality validation:', function () {
         };
         validator.validate('', schema, function (report) {
             assert.isTrue(report.valid);
+            done();
+        });
+    });
+
+    it('should fail validating in noTypeless mode', function (done) {
+        var validator = new zSchema({
+            noTypeless: true
+        });
+        var schema = {
+            'type': 'array',
+            'items': {}
+        };
+        validator.compileSchema(schema, function (err, compiled) {
+            assert.isTrue(err.length === 1);
+            done();
+        });
+    });
+
+    it('should pass validating in noTypeless mode', function (done) {
+        var validator = new zSchema({
+            noTypeless: true
+        });
+        var schema = {
+            'type': 'array',
+            'items': {
+                'type': 'object',
+                'properties': {
+                    'one': {
+                        'type': 'number'
+                    }
+                }
+            }
+        };
+        validator.compileSchema(schema, function (err, compiled) {
+            assert.isTrue(!err);
             done();
         });
     });

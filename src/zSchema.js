@@ -467,9 +467,15 @@
      */
     function zSchema(options) {
         this.options = Utils.defaults(options || {}, {
-            strict: false, // when on, forces not to leave out some keys on schemas (additionalProperties, additionalItems)
-            noZeroLengthStrings: false // when on, always adds minLength: 1 to schemas where type is string
+            noZeroLengthStrings: false, // when on, always adds minLength: 1 to schemas where type is string,
+            noTypeless: false, // when on, every schema must specify a type
+            forceAdditional: false // when on, forces not to leave out some keys on schemas (additionalProperties, additionalItems)
         });
+        if (this.options.strict === true) {
+            this.options.noZeroLengthStrings = true;
+            this.options.noTypeless = true;
+            this.options.forceAdditional = true;
+        }
     }
 
     // static-methods
@@ -666,6 +672,9 @@
     };
 
     zSchema.prototype._validateSchema = function (report, schema) {
+        if (this.options.noTypeless === true) {
+            report.expect(schema.type !== undefined, 'EC01', 'type');
+        }
         Utils.forEach(schema, function (value, key) {
             if (SchemaValidators[key] !== undefined) {
                 SchemaValidators[key].call(this, report, schema);
@@ -889,7 +898,7 @@
                 }, this);
             }
             // custom - strict mode
-            if (this.options.strict === true) {
+            if (this.options.forceAdditional === true) {
                 report.expect(schema.additionalItems !== undefined, 'EC01', 'additionalItems');
             }
         },
@@ -955,7 +964,7 @@
                 report.goUp();
             }, this);
             // custom - strict mode
-            if (this.options.strict === true) {
+            if (this.options.forceAdditional === true) {
                 report.expect(schema.additionalProperties !== undefined, 'EC01', 'additionalProperties');
             }
         },

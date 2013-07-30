@@ -93,13 +93,13 @@ zSchema.validate('xxx', {
 
 When creating new instance of validator, you can specify some options that will alter the validator behaviour.
 
-* strict: ```true/false```
+* forceAdditional: ```true/false```
 
-if strict mode is turned on, you are not able to leave properties "addtionalItems" and "additionalProperties" to default
+if forceAdditional mode is turned on, you are not able to leave properties "addtionalItems" and "additionalProperties" to default
 
 ```javascript
 var validator = new zSchema({
-    strict: true
+    forceAdditional: true
 });
 ```
 
@@ -111,5 +111,23 @@ so you can avoid having empty strings in your objects instead of null
 ```javascript
 var validator = new zSchema({
     noZeroLengthStrings: true
+});
+```
+
+* noTypeless: ```true/false```
+
+if noTypeless is turned on, all schemas must specify attribute ```type```
+
+```javascript
+var validator = new zSchema({
+    noTypeless: true
+});
+```
+
+Alternatively, you can turn on all of the above options with:
+
+```javascript
+var validator = new zSchema({
+    strict: true
 });
 ```

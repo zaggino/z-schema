@@ -5,6 +5,8 @@ var assert = require('chai').assert;
 
 describe('Validations for API:', function () {
 
+    this.timeout(10000);
+
     var compiledSchema = null;
     var schema = {
         '$ref': 'http://json-schema.org/draft-04/schema#'
