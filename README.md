@@ -91,40 +91,46 @@ zSchema.validate('xxx', {
 }
 ```
 
-When creating new instance of validator, you can specify some options that will alter the validator behaviour.
+Strict validation
+-----------------
 
-* forceAdditional: ```true/false```
-
-if forceAdditional mode is turned on, you are not able to leave properties "addtionalItems" and "additionalProperties" to default
+When creating new instance of validator, you can specify some options that will alter the validator behaviour like this:
 
 ```javascript
 var validator = new zSchema({
-    forceAdditional: true
+    option: true
 });
 ```
+
+* noExtraKeywords: ```true/false```
+
+when true, do not allow unknown keywords in schema
 
 * noZeroLengthStrings: ```true/false```
 
-if noZeroLengthStrings are turned on, all defnitions of type ```string``` will assume minLength for this type is 1,
-so you can avoid having empty strings in your objects instead of null
-
-```javascript
-var validator = new zSchema({
-    noZeroLengthStrings: true
-});
-```
+when true, always adds minLength: 1 to schemas where type is string
 
 * noTypeless: ```true/false```
 
-if noTypeless is turned on, all schemas must specify attribute ```type```
+when true, every schema must specify a type
 
-```javascript
-var validator = new zSchema({
-    noTypeless: true
-});
-```
+* forceAdditional: ```true/false```
 
-Alternatively, you can turn on all of the above options with:
+when true, forces not to leave out some keys on schemas (additionalProperties, additionalItems)
+
+* forceProperties: ```true/false```
+
+when true, forces not to leave out properties or patternProperties on type-object schemas
+
+* forceItems: ```true/false```
+
+when true, forces not to leave out items on array-type schemas
+
+* forceMaxLength: ```true/false```
+
+when true, forces not to leave out maxLength on string-type schemas, when format or enum is not specified
+
+__Alternatively__, you can turn on all of the above options with:
 
 ```javascript
 var validator = new zSchema({

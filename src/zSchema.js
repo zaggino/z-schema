@@ -292,6 +292,9 @@
      */
     var FormatValidators = {
         'date': function (date) {
+            if (!Utils.isString(date)) {
+                return true;
+            }
             // full-date from http://tools.ietf.org/html/rfc3339#section-5.6
             var re = Utils.getRegExp('^([0-9]{4})-([0-9]{2})-([0-9]{2})$');
             var matches = re.exec(date);
@@ -307,6 +310,9 @@
             return true;
         },
         'date-time': function (dateTime) {
+            if (!Utils.isString(dateTime)) {
+                return true;
+            }
             // date-time from http://tools.ietf.org/html/rfc3339#section-5.6
             if (!Utils.isString(dateTime)) {
                 return false;
@@ -330,11 +336,17 @@
             return true;
         },
         'email': function (email) {
+            if (!Utils.isString(email)) {
+                return true;
+            }
             // https://www.owasp.org/index.php/OWASP_Validation_Regex_Repository
             var re = Utils.getRegExp('^[a-zA-Z0-9+&*-]+(?:\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,7}$');
             return re.test(email);
         },
         'hostname': function (hostname) {
+            if (!Utils.isString(hostname)) {
+                return true;
+            }
             // http://stackoverflow.com/questions/106179/regular-expression-to-match-hostname-or-ip-address
             if (hostname.indexOf('.') === -1) {
                 return false;
@@ -343,16 +355,25 @@
             return re.test(hostname);
         },
         'ipv4': function (ipv4) {
+            if (!Utils.isString(ipv4)) {
+                return true;
+            }
             // https://www.owasp.org/index.php/OWASP_Validation_Regex_Repository
             var re = Utils.getRegExp('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$');
             return re.test(ipv4);
         },
         'ipv6': function (ipv6) {
+            if (!Utils.isString(ipv6)) {
+                return true;
+            }
             // Stephen Ryan at Dartware @ http://forums.intermapper.com/viewtopic.php?t=452
             var re = Utils.getRegExp('^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$');
             return re.test(ipv6);
         },
         'uri': function (uri) {
+            if (!Utils.isString(uri)) {
+                return true;
+            }
             // https://www.owasp.org/index.php/OWASP_Validation_Regex_Repository
             var re = Utils.getRegExp('((((https?|ftps?|gopher|telnet|nntp):\/\/)|(mailto:|news:))(%[0-9A-Fa-f]{2}|[-()_.!~*\';\/?:@&=+$,A-Za-z0-9])+)([).!\';\/?:,][[:blank:]])?');
             return re.test(uri);
@@ -378,7 +399,8 @@
             'KEYWORD_SCHEMA_EXPECTED_IN_OBJECT': 'Keyword "{1}" is expected to be an object of valid schemas.',
             'E001': 'Some properties are not expected to appear on this object ({1}).',
             'E002': 'Instance failed to validate against schemas in "{1}".',
-            'EC01': 'Keyword "{1}" must always be defined when using strict mode.'
+            'EC01': 'Keyword "{1}" must always be defined when using strict mode.',
+            'EC02': 'Keyword "{1}" is not expected to appear in the schema.'
         },
         fail: function (msg) {
             if (this.messages[msg]) {
@@ -467,14 +489,22 @@
      */
     function zSchema(options) {
         this.options = Utils.defaults(options || {}, {
+            noExtraKeywords: false, // when on, do not allow unknown keywords in schema
             noZeroLengthStrings: false, // when on, always adds minLength: 1 to schemas where type is string,
             noTypeless: false, // when on, every schema must specify a type
-            forceAdditional: false // when on, forces not to leave out some keys on schemas (additionalProperties, additionalItems)
+            forceAdditional: false, // when on, forces not to leave out some keys on schemas (additionalProperties, additionalItems)
+            forceProperties: false, // when on, forces not to leave out properties or patternProperties on type-object schemas
+            forceItems: false, // when on, forces not to leave out items on array-type schemas
+            forceMaxLength: false // when on, forces not to leave out maxLength on string-type schemas, when format or enum is not specified
         });
         if (this.options.strict === true) {
+            this.options.noExtraKeywords = true;
             this.options.noZeroLengthStrings = true;
             this.options.noTypeless = true;
             this.options.forceAdditional = true;
+            this.options.forceProperties = true;
+            this.options.forceItems = true;
+            this.options.forceMaxLength = true;
         }
     }
 
@@ -617,7 +647,9 @@
             rv.push(schema.$ref);
         }
         Utils.forEach(schema, function (val, key) {
-            rv = rv.concat(_collectReferences(val));
+            if (Utils.isObject(val) || Utils.isArray(val)) {
+                rv = rv.concat(_collectReferences(val));
+            }
         }, this);
         return rv;
     };
@@ -638,7 +670,9 @@
             }
         }
         Utils.forEach(schema, function (val, key) {
-            _fixReferences(val, scope);
+            if (Utils.isObject(val) || Utils.isArray(val)) {
+                _fixReferences(val, scope);
+            }
         }, this);
         if (Utils.isString(schema.id)) {
             scope.pop();
@@ -679,7 +713,11 @@
             if (SchemaValidators[key] !== undefined) {
                 SchemaValidators[key].call(this, report, schema);
             } else {
-                report.addWarning('Unknown key "' + key + '" found in schema.')
+                if (this.options.noExtraKeywords === true) {
+                    report.expect(false, 'EC02', key);
+                } else {
+                    report.addWarning('Unknown key "' + key + '" found in schema.')
+                }
             }
         }, this);
         return report.isValid();
@@ -1037,6 +1075,21 @@
                     }
                 }
             }
+            if (this.options.forceProperties === true) {
+                if (schema.type === 'object' || isArray && schema.type.indexOf('object') !== -1) {
+                    report.expect(schema.properties !== undefined || schema.patternProperties !== undefined, 'EC01', 'properties');
+                }
+            }
+            if (this.options.forceItems === true) {
+                if (schema.type === 'array' || isArray && schema.type.indexOf('array') !== -1) {
+                    report.expect(schema.items !== undefined, 'EC01', 'items');
+                }
+            }
+            if (this.options.forceMaxLength === true) {
+                if (schema.type === 'string' || isArray && schema.type.indexOf('string') !== -1) {
+                    report.expect(schema.maxLength !== undefined || schema.format !== undefined || schema.enum !== undefined, 'EC01', 'maxLength');
+                }
+            }
         },
         allOf: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.1
@@ -1366,9 +1419,6 @@
         },
         format: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
-            if (!Utils.isString(instance)) {
-                return;
-            }
             report.expect(FormatValidators[schema.format](instance), 'Instance did not pass format validation. (' + schema.format + ')');
         }
     }
