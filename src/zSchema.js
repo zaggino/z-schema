@@ -399,6 +399,7 @@
             'KEYWORD_SCHEMA_EXPECTED_IN_OBJECT': 'Keyword "{1}" is expected to be an object of valid schemas.',
             'E001': 'Some properties are not expected to appear on this object ({1}).',
             'E002': 'Instance failed to validate against schemas in "{1}".',
+            'E003': 'Value of instance must be equal to one of the elements in "enum". ({1})',
             'EC01': 'Keyword "{1}" must always be defined when using strict mode.',
             'EC02': 'Keyword "{1}" is not expected to appear in the schema.'
         },
@@ -1361,7 +1362,7 @@
                     break;
                 }
             }
-            report.expect(match, 'Value of instance must be equal to one of the elements in "enum"');
+            report.expect(match, 'E003', instance);
         },
         type: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.2
