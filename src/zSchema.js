@@ -400,6 +400,7 @@
             'E001': 'Some properties are not expected to appear on this object ({1}).',
             'E002': 'Instance failed to validate against schemas in "{1}".',
             'E003': 'Value of instance must be equal to one of the elements in "enum". ({1})',
+            'E004': '"{1}" is expected to be of type {2}. ({3})',
             'EC01': 'Keyword "{1}" must always be defined when using strict mode.',
             'EC02': 'Keyword "{1}" is not expected to appear in the schema.'
         },
@@ -1369,7 +1370,7 @@
             var instanceType = Utils.whatIs(instance);
             if (Utils.isString(schema.type)) {
                 report.expect(instanceType === schema.type || instanceType === 'integer' && schema.type === 'number',
-                    instance + ' is expected to be of type ' + schema.type);
+                    'E004', instance, schema.type, instanceType);
             } else {
                 var one = schema.type.indexOf(instanceType) !== -1;
                 var two = instanceType === 'integer' && schema.type.indexOf('number') !== -1;
