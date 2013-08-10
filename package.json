@@ -13,9 +13,9 @@
         "type": "git",
         "url": "https://github.com/zaggino/z-schema.git"
     },
-    "main": "./src/zSchema.js",
-    "files": ["./src/zSchema.js", "LICENSE"],
-    "version": "1.4.2",
+    "main": "src/zSchema.js",
+    "files": ["src/zSchema.js", "src/zSchema.min.js", "LICENSE", "README.md"],
+    "version": "1.4.3",
     "dependencies": {
         "q": ">= 0.9.6"
     },
