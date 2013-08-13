@@ -401,6 +401,8 @@
             'E002': 'Instance failed to validate against schemas in "{1}".',
             'E003': 'Value of instance must be equal to one of the elements in "enum". ({1})',
             'E004': '"{1}" is expected to be of type {2}. ({3})',
+            'E005': 'Instance did not pass format validation. ({1}, {2})',
+            'E006': 'Instance validated against more than one schema in "{1}".',
             'EC01': 'Keyword "{1}" must always be defined when using strict mode.',
             'EC02': 'Keyword "{1}" is not expected to appear in the schema.'
         },
@@ -451,6 +453,15 @@
                 path: '#/' + this.path.join('/')
             });
             return true;
+        },
+        addSubReports: function (fn, reports) {
+            this.goDown(fn);
+            reports.forEach(function (report) {
+                report.errors.forEach(function (err) {
+                    this.addError(err.message);
+                }, this);
+            }, this);
+            this.goUp();
         },
         addError: function (message) {
             this.errors.push({
@@ -1386,28 +1397,44 @@
         anyOf: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.2
             var passes = 0;
+            var subReports = [];
             for (var i = 0, l = schema.anyOf.length; i < l; i++) {
                 var subReport = new Report(report);
                 this._validateObject(subReport, schema.anyOf[i], instance);
                 if (subReport.isValid()) {
                     passes++;
                     break;
+                } else {
+                    subReports.push(subReport);
                 }
             }
+
             report.expect(passes >= 1, 'E002', 'anyOf');
+
+            if (passes === 0) {
+                report.addSubReports('[anyOf]', subReports);
+            }
         },
         oneOf: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.2
             var passes = 0;
+            var subReports = [];
             for (var i = 0, l = schema.oneOf.length; i < l; i++) {
                 var subReport = new Report(report);
                 this._validateObject(subReport, schema.oneOf[i], instance);
                 if (subReport.isValid()) {
                     passes++;
+                } else {
+                    subReports.push(subReport);
                 }
             }
+
             report.expect(passes > 0, 'E002', 'oneOf');
-            report.expect(passes < 2, 'Instance validated against more than one schema in "oneOf".');
+            report.expect(passes < 2, 'E006', 'oneOf');
+
+            if (passes === 0) {
+                report.addSubReports('[oneOf]', subReports);
+            }
         },
         not: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
@@ -1421,7 +1448,7 @@
         },
         format: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
-            report.expect(FormatValidators[schema.format](instance), 'Instance did not pass format validation. (' + schema.format + ')');
+            report.expect(FormatValidators[schema.format](instance), 'E005', schema.format, instance);
         }
     }
 
