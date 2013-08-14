@@ -39,6 +39,23 @@ The report object will look something like:
 }
 ```
 
+If you need just to validate your schema, you can do it like this:
+
+```javascript
+var validator = new zSchema();
+var report = validator.validateSchema(schema);
+if (report.valid === true) ...
+```
+
+Or with Node.js style callback:
+
+```javascript
+var validator = new zSchema();
+validator.validateSchema(schema, function (err, valid) {
+    if (err) ...
+});
+```
+
 Remote references in schemas
 ----------------------------
 

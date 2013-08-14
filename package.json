@@ -15,7 +15,7 @@
     },
     "main": "src/zSchema.js",
     "files": ["src/zSchema.js", "src/zSchema.min.js", "LICENSE", "README.md"],
-    "version": "1.5.0",
+    "version": "1.5.1",
     "dependencies": {
         "q": ">= 0.9.6"
     },
