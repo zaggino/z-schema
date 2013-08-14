@@ -39,6 +39,24 @@ The report object will look something like:
 }
 ```
 
+Remote references in schemas
+----------------------------
+
+Your schemas can include remote references that should be real URIs ([more on that here](http://json-schema.org/latest/json-schema-core.html#anchor22)) 
+so validator can make a request and download the schema needed. Validator automatically
+caches these remote requests so they are not repeated with every validation.
+
+In case you don't have a real server or you'd like to load files from different location,
+you can preload remote locations into the validator like this:
+
+```javascript
+var fileContent = fs.readFileSync(__dirname + '/../json_schema_test_suite/remotes/integer.json', 'utf8');
+zSchema.setRemoteReference('http://localhost:1234/integer.json', fileContent);
+```
+
+```http://localhost:1234/integer.json``` doesn't have to be online now, all schemas
+referencing it will validate against ```string``` that was passed to the function.
+
 Advanced (Server) Usage
 -----------------------
 
