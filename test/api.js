@@ -41,4 +41,23 @@ describe('Validations for API:', function () {
         done();
     });
 
+    it('should validate schema sync', function (done) {
+        var sch = {
+            "type": "string"
+        };
+        var ins = new zSchema();
+        var report = ins.validateSchema(sch);
+        assert.isTrue(report.valid);
+        done();
+    });
+    it('should not validate schema sync', function (done) {
+        var sch = {
+            "type": null
+        };
+        var ins = new zSchema();
+        var report = ins.validateSchema(sch);
+        assert.isFalse(report.valid);
+        done();
+    });
+
 });

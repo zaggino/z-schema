@@ -600,6 +600,22 @@
         }).done();
     };
 
+    zSchema.prototype.validateSchema = function (schema, callback) {
+        var report = new Report();
+        this._validateSchema(report, schema);
+        report = report.toJSON();
+
+        if (callback) {
+            if (report.valid === true) {
+                callback(undefined, true);
+            } else {
+                callback(report.errors, undefined);
+            }
+        }
+
+        return report;
+    };
+
     zSchema.prototype.validateWithCompiled = function (json, compiledSchema, callback) {
         if (compiledSchema.__compiled !== true) {
             console.warn('Schema is not compiled and might provide unexpected results.');
