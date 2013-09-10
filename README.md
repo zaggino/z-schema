@@ -6,6 +6,8 @@ JSON Schema validator for Node.js (draft4 version)
 
 Forked from [zaggino/z-schema](https://github.com/zaggino/z-schema):
 - Reorganised validation errors
+- Fully async API (Promises + callbacks)
+- Async custom format validators
 
 Coded according to:
 
