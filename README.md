@@ -139,13 +139,26 @@ zSchema.validate('xxx', {
 
 Custom validators can also be async:
 
+Using promises:
+
 ```javascript
 zSchema.registerFormat('xstring', function (str) {
     return Q.delay(1000).thenResolve(return str === 'xxx'); // return a promise for validation result
 });
 ```
 
-Any exception thrown in custom validation function is written into validation error:
+Using classic callback:
+
+```javascript
+zSchema.registerFormat('xstring', function (str, callback) {
+    setTimeout(function(){
+        callback(null, str === 'xxx');
+        // or return custom error: callback(new Error('Bad, bad value!'))
+    }, 2000)
+});
+```
+
+Any exception thrown (or returned via classic callback) in custom validation function is written into validation error:
 ```javascript
 zSchema.registerFormat('xstring', function (str) {
     throw new Error('Bad, bad value!');
