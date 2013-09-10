@@ -11,8 +11,8 @@ describe('Validations for referencing children:', function () {
             'items': {
                 'type': 'string'
             }
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -34,9 +34,9 @@ describe('Validations for referencing children:', function () {
             'additionalItems': {
                 'type': 'null'
             }
-        }, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        }, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -62,9 +62,9 @@ describe('Validations for referencing children:', function () {
                 'z': {}
             },
             'additionalProperties': false
-        }, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        }, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -81,8 +81,8 @@ describe('Validations for referencing children:', function () {
             'not': {
                 '$ref': '#/definitions/myNumber'
             }
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -105,9 +105,9 @@ describe('Validations for referencing children:', function () {
                 }
             },
             '$ref': '#/definitions/myNumber'
-        }, function (report) {
-            assert.isFalse(report.valid);
-            assert.isTrue(new RegExp('level1').test(report.errors[0].path));
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
+            assert.isTrue(new RegExp('level1').test(err.errors[0].path));
             done();
         });
     });
@@ -153,9 +153,9 @@ describe('Validations for referencing children:', function () {
                 }
             ]
 
-        }, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        }, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -205,9 +205,9 @@ describe('Validations for referencing children:', function () {
                 }
             ]
 
-        }, function (report) {
-            assert.isTrue(new RegExp('/obj2/obj1').test(report.errors[0].path));
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.isTrue(new RegExp('/obj2/obj1').test(err.errors[0].path));
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -256,9 +256,9 @@ describe('Validations for referencing children:', function () {
                 }
             ]
 
-        }, function (report) {
-            // if (!report.valid) { console.log(report); }
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            // if(err) { console.log(err); }
+            assert.instanceOf(err, Error);
             done();
         });
     });

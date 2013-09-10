@@ -9,7 +9,7 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'maxLength': 5
-        }, function (report) {
+        }, function (err, report) {
             assert.isTrue(report.valid);
             done();
         });
@@ -18,7 +18,7 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'maxLength': 3
-        }, function (report) {
+        }, function (err, report) {
             assert.isTrue(report.valid);
             done();
         });
@@ -27,8 +27,8 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'maxLength': 1
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -36,7 +36,7 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'minLength': 1
-        }, function (report) {
+        }, function (err, report) {
             assert.isTrue(report.valid);
             done();
         });
@@ -45,7 +45,7 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'minLength': 3
-        }, function (report) {
+        }, function (err, report) {
             assert.isTrue(report.valid);
             done();
         });
@@ -54,8 +54,8 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'minLength': 5
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -64,9 +64,9 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'pattern': ''
-        }, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        }, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -76,8 +76,8 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'number',
             'pattern': ''
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -85,8 +85,8 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'pattern': 5
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -94,9 +94,9 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'pattern': '^xxx$'
-        }, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        }, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -106,8 +106,8 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'pattern': '^xxxx$'
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -120,9 +120,9 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'format': 'xstring'
-        }, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        }, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -132,8 +132,8 @@ describe('Validations for string type:', function () {
         zSchema.validate('yyy', {
             'type': 'string',
             'format': 'xstring'
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -142,7 +142,7 @@ describe('Validations for string type:', function () {
         zSchema.validate('9999-12-31', {
             'type': 'string',
             'format': 'date'
-        }, function (report) {
+        }, function (err, report) {
             assert.isTrue(report.valid);
             done();
         });

@@ -67,13 +67,15 @@ describe('Validations for json schema files:', function () {
 
                         // console.log(testSuite.description + '/' + testDefinition.description);
 
-                        zSchema.validate(testDefinition.data, testSuite.schema, function (report) {
+                        zSchema.validate(testDefinition.data, testSuite.schema, function (err, report) {
 
-                            if (report.valid === testDefinition.valid) {
+                            var valid = report && report.valid || false;
+
+                            if (valid === testDefinition.valid) {
                                 done();
                             } else {
                                 if (testDefinition.valid === true) {
-                                    console.log(report);
+                                    console.log(report || err);
                                     throw new Error('Test should pass, but failed.');
                                 } else {
                                     throw new Error('Test should fail, but passed.');

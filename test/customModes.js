@@ -21,7 +21,7 @@ describe('Custom functionality validation:', function () {
             }
         };
         validator.compileSchema(schema, function (err, compiled) {
-            assert.isTrue(err.length === 2);
+            assert.isTrue(err.errors.length === 2);
             done();
         });
     });
@@ -54,8 +54,8 @@ describe('Custom functionality validation:', function () {
         var schema = {
             'type': 'string'
         };
-        validator.validate('', schema, function (report) {
-            assert.isFalse(report.valid);
+        validator.validate('', schema, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -67,7 +67,7 @@ describe('Custom functionality validation:', function () {
         var schema = {
             'type': 'string'
         };
-        validator.validate('', schema, function (report) {
+        validator.validate('', schema, function (err, report) {
             assert.isTrue(report.valid);
             done();
         });
@@ -82,7 +82,7 @@ describe('Custom functionality validation:', function () {
             'items': {}
         };
         validator.compileSchema(schema, function (err, compiled) {
-            assert.isTrue(err.length === 1);
+            assert.isTrue(err.errors.length === 1);
             done();
         });
     });
