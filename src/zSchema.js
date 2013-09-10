@@ -1734,7 +1734,18 @@
         format: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
 
-            return Q.fcall(FormatValidators[schema.format], instance)
+            var deferred = Q.defer();
+
+            try {
+                var p = FormatValidators[schema.format](instance, deferred.makeNodeResolver());
+                if(Q.isPromise(p) || Utils.isBoolean(p)){
+                    deferred.resolve(p);
+                }
+            } catch (e){
+                deferred.reject(e);
+            }
+
+            return deferred.promise
                 .then(function (valid) { //sync validators return true/false
                     if(!valid){
                         report.addError('FORMAT_CUSTOM', {format: schema.format})
