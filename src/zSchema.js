@@ -1220,6 +1220,10 @@
             // http://json-schema.org/latest/json-schema-core.html#rfc.section.7.2
             report.expect(Utils.isString(schema.id), 'KEYWORD_TYPE_EXPECTED', 'id', 'string');
         },
+        title: function (report, schema) {
+            // http://json-schema.org/latest/json-schema-validation.html#rfc.section.6.1
+            report.expect(Utils.isString(schema.title), 'KEYWORD_TYPE_EXPECTED', {keyword: 'title', type: 'string'});
+        },
         description: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.6.1
             report.expect(Utils.isString(schema.description), 'KEYWORD_TYPE_EXPECTED', 'description', 'string');
