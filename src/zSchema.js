@@ -26,14 +26,12 @@
 
     var Q = require('q');
 
-    var ValidationError = function(code, message, params, path, subErrors) {
+    var ValidationError = function(code, message, params, path) {
         this.code = code;
         this.message = message;
         this.path = path || "";
 
         this.params = params || {};
-
-        this.subErrors = subErrors || null;
     }
 
     ValidationError.prototype = new Error();
@@ -78,7 +76,7 @@
         'KEYWORD_PATTERN': 'Keyword "{keyword}" is not a valid RegExp pattern ({pattern})'
     };
 
-    ValidationError.createError = function (code, params, path, subErrors) {
+    ValidationError.createError = function (code, params, path) {
         var msg = ValidationError.messages[code];
         params = params || {};
 
@@ -91,7 +89,7 @@
             return typeof subValue === 'string' || typeof subValue === 'number' ? subValue : whole;
         });
 
-        return new ValidationError(code, msg, params, path, subErrors);
+        return new ValidationError(code, msg, params, path);
     };
 
     var Utils = {
@@ -473,6 +471,7 @@
             this.goDown(fn);
             reports.forEach(function (report) {
                 report.errors.forEach(function (err) {
+                    err.path = '#/' + this.path.join('/')
                     this.errors.push(err)
                 }, this);
             }, this);
