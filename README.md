@@ -92,6 +92,17 @@ Advanced Usage
 You can pre-compile schemas (for example on your server startup) so your application is not
 bothered by schema compilation and validation when validating ingoing / outgoing objects.
 
+Promises:
+
+```javascript
+var validator = new zSchema();
+validator.compileSchema(schema)
+    .then(function(compiledSchema){
+    })
+```
+
+Or callback:
+
 ```javascript
 var validator = new zSchema();
 validator.compileSchema(schema, function (err, compiledSchema) {
