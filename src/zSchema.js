@@ -848,7 +848,7 @@
         return report.toPromise()
     };
 
-    zSchema.prototype._validateObject = function (report, schema, instance, paths) {
+    zSchema.prototype._validateObject = function (report, schema, instance) {
         zSchema.expect.object(schema);
 
         var self = this;
