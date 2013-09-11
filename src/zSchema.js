@@ -31,7 +31,6 @@
         this.code = code;
         this.message = message;
         this.path = path || "";
-
         this.params = params || {};
     }
 
@@ -78,6 +77,14 @@
         'KEYWORD_VALUE_TYPE': 'Each element of keyword "{keyword}" array must be a "{type}"',
         'UNKNOWN_FORMAT': 'There is no validation function for format "{format}"'
     };
+
+    ValidationError.prototype.addSubError = function (err) {
+        if(!this.subErrors){
+            this.subErrors = [];
+        }
+
+        this.subErrors.push(err);
+    }
 
     ValidationError.createError = function (code, params, path) {
         var msg = ValidationError.messages[code];
@@ -473,6 +480,7 @@
 
     var Report = function (parentReport) {
         if (parentReport) {
+            this.parentReport = parentReport;
             Utils.forEach(parentReport, function (val, key) {
                 this[key] = val;
             }, this);
@@ -482,30 +490,42 @@
         this.path = [];
     }
     Report.prototype = {
+        getPath: function () {
+            var path = ['#'];
+
+            if(this.parentReport){
+                path = path.concat(this.parentReport.path);
+            }
+            path = path.concat(this.path);
+
+            if(path.length == 1){
+                return '#/'
+            }
+
+            return path.join('/');
+        },
         addWarning: function (message) {
             this.warnings.push({
                 message: message,
-                path: '#/' + this.path.join('/')
+                path: this.getPath()
             });
             return true;
         },
-        addSubReports: function (fn, reports) {
-            this.goDown(fn);
-            reports.forEach(function (report) {
-                report.errors.forEach(function (err) {
-                    err.path = '#/' + this.path.join('/')
-                    this.errors.push(err)
+        addError: function (code, params, subReports) {
+            var err = ValidationError.createError(code, params, this.getPath());
+            if(subReports){
+                subReports.forEach(function (report) {
+                    report.errors.forEach(function (_err) {
+                        err.addSubError(_err)
+                    }, this);
                 }, this);
-            }, this);
-            this.goUp();
-        },
-        addError: function (code, params) {
-            this.errors.push(ValidationError.createError(code, params, ('#/' + this.path.join('/'))));
+            }
+            this.errors.push(err);
             return false;
         },
-        expect: function (bool, code, params) {
+        expect: function (bool, code, params, subReports) {
             if (!bool) {
-                this.addError(code, params);
+                this.addError(code, params, subReports);
                 return false;
             } else {
                 return true;
@@ -658,10 +678,14 @@
                         // object validation against schema
                         return self._validateObject(report, compiledSchema, json)
                             .then(function () {
-                                return report.toJSON()
+                                return report.toPromise()
                             })
                     })
-            }).nodeify(callback)
+            })
+            .then(function () {
+                return report.toJSON()
+            })
+            .nodeify(callback)
     };
 
     /**
@@ -824,7 +848,7 @@
         return report.toPromise()
     };
 
-    zSchema.prototype._validateObject = function (report, schema, instance) {
+    zSchema.prototype._validateObject = function (report, schema, instance, paths) {
         zSchema.expect.object(schema);
 
         var self = this;
@@ -841,7 +865,7 @@
             maxRefs--;
         }
 
-        return Q.allSettled(Utils.map(schema, function (val, key) {
+        return Q.all(Utils.map(schema, function (val, key) {
                 if (InstanceValidators[key] !== undefined) {
                     return Q.fcall(InstanceValidators[key].bind(self), report, schema, instance);
                 }
@@ -855,12 +879,11 @@
                     return self._recurseObject(report, schema, instance);
                 }
             })
-            .finally(function () {
+            .then(function () {
                 if (thisIsRoot) {
                     delete report.rootSchema;
                 }
-
-                return report.toPromise();
+                return report;
             })
     };
 
@@ -875,10 +898,10 @@
         if (Utils.isObject(schema.items)) {
 
             instance.forEach(function (val, index) {
-                p = p.finally(function () {
+                p = p.then(function () {
                     report.goDown('[' + index + ']');
                     return self._validateObject(report, schema.items, val)
-                        .finally(function () {
+                        .then(function () {
                             report.goUp();
                         })
                 })
@@ -895,12 +918,12 @@
 
             instance.forEach(function (val, index) {
                 
-                p = p.finally(function () {
+                p = p.then(function () {
                     // equal to doesnt make sense here
                     if (index < schema.items.length) {
                         report.goDown('[' + index + ']');
                         return self._validateObject(report, schema.items[index], val)
-                            .finally(function () {
+                            .then(function () {
                                 report.goUp();
                             })
                     } else {
@@ -908,7 +931,7 @@
                         if (Utils.isObject(schema.additionalItems)) {
                             report.goDown('[' + index + ']');
                             return self._validateObject(report, schema.additionalItems, val)
-                                .finally(function () {
+                                .then(function () {
                                     report.goUp();
                                 })
                         }
@@ -965,10 +988,10 @@
 
             // Instance property value must pass all schemas from s
             s.forEach(function (sch) {
-                promise = promise.finally(function () {
+                promise = promise.then(function () {
                     report.goDown(m);
                     return self._validateObject(report, sch, propertyValue)
-                        .finally(function () {
+                        .then(function () {
                             report.goUp();
                         })
                 })
@@ -1542,7 +1565,7 @@
             }
             Utils.forEach(schema.dependencies, function (dependency, name) {
 
-                p = p.finally(function () {
+                p = p.then(function () {
                     if (instance[name] !== undefined) {
                         if (Utils.isObject(dependency)) {
                             // errors will be added to same report
@@ -1588,7 +1611,7 @@
             var p = Q();
 
             schema.allOf.forEach(function (sch) {
-                p = p.finally(function () {
+                p = p.then(function () {
                     return self._validateObject(report, sch, instance);
                 })
             });
@@ -1604,12 +1627,12 @@
             var p = Q();
 
             schema.anyOf.forEach(function (anyOf) {
-                p = p.finally(function () {
+                p = p.then(function () {
 
                     if(passes > 0) return;
                     var subReport = new Report(report);
                     return self._validateObject(subReport, anyOf, instance)
-                        .finally(function () {
+                        .then(function () {
                             if (subReport.isValid()) {
                                 passes++;
                             } else {
@@ -1619,12 +1642,8 @@
                 })
             })
 
-            return p.finally(function () {
-                report.expect(passes >= 1, 'ANY_OF_MISSING');
-
-                if (passes === 0) {
-                    report.addSubReports('[anyOf]', subReports);
-                }
+            return p.then(function () {
+                report.expect(passes >= 1, 'ANY_OF_MISSING', {}, passes === 0 ? subReports : null);
             })
         },
         oneOf: function (report, schema, instance) {
@@ -1636,10 +1655,11 @@
             var p = Q();
 
             schema.oneOf.forEach(function (oneOf) {
-                p = p.finally(function () {
+                p = p.then(function () {
+
                     var subReport = new Report(report);
                     return self._validateObject(subReport, oneOf, instance)
-                        .finally(function () {
+                        .then(function () {
                             if (subReport.isValid()) {
                                 passes++;
                             } else {
@@ -1648,22 +1668,17 @@
                         })
                 })
             })
-            
-            return p.finally(function () {
-                report.expect(passes > 0, 'ONE_OF_MISSING');
+
+            return p.then(function () {
+                report.expect(passes > 0, 'ONE_OF_MISSING', {}, passes === 0 ? subReports : null);
                 report.expect(passes < 2, 'ONE_OF_MULTIPLE');
-
-                if (passes === 0) {
-                    report.addSubReports('[oneOf]', subReports);
-                }
             })
-
         },
         not: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
             var subReport = new Report(report);
             return this._validateObject(subReport, schema.not, instance)
-                .finally(function () {
+                .then(function () {
                     report.expect(!subReport.isValid(), 'NOT_PASSED');
                 })
         },
