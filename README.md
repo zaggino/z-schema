@@ -123,11 +123,6 @@ zSchema.validate(json, compiledSchema)
     })
 ```
 
-Note:
-
-Most basic schemas don't have to be compiled for validation to work (although recommended).
-Async compilation was mostly created to work with schemas that contain references to other files.
-
 Custom format validators
 -----------------------
 
