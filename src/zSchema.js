@@ -23,19 +23,22 @@
  * @license http://opensource.org/licenses/MIT
  */
 
+/*jslint node:true, nomen:true, plusplus:true, regexp:true, vars:true*/
 /*jshint -W044*/
+/*global zSchema*/
 
 (function () {
+    "use strict";
 
     var Q = require('q');
 
-    var ValidationError = function(code, message, params, path) {
+    var ValidationError = function (code, message, params, path) {
         this.code = code;
         this.message = message;
         this.path = path || "";
 
         this.params = params || {};
-    }
+    };
 
     ValidationError.prototype = new Error();
 
@@ -91,10 +94,10 @@
 
         msg = msg.replace(/\{([^{}]*)\}/g, function (whole, varName) {
             var subValue = params[varName];
-            if(typeof subValue === 'string' || typeof subValue === 'number'){
-                return subValue
+            if (typeof subValue === 'string' || typeof subValue === 'number') {
+                return subValue;
             }
-            if(subValue && typeof subValue.toString === 'function' ){
+            if (subValue && typeof subValue.toString === 'function') {
                 return subValue.toString();
             }
             return whole;
@@ -165,8 +168,8 @@
             return true;
         },
         keys: function (obj) {
-            var rv = [];
-            for (var key in obj) {
+            var rv = [], key;
+            for (key in obj) {
                 if (obj.hasOwnProperty(key)) {
                     rv.push(key);
                 }
@@ -177,7 +180,8 @@
             if (Array.isArray(obj)) {
                 return obj.forEach(callback, context);
             } else if (Utils.isObject(obj)) {
-                for (var key in obj) {
+                var key;
+                for (key in obj) {
                     if (obj.hasOwnProperty(key)) {
                         callback.call(context, obj[key], key);
                     }
@@ -186,12 +190,11 @@
         },
         map: function (obj, callback, thisArg) {
             var index = -1,
-                length = obj ? obj.length : 0,
-                result = Array(typeof length == 'number' ? length : 0);
+                result = [];
 
             Utils.forEach(obj, function (val, key) {
-                result[++index] = callback.call(thisArg, val, key)
-            })
+                result[++index] = callback.call(thisArg, val, key);
+            });
 
             return result;
         },
