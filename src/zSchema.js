@@ -23,6 +23,8 @@
  * @license http://opensource.org/licenses/MIT
  */
 
+/*jshint -W044*/
+
 (function () {
 
     var Q = require('q');

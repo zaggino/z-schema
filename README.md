@@ -219,8 +219,8 @@ var validator = new zSchema({
 
 # Pull requests
 
-Avoid JSHint errors, settings for the JSHint are specified in ```.jshintrc```.
-Please check for errors before opening any pull requests.
+Avoid JSHint errors - settings for the JSHint are specified in ```.jshintrc```.
+You can check for errors using ```grunt jshint``` task. Please check for errors before opening any pull requests.
 
 # Credits
 

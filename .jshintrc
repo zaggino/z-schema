@@ -10,7 +10,7 @@
     "nonew": true,
     "quotmark": true,
     "undef": true,
-    "unused": false,
+    "unused": true,
     "trailing": true,
 
     "maxparams": 20,
@@ -23,6 +23,7 @@
     "node": true,
     "nonstandard": true,
     "devel": true,
+    "loopfunc": true,
 
     "globals": {
         
