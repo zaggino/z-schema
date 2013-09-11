@@ -45,6 +45,7 @@
         "email": "zaggino@gmail.com"
     },
     "scripts": {
-
+        "prepublish": "grunt",
+        "test": "grunt test"
     }
 }
