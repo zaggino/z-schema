@@ -13,7 +13,7 @@ describe('Validations for object type:', function () {
         }, {
             'type': 'object',
             'maxProperties': 3
-        }, function (report) {
+        }, function (err, report) {
             assert.isTrue(report.valid);
             done();
         });
@@ -26,8 +26,8 @@ describe('Validations for object type:', function () {
         }, {
             'type': 'object',
             'maxProperties': 2
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -39,7 +39,7 @@ describe('Validations for object type:', function () {
         }, {
             'type': 'object',
             'minProperties': 3
-        }, function (report) {
+        }, function (err, report) {
             assert.isTrue(report.valid);
             done();
         });
@@ -52,8 +52,8 @@ describe('Validations for object type:', function () {
         }, {
             'type': 'object',
             'minProperties': 4
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -65,7 +65,7 @@ describe('Validations for object type:', function () {
         }, {
             'type': 'object',
             'required': ['x1']
-        }, function (report) {
+        }, function (err, report) {
             assert.isTrue(report.valid);
             done();
         });
@@ -79,9 +79,9 @@ describe('Validations for object type:', function () {
         }, {
             'type': 'object',
             'required': ['x4']
-        }, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        }, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -95,8 +95,8 @@ describe('Validations for object type:', function () {
         }, {
             'type': 'object',
             'required': 'x1'
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -108,8 +108,8 @@ describe('Validations for object type:', function () {
         }, {
             'type': 'object',
             'required': []
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -132,9 +132,9 @@ describe('Validations for object type:', function () {
             'apple': 'pie'
         };
 
-        zSchema.validate(instance, schema, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        zSchema.validate(instance, schema, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -161,8 +161,8 @@ describe('Validations for object type:', function () {
             'apple': 'pie'
         };
 
-        zSchema.validate(instance, schema, function (report) {
-            assert.isFalse(report.valid);
+        zSchema.validate(instance, schema, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -180,9 +180,9 @@ describe('Validations for object type:', function () {
             'd': null,
         };
 
-        zSchema.validate(instance, schema, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        zSchema.validate(instance, schema, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -201,8 +201,8 @@ describe('Validations for object type:', function () {
             'd': null,
         };
 
-        zSchema.validate(instance, schema, function (report) {
-            assert.isFalse(report.valid);
+        zSchema.validate(instance, schema, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -221,9 +221,9 @@ describe('Validations for object type:', function () {
             'b': null
         };
 
-        zSchema.validate(instance, schema, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        zSchema.validate(instance, schema, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -244,8 +244,8 @@ describe('Validations for object type:', function () {
                 }
             }
         };
-        zSchema.validate(obj, schema, function (report) {
-            assert.isFalse(report.valid);
+        zSchema.validate(obj, schema, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -254,8 +254,8 @@ describe('Validations for object type:', function () {
             'type': 'string',
             'required': true
         };
-        zSchema.validate({}, schema, function (report) {
-            assert.isFalse(report.valid);
+        zSchema.validate({}, schema, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -270,8 +270,8 @@ describe('Validations for object type:', function () {
             },
             'additionalProperties': false
         };
-        zSchema.validate({}, schema, function (report) {
-            assert.isFalse(report.valid);
+        zSchema.validate({}, schema, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
