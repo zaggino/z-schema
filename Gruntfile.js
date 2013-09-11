@@ -8,7 +8,7 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON("package.json"),
         uglify: {
             options: {
-                banner: "/*! <%= pkg.name %> version <%= pkg.version %>, <%= grunt.template.today('yyyy-mm-dd') %> */\n",
+                banner: "/*! <%= pkg.name %> version <%= pkg.version %> */\n",
                 report: "min"
             },
             build: {
@@ -18,15 +18,24 @@ module.exports = function (grunt) {
         },
         jshint: {
             all: ["src/zSchema.js"],
-            jshintrc: ".jshintrc"
+            options: {
+                jshintrc: ".jshintrc"
+            }
+        },
+        simplemocha: {
+            options: {
+                reporter: "dot"
+            },
+            all: { src: ["test/*.js"] }
         }
     });
 
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-contrib-jshint");
+    grunt.loadNpmTasks("grunt-simple-mocha");
 
     // Default task(s).
-    grunt.registerTask("default", ["jshint", "uglify"]);
+    grunt.registerTask("default", ["jshint", "uglify", "simplemocha"]);
 
 };
