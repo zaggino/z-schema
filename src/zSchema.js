@@ -790,7 +790,6 @@
     zSchema.prototype._validateSchema = function (report, schema) {
 
         var self = this;
-        var p = Q();
 
         if (this.options.noTypeless === true) {
             report.expect(schema.type !== undefined, 'KEYWORD_UNDEFINED_STRICT', {keyword: 'type'});
@@ -798,22 +797,18 @@
 
         Utils.forEach(schema, function (value, key) {
 
-            p = p.finally(function () {
-                if (SchemaValidators[key] !== undefined) {
-                    return Q.fcall(SchemaValidators[key].bind(self), report, schema);
+            if (SchemaValidators[key] !== undefined) {
+                SchemaValidators[key].call(self, report, schema);
+            } else {
+                if (self.options.noExtraKeywords === true) {
+                    report.expect(false, 'KEYWORD_UNEXPECTED', {keyword: key});
                 } else {
-                    if (self.options.noExtraKeywords === true) {
-                        report.expect(false, 'KEYWORD_UNEXPECTED', {keyword: key});
-                    } else {
-                        report.addWarning('Unknown key "' + key + '" found in schema.')
-                    }
+                    report.addWarning('Unknown key "' + key + '" found in schema.')
                 }
-            })
+            }
         });
 
-        return p.finally(function () {
-            return report.toPromise()
-        });
+        return report.toPromise()
     };
 
     zSchema.prototype._validateObject = function (report, schema, instance) {
@@ -1041,17 +1036,14 @@
             if (!fine) return;
             if (isObject) {
                 report.goDown('additionalItems');
-                return this._validateSchema(report, schema.additionalItems)
-                    .finally(function () {
-                        report.goUp();
-                    })
+                this._validateSchema(report, schema.additionalItems);
+                report.goUp();
             }
         },
         items: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.1
 
             var self = this;
-            var p = Q();
 
             var isArray = Utils.isArray(schema.items);
             var isObject = Utils.isObject(schema.items);
@@ -1059,29 +1051,21 @@
             if (!fine) return;
             if (isObject) {
                 report.goDown('items');
-                p = this._validateSchema(report, schema.items)
-                    .finally(function () {
-                        report.goUp();
-                    })
+                this._validateSchema(report, schema.items)
+                report.goUp();
             } else if (isArray) {
                 schema.items.forEach(function (obj, index) {
 
-                    p = p.finally(function () {
-                        report.goDown('items[' + index + ']');
-                        return self._validateSchema(report, obj)
-                            .finally(function () {
-                                report.goUp();
-                            })
-                    })
+                    report.goDown('items[' + index + ']');
+                    self._validateSchema(report, obj)
+                    report.goUp();
                 });
             }
 
-            return p.finally(function () {
-                // custom - strict mode
-                if (self.options.forceAdditional === true) {
-                    report.expect(schema.additionalItems !== undefined, 'KEYWORD_UNDEFINED_STRICT', {keyword: 'additionalItems'});
-                }
-            })
+            // custom - strict mode
+            if (self.options.forceAdditional === true) {
+                report.expect(schema.additionalItems !== undefined, 'KEYWORD_UNDEFINED_STRICT', {keyword: 'additionalItems'});
+            }
 
         },
         maxItems: function (report, schema) {
@@ -1132,94 +1116,69 @@
             if (!fine) return;
             if (isObject) {
                 report.goDown('additionalProperties');
-                return this._validateSchema(report, schema.additionalProperties)
-                    .finally(function () {
-                        report.goUp();
-                    })
+                this._validateSchema(report, schema.additionalProperties)
+                report.goUp();
             }
         },
         properties: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.1
             var self = this;
-            var p = Q();
 
             var fine = report.expect(Utils.isObject(schema.properties), 'KEYWORD_TYPE_EXPECTED', {keyword: 'properties', type: 'object'});
             if (!fine) return;
             Utils.forEach(schema.properties, function (val, propName) {
-
-                p = p.finally(function () {
-                    report.goDown('properties[' + propName + ']');
-                    return self._validateSchema(report, val)
-                        .finally(function () {
-                            report.goUp();
-                        })
-                })
+                report.goDown('properties[' + propName + ']');
+                self._validateSchema(report, val)
+                report.goUp();
             });
 
-            return p.finally(function () {
-                // custom - strict mode
-                if (self.options.forceAdditional === true) {
-                    report.expect(schema.additionalProperties !== undefined, 'KEYWORD_UNDEFINED_STRICT', {keyword: 'additionalProperties'});
-                }
-            })
+            // custom - strict mode
+            if (self.options.forceAdditional === true) {
+                report.expect(schema.additionalProperties !== undefined, 'KEYWORD_UNDEFINED_STRICT', {keyword: 'additionalProperties'});
+            }
         },
         patternProperties: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.1
 
             var self = this;
-            var p = Q();
 
             var fine = report.expect(Utils.isObject(schema.patternProperties), 'KEYWORD_TYPE_EXPECTED', {keyword: 'patternProperties', type: 'object'});
             if (!fine) return;
             Utils.forEach(schema.patternProperties, function (val, propName) {
-
-                p = p.finally(function () {
-                    try {
-                        Utils.getRegExp(propName);
-                    } catch (e) {
-                        report.addError('KEYWORD_PATTERN', {keyword: 'patternProperties', pattern: propName});
-                    }
-                    report.goDown('patternProperties[' + propName + ']');
-                    return self._validateSchema(report, val)
-                        .finally(function () {
-                            report.goUp();
-                        })
-                })
+                try {
+                    Utils.getRegExp(propName);
+                } catch (e) {
+                    report.addError('KEYWORD_PATTERN', {keyword: 'patternProperties', pattern: propName});
+                }
+                report.goDown('patternProperties[' + propName + ']');
+                self._validateSchema(report, val)
+                report.goUp();
             });
-
-            return p;
         },
         dependencies: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.5.1
 
             var self = this;
-            var p = Q();
 
             var fine = report.expect(Utils.isObject(schema.dependencies), 'KEYWORD_TYPE_EXPECTED', 'dependencies', 'object');
             if (!fine) return;
             Utils.forEach(schema.dependencies, function (schemaDependency, schemaKey) {
 
-                p = p.finally(function () {
-                    var isObject = Utils.isObject(schemaDependency);
-                    var isArray = Utils.isArray(schemaDependency);
-                    report.expect(isObject || isArray, 'KEYWORD_VALUE_TYPE', {keyword: 'dependencies', type: 'object or array'} );
-                    if (isObject) {
-                        report.goDown('dependencies[' + schemaKey + ']');
-                        return self._validateSchema(report, schemaDependency)
-                            .finally(function () {
-                                report.goUp();
-                            })
-                    } else if (isArray) {
-                        report.expect(schemaDependency.length > 0, 'KEYWORD_MUST_BE', {keyword: 'dependencies', expression: 'not empty array'});
-                        schemaDependency.forEach(function (el) {
-                            report.expect(Utils.isString(el), 'KEYWORD_VALUE_TYPE', {keyword: 'dependensices', type: 'string'});
-                        });
-                        report.expect(Utils.isUniqueArray(schemaDependency), {keyword: 'dependencies', expression: 'an array with unique items'});
-                    }
-                })
+                var isObject = Utils.isObject(schemaDependency);
+                var isArray = Utils.isArray(schemaDependency);
+                report.expect(isObject || isArray, 'KEYWORD_VALUE_TYPE', {keyword: 'dependencies', type: 'object or array'} );
+                if (isObject) {
+                    report.goDown('dependencies[' + schemaKey + ']');
+                    self._validateSchema(report, schemaDependency)
+                    report.goUp();
+                } else if (isArray) {
+                    report.expect(schemaDependency.length > 0, 'KEYWORD_MUST_BE', {keyword: 'dependencies', expression: 'not empty array'});
+                    schemaDependency.forEach(function (el) {
+                        report.expect(Utils.isString(el), 'KEYWORD_VALUE_TYPE', {keyword: 'dependensices', type: 'string'});
+                    });
+                    report.expect(Utils.isUniqueArray(schemaDependency), {keyword: 'dependencies', expression: 'an array with unique items'});
+                }
             });
-
-            return p;
         },
         enum: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.1.1
@@ -1274,7 +1233,6 @@
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.1
 
             var self = this;
-            var p = Q();
 
             var fine;
             fine = report.expect(Utils.isArray(schema.allOf), 'KEYWORD_TYPE_EXPECTED', {keyword: 'allOf', type: 'array'});
@@ -1282,23 +1240,15 @@
             fine = report.expect(schema.allOf.length > 0, 'KEYWORD_MUST_BE', {keyword: 'allOf', expression:'an array with at least one element'});
             if (!fine) return;
             schema.allOf.forEach(function (sch, index) {
-
-                p = p.finally(function () {
-                    report.goDown('allOf[' + index + ']');
-                    return self._validateSchema(report, sch)
-                        .finally(function () {
-                            report.goUp();
-                        })
-                })
+                report.goDown('allOf[' + index + ']');
+                self._validateSchema(report, sch)
+                report.goUp();
             });
-
-            return p;
         },
         anyOf: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.1
 
             var self = this;
-            var p = Q();
 
             var fine;
             fine = report.expect(Utils.isArray(schema.anyOf), 'KEYWORD_TYPE_EXPECTED', {keyword: 'anyOf', type: 'array'});
@@ -1306,23 +1256,15 @@
             fine = report.expect(schema.anyOf.length > 0, 'KEYWORD_MUST_BE', {keyword: 'anyOf', expression: 'an array with at least one element'});
             if (!fine) return;
             schema.anyOf.forEach(function (sch, index) {
-
-                p = p.finally(function () {
-                    report.goDown('anyOf[' + index + ']');
-                    return self._validateSchema(report, sch)
-                        .finally(function () {
-                            report.goUp();
-                        })
-                })
+                report.goDown('anyOf[' + index + ']');
+                self._validateSchema(report, sch)
+                report.goUp();
             });
-
-            return p;
         },
         oneOf: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.1
 
             var self = this;
-            var p = Q();
 
             var fine;
             fine = report.expect(Utils.isArray(schema.oneOf), 'KEYWORD_TYPE_EXPECTED', {keyword: 'oneOf', type: 'array'});
@@ -1331,17 +1273,10 @@
             if (!fine) return;
 
             schema.oneOf.forEach(function (sch, index) {
-
-                p = p.finally(function () {
-                    report.goDown('oneOf[' + index + ']');
-                    return self._validateSchema(report, sch)
-                        .finally(function () {
-                            report.goUp();
-                        })
-                })
+                report.goDown('oneOf[' + index + ']');
+                self._validateSchema(report, sch)
+                report.goUp();
             });
-
-            return p;
         },
         not: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.1
@@ -1349,35 +1284,24 @@
             fine = report.expect(Utils.isObject(schema.not), 'KEYWORD_TYPE_EXPECTED', {keyword: 'not', type: 'object'});
             if (!fine) return;
             report.goDown('not');
-
-            return this._validateSchema(report, schema.not)
-                .finally(function () {
-                    report.goUp();
-                })
+            this._validateSchema(report, schema.not)
+            report.goUp();
         },
         definitions: function (report, schema) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.1
 
             var self = this;
-            var p = Q();
 
             var fine;
             fine = report.expect(Utils.isObject(schema.definitions), 'KEYWORD_TYPE_EXPECTED', {keyword: 'definitions', type: 'object'});
             if (!fine) return;
 
             Utils.forEach(schema.definitions, function (obj, index) {
-
-                p = p.finally(function () {
-                    report.goDown('definitions[' + index + ']');
-                    return self._validateSchema(report, obj)
-                        .finally(function () {
-                            report.goUp();
-                        })
-                })
+                report.goDown('definitions[' + index + ']');
+                return self._validateSchema(report, obj)
+                report.goUp();
 
             });
-
-            return p;
         },
         format: function (report, schema) {
             var fine;
