@@ -1,7 +1,7 @@
-/* global describe, before, it */
+/*jshint strict:false, loopfunc:true*/
+/*global before, describe, it */
 
 var fs = require('fs');
-var assert = require('chai').assert;
 var zSchema = require('../src/ZSchema');
 
 // preload files here because we want to run tests without localhost server

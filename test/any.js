@@ -1,4 +1,5 @@
-/* global describe, before, it */
+/*jshint strict:false*/
+/*global describe, it*/
 
 var zSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
@@ -21,7 +22,7 @@ describe('Validations for any type:', function () {
         zSchema.validate('xxxx', {
             'type': 'string',
             'enum': ['x', 'xx', 'xxx']
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -56,12 +57,11 @@ describe('Validations for any type:', function () {
 
         zSchema.validate('xxx', {
             'allOf': schemas
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
     });
-
     it('should pass anyOf test', function (done) {
         var schemas = [{
                 'type': 'string'
@@ -88,12 +88,11 @@ describe('Validations for any type:', function () {
 
         zSchema.validate('xxx', {
             'anyOf': schemas
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
     });
-
     it('should pass oneOf test', function (done) {
         var schemas = [{
                 'type': 'string'
@@ -120,12 +119,11 @@ describe('Validations for any type:', function () {
 
         zSchema.validate('xxx', {
             'oneOf': schemas
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
     });
-
     it('should pass "not" test', function (done) {
         zSchema.validate('xxx', {
             'not': {
@@ -144,7 +142,7 @@ describe('Validations for any type:', function () {
             'not': {
                 'type': 'string'
             }
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });

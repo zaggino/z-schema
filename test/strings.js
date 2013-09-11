@@ -1,4 +1,5 @@
-/* global describe, before, it */
+/*jshint strict:false*/
+/*global describe, it*/
 
 var zSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
@@ -27,7 +28,7 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'maxLength': 1
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -54,7 +55,7 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'minLength': 5
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -76,7 +77,7 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'number',
             'pattern': ''
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -85,7 +86,7 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'pattern': 5
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -106,7 +107,7 @@ describe('Validations for string type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'pattern': '^xxxx$'
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -132,7 +133,7 @@ describe('Validations for string type:', function () {
         zSchema.validate('yyy', {
             'type': 'string',
             'format': 'xstring'
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });

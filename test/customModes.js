@@ -1,4 +1,5 @@
-/* global describe, before, it */
+/*jshint strict:false*/
+/*global describe, it*/
 
 var zSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
@@ -20,7 +21,7 @@ describe('Custom functionality validation:', function () {
                 }
             }
         };
-        validator.compileSchema(schema, function (err, compiled) {
+        validator.compileSchema(schema, function (err) {
             assert.isTrue(err.errors.length === 2);
             done();
         });
@@ -41,7 +42,7 @@ describe('Custom functionality validation:', function () {
                 }
             }
         };
-        validator.compileSchema(schema, function (err, compiled) {
+        validator.compileSchema(schema, function (err) {
             assert.isTrue(!err);
             done();
         });
@@ -54,7 +55,7 @@ describe('Custom functionality validation:', function () {
         var schema = {
             'type': 'string'
         };
-        validator.validate('', schema, function (err, report) {
+        validator.validate('', schema, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -81,7 +82,7 @@ describe('Custom functionality validation:', function () {
             'type': 'array',
             'items': {}
         };
-        validator.compileSchema(schema, function (err, compiled) {
+        validator.compileSchema(schema, function (err) {
             assert.isTrue(err.errors.length === 1);
             done();
         });
@@ -102,7 +103,7 @@ describe('Custom functionality validation:', function () {
                 }
             }
         };
-        validator.compileSchema(schema, function (err, compiled) {
+        validator.compileSchema(schema, function (err) {
             assert.isTrue(!err);
             done();
         });

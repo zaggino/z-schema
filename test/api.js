@@ -1,4 +1,5 @@
-/* global describe, before, it */
+/*jshint strict:false*/
+/*global describe, it*/
 
 var zSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
@@ -20,7 +21,6 @@ describe('Validations for API:', function () {
             done();
         });
     });
-
     it('should return with resolved with promise for compiled schema #1', function (done) {
         var valid = {
             'type': 'string'
@@ -31,9 +31,8 @@ describe('Validations for API:', function () {
                 assert.isTrue(report.valid);
                 done();
             })
-            .done()
+            .done();
     });
-
     it('should return with rejected promise for compiled schema #2', function (done) {
         var valid = {
             'type': 'abrakadabra'
@@ -44,12 +43,11 @@ describe('Validations for API:', function () {
                 assert.instanceOf(err, Error);
                 done();
             })
-            .done()
+            .done();
     });
-
     it('should return resolved promise for schema', function (done) {
         var sch = {
-            "type": "string"
+            'type': 'string'
         };
         var ins = new zSchema();
         ins.validate(sch, compiledSchema)
@@ -57,11 +55,11 @@ describe('Validations for API:', function () {
                 assert.isTrue(report.valid);
                 done();
             })
-            .done()
+            .done();
     });
     it('should return rejected promise for schema', function (done) {
         var sch = {
-            "type": null
+            'type': null
         };
         var ins = new zSchema();
         ins.validate(sch, compiledSchema)
@@ -69,7 +67,6 @@ describe('Validations for API:', function () {
                 assert.instanceOf(err, Error);
                 done();
             })
-            .done()
+            .done();
     });
-
 });

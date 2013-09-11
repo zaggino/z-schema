@@ -1,4 +1,5 @@
-/* global describe, before, it */
+/*jshint strict:false*/
+/*global describe, it*/
 
 var zSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
@@ -26,7 +27,7 @@ describe('Validations for object type:', function () {
         }, {
             'type': 'object',
             'maxProperties': 2
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -52,7 +53,7 @@ describe('Validations for object type:', function () {
         }, {
             'type': 'object',
             'minProperties': 4
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -95,7 +96,7 @@ describe('Validations for object type:', function () {
         }, {
             'type': 'object',
             'required': 'x1'
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -108,7 +109,7 @@ describe('Validations for object type:', function () {
         }, {
             'type': 'object',
             'required': []
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -161,7 +162,7 @@ describe('Validations for object type:', function () {
             'apple': 'pie'
         };
 
-        zSchema.validate(instance, schema, function (err, report) {
+        zSchema.validate(instance, schema, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -201,7 +202,7 @@ describe('Validations for object type:', function () {
             'd': null,
         };
 
-        zSchema.validate(instance, schema, function (err, report) {
+        zSchema.validate(instance, schema, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -244,7 +245,7 @@ describe('Validations for object type:', function () {
                 }
             }
         };
-        zSchema.validate(obj, schema, function (err, report) {
+        zSchema.validate(obj, schema, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -254,7 +255,7 @@ describe('Validations for object type:', function () {
             'type': 'string',
             'required': true
         };
-        zSchema.validate({}, schema, function (err, report) {
+        zSchema.validate({}, schema, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -270,7 +271,7 @@ describe('Validations for object type:', function () {
             },
             'additionalProperties': false
         };
-        zSchema.validate({}, schema, function (err, report) {
+        zSchema.validate({}, schema, function (err) {
             assert.instanceOf(err, Error);
             done();
         });

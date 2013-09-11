@@ -1,4 +1,5 @@
-/* global describe, before, it */
+/*jshint strict:false*/
+/*global describe, it*/
 
 var zSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
@@ -50,7 +51,7 @@ describe('Validations for array type:', function () {
         });
     });
     it('should pass example from specification #4', function (done) {
-        zSchema.validate([1, 2, 3, 4], schemaFromSpecification, function (err, report) {
+        zSchema.validate([1, 2, 3, 4], schemaFromSpecification, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -61,7 +62,7 @@ describe('Validations for array type:', function () {
             },
             true, 31.000002020013];
 
-        zSchema.validate(o, schemaFromSpecification, function (err, report) {
+        zSchema.validate(o, schemaFromSpecification, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -79,7 +80,7 @@ describe('Validations for array type:', function () {
         zSchema.validate([1, 2, 3], {
             'type': 'array',
             'maxItems': 1
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -97,7 +98,7 @@ describe('Validations for array type:', function () {
         zSchema.validate([1, 2, 3], {
             'type': 'array',
             'minItems': 5
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -115,7 +116,7 @@ describe('Validations for array type:', function () {
         zSchema.validate([1, 1, 1], {
             'type': 'array',
             'uniqueItems': true
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -133,7 +134,7 @@ describe('Validations for array type:', function () {
         zSchema.validate([[1, 2], [1, 2]], {
             'type': 'array',
             'uniqueItems': true
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -165,7 +166,7 @@ describe('Validations for array type:', function () {
         zSchema.validate(a, {
             'type': 'array',
             'uniqueItems': true
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });

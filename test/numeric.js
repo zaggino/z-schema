@@ -1,4 +1,5 @@
-/* global describe, before, it */
+/*jshint strict:false*/
+/*global describe, it*/
 
 var zSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
@@ -21,7 +22,7 @@ describe('Validations for numeric type:', function () {
         zSchema.validate(10, {
             'type': 'number',
             'multipleOf': 0
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -30,7 +31,7 @@ describe('Validations for numeric type:', function () {
         zSchema.validate(10, {
             'type': 'number',
             'multipleOf': -10
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -39,7 +40,7 @@ describe('Validations for numeric type:', function () {
         zSchema.validate('test', {
             'type': 'string',
             'multipleOf': 'xxx'
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -60,7 +61,7 @@ describe('Validations for numeric type:', function () {
         zSchema.validate(12, {
             'type': 'number',
             'multipleOf': 5
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -81,7 +82,7 @@ describe('Validations for numeric type:', function () {
         zSchema.validate(5, {
             'type': 'number',
             'maximum': '6'
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -103,7 +104,7 @@ describe('Validations for numeric type:', function () {
         zSchema.validate(5, {
             'type': 'number',
             'exclusiveMaximum': 4
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -125,7 +126,7 @@ describe('Validations for numeric type:', function () {
             'type': 'number',
             'maximum': 0,
             'exclusiveMaximum': true
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -145,7 +146,7 @@ describe('Validations for numeric type:', function () {
             'type': 'number',
             'maximum': 1,
             'exclusiveMaximum': true
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -173,7 +174,7 @@ describe('Validations for numeric type:', function () {
         zSchema.validate(5, {
             'type': 'number',
             'minimum': '6'
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -196,7 +197,7 @@ describe('Validations for numeric type:', function () {
             'type': 'number',
             'minimum': 0,
             'exclusiveMinimum': 4
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -218,7 +219,7 @@ describe('Validations for numeric type:', function () {
             'type': 'number',
             'minimum': 0,
             'exclusiveMinimum': true
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -241,7 +242,7 @@ describe('Validations for numeric type:', function () {
             'type': 'number',
             'minimum': 1,
             'exclusiveMinimum': true
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });

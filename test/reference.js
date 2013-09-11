@@ -1,4 +1,5 @@
-/* global describe, before, it */
+/*jshint strict:false*/
+/*global describe, it*/
 
 var zSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
@@ -11,7 +12,7 @@ describe('Validations for referencing children:', function () {
             'items': {
                 'type': 'string'
             }
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -81,7 +82,7 @@ describe('Validations for referencing children:', function () {
             'not': {
                 '$ref': '#/definitions/myNumber'
             }
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -105,7 +106,7 @@ describe('Validations for referencing children:', function () {
                 }
             },
             '$ref': '#/definitions/myNumber'
-        }, function (err, report) {
+        }, function (err) {
             assert.instanceOf(err, Error);
             assert.isTrue(new RegExp('level1').test(err.errors[0].path));
             done();
@@ -205,7 +206,7 @@ describe('Validations for referencing children:', function () {
                 }
             ]
 
-        }, function (err, report) {
+        }, function (err) {
             assert.isTrue(new RegExp('/obj2/obj1').test(err.errors[0].path));
             assert.instanceOf(err, Error);
             done();
@@ -256,7 +257,7 @@ describe('Validations for referencing children:', function () {
                 }
             ]
 
-        }, function (err, report) {
+        }, function (err) {
             // if(err) { console.log(err); }
             assert.instanceOf(err, Error);
             done();
