@@ -15,49 +15,61 @@ describe('Validations for API:', function () {
     it('should compile official schema', function (done) {
         var ins = new zSchema();
         ins.compileSchema(schema, function (err, sch) {
-            assert.isUndefined(err);
+            assert.isNull(err);
             compiledSchema = sch;
             done();
         });
     });
 
-    it('should validate sync with compiled schema #1', function (done) {
+    it('should return with resolved with promise for compiled schema #1', function (done) {
         var valid = {
             'type': 'string'
         };
         var ins = new zSchema();
-        var report = ins.validateWithCompiled(valid, compiledSchema);
-        assert.isTrue(report.valid);
-        done();
+        ins.validate(valid, compiledSchema)
+            .then(function (report) {
+                assert.isTrue(report.valid);
+                done();
+            })
+            .done()
     });
 
-    it('should validate sync with compiled schema #2', function (done) {
+    it('should return with rejected promise for compiled schema #2', function (done) {
         var valid = {
             'type': 'abrakadabra'
         };
         var ins = new zSchema();
-        var report = ins.validateWithCompiled(valid, compiledSchema);
-        assert.isFalse(report.valid);
-        done();
+        ins.validate(valid, compiledSchema)
+            .fail(function (err) {
+                assert.instanceOf(err, Error);
+                done();
+            })
+            .done()
     });
 
-    it('should validate schema sync', function (done) {
+    it('should return resolved promise for schema', function (done) {
         var sch = {
             "type": "string"
         };
         var ins = new zSchema();
-        var report = ins.validateSchema(sch);
-        assert.isTrue(report.valid);
-        done();
+        ins.validate(sch, compiledSchema)
+            .then(function (report) {
+                assert.isTrue(report.valid);
+                done();
+            })
+            .done()
     });
-    it('should not validate schema sync', function (done) {
+    it('should return rejected promise for schema', function (done) {
         var sch = {
             "type": null
         };
         var ins = new zSchema();
-        var report = ins.validateSchema(sch);
-        assert.isFalse(report.valid);
-        done();
+        ins.validate(sch, compiledSchema)
+            .fail(function (err) {
+                assert.instanceOf(err, Error);
+                done();
+            })
+            .done()
     });
 
 });

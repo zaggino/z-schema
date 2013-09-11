@@ -9,6 +9,18 @@
         "email": "zaggino@gmail.com",
         "url": "https://github.com/zaggino"
     },
+    "contributors": [
+        {
+            "name": "Martin Zagora",
+            "email": "zaggino@gmail.com",
+            "url": "https://github.com/zaggino"
+        },
+        {
+            "name": "Oleksiy Krivoshey",
+            "email": "oleksiyk@gmail.com",
+            "url": "https://github.com/oleksiyk"
+        }
+    ],
     "repository": {
         "type": "git",
         "url": "https://github.com/zaggino/z-schema.git"

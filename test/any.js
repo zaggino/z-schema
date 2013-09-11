@@ -9,9 +9,9 @@ describe('Validations for any type:', function () {
         zSchema.validate('xxx', {
             'type': 'string',
             'enum': ['x', 'xx', 'xxx']
-        }, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        }, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -21,8 +21,8 @@ describe('Validations for any type:', function () {
         zSchema.validate('xxxx', {
             'type': 'string',
             'enum': ['x', 'xx', 'xxx']
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -37,9 +37,9 @@ describe('Validations for any type:', function () {
 
         zSchema.validate('xxx', {
             'allOf': schemas
-        }, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        }, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -56,8 +56,8 @@ describe('Validations for any type:', function () {
 
         zSchema.validate('xxx', {
             'allOf': schemas
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -71,9 +71,9 @@ describe('Validations for any type:', function () {
 
         zSchema.validate('xxx', {
             'anyOf': schemas
-        }, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        }, function (err, report) {
+            if (err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -88,8 +88,8 @@ describe('Validations for any type:', function () {
 
         zSchema.validate('xxx', {
             'anyOf': schemas
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -103,9 +103,9 @@ describe('Validations for any type:', function () {
 
         zSchema.validate('xxx', {
             'oneOf': schemas
-        }, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        }, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -120,8 +120,8 @@ describe('Validations for any type:', function () {
 
         zSchema.validate('xxx', {
             'oneOf': schemas
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });
@@ -131,9 +131,9 @@ describe('Validations for any type:', function () {
             'not': {
                 'type': 'array'
             }
-        }, function (report) {
-            if (!report.valid) {
-                console.log(report);
+        }, function (err, report) {
+            if(err) {
+                console.log(err);
             }
             assert.isTrue(report.valid);
             done();
@@ -144,8 +144,8 @@ describe('Validations for any type:', function () {
             'not': {
                 'type': 'string'
             }
-        }, function (report) {
-            assert.isFalse(report.valid);
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
             done();
         });
     });

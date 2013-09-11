@@ -4,6 +4,11 @@ z-schema validator
 
 JSON Schema validator for Node.js (draft4 version)
 
+Forked from [zaggino/z-schema](https://github.com/zaggino/z-schema):
+- Reorganised validation errors
+- Fully async API (Promises + callbacks)
+- Async custom format validators
+
 Coded according to:
 
 [json-schema documentation](http://json-schema.org/documentation.html),
@@ -21,37 +26,44 @@ Basic Usage
 -----------
 
 ```javascript
-var report = zSchema.validate(json, schema, function(report) {
-    if (report.valid === true) ...
-});
+zSchema.validate(json, schema)
+    .then(function(report){
+        // successful validation 
+        // there might be warnings: console.log(report.warnings)
+    })
+    .fail(function(err){
+        console.error(err.errors)
+    })
 ```
 
-If ```report.valid === false```, then errors can be found in ```report.errors```.
-
-The report object will look something like:
-
-```json
-{
-    "valid": false,
-    "errors": [
-    
-    ]
-}
+Using traditional callback:
+```javascript
+zSchema.validate(json, schema, function(err, report){
+    if(err){
+        console.error(err.errors);
+        return;
+    }
+    // successful validation 
+    // there might be warnings: console.log(report.warnings)
+})
 ```
 
 If you need just to validate your schema, you can do it like this:
 
 ```javascript
 var validator = new zSchema();
-var report = validator.validateSchema(schema);
-if (report.valid === true) ...
+validator.validateSchema(schema)
+    .then(function(report){
+    })
+    .fail(function(err){
+    })
 ```
 
 Or with Node.js style callback:
 
 ```javascript
 var validator = new zSchema();
-validator.validateSchema(schema, function (err, valid) {
+validator.validateSchema(schema, function (err, report) {
     if (err) ...
 });
 ```
@@ -74,11 +86,22 @@ zSchema.setRemoteReference('http://localhost:1234/integer.json', fileContent);
 ```http://localhost:1234/integer.json``` doesn't have to be online now, all schemas
 referencing it will validate against ```string``` that was passed to the function.
 
-Advanced (Server) Usage
------------------------
+Advanced Usage
+---------------
 
 You can pre-compile schemas (for example on your server startup) so your application is not
 bothered by schema compilation and validation when validating ingoing / outgoing objects.
+
+Promises:
+
+```javascript
+var validator = new zSchema();
+validator.compileSchema(schema)
+    .then(function(compiledSchema){
+    })
+```
+
+Or callback:
 
 ```javascript
 var validator = new zSchema();
@@ -88,28 +111,20 @@ validator.compileSchema(schema, function (err, compiledSchema) {
 });
 ```
 
-Then you can re-use compiled schemas easily with sync-async validation API.
+Then you can re-use compiled schemas easily just the same way as non-compiled.
 
 ```javascript
-var report = validator.validateWithCompiled(json, compiledSchema);
-assert.isTrue(report.valid);
-...
+zSchema.validate(json, compiledSchema)
+    .then(function(report){
+        // ...
+    })
+    .fail(function(err){
+        console.error(err.errors)
+    })
 ```
 
-```javascript
-validator.validateWithCompiled(json, compiledSchema, function(err, success, report) {
-    assert.isTrue(success);
-    ...
-});
-```
-
-Note:
-
-Most basic schemas don't have to be compiled for validation to work (although recommended).
-Async compilation was mostly created to work with schemas that contain references to other files.
-
-Customization
--------------
+Custom format validators
+-----------------------
 
 You can add validation for your own custom string formats like this:
 (these are added to all validator instances, because it would never make sense to have multiple 
@@ -117,15 +132,53 @@ functions to validate format with the same name)
 
 ```javascript
 zSchema.registerFormat('xstring', function (str) {
-    return str === 'xxx';
+    return str === 'xxx'; // return true/false as a result of validation
 });
+
 zSchema.validate('xxx', {
     'type': 'string',
     'format': 'xstring'
-}, function (report) {
-    // report.valid will be true
-}
+})
+.then(function(){})
+.fail(function(err){})
 ```
+
+Custom validators can also be async:
+
+Using promises:
+
+```javascript
+zSchema.registerFormat('xstring', function (str) {
+    return Q.delay(1000).thenResolve(return str === 'xxx'); // return a promise for validation result
+});
+```
+
+Using classic callback:
+
+```javascript
+zSchema.registerFormat('xstring', function (str, callback) {
+    setTimeout(function(){
+        callback(null, str === 'xxx');
+        // or return custom error: callback(new Error('Bad, bad value!'))
+    }, 2000)
+});
+```
+
+Any exception thrown (or returned via classic callback) in custom validation function is written into validation error:
+```javascript
+zSchema.registerFormat('xstring', function (str) {
+    throw new Error('Bad, bad value!');
+});
+```
+And then expect errors to contain something like this:
+
+```
+[{ code: 'FORMAT',
+    message: 'xstring format validation failed: Error: Bad, bad value!',
+    path: '#/test',
+    params: { format: 'xstring', error: [Error: Bad, bad value!] } } ]
+```
+
 
 Strict validation
 -----------------
