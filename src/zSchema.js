@@ -66,7 +66,7 @@
         'ARRAY_UNIQUE': 'Array items are not unique (indices {index1} and {index2})',
         'ARRAY_ADDITIONAL_ITEMS': 'Additional items not allowed',
         // Format errors
-        'FORMAT_CUSTOM': '{format} format validation failed: {error}',
+        'FORMAT': '{format} format validation failed: {error}',
 
         // Schema validation errors
         'KEYWORD_TYPE_EXPECTED': 'Keyword "{keyword}" is expected to be type of type "{type}"',
@@ -469,6 +469,8 @@
         }
     };
 
+    var CustomFormatValidators = {};
+
     var Report = function (parentReport) {
         if (parentReport) {
             Utils.forEach(parentReport, function (val, key) {
@@ -612,10 +614,16 @@
     zSchema.registerFormat = function (name, func) {
         zSchema.expect.string(name);
         zSchema.expect.callable(func);
+
         if (FormatValidators[name]) {
+            throw new Error("Cannot override built-in validator for " + name);
+        }
+
+        if (CustomFormatValidators[name]) {
             throw new Error("Cannot override existing validator for " + name);
         }
-        FormatValidators[name] = func;
+
+        CustomFormatValidators[name] = func;
     };
 
     /*
@@ -1312,7 +1320,7 @@
             var fine;
             fine = report.expect(Utils.isString(schema.format), 'KEYWORD_TYPE_EXPECTED', {keyword: 'format', type: 'string'});
             if (!fine) return;
-            fine = report.expect(Utils.isFunction(FormatValidators[schema.format]), 'UNKNOWN_FORMAT', {format: schema.format});
+            fine = report.expect(Utils.isFunction(FormatValidators[schema.format]) || Utils.isFunction(CustomFormatValidators[schema.format]), 'UNKNOWN_FORMAT', {format: schema.format});
             if (!fine) return;
         },
         id: function (report, schema) {
@@ -1666,10 +1674,16 @@
         format: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
 
+            if(typeof FormatValidators[schema.format] === 'function'){ // built-in format (sync)
+                report.expect(FormatValidators[schema.format](instance), 'FORMAT', {format: schema.format});
+                return;
+            }
+
+            // custom format (sync or async)
             var deferred = Q.defer();
 
             try {
-                var p = FormatValidators[schema.format](instance, deferred.makeNodeResolver());
+                var p = CustomFormatValidators[schema.format](instance, deferred.makeNodeResolver());
                 if(Q.isPromise(p) || Utils.isBoolean(p)){
                     deferred.resolve(p);
                 }
@@ -1678,13 +1692,13 @@
             }
 
             return deferred.promise
-                .then(function (valid) { //sync validators return true/false
+                .then(function (valid) { // validators may return (resolve with) true/false
                     if(!valid){
-                        report.addError('FORMAT_CUSTOM', {format: schema.format})
+                        report.addError('FORMAT', {format: schema.format})
                     }
                 })
-                .fail(function (err) { // async validators may throw Error or return rejected promise
-                    report.addError('FORMAT_CUSTOM', {format: schema.format, error: err})
+                .fail(function (err) { // validators may throw Error or return rejected promise
+                    report.addError('FORMAT', {format: schema.format, error: err})
                 })
         }
     }
