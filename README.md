@@ -1,13 +1,8 @@
-z-schema validator
-==================
+# z-schema validator
+
 [![NPM version](https://badge.fury.io/js/z-schema.png)](http://badge.fury.io/js/z-schema)
 
 JSON Schema validator for Node.js (draft4 version)
-
-Forked from [zaggino/z-schema](https://github.com/zaggino/z-schema):
-- Reorganised validation errors
-- Fully async API (Promises + callbacks)
-- Async custom format validators
 
 Coded according to:
 
@@ -22,8 +17,7 @@ Passing all tests here (even optional, except zeroTerminatedFloats):
 
 Will try to maintain this as much as possible, all bug reports welcome.
 
-Basic Usage
------------
+## Basic Usage
 
 ```javascript
 zSchema.validate(json, schema)
@@ -68,8 +62,7 @@ validator.validateSchema(schema, function (err, report) {
 });
 ```
 
-Remote references in schemas
-----------------------------
+## Remote references in schemas
 
 Your schemas can include remote references that should be real URIs ([more on that here](http://json-schema.org/latest/json-schema-core.html#anchor22)) 
 so validator can make a request and download the schema needed. Validator automatically
@@ -86,8 +79,7 @@ zSchema.setRemoteReference('http://localhost:1234/integer.json', fileContent);
 ```http://localhost:1234/integer.json``` doesn't have to be online now, all schemas
 referencing it will validate against ```string``` that was passed to the function.
 
-Advanced Usage
----------------
+## Advanced Usage
 
 You can pre-compile schemas (for example on your server startup) so your application is not
 bothered by schema compilation and validation when validating ingoing / outgoing objects.
@@ -123,8 +115,7 @@ zSchema.validate(json, compiledSchema)
     })
 ```
 
-Custom format validators
------------------------
+## Custom format validators
 
 You can add validation for your own custom string formats like this:
 (these are added to all validator instances, because it would never make sense to have multiple 
@@ -180,8 +171,7 @@ And then expect errors to contain something like this:
 ```
 
 
-Strict validation
------------------
+## Strict validation
 
 When creating new instance of validator, you can specify some options that will alter the validator behaviour like this:
 
@@ -226,3 +216,13 @@ var validator = new zSchema({
     strict: true
 });
 ```
+
+# Pull requests
+
+Avoid JSHint errors, settings for the JSHint are specified in ```.jshintrc```.
+Please check for errors before opening any pull requests.
+
+# Credits
+
+* Written by Martin Zagora, <zaggino@gmail.com>
+* Thanks to Oleksiy Krivoshey, <oleksiyk@gmail.com> for refactoring and new API (version 2.x)

@@ -27,14 +27,14 @@
     },
     "main": "src/zSchema.js",
     "files": ["src/zSchema.js", "src/zSchema.min.js", "LICENSE", "README.md"],
-    "version": "1.5.1",
+    "version": "2.0.0",
     "dependencies": {
-        "q": ">= 0.9.6"
+        "q": "0.9.7"
     },
     "devDependencies": {
-        "mocha": ">= 1.12.0",
-        "chai": ">= 1.7.2",
-        "uglify-js": ">= 2.3.6"
+        "mocha": "1.12.1",
+        "chai": "1.7.2",
+        "uglify-js": "2.4.0"
     },
     "bugs": {
         "url": "https://github.com/zaggino/z-schema/issues",
