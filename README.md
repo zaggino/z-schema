@@ -63,7 +63,7 @@ Or with Node.js style callback:
 
 ```javascript
 var validator = new zSchema();
-validator.validateSchema(schema, function (err, valid) {
+validator.validateSchema(schema, function (err, report) {
     if (err) ...
 });
 ```
