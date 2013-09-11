@@ -789,6 +789,11 @@
 
     zSchema.prototype._validateSchema = function (report, schema) {
 
+        if (schema.__validated) {
+            return Q(schema);
+        }
+        schema.__validated = true;
+
         var self = this;
 
         if (this.options.noTypeless === true) {
@@ -1328,6 +1333,9 @@
         // ---- custom keys used by zSchema
         __compiled: function (report, schema) {
             zSchema.expect.boolean(schema.__compiled);
+        },
+        __validated: function (report, schema) {
+            zSchema.expect.boolean(schema.__validated);
         }
     };
 
