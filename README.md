@@ -63,7 +63,7 @@ Or with Node.js style callback:
 
 ```javascript
 var validator = new zSchema();
-validator.validateSchema(schema, function (err, valid) {
+validator.validateSchema(schema, function (err, report) {
     if (err) ...
 });
 ```
@@ -170,10 +170,10 @@ zSchema.registerFormat('xstring', function (str) {
     throw new Error('Bad, bad value!');
 });
 ```
-And then expect errors to contain somtheing like this:
+And then expect errors to contain something like this:
 
 ```
-[{ code: 'FORMAT_CUSTOM',
+[{ code: 'FORMAT',
     message: 'xstring format validation failed: Error: Bad, bad value!',
     path: '#/test',
     params: { format: 'xstring', error: [Error: Bad, bad value!] } } ]
