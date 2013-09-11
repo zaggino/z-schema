@@ -20,7 +20,11 @@ Will try to maintain this as much as possible, all bug reports welcome.
 ## Basic Usage
 
 ```javascript
-zSchema.validate(json, schema)
+var ZSchema = require("z-schema");
+```
+
+```javascript
+ZSchema.validate(json, schema)
     .then(function(report){
         // successful validation 
         // there might be warnings: console.log(report.warnings)
@@ -32,7 +36,7 @@ zSchema.validate(json, schema)
 
 Using traditional callback:
 ```javascript
-zSchema.validate(json, schema, function(err, report){
+ZSchema.validate(json, schema, function(err, report){
     if(err){
         console.error(err.errors);
         return;
@@ -45,7 +49,7 @@ zSchema.validate(json, schema, function(err, report){
 If you need just to validate your schema, you can do it like this:
 
 ```javascript
-var validator = new zSchema();
+var validator = new ZSchema();
 validator.validateSchema(schema)
     .then(function(report){
     })
@@ -56,7 +60,7 @@ validator.validateSchema(schema)
 Or with Node.js style callback:
 
 ```javascript
-var validator = new zSchema();
+var validator = new ZSchema();
 validator.validateSchema(schema, function (err, report) {
     if (err) ...
 });
@@ -73,7 +77,7 @@ you can preload remote locations into the validator like this:
 
 ```javascript
 var fileContent = fs.readFileSync(__dirname + '/../json_schema_test_suite/remotes/integer.json', 'utf8');
-zSchema.setRemoteReference('http://localhost:1234/integer.json', fileContent);
+ZSchema.setRemoteReference('http://localhost:1234/integer.json', fileContent);
 ```
 
 ```http://localhost:1234/integer.json``` doesn't have to be online now, all schemas
@@ -87,7 +91,7 @@ bothered by schema compilation and validation when validating ingoing / outgoing
 Promises:
 
 ```javascript
-var validator = new zSchema();
+var validator = new ZSchema();
 validator.compileSchema(schema)
     .then(function(compiledSchema){
     })
@@ -96,7 +100,7 @@ validator.compileSchema(schema)
 Or callback:
 
 ```javascript
-var validator = new zSchema();
+var validator = new ZSchema();
 validator.compileSchema(schema, function (err, compiledSchema) {
     assert.isUndefined(err);
     ...
@@ -106,7 +110,8 @@ validator.compileSchema(schema, function (err, compiledSchema) {
 Then you can re-use compiled schemas easily just the same way as non-compiled.
 
 ```javascript
-zSchema.validate(json, compiledSchema)
+var validator = new ZSchema();
+validator.validate(json, compiledSchema)
     .then(function(report){
         // ...
     })
@@ -122,11 +127,13 @@ You can add validation for your own custom string formats like this:
 functions to validate format with the same name)
 
 ```javascript
-zSchema.registerFormat('xstring', function (str) {
+var validator = new ZSchema();
+
+ZSchema.registerFormat('xstring', function (str) {
     return str === 'xxx'; // return true/false as a result of validation
 });
 
-zSchema.validate('xxx', {
+validator.validate('xxx', {
     'type': 'string',
     'format': 'xstring'
 })
@@ -139,7 +146,7 @@ Custom validators can also be async:
 Using promises:
 
 ```javascript
-zSchema.registerFormat('xstring', function (str) {
+ZSchema.registerFormat('xstring', function (str) {
     return Q.delay(1000).thenResolve(return str === 'xxx'); // return a promise for validation result
 });
 ```
@@ -147,7 +154,7 @@ zSchema.registerFormat('xstring', function (str) {
 Using classic callback:
 
 ```javascript
-zSchema.registerFormat('xstring', function (str, callback) {
+ZSchema.registerFormat('xstring', function (str, callback) {
     setTimeout(function(){
         callback(null, str === 'xxx');
         // or return custom error: callback(new Error('Bad, bad value!'))
@@ -157,7 +164,7 @@ zSchema.registerFormat('xstring', function (str, callback) {
 
 Any exception thrown (or returned via classic callback) in custom validation function is written into validation error:
 ```javascript
-zSchema.registerFormat('xstring', function (str) {
+ZSchema.registerFormat('xstring', function (str) {
     throw new Error('Bad, bad value!');
 });
 ```
@@ -176,7 +183,7 @@ And then expect errors to contain something like this:
 When creating new instance of validator, you can specify some options that will alter the validator behaviour like this:
 
 ```javascript
-var validator = new zSchema({
+var validator = new ZSchema({
     option: true
 });
 ```
@@ -212,7 +219,7 @@ when true, forces not to leave out maxLength on string-type schemas, when format
 __Alternatively__, you can turn on all of the above options with:
 
 ```javascript
-var validator = new zSchema({
+var validator = new ZSchema({
     strict: true
 });
 ```
