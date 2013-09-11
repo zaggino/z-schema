@@ -12,12 +12,12 @@ module.exports = function (grunt) {
                 report: "min"
             },
             build: {
-                src: "src/zSchema.js",
-                dest: "src/zSchema.min.js"
+                src: "<%= pkg.files[0] %>",
+                dest: "<%= pkg.files[1] %>"
             }
         },
         jshint: {
-            all: ["src/zSchema.js"],
+            all: ["<%= pkg.files[0] %>"],
             options: {
                 jshintrc: ".jshintrc"
             }

@@ -1,6 +1,6 @@
 /* global describe, before, it */
 
-var zSchema = require('../src/zSchema');
+var zSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
 
 describe('Validations for array type:', function () {

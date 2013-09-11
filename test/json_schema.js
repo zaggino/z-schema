@@ -2,7 +2,7 @@
 
 var fs = require('fs');
 var assert = require('chai').assert;
-var zSchema = require('../src/zSchema');
+var zSchema = require('../src/ZSchema');
 
 // preload files here because we want to run tests without localhost server
 var fileContent = fs.readFileSync(__dirname + '/../json_schema_test_suite/remotes/integer.json', 'utf8');
