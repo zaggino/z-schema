@@ -1,3 +1,5 @@
+src/ZSchema.min.js
+
 lib-cov
 *.seed
 *.log
