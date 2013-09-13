@@ -36,7 +36,7 @@ describe('Validations for referencing children:', function () {
                 'type': 'null'
             }
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -64,7 +64,7 @@ describe('Validations for referencing children:', function () {
             },
             'additionalProperties': false
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -155,7 +155,7 @@ describe('Validations for referencing children:', function () {
             ]
 
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);

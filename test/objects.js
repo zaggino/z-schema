@@ -81,7 +81,7 @@ describe('Validations for object type:', function () {
             'type': 'object',
             'required': ['x4']
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -134,7 +134,7 @@ describe('Validations for object type:', function () {
         };
 
         zSchema.validate(instance, schema, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -182,7 +182,7 @@ describe('Validations for object type:', function () {
         };
 
         zSchema.validate(instance, schema, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -223,7 +223,7 @@ describe('Validations for object type:', function () {
         };
 
         zSchema.validate(instance, schema, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);

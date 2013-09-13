@@ -28,8 +28,9 @@
     "jquery": true,
     "node": true,
     "nonstandard": true,
+    "white": true,
 
     "globals": {
-        
+
     }
 }

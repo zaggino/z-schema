@@ -66,7 +66,7 @@ describe('Validations for string type:', function () {
             'type': 'string',
             'pattern': ''
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -96,7 +96,7 @@ describe('Validations for string type:', function () {
             'type': 'string',
             'pattern': '^xxx$'
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -122,7 +122,7 @@ describe('Validations for string type:', function () {
             'type': 'string',
             'format': 'xstring'
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);

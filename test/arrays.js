@@ -11,7 +11,7 @@ describe('Validations for array type:', function () {
             'type': 'array',
             'items': []
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -25,7 +25,7 @@ describe('Validations for array type:', function () {
     };
     it('should pass example from specification #1', function (done) {
         zSchema.validate([], schemaFromSpecification, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -34,7 +34,7 @@ describe('Validations for array type:', function () {
     });
     it('should pass example from specification #2', function (done) {
         zSchema.validate([[1, 2, 3, 4], [5, 6, 7, 8]], schemaFromSpecification, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -43,7 +43,7 @@ describe('Validations for array type:', function () {
     });
     it('should pass example from specification #3', function (done) {
         zSchema.validate([1, 2, 3], schemaFromSpecification, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -150,7 +150,7 @@ describe('Validations for array type:', function () {
             'type': 'array',
             'uniqueItems': true
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);

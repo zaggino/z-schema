@@ -11,7 +11,7 @@ describe('Core validations:', function () {
             zSchema.validate([], {
                 'type': 'array'
             }, function (err, report) {
-                if(err) {
+                if (err) {
                     console.log(err);
                 }
                 assert.isTrue(report.valid);
@@ -22,7 +22,7 @@ describe('Core validations:', function () {
             zSchema.validate(true, {
                 'type': 'boolean'
             }, function (err, report) {
-                if(err) {
+                if (err) {
                     console.log(err);
                 }
                 assert.isTrue(report.valid);
@@ -33,7 +33,7 @@ describe('Core validations:', function () {
             zSchema.validate(5, {
                 'type': 'integer'
             }, function (err, report) {
-                if(err) {
+                if (err) {
                     console.log(err);
                 }
                 assert.isTrue(report.valid);
@@ -44,7 +44,7 @@ describe('Core validations:', function () {
             zSchema.validate(12.4, {
                 'type': 'number'
             }, function (err, report) {
-                if(err) {
+                if (err) {
                     console.log(err);
                 }
                 assert.isTrue(report.valid);
@@ -55,7 +55,7 @@ describe('Core validations:', function () {
             zSchema.validate(null, {
                 'type': 'null'
             }, function (err, report) {
-                if(err) {
+                if (err) {
                     console.log(err);
                 }
                 assert.isTrue(report.valid);
@@ -66,7 +66,7 @@ describe('Core validations:', function () {
             zSchema.validate({}, {
                 'type': 'object'
             }, function (err, report) {
-                if(err) {
+                if (err) {
                     console.log(err);
                 }
                 assert.isTrue(report.valid);
@@ -77,7 +77,7 @@ describe('Core validations:', function () {
             zSchema.validate('xxx', {
                 'type': 'string'
             }, function (err, report) {
-                if(err) {
+                if (err) {
                     console.log(err);
                 }
                 assert.isTrue(report.valid);
@@ -176,7 +176,7 @@ describe('Core validations:', function () {
             zSchema.validate(null, {
                 'type': ['array', 'boolean', 'integer', 'number', 'null', 'object', 'string']
             }, function (err, report) {
-                if(err) {
+                if (err) {
                     console.log(err);
                 }
                 assert.isTrue(report.valid);

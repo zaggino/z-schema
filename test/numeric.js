@@ -11,7 +11,7 @@ describe('Validations for numeric type:', function () {
             'type': 'number',
             'multipleOf': 5
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -50,7 +50,7 @@ describe('Validations for numeric type:', function () {
             'type': 'number',
             'multipleOf': 5
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -71,7 +71,7 @@ describe('Validations for numeric type:', function () {
             'type': 'number',
             'maximum': 6
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -93,7 +93,7 @@ describe('Validations for numeric type:', function () {
             'maximum': 0,
             'exclusiveMaximum': true
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -114,7 +114,7 @@ describe('Validations for numeric type:', function () {
             'type': 'number',
             'maximum': 0
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -185,7 +185,7 @@ describe('Validations for numeric type:', function () {
             'minimum': 0,
             'exclusiveMinimum': true
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -207,7 +207,7 @@ describe('Validations for numeric type:', function () {
             'type': 'number',
             'minimum': 0
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -230,7 +230,7 @@ describe('Validations for numeric type:', function () {
             'minimum': 0,
             'exclusiveMinimum': false
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(err);
             }
             assert.isTrue(report.valid);
@@ -253,7 +253,7 @@ describe('Validations for numeric type:', function () {
             'minimum': 1,
             'exclusiveMinimum': true
         }, function (err, report) {
-            if(err) {
+            if (err) {
                 console.log(report);
             }
             assert.isTrue(report.valid);
