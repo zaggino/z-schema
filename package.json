@@ -19,6 +19,10 @@
             "name": "Oleksiy Krivoshey",
             "email": "oleksiyk@gmail.com",
             "url": "https://github.com/oleksiyk"
+        },
+        {
+            "name": "Jurie-Jan Botha",
+            "url": "https://github.com/juriejan"
         }
     ],
     "repository": {
@@ -27,17 +31,17 @@
     },
     "main": "src/ZSchema.js",
     "files": ["src/ZSchema.js", "src/ZSchema.min.js", "LICENSE", "README.md"],
-    "version": "2.0.0",
+    "version": "2.0.1",
     "dependencies": {
         "q": "0.9.7"
     },
     "devDependencies": {
-        "chai": "1.7.2",
+        "chai": "1.8.1",
         "grunt": "0.4.1",
         "grunt-contrib-uglify": "0.2.4",
         "grunt-contrib-jshint": "0.6.4",
         "grunt-simple-mocha": "0.4.0",
-        "mocha": "1.12.1",
+        "mocha": "1.13.0",
         "uglify-js": "2.4.0"
     },
     "bugs": {
