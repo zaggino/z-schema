@@ -148,4 +148,32 @@ describe('Validations for string type:', function () {
             done();
         });
     });
+
+    it('should pass uri format validation', function (done) {
+        zSchema.validate('http://example.com', {
+            'type': 'string',
+            'format': 'uri'
+        }, function (err, report) {
+            if (err) {
+                console.log(err);
+            }
+            assert.isTrue(!err);
+            if (report) {
+                assert.isTrue(report.valid);
+            }
+            done();
+        });
+    });
+    it('should not pass uri format validation', function (done) {
+        zSchema.validate('foobar http://example.com foobar', {
+            'type': 'string',
+            'format': 'uri'
+        }, function (err, report) {
+            assert.instanceOf(err, Error);
+            if (report) {
+                assert.isFalse(report.valid);
+            }
+            done();
+        });
+    });
 });
