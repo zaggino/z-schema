@@ -398,8 +398,7 @@
                 return true;
             }
             // full-date from http://tools.ietf.org/html/rfc3339#section-5.6
-            var re = Utils.getRegExp('^([0-9]{4})-([0-9]{2})-([0-9]{2})$');
-            var matches = re.exec(date);
+            var matches = Utils.getRegExp('^([0-9]{4})-([0-9]{2})-([0-9]{2})$').exec(date);
             if (matches === null) {
                 return false;
             }
@@ -416,9 +415,6 @@
                 return true;
             }
             // date-time from http://tools.ietf.org/html/rfc3339#section-5.6
-            if (!Utils.isString(dateTime)) {
-                return false;
-            }
             var s = dateTime.toLowerCase().split('t');
             if (!FormatValidators.date(s[0])) {
                 return false;
@@ -441,9 +437,8 @@
             if (!Utils.isString(email)) {
                 return true;
             }
-            // From the jQuery Validation plugin
-            // Contributed by Scott Gonzalez: http://scottgonzalez.com/
-            var re = Utils.getRegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i);
+            // http://fightingforalostcause.net/misc/2006/compare-email-regex.php
+            var re = Utils.getRegExp(/^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i);
             return re.test(email);
         },
         'hostname': function (hostname) {
