@@ -452,6 +452,9 @@
             var re = Utils.getRegExp('^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$');
             return re.test(hostname);
         },
+        'host-name': function () {
+            return FormatValidators.hostname.apply(this, arguments);
+        },
         'ipv4': function (ipv4) {
             if (!Utils.isString(ipv4)) {
                 return true;
