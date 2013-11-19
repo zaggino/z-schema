@@ -841,14 +841,21 @@
         var self = this;
         var rv = q.defer();
 
+        if (!rootSchema.__remotes) {
+            rootSchema.__remotes = {};
+        }
+
+        // do not try to download self
+        if (rootSchema.id && uri === rootSchema.id.split('#')[0]) {
+            rootSchema.__remotes[uri] = rootSchema;
+            rv.resolve();
+            return rv.promise;
+        }
+
         Utils.getRemoteSchema(uri, function (err, remoteSchema) {
             if (err) {
                 err.description = 'Connection failed to: ' + uri;
                 return rv.reject(err);
-            }
-
-            if (!rootSchema.__remotes) {
-                rootSchema.__remotes = {};
             }
 
             rv.resolve(self._compileSchema(report, remoteSchema)

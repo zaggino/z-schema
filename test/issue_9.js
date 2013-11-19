@@ -54,7 +54,7 @@ describe("Schemas from http://json-schema.org/example2.html:", function () {
     };
 
     var keySchema = {
-        // "id": "http://some.site.somewhere/entry-schema#", (invalid ID so commented out)
+        "id": "http://some.site.somewhere/entry-schema#",
         "$schema": "http://json-schema.org/draft-04/schema#",
         "description": "schema for an fstab entry",
         "type": "object",
