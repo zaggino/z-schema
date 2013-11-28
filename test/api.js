@@ -39,7 +39,7 @@ describe('Validations for API:', function () {
         };
         var ins = new zSchema();
         ins.validate(valid, compiledSchema)
-            .fail(function (err) {
+            .catch(function (err) {
                 assert.instanceOf(err, Error);
                 done();
             })
@@ -63,7 +63,7 @@ describe('Validations for API:', function () {
         };
         var ins = new zSchema();
         ins.validate(sch, compiledSchema)
-            .fail(function (err) {
+            .catch(function (err) {
                 assert.instanceOf(err, Error);
                 done();
             })
