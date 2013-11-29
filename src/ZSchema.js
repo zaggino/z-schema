@@ -1762,7 +1762,7 @@
             var deferred = Promise.defer();
 
             try {
-                var p = CustomFormatValidators[schema.format](instance, deferred.callback);
+                p = CustomFormatValidators[schema.format](instance, deferred.callback);
                 if (Promise.is(p) || Utils.isBoolean(p)) {
                     deferred.resolve(p);
                 }
