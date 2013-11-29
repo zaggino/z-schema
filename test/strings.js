@@ -113,32 +113,6 @@ describe('Validations for string type:', function () {
         });
     });
 
-    zSchema.registerFormat('xstring', function (str) {
-        return str === 'xxx';
-    });
-
-    it('should pass format validation', function (done) {
-        zSchema.validate('xxx', {
-            'type': 'string',
-            'format': 'xstring'
-        }, function (err, report) {
-            if (err) {
-                console.log(err);
-            }
-            assert.isTrue(report.valid);
-            done();
-        });
-    });
-    it('should not pass format validation', function (done) {
-        zSchema.validate('yyy', {
-            'type': 'string',
-            'format': 'xstring'
-        }, function (err) {
-            assert.instanceOf(err, Error);
-            done();
-        });
-    });
-
     it('should pass date validation', function (done) {
         zSchema.validate('9999-12-31', {
             'type': 'string',

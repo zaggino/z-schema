@@ -671,7 +671,10 @@
     };
 
     /*
-     *  Register your own format to use when validating
+     *  Register your own format function to use when validating
+     *
+     *  `func` can be sync or async and can either return a promise or
+     *  execute a classic callback passed as last argument
      */
     ZSchema.registerFormat = function (name, func) {
         ZSchema.expect.string(name);
@@ -686,6 +689,14 @@
         }
 
         CustomFormatValidators[name] = func;
+    };
+
+    /**
+     * Register your own format validation function and tell ZSchema to call it in sync mode (performance)
+     */
+    ZSchema.registerFormatSync = function (name, func) {
+        func.__zSchemaSync = true;
+        return ZSchema.registerFormat(name, func);
     };
 
     /*
@@ -915,7 +926,7 @@
 
         return Promise.all(Utils.map(schema, function (val, key) {
                 if (InstanceValidators[key] !== undefined) {
-                    return Promise.try(InstanceValidators[key].bind(self), [report, schema, instance]);
+                    return InstanceValidators[key].call(self, report, schema, instance);
                 }
             }))
             .then(function () {
@@ -1696,24 +1707,17 @@
             var passes = 0;
             var subReports = [];
 
-            var p = Promise.resolve();
-
-            schema.oneOf.forEach(function (oneOf) {
-                p = p.then(function () {
-
-                    var subReport = new Report(report);
-                    return self._validateObject(subReport, oneOf, instance)
-                        .then(function () {
-                            if (subReport.isValid()) {
-                                passes++;
-                            } else {
-                                subReports.push(subReport);
-                            }
-                        });
-                });
-            });
-
-            return p.then(function () {
+            return Promise.all(schema.oneOf.map(function (oneOf) {
+                var subReport = new Report(report);
+                return self._validateObject(subReport, oneOf, instance)
+                    .then(function () {
+                        if (subReport.isValid()) {
+                            passes++;
+                        } else {
+                            subReports.push(subReport);
+                        }
+                    });
+            })).then(function () {
                 report.expect(passes > 0, 'ONE_OF_MISSING', {}, passes === 0 ? subReports : null);
                 report.expect(passes < 2, 'ONE_OF_MULTIPLE');
             });
@@ -1733,8 +1737,24 @@
         format: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
 
+            var p;
+
             if (typeof FormatValidators[schema.format] === 'function') { // built-in format (sync)
                 report.expect(FormatValidators[schema.format](instance), 'FORMAT', {format: schema.format, error: instance});
+                return;
+            }
+
+            // custom format was registered as sync function, so we can do some speedup
+            if (CustomFormatValidators[schema.format].__zSchemaSync === true) {
+                try {
+                    p = CustomFormatValidators[schema.format](instance);
+                    if (p !== true) {
+                        report.addError('FORMAT', {format: schema.format});
+                    }
+                } catch (err) {
+                    report.addError('FORMAT', {format: schema.format, error: err});
+                }
+
                 return;
             }
 
