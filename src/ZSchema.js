@@ -330,7 +330,7 @@
             });
         },
         // query should be valid json pointer
-        resolveSchemaQuery: function resolveSchemaQuery(schema, rootSchema, queryStr) {
+        resolveSchemaQuery: function resolveSchemaQuery(schema, rootSchema, queryStr, allowNull) {
             ZSchema.expect.string(queryStr);
             if (queryStr === '#') {
                 return rootSchema;
@@ -340,19 +340,23 @@
             var uriPart = queryStr.split('#')[0];
             var queryPart = queryStr.split('#')[1];
 
-            if (queryStr.indexOf('http:') === 0 || queryStr.indexOf('https:') === 0) {
-                // remote
-                if (!rootSchema.__remotes || !rootSchema.__remotes[uriPart]) {
-                    throw new Error('Remote is not downloaded: ' + uriPart);
+            if (uriPart) {
+                if (uriPart.indexOf('http:') === 0 || uriPart.indexOf('https:') === 0) {
+                    // remote
+                    if (!rootSchema.__remotes || !rootSchema.__remotes[uriPart]) {
+                        throw new Error('Remote is not downloaded: ' + uriPart);
+                    }
+                    rv = rootSchema.__remotes[uriPart];
+                } else {
+                    // it's a local ID
+                    rv = Utils.resolveSchemaId(rootSchema, uriPart);
                 }
-                rv = rootSchema.__remotes[uriPart];
+            } else {
+                rv = rootSchema;
             }
 
-            // pick remote or current
-            rv = rv || rootSchema;
-
-            // we have remote schema            
-            if (queryPart) {
+            // we have the schema and query to resolve in it
+            if (rv && queryPart) {
                 var queries = ('#' + queryPart).split('/');
                 while (queries.length > 0) {
                     var key = Utils.decodeJSONPointer(queries.shift());
@@ -364,7 +368,7 @@
                 }
             }
 
-            if (!rv) {
+            if (!rv && !allowNull) {
                 throw new Error('Could not resolve schema reference: ' + queryStr);
             }
 
@@ -772,6 +776,23 @@
     };
     */
 
+    // recurse schema and collect all references for download
+    ZSchema.prototype._collectReferences = function _collectReferences(schema) {
+        var rv = [];
+        if (schema.$ref) {
+            rv.push(schema.$ref);
+        }
+        Utils.forEach(schema, function (val, key) {
+            if (typeof key === 'string' && key.indexOf('__') === 0) {
+                return;
+            }
+            if (Utils.isObject(val) || Utils.isArray(val)) {
+                rv = rv.concat(_collectReferences(val));
+            }
+        }, this);
+        return rv;
+    };
+
     ZSchema.prototype._compileSchema = function (report, schema) {
         // reusing of compiled schemas
         if (schema.__compiled) {
@@ -780,7 +801,8 @@
         schema.__compiled = true;
 
         // fix all references
-        this._fixReferences(schema);
+        this._fixInnerReferences(schema);
+        this._fixOuterReferences(schema);
         // then collect for downloading other schemas
         var refs = Utils.uniq(this._collectReferences(schema));
 
@@ -788,7 +810,11 @@
 
         return q.all(refs.map(function (ref) {
                 // never download itself
-                if (ref.indexOf(schema.$schema) !== 0 && (ref.indexOf('http:') === 0 || ref.indexOf('https:') === 0)) {
+                if (ref.indexOf(schema.$schema) === 0) {
+                    return;
+                }
+                // download if it is a remote
+                if (ref.indexOf('http:') === 0 || ref.indexOf('https:') === 0) {
                     return self._downloadRemoteReferences(report, schema, ref.split('#')[0]);
                 }
             }))
@@ -797,38 +823,45 @@
             });
     };
 
-    // recurse schema and collect all references for download
-    ZSchema.prototype._collectReferences = function _collectReferences(schema) {
-        var rv = [];
-        if (schema.$ref) {
-            rv.push(schema.$ref);
+    ZSchema.prototype._fixInnerReferences = function _fixInnerReferences(rootSchema, schema) {
+        if (!schema) {
+            schema = rootSchema;
         }
-        Utils.forEach(schema, function (val) {
+        if (schema.$ref && schema.__$refResolved !== null && schema.$ref.indexOf('http:') !== 0 && schema.$ref.indexOf('https:') !== 0) {
+            schema.__$refResolved = Utils.resolveSchemaQuery(schema, rootSchema, schema.$ref, true) || null;
+        }
+        Utils.forEach(schema, function (val, key) {
+            if (typeof key === 'string' && key.indexOf('__') === 0) {
+                return;
+            }
             if (Utils.isObject(val) || Utils.isArray(val)) {
-                rv = rv.concat(_collectReferences(val));
+                _fixInnerReferences(rootSchema, val);
             }
         }, this);
-        return rv;
     };
 
     // fix references according to current scope
-    ZSchema.prototype._fixReferences = function _fixReferences(schema, scope) {
+    ZSchema.prototype._fixOuterReferences = function _fixOuterReferences(schema, scope) {
         scope = scope || [];
         if (Utils.isString(schema.id)) {
             scope.push(schema.id);
         }
-        if (schema.$ref) {
+        if (schema.$ref && !schema.__$refResolved) {
             if (scope.length > 0) {
-                if (schema.$ref.indexOf('#') === 0) {
-                    schema.$ref = scope.join('').split('#')[0] + schema.$ref;
+                var s = scope.join('').split('#')[0];
+                if (schema.$ref[0] === '#') {
+                    schema.$ref = s + schema.$ref;
                 } else {
-                    schema.$ref = scope.join('') + schema.$ref;
+                    schema.$ref = s.substring(0, 1 + s.lastIndexOf('/')) + schema.$ref;
                 }
             }
         }
-        Utils.forEach(schema, function (val) {
+        Utils.forEach(schema, function (val, key) {
+            if (typeof key === 'string' && key.indexOf('__') === 0) {
+                return;
+            }
             if (Utils.isObject(val) || Utils.isArray(val)) {
-                _fixReferences(val, scope);
+                _fixOuterReferences(val, scope);
             }
         }, this);
         if (Utils.isString(schema.id)) {
@@ -881,7 +914,9 @@
         }
 
         Utils.forEach(schema, function (value, key) {
-
+            if (typeof key === 'string' && key.indexOf('__') === 0) {
+                return;
+            }
             if (SchemaValidators[key] !== undefined) {
                 SchemaValidators[key].call(self, report, schema);
             } else {
@@ -909,7 +944,11 @@
 
         var maxRefs = 99;
         while (schema.$ref && maxRefs > 0) {
-            schema = Utils.resolveSchemaQuery(schema, report.rootSchema, schema.$ref);
+            if (schema.__$refResolved) {
+                schema = schema.__$refResolved;
+            } else {
+                schema = Utils.resolveSchemaQuery(schema, report.rootSchema, schema.$ref);
+            }
             maxRefs--;
         }
 
@@ -1059,6 +1098,11 @@
             // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07
             // http://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03
             report.expect(Utils.isString(schema.$ref), 'KEYWORD_TYPE_EXPECTED', {keyword: '$ref', type: 'string'});
+            // we need to validate that schema.$ref is a valid reference in case it's not an URI
+            // TODO: if it's compiled, just check for pointer
+            // TODO: look for an ID inside this schema
+            // TODO: look for an ID inside other already loaded schemas
+            // TODO: if still not found, use canonical dereferencing and fetch the appropriate schema
         },
         $schema: function (report, schema) {
             // http://json-schema.org/latest/json-schema-core.html#rfc.section.6
