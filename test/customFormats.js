@@ -5,12 +5,6 @@ var zSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
 var Promise = require('bluebird');
 
-Promise.delay = function (ms) {
-    return new Promise(function (v) {
-        setTimeout(v, ms);
-    });
-};
-
 describe('Custom format validators:', function () {
     zSchema.registerFormat('xstring', function (str) {
         return str === 'xxx';

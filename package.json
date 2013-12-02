@@ -33,7 +33,7 @@
     "files": ["src/ZSchema.js", "src/ZSchema.min.js", "LICENSE", "README.md"],
     "version": "2.0.4",
     "dependencies": {
-        "bluebird": "~0.10.10"
+        "bluebird": "~0.11.*"
     },
     "devDependencies": {
         "chai": "1.8.1",
