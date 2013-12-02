@@ -48,6 +48,7 @@
         'ONE_OF_MISSING': 'Data does not match any schemas from "oneOf"',
         'ONE_OF_MULTIPLE': 'Data is valid against more than one schema from "oneOf"',
         'NOT_PASSED': 'Data matches schema from "not"',
+        'UNRESOLVABLE_REFERENCE': 'Reference could not be resolved: {ref}',
         // Numeric errors
         'MULTIPLE_OF': 'Value {value} is not a multiple of {multipleOf}',
         'MINIMUM': 'Value {value} is less than minimum {minimum}',
@@ -780,7 +781,7 @@
     ZSchema.prototype._collectReferences = function _collectReferences(schema) {
         var rv = [];
         if (schema.$ref) {
-            rv.push(schema.$ref);
+            rv.push(schema);
         }
         Utils.forEach(schema, function (val, key) {
             if (typeof key === 'string' && key.indexOf('__') === 0) {
@@ -804,7 +805,10 @@
         this._fixInnerReferences(schema);
         this._fixOuterReferences(schema);
         // then collect for downloading other schemas
-        var refs = Utils.uniq(this._collectReferences(schema));
+        var refObjs = this._collectReferences(schema);
+        var refs = Utils.uniq(refObjs.map(function (obj) {
+            return obj.$ref;
+        }));
 
         var self = this;
 
@@ -819,6 +823,12 @@
                 }
             }))
             .then(function () {
+                refObjs.forEach(function (refObj) {
+                    if (!refObj.__$refResolved) {
+                        refObj.__$refResolved = Utils.resolveSchemaQuery(refObj, schema, refObj.$ref, true) || null;
+                    }
+                    report.expect(refObj.__$refResolved != null, 'UNRESOLVABLE_REFERENCE', {ref: refObj.$ref});
+                });
                 return schema;
             });
     };

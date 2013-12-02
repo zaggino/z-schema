@@ -41,11 +41,13 @@ describe("https://github.com/zaggino/z-schema/issues/12", function () {
         required: ["a"]
     };
 
+    /*
     var schemaB = {
         $schema: "http://json-schema.org/draft-04/schema#",
         id: "schemaB",
         type: "integer"
     };
+    */
 
     it("should successfully validate with validSchema from http://json-schema.org/latest/json-schema-core.html#rfc.section.7.2.3", function (done) {
         this.timeout(15000);
@@ -66,25 +68,22 @@ describe("https://github.com/zaggino/z-schema/issues/12", function () {
         validator.validate(["1", null, 3], validSchema).then(function (report) {
             assert.isFalse(report.valid);
             done();
-        }).fail(function (err) {
+        }).fail(function () {
             assert.isTrue(true);
             done();
         });
     });
 
-    /*
     it("schemaA should fail compilation on its own", function (done) {
         var validator = new ZSchema();
         validator.compileSchema(schemaA).then(function (report) {
             assert.isFalse(report.valid);
             done();
         }).fail(function (err) {
-            console.log(err);
-            // TODO: check error code makes sense
-            assert.isTrue(true);
+            assert.isTrue(err.errors.length === 1);
+            assert.isTrue(err.errors[0].code === "UNRESOLVABLE_REFERENCE");
             done();
         });
     });
-    */
 
 });
