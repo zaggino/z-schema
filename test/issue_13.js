@@ -1,22 +1,28 @@
 /*jshint strict:false, loopfunc:true*/
-/*global describe, it*/
+/*global beforeEach, describe, it*/
 
 var ZSchema = require("../src/ZSchema");
 var assert = require("chai").assert;
 
 describe("https://github.com/zaggino/z-schema/issues/13", function () {
 
-    var schemaA = {id: "schemaA", type: "integer"};
-    var schemaB = {id: "schemaB", type: "string"};
-    var mainSchema = {
-        id: "mainSchema",
-        type: "object",
-        properties: {
-            a: {"$ref": "schemaA"},
-            b: {"$ref": "schemaB"},
-            c: {"enum": ["C"]}
-        }
-    };
+    var schemaA;
+    var schemaB;
+    var mainSchema;
+
+    beforeEach(function () {
+        schemaA = {id: "schemaA", type: "integer"};
+        schemaB = {id: "schemaB", type: "string"};
+        mainSchema = {
+            id: "mainSchema",
+            type: "object",
+            properties: {
+                a: {"$ref": "schemaA"},
+                b: {"$ref": "schemaB"},
+                c: {"enum": ["C"]}
+            }
+        };
+    });
 
     it("should add compilation marks to a schema if it passed compilation", function (done) {
         var schema = {id: "schemaA", type: "integer"};
@@ -97,6 +103,50 @@ describe("https://github.com/zaggino/z-schema/issues/13", function () {
             });
         }).fail(function (err) {
             assert.isUndefined(err);
+            done();
+        }).fail(function (e) {
+            done(e);
+        });
+    });
+
+    it("compile multiple schemas at once", function (done) {
+        var validator = new ZSchema();
+        validator.compileSchema([schemaA, schemaB, mainSchema]).then(function () {
+            assert.isTrue(schemaA.__$compiled);
+            assert.isTrue(schemaB.__$compiled);
+            assert.isTrue(mainSchema.__$compiled);
+            done();
+        }).fail(function (err) {
+            assert.isUndefined(err);
+            done();
+        }).fail(function (e) {
+            done(e);
+        });
+    });
+
+    it("should validate with mainSchema", function (done) {
+        var validator = new ZSchema();
+        validator.compileSchema([schemaA, schemaB, mainSchema]).then(function () {
+            return validator.validate({a: 1, b: "b", c: "C"}, mainSchema).then(function (report) {
+                assert.isTrue(report.valid);
+                done();
+            });
+        }).fail(function (err) {
+            assert.isUndefined(err);
+            done();
+        }).fail(function (e) {
+            done(e);
+        });
+    });
+
+    it("should not validate with mainSchema", function (done) {
+        var validator = new ZSchema();
+        validator.compileSchema([schemaA, schemaB, mainSchema]).then(function () {
+            return validator.validate({a: "a", b: 2, c: "X"}, mainSchema).then(function () {
+                assert.isTrue(false);
+            });
+        }).fail(function (err) {
+            assert.isTrue(err.errors.length === 3);
             done();
         }).fail(function (e) {
             done(e);

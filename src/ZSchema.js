@@ -748,15 +748,23 @@
      */
     ZSchema.prototype.compileSchema = function (schema, callback) {
         var self = this;
-        var report = new Report();
 
-        return this._compileSchema(report, schema)
-            .then(function (compiledSchema) {
-                return self._validateSchema(report, compiledSchema)
-                    .then(function () {
-                        return compiledSchema;
-                    });
-            }).nodeify(callback);
+        if (Array.isArray(schema)) {
+            var result = q();
+            schema.forEach(function (sch) {
+                result = result.then(function () {
+                    return self.compileSchema.call(self, sch);
+                });
+            });
+            return result.nodeify(callback);
+        }
+
+        var report = new Report();
+        return this._compileSchema(report, schema).then(function (compiledSchema) {
+            return self._validateSchema(report, compiledSchema).then(function () {
+                return compiledSchema;
+            });
+        }).nodeify(callback);
     };
 
     /**
@@ -804,7 +812,6 @@
         if (schema.__$compiled) {
             return q(schema);
         }
-
 
         // fix all references
         this._fixInnerReferences(schema);
