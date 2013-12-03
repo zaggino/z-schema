@@ -83,6 +83,8 @@ describe("https://github.com/zaggino/z-schema/issues/12", function () {
             assert.isTrue(err.errors.length === 1);
             assert.isTrue(err.errors[0].code === "UNRESOLVABLE_REFERENCE");
             done();
+        }).fail(function (e) {
+            done(e);
         });
     });
 

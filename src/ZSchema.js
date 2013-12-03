@@ -796,10 +796,10 @@
 
     ZSchema.prototype._compileSchema = function (report, schema) {
         // reusing of compiled schemas
-        if (schema.__compiled) {
+        if (schema.__$compiled) {
             return q(schema);
         }
-        schema.__compiled = true;
+
 
         // fix all references
         this._fixInnerReferences(schema);
@@ -829,6 +829,10 @@
                     }
                     report.expect(refObj.__$refResolved != null, 'UNRESOLVABLE_REFERENCE', {ref: refObj.$ref});
                 });
+
+                if (report.isValid()) {
+                    schema.__$compiled = true;
+                }
                 return schema;
             });
     };
@@ -911,11 +915,9 @@
     };
 
     ZSchema.prototype._validateSchema = function (report, schema) {
-
-        if (schema.__validated) {
+        if (schema.__$validated) {
             return q(schema);
         }
-        schema.__validated = true;
 
         var self = this;
 
@@ -937,6 +939,10 @@
                 }
             }
         });
+
+        if (report.isValid()) {
+            schema.__$validated = true;
+        }
 
         return report.toPromise();
     };
@@ -1460,11 +1466,11 @@
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.6.2   
         },
         // ---- custom keys used by ZSchema
-        __compiled: function (report, schema) {
-            ZSchema.expect.boolean(schema.__compiled);
+        __$compiled: function (report, schema) {
+            ZSchema.expect.boolean(schema.__$compiled);
         },
-        __validated: function (report, schema) {
-            ZSchema.expect.boolean(schema.__validated);
+        __$validated: function (report, schema) {
+            ZSchema.expect.boolean(schema.__$validated);
         }
     };
 
