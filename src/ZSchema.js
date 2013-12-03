@@ -32,6 +32,8 @@
 
     var Promise = require('bluebird');
 
+    Promise.prototype.fail = Promise.prototype.catch;
+
     var ValidationError = function (code, message, params, path) {
         this.code = code;
         this.message = message;
