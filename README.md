@@ -225,6 +225,12 @@ var validator = new ZSchema({
 });
 ```
 
+## More options
+
+* noSchemaCache: ```true/false```
+
+when true, disables caching of compiled schemas - cache is used to resolve references to other schemas by their ID
+
 # Pull requests
 
 Avoid JSHint errors - settings for the JSHint are specified in ```.jshintrc```.

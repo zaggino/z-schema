@@ -620,7 +620,8 @@
             forceAdditional: false, // when on, forces not to leave out some keys on schemas (additionalProperties, additionalItems)
             forceProperties: false, // when on, forces not to leave out properties or patternProperties on type-object schemas
             forceItems: false, // when on, forces not to leave out items on array-type schemas
-            forceMaxLength: false // when on, forces not to leave out maxLength on string-type schemas, when format or enum is not specified
+            forceMaxLength: false, // when on, forces not to leave out maxLength on string-type schemas, when format or enum is not specified
+            noSchemaCache: false // when on, schema caching is disabled - cache is used to resolve references by id between schemas
         });
         if (this.options.strict === true) {
             this.options.noExtraKeywords = true;
@@ -630,6 +631,10 @@
             this.options.forceProperties = true;
             this.options.forceItems = true;
             this.options.forceMaxLength = true;
+        }
+        // schema-cache can be turned off for memory / performance gain when not required
+        if (this.options.noSchemaCache !== true) {
+            this.schemaCache = {};
         }
     }
 
@@ -827,11 +832,17 @@
                     if (!refObj.__$refResolved) {
                         refObj.__$refResolved = Utils.resolveSchemaQuery(refObj, schema, refObj.$ref, true) || null;
                     }
+                    if (self.schemaCache && self.schemaCache[refObj.$ref]) {
+                        refObj.__$refResolved = self.schemaCache[refObj.$ref];
+                    }
                     report.expect(refObj.__$refResolved != null, 'UNRESOLVABLE_REFERENCE', {ref: refObj.$ref});
                 });
 
                 if (report.isValid()) {
                     schema.__$compiled = true;
+                }
+                if (schema.id && self.schemaCache) {
+                    self.schemaCache[schema.id] = schema;
                 }
                 return schema;
             });
