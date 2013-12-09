@@ -168,7 +168,7 @@ describe("Schemas from http://json-schema.org/example2.html:", function () {
         validator.validateSchema(rootSchema).then(function (report) {
             assert.isTrue(report.valid);
             done();
-        }).fail(function (err) {
+        }).catch(function (err) {
             console.log(err);
             assert.isTrue(false);
             done();
@@ -180,7 +180,7 @@ describe("Schemas from http://json-schema.org/example2.html:", function () {
         validator.validateSchema(keySchema).then(function (report) {
             assert.isTrue(report.valid);
             done();
-        }).fail(function (err) {
+        }).catch(function (err) {
             console.log(err);
             assert.isTrue(false);
             done();
@@ -191,7 +191,7 @@ describe("Schemas from http://json-schema.org/example2.html:", function () {
         var validator = new ZSchema();
         validator.validate(sampleObject, rootSchema).then(function () {
             done();
-        }).fail(function (err) {
+        }).catch(function (err) {
             console.log(err);
         });
     });
@@ -208,7 +208,7 @@ describe("Schemas from http://json-schema.org/example2.html:", function () {
             validator.validate(sampleObject[key], keySchema).then(function () {
                 passed++;
                 if (passed === total) { done(); }
-            }).fail(function (err) {
+            }).catch(function (err) {
                 console.log(err);
             });
         }

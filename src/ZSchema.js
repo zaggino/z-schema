@@ -30,7 +30,9 @@
 (function () {
     'use strict';
 
-    var q = require('q');
+    var Promise = require('bluebird');
+
+    Promise.prototype.fail = Promise.prototype.catch;
 
     var ValidationError = function (code, message, params, path) {
         this.code = code;
@@ -596,9 +598,9 @@
         },
         toPromise: function () {
             if (this.isValid()) {
-                return q(this);
+                return Promise.resolve(this);
             } else {
-                return q.reject(this.toError());
+                return Promise.reject(this.toError());
             }
         },
         goDown: function (str) {
@@ -681,7 +683,10 @@
     };
 
     /*
-     *  Register your own format to use when validating
+     *  Register your own format function to use when validating
+     *
+     *  `func` can be sync or async and can either return a promise or
+     *  execute a classic callback passed as last argument
      */
     ZSchema.registerFormat = function (name, func) {
         ZSchema.expect.string(name);
@@ -696,6 +701,14 @@
         }
 
         CustomFormatValidators[name] = func;
+    };
+
+    /**
+     * Register your own format validation function and tell ZSchema to call it in sync mode (performance)
+     */
+    ZSchema.registerFormatSync = function (name, func) {
+        func.__zSchemaSync = true;
+        return ZSchema.registerFormat(name, func);
     };
 
     /*
@@ -750,7 +763,7 @@
         var self = this;
 
         if (Array.isArray(schema)) {
-            var result = q();
+            var result = Promise.resolve();
             schema.forEach(function (sch) {
                 result = result.then(function () {
                     return self.compileSchema.call(self, sch);
@@ -810,7 +823,7 @@
     ZSchema.prototype._compileSchema = function (report, schema) {
         // reusing of compiled schemas
         if (schema.__$compiled) {
-            return q(schema);
+            return Promise.resolve(schema);
         }
 
         // fix all references
@@ -824,7 +837,7 @@
 
         var self = this;
 
-        return q.all(refs.map(function (ref) {
+        return Promise.all(refs.map(function (ref) {
                 // never download itself
                 if (ref.indexOf(schema.$schema) === 0) {
                     return;
@@ -904,7 +917,7 @@
     // download remote references when needed
     ZSchema.prototype._downloadRemoteReferences = function (report, rootSchema, uri) {
         var self = this;
-        var rv = q.defer();
+        var rv = Promise.defer();
 
         if (!rootSchema.__remotes) {
             rootSchema.__remotes = {};
@@ -934,7 +947,7 @@
 
     ZSchema.prototype._validateSchema = function (report, schema) {
         if (schema.__$validated) {
-            return q(schema);
+            return Promise.resolve(schema);
         }
 
         var self = this;
@@ -986,9 +999,9 @@
             maxRefs--;
         }
 
-        return q.all(Utils.map(schema, function (val, key) {
+        return Promise.all(Utils.map(schema, function (val, key) {
                 if (InstanceValidators[key] !== undefined) {
-                    return q.fcall(InstanceValidators[key].bind(self), report, schema, instance);
+                    return InstanceValidators[key].call(self, report, schema, instance);
                 }
             }))
             .then(function () {
@@ -1012,9 +1025,9 @@
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.2
 
         var self = this;
-        var p = q();
+        var p = Promise.resolve();
 
-        // If items is a schema, then the child instance must be valid against this schema, 
+        // If items is a schema, then the child instance must be valid against this schema,
         // regardless of its index, and regardless of the value of "additionalItems".
         if (Utils.isObject(schema.items)) {
 
@@ -1032,13 +1045,13 @@
         }
 
         // If "items" is an array, this situation, the schema depends on the index:
-        // if the index is less than, or equal to, the size of "items", 
+        // if the index is less than, or equal to, the size of "items",
         // the child instance must be valid against the corresponding schema in the "items" array;
         // otherwise, it must be valid against the schema defined by "additionalItems".
         if (Utils.isArray(schema.items)) {
 
             instance.forEach(function (val, index) {
-                
+
                 p = p.then(function () {
                     // equal to doesnt make sense here
                     if (index < schema.items.length) {
@@ -1069,9 +1082,9 @@
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.3
 
         var self = this;
-        var promise = q();
+        var promise = Promise.resolve();
 
-        // If "additionalProperties" is absent, it is considered present with an empty schema as a value. 
+        // If "additionalProperties" is absent, it is considered present with an empty schema as a value.
         // In addition, boolean value true is considered equivalent to an empty schema.
         var additionalProperties = schema.additionalProperties;
         if (additionalProperties === true || additionalProperties === undefined) {
@@ -1123,7 +1136,7 @@
         return promise;
     };
 
-    /* 
+    /*
      * use this functions to validate json schema itself
      * every code here SHOULD reference json schema specification
      */
@@ -1481,7 +1494,7 @@
             report.expect(Utils.isString(schema.description), 'KEYWORD_TYPE_EXPECTED', {keyword: 'description', type: 'string'});
         },
         'default': function () { /*report, schema*/
-            // http://json-schema.org/latest/json-schema-validation.html#rfc.section.6.2   
+            // http://json-schema.org/latest/json-schema-validation.html#rfc.section.6.2
         },
         // ---- custom keys used by ZSchema
         __$compiled: function (report, schema) {
@@ -1579,7 +1592,7 @@
                 return;
             }
 
-            // if the value of "additionalItems" is boolean value false and the value of "items" is an array, 
+            // if the value of "additionalItems" is boolean value false and the value of "items" is an array,
             // the instance is valid if its size is less than, or equal to, the size of "items".
             if (schema.additionalItems === false && Utils.isArray(schema.items)) {
                 report.expect(instance.length <= schema.items.length, 'ARRAY_ADDITIONAL_ITEMS');
@@ -1682,7 +1695,7 @@
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.5.2
 
             var self = this;
-            var p = q();
+            var p = Promise.resolve();
 
             if (!Utils.isObject(instance)) {
                 return;
@@ -1731,7 +1744,7 @@
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
 
             var self = this;
-            var p = q();
+            var p = Promise.resolve();
 
             schema.allOf.forEach(function (sch) {
                 p = p.then(function () {
@@ -1747,7 +1760,7 @@
             var subReports = [];
 
             var self = this;
-            var p = q();
+            var p = Promise.resolve();
 
             schema.anyOf.forEach(function (anyOf) {
                 p = p.then(function () {
@@ -1773,25 +1786,18 @@
             var self = this;
             var passes = 0;
             var subReports = [];
-            
-            var p = q();
 
-            schema.oneOf.forEach(function (oneOf) {
-                p = p.then(function () {
-
-                    var subReport = new Report(report);
-                    return self._validateObject(subReport, oneOf, instance)
-                        .then(function () {
-                            if (subReport.isValid()) {
-                                passes++;
-                            } else {
-                                subReports.push(subReport);
-                            }
-                        });
-                });
-            });
-
-            return p.then(function () {
+            return Promise.all(schema.oneOf.map(function (oneOf) {
+                var subReport = new Report(report);
+                return self._validateObject(subReport, oneOf, instance)
+                    .then(function () {
+                        if (subReport.isValid()) {
+                            passes++;
+                        } else {
+                            subReports.push(subReport);
+                        }
+                    });
+            })).then(function () {
                 report.expect(passes > 0, 'ONE_OF_MISSING', {}, passes === 0 ? subReports : null);
                 report.expect(passes < 2, 'ONE_OF_MULTIPLE');
             });
@@ -1811,17 +1817,33 @@
         format: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
 
+            var p;
+
             if (typeof FormatValidators[schema.format] === 'function') { // built-in format (sync)
                 report.expect(FormatValidators[schema.format](instance), 'FORMAT', {format: schema.format, error: instance});
                 return;
             }
 
+            // custom format was registered as sync function, so we can do some speedup
+            if (CustomFormatValidators[schema.format].__zSchemaSync === true) {
+                try {
+                    p = CustomFormatValidators[schema.format](instance);
+                    if (p !== true) {
+                        report.addError('FORMAT', {format: schema.format});
+                    }
+                } catch (err) {
+                    report.addError('FORMAT', {format: schema.format, error: err});
+                }
+
+                return;
+            }
+
             // custom format (sync or async)
-            var deferred = q.defer();
+            var deferred = Promise.defer();
 
             try {
-                var p = CustomFormatValidators[schema.format](instance, deferred.makeNodeResolver());
-                if (q.isPromise(p) || Utils.isBoolean(p)) {
+                p = CustomFormatValidators[schema.format](instance, deferred.callback);
+                if (Promise.is(p) || Utils.isBoolean(p)) {
                     deferred.resolve(p);
                 }
             } catch (e) {
@@ -1834,7 +1856,7 @@
                         report.addError('FORMAT', {format: schema.format});
                     }
                 })
-                .fail(function (err) { // validators may throw Error or return rejected promise
+                .catch(function (err) { // validators may throw Error or return rejected promise
                     report.addError('FORMAT', {format: schema.format, error: err});
                 });
         }

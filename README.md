@@ -27,10 +27,10 @@ var ZSchema = require("z-schema");
 ```javascript
 ZSchema.validate(json, schema)
     .then(function(report){
-        // successful validation 
+        // successful validation
         // there might be warnings: console.log(report.warnings)
     })
-    .fail(function(err){
+    .catch(function(err){
         console.error(err.errors)
     })
 ```
@@ -42,7 +42,7 @@ ZSchema.validate(json, schema, function(err, report){
         console.error(err.errors);
         return;
     }
-    // successful validation 
+    // successful validation
     // there might be warnings: console.log(report.warnings)
 })
 ```
@@ -54,7 +54,7 @@ var validator = new ZSchema();
 validator.validateSchema(schema)
     .then(function(report){
     })
-    .fail(function(err){
+    .catch(function(err){
     })
 ```
 
@@ -69,7 +69,7 @@ validator.validateSchema(schema, function (err, report) {
 
 ## Remote references in schemas
 
-Your schemas can include remote references that should be real URIs ([more on that here](http://json-schema.org/latest/json-schema-core.html#anchor22)) 
+Your schemas can include remote references that should be real URIs ([more on that here](http://json-schema.org/latest/json-schema-core.html#anchor22))
 so validator can make a request and download the schema needed. Validator automatically
 caches these remote requests so they are not repeated with every validation.
 
@@ -116,7 +116,7 @@ validator.validate(json, compiledSchema)
     .then(function(report){
         // ...
     })
-    .fail(function(err){
+    .catch(function(err){
         console.error(err.errors)
     })
 ```
@@ -124,7 +124,7 @@ validator.validate(json, compiledSchema)
 ## Custom format validators
 
 You can add validation for your own custom string formats like this:
-(these are added to all validator instances, because it would never make sense to have multiple 
+(these are added to all validator instances, because it would never make sense to have multiple
 functions to validate format with the same name)
 
 ```javascript
@@ -139,7 +139,7 @@ validator.validate('xxx', {
     'format': 'xstring'
 })
 .then(function(){})
-.fail(function(err){})
+.catch(function(err){})
 ```
 
 Custom validators can also be async:
