@@ -74,7 +74,6 @@
         'ARRAY_ADDITIONAL_ITEMS': 'Additional items not allowed',
         // Format errors
         'FORMAT': '{format} format validation failed: {error}',
-
         // Schema validation errors
         'KEYWORD_TYPE_EXPECTED': 'Keyword "{keyword}" is expected to be type of type "{type}"',
         'KEYWORD_UNDEFINED_STRICT': 'Keyword "{keyword}" must be defined in strict mode',
@@ -83,7 +82,9 @@
         'KEYWORD_DEPENDENCY': 'Keyword "{keyword1}" requires keyword "{keyword2}"',
         'KEYWORD_PATTERN': 'Keyword "{keyword}" is not a valid RegExp pattern ({pattern})',
         'KEYWORD_VALUE_TYPE': 'Each element of keyword "{keyword}" array must be a "{type}"',
-        'UNKNOWN_FORMAT': 'There is no validation function for format "{format}"'
+        'UNKNOWN_FORMAT': 'There is no validation function for format "{format}"',
+        // Remote errors
+        'SCHEMA_NOT_REACHABLE': 'Validator was not able to read schema located at {uri}'
     };
 
     ValidationError.prototype.addSubError = function (err) {
@@ -950,32 +951,51 @@
             return Promise.resolve(schema);
         }
 
-        var self = this;
+        var self = this,
+            hasParentSchema = !! schema.$schema;
 
-        if (this.options.noTypeless === true) {
-            report.expect(schema.type !== undefined, 'KEYWORD_UNDEFINED_STRICT', {keyword: 'type'});
-        }
-
-        Utils.forEach(schema, function (value, key) {
-            if (typeof key === 'string' && key.indexOf('__') === 0) {
-                return;
+        var finish = function () {
+            // run sync validations over schema keywords
+            if (self.options.noTypeless === true) {
+                report.expect(schema.type !== undefined, 'KEYWORD_UNDEFINED_STRICT', {keyword: 'type'});
             }
-            if (SchemaValidators[key] !== undefined) {
-                SchemaValidators[key].call(self, report, schema);
-            } else {
-                if (self.options.noExtraKeywords === true) {
-                    report.expect(false, 'KEYWORD_UNEXPECTED', {keyword: key});
-                } else {
-                    report.addWarning('Unknown key "' + key + '" found in schema.');
+            Utils.forEach(schema, function (value, key) {
+                if (typeof key === 'string' && key.indexOf('__') === 0) {
+                    return;
                 }
+                if (SchemaValidators[key] !== undefined) {
+                    SchemaValidators[key].call(self, report, schema);
+                } else if (!hasParentSchema) {
+                    if (self.options.noExtraKeywords === true) {
+                        report.expect(false, 'KEYWORD_UNEXPECTED', {keyword: key});
+                    } else {
+                        report.addWarning('Unknown key "' + key + '" found in schema.');
+                    }
+                }
+            });
+            if (report.isValid()) {
+                schema.__$validated = true;
             }
-        });
+            return report.toPromise();
+        };
 
-        if (report.isValid()) {
-            schema.__$validated = true;
+        // if $schema is present, this schema should validate against that $schema
+        if (hasParentSchema && schema.$schema !== schema.__$downloadedFrom) {
+            var rv = Promise.defer();
+            Utils.getRemoteSchema(schema.$schema, function (err, remoteSchema) {
+                if (err) {
+                    report.addError('SCHEMA_NOT_REACHABLE', {uri: schema.$schema});
+                    rv.reject();
+                    return;
+                }
+                rv.resolve();
+                // TODO: validate schema against remoteSchema
+                // TODO: how to prevent recursion ?
+            });
+            return rv.promise.then(finish);
+        } else {
+            return finish();
         }
-
-        return report.toPromise();
     };
 
     ZSchema.prototype._validateObject = function (report, schema, instance) {
@@ -1145,11 +1165,6 @@
             // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07
             // http://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03
             report.expect(Utils.isString(schema.$ref), 'KEYWORD_TYPE_EXPECTED', {keyword: '$ref', type: 'string'});
-            // we need to validate that schema.$ref is a valid reference in case it's not an URI
-            // TODO: if it's compiled, just check for pointer
-            // TODO: look for an ID inside this schema
-            // TODO: look for an ID inside other already loaded schemas
-            // TODO: if still not found, use canonical dereferencing and fetch the appropriate schema
         },
         $schema: function (report, schema) {
             // http://json-schema.org/latest/json-schema-core.html#rfc.section.6
