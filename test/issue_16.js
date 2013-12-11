@@ -3,6 +3,9 @@
 
 var ZSchema = require("../src/ZSchema");
 var assert = require("chai").assert;
+var fs = require("fs");
+
+ZSchema.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", fs.readFileSync(__dirname + "/remotes/hyper-schema.json", "utf8"));
 
 describe("https://github.com/zaggino/z-schema/issues/16", function () {
 
@@ -63,6 +66,7 @@ describe("https://github.com/zaggino/z-schema/issues/16", function () {
     });
 
     it("should fail because links is expected to be an array", function (done) {
+        this.timeout(60 * 60 * 1000);
         var schema = {
             $schema: "http://json-schema.org/draft-04/hyper-schema#",
             links: "not an array"

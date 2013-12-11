@@ -117,6 +117,11 @@
         return new ValidationError(code, msg, params, path);
     };
 
+    function isAbsoluteUri(str) {
+        // TODO: cache reg-exp
+        return (/^https?\:\/\//).test(str);
+    }
+
     var Utils = {
         isBoolean: function (what) {
             return typeof what === 'boolean';
@@ -300,10 +305,19 @@
         },
         _getRemoteSchemaCache: {},
         getRemoteSchema: function (urlWithQuery, callback) {
-            var url = urlWithQuery.split('#')[0];
+            var self = this,
+                url = urlWithQuery.split('#')[0];
 
-            function returnSchemaFromString(str) {
-                var sch = JSON.parse(str);
+            function returnSchemaFromString(str, url) {
+                var sch;
+
+                try {
+                    sch = JSON.parse(str);
+                } catch (e) {
+                    delete self._getRemoteSchemaCache[url];
+                    throw new Error('Not a JSON data at: ' + url + ', ' + e);
+                }
+
                 // override in case of 'lying' schemas?
                 if (!sch.id) {
                     sch.id = url;
@@ -311,15 +325,15 @@
                 if (!sch.$schema) {
                     sch.$schema = url;
                 }
+                sch.__$downloadedFrom = url;
                 callback(undefined, sch);
             }
 
-            if (this._getRemoteSchemaCache[url]) {
-                returnSchemaFromString(this._getRemoteSchemaCache[url]);
+            if (self._getRemoteSchemaCache[url]) {
+                returnSchemaFromString(self._getRemoteSchemaCache[url], url);
                 return;
             }
 
-            var self = this;
             var http = require('http');
             http.get(url, function (res) {
                 var data = '';
@@ -327,7 +341,7 @@
                     data += chunk;
                 });
                 res.on('end', function () {
-                    returnSchemaFromString(self._getRemoteSchemaCache[url] = data);
+                    returnSchemaFromString(self._getRemoteSchemaCache[url] = data, url);
                 });
             }).on('error', function (e) {
                 callback(e);
@@ -830,6 +844,7 @@
         // fix all references
         this._fixInnerReferences(schema);
         this._fixOuterReferences(schema);
+
         // then collect for downloading other schemas
         var refObjs = this._collectReferences(schema);
         var refs = Utils.uniq(refObjs.map(function (obj) {
@@ -892,7 +907,7 @@
         if (Utils.isString(schema.id)) {
             scope.push(schema.id);
         }
-        if (schema.$ref && !schema.__$refResolved) {
+        if (schema.$ref && !schema.__$refResolved && !isAbsoluteUri(schema.$ref)) {
             if (scope.length > 0) {
                 var s = scope.join('').split('#')[0];
                 if (schema.$ref[0] === '#') {
@@ -980,17 +995,31 @@
         };
 
         // if $schema is present, this schema should validate against that $schema
-        if (hasParentSchema && schema.$schema !== schema.__$downloadedFrom) {
+        if (hasParentSchema) {
             var rv = Promise.defer();
+
             Utils.getRemoteSchema(schema.$schema, function (err, remoteSchema) {
                 if (err) {
                     report.addError('SCHEMA_NOT_REACHABLE', {uri: schema.$schema});
                     rv.reject();
                     return;
                 }
-                rv.resolve();
+
                 // TODO: validate schema against remoteSchema
                 // TODO: how to prevent recursion ?
+                /*
+                console.log('x');
+                console.log(schema.$schema);
+                console.log(schema.__$downloadedFrom);
+                console.log(remoteSchema.__$downloadedFrom);
+                */
+
+                self.validate(schema, remoteSchema, function (err, report) {
+                    // console.log(report);
+                    if (report.valid) { rv.resolve(); }
+                    else { rv.reject(); }
+                });
+
             });
             return rv.promise.then(finish);
         } else {
