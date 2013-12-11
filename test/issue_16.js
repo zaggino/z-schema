@@ -62,21 +62,20 @@ describe("https://github.com/zaggino/z-schema/issues/16", function () {
         });
     });
 
-    /*
     it("should fail because links is expected to be an array", function (done) {
         var schema = {
             $schema: "http://json-schema.org/draft-04/hyper-schema#",
             links: "not an array"
         };
-        new ZSchema().validateSchema(schema).fail(function (err) {
-            done(err);
+        new ZSchema().validateSchema(schema).fail(function (report) {
+            assert.isTrue(report.errors.length > 0);
+            done();
         }).then(function (report) {
-            assert.isFalse(report.valid);
+            assert.isFalse(report.valid, "Report should not be valid");
             done();
         }).fail(function (e) {
             done(e);
         });
     });
-    */
 
 });
