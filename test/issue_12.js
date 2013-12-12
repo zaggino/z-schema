@@ -24,7 +24,7 @@ describe("https://github.com/zaggino/z-schema/issues/12", function () {
     };
 
     var schemaA = {
-        $schema: "http://json-schema.org/draft-04/schema#",
+        // $schema: "http://json-schema.org/draft-04/schema#", `schemaA` is not be a valid id - according to $schema it has to be uri
         id: "schemaA",
         type: "object",
         properties: {
@@ -50,7 +50,6 @@ describe("https://github.com/zaggino/z-schema/issues/12", function () {
     */
 
     it("should successfully validate with validSchema from http://json-schema.org/latest/json-schema-core.html#rfc.section.7.2.3", function (done) {
-        this.timeout(15000);
         var validator = new ZSchema();
         validator.validate([1, 2, 3], validSchema).then(function (report) {
             assert.isTrue(report.valid);
@@ -63,7 +62,6 @@ describe("https://github.com/zaggino/z-schema/issues/12", function () {
     });
 
     it("should fail validation with validSchema from http://json-schema.org/latest/json-schema-core.html#rfc.section.7.2.3", function (done) {
-        this.timeout(15000);
         var validator = new ZSchema();
         validator.validate(["1", null, 3], validSchema).then(function (report) {
             assert.isFalse(report.valid);
