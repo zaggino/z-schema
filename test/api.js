@@ -1,16 +1,18 @@
 /*jshint strict:false*/
 /*global describe, it*/
 
-var zSchema = require('../src/ZSchema');
+var ZSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
+var fs = require('fs');
 
-zSchema.registerFormat('regex', function () {
+ZSchema.setRemoteReference('http://json-schema.org/draft-04/schema', fs.readFileSync(__dirname + '/remotes/schema.json', 'utf8'));
+ZSchema.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', fs.readFileSync(__dirname + '/remotes/hyper-schema.json', 'utf8'));
+
+ZSchema.registerFormat('regex', function () {
     return true;
 });
 
 describe('Validations for API:', function () {
-
-    this.timeout(10000);
 
     var compiledSchema = null;
     var schema = {
@@ -225,7 +227,7 @@ describe('Validations for API:', function () {
     };
 
     it('should compile official schema downloaded', function (done) {
-        var ins = new zSchema();
+        var ins = new ZSchema();
         ins.compileSchema(schemaDownloaded, function (err, sch) {
             if (err) {
                 console.error(err);
@@ -236,7 +238,7 @@ describe('Validations for API:', function () {
         });
     });
     it('should compile official schema', function (done) {
-        var ins = new zSchema();
+        var ins = new ZSchema();
         ins.compileSchema(schema, function (err, sch) {
             assert.isNull(err);
             compiledSchema = sch;
@@ -247,7 +249,7 @@ describe('Validations for API:', function () {
         var valid = {
             'type': 'string'
         };
-        var ins = new zSchema();
+        var ins = new ZSchema();
         ins.validate(valid, compiledSchema)
             .then(function (report) {
                 assert.isTrue(report.valid);
@@ -259,7 +261,7 @@ describe('Validations for API:', function () {
         var valid = {
             'type': 'abrakadabra'
         };
-        var ins = new zSchema();
+        var ins = new ZSchema();
         ins.validate(valid, compiledSchema)
             .catch(function (err) {
                 assert.instanceOf(err, Error);
@@ -271,7 +273,7 @@ describe('Validations for API:', function () {
         var sch = {
             'type': 'string'
         };
-        var ins = new zSchema();
+        var ins = new ZSchema();
         ins.validate(sch, compiledSchema)
             .then(function (report) {
                 assert.isTrue(report.valid);
@@ -283,7 +285,7 @@ describe('Validations for API:', function () {
         var sch = {
             'type': null
         };
-        var ins = new zSchema();
+        var ins = new ZSchema();
         ins.validate(sch, compiledSchema)
             .catch(function (err) {
                 assert.instanceOf(err, Error);
