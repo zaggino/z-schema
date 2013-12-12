@@ -5,6 +5,7 @@ var ZSchema = require("../src/ZSchema");
 var assert = require("chai").assert;
 var fs = require("fs");
 
+ZSchema.setRemoteReference("http://json-schema.org/draft-04/schema", fs.readFileSync(__dirname + "/remotes/schema.json", "utf8"));
 ZSchema.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", fs.readFileSync(__dirname + "/remotes/hyper-schema.json", "utf8"));
 
 describe("https://github.com/zaggino/z-schema/issues/16", function () {
@@ -23,6 +24,7 @@ describe("https://github.com/zaggino/z-schema/issues/16", function () {
     });
 
     it("should pass when url in $schema is reachable", function (done) {
+        this.timeout(10000);
         var schema = {
             $schema: "http://json-schema.org/draft-04/hyper-schema#"
         };
@@ -41,11 +43,9 @@ describe("https://github.com/zaggino/z-schema/issues/16", function () {
         var schema = {
             $schema: "http://localhost:12345/schema"
         };
-        new ZSchema().validateSchema(schema).then(function (report) {
-            assert.isFalse(report.valid);
+        new ZSchema().validateSchema(schema).fail(function (err) {
+            assert.isTrue(err.errors[0].code === "SCHEMA_NOT_REACHABLE");
             done();
-        }).fail(function (e) {
-            done(e);
         });
     });
 
@@ -66,7 +66,6 @@ describe("https://github.com/zaggino/z-schema/issues/16", function () {
     });
 
     it("should fail because links is expected to be an array", function (done) {
-        this.timeout(60 * 60 * 1000);
         var schema = {
             $schema: "http://json-schema.org/draft-04/hyper-schema#",
             links: "not an array"
@@ -74,11 +73,6 @@ describe("https://github.com/zaggino/z-schema/issues/16", function () {
         new ZSchema().validateSchema(schema).fail(function (report) {
             assert.isTrue(report.errors.length > 0);
             done();
-        }).then(function (report) {
-            assert.isFalse(report.valid, "Report should not be valid");
-            done();
-        }).fail(function (e) {
-            done(e);
         });
     });
 

@@ -967,7 +967,7 @@
         }
 
         var self = this,
-            hasParentSchema = !! schema.$schema;
+            hasParentSchema = schema.$schema && schema.id !== schema.$schema;
 
         var finish = function () {
             // run sync validations over schema keywords
@@ -991,35 +991,30 @@
             if (report.isValid()) {
                 schema.__$validated = true;
             }
+
             return report.toPromise();
         };
 
         // if $schema is present, this schema should validate against that $schema
         if (hasParentSchema) {
             var rv = Promise.defer();
-
             Utils.getRemoteSchema(schema.$schema, function (err, remoteSchema) {
                 if (err) {
                     report.addError('SCHEMA_NOT_REACHABLE', {uri: schema.$schema});
-                    rv.reject();
+                    rv.resolve();
                     return;
                 }
-
-                // TODO: validate schema against remoteSchema
-                // TODO: how to prevent recursion ?
-                /*
-                console.log('x');
-                console.log(schema.$schema);
-                console.log(schema.__$downloadedFrom);
-                console.log(remoteSchema.__$downloadedFrom);
-                */
-
-                self.validate(schema, remoteSchema, function (err, report) {
-                    // console.log(report);
-                    if (report.valid) { rv.resolve(); }
-                    else { rv.reject(); }
-                });
-
+                // prevent recursion here
+                if (schema.__$downloadedFrom !== remoteSchema.__$downloadedFrom) {
+                    self.validate(schema, remoteSchema, function (err) {
+                        if (err) {
+                            report.errors = report.errors.concat(err.errors);
+                        }
+                        rv.resolve();
+                    });
+                } else {
+                    rv.resolve();
+                }
             });
             return rv.promise.then(finish);
         } else {
