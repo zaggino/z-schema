@@ -778,13 +778,7 @@
         var self = this;
 
         if (Array.isArray(schema)) {
-            var result = Promise.resolve();
-            schema.forEach(function (sch) {
-                result = result.then(function () {
-                    return self.compileSchema.call(self, sch);
-                });
-            });
-            return result.nodeify(callback);
+            return self.compileSchemas(schema);
         }
 
         var report = new Report();
@@ -793,6 +787,55 @@
                 return compiledSchema;
             });
         }).nodeify(callback);
+    };
+
+    /**
+     * Compile multiple schemas in one batch
+     * @param {Array} array of schemas
+     * @param {Function} callback
+     * @returns {Object} Promise
+     */
+    ZSchema.prototype.compileSchemas = function (arr, callback) {
+        var self = this,
+            compileSchemasFinished = Promise.defer(),
+            compiled = [],
+            failed = [],
+            lastError;
+
+        var loopArrayFinished;
+        function loopArray() {
+            // condition
+            if (arr.length === 0) { return loopArrayFinished.resolve(); }
+            // body
+            var nextSchema = arr.shift();
+            self.compileSchema(nextSchema).then(function () {
+                compiled.push(nextSchema);
+            }).catch(function (err) {
+                lastError = err;
+                failed.push(nextSchema);
+            }).finally(function () {
+                loopArray();
+            });
+        }
+
+        var lastArrayLength;
+        function loopCompile() {
+            // condition
+            if (arr.length === 0) { return compileSchemasFinished.resolve(compiled); }
+            if (arr.length === lastArrayLength) { return compileSchemasFinished.reject(lastError); }
+            // body
+            lastArrayLength = arr.length;
+            loopArrayFinished = Promise.defer();
+            loopArrayFinished.promise.then(function () {
+                arr = failed;
+                failed = [];
+                loopCompile();
+            });
+            loopArray();
+        }
+        loopCompile();
+
+        return compileSchemasFinished.promise.nodeify(callback);
     };
 
     /**

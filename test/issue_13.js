@@ -109,18 +109,35 @@ describe("https://github.com/zaggino/z-schema/issues/13", function () {
         });
     });
 
-    it("compile multiple schemas at once", function (done) {
+    it("compile multiple schemas at once in correct order", function (done) {
         var validator = new ZSchema();
         validator.compileSchema([schemaA, schemaB, mainSchema]).then(function () {
             assert.isTrue(schemaA.__$compiled);
             assert.isTrue(schemaB.__$compiled);
             assert.isTrue(mainSchema.__$compiled);
             done();
-        }).fail(function (err) {
-            assert.isUndefined(err);
+        }).fail(function (e) {
+            done(e);
+        });
+    });
+
+    it("compile multiple schemas at once in any order", function (done) {
+        var validator = new ZSchema();
+        validator.compileSchema([schemaA, mainSchema, schemaB]).then(function () {
+            assert.isTrue(schemaA.__$compiled);
+            assert.isTrue(schemaB.__$compiled);
+            assert.isTrue(mainSchema.__$compiled);
             done();
         }).fail(function (e) {
             done(e);
+        });
+    });
+
+    it("compile multiple schemas should not run forever if not resolvable", function (done) {
+        var validator = new ZSchema();
+        validator.compileSchema([schemaA, mainSchema]).catch(function (err) {
+            assert.isTrue(err.errors.length > 0);
+            done();
         });
     });
 
