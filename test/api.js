@@ -8,10 +8,6 @@ var fs = require('fs');
 ZSchema.setRemoteReference('http://json-schema.org/draft-04/schema', fs.readFileSync(__dirname + '/remotes/schema.json', 'utf8'));
 ZSchema.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', fs.readFileSync(__dirname + '/remotes/hyper-schema.json', 'utf8'));
 
-ZSchema.registerFormat('regex', function () {
-    return true;
-});
-
 describe('Validations for API:', function () {
 
     var compiledSchema = null;
