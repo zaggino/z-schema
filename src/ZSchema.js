@@ -32,13 +32,16 @@
 
     var Promise = require('bluebird');
 
+    // z-schema used Q before bluebird, so alias is here to preserve compatibility
     Promise.prototype.fail = Promise.prototype.catch;
 
+    /***** ValidationError class *****/
+
     var ValidationError = function (code, message, params, path) {
-        this.code = code;
+        this.code    = code;
         this.message = message;
-        this.path = path || '';
-        this.params = params || {};
+        this.path    = path || '';
+        this.params  = params || {};
     };
 
     ValidationError.prototype = new Error();
@@ -88,16 +91,13 @@
     };
 
     ValidationError.prototype.addSubError = function (err) {
-        if (!this.subErrors) {
-            this.subErrors = [];
-        }
-
+        if (!this.subErrors) { this.subErrors = []; }
         this.subErrors.push(err);
     };
 
     ValidationError.createError = function (code, params, path) {
         var msg = ValidationError.messages[code];
-        params = params || {};
+        params  = params || {};
 
         if (typeof msg !== 'string') {
             throw new Error('Unknown error code: ' + code);
@@ -117,10 +117,7 @@
         return new ValidationError(code, msg, params, path);
     };
 
-    function isAbsoluteUri(str) {
-        // TODO: cache reg-exp
-        return (/^https?\:\/\//).test(str);
-    }
+    /***** Utility methods *****/
 
     var Utils = {
         isBoolean: function (what) {
@@ -182,6 +179,9 @@
                 }
             }
             return true;
+        },
+        isAbsoluteUri: function (str) {
+            return Utils.getRegExp('^https?\:\/\/').test(str);
         },
         keys: function (obj) {
             var rv = [], key;
@@ -958,7 +958,7 @@
         if (Utils.isString(schema.id)) {
             scope.push(schema.id);
         }
-        if (schema.$ref && !schema.__$refResolved && !isAbsoluteUri(schema.$ref)) {
+        if (schema.$ref && !schema.__$refResolved && !Utils.isAbsoluteUri(schema.$ref)) {
             if (scope.length > 0) {
                 var s = scope.join('').split('#')[0];
                 if (schema.$ref[0] === '#') {
