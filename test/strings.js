@@ -139,7 +139,9 @@ describe('Validations for string type:', function () {
         });
     });
     it('should not pass uri format validation', function (done) {
-        zSchema.validate('foobar http://example.com foobar', {
+        new zSchema({
+            strictUris: true
+        }).validate('foobar http://example.com foobar', {
             'type': 'string',
             'format': 'uri'
         }, function (err, report) {

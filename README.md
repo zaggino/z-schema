@@ -12,7 +12,7 @@ Coded according to:
 [json-schema-validation](http://json-schema.org/latest/json-schema-validation.html),
 [json-schema-hypermedia](http://json-schema.org/latest/json-schema-hypermedia.html)
 
-Passing all tests here (even optional, except zeroTerminatedFloats):
+Passing all tests here (even optional, except zeroTerminatedFloats and some URI tests, see more info in [#18](https://github.com/zaggino/z-schema/issues/18)):
 
 [json-schema/JSON-Schema-Test-Suite](https://github.com/json-schema/JSON-Schema-Test-Suite)
 
@@ -230,6 +230,10 @@ var validator = new ZSchema({
 * noSchemaCache: ```true/false```
 
 when true, disables caching of compiled schemas - cache is used to resolve references to other schemas by their ID
+
+* strictUris: ```true/false```
+
+when true, uri's need to be in full rfc3986 format, by default checks for uri-fragment, more info in [#18](https://github.com/zaggino/z-schema/issues/18)
 
 # Pull requests
 
