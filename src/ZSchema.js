@@ -493,6 +493,7 @@
                 return FormatValidators['strict-uri'].apply(this, arguments);
             }
             // https://github.com/zaggino/z-schema/issues/18
+            // RegExp from http://tools.ietf.org/html/rfc3986#appendix-B
             return typeof uri !== 'string' || Utils.getRegExp('^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?').test(uri);
         },
         'strict-uri': function (uri) {
