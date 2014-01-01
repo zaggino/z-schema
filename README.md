@@ -1,7 +1,7 @@
 # z-schema validator
 
 [![NPM version](https://badge.fury.io/js/z-schema.png)](http://badge.fury.io/js/z-schema)
-[![Dependency Status](https://gemnasium.com/zaggino/z-schema.png)](https://gemnasium.com/zaggino/z-schema)
+[![Dependency Status](https://david-dm.org/zaggino/z-schema.png?theme=shields.io)](https://david-dm.org/zaggino/z-schema)
 
 JSON Schema validator for Node.js (draft4 version)
 
