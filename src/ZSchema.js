@@ -79,7 +79,7 @@
         // Format errors
         'FORMAT': '{format} format validation failed: {error}',
         // Schema validation errors
-        'KEYWORD_TYPE_EXPECTED': 'Keyword "{keyword}" is expected to be type of type "{type}"',
+        'KEYWORD_TYPE_EXPECTED': 'Keyword "{keyword}" is expected to be of type "{type}"',
         'KEYWORD_UNDEFINED_STRICT': 'Keyword "{keyword}" must be defined in strict mode',
         'KEYWORD_UNEXPECTED': 'Keyword "{keyword}" is not expected to appear in the schema',
         'KEYWORD_MUST_BE': 'Keyword "{keyword}" must be {expression}',
@@ -88,7 +88,8 @@
         'KEYWORD_VALUE_TYPE': 'Each element of keyword "{keyword}" array must be a "{type}"',
         'UNKNOWN_FORMAT': 'There is no validation function for format "{format}"',
         // Remote errors
-        'SCHEMA_NOT_REACHABLE': 'Validator was not able to read schema located at {uri}'
+        'SCHEMA_NOT_REACHABLE': 'Validator was not able to read schema located at {uri}',
+        'SCHEMA_TYPE_EXPECTED': 'Schema is expected to be of type "object"'
     };
 
     ValidationError.prototype.addSubError = function (err) {
@@ -843,6 +844,8 @@
      */
     ZSchema.prototype.validateSchema = function (schema, callback) {
         var report = new Report();
+
+        report.expect(Utils.isObject(schema), 'SCHEMA_TYPE_EXPECTED');
 
         return this._validateSchema(report, schema)
             .then(function () {
