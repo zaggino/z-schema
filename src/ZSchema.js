@@ -31,6 +31,7 @@
     'use strict';
 
     var Promise = require('bluebird');
+    var request = require('request');
 
     // z-schema used Q before bluebird, so alias is here to preserve compatibility
     Promise.prototype.fail = Promise.prototype.catch;
@@ -334,17 +335,12 @@
                 return;
             }
 
-            var http = require('http');
-            http.get(url, function (res) {
-                var data = '';
-                res.on('data', function (chunk) {
-                    data += chunk;
-                });
-                res.on('end', function () {
-                    returnSchemaFromString(self._getRemoteSchemaCache[url] = data, url);
-                });
-            }).on('error', function (e) {
-                callback(e);
+            request(url, function (error, response, body) {
+                if (error) {
+                    callback(error);
+                    return;
+                }
+                returnSchemaFromString(self._getRemoteSchemaCache[url] = body, url);
             });
         },
         // query should be valid json pointer
