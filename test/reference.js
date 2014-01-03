@@ -1,13 +1,13 @@
 /*jshint strict:false*/
 /*global describe, it*/
 
-var zSchema = require('../src/ZSchema');
+var ZSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
 
 describe('Validations for referencing children:', function () {
 
     it('should not pass deep validation on array', function (done) {
-        zSchema.validate([1, 2, 3], {
+        ZSchema.validate([1, 2, 3], {
             'type': 'array',
             'items': {
                 'type': 'string'
@@ -19,7 +19,7 @@ describe('Validations for referencing children:', function () {
     });
 
     it('should pass deep validation on array', function (done) {
-        zSchema.validate([1, 2, 3, null], {
+        ZSchema.validate([1, 2, 3, null], {
             'type': 'array',
             'items': [
                 {
@@ -45,7 +45,7 @@ describe('Validations for referencing children:', function () {
     });
 
     it('should pass deep validation on object', function (done) {
-        zSchema.validate({
+        ZSchema.validate({
             'x': 1,
             'y': 2,
             'z': 3
@@ -73,7 +73,7 @@ describe('Validations for referencing children:', function () {
     });
 
     it('should pass resolving of definition #1', function (done) {
-        zSchema.validate(5, {
+        ZSchema.validate(5, {
             'definitions': {
                 'myNumber': {
                     'type': 'number'
@@ -93,7 +93,7 @@ describe('Validations for referencing children:', function () {
             'level1': 5
         };
 
-        zSchema.validate(o, {
+        ZSchema.validate(o, {
             'definitions': {
                 'myNumber': {
                     'type': 'object',
@@ -123,7 +123,7 @@ describe('Validations for referencing children:', function () {
             }
         ];
 
-        zSchema.validate(o, {
+        ZSchema.validate(o, {
             'definitions': {
                 'myObject': {
                     'type': 'object',
@@ -175,7 +175,7 @@ describe('Validations for referencing children:', function () {
             }
         ];
 
-        zSchema.validate(o, {
+        ZSchema.validate(o, {
             'definitions': {
                 'myObject': {
                     'type': 'object',
@@ -225,7 +225,7 @@ describe('Validations for referencing children:', function () {
             }
         ];
 
-        zSchema.validate(o, {
+        ZSchema.validate(o, {
             'definitions': {
                 'myObject': {
                     'id': '#foo',

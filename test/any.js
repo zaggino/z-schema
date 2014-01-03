@@ -1,13 +1,13 @@
 /*jshint strict:false*/
 /*global describe, it*/
 
-var zSchema = require('../src/ZSchema');
+var ZSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
 
 describe('Validations for any type:', function () {
 
     it('should pass enum test', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'enum': ['x', 'xx', 'xxx']
         }, function (err, report) {
@@ -19,7 +19,7 @@ describe('Validations for any type:', function () {
         });
     });
     it('should not pass enum test', function (done) {
-        zSchema.validate('xxxx', {
+        ZSchema.validate('xxxx', {
             'type': 'string',
             'enum': ['x', 'xx', 'xxx']
         }, function (err) {
@@ -36,7 +36,7 @@ describe('Validations for any type:', function () {
                 'maxLength': 3
             }];
 
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'allOf': schemas
         }, function (err, report) {
             if (err) {
@@ -55,7 +55,7 @@ describe('Validations for any type:', function () {
                 'maxLength': 3
             }];
 
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'allOf': schemas
         }, function (err) {
             assert.instanceOf(err, Error);
@@ -69,7 +69,7 @@ describe('Validations for any type:', function () {
                 'type': 'object'
             }];
 
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'anyOf': schemas
         }, function (err, report) {
             if (err) {
@@ -86,7 +86,7 @@ describe('Validations for any type:', function () {
                 'type': 'object'
             }];
 
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'anyOf': schemas
         }, function (err) {
             assert.instanceOf(err, Error);
@@ -100,7 +100,7 @@ describe('Validations for any type:', function () {
                 'type': 'object'
             }];
 
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'oneOf': schemas
         }, function (err, report) {
             if (err) {
@@ -117,7 +117,7 @@ describe('Validations for any type:', function () {
                 'type': 'string'
             }];
 
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'oneOf': schemas
         }, function (err) {
             assert.instanceOf(err, Error);
@@ -125,7 +125,7 @@ describe('Validations for any type:', function () {
         });
     });
     it('should pass "not" test', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'not': {
                 'type': 'array'
             }
@@ -138,7 +138,7 @@ describe('Validations for any type:', function () {
         });
     });
     it('should not pass "not" test', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'not': {
                 'type': 'string'
             }

@@ -328,11 +328,15 @@
                     sch.$schema = url;
                 }
                 sch.__$downloadedFrom = url;
-                callback(undefined, sch);
+                return callback ? callback(undefined, sch) : sch;
             }
 
             if (self._getRemoteSchemaCache[url]) {
-                returnSchemaFromString(self._getRemoteSchemaCache[url], url);
+                return returnSchemaFromString(self._getRemoteSchemaCache[url], url);
+            }
+
+            if (!callback) {
+                // sync mode, checking in cache only
                 return;
             }
 
@@ -345,7 +349,7 @@
             });
         },
         // query should be valid json pointer
-        resolveSchemaQuery: function resolveSchemaQuery(schema, rootSchema, queryStr, allowNull) {
+        resolveSchemaQuery: function resolveSchemaQuery(schema, rootSchema, queryStr, allowNull, sync) {
             ZSchema.expect.string(queryStr);
             if (queryStr === '#') {
                 return rootSchema;
@@ -359,7 +363,11 @@
                 if (uriPart.indexOf('http:') === 0 || uriPart.indexOf('https:') === 0) {
                     // remote
                     if (!rootSchema.__remotes || !rootSchema.__remotes[uriPart]) {
-                        throw new Error('Remote is not downloaded: ' + uriPart);
+                        if (!sync) {
+                            throw new Error('Remote is not downloaded: ' + uriPart);
+                        } else {
+                            throw new Error('Use .setRemoteReference to download references in sync mode: ' + uriPart);
+                        }
                     }
                     rv = rootSchema.__remotes[uriPart];
                 } else {
@@ -635,7 +643,8 @@
             forceItems: false, // when on, forces not to leave out items on array-type schemas
             forceMaxLength: false, // when on, forces not to leave out maxLength on string-type schemas, when format or enum is not specified
             noSchemaCache: false, // when on, schema caching is disabled - cache is used to resolve references by id between schemas
-            strictUris: false // when on, strict uris by rfc3986 are required - https://github.com/zaggino/z-schema/issues/18
+            strictUris: false, // when on, strict uris by rfc3986 are required - https://github.com/zaggino/z-schema/issues/18
+            sync: false // when on, features that require async handling are disabled - https://github.com/zaggino/z-schema/issues/19
         });
         if (this.options.strict === true) {
             this.options.noExtraKeywords = true;
@@ -719,7 +728,7 @@
      * Register your own format validation function and tell ZSchema to call it in sync mode (performance)
      */
     ZSchema.registerFormatSync = function (name, func) {
-        func.__zSchemaSync = true;
+        func.__$sync = true;
         return ZSchema.registerFormat(name, func);
     };
 
@@ -746,23 +755,42 @@
         var self = this;
         var report = new Report();
 
-        // schema compilation is async as some remote requests may occur
-        return this._compileSchema(report, schema)
-            .then(function (compiledSchema) {
-                // schema validation
-                return self._validateSchema(report, compiledSchema)
-                    .then(function () {
-                        // object validation against schema
-                        return self._validateObject(report, compiledSchema, json)
-                            .then(function () {
-                                return report.toPromise();
-                            });
-                    });
-            })
-            .then(function () {
-                return report.toJSON();
-            })
-            .nodeify(callback);
+        if (this.options.sync) {
+
+            if (!schema.__$compiled) {
+                this._compileSchema(report, schema);
+            }
+            if (!schema.__$validated) {
+                this._validateSchema(report, schema);
+            }
+            this._validateObject(report, schema, json);
+            this._lastError = report.toJSON();
+            return report.isValid();
+
+        } else {
+
+            // schema compilation is async as some remote requests may occur
+            return this._compileSchema(report, schema)
+                .then(function (compiledSchema) {
+                    // schema validation
+                    return self._validateSchema(report, compiledSchema)
+                        .then(function () {
+                            // object validation against schema
+                            return self._validateObject(report, compiledSchema, json)
+                                .then(function () {
+                                    return report.toPromise();
+                                });
+                        });
+                })
+                .then(function () {
+                    return report.toJSON();
+                })
+                .nodeify(callback);
+        }
+    };
+
+    ZSchema.prototype.getLastError = function () {
+        return this._lastError;
     };
 
     /**
@@ -775,15 +803,23 @@
         var self = this;
 
         if (Array.isArray(schema)) {
-            return self.compileSchemas(schema);
+            return this.options.sync ? this.compileSchemasSync(schema) : this.compileSchemas(schema);
         }
 
         var report = new Report();
-        return this._compileSchema(report, schema).then(function (compiledSchema) {
-            return self._validateSchema(report, compiledSchema).then(function () {
-                return compiledSchema;
-            });
-        }).nodeify(callback);
+
+        if (this.options.sync) {
+            this._compileSchema(report, schema);
+            this._validateSchema(report, schema);
+            this._lastError = report.toJSON();
+            return report.isValid();
+        } else {
+            return this._compileSchema(report, schema).then(function (compiledSchema) {
+                return self._validateSchema(report, compiledSchema).then(function () {
+                    return compiledSchema;
+                });
+            }).nodeify(callback);
+        }
     };
 
     /**
@@ -835,6 +871,10 @@
         return compileSchemasFinished.promise.nodeify(callback);
     };
 
+    ZSchema.prototype.compileSchemasSync = function (/*arr*/) {
+        throw new Error('NOT IMPLEMENTED');
+    };
+
     /**
      * Validate schema
      *
@@ -844,43 +884,42 @@
      */
     ZSchema.prototype.validateSchema = function (schema, callback) {
         var report = new Report();
-
         report.expect(Utils.isObject(schema), 'SCHEMA_TYPE_EXPECTED');
 
-        return this._validateSchema(report, schema)
-            .then(function () {
-                return report.toJSON();
-            })
-            .nodeify(callback);
+        if (this.options.sync) {
+            this._validateSchema(report, schema);
+            this._lastError = report.toJSON();
+            return report.isValid();
+        } else {
+            return this._validateSchema(report, schema)
+                .then(function () {
+                    return report.toJSON();
+                })
+                .nodeify(callback);
+        }
     };
-
-    /*
-    ZSchema.prototype.validateWithCompiled = function (json, compiledSchema, callback) {
-        return this.validate(json, compiledSchema, callback);
-    };
-    */
 
     // recurse schema and collect all references for download
     ZSchema.prototype._collectReferences = function _collectReferences(schema) {
-        var rv = [];
+        var arr = [];
         if (schema.$ref) {
-            rv.push(schema);
+            arr.push(schema);
         }
         Utils.forEach(schema, function (val, key) {
             if (typeof key === 'string' && key.indexOf('__') === 0) {
                 return;
             }
             if (Utils.isObject(val) || Utils.isArray(val)) {
-                rv = rv.concat(_collectReferences(val));
+                arr = arr.concat(_collectReferences(val));
             }
         }, this);
-        return rv;
+        return arr;
     };
 
     ZSchema.prototype._compileSchema = function (report, schema) {
         // reusing of compiled schemas
         if (schema.__$compiled) {
-            return Promise.resolve(schema);
+            return this.options.sync ? schema : Promise.resolve(schema);
         }
 
         // fix all references
@@ -893,9 +932,27 @@
             return obj.$ref;
         }));
 
-        var self = this;
+        function afterDownload() {
+            refObjs.forEach(function (refObj) {
+                if (!refObj.__$refResolved) {
+                    refObj.__$refResolved = Utils.resolveSchemaQuery(refObj, schema, refObj.$ref, true, self.options.sync) || null;
+                }
+                if (self.schemaCache && self.schemaCache[refObj.$ref]) {
+                    refObj.__$refResolved = self.schemaCache[refObj.$ref];
+                }
+                report.expect(refObj.__$refResolved != null, 'UNRESOLVABLE_REFERENCE', {ref: refObj.$ref});
+            });
+            if (report.isValid()) {
+                schema.__$compiled = true;
+            }
+            if (schema.id && self.schemaCache) {
+                self.schemaCache[schema.id] = schema;
+            }
+            return schema;
+        }
 
-        return Promise.all(refs.map(function (ref) {
+        function download() {
+            return refs.map(function (ref) {
                 // never download itself
                 if (ref.indexOf(schema.$schema) === 0) {
                     return;
@@ -904,26 +961,16 @@
                 if (ref.indexOf('http:') === 0 || ref.indexOf('https:') === 0) {
                     return self._downloadRemoteReferences(report, schema, ref.split('#')[0]);
                 }
-            }))
-            .then(function () {
-                refObjs.forEach(function (refObj) {
-                    if (!refObj.__$refResolved) {
-                        refObj.__$refResolved = Utils.resolveSchemaQuery(refObj, schema, refObj.$ref, true) || null;
-                    }
-                    if (self.schemaCache && self.schemaCache[refObj.$ref]) {
-                        refObj.__$refResolved = self.schemaCache[refObj.$ref];
-                    }
-                    report.expect(refObj.__$refResolved != null, 'UNRESOLVABLE_REFERENCE', {ref: refObj.$ref});
-                });
-
-                if (report.isValid()) {
-                    schema.__$compiled = true;
-                }
-                if (schema.id && self.schemaCache) {
-                    self.schemaCache[schema.id] = schema;
-                }
-                return schema;
             });
+        }
+
+        var self = this;
+        if (this.options.sync) {
+            download();
+            afterDownload();
+        } else {
+            return Promise.all(download()).then(afterDownload);
+        }
     };
 
     ZSchema.prototype._fixInnerReferences = function _fixInnerReferences(rootSchema, schema) {
@@ -931,14 +978,14 @@
             schema = rootSchema;
         }
         if (schema.$ref && schema.__$refResolved !== null && schema.$ref.indexOf('http:') !== 0 && schema.$ref.indexOf('https:') !== 0) {
-            schema.__$refResolved = Utils.resolveSchemaQuery(schema, rootSchema, schema.$ref, true) || null;
+            schema.__$refResolved = Utils.resolveSchemaQuery(schema, rootSchema, schema.$ref, true, this.options.sync) || null;
         }
         Utils.forEach(schema, function (val, key) {
             if (typeof key === 'string' && key.indexOf('__') === 0) {
                 return;
             }
             if (Utils.isObject(val) || Utils.isArray(val)) {
-                _fixInnerReferences(rootSchema, val);
+                _fixInnerReferences.call(this, rootSchema, val);
             }
         }, this);
     };
@@ -974,9 +1021,6 @@
 
     // download remote references when needed
     ZSchema.prototype._downloadRemoteReferences = function (report, rootSchema, uri) {
-        var self = this;
-        var rv = Promise.defer();
-
         if (!rootSchema.__remotes) {
             rootSchema.__remotes = {};
         }
@@ -984,28 +1028,36 @@
         // do not try to download self
         if (rootSchema.id && uri === rootSchema.id.split('#')[0]) {
             rootSchema.__remotes[uri] = rootSchema;
-            rv.resolve();
-            return rv.promise;
+            return this.options.sync ? null : Promise.resolve();
         }
 
-        Utils.getRemoteSchema(uri, function (err, remoteSchema) {
-            if (err) {
-                err.description = 'Connection failed to: ' + uri;
-                return rv.reject(err);
+        if (this.options.sync) {
+            // getRemoteSchema is sync when callback is not specified
+            var remoteSchema = Utils.getRemoteSchema(uri);
+            if (remoteSchema) {
+                this._compileSchema(report, remoteSchema);
+                rootSchema.__remotes[uri] = remoteSchema;
             }
-
-            rv.resolve(self._compileSchema(report, remoteSchema)
+        } else {
+            var self = this,
+                p = Promise.defer();
+            Utils.getRemoteSchema(uri, function (err, remoteSchema) {
+                if (err) {
+                    err.description = 'Connection failed to: ' + uri;
+                    return p.reject(err);
+                }
+                p.resolve(self._compileSchema(report, remoteSchema)
                     .then(function (compiledRemoteSchema) {
                         rootSchema.__remotes[uri] = compiledRemoteSchema;
                     }));
-        });
-
-        return rv.promise;
+            });
+            return p.promise;
+        }
     };
 
     ZSchema.prototype._validateSchema = function (report, schema) {
         if (schema.__$validated) {
-            return Promise.resolve(schema);
+            return this.options.sync ? schema : Promise.resolve(schema);
         }
 
         var self = this,
@@ -1033,32 +1085,37 @@
             if (report.isValid()) {
                 schema.__$validated = true;
             }
-
-            return report.toPromise();
+            self._lastError = report.toJSON();
+            return self.options.sync ? report.isValid() : report.toPromise();
         };
 
         // if $schema is present, this schema should validate against that $schema
         if (hasParentSchema) {
-            var rv = Promise.defer();
-            Utils.getRemoteSchema(schema.$schema, function (err, remoteSchema) {
-                if (err) {
-                    report.addError('SCHEMA_NOT_REACHABLE', {uri: schema.$schema});
-                    rv.resolve();
-                    return;
-                }
-                // prevent recursion here
-                if (schema.__$downloadedFrom !== remoteSchema.__$downloadedFrom) {
-                    self.validate(schema, remoteSchema, function (err) {
-                        if (err) {
-                            report.errors = report.errors.concat(err.errors);
-                        }
+            if (this.options.sync) {
+                // remote schema will not be validated in sync mode - assume that schema is correct
+                return finish();
+            } else {
+                var rv = Promise.defer();
+                Utils.getRemoteSchema(schema.$schema, function (err, remoteSchema) {
+                    if (err) {
+                        report.addError('SCHEMA_NOT_REACHABLE', {uri: schema.$schema});
                         rv.resolve();
-                    });
-                } else {
-                    rv.resolve();
-                }
-            });
-            return rv.promise.then(finish);
+                        return;
+                    }
+                    // prevent recursion here
+                    if (schema.__$downloadedFrom !== remoteSchema.__$downloadedFrom) {
+                        self.validate(schema, remoteSchema, function (err) {
+                            if (err) {
+                                report.errors = report.errors.concat(err.errors);
+                            }
+                            rv.resolve();
+                        });
+                    } else {
+                        rv.resolve();
+                    }
+                });
+                return rv.promise.then(finish);
+            }
         } else {
             return finish();
         }
@@ -1080,54 +1137,74 @@
             if (schema.__$refResolved) {
                 schema = schema.__$refResolved;
             } else {
-                schema = Utils.resolveSchemaQuery(schema, report.rootSchema, schema.$ref);
+                schema = Utils.resolveSchemaQuery(schema, report.rootSchema, schema.$ref, false, self.options.sync);
             }
             maxRefs--;
         }
 
-        return Promise.all(Utils.map(schema, function (val, key) {
-                if (InstanceValidators[key] !== undefined) {
-                    return InstanceValidators[key].call(self, report, schema, instance);
-                }
-            }))
-            .then(function () {
+        function step1(val, key) {
+            if (InstanceValidators[key] !== undefined) {
+                return InstanceValidators[key].call(self, report, schema, instance);
+            }
+        }
 
-                // Children calculations
-                if (Utils.isArray(instance)) {
-                    return self._recurseArray(report, schema, instance);
-                } else if (Utils.isObject(instance)) {
-                    return self._recurseObject(report, schema, instance);
-                }
-            })
-            .then(function () {
-                if (thisIsRoot) {
-                    delete report.rootSchema;
-                }
-                return report;
-            });
+        function step2() {
+            // Children calculations
+            if (Utils.isArray(instance)) {
+                return self._recurseArray(report, schema, instance);
+            } else if (Utils.isObject(instance)) {
+                return self._recurseObject(report, schema, instance);
+            }
+        }
+
+        function step3() {
+            if (thisIsRoot) {
+                delete report.rootSchema;
+            }
+            return report;
+        }
+
+        if (this.options.sync) {
+            Utils.forEach(schema, step1);
+            step2();
+            step3();
+            self._lastError = report.toJSON();
+            return report.isValid();
+        } else {
+            return Promise.all(Utils.map(schema, step1)).then(step2).then(step3);
+        }
     };
 
     ZSchema.prototype._recurseArray = function (report, schema, instance) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.2
 
-        var self = this;
-        var p = Promise.resolve();
+        var p, self = this;
 
         // If items is a schema, then the child instance must be valid against this schema,
         // regardless of its index, and regardless of the value of "additionalItems".
         if (Utils.isObject(schema.items)) {
 
-            instance.forEach(function (val, index) {
-                p = p.then(function () {
+            if (this.options.sync) {
+                instance.forEach(function (val, index) {
                     report.goDown('[' + index + ']');
-                    return self._validateObject(report, schema.items, val)
-                        .then(function () {
-                            report.goUp();
-                        });
+                    this._validateObject(report, schema.items, val);
+                    report.goUp();
+                }, this);
+                return;
+            } else {
+                p = Promise.resolve();
+                instance.forEach(function (val, index) {
+                    p = p.then(function () {
+                        report.goDown('[' + index + ']');
+                        return self._validateObject(report, schema.items, val)
+                            .then(function () {
+                                report.goUp();
+                            });
+                    });
                 });
-            });
+                return p;
+            }
 
-            return p;
         }
 
         // If "items" is an array, this situation, the schema depends on the index:
@@ -1136,31 +1213,48 @@
         // otherwise, it must be valid against the schema defined by "additionalItems".
         if (Utils.isArray(schema.items)) {
 
-            instance.forEach(function (val, index) {
-
-                p = p.then(function () {
+            if (this.options.sync) {
+                instance.forEach(function (val, index) {
                     // equal to doesnt make sense here
                     if (index < schema.items.length) {
                         report.goDown('[' + index + ']');
-                        return self._validateObject(report, schema.items[index], val)
-                            .then(function () {
-                                report.goUp();
-                            });
+                        this._validateObject(report, schema.items[index], val);
+                        report.goUp();
                     } else {
                         // might be boolean
                         if (Utils.isObject(schema.additionalItems)) {
                             report.goDown('[' + index + ']');
-                            return self._validateObject(report, schema.additionalItems, val)
+                            this._validateObject(report, schema.additionalItems, val);
+                            report.goUp();
+                        }
+                    }
+                }, this);
+                return;
+            } else {
+                p = Promise.resolve();
+                instance.forEach(function (val, index) {
+                    p = p.then(function () {
+                        // equal to doesnt make sense here
+                        if (index < schema.items.length) {
+                            report.goDown('[' + index + ']');
+                            return self._validateObject(report, schema.items[index], val)
                                 .then(function () {
                                     report.goUp();
                                 });
+                        } else {
+                            // might be boolean
+                            if (Utils.isObject(schema.additionalItems)) {
+                                report.goDown('[' + index + ']');
+                                return self._validateObject(report, schema.additionalItems, val)
+                                    .then(function () {
+                                        report.goUp();
+                                    });
+                            }
                         }
-                    }
+                    });
                 });
-
-            });
-
-            return p;
+                return p;
+            }
         }
     };
 
@@ -1168,7 +1262,7 @@
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.3
 
         var self = this;
-        var promise = Promise.resolve();
+        var promise = this.options.sync ? null : Promise.resolve();
 
         // If "additionalProperties" is absent, it is considered present with an empty schema as a value.
         // In addition, boolean value true is considered equivalent to an empty schema.
@@ -1208,18 +1302,23 @@
 
             // Instance property value must pass all schemas from s
             s.forEach(function (sch) {
-                promise = promise.then(function () {
+                if (this.options.sync) {
                     report.goDown(m);
-                    return self._validateObject(report, sch, propertyValue)
-                        .then(function () {
-                            report.goUp();
-                        });
-                });
+                    this._validateObject(report, sch, propertyValue);
+                    report.goUp();
+                } else {
+                    promise = promise.then(function () {
+                        report.goDown(m);
+                        return self._validateObject(report, sch, propertyValue)
+                            .then(function () {
+                                report.goUp();
+                            });
+                    });
+                }
+            }, this);
+        }, this);
 
-            });
-        });
-
-        return promise;
+        return this.options.sync ? null : promise;
     };
 
     /*
@@ -1317,7 +1416,7 @@
                 });
             }
             // custom - strict mode
-            if (self.options.forceAdditional === true) {
+            if (this.options.forceAdditional === true) {
                 report.expect(schema.additionalItems !== undefined, 'KEYWORD_UNDEFINED_STRICT', {keyword: 'additionalItems'});
             }
         },
@@ -1387,7 +1486,7 @@
             });
 
             // custom - strict mode
-            if (self.options.forceAdditional === true) {
+            if (this.options.forceAdditional === true) {
                 report.expect(schema.additionalProperties !== undefined, 'KEYWORD_UNDEFINED_STRICT', {keyword: 'additionalProperties'});
             }
         },
@@ -1775,28 +1874,26 @@
         dependencies: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.5.2
 
-            var self = this;
-            var p = Promise.resolve();
-
             if (!Utils.isObject(instance)) {
                 return;
             }
-            Utils.forEach(schema.dependencies, function (dependency, name) {
-                p = p.then(function () {
-                    if (instance[name] !== undefined) {
-                        if (Utils.isObject(dependency)) {
-                            // errors will be added to same report
-                            return self._validateObject(report, dependency, instance);
-                        } else { // Array
-                            Utils.forEach(dependency, function (requiredProp) {
-                                report.expect(instance[requiredProp] !== undefined, 'OBJECT_DEPENDENCY_KEY', { missing: requiredProp, key: name });
-                            });
-                        }
-                    }
-                });
-            });
 
-            return p;
+            var promiseArray = [];
+
+            Utils.forEach(schema.dependencies, function (dependency, name) {
+                if (instance[name] !== undefined) {
+                    if (Utils.isObject(dependency)) {
+                        // errors will be added to same report
+                        promiseArray.push(this._validateObject(report, dependency, instance));
+                    } else { // Array
+                        Utils.forEach(dependency, function (requiredProp) {
+                            report.expect(instance[requiredProp] !== undefined, 'OBJECT_DEPENDENCY_KEY', { missing: requiredProp, key: name });
+                        });
+                    }
+                }
+            }, this);
+
+            return this.options.sync ? null : Promise.all(promiseArray);
         },
         enum: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.1.2
@@ -1824,30 +1921,76 @@
         allOf: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
 
-            var self = this;
-            var p = Promise.resolve();
-
-            schema.allOf.forEach(function (sch) {
-                p = p.then(function () {
+            if (this.options.sync) {
+                schema.allOf.forEach(function (sch) {
+                    this._validateObject(report, sch, instance);
+                }, this);
+            } else {
+                var self = this;
+                return Promise.all(schema.allOf.map(function (sch) {
                     return self._validateObject(report, sch, instance);
-                });
-            });
-
-            return p;
+                }));
+            }
         },
         anyOf: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.2
             var passes = 0;
             var subReports = [];
 
-            var self = this;
-            var p = Promise.resolve();
-
-            schema.anyOf.forEach(function (anyOf) {
-                p = p.then(function () {
+            if (this.options.sync) {
+                schema.anyOf.forEach(function (sch) {
                     if (passes > 0) { return; }
                     var subReport = new Report(report);
-                    return self._validateObject(subReport, anyOf, instance)
+                    this._validateObject(subReport, sch, instance);
+                    if (subReport.isValid()) { passes++; }
+                }, this);
+                report.expect(passes >= 1, 'ANY_OF_MISSING', {}, passes === 0 ? subReports : null);
+                return;
+            } else {
+                var self = this,
+                    p = Promise.resolve();
+                schema.anyOf.forEach(function (anyOf) {
+                    p = p.then(function () {
+                        if (passes > 0) { return; }
+                        var subReport = new Report(report);
+                        return self._validateObject(subReport, anyOf, instance)
+                            .then(function () {
+                                if (subReport.isValid()) {
+                                    passes++;
+                                } else {
+                                    subReports.push(subReport);
+                                }
+                            });
+                    });
+                });
+                return p.then(function () {
+                    report.expect(passes >= 1, 'ANY_OF_MISSING', {}, passes === 0 ? subReports : null);
+                });
+            }
+        },
+        oneOf: function (report, schema, instance) {
+            // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.2
+            var passes = 0;
+            var subReports = [];
+
+            function finish() {
+                report.expect(passes > 0, 'ONE_OF_MISSING', {}, passes === 0 ? subReports : null);
+                report.expect(passes < 2, 'ONE_OF_MULTIPLE');
+            }
+
+            if (this.options.sync) {
+                schema.oneOf.forEach(function (sch) {
+                    var subReport = new Report(report);
+                    this._validateObject(subReport, sch, instance);
+                    if (subReport.isValid()) { passes++; }
+                }, this);
+                finish();
+                return;
+            } else {
+                var self = this;
+                return Promise.all(schema.oneOf.map(function (oneOf) {
+                    var subReport = new Report(report);
+                    return self._validateObject(subReport, oneOf, instance)
                         .then(function () {
                             if (subReport.isValid()) {
                                 passes++;
@@ -1855,41 +1998,24 @@
                                 subReports.push(subReport);
                             }
                         });
-                });
-            });
-
-            return p.then(function () {
-                report.expect(passes >= 1, 'ANY_OF_MISSING', {}, passes === 0 ? subReports : null);
-            });
-        },
-        oneOf: function (report, schema, instance) {
-            // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.2
-            var self = this;
-            var passes = 0;
-            var subReports = [];
-
-            return Promise.all(schema.oneOf.map(function (oneOf) {
-                var subReport = new Report(report);
-                return self._validateObject(subReport, oneOf, instance)
-                    .then(function () {
-                        if (subReport.isValid()) {
-                            passes++;
-                        } else {
-                            subReports.push(subReport);
-                        }
-                    });
-            })).then(function () {
-                report.expect(passes > 0, 'ONE_OF_MISSING', {}, passes === 0 ? subReports : null);
-                report.expect(passes < 2, 'ONE_OF_MULTIPLE');
-            });
+                })).then(finish);
+            }
         },
         not: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
+
             var subReport = new Report(report);
-            return this._validateObject(subReport, schema.not, instance)
-                .then(function () {
-                    report.expect(!subReport.isValid(), 'NOT_PASSED');
-                });
+
+            function finish() {
+                report.expect(!subReport.isValid(), 'NOT_PASSED');
+            }
+
+            if (this.options.sync) {
+                this._validateObject(subReport, schema.not, instance);
+                finish();
+            } else {
+                return this._validateObject(subReport, schema.not, instance).then(finish);
+            }
         },
         definitions: function () { /*report, schema, instance*/
             //http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.2
@@ -1906,7 +2032,7 @@
             }
 
             // custom format was registered as sync function, so we can do some speedup
-            if (CustomFormatValidators[schema.format].__zSchemaSync === true) {
+            if (CustomFormatValidators[schema.format].__$sync === true) {
                 try {
                     p = CustomFormatValidators[schema.format](instance);
                     if (p !== true) {

@@ -1,31 +1,31 @@
 /*jshint strict:false*/
 /*global describe, it*/
 
-var zSchema = require('../src/ZSchema');
+var ZSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
 var Promise = require('bluebird');
 
 describe('Custom format validators:', function () {
-    zSchema.registerFormat('xstring', function (str) {
+    ZSchema.registerFormat('xstring', function (str) {
         return str === 'xxx';
     });
 
-    zSchema.registerFormatSync('xstringSync', function (str) {
+    ZSchema.registerFormatSync('xstringSync', function (str) {
         return str === 'xxx';
     });
 
-    zSchema.registerFormat('xstringAsyncPromise', function (str) {
+    ZSchema.registerFormat('xstringAsyncPromise', function (str) {
         return Promise.delay(100).return(str === 'xxx');
     });
 
-    zSchema.registerFormat('xstringAsyncCb', function (str, cb) {
+    ZSchema.registerFormat('xstringAsyncCb', function (str, cb) {
         setTimeout(function () {
             cb(null, str === 'xxx');
         }, 100);
     });
 
     it('should pass sync format validation', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'format': 'xstring'
         }, function (err, report) {
@@ -38,7 +38,7 @@ describe('Custom format validators:', function () {
     });
 
     it('should not pass sync format validation', function (done) {
-        zSchema.validate('yyy', {
+        ZSchema.validate('yyy', {
             'type': 'string',
             'format': 'xstring'
         }, function (err) {
@@ -48,7 +48,7 @@ describe('Custom format validators:', function () {
     });
 
     it('should pass forced sync format validation', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'format': 'xstringSync'
         }, function (err, report) {
@@ -61,7 +61,7 @@ describe('Custom format validators:', function () {
     });
 
     it('should not pass forced sync format validation', function (done) {
-        zSchema.validate('yyy', {
+        ZSchema.validate('yyy', {
             'type': 'string',
             'format': 'xstringSync'
         }, function (err) {
@@ -71,7 +71,7 @@ describe('Custom format validators:', function () {
     });
 
     it('should pass async (promise) format validation', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'format': 'xstringAsyncPromise'
         }, function (err, report) {
@@ -84,7 +84,7 @@ describe('Custom format validators:', function () {
     });
 
     it('should not pass async (promise) format validation', function (done) {
-        zSchema.validate('yyy', {
+        ZSchema.validate('yyy', {
             'type': 'string',
             'format': 'xstringAsyncPromise'
         }, function (err) {
@@ -94,7 +94,7 @@ describe('Custom format validators:', function () {
     });
 
     it('should pass async (callback) format validation', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'format': 'xstringAsyncCb'
         }, function (err, report) {
@@ -107,7 +107,7 @@ describe('Custom format validators:', function () {
     });
 
     it('should not pass async (callback) format validation', function (done) {
-        zSchema.validate('yyy', {
+        ZSchema.validate('yyy', {
             'type': 'string',
             'format': 'xstringAsyncCb'
         }, function (err) {

@@ -1,13 +1,13 @@
 /*jshint strict:false*/
 /*global describe, it*/
 
-var zSchema = require('../src/ZSchema');
+var ZSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
 
 describe('Validations for string type:', function () {
 
     it('should pass strings with lesser length #1', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'maxLength': 5
         }, function (err, report) {
@@ -16,7 +16,7 @@ describe('Validations for string type:', function () {
         });
     });
     it('should pass strings with lesser length #2', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'maxLength': 3
         }, function (err, report) {
@@ -25,7 +25,7 @@ describe('Validations for string type:', function () {
         });
     });
     it('should pass strings with lesser length #3', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'maxLength': 1
         }, function (err) {
@@ -34,7 +34,7 @@ describe('Validations for string type:', function () {
         });
     });
     it('should pass strings with bigger length #1', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'minLength': 1
         }, function (err, report) {
@@ -43,7 +43,7 @@ describe('Validations for string type:', function () {
         });
     });
     it('should pass strings with bigger length #2', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'minLength': 3
         }, function (err, report) {
@@ -52,7 +52,7 @@ describe('Validations for string type:', function () {
         });
     });
     it('should pass strings with bigger length #3', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'minLength': 5
         }, function (err) {
@@ -62,7 +62,7 @@ describe('Validations for string type:', function () {
     });
     //-- pattern
     it('should accept pattern on strings #1', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'pattern': ''
         }, function (err, report) {
@@ -74,7 +74,7 @@ describe('Validations for string type:', function () {
         });
     });
     it('should accept pattern on strings #2', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'number',
             'pattern': ''
         }, function (err) {
@@ -83,7 +83,7 @@ describe('Validations for string type:', function () {
         });
     });
     it('should accept pattern on strings #3', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'pattern': 5
         }, function (err) {
@@ -92,7 +92,7 @@ describe('Validations for string type:', function () {
         });
     });
     it('should pass pattern validation #1', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'pattern': '^xxx$'
         }, function (err, report) {
@@ -104,7 +104,7 @@ describe('Validations for string type:', function () {
         });
     });
     it('should pass pattern validation #2', function (done) {
-        zSchema.validate('xxx', {
+        ZSchema.validate('xxx', {
             'type': 'string',
             'pattern': '^xxxx$'
         }, function (err) {
@@ -114,7 +114,7 @@ describe('Validations for string type:', function () {
     });
 
     it('should pass date validation', function (done) {
-        zSchema.validate('9999-12-31', {
+        ZSchema.validate('9999-12-31', {
             'type': 'string',
             'format': 'date'
         }, function (err, report) {
@@ -124,7 +124,7 @@ describe('Validations for string type:', function () {
     });
 
     it('should pass uri format validation', function (done) {
-        zSchema.validate('http://example.com', {
+        ZSchema.validate('http://example.com', {
             'type': 'string',
             'format': 'uri'
         }, function (err, report) {
@@ -139,7 +139,7 @@ describe('Validations for string type:', function () {
         });
     });
     it('should not pass uri format validation', function (done) {
-        new zSchema({
+        new ZSchema({
             strictUris: true
         }).validate('foobar http://example.com foobar', {
             'type': 'string',

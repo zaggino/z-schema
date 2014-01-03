@@ -1,14 +1,14 @@
 /*jshint strict:false*/
 /*global describe, it*/
 
-var zSchema = require('../src/ZSchema');
+var ZSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
 
 describe('Core validations:', function () {
 
     describe('JSON Schema primitive types:', function () {
         it('should validate array', function (done) {
-            zSchema.validate([], {
+            ZSchema.validate([], {
                 'type': 'array'
             }, function (err, report) {
                 if (err) {
@@ -19,7 +19,7 @@ describe('Core validations:', function () {
             });
         });
         it('should validate boolean', function (done) {
-            zSchema.validate(true, {
+            ZSchema.validate(true, {
                 'type': 'boolean'
             }, function (err, report) {
                 if (err) {
@@ -30,7 +30,7 @@ describe('Core validations:', function () {
             });
         });
         it('should validate integer', function (done) {
-            zSchema.validate(5, {
+            ZSchema.validate(5, {
                 'type': 'integer'
             }, function (err, report) {
                 if (err) {
@@ -41,7 +41,7 @@ describe('Core validations:', function () {
             });
         });
         it('should validate number', function (done) {
-            zSchema.validate(12.4, {
+            ZSchema.validate(12.4, {
                 'type': 'number'
             }, function (err, report) {
                 if (err) {
@@ -52,7 +52,7 @@ describe('Core validations:', function () {
             });
         });
         it('should validate null', function (done) {
-            zSchema.validate(null, {
+            ZSchema.validate(null, {
                 'type': 'null'
             }, function (err, report) {
                 if (err) {
@@ -63,7 +63,7 @@ describe('Core validations:', function () {
             });
         });
         it('should validate object', function (done) {
-            zSchema.validate({}, {
+            ZSchema.validate({}, {
                 'type': 'object'
             }, function (err, report) {
                 if (err) {
@@ -74,7 +74,7 @@ describe('Core validations:', function () {
             });
         });
         it('should validate string', function (done) {
-            zSchema.validate('xxx', {
+            ZSchema.validate('xxx', {
                 'type': 'string'
             }, function (err, report) {
                 if (err) {
@@ -85,7 +85,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not validate array as null', function (done) {
-            zSchema.validate([], {
+            ZSchema.validate([], {
                 'type': 'null'
             }, function (err) {
                 assert.instanceOf(err, Error);
@@ -93,7 +93,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not validate boolean as null', function (done) {
-            zSchema.validate(false, {
+            ZSchema.validate(false, {
                 'type': 'null'
             }, function (err) {
                 assert.instanceOf(err, Error);
@@ -101,7 +101,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not validate integer as null', function (done) {
-            zSchema.validate(0, {
+            ZSchema.validate(0, {
                 'type': 'null'
             }, function (err) {
                 assert.instanceOf(err, Error);
@@ -109,7 +109,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not validate number as null', function (done) {
-            zSchema.validate(0.0, {
+            ZSchema.validate(0.0, {
                 'type': 'null'
             }, function (err) {
                 assert.instanceOf(err, Error);
@@ -117,7 +117,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not validate null as object', function (done) {
-            zSchema.validate(null, {
+            ZSchema.validate(null, {
                 'type': 'object'
             }, function (err) {
                 assert.instanceOf(err, Error);
@@ -125,7 +125,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not validate object as array', function (done) {
-            zSchema.validate({}, {
+            ZSchema.validate({}, {
                 'type': 'array'
             }, function (err) {
                 assert.instanceOf(err, Error);
@@ -133,7 +133,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not validate string as null', function (done) {
-            zSchema.validate('', {
+            ZSchema.validate('', {
                 'type': 'null'
             }, function (err) {
                 assert.instanceOf(err, Error);
@@ -141,7 +141,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not confuse integer and number #1', function (done) {
-            zSchema.validate(5, {
+            ZSchema.validate(5, {
                 'type': 'integer'
             }, function (err, report) {
                 assert.isTrue(report.valid);
@@ -149,7 +149,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not confuse integer and number #2', function (done) {
-            zSchema.validate(5.1, {
+            ZSchema.validate(5.1, {
                 'type': 'integer'
             }, function (err) {
                 assert.instanceOf(err, Error);
@@ -157,7 +157,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not confuse integer and number #3', function (done) {
-            zSchema.validate(5, {
+            ZSchema.validate(5, {
                 'type': 'number'
             }, function (err, report) {
                 assert.isTrue(report.valid);
@@ -165,7 +165,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not confuse integer and number #4', function (done) {
-            zSchema.validate(5.1, {
+            ZSchema.validate(5.1, {
                 'type': 'number'
             }, function (err, report) {
                 assert.isTrue(report.valid);
@@ -173,7 +173,7 @@ describe('Core validations:', function () {
             });
         });
         it('should accept arrays of types', function (done) {
-            zSchema.validate(null, {
+            ZSchema.validate(null, {
                 'type': ['array', 'boolean', 'integer', 'number', 'null', 'object', 'string']
             }, function (err, report) {
                 if (err) {
@@ -184,7 +184,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not ever accept function', function (done) {
-            zSchema.validate(function () {
+            ZSchema.validate(function () {
                 return 'validate me please';
             }, {
                 'type': ['array', 'boolean', 'integer', 'number', 'null', 'object', 'string']
@@ -194,7 +194,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not ever accept function #2', function (done) {
-            zSchema.validate(function () {
+            ZSchema.validate(function () {
                 return 'validate me please';
             }, {
                 'type': ['function', 'array', 'boolean', 'integer', 'number', 'null', 'object', 'string']
@@ -204,7 +204,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not ever accept function #3', function (done) {
-            zSchema.validate(function () {
+            ZSchema.validate(function () {
                 return 'validate me please';
             }, {
                 'type': 'function'
@@ -214,7 +214,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not accept NaN as integer', function (done) {
-            zSchema.validate(NaN, {
+            ZSchema.validate(NaN, {
                 'type': 'integer'
             }, function (err) {
                 assert.instanceOf(err, Error);
@@ -222,7 +222,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not accept NaN as number', function (done) {
-            zSchema.validate(NaN, {
+            ZSchema.validate(NaN, {
                 'type': 'number'
             }, function (err) {
                 assert.instanceOf(err, Error);
@@ -230,7 +230,7 @@ describe('Core validations:', function () {
             });
         });
         it('should not accept long number as integer', function (done) {
-            zSchema.validate(1.000000000000001, {
+            ZSchema.validate(1.000000000000001, {
                 'type': 'integer'
             }, function (err) {
                 assert.instanceOf(err, Error);
@@ -238,7 +238,7 @@ describe('Core validations:', function () {
             });
         });
         it('should accept long number as number', function (done) {
-            zSchema.validate(1.000000000000001, {
+            ZSchema.validate(1.000000000000001, {
                 'type': 'number'
             }, function (err, report) {
                 assert.isTrue(report.valid);

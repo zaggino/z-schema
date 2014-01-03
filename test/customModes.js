@@ -1,13 +1,13 @@
 /*jshint strict:false*/
 /*global describe, it*/
 
-var zSchema = require('../src/ZSchema');
+var ZSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
 
 describe('Custom functionality validation:', function () {
 
     it('should fail validating in forceAdditional mode', function (done) {
-        var validator = new zSchema({
+        var validator = new ZSchema({
             forceAdditional: true
         });
         var schema = {
@@ -28,7 +28,7 @@ describe('Custom functionality validation:', function () {
     });
 
     it('should pass validating in default mode', function (done) {
-        var validator = new zSchema({
+        var validator = new ZSchema({
             // strict: true
         });
         var schema = {
@@ -49,7 +49,7 @@ describe('Custom functionality validation:', function () {
     });
 
     it('should fail validating in noZeroLengthStrings mode', function (done) {
-        var validator = new zSchema({
+        var validator = new ZSchema({
             noZeroLengthStrings: true
         });
         var schema = {
@@ -62,7 +62,7 @@ describe('Custom functionality validation:', function () {
     });
 
     it('should pass validating in noZeroLengthStrings mode', function (done) {
-        var validator = new zSchema({
+        var validator = new ZSchema({
             // noZeroLengthStrings: true
         });
         var schema = {
@@ -75,7 +75,7 @@ describe('Custom functionality validation:', function () {
     });
 
     it('should fail validating in noTypeless mode', function (done) {
-        var validator = new zSchema({
+        var validator = new ZSchema({
             noTypeless: true
         });
         var schema = {
@@ -89,7 +89,7 @@ describe('Custom functionality validation:', function () {
     });
 
     it('should pass validating in noTypeless mode', function (done) {
-        var validator = new zSchema({
+        var validator = new ZSchema({
             noTypeless: true
         });
         var schema = {

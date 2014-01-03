@@ -1,13 +1,13 @@
 /*jshint strict:false*/
 /*global describe, it*/
 
-var zSchema = require('../src/ZSchema');
+var ZSchema = require('../src/ZSchema');
 var assert = require('chai').assert;
 
 describe('Validations for array type:', function () {
 
     it('should accept items on arrays', function (done) {
-        zSchema.validate([], {
+        ZSchema.validate([], {
             'type': 'array',
             'items': []
         }, function (err, report) {
@@ -24,7 +24,7 @@ describe('Validations for array type:', function () {
         'additionalItems': false
     };
     it('should pass example from specification #1', function (done) {
-        zSchema.validate([], schemaFromSpecification, function (err, report) {
+        ZSchema.validate([], schemaFromSpecification, function (err, report) {
             if (err) {
                 console.log(err);
             }
@@ -33,7 +33,7 @@ describe('Validations for array type:', function () {
         });
     });
     it('should pass example from specification #2', function (done) {
-        zSchema.validate([[1, 2, 3, 4], [5, 6, 7, 8]], schemaFromSpecification, function (err, report) {
+        ZSchema.validate([[1, 2, 3, 4], [5, 6, 7, 8]], schemaFromSpecification, function (err, report) {
             if (err) {
                 console.log(err);
             }
@@ -42,7 +42,7 @@ describe('Validations for array type:', function () {
         });
     });
     it('should pass example from specification #3', function (done) {
-        zSchema.validate([1, 2, 3], schemaFromSpecification, function (err, report) {
+        ZSchema.validate([1, 2, 3], schemaFromSpecification, function (err, report) {
             if (err) {
                 console.log(err);
             }
@@ -51,7 +51,7 @@ describe('Validations for array type:', function () {
         });
     });
     it('should pass example from specification #4', function (done) {
-        zSchema.validate([1, 2, 3, 4], schemaFromSpecification, function (err) {
+        ZSchema.validate([1, 2, 3, 4], schemaFromSpecification, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
@@ -62,13 +62,13 @@ describe('Validations for array type:', function () {
             },
             true, 31.000002020013];
 
-        zSchema.validate(o, schemaFromSpecification, function (err) {
+        ZSchema.validate(o, schemaFromSpecification, function (err) {
             assert.instanceOf(err, Error);
             done();
         });
     });
     it('should pass maxItems', function (done) {
-        zSchema.validate([1, 2, 3], {
+        ZSchema.validate([1, 2, 3], {
             'type': 'array',
             'maxItems': 3
         }, function (err, report) {
@@ -77,7 +77,7 @@ describe('Validations for array type:', function () {
         });
     });
     it('should not pass maxItems', function (done) {
-        zSchema.validate([1, 2, 3], {
+        ZSchema.validate([1, 2, 3], {
             'type': 'array',
             'maxItems': 1
         }, function (err) {
@@ -86,7 +86,7 @@ describe('Validations for array type:', function () {
         });
     });
     it('should pass minItems', function (done) {
-        zSchema.validate([1, 2, 3], {
+        ZSchema.validate([1, 2, 3], {
             'type': 'array',
             'minItems': 3
         }, function (err, report) {
@@ -95,7 +95,7 @@ describe('Validations for array type:', function () {
         });
     });
     it('should not pass minItems', function (done) {
-        zSchema.validate([1, 2, 3], {
+        ZSchema.validate([1, 2, 3], {
             'type': 'array',
             'minItems': 5
         }, function (err) {
@@ -104,7 +104,7 @@ describe('Validations for array type:', function () {
         });
     });
     it('should pass uniqueItems', function (done) {
-        zSchema.validate([1, 2, 3], {
+        ZSchema.validate([1, 2, 3], {
             'type': 'array',
             'uniqueItems': true
         }, function (err, report) {
@@ -113,7 +113,7 @@ describe('Validations for array type:', function () {
         });
     });
     it('should not pass uniqueItems', function (done) {
-        zSchema.validate([1, 1, 1], {
+        ZSchema.validate([1, 1, 1], {
             'type': 'array',
             'uniqueItems': true
         }, function (err) {
@@ -122,7 +122,7 @@ describe('Validations for array type:', function () {
         });
     });
     it('should not pass uniqueItems when order of elements is different in arrays #1', function (done) {
-        zSchema.validate([[1, 2], [2, 1]], {
+        ZSchema.validate([[1, 2], [2, 1]], {
             'type': 'array',
             'uniqueItems': true
         }, function (err, report) {
@@ -131,7 +131,7 @@ describe('Validations for array type:', function () {
         });
     });
     it('should not pass uniqueItems when order of elements is different in arrays #2', function (done) {
-        zSchema.validate([[1, 2], [1, 2]], {
+        ZSchema.validate([[1, 2], [1, 2]], {
             'type': 'array',
             'uniqueItems': true
         }, function (err) {
@@ -146,7 +146,7 @@ describe('Validations for array type:', function () {
                 'x': 'y'
             }];
 
-        zSchema.validate(a, {
+        ZSchema.validate(a, {
             'type': 'array',
             'uniqueItems': true
         }, function (err, report) {
@@ -163,7 +163,7 @@ describe('Validations for array type:', function () {
             }, {
                 'a': [1, 2]
             }];
-        zSchema.validate(a, {
+        ZSchema.validate(a, {
             'type': 'array',
             'uniqueItems': true
         }, function (err) {

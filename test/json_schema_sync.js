@@ -3,6 +3,9 @@
 
 var fs = require('fs');
 var ZSchema = require('../src/ZSchema');
+var validator = new ZSchema({
+    sync: true
+});
 
 // preload files here because we want to run tests without localhost server
 ZSchema.setRemoteReference('http://localhost:1234/integer.json',
@@ -11,8 +14,10 @@ ZSchema.setRemoteReference('http://localhost:1234/subSchemas.json',
                            fs.readFileSync(__dirname + '/../json_schema_test_suite/remotes/subSchemas.json', 'utf8'));
 ZSchema.setRemoteReference('http://localhost:1234/folder/folderInteger.json',
                            fs.readFileSync(__dirname + '/../json_schema_test_suite/remotes/folder/folderInteger.json', 'utf8'));
+ZSchema.setRemoteReference('http://json-schema.org/draft-04/schema',
+                           fs.readFileSync(__dirname + '/remotes/schema.json', 'utf8'));
 
-describe('Validations for json schema files:', function () {
+describe('SYNC Validations for json schema files:', function () {
 
     var testDir = __dirname + '/../json_schema_test_suite/tests/draft4/';
 
@@ -71,22 +76,17 @@ describe('Validations for json schema files:', function () {
 
                         // console.log(testSuite.description + '/' + testDefinition.description);
 
-                        ZSchema.validate(testDefinition.data, testSuite.schema, function (err, report) {
-
-                            var valid = report && report.valid || false;
-
-                            if (valid === testDefinition.valid) {
-                                done();
+                        var valid = validator.validate(testDefinition.data, testSuite.schema);
+                        if (valid === testDefinition.valid) {
+                            done();
+                        } else {
+                            if (testDefinition.valid === true) {
+                                console.log(validator.getLastError());
+                                throw new Error('Test should pass, but failed.');
                             } else {
-                                if (testDefinition.valid === true) {
-                                    console.log(report || err);
-                                    throw new Error('Test should pass, but failed.');
-                                } else {
-                                    throw new Error('Test should fail, but passed.');
-                                }
+                                throw new Error('Test should fail, but passed.');
                             }
-
-                        });
+                        }
 
                     });
 
