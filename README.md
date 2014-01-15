@@ -39,6 +39,9 @@ There is also support for _sync_ mode like this:
 ```javascript
 var validator = new ZSchema({ sync: true });
 var valid = validator.validate(json, schema);
+if (!valid) {
+    var error = validator.getLastError();
+}
 ```
 
 Using traditional callback:
