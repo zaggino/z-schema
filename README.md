@@ -35,6 +35,12 @@ ZSchema.validate(json, schema)
     })
 ```
 
+There is also support for _sync_ mode like this:
+```javascript
+var validator = new ZSchema({ sync: true });
+var valid = validator.validate(json, schema);
+```
+
 Using traditional callback:
 ```javascript
 ZSchema.validate(json, schema, function(err, report){
