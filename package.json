@@ -33,17 +33,17 @@
     "files": ["src/ZSchema.js", "src/ZSchema.min.js", "LICENSE", "README.md"],
     "version": "2.3.1",
     "dependencies": {
-        "bluebird": "~0.11.*",
-        "request": "~2.30.*"
+        "bluebird": "~1.0.*",
+        "request": "~2.31.*"
     },
     "devDependencies": {
-        "chai": "1.8.1",
-        "grunt": "0.4.1",
-        "grunt-contrib-uglify": "0.2.4",
-        "grunt-contrib-jshint": "0.6.4",
-        "grunt-simple-mocha": "0.4.0",
-        "mocha": "1.13.0",
-        "uglify-js": "2.4.0"
+        "chai": "latest",
+        "grunt": "latest",
+        "grunt-contrib-uglify": "latest",
+        "grunt-contrib-jshint": "latest",
+        "grunt-simple-mocha": "latest",
+        "mocha": "latest",
+        "uglify-js": "latest"
     },
     "bugs": {
         "url": "https://github.com/zaggino/z-schema/issues",
