@@ -34,7 +34,7 @@
     "version": "2.4.1",
     "dependencies": {
         "bluebird": "~1.0.*",
-        "request": "~2.31.*"
+        "request": "~2.*"
     },
     "devDependencies": {
         "chai": "latest",
