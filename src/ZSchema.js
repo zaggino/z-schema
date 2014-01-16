@@ -812,7 +812,11 @@
             this._compileSchema(report, schema);
             this._validateSchema(report, schema);
             this._lastError = report.toJSON();
-            return report.isValid();
+            if (report.isValid()) {
+                return schema;
+            } else {
+                throw report.toError();
+            }
         } else {
             return this._compileSchema(report, schema).then(function (compiledSchema) {
                 return self._validateSchema(report, compiledSchema).then(function () {
@@ -871,8 +875,36 @@
         return compileSchemasFinished.promise.nodeify(callback);
     };
 
-    ZSchema.prototype.compileSchemasSync = function (/*arr*/) {
-        throw new Error('NOT IMPLEMENTED');
+    ZSchema.prototype.compileSchemasSync = function (arr) {
+        var self = this,
+            lastError,
+            compiled,
+            retArr = [];
+
+        function cycle() {
+            compiled = 0;
+            arr.forEach(function (sch, i) {
+                try {
+                    self.compileSchema(sch);
+                } catch (e) {
+                    lastError = e;
+                    return;
+                }
+                compiled++;
+                retArr.push(sch);
+                arr.splice(i, 1);
+            });
+        }
+
+        do {
+            cycle();
+        } while (compiled > 0);
+
+        if (arr.length === 0) {
+            return retArr;
+        } else {
+            throw lastError;
+        }
     };
 
     /**
@@ -889,7 +921,11 @@
         if (this.options.sync) {
             this._validateSchema(report, schema);
             this._lastError = report.toJSON();
-            return report.isValid();
+            if (report.isValid()) {
+                return schema;
+            } else {
+                throw report.toError();
+            }
         } else {
             return this._validateSchema(report, schema)
                 .then(function () {

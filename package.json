@@ -31,7 +31,7 @@
     },
     "main": "src/ZSchema.js",
     "files": ["src/ZSchema.js", "src/ZSchema.min.js", "LICENSE", "README.md"],
-    "version": "2.4.0",
+    "version": "2.4.1",
     "dependencies": {
         "bluebird": "~1.0.*",
         "request": "~2.31.*"
