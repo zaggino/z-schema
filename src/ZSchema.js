@@ -468,11 +468,46 @@
             if (!Utils.isString(hostname)) {
                 return true;
             }
-            // http://stackoverflow.com/questions/106179/regular-expression-to-match-hostname-or-ip-address
-            if (hostname.indexOf('.') === -1) {
-                return false;
+            /*
+                http://json-schema.org/latest/json-schema-validation.html#anchor114
+                A string instance is valid against this attribute if it is a valid
+                representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
+
+                http://tools.ietf.org/html/rfc1034#section-3.5
+
+                <digit> ::= any one of the ten digits 0 through 9
+                var digit = /[0-9]/;
+
+                <letter> ::= any one of the 52 alphabetic characters A through Z in upper case and a through z in lower case
+                var letter = /[a-zA-Z]/;
+
+                <let-dig> ::= <letter> | <digit>
+                var letDig = /[0-9a-zA-Z]/;
+
+                <let-dig-hyp> ::= <let-dig> | "-"
+                var letDigHyp = /[-0-9a-zA-Z]/;
+
+                <ldh-str> ::= <let-dig-hyp> | <let-dig-hyp> <ldh-str>
+                var ldhStr = /[-0-9a-zA-Z]+/;
+
+                <label> ::= <letter> [ [ <ldh-str> ] <let-dig> ]
+                var label = /[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?/;
+
+                <subdomain> ::= <label> | <subdomain> "." <label>
+                var subdomain = /^[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?(\.[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?)*$/;
+
+                <domain> ::= <subdomain> | " "
+                var domain = null;
+            */
+            var valid = Utils.getRegExp('^[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?(\\.[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?)*$').test(hostname);
+            if (valid) {
+                // the sum of all label octets and label lengths is limited to 255.
+                if (hostname.length > 255) { return false; }
+                // Each node has a label, which is zero to 63 octets in length
+                var labels = hostname.split('.');
+                for (var i = 0; i < labels.length; i++) { if (labels[i].length > 63) { return false; } }
             }
-            return Utils.getRegExp('^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$').test(hostname);
+            return valid;
         },
         'host-name': function () {
             return FormatValidators.hostname.apply(this, arguments);
