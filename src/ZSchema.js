@@ -1137,7 +1137,7 @@
         var finish = function () {
             // run sync validations over schema keywords
             if (self.options.noTypeless === true) {
-                report.expect(schema.type !== undefined, 'KEYWORD_UNDEFINED_STRICT', {keyword: 'type'});
+                report.expect(schema.type !== undefined || schema.anyOf !== undefined || schema.oneOf !== undefined || schema.not !== undefined || schema['$ref'] !== undefined, 'KEYWORD_UNDEFINED_STRICT', {keyword: 'type'});
             }
             Utils.forEach(schema, function (value, key) {
                 if (typeof key === 'string' && key.indexOf('__') === 0) {
