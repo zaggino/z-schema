@@ -18,7 +18,7 @@
             "properties": {
                 "storage": {
                     "type": "object",
-                    "oneOf": [
+                    "anyOf": [
                         { "$ref": "#/definitions/entry/definitions/diskDevice" },
                         { "$ref": "#/definitions/entry/definitions/diskUUID" },
                         { "$ref": "#/definitions/entry/definitions/nfs" },
@@ -68,7 +68,7 @@
                         },
                         "server": {
                             "type": "string",
-                            "oneOf": [
+                            "anyOf": [
                                 { "format": "host-name" },
                                 { "format": "ipv4" },
                                 { "format": "ipv6" }

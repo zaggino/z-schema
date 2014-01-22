@@ -13,10 +13,8 @@ var advancedSchema = require('./advanced_schema_v4.json');
 var tv4 = require('tv4');
 var result = tv4.validateResult(basicObject, basicSchema);
 assert.deepEqual(result.valid, true, 'tv4 is expected to validate basic truthfully');
-/* fails to validate
 var result = tv4.validateResult(advancedObject, advancedSchema);
 assert.deepEqual(result.valid, true, 'tv4 is expected to validate advanced truthfully');
-*/
 
 // JaySchema for Node.js - supports version 4 (BSD)
 var JaySchema = require('jayschema');
@@ -59,11 +57,9 @@ new Benchmark.Suite()
 
 new Benchmark.Suite()
     // add tests
-    /* fails to validate
     .add('tv4#advanced', function () {
         tv4.validateResult(advancedObject, advancedSchema);
     })
-    */
     .add('jayschema#advanced', function () {
         js.validate(advancedObject, advancedSchema);
     })
