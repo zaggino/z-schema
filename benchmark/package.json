@@ -1,0 +1,12 @@
+{
+    "name": "benchmark",
+    "main": "benchmark.js",
+    "license": "MIT",
+    "dependencies": {
+        "benchmark": "latest",
+        "assert": "latest",
+        "jayschema": "latest",
+        "tv4": "latest",
+        "z-schema": "latest"
+    }
+}

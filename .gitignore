@@ -1,3 +1,4 @@
 /node_modules/
 /src/ZSchema.min.js
 /npm-debug.log
+/benchmark/node_modules/
