@@ -18,7 +18,7 @@
             "properties": {
                 "storage": {
                     "type": "object",
-                    "anyOf": [
+                    "oneOf": [
                         { "$ref": "#/definitions/entry/definitions/diskDevice" },
                         { "$ref": "#/definitions/entry/definitions/diskUUID" },
                         { "$ref": "#/definitions/entry/definitions/nfs" },
