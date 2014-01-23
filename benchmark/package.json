@@ -6,6 +6,7 @@
         "benchmark": "latest",
         "assert": "latest",
         "jayschema": "latest",
+        "json-schema-suite": "latest",
         "tv4": "latest",
         "z-schema": "latest"
     }

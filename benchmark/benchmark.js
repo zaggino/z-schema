@@ -24,6 +24,14 @@ assert.deepEqual(errs.length, 0, 'JaySchema is expected to validate basic truthf
 var errs = js.validate(advancedObject, advancedSchema);
 assert.deepEqual(errs.length, 0, 'JaySchema is expected to validate advanced truthfully');
 
+// json-schema-suite
+var suite = require('json-schema-suite');
+var jsonSch = new suite.Validator();
+var result = jsonSch.validateRaw(basicObject, basicSchema);
+assert.deepEqual(result, true, 'json-schema-suite is expected to validate basic truthfully');
+var result = jsonSch.validateRaw(advancedObject, advancedSchema);
+assert.deepEqual(result, true, 'json-schema-suite is expected to validate advanced truthfully');
+
 // z-schema for Node.js - supports version 4 (MIT)
 var ZSchema = require('z-schema');
 var zs = new ZSchema({ sync: true });
@@ -39,6 +47,9 @@ new Benchmark.Suite()
     })
     .add('jayschema#basic', function () {
         js.validate(basicObject, basicSchema);
+    })
+    .add('json-schema-suite#basic', function () {
+        jsonSch.validateRaw(basicObject, basicSchema);
     })
     .add('z-schema#basic', function () {
         zs.validate(basicObject, basicSchema);
@@ -62,6 +73,9 @@ new Benchmark.Suite()
     })
     .add('jayschema#advanced', function () {
         js.validate(advancedObject, advancedSchema);
+    })
+    .add('json-schema-suite#advanced', function () {
+        jsonSch.validateRaw(advancedObject, advancedSchema);
     })
     .add('z-schema#advanced', function () {
         zs.validate(advancedObject, advancedSchema);
