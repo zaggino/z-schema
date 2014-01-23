@@ -4,7 +4,8 @@
     "license": "MIT",
     "dependencies": {
         "benchmark": "latest",
-        "assert": "latest",
+        "mustache": "latest",
+        "lodash": "2.4.0",
         "jayschema": "latest",
         "json-schema-suite": "latest",
         "tv4": "latest",

@@ -1,93 +1,57 @@
 'use strict';
 
-var Benchmark = require('benchmark');
-var assert = require('assert');
+var Tester = require('./tester');
+var ZSchema = require('z-schema');
+var JaySchema = require('jayschema');
+var JsonSchemaSuite = require('json-schema-suite');
+var tv4 = require('tv4');
 
-// http://json-schema.org/example1.html
+Tester.registerValidator({
+    name: 'z-schema',
+    setup: function () {
+        return new ZSchema({ sync: true });
+    },
+    test: function (instance, json, schema) {
+        return instance.validate(json, schema) === true;
+    }
+});
+
+Tester.registerValidator({
+    name: 'jayschema',
+    setup: function () {
+        return new JaySchema();
+    },
+    test: function (instance, json, schema) {
+        return instance.validate(json, schema).length === 0;
+    }
+});
+
+Tester.registerValidator({
+    name: 'json-schema-suite',
+    setup: function () {
+        return new JsonSchemaSuite.Validator();
+    },
+    test: function (instance, json, schema) {
+        return instance.validateRaw(json, schema) === true;
+    }
+});
+
+Tester.registerValidator({
+    name: 'tv4',
+    setup: function () {
+        return tv4;
+    },
+    test: function (instance, json, schema) {
+        return instance.validateResult(json, schema).valid === true;
+    }
+});
+
 var basicObject = require('./basic_object.json');
 var basicSchema = require('./basic_schema_v4.json');
+Tester.runOne('basicObject', basicObject, basicSchema, true);
+
 var advancedObject = require('./advanced_object.json');
 var advancedSchema = require('./advanced_schema_v4.json');
+Tester.runOne('advancedObject', advancedObject, advancedSchema, true);
 
-// tv4 - supports version 4 (Public Domain)
-var tv4 = require('tv4');
-var result = tv4.validateResult(basicObject, basicSchema);
-assert.deepEqual(result.valid, true, 'tv4 is expected to validate basic truthfully');
-var result = tv4.validateResult(advancedObject, advancedSchema);
-assert.deepEqual(result.valid, true, 'tv4 is expected to validate advanced truthfully');
-
-// JaySchema for Node.js - supports version 4 (BSD)
-var JaySchema = require('jayschema');
-var js = new JaySchema();
-var errs = js.validate(basicObject, basicSchema);
-assert.deepEqual(errs.length, 0, 'JaySchema is expected to validate basic truthfully');
-var errs = js.validate(advancedObject, advancedSchema);
-assert.deepEqual(errs.length, 0, 'JaySchema is expected to validate advanced truthfully');
-
-// json-schema-suite
-var suite = require('json-schema-suite');
-var jsonSch = new suite.Validator();
-var result = jsonSch.validateRaw(basicObject, basicSchema);
-assert.deepEqual(result, true, 'json-schema-suite is expected to validate basic truthfully');
-var result = jsonSch.validateRaw(advancedObject, advancedSchema);
-assert.deepEqual(result, true, 'json-schema-suite is expected to validate advanced truthfully');
-
-// z-schema for Node.js - supports version 4 (MIT)
-var ZSchema = require('z-schema');
-var zs = new ZSchema({ sync: true });
-var valid = zs.validate(basicObject, basicSchema);
-assert.deepEqual(valid, true, 'z-schema is expected to validate basic truthfully');
-var valid = zs.validate(advancedObject, advancedSchema);
-assert.deepEqual(valid, true, 'z-schema is expected to validate advanced truthfully');
-
-new Benchmark.Suite()
-    // add tests
-    .add('tv4#basic', function () {
-        tv4.validateResult(basicObject, basicSchema);
-    })
-    .add('jayschema#basic', function () {
-        js.validate(basicObject, basicSchema);
-    })
-    .add('json-schema-suite#basic', function () {
-        jsonSch.validateRaw(basicObject, basicSchema);
-    })
-    .add('z-schema#basic', function () {
-        zs.validate(basicObject, basicSchema);
-    })
-    // add listeners
-    .on('cycle', function (event) {
-        console.log(String(event.target));
-    })
-    .on('complete', function () {
-        console.log('Fastest is ' + this.filter('fastest').pluck('name'));
-    })
-    // run sync
-    .run({
-        'async': false
-    });
-
-new Benchmark.Suite()
-    // add tests
-    .add('tv4#advanced', function () {
-        tv4.validateResult(advancedObject, advancedSchema);
-    })
-    .add('jayschema#advanced', function () {
-        js.validate(advancedObject, advancedSchema);
-    })
-    .add('json-schema-suite#advanced', function () {
-        jsonSch.validateRaw(advancedObject, advancedSchema);
-    })
-    .add('z-schema#advanced', function () {
-        zs.validate(advancedObject, advancedSchema);
-    })
-    // add listeners
-    .on('cycle', function (event) {
-        console.log(String(event.target));
-    })
-    .on('complete', function () {
-        console.log('Fastest is ' + this.filter('fastest').pluck('name'));
-    })
-    // run sync
-    .run({
-        'async': false
-    });
+Tester.saveResults('results.html', 'results.template');

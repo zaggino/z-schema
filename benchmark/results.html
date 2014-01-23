@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <style type="text/css">
+        table {
+            border: 1px solid black;
+        }
+        td {
+            border: 1px solid black;
+        }
+        .failed {
+            background-color: #ff6e6e;
+        }
+        .fastest {
+            background-color: #6eff79;
+        }
+    </style>
+</head>
+<body>
+<table>
+    <tr>
+        <th></th>
+        <th>
+            z-schema
+        </th>
+        <th>
+            jayschema
+        </th>
+        <th>
+            json-schema-suite
+        </th>
+        <th>
+            tv4
+        </th>
+    </tr>
+    <tr>
+        <td>basicObject</td>
+        <td  >
+            13126
+        </td>
+        <td  >
+            849
+        </td>
+        <td  class="fastest">
+            76823
+        </td>
+        <td  >
+            28715
+        </td>
+    </tr>
+    <tr>
+        <td>advancedObject</td>
+        <td  >
+            2533
+        </td>
+        <td  >
+            112
+        </td>
+        <td  class="fastest">
+            62539
+        </td>
+        <td  >
+            2882
+        </td>
+    </tr>
+</table>
+</body>
+</html>
