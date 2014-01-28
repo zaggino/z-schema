@@ -3,16 +3,16 @@
 <head>
     <style type="text/css">
         table {
-            border: 1px solid black;   
+            border: 1px solid black;
         }
         td {
             border: 1px solid black;
         }
         .failed {
-            background-color: #ff6e6e; 
+            background-color: #ff6e6e;
         }
         .fastest {
-            background-color: #6eff79; 
+            background-color: #6eff79;
         }
     </style>
 </head>

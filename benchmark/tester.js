@@ -22,8 +22,14 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
         // setup instance
         var instance = validatorObject.setup();
         // verify that validator really works
-        var givenResult = validatorObject.test(instance, json, schema);
+        var givenResult;
+        try {
+            givenResult = validatorObject.test(instance, json, schema);
+        } catch (e) {
+            givenResult = e;
+        }
         if (givenResult !== expectedResult) {
+            console.warn(validatorObject.name + ' failed the test ' + testName);
             return;
             // throw new Error(validatorObject.name + ' failed test ' + testName);
         }
@@ -45,6 +51,8 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
         .run({
             'async': false
         });
+
+    console.log('-');
 
     var fastestName = suite.filter('fastest').pluck('name').toString();
     var suiteResult = {
@@ -68,6 +76,55 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
         }
     });
     this.results.push(suiteResult);
+};
+
+Tester.runFileContent = function (json) {
+    json.forEach(function (testSuite) {
+        testSuite.tests.forEach(function (test) {
+            var testName = [testSuite.description, test.description].join(', ');
+            this.runOne(testName, test.data, testSuite.schema, test.valid);
+        }, this);
+    }, this);
+};
+
+Tester.runFile = function (filename) {
+    var content = JSON.parse(fs.readFileSync(filename).toString());
+    this.runFileContent(content);
+};
+
+function mergeObjects(dest, src) {
+    for (var key in src) {
+        if (!dest[key]) {
+            dest[key] = src[key];
+        } else {
+            throw new Error('Object merge failed on key: ' + key);
+        }
+    }
+}
+
+function readDirToObject(dirpath, prefix) {
+    var obj = {};
+    prefix = prefix || '';
+    var files = fs.readdirSync(dirpath);
+    files.forEach(function (fileName) {
+        var stats = fs.statSync(dirpath + fileName);
+        if (stats.isDirectory()) {
+            var o = readDirToObject(dirpath + fileName + '/', fileName + '/');
+            mergeObjects(obj, o);
+        } else {
+            var fileContents = fs.readFileSync(dirpath + fileName, 'utf8');
+            var json = JSON.parse(fileContents);
+            obj[prefix + fileName] = json;
+        }
+    });
+    return obj;
+}
+
+Tester.runDirectory = function (directory) {
+    var files = readDirToObject(directory);
+    for (var fileName in files) {
+        Tester.runFileContent(files[fileName]);
+    }
 };
 
 Tester.saveResults = function (filename, templateName) {
