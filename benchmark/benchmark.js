@@ -32,7 +32,7 @@ Tester.registerValidator({
         return new JsonSchemaSuite.Validator();
     },
     test: function (instance, json, schema) {
-        return instance.validateRaw(json, schema) === true;
+        return instance.validateRaw(schema, json) === true;
     }
 });
 
