@@ -7,6 +7,8 @@
         }
         td {
             border: 1px solid black;
+            text-align: left;
+            padding: 3px 10px;
         }
         .failed {
             background-color: #ff6e6e;
@@ -36,4066 +38,4066 @@
     <tr>
         <td>basicObject</td>
         <td  >
-            1650
+            44% (1531)
         </td>
         <td  >
-            145
+            4% (146)
         </td>
         <td  >
-            366
+            10% (374)
         </td>
         <td  class="fastest">
-            3338
+            100% (3421)
         </td>
     </tr>
     <tr>
         <td>advancedObject</td>
         <td  >
-            312
+            84% (318)
         </td>
         <td  >
-            14
+            4% (17)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  class="fastest">
-            336
+            100% (377)
         </td>
     </tr>
     <tr>
         <td>additionalItems as schema, additional items match schema</td>
         <td  >
-            7066
+            42% (7335)
         </td>
         <td  >
-            487
+            2% (501)
         </td>
         <td  >
-            2121
+            12% (2137)
         </td>
         <td  class="fastest">
-            16460
+            100% (17250)
         </td>
     </tr>
     <tr>
         <td>additionalItems as schema, additional items do not match schema</td>
         <td  >
-            5609
+            66% (7725)
         </td>
         <td  >
-            460
+            4% (474)
         </td>
         <td  >
-            2131
+            18% (2127)
         </td>
         <td  class="fastest">
-            10513
+            100% (11557)
         </td>
     </tr>
     <tr>
         <td>items is schema, no additionalItems, all items match schema</td>
         <td  >
-            15726
+            49% (10395)
         </td>
         <td  >
-            481
+            2% (490)
         </td>
         <td  >
-            2179
+            10% (2170)
         </td>
         <td  class="fastest">
-            19651
+            100% (21020)
         </td>
     </tr>
     <tr>
         <td>array of items with no additionalItems, no additional items present</td>
-        <td  >
-            8407
-        </td>
-        <td  >
-            532
-        </td>
-        <td  >
-            2286
-        </td>
         <td  class="fastest">
-            17465
+            100% (19019)
+        </td>
+        <td  >
+            2% (544)
+        </td>
+        <td  >
+            12% (2324)
+        </td>
+        <td  >
+            94% (17916)
         </td>
     </tr>
     <tr>
         <td>array of items with no additionalItems, additional items are not permitted</td>
-        <td  >
-            12993
-        </td>
-        <td  >
-            493
-        </td>
-        <td  >
-            2211
-        </td>
         <td  class="fastest">
-            14869
+            100% (15882)
+        </td>
+        <td  >
+            3% (505)
+        </td>
+        <td  >
+            14% (2260)
+        </td>
+        <td  >
+            97% (15427)
         </td>
     </tr>
     <tr>
         <td>additionalItems as false without items, items defaults to empty schema so everything is valid</td>
         <td  class="fastest">
-            54412
+            100% (56666)
         </td>
         <td  >
-            781
+            1% (795)
         </td>
         <td  >
-            12642
+            23% (13289)
         </td>
         <td  >
-            31710
+            57% (32589)
         </td>
     </tr>
     <tr>
         <td>additionalItems as false without items, ignores non-arrays</td>
-        <td  >
-            15795
+        <td  class="fastest">
+            100% (26914)
         </td>
         <td  >
-            882
+            3% (908)
         </td>
         <td  >
-            10264
+            39% (10611)
         </td>
         <td  >
-            24777
+            92% (24900)
         </td>
     </tr>
     <tr>
         <td>additionalItems are allowed by default, only the first item is validated</td>
         <td  >
-            10255
+            77% (16209)
         </td>
         <td  >
-            686
+            3% (710)
         </td>
         <td  >
-            4298
+            20% (4399)
         </td>
         <td  class="fastest">
-            20717
+            100% (21040)
         </td>
     </tr>
     <tr>
         <td>additionalProperties being false does not allow other properties, no additional properties is valid</td>
-        <td  >
-            7170
-        </td>
-        <td  >
-            510
-        </td>
-        <td  >
-            2772
-        </td>
         <td  class="fastest">
-            12108
+            100% (12384)
+        </td>
+        <td  >
+            4% (519)
+        </td>
+        <td  >
+            23% (2856)
+        </td>
+        <td  >
+            98% (12192)
         </td>
     </tr>
     <tr>
         <td>additionalProperties being false does not allow other properties, an additional property is invalid</td>
         <td  >
-            7839
+            68% (5548)
         </td>
         <td  >
-            444
+            5% (445)
         </td>
         <td  >
-            2010
+            25% (2072)
         </td>
         <td  class="fastest">
-            8195
+            100% (8056)
         </td>
     </tr>
     <tr>
         <td>additionalProperties being false does not allow other properties, ignores non-objects</td>
         <td  class="fastest">
-            49911
+            100% (51041)
         </td>
         <td  >
-            795
+            1% (795)
         </td>
         <td  >
-            4438
+            8% (4580)
         </td>
         <td  >
-            16967
+            33% (17351)
         </td>
     </tr>
     <tr>
         <td>additionalProperties being false does not allow other properties, patternProperties are not additional properties</td>
         <td  class="fastest">
-            10757
+            100% (10856)
         </td>
         <td  >
-            479
+            4% (488)
         </td>
         <td  >
-            2049
+            19% (2113)
         </td>
         <td  >
-            9738
+            90% (9853)
         </td>
     </tr>
     <tr>
         <td>additionalProperties allows a schema which should validate, no additional properties is valid</td>
         <td  >
-            9771
+            53% (9771)
         </td>
         <td  >
-            559
+            3% (575)
         </td>
         <td  >
-            3422
+            18% (3418)
         </td>
         <td  class="fastest">
-            17724
+            100% (18289)
         </td>
     </tr>
     <tr>
         <td>additionalProperties allows a schema which should validate, an additional valid property is valid</td>
         <td  >
-            11048
+            63% (9087)
         </td>
         <td  >
-            488
+            3% (501)
         </td>
         <td  >
-            2206
+            15% (2252)
         </td>
         <td  class="fastest">
-            13905
+            100% (14241)
         </td>
     </tr>
     <tr>
         <td>additionalProperties allows a schema which should validate, an additional invalid property is invalid</td>
         <td  >
-            6903
+            75% (7761)
         </td>
         <td  >
-            460
+            4% (470)
         </td>
         <td  >
-            2186
+            20% (2146)
         </td>
         <td  class="fastest">
-            9922
+            100% (10348)
         </td>
     </tr>
     <tr>
         <td>additionalProperties are allowed by default, additional properties are allowed</td>
         <td  >
-            13875
+            77% (12780)
         </td>
         <td  >
-            566
+            3% (561)
         </td>
         <td  >
-            3100
+            18% (3072)
         </td>
         <td  class="fastest">
-            16131
+            100% (16558)
         </td>
     </tr>
     <tr>
         <td>allOf, allOf</td>
         <td  >
-            5546
+            65% (5433)
         </td>
         <td  >
-            362
+            4% (369)
         </td>
         <td  >
-            1436
+            17% (1468)
         </td>
         <td  class="fastest">
-            8106
+            100% (8288)
         </td>
     </tr>
     <tr>
         <td>allOf, mismatch second</td>
         <td  >
-            5884
+            52% (4677)
         </td>
         <td  >
-            356
+            3% (358)
         </td>
         <td  >
-            1671
+            19% (1753)
         </td>
         <td  class="fastest">
-            8794
+            100% (8977)
         </td>
     </tr>
     <tr>
         <td>allOf, mismatch first</td>
         <td  >
-            4520
+            92% (7213)
         </td>
         <td  >
-            355
+            4% (354)
         </td>
         <td  >
-            1691
+            22% (1736)
         </td>
         <td  class="fastest">
-            7119
+            100% (7761)
         </td>
     </tr>
     <tr>
         <td>allOf, wrong type</td>
         <td  >
-            3759
+            67% (5075)
         </td>
         <td  >
-            344
+            4% (352)
         </td>
         <td  >
-            1454
+            19% (1474)
         </td>
         <td  class="fastest">
-            7232
+            100% (7540)
         </td>
     </tr>
     <tr>
         <td>allOf with base schema, valid</td>
         <td  >
-            5046
+            55% (3595)
         </td>
         <td  >
-            298
+            4% (306)
         </td>
         <td  >
-            1168
+            18% (1202)
         </td>
         <td  class="fastest">
-            6443
+            100% (6507)
         </td>
     </tr>
     <tr>
         <td>allOf with base schema, mismatch base schema</td>
         <td  >
-            3610
+            42% (4148)
         </td>
         <td  >
-            288
+            3% (301)
         </td>
         <td  >
-            1353
+            14% (1380)
         </td>
         <td  class="fastest">
-            9381
+            100% (9671)
         </td>
     </tr>
     <tr>
         <td>allOf with base schema, mismatch first allOf</td>
         <td  >
-            3562
+            54% (4122)
         </td>
         <td  >
-            295
+            3% (300)
         </td>
         <td  >
-            1344
+            18% (1388)
         </td>
         <td  class="fastest">
-            6955
+            100% (7505)
         </td>
     </tr>
     <tr>
         <td>allOf with base schema, mismatch second allOf</td>
         <td  >
-            5193
+            58% (3666)
         </td>
         <td  >
-            291
+            4% (302)
         </td>
         <td  >
-            1293
+            21% (1310)
         </td>
         <td  class="fastest">
-            6056
+            100% (6218)
         </td>
     </tr>
     <tr>
         <td>allOf with base schema, mismatch both</td>
         <td  >
-            3811
+            51% (3991)
         </td>
         <td  >
-            294
+            3% (300)
         </td>
         <td  >
-            1474
+            19% (1509)
         </td>
         <td  class="fastest">
-            7488
+            100% (7760)
         </td>
     </tr>
     <tr>
         <td>allOf simple types, valid</td>
-        <td  >
-            20315
-        </td>
-        <td  >
-            542
-        </td>
-        <td  >
-            2820
-        </td>
         <td  class="fastest">
-            19074
+            100% (20470)
+        </td>
+        <td  >
+            2% (549)
+        </td>
+        <td  >
+            13% (2846)
+        </td>
+        <td  >
+            95% (19629)
         </td>
     </tr>
     <tr>
         <td>allOf simple types, mismatch one</td>
         <td  >
-            12534
+            97% (12868)
         </td>
         <td  >
-            490
+            3% (492)
         </td>
         <td  >
-            2847
+            21% (2903)
         </td>
         <td  class="fastest">
-            12488
+            100% (13208)
         </td>
     </tr>
     <tr>
         <td>anyOf, first anyOf valid</td>
         <td  >
-            13374
+            75% (13953)
         </td>
         <td  >
-            674
+            3% (687)
         </td>
         <td  >
-            2800
+            15% (2820)
         </td>
         <td  class="fastest">
-            18151
+            100% (18576)
         </td>
     </tr>
     <tr>
         <td>anyOf, second anyOf valid</td>
         <td  >
-            6706
+            64% (6838)
         </td>
         <td  >
-            508
+            4% (528)
         </td>
         <td  >
-            2765
+            26% (2811)
         </td>
         <td  class="fastest">
-            10101
+            100% (10603)
         </td>
     </tr>
     <tr>
         <td>anyOf, both anyOf valid</td>
         <td  >
-            13316
+            74% (13702)
         </td>
         <td  >
-            660
+            3% (683)
         </td>
         <td  >
-            2786
+            15% (2853)
         </td>
         <td  class="fastest">
-            18064
+            100% (18436)
         </td>
     </tr>
     <tr>
         <td>anyOf, neither anyOf valid</td>
         <td  >
-            5367
+            71% (5515)
         </td>
         <td  >
-            456
+            6% (472)
         </td>
         <td  >
-            2716
+            36% (2801)
         </td>
         <td  class="fastest">
-            7309
+            100% (7745)
         </td>
     </tr>
     <tr>
         <td>anyOf with base schema, mismatch base schema</td>
         <td  >
-            9768
+            69% (10063)
         </td>
         <td  >
-            728
+            5% (755)
         </td>
         <td  >
-            2651
+            18% (2664)
         </td>
         <td  class="fastest">
-            14113
+            100% (14422)
         </td>
     </tr>
     <tr>
         <td>anyOf with base schema, one anyOf valid</td>
         <td  >
-            6433
+            63% (6808)
         </td>
         <td  >
-            488
+            4% (502)
         </td>
         <td  >
-            2729
+            26% (2825)
         </td>
         <td  class="fastest">
-            10287
+            100% (10664)
         </td>
     </tr>
     <tr>
         <td>anyOf with base schema, both anyOf invalid</td>
         <td  >
-            5299
+            68% (5417)
         </td>
         <td  >
-            429
+            5% (445)
         </td>
         <td  >
-            2747
+            35% (2845)
         </td>
         <td  class="fastest">
-            7594
+            100% (7932)
         </td>
     </tr>
     <tr>
         <td>valid definition, valid definition schema</td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  >
-            158
+            1% (158)
         </td>
         <td  class="fastest">
-            11635
+            100% (11662)
         </td>
         <td  >
-            7955
+            70% (8183)
         </td>
     </tr>
     <tr>
         <td>invalid definition, invalid definition schema</td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  class="fastest">
-            146
+            100% (151)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>dependencies, neither</td>
         <td  class="fastest">
-            39678
+            100% (37103)
         </td>
         <td  >
-            722
+            1% (729)
         </td>
         <td  >
-            9081
+            24% (9142)
         </td>
         <td  >
-            21038
+            57% (21500)
         </td>
     </tr>
     <tr>
         <td>dependencies, nondependant</td>
         <td  class="fastest">
-            25033
+            100% (25517)
         </td>
         <td  >
-            736
+            2% (714)
         </td>
         <td  >
-            8419
+            33% (8481)
         </td>
         <td  >
-            18960
+            74% (19004)
         </td>
     </tr>
     <tr>
         <td>dependencies, with dependency</td>
         <td  >
-            11090
+            65% (12298)
         </td>
         <td  >
-            732
+            3% (727)
         </td>
         <td  >
-            7192
+            39% (7440)
         </td>
         <td  class="fastest">
-            18761
+            100% (18687)
         </td>
     </tr>
     <tr>
         <td>dependencies, missing dependency</td>
         <td  >
-            6728
+            54% (7009)
         </td>
         <td  >
-            643
+            5% (662)
         </td>
         <td  >
-            7216
+            56% (7151)
         </td>
         <td  class="fastest">
-            12516
+            100% (12750)
         </td>
     </tr>
     <tr>
         <td>dependencies, ignores non-objects</td>
         <td  class="fastest">
-            55796
+            100% (61254)
         </td>
         <td  >
-            844
+            1% (807)
         </td>
         <td  >
-            9953
+            16% (10222)
         </td>
         <td  >
-            23868
+            39% (24287)
         </td>
     </tr>
     <tr>
         <td>multiple dependencies, neither</td>
         <td  class="fastest">
-            37397
+            100% (37396)
         </td>
         <td  >
-            748
+            2% (763)
         </td>
         <td  >
-            8755
+            24% (9041)
         </td>
         <td  >
-            20092
+            55% (20575)
         </td>
     </tr>
     <tr>
         <td>multiple dependencies, nondependants</td>
+        <td  >
+            86% (15638)
+        </td>
+        <td  >
+            4% (773)
+        </td>
+        <td  >
+            44% (7987)
+        </td>
         <td  class="fastest">
-            20524
-        </td>
-        <td  >
-            750
-        </td>
-        <td  >
-            8125
-        </td>
-        <td  >
-            17936
+            100% (18011)
         </td>
     </tr>
     <tr>
         <td>multiple dependencies, with dependencies</td>
         <td  >
-            7382
+            41% (7350)
         </td>
         <td  >
-            746
+            4% (770)
         </td>
         <td  >
-            7051
+            40% (7158)
         </td>
         <td  class="fastest">
-            17529
+            100% (17506)
         </td>
     </tr>
     <tr>
         <td>multiple dependencies, missing dependency</td>
+        <td  >
+            81% (9674)
+        </td>
+        <td  >
+            5% (673)
+        </td>
+        <td  >
+            58% (6949)
+        </td>
         <td  class="fastest">
-            12358
-        </td>
-        <td  >
-            659
-        </td>
-        <td  >
-            6862
-        </td>
-        <td  >
-            11528
+            100% (11938)
         </td>
     </tr>
     <tr>
         <td>multiple dependencies, missing other dependency</td>
-        <td  >
-            6222
-        </td>
-        <td  >
-            648
-        </td>
-        <td  >
-            7035
-        </td>
         <td  class="fastest">
-            11340
+            100% (12417)
+        </td>
+        <td  >
+            5% (663)
+        </td>
+        <td  >
+            56% (6966)
+        </td>
+        <td  >
+            96% (11940)
         </td>
     </tr>
     <tr>
         <td>multiple dependencies, missing both dependencies</td>
         <td  >
-            10792
+            49% (6122)
         </td>
         <td  >
-            649
+            5% (671)
         </td>
         <td  >
-            7103
+            57% (7168)
         </td>
         <td  class="fastest">
-            11674
+            100% (12459)
         </td>
     </tr>
     <tr>
         <td>multiple dependencies subschema, valid</td>
         <td  >
-            6510
+            46% (5617)
         </td>
         <td  >
-            487
+            4% (488)
         </td>
         <td  >
-            1878
+            15% (1912)
         </td>
         <td  class="fastest">
-            12027
+            100% (12181)
         </td>
     </tr>
     <tr>
         <td>multiple dependencies subschema, no dependency</td>
-        <td  >
-            9616
-        </td>
-        <td  >
-            709
-        </td>
-        <td  >
-            4231
-        </td>
         <td  class="fastest">
-            17385
+            100% (25814)
+        </td>
+        <td  >
+            2% (715)
+        </td>
+        <td  >
+            16% (4254)
+        </td>
+        <td  >
+            67% (17541)
         </td>
     </tr>
     <tr>
         <td>multiple dependencies subschema, wrong type</td>
         <td  >
-            7766
+            50% (4827)
         </td>
         <td  >
-            443
+            4% (455)
         </td>
         <td  >
-            1908
+            20% (1945)
         </td>
         <td  class="fastest">
-            9050
+            100% (9621)
         </td>
     </tr>
     <tr>
         <td>multiple dependencies subschema, wrong type other</td>
         <td  >
-            4707
+            59% (5189)
         </td>
         <td  >
-            446
+            5% (455)
         </td>
         <td  >
-            1916
+            22% (1945)
         </td>
         <td  class="fastest">
-            8257
+            100% (8730)
         </td>
     </tr>
     <tr>
         <td>multiple dependencies subschema, wrong type both</td>
         <td  >
-            4158
+            67% (6572)
         </td>
         <td  >
-            420
+            4% (437)
         </td>
         <td  >
-            1902
+            20% (1948)
         </td>
         <td  class="fastest">
-            9475
+            100% (9670)
         </td>
     </tr>
     <tr>
         <td>simple enum validation, one of the enum is valid</td>
         <td  class="fastest">
-            54197
+            100% (58726)
         </td>
         <td  >
-            782
+            1% (796)
         </td>
         <td  >
-            9876
+            16% (9903)
         </td>
         <td  >
-            32936
+            56% (33471)
         </td>
     </tr>
     <tr>
         <td>simple enum validation, something else is invalid</td>
         <td  class="fastest">
-            24886
+            100% (26027)
         </td>
         <td  >
-            695
+            2% (707)
         </td>
         <td  >
-            9730
+            37% (9675)
         </td>
         <td  >
-            20595
+            79% (20590)
         </td>
     </tr>
     <tr>
         <td>heterogeneous enum validation, one of the enum is valid</td>
         <td  class="fastest">
-            45314
+            100% (48406)
         </td>
         <td  >
-            750
+            1% (769)
         </td>
         <td  >
-            10347
+            21% (10505)
         </td>
         <td  >
-            30221
+            65% (31508)
         </td>
     </tr>
     <tr>
         <td>heterogeneous enum validation, something else is invalid</td>
         <td  class="fastest">
-            24023
+            100% (25042)
         </td>
         <td  >
-            671
+            2% (689)
         </td>
         <td  >
-            12536
+            51% (12920)
         </td>
         <td  >
-            20260
+            82% (20573)
         </td>
     </tr>
     <tr>
         <td>heterogeneous enum validation, objects are deep compared</td>
         <td  >
-            8686
+            84% (14277)
         </td>
         <td  >
-            670
+            3% (669)
         </td>
         <td  >
-            8292
+            51% (8708)
         </td>
         <td  class="fastest">
-            15662
+            100% (16878)
         </td>
     </tr>
     <tr>
         <td>a schema given for items, valid items</td>
         <td  >
-            16832
+            57% (11746)
         </td>
         <td  >
-            587
+            2% (600)
         </td>
         <td  >
-            2781
+            14% (2889)
         </td>
         <td  class="fastest">
-            20208
+            100% (20497)
         </td>
     </tr>
     <tr>
         <td>a schema given for items, wrong type of items</td>
         <td  >
-            6842
+            98% (13606)
         </td>
         <td  >
-            588
+            4% (598)
         </td>
         <td  >
-            3642
+            26% (3670)
         </td>
         <td  class="fastest">
-            13398
+            100% (13793)
         </td>
     </tr>
     <tr>
         <td>a schema given for items, ignores non-arrays</td>
         <td  >
-            14103
+            44% (10160)
         </td>
         <td  >
-            844
+            3% (870)
         </td>
         <td  >
-            7682
+            33% (7730)
         </td>
         <td  class="fastest">
-            22227
+            100% (22828)
         </td>
     </tr>
     <tr>
         <td>an array of schemas for items, correct types</td>
-        <td  >
-            15648
-        </td>
-        <td  >
-            625
-        </td>
-        <td  >
-            2683
-        </td>
         <td  class="fastest">
-            17188
+            100% (21718)
+        </td>
+        <td  >
+            2% (641)
+        </td>
+        <td  >
+            12% (2748)
+        </td>
+        <td  >
+            81% (17789)
         </td>
     </tr>
     <tr>
         <td>an array of schemas for items, wrong types</td>
         <td  >
-            5832
+            76% (9574)
         </td>
         <td  >
-            535
+            4% (547)
         </td>
         <td  >
-            2685
+            21% (2694)
         </td>
         <td  class="fastest">
-            11573
+            100% (12500)
         </td>
     </tr>
     <tr>
         <td>maximum validation, below the maximum is valid</td>
         <td  class="fastest">
-            50804
+            100% (57009)
         </td>
         <td  >
-            784
+            1% (803)
         </td>
         <td  >
-            10520
+            18% (10452)
         </td>
         <td  >
-            31393
+            55% (31881)
         </td>
     </tr>
     <tr>
         <td>maximum validation, above the maximum is invalid</td>
         <td  class="fastest">
-            23364
+            100% (25005)
         </td>
         <td  >
-            684
+            2% (705)
         </td>
         <td  >
-            10570
+            41% (10323)
         </td>
         <td  >
-            18474
+            76% (19017)
         </td>
     </tr>
     <tr>
         <td>maximum validation, ignores non-numbers</td>
         <td  class="fastest">
-            57414
+            100% (61070)
         </td>
         <td  >
-            887
+            1% (897)
         </td>
         <td  >
-            10775
+            18% (11224)
         </td>
         <td  >
-            31870
+            52% (32089)
         </td>
     </tr>
     <tr>
         <td>exclusiveMaximum validation, below the maximum is still valid</td>
         <td  class="fastest">
-            51504
+            100% (55511)
         </td>
         <td  >
-            710
+            1% (718)
         </td>
         <td  >
-            9372
+            16% (9432)
         </td>
         <td  >
-            30172
+            54% (30479)
         </td>
     </tr>
     <tr>
         <td>exclusiveMaximum validation, boundary point is invalid</td>
         <td  class="fastest">
-            23400
+            100% (24210)
         </td>
         <td  >
-            634
+            2% (645)
         </td>
         <td  >
-            9323
+            39% (9521)
         </td>
         <td  >
-            18165
+            75% (18342)
         </td>
     </tr>
     <tr>
         <td>maxItems validation, shorter is valid</td>
         <td  class="fastest">
-            52571
+            100% (57232)
         </td>
         <td  >
-            781
+            1% (801)
         </td>
         <td  >
-            12128
+            21% (12515)
         </td>
         <td  >
-            30763
+            55% (31695)
         </td>
     </tr>
     <tr>
         <td>maxItems validation, exact length is valid</td>
         <td  class="fastest">
-            53851
+            100% (56309)
         </td>
         <td  >
-            787
+            1% (797)
         </td>
         <td  >
-            11390
+            22% (12630)
         </td>
         <td  >
-            30656
+            54% (30672)
         </td>
     </tr>
     <tr>
         <td>maxItems validation, too long is invalid</td>
         <td  class="fastest">
-            23847
+            100% (24647)
         </td>
         <td  >
-            681
+            2% (686)
         </td>
         <td  >
-            12047
+            50% (12460)
         </td>
         <td  >
-            18098
+            75% (18710)
         </td>
     </tr>
     <tr>
         <td>maxItems validation, ignores non-arrays</td>
         <td  class="fastest">
-            60988
+            100% (61366)
         </td>
         <td  >
-            883
+            1% (900)
         </td>
         <td  >
-            10820
+            18% (11472)
         </td>
         <td  >
-            31908
+            52% (32315)
         </td>
     </tr>
     <tr>
         <td>maxLength validation, shorter is valid</td>
         <td  class="fastest">
-            56246
+            100% (62877)
         </td>
         <td  >
-            786
+            1% (805)
         </td>
         <td  >
-            10530
+            17% (10800)
         </td>
         <td  >
-            31794
+            51% (32372)
         </td>
     </tr>
     <tr>
         <td>maxLength validation, exact length is valid</td>
         <td  class="fastest">
-            53535
+            100% (58912)
         </td>
         <td  >
-            791
+            1% (802)
         </td>
         <td  >
-            10430
+            18% (10820)
         </td>
         <td  >
-            31677
+            54% (32290)
         </td>
     </tr>
     <tr>
         <td>maxLength validation, too long is invalid</td>
         <td  class="fastest">
-            23953
+            100% (25107)
         </td>
         <td  >
-            677
+            2% (706)
         </td>
         <td  >
-            10684
+            42% (10677)
         </td>
         <td  >
-            17990
+            76% (19132)
         </td>
     </tr>
     <tr>
         <td>maxLength validation, ignores non-strings</td>
         <td  class="fastest">
-            57289
+            100% (63783)
         </td>
         <td  >
-            871
+            1% (897)
         </td>
         <td  >
-            10895
+            16% (10519)
         </td>
         <td  >
-            31549
+            50% (32174)
         </td>
     </tr>
     <tr>
         <td>maxProperties validation, shorter is valid</td>
-        <td  >
-            15108
+        <td  class="fastest">
+            100% (26631)
         </td>
         <td  >
-            757
+            2% (792)
         </td>
         <td  >
-            9882
+            38% (10130)
         </td>
         <td  >
-            24318
+            93% (24830)
         </td>
     </tr>
     <tr>
         <td>maxProperties validation, exact length is valid</td>
         <td  >
-            20359
+            38% (9059)
         </td>
         <td  >
-            763
+            3% (801)
         </td>
         <td  >
-            9658
+            41% (9855)
         </td>
         <td  class="fastest">
-            23039
+            100% (23630)
         </td>
     </tr>
     <tr>
         <td>maxProperties validation, too long is invalid</td>
         <td  >
-            6193
+            35% (6284)
         </td>
         <td  >
-            678
+            3% (682)
         </td>
         <td  >
-            9237
+            54% (9579)
         </td>
         <td  class="fastest">
-            16252
+            100% (17525)
         </td>
     </tr>
     <tr>
         <td>maxProperties validation, ignores non-objects</td>
         <td  class="fastest">
-            57125
+            100% (58942)
         </td>
         <td  >
-            859
+            1% (891)
         </td>
         <td  >
-            11028
+            19% (11312)
         </td>
         <td  >
-            31122
+            54% (32274)
         </td>
     </tr>
     <tr>
         <td>minimum validation, above the minimum is valid</td>
         <td  class="fastest">
-            54727
+            100% (59011)
         </td>
         <td  >
-            775
+            1% (797)
         </td>
         <td  >
-            10454
+            17% (10593)
         </td>
         <td  >
-            31301
+            53% (31782)
         </td>
     </tr>
     <tr>
         <td>minimum validation, below the minimum is invalid</td>
         <td  class="fastest">
-            23474
+            100% (24273)
         </td>
         <td  >
-            670
+            2% (701)
         </td>
         <td  >
-            10438
+            43% (10585)
         </td>
         <td  >
-            18804
+            77% (18908)
         </td>
     </tr>
     <tr>
         <td>minimum validation, ignores non-numbers</td>
         <td  class="fastest">
-            57974
+            100% (61291)
         </td>
         <td  >
-            871
+            1% (887)
         </td>
         <td  >
-            10719
+            18% (11173)
         </td>
         <td  >
-            30730
+            52% (32322)
         </td>
     </tr>
     <tr>
         <td>exclusiveMinimum validation, above the minimum is still valid</td>
         <td  class="fastest">
-            52614
+            100% (54611)
         </td>
         <td  >
-            714
+            1% (719)
         </td>
         <td  >
-            9392
+            16% (9229)
         </td>
         <td  >
-            30435
+            57% (31289)
         </td>
     </tr>
     <tr>
         <td>exclusiveMinimum validation, boundary point is invalid</td>
         <td  class="fastest">
-            23016
+            100% (24237)
         </td>
         <td  >
-            622
+            2% (638)
         </td>
         <td  >
-            9392
+            39% (9492)
         </td>
         <td  >
-            18150
+            76% (18533)
         </td>
     </tr>
     <tr>
         <td>minItems validation, longer is valid</td>
         <td  class="fastest">
-            51630
+            100% (51717)
         </td>
         <td  >
-            774
+            1% (800)
         </td>
         <td  >
-            11971
+            24% (12599)
         </td>
         <td  >
-            30493
+            60% (31489)
         </td>
     </tr>
     <tr>
         <td>minItems validation, exact length is valid</td>
         <td  class="fastest">
-            50318
+            100% (53212)
         </td>
         <td  >
-            768
+            1% (800)
         </td>
         <td  >
-            11718
+            23% (12627)
         </td>
         <td  >
-            30862
+            58% (31339)
         </td>
     </tr>
     <tr>
         <td>minItems validation, too short is invalid</td>
         <td  class="fastest">
-            23449
+            100% (23666)
         </td>
         <td  >
-            696
+            2% (706)
         </td>
         <td  >
-            11585
+            51% (12256)
         </td>
         <td  >
-            18272
+            79% (18755)
         </td>
     </tr>
     <tr>
         <td>minItems validation, ignores non-arrays</td>
         <td  class="fastest">
-            55400
+            100% (58799)
         </td>
         <td  >
-            870
+            1% (877)
         </td>
         <td  >
-            12094
+            21% (12728)
         </td>
         <td  >
-            31481
+            53% (31743)
         </td>
     </tr>
     <tr>
         <td>minLength validation, longer is valid</td>
         <td  class="fastest">
-            57004
+            100% (61723)
         </td>
         <td  >
-            773
+            1% (795)
         </td>
         <td  >
-            10800
+            17% (11084)
         </td>
         <td  >
-            31456
+            52% (32150)
         </td>
     </tr>
     <tr>
         <td>minLength validation, exact length is valid</td>
         <td  class="fastest">
-            53917
+            100% (60924)
         </td>
         <td  >
-            782
+            1% (797)
         </td>
         <td  >
-            10789
+            18% (11036)
         </td>
         <td  >
-            31264
+            53% (32533)
         </td>
     </tr>
     <tr>
         <td>minLength validation, too short is invalid</td>
         <td  class="fastest">
-            23742
+            100% (25773)
         </td>
         <td  >
-            697
+            2% (703)
         </td>
         <td  >
-            10651
+            41% (10667)
         </td>
         <td  >
-            18389
+            75% (19342)
         </td>
     </tr>
     <tr>
         <td>minLength validation, ignores non-strings</td>
         <td  class="fastest">
-            57909
+            100% (67544)
         </td>
         <td  >
-            884
+            1% (900)
         </td>
         <td  >
-            10734
+            16% (10842)
         </td>
         <td  >
-            31697
+            47% (32237)
         </td>
     </tr>
     <tr>
         <td>minProperties validation, longer is valid</td>
         <td  >
-            20006
+            45% (10852)
         </td>
         <td  >
-            769
+            3% (785)
         </td>
         <td  >
-            9559
+            42% (10039)
         </td>
         <td  class="fastest">
-            23107
+            100% (23638)
         </td>
     </tr>
     <tr>
         <td>minProperties validation, exact length is valid</td>
+        <td  >
+            47% (11518)
+        </td>
+        <td  >
+            3% (796)
+        </td>
+        <td  >
+            42% (10299)
+        </td>
         <td  class="fastest">
-            26269
-        </td>
-        <td  >
-            770
-        </td>
-        <td  >
-            9634
-        </td>
-        <td  >
-            24108
+            100% (24324)
         </td>
     </tr>
     <tr>
         <td>minProperties validation, too short is invalid</td>
         <td  class="fastest">
-            21505
+            100% (21266)
         </td>
         <td  >
-            685
+            3% (689)
         </td>
         <td  >
-            10407
+            51% (11013)
         </td>
         <td  >
-            16823
+            82% (17453)
         </td>
     </tr>
     <tr>
         <td>minProperties validation, ignores non-objects</td>
         <td  class="fastest">
-            60695
+            100% (57768)
         </td>
         <td  >
-            883
+            1% (893)
         </td>
         <td  >
-            12056
+            21% (12633)
         </td>
         <td  >
-            31757
+            52% (30111)
         </td>
     </tr>
     <tr>
         <td>by int, int by int</td>
         <td  class="fastest">
-            48411
+            100% (49268)
         </td>
         <td  >
-            788
+            1% (784)
         </td>
         <td  >
-            10462
+            21% (10764)
         </td>
         <td  >
-            31718
+            64% (31557)
         </td>
     </tr>
     <tr>
         <td>by int, int by int fail</td>
         <td  class="fastest">
-            22635
+            100% (23453)
         </td>
         <td  >
-            681
+            2% (692)
         </td>
         <td  >
-            10516
+            45% (10777)
         </td>
         <td  >
-            20371
+            89% (21001)
         </td>
     </tr>
     <tr>
         <td>by int, ignores non-numbers</td>
         <td  class="fastest">
-            55503
+            100% (60009)
         </td>
         <td  >
-            876
+            1% (891)
         </td>
         <td  >
-            10926
+            18% (11053)
         </td>
         <td  >
-            31009
+            53% (31939)
         </td>
     </tr>
     <tr>
         <td>by number, zero is multiple of anything</td>
         <td  class="fastest">
-            49707
+            100% (51378)
         </td>
         <td  >
-            780
+            1% (802)
         </td>
         <td  >
-            11364
+            22% (11761)
         </td>
         <td  >
-            31194
+            61% (31565)
         </td>
     </tr>
     <tr>
         <td>by number, 4.5 is multiple of 1.5</td>
         <td  class="fastest">
-            48478
+            100% (50962)
         </td>
         <td  >
-            778
+            1% (802)
         </td>
         <td  >
-            10282
+            20% (10468)
         </td>
         <td  >
-            31386
+            61% (31472)
         </td>
     </tr>
     <tr>
         <td>by number, 35 is not multiple of 1.5</td>
         <td  class="fastest">
-            22612
+            100% (22707)
         </td>
         <td  >
-            666
+            3% (701)
         </td>
         <td  >
-            10486
+            46% (10568)
         </td>
         <td  >
-            20093
+            90% (20585)
         </td>
     </tr>
     <tr>
         <td>by small number, 0.0075 is multiple of 0.0001</td>
         <td  class="fastest">
-            49026
+            100% (50545)
         </td>
         <td  >
-            766
+            1% (798)
         </td>
         <td  >
-            10433
+            20% (10522)
         </td>
         <td  >
-            31451
+            62% (31496)
         </td>
     </tr>
     <tr>
         <td>by small number, 0.00751 is not multiple of 0.0001</td>
         <td  class="fastest">
-            22679
+            100% (23063)
         </td>
         <td  >
-            690
+            3% (703)
         </td>
         <td  >
-            10238
+            44% (10377)
         </td>
         <td  >
-            20297
+            89% (20647)
         </td>
     </tr>
     <tr>
         <td>not, allowed</td>
         <td  >
-            10351
+            67% (10860)
         </td>
         <td  >
-            634
+            4% (649)
         </td>
         <td  >
-            5266
+            33% (5412)
         </td>
         <td  class="fastest">
-            15305
+            100% (16029)
         </td>
     </tr>
     <tr>
         <td>not, disallowed</td>
         <td  >
-            12215
+            60% (12923)
         </td>
         <td  >
-            623
+            3% (643)
         </td>
         <td  >
-            5153
+            24% (5136)
         </td>
         <td  class="fastest">
-            20286
+            100% (21341)
         </td>
     </tr>
     <tr>
         <td>not multiple types, valid</td>
         <td  >
-            9868
+            73% (10220)
         </td>
         <td  >
-            613
+            4% (630)
         </td>
         <td  >
-            5181
+            37% (5232)
         </td>
         <td  class="fastest">
-            13216
+            100% (13862)
         </td>
     </tr>
     <tr>
         <td>not multiple types, mismatch</td>
         <td  >
-            11959
+            70% (12474)
         </td>
         <td  >
-            625
+            3% (637)
         </td>
         <td  >
-            4958
+            28% (5085)
         </td>
         <td  class="fastest">
-            16848
+            100% (17643)
         </td>
     </tr>
     <tr>
         <td>not multiple types, other mismatch</td>
         <td  >
-            11761
+            72% (12768)
         </td>
         <td  >
-            628
+            3% (638)
         </td>
         <td  >
-            5594
+            33% (5882)
         </td>
         <td  class="fastest">
-            17254
+            100% (17679)
         </td>
     </tr>
     <tr>
         <td>not more complex schema, match</td>
         <td  >
-            10162
+            74% (10583)
         </td>
         <td  >
-            602
+            4% (616)
         </td>
         <td  >
-            3836
+            27% (3868)
         </td>
         <td  class="fastest">
-            14113
+            100% (14245)
         </td>
     </tr>
     <tr>
         <td>not more complex schema, other match</td>
         <td  >
-            6800
+            68% (6952)
         </td>
         <td  >
-            489
+            4% (496)
         </td>
         <td  >
-            2697
+            26% (2725)
         </td>
         <td  class="fastest">
-            9466
+            100% (10132)
         </td>
     </tr>
     <tr>
         <td>not more complex schema, mismatch</td>
         <td  >
-            7854
+            62% (8170)
         </td>
         <td  >
-            485
+            3% (502)
         </td>
         <td  >
-            2748
+            20% (2714)
         </td>
         <td  class="fastest">
-            12665
+            100% (13104)
         </td>
     </tr>
     <tr>
         <td>oneOf, first oneOf valid</td>
         <td  >
-            6250
+            61% (6634)
         </td>
         <td  >
-            520
+            5% (538)
         </td>
         <td  >
-            2616
+            25% (2687)
         </td>
         <td  class="fastest">
-            10072
+            100% (10728)
         </td>
     </tr>
     <tr>
         <td>oneOf, second oneOf valid</td>
         <td  >
-            6315
+            62% (6578)
         </td>
         <td  >
-            526
+            5% (539)
         </td>
         <td  >
-            2634
+            24% (2647)
         </td>
         <td  class="fastest">
-            10010
+            100% (10607)
         </td>
     </tr>
     <tr>
         <td>oneOf, both oneOf valid</td>
         <td  >
-            7108
+            57% (7360)
         </td>
         <td  >
-            519
+            4% (519)
         </td>
         <td  >
-            2625
+            21% (2703)
         </td>
         <td  class="fastest">
-            12226
+            100% (12787)
         </td>
     </tr>
     <tr>
         <td>oneOf, neither oneOf valid</td>
         <td  >
-            5171
+            71% (5329)
         </td>
         <td  >
-            459
+            6% (474)
         </td>
         <td  >
-            2596
+            36% (2696)
         </td>
         <td  class="fastest">
-            7191
+            100% (7404)
         </td>
     </tr>
     <tr>
         <td>oneOf with base schema, mismatch base schema</td>
         <td  >
-            6034
+            44% (6246)
         </td>
         <td  >
-            735
+            5% (752)
         </td>
         <td  >
-            2482
+            18% (2580)
         </td>
         <td  class="fastest">
-            13960
+            100% (14178)
         </td>
     </tr>
     <tr>
         <td>oneOf with base schema, one oneOf valid</td>
         <td  >
-            6355
+            60% (6498)
         </td>
         <td  >
-            478
+            4% (502)
         </td>
         <td  >
-            2654
+            25% (2690)
         </td>
         <td  class="fastest">
-            10119
+            100% (10751)
         </td>
     </tr>
     <tr>
         <td>oneOf with base schema, both oneOf valid</td>
         <td  >
-            7163
+            58% (7311)
         </td>
         <td  >
-            480
+            3% (498)
         </td>
         <td  >
-            2657
+            21% (2723)
         </td>
         <td  class="fastest">
-            11828
+            100% (12572)
         </td>
     </tr>
     <tr>
         <td>integer, a bignum is an integer</td>
         <td  class="fastest">
-            48259
+            100% (49439)
         </td>
         <td  >
-            861
+            1% (902)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  >
-            29083
+            58% (28762)
         </td>
     </tr>
     <tr>
         <td>number, a bignum is a number</td>
         <td  class="fastest">
-            49270
+            100% (46461)
         </td>
         <td  >
-            871
+            1% (888)
         </td>
         <td  >
-            9310
+            20% (9544)
         </td>
         <td  >
-            29921
+            64% (29989)
         </td>
     </tr>
     <tr>
         <td>string, a bignum is not a string</td>
         <td  class="fastest">
-            22498
+            100% (23016)
         </td>
         <td  >
-            770
+            3% (783)
         </td>
         <td  >
-            9303
+            40% (9277)
         </td>
         <td  >
-            18462
+            81% (18776)
         </td>
     </tr>
     <tr>
         <td>float comparison with high precision, comparison works for high numbers</td>
         <td  class="fastest">
-            22391
+            100% (24055)
         </td>
         <td  >
-            633
+            2% (634)
         </td>
         <td  >
-            9057
+            38% (9251)
         </td>
         <td  >
-            18157
+            75% (18248)
         </td>
     </tr>
     <tr>
         <td>validation of date-time strings, a valid date-time string</td>
         <td  >
-            27431
+            97% (28884)
         </td>
         <td  >
-            744
+            2% (767)
         </td>
         <td  >
-            10829
+            37% (11015)
         </td>
         <td  class="fastest">
-            29121
+            100% (29650)
         </td>
     </tr>
     <tr>
         <td>validation of date-time strings, an invalid date-time string</td>
         <td  class="fastest">
-            19001
+            100% (19489)
         </td>
         <td  >
-            678
+            3% (690)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>validation of date-time strings, only RFC3339 not all of ISO 8601 are valid</td>
         <td  class="fastest">
-            18974
+            100% (19744)
         </td>
         <td  >
-            680
+            3% (686)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>validation of URIs, a valid URI</td>
         <td  class="fastest">
-            38249
+            100% (39022)
         </td>
         <td  >
-            756
+            2% (785)
         </td>
         <td  >
-            10096
+            26% (10265)
         </td>
         <td  >
-            29245
+            76% (29680)
         </td>
     </tr>
     <tr>
         <td>validation of URIs, an invalid URI</td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  class="fastest">
-            677
+            100% (696)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>validation of URIs, an invalid URI though valid URI reference</td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
     </tr>
     <tr>
         <td>validation of e-mail addresses, a valid e-mail address</td>
         <td  >
-            21558
+            74% (21990)
         </td>
         <td  >
-            765
+            2% (787)
         </td>
         <td  >
-            10347
+            35% (10529)
         </td>
         <td  class="fastest">
-            28903
+            100% (29414)
         </td>
     </tr>
     <tr>
         <td>validation of e-mail addresses, an invalid e-mail address</td>
         <td  class="fastest">
-            14863
+            100% (15134)
         </td>
         <td  >
-            679
+            4% (687)
         </td>
         <td  >
-            10466
+            69% (10568)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>validation of IP addresses, a valid IP address</td>
         <td  class="fastest">
-            38360
+            100% (42131)
         </td>
         <td  >
-            770
+            1% (788)
         </td>
         <td  >
-            11047
+            26% (11161)
         </td>
         <td  >
-            28953
+            70% (29674)
         </td>
     </tr>
     <tr>
         <td>validation of IP addresses, an IP address with too many components</td>
         <td  class="fastest">
-            20855
+            100% (21282)
         </td>
         <td  >
-            681
+            3% (704)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>validation of IP addresses, an IP address with out-of-range values</td>
         <td  class="fastest">
-            20992
+            100% (21559)
         </td>
         <td  >
-            681
+            3% (706)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>validation of IPv6 addresses, a valid IPv6 address</td>
         <td  class="fastest">
-            32113
+            100% (33813)
         </td>
         <td  >
-            751
+            2% (749)
         </td>
         <td  >
-            11015
+            32% (11090)
         </td>
         <td  >
-            28613
+            87% (29701)
         </td>
     </tr>
     <tr>
         <td>validation of IPv6 addresses, an IPv6 address with out-of-range values</td>
         <td  class="fastest">
-            19499
+            100% (20131)
         </td>
         <td  >
-            663
+            3% (693)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>validation of IPv6 addresses, an IPv6 address with too many components</td>
         <td  class="fastest">
-            18687
+            100% (19173)
         </td>
         <td  >
-            672
+            3% (691)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>validation of IPv6 addresses, an IPv6 address containing illegal characters</td>
         <td  class="fastest">
-            19742
+            100% (20302)
         </td>
         <td  >
-            678
+            3% (706)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>validation of host names, a valid host name</td>
         <td  class="fastest">
-            31688
+            100% (33020)
         </td>
         <td  >
-            760
+            2% (786)
         </td>
         <td  >
-            10917
+            33% (10971)
         </td>
         <td  >
-            28379
+            89% (29682)
         </td>
     </tr>
     <tr>
         <td>validation of host names, a host name starting with an illegal character</td>
         <td  class="fastest">
-            21274
+            100% (21750)
         </td>
         <td  >
-            669
+            3% (708)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>validation of host names, a host name containing illegal characters</td>
         <td  class="fastest">
-            21090
+            100% (21574)
         </td>
         <td  >
-            684
+            3% (708)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>validation of host names, a host name with a component too long</td>
         <td  class="fastest">
-            19270
+            100% (20328)
         </td>
         <td  >
-            683
+            3% (700)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>some languages do not distinguish between different types of numeric value, a float is not an integer even without fractional part</td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
     </tr>
     <tr>
         <td>pattern validation, a matching pattern is valid</td>
         <td  class="fastest">
-            50421
+            100% (53693)
         </td>
         <td  >
-            766
+            1% (797)
         </td>
         <td  >
-            9292
+            18% (10085)
         </td>
         <td  >
-            27165
+            52% (28041)
         </td>
     </tr>
     <tr>
         <td>pattern validation, a non-matching pattern is invalid</td>
         <td  class="fastest">
-            23434
+            100% (25466)
         </td>
         <td  >
-            684
+            2% (708)
         </td>
         <td  >
-            9876
+            39% (10165)
         </td>
         <td  >
-            18330
+            73% (18796)
         </td>
     </tr>
     <tr>
         <td>pattern validation, ignores non-strings</td>
         <td  class="fastest">
-            58118
+            100% (61630)
         </td>
         <td  >
-            868
+            1% (902)
         </td>
         <td  >
-            11949
+            20% (12545)
         </td>
         <td  >
-            31200
+            51% (32036)
         </td>
     </tr>
     <tr>
         <td>patternProperties validates properties matching a regex, a single valid match is valid</td>
         <td  class="fastest">
-            16006
+            100% (16977)
         </td>
         <td  >
-            600
+            3% (603)
         </td>
         <td  >
-            3046
+            18% (3166)
         </td>
         <td  >
-            12484
+            74% (12707)
         </td>
     </tr>
     <tr>
         <td>patternProperties validates properties matching a regex, multiple valid matches is valid</td>
         <td  class="fastest">
-            12743
+            100% (13436)
         </td>
         <td  >
-            554
+            4% (570)
         </td>
         <td  >
-            2205
+            16% (2276)
         </td>
         <td  >
-            9713
+            74% (9948)
         </td>
     </tr>
     <tr>
         <td>patternProperties validates properties matching a regex, a single invalid match is invalid</td>
         <td  >
-            5334
+            70% (6539)
         </td>
         <td  >
-            502
+            5% (527)
         </td>
         <td  >
-            2245
+            24% (2257)
         </td>
         <td  class="fastest">
-            8947
+            100% (9271)
         </td>
     </tr>
     <tr>
         <td>patternProperties validates properties matching a regex, multiple invalid matches is invalid</td>
         <td  >
-            8130
+            52% (4987)
         </td>
         <td  >
-            474
+            5% (498)
         </td>
         <td  >
-            2308
+            24% (2309)
         </td>
         <td  class="fastest">
-            8914
+            100% (9410)
         </td>
     </tr>
     <tr>
         <td>patternProperties validates properties matching a regex, ignores non-objects</td>
         <td  class="fastest">
-            53441
+            100% (56862)
         </td>
         <td  >
-            820
+            1% (856)
         </td>
         <td  >
-            6261
+            10% (5904)
         </td>
         <td  >
-            18688
+            34% (19411)
         </td>
     </tr>
     <tr>
         <td>multiple simultaneous patternProperties are validated, a single valid match is valid</td>
         <td  class="fastest">
-            17564
+            100% (13854)
         </td>
         <td  >
-            592
+            4% (611)
         </td>
         <td  >
-            2832
+            19% (2769)
         </td>
         <td  >
-            10922
+            84% (11693)
         </td>
     </tr>
     <tr>
         <td>multiple simultaneous patternProperties are validated, a simultaneous match is valid</td>
-        <td  >
-            7008
-        </td>
-        <td  >
-            519
-        </td>
-        <td  >
-            2176
-        </td>
         <td  class="fastest">
-            10738
+            100% (14737)
+        </td>
+        <td  >
+            3% (531)
+        </td>
+        <td  >
+            15% (2248)
+        </td>
+        <td  >
+            74% (10934)
         </td>
     </tr>
     <tr>
         <td>multiple simultaneous patternProperties are validated, multiple matches is valid</td>
         <td  >
-            7706
+            97% (8464)
         </td>
         <td  >
-            480
+            5% (497)
         </td>
         <td  >
-            1694
+            20% (1773)
         </td>
-        <td  >
-            8603
+        <td  class="fastest">
+            100% (8697)
         </td>
     </tr>
     <tr>
         <td>multiple simultaneous patternProperties are validated, an invalid due to one is invalid</td>
+        <td  >
+            70% (6497)
+        </td>
+        <td  >
+            6% (555)
+        </td>
+        <td  >
+            31% (2896)
+        </td>
         <td  class="fastest">
-            10761
-        </td>
-        <td  >
-            547
-        </td>
-        <td  >
-            2732
-        </td>
-        <td  >
-            8731
+            100% (9172)
         </td>
     </tr>
     <tr>
         <td>multiple simultaneous patternProperties are validated, an invalid due to the other is invalid</td>
+        <td  >
+            89% (7230)
+        </td>
+        <td  >
+            6% (489)
+        </td>
+        <td  >
+            27% (2262)
+        </td>
         <td  class="fastest">
-            10172
-        </td>
-        <td  >
-            477
-        </td>
-        <td  >
-            2183
-        </td>
-        <td  >
-            7749
+            100% (8117)
         </td>
     </tr>
     <tr>
         <td>multiple simultaneous patternProperties are validated, an invalid due to both is invalid</td>
         <td  >
-            4078
+            48% (4482)
         </td>
         <td  >
-            394
+            4% (415)
         </td>
         <td  >
-            1497
+            16% (1506)
         </td>
         <td  class="fastest">
-            8709
+            100% (9232)
         </td>
     </tr>
     <tr>
         <td>regexes are not anchored by default and are case sensitive, non recognized members are ignored</td>
+        <td  >
+            68% (8176)
+        </td>
+        <td  >
+            5% (659)
+        </td>
+        <td  >
+            33% (4033)
+        </td>
         <td  class="fastest">
-            17587
-        </td>
-        <td  >
-            632
-        </td>
-        <td  >
-            3954
-        </td>
-        <td  >
-            11804
+            100% (11987)
         </td>
     </tr>
     <tr>
         <td>regexes are not anchored by default and are case sensitive, recognized members are accounted for</td>
-        <td  >
-            5985
-        </td>
-        <td  >
-            542
-        </td>
-        <td  >
-            3101
-        </td>
         <td  class="fastest">
-            8726
+            100% (12133)
+        </td>
+        <td  >
+            4% (565)
+        </td>
+        <td  >
+            25% (3136)
+        </td>
+        <td  >
+            77% (9376)
         </td>
     </tr>
     <tr>
         <td>regexes are not anchored by default and are case sensitive, regexes are case sensitive</td>
+        <td  >
+            66% (8736)
+        </td>
+        <td  >
+            5% (666)
+        </td>
+        <td  >
+            32% (4228)
+        </td>
         <td  class="fastest">
-            19355
-        </td>
-        <td  >
-            644
-        </td>
-        <td  >
-            4306
-        </td>
-        <td  >
-            12341
+            100% (13145)
         </td>
     </tr>
     <tr>
         <td>regexes are not anchored by default and are case sensitive, regexes are case sensitive, 2</td>
-        <td  >
-            5888
-        </td>
-        <td  >
-            541
-        </td>
-        <td  >
-            2845
-        </td>
         <td  class="fastest">
-            8530
+            100% (11851)
+        </td>
+        <td  >
+            4% (556)
+        </td>
+        <td  >
+            24% (2932)
+        </td>
+        <td  >
+            75% (8925)
         </td>
     </tr>
     <tr>
         <td>object properties validation, both properties present and valid is valid</td>
+        <td  >
+            74% (11477)
+        </td>
+        <td  >
+            3% (584)
+        </td>
+        <td  >
+            18% (2758)
+        </td>
         <td  class="fastest">
-            16248
-        </td>
-        <td  >
-            563
-        </td>
-        <td  >
-            2740
-        </td>
-        <td  >
-            14973
+            100% (15322)
         </td>
     </tr>
     <tr>
         <td>object properties validation, one property invalid is invalid</td>
         <td  >
-            9768
+            54% (5804)
         </td>
         <td  >
-            524
+            5% (533)
         </td>
         <td  >
-            2612
+            26% (2784)
         </td>
         <td  class="fastest">
-            10253
+            100% (10575)
         </td>
     </tr>
     <tr>
         <td>object properties validation, both properties invalid is invalid</td>
         <td  >
-            7084
+            42% (5209)
         </td>
         <td  >
-            490
+            4% (496)
         </td>
         <td  >
-            2798
+            23% (2828)
         </td>
         <td  class="fastest">
-            11539
+            100% (12133)
         </td>
     </tr>
     <tr>
         <td>object properties validation, doesn&#39;t invalidate other properties</td>
         <td  >
-            9367
+            79% (15059)
         </td>
         <td  >
-            667
+            3% (670)
         </td>
         <td  >
-            5535
+            29% (5663)
         </td>
         <td  class="fastest">
-            19032
+            100% (19012)
         </td>
     </tr>
     <tr>
         <td>object properties validation, ignores non-objects</td>
         <td  class="fastest">
-            55849
+            100% (52614)
         </td>
         <td  >
-            827
+            1% (830)
         </td>
         <td  >
-            6232
+            12% (6392)
         </td>
         <td  >
-            23831
+            46% (24244)
         </td>
     </tr>
     <tr>
         <td>properties, patternProperties, additionalProperties interaction, property validates property</td>
         <td  class="fastest">
-            12410
+            100% (13853)
         </td>
         <td  >
-            417
+            3% (430)
         </td>
         <td  >
-            1876
+            14% (1946)
         </td>
         <td  >
-            9612
+            70% (9717)
         </td>
     </tr>
     <tr>
         <td>properties, patternProperties, additionalProperties interaction, property invalidates property</td>
         <td  >
-            8137
+            61% (5538)
         </td>
         <td  >
-            384
+            4% (397)
         </td>
         <td  >
-            1908
+            21% (1920)
         </td>
         <td  class="fastest">
-            8197
+            100% (8972)
         </td>
     </tr>
     <tr>
         <td>properties, patternProperties, additionalProperties interaction, patternProperty invalidates property</td>
         <td  class="fastest">
-            9821
+            100% (8645)
         </td>
         <td  >
-            390
+            4% (402)
         </td>
         <td  >
-            1881
+            22% (1922)
         </td>
         <td  >
-            6969
+            89% (7696)
         </td>
     </tr>
     <tr>
         <td>properties, patternProperties, additionalProperties interaction, patternProperty validates nonproperty</td>
-        <td  >
-            7907
-        </td>
-        <td  >
-            466
-        </td>
-        <td  >
-            2188
-        </td>
         <td  class="fastest">
-            10244
+            100% (13892)
+        </td>
+        <td  >
+            3% (483)
+        </td>
+        <td  >
+            15% (2219)
+        </td>
+        <td  >
+            74% (10293)
         </td>
     </tr>
     <tr>
         <td>properties, patternProperties, additionalProperties interaction, patternProperty invalidates nonproperty</td>
+        <td  >
+            75% (6060)
+        </td>
+        <td  >
+            5% (442)
+        </td>
+        <td  >
+            27% (2234)
+        </td>
         <td  class="fastest">
-            10838
-        </td>
-        <td  >
-            428
-        </td>
-        <td  >
-            2151
-        </td>
-        <td  >
-            7439
+            100% (8010)
         </td>
     </tr>
     <tr>
         <td>properties, patternProperties, additionalProperties interaction, additionalProperty ignores property</td>
+        <td  >
+            84% (8707)
+        </td>
+        <td  >
+            4% (510)
+        </td>
+        <td  >
+            22% (2274)
+        </td>
         <td  class="fastest">
-            16656
-        </td>
-        <td  >
-            494
-        </td>
-        <td  >
-            2262
-        </td>
-        <td  >
-            10142
+            100% (10317)
         </td>
     </tr>
     <tr>
         <td>properties, patternProperties, additionalProperties interaction, additionalProperty validates others</td>
-        <td  >
-            7862
-        </td>
-        <td  >
-            489
-        </td>
-        <td  >
-            2240
-        </td>
         <td  class="fastest">
-            9799
+            100% (16518)
+        </td>
+        <td  >
+            3% (505)
+        </td>
+        <td  >
+            13% (2286)
+        </td>
+        <td  >
+            59% (9864)
         </td>
     </tr>
     <tr>
         <td>properties, patternProperties, additionalProperties interaction, additionalProperty invalidates others</td>
+        <td  >
+            77% (6175)
+        </td>
+        <td  >
+            5% (475)
+        </td>
+        <td  >
+            28% (2287)
+        </td>
         <td  class="fastest">
-            11482
-        </td>
-        <td  >
-            464
-        </td>
-        <td  >
-            2219
-        </td>
-        <td  >
-            7712
+            100% (8015)
         </td>
     </tr>
     <tr>
         <td>root pointer ref, match</td>
         <td  class="fastest">
-            8133
+            100% (18412)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>root pointer ref, recursive match</td>
         <td  class="fastest">
-            6324
+            100% (7908)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>root pointer ref, mismatch</td>
         <td  class="fastest">
-            20360
+            100% (20390)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  >
-            3202
+            16% (3336)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>root pointer ref, recursive mismatch</td>
         <td  class="fastest">
-            6537
+            100% (9705)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  >
-            3241
+            34% (3325)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>relative pointer ref to object, match</td>
         <td  class="fastest">
-            21447
+            100% (21430)
         </td>
         <td  >
-            325
+            1% (342)
         </td>
         <td  >
-            3151
+            15% (3230)
         </td>
         <td  >
-            5961
+            28% (6099)
         </td>
     </tr>
     <tr>
         <td>relative pointer ref to object, mismatch</td>
         <td  class="fastest">
-            6849
+            100% (7269)
         </td>
         <td  >
-            322
+            4% (330)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  >
-            5149
+            75% (5523)
         </td>
     </tr>
     <tr>
         <td>relative pointer ref to array, match array</td>
         <td  class="fastest">
-            11597
+            100% (21402)
         </td>
         <td  >
-            353
+            1% (368)
         </td>
         <td  >
-            2304
+            11% (2418)
         </td>
         <td  >
-            5928
+            28% (6083)
         </td>
     </tr>
     <tr>
         <td>relative pointer ref to array, mismatch array</td>
         <td  class="fastest">
-            13482
+            100% (8104)
         </td>
         <td  >
-            336
+            4% (346)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  >
-            4918
+            65% (5294)
         </td>
     </tr>
     <tr>
         <td>escaped pointer ref, slash</td>
         <td  class="fastest">
-            5725
+            100% (6125)
         </td>
         <td  >
-            307
+            5% (313)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  >
-            2953
+            50% (3105)
         </td>
     </tr>
     <tr>
         <td>escaped pointer ref, tilda</td>
         <td  class="fastest">
-            10542
+            100% (10933)
         </td>
         <td  >
-            308
+            2% (315)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  >
-            2979
+            27% (3044)
         </td>
     </tr>
     <tr>
         <td>escaped pointer ref, percent</td>
         <td  class="fastest">
-            5681
+            100% (5959)
         </td>
         <td  >
-            306
+            5% (316)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  >
-            2912
+            51% (3074)
         </td>
     </tr>
     <tr>
         <td>nested refs, nested ref valid</td>
         <td  class="fastest">
-            51792
+            100% (54724)
         </td>
         <td  >
-            200
+            0% (203)
         </td>
         <td  >
-            1584
+            3% (1692)
         </td>
         <td  >
-            5063
+            9% (5074)
         </td>
     </tr>
     <tr>
         <td>nested refs, nested ref invalid</td>
         <td  class="fastest">
-            25061
+            100% (24634)
         </td>
         <td  >
-            195
+            0% (199)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  >
-            4555
+            19% (4755)
         </td>
     </tr>
     <tr>
         <td>remote ref, containing refs itself, remote ref valid</td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  >
-            160
+            1% (173)
         </td>
         <td  class="fastest">
-            10981
+            100% (11244)
         </td>
         <td  >
-            8198
+            73% (8294)
         </td>
     </tr>
     <tr>
         <td>remote ref, containing refs itself, remote ref invalid</td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  class="fastest">
-            164
+            100% (169)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>remote ref, remote ref valid</td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  class="fastest">
-            11523
+            100% (12042)
         </td>
         <td  >
-            8463
+            71% (8618)
         </td>
     </tr>
     <tr>
         <td>remote ref, remote ref invalid</td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  class="fastest">
-            363
+            100% (358)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>fragment within remote ref, remote fragment valid</td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  class="fastest">
-            11797
+            100% (12430)
         </td>
         <td  >
-            7771
+            64% (7957)
         </td>
     </tr>
     <tr>
         <td>fragment within remote ref, remote fragment invalid</td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
     </tr>
     <tr>
         <td>ref within remote ref, ref within ref valid</td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  class="fastest">
-            11623
+            100% (12439)
         </td>
         <td  >
-            7765
+            64% (7988)
         </td>
     </tr>
     <tr>
         <td>ref within remote ref, ref within ref invalid</td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
     </tr>
     <tr>
         <td>change resolution scope, changed scope ref valid</td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
         <td  class="fastest">
-            1390
+            100% (1435)
         </td>
         <td class="failed" >
-            -1
+            0% (-1)
         </td>
     </tr>
     <tr>
         <td>change resolution scope, changed scope ref invalid</td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
         <td class="failed" >
-            -1
+            NaN% (-1)
         </td>
     </tr>
     <tr>
         <td>required validation, present required property is valid</td>
         <td  >
-            8928
+            55% (9248)
         </td>
         <td  >
-            553
+            3% (570)
         </td>
         <td  >
-            3678
+            22% (3801)
         </td>
         <td  class="fastest">
-            16432
+            100% (16548)
         </td>
     </tr>
     <tr>
         <td>required validation, non-present required property is invalid</td>
         <td  >
-            13007
+            93% (12841)
         </td>
         <td  >
-            504
+            3% (524)
         </td>
         <td  >
-            3689
+            28% (3868)
         </td>
         <td  class="fastest">
-            13212
+            100% (13796)
         </td>
     </tr>
     <tr>
         <td>required default validation, not required by default</td>
         <td  class="fastest">
-            37748
+            100% (38590)
         </td>
         <td  >
-            681
+            1% (692)
         </td>
         <td  >
-            8066
+            21% (8183)
         </td>
         <td  >
-            25321
+            67% (25882)
         </td>
     </tr>
     <tr>
         <td>integer type matches integers, an integer is an integer</td>
         <td  class="fastest">
-            53089
+            100% (50881)
         </td>
         <td  >
-            875
+            1% (876)
         </td>
         <td  >
-            9723
+            19% (9900)
         </td>
         <td  >
-            29204
+            57% (29098)
         </td>
     </tr>
     <tr>
         <td>integer type matches integers, a float is not an integer</td>
         <td  class="fastest">
-            23037
+            100% (22987)
         </td>
         <td  >
-            770
+            3% (784)
         </td>
         <td  >
-            9514
+            42% (9733)
         </td>
         <td  >
-            17619
+            79% (18352)
         </td>
     </tr>
     <tr>
         <td>integer type matches integers, a string is not an integer</td>
         <td  class="fastest">
-            23671
+            100% (24116)
         </td>
         <td  >
-            763
+            3% (776)
         </td>
         <td  >
-            10078
+            42% (10369)
         </td>
         <td  >
-            17538
+            77% (18749)
         </td>
     </tr>
     <tr>
         <td>integer type matches integers, an object is not an integer</td>
         <td  class="fastest">
-            20893
+            100% (20527)
         </td>
         <td  >
-            759
+            3% (793)
         </td>
         <td  >
-            9702
+            47% (9816)
         </td>
         <td  >
-            17664
+            91% (18685)
         </td>
     </tr>
     <tr>
         <td>integer type matches integers, an array is not an integer</td>
         <td  class="fastest">
-            23129
+            100% (23332)
         </td>
         <td  >
-            767
+            3% (781)
         </td>
         <td  >
-            10999
+            49% (11437)
         </td>
         <td  >
-            17882
+            77% (18073)
         </td>
     </tr>
     <tr>
         <td>integer type matches integers, a boolean is not an integer</td>
         <td  class="fastest">
-            23866
+            100% (24315)
         </td>
         <td  >
-            773
+            3% (783)
         </td>
         <td  >
-            10783
+            44% (10840)
         </td>
         <td  >
-            17834
+            77% (18843)
         </td>
     </tr>
     <tr>
         <td>integer type matches integers, null is not an integer</td>
         <td  class="fastest">
-            22799
+            100% (24172)
         </td>
         <td  >
-            769
+            3% (787)
         </td>
         <td  >
-            13848
+            56% (13619)
         </td>
         <td  >
-            17704
+            78% (18904)
         </td>
     </tr>
     <tr>
         <td>number type matches numbers, an integer is a number</td>
         <td  class="fastest">
-            48403
+            100% (48798)
         </td>
         <td  >
-            862
+            1% (885)
         </td>
         <td  >
-            9901
+            19% (9610)
         </td>
         <td  >
-            29017
+            63% (30781)
         </td>
     </tr>
     <tr>
         <td>number type matches numbers, a float is a number</td>
         <td  class="fastest">
-            50159
+            100% (47465)
         </td>
         <td  >
-            861
+            1% (874)
         </td>
         <td  >
-            9770
+            20% (9628)
         </td>
         <td  >
-            29388
+            63% (30370)
         </td>
     </tr>
     <tr>
         <td>number type matches numbers, a string is not a number</td>
         <td  class="fastest">
-            23868
+            100% (24199)
         </td>
         <td  >
-            769
+            3% (771)
         </td>
         <td  >
-            10103
+            42% (10309)
         </td>
         <td  >
-            17934
+            76% (18610)
         </td>
     </tr>
     <tr>
         <td>number type matches numbers, an object is not a number</td>
         <td  class="fastest">
-            20852
+            100% (20503)
         </td>
         <td  >
-            761
+            3% (785)
         </td>
         <td  >
-            9744
+            47% (9684)
         </td>
         <td  >
-            18032
+            91% (18727)
         </td>
     </tr>
     <tr>
         <td>number type matches numbers, an array is not a number</td>
         <td  class="fastest">
-            22741
+            100% (23513)
         </td>
         <td  >
-            772
+            3% (786)
         </td>
         <td  >
-            11277
+            47% (11217)
         </td>
         <td  >
-            17825
+            80% (18882)
         </td>
     </tr>
     <tr>
         <td>number type matches numbers, a boolean is not a number</td>
         <td  class="fastest">
-            24028
+            100% (23868)
         </td>
         <td  >
-            760
+            3% (781)
         </td>
         <td  >
-            10924
+            45% (10905)
         </td>
         <td  >
-            17677
+            77% (18520)
         </td>
     </tr>
     <tr>
         <td>number type matches numbers, null is not a number</td>
         <td  class="fastest">
-            23861
+            100% (23957)
         </td>
         <td  >
-            776
+            3% (775)
         </td>
         <td  >
-            13498
+            57% (13866)
         </td>
         <td  >
-            17915
+            77% (18663)
         </td>
     </tr>
     <tr>
         <td>string type matches strings, 1 is not a string</td>
         <td  class="fastest">
-            23045
+            100% (23096)
         </td>
         <td  >
-            773
+            3% (787)
         </td>
         <td  >
-            9598
+            41% (9494)
         </td>
         <td  >
-            17970
+            81% (18772)
         </td>
     </tr>
     <tr>
         <td>string type matches strings, a float is not a string</td>
         <td  class="fastest">
-            22797
+            100% (23433)
         </td>
         <td  >
-            773
+            3% (772)
         </td>
         <td  >
-            9514
+            40% (9441)
         </td>
         <td  >
-            17645
+            80% (18884)
         </td>
     </tr>
     <tr>
         <td>string type matches strings, a string is a string</td>
         <td  class="fastest">
-            52949
+            100% (51566)
         </td>
         <td  >
-            862
+            1% (886)
         </td>
         <td  >
-            10301
+            20% (10441)
         </td>
         <td  >
-            29615
+            59% (30495)
         </td>
     </tr>
     <tr>
         <td>string type matches strings, an object is not a string</td>
         <td  class="fastest">
-            20687
+            100% (20887)
         </td>
         <td  >
-            760
+            3% (772)
         </td>
         <td  >
-            9779
+            46% (9791)
         </td>
         <td  >
-            17839
+            88% (18535)
         </td>
     </tr>
     <tr>
         <td>string type matches strings, an array is not a string</td>
         <td  class="fastest">
-            23705
+            100% (23291)
         </td>
         <td  >
-            760
+            3% (789)
         </td>
         <td  >
-            10970
+            47% (11144)
         </td>
         <td  >
-            17974
+            80% (18782)
         </td>
     </tr>
     <tr>
         <td>string type matches strings, a boolean is not a string</td>
         <td  class="fastest">
-            24274
+            100% (24299)
         </td>
         <td  >
-            774
+            3% (787)
         </td>
         <td  >
-            10747
+            43% (10463)
         </td>
         <td  >
-            17873
+            77% (18926)
         </td>
     </tr>
     <tr>
         <td>string type matches strings, null is not a string</td>
         <td  class="fastest">
-            24258
+            100% (23685)
         </td>
         <td  >
-            761
+            3% (788)
         </td>
         <td  >
-            13700
+            56% (13497)
         </td>
         <td  >
-            17732
+            78% (18662)
         </td>
     </tr>
     <tr>
         <td>object type matches objects, an integer is not an object</td>
         <td  class="fastest">
-            23100
+            100% (22967)
         </td>
         <td  >
-            771
+            3% (774)
         </td>
         <td  >
-            9525
+            42% (9731)
         </td>
         <td  >
-            17867
+            82% (18925)
         </td>
     </tr>
     <tr>
         <td>object type matches objects, a float is not an object</td>
         <td  class="fastest">
-            23536
+            100% (23536)
         </td>
         <td  >
-            768
+            3% (785)
         </td>
         <td  >
-            9434
+            40% (9425)
         </td>
         <td  >
-            17671
+            79% (18796)
         </td>
     </tr>
     <tr>
         <td>object type matches objects, a string is not an object</td>
         <td  class="fastest">
-            24100
+            100% (24011)
         </td>
         <td  >
-            772
+            3% (775)
         </td>
         <td  >
-            9854
+            42% (10238)
         </td>
         <td  >
-            17926
+            78% (18869)
         </td>
     </tr>
     <tr>
         <td>object type matches objects, an object is an object</td>
         <td  class="fastest">
-            40904
+            100% (39371)
         </td>
         <td  >
-            874
+            2% (871)
         </td>
         <td  >
-            9809
+            25% (9931)
         </td>
         <td  >
-            26529
+            67% (26671)
         </td>
     </tr>
     <tr>
         <td>object type matches objects, an array is not an object</td>
         <td  class="fastest">
-            22703
+            100% (23672)
         </td>
         <td  >
-            761
+            3% (774)
         </td>
         <td  >
-            11167
+            47% (11347)
         </td>
         <td  >
-            17666
+            78% (18535)
         </td>
     </tr>
     <tr>
         <td>object type matches objects, a boolean is not an object</td>
         <td  class="fastest">
-            24083
+            100% (24405)
         </td>
         <td  >
-            760
+            3% (784)
         </td>
         <td  >
-            10708
+            44% (10789)
         </td>
         <td  >
-            17906
+            77% (18897)
         </td>
     </tr>
     <tr>
         <td>object type matches objects, null is not an object</td>
         <td  class="fastest">
-            23764
+            100% (23965)
         </td>
         <td  >
-            770
+            3% (778)
         </td>
         <td  >
-            13534
+            56% (13645)
         </td>
         <td  >
-            18016
+            79% (18970)
         </td>
     </tr>
     <tr>
         <td>array type matches arrays, an integer is not an array</td>
         <td  class="fastest">
-            22908
+            100% (23101)
         </td>
         <td  >
-            772
+            3% (774)
         </td>
         <td  >
-            9651
+            41% (9579)
         </td>
         <td  >
-            17578
+            80% (18648)
         </td>
     </tr>
     <tr>
         <td>array type matches arrays, a float is not an array</td>
         <td  class="fastest">
-            23230
+            100% (23374)
         </td>
         <td  >
-            758
+            3% (773)
         </td>
         <td  >
-            9684
+            40% (9550)
         </td>
         <td  >
-            17771
+            80% (18904)
         </td>
     </tr>
     <tr>
         <td>array type matches arrays, a string is not an array</td>
         <td  class="fastest">
-            24114
+            100% (24266)
         </td>
         <td  >
-            773
+            3% (788)
         </td>
         <td  >
-            9969
+            41% (10076)
         </td>
         <td  >
-            18199
+            77% (18862)
         </td>
     </tr>
     <tr>
         <td>array type matches arrays, an object is not an array</td>
         <td  class="fastest">
-            20843
+            100% (20457)
         </td>
         <td  >
-            771
+            3% (785)
         </td>
         <td  >
-            9518
+            47% (9679)
         </td>
         <td  >
-            17859
+            92% (18902)
         </td>
     </tr>
     <tr>
         <td>array type matches arrays, an array is not an array</td>
         <td  class="fastest">
-            50709
+            100% (48861)
         </td>
         <td  >
-            848
+            1% (875)
         </td>
         <td  >
-            11322
+            23% (11501)
         </td>
         <td  >
-            28831
+            60% (29469)
         </td>
     </tr>
     <tr>
         <td>array type matches arrays, a boolean is not an array</td>
         <td  class="fastest">
-            23780
+            100% (24294)
         </td>
         <td  >
-            761
+            3% (775)
         </td>
         <td  >
-            10897
+            44% (10865)
         </td>
         <td  >
-            18141
+            76% (18543)
         </td>
     </tr>
     <tr>
         <td>array type matches arrays, null is not an array</td>
         <td  class="fastest">
-            23913
+            100% (24290)
         </td>
         <td  >
-            765
+            3% (785)
         </td>
         <td  >
-            13579
+            55% (13554)
         </td>
         <td  >
-            17985
+            77% (18905)
         </td>
     </tr>
     <tr>
         <td>boolean type matches booleans, an integer is not a boolean</td>
         <td  class="fastest">
-            23165
+            100% (23205)
         </td>
         <td  >
-            764
+            3% (782)
         </td>
         <td  >
-            9619
+            41% (9582)
         </td>
         <td  >
-            18039
+            81% (18888)
         </td>
     </tr>
     <tr>
         <td>boolean type matches booleans, a float is not a boolean</td>
         <td  class="fastest">
-            22933
+            100% (23104)
         </td>
         <td  >
-            767
+            3% (788)
         </td>
         <td  >
-            9698
+            40% (9301)
         </td>
         <td  >
-            17396
+            81% (18817)
         </td>
     </tr>
     <tr>
         <td>boolean type matches booleans, a string is not a boolean</td>
         <td  class="fastest">
-            23910
+            100% (23919)
         </td>
         <td  >
-            755
+            3% (776)
         </td>
         <td  >
-            10204
+            43% (10340)
         </td>
         <td  >
-            17907
+            77% (18639)
         </td>
     </tr>
     <tr>
         <td>boolean type matches booleans, an object is not a boolean</td>
         <td  class="fastest">
-            20940
+            100% (20870)
         </td>
         <td  >
-            764
+            3% (784)
         </td>
         <td  >
-            9602
+            46% (9654)
         </td>
         <td  >
-            17880
+            90% (18803)
         </td>
     </tr>
     <tr>
         <td>boolean type matches booleans, an array is not a boolean</td>
         <td  class="fastest">
-            23149
+            100% (23142)
         </td>
         <td  >
-            755
+            3% (785)
         </td>
         <td  >
-            11003
+            48% (11234)
         </td>
         <td  >
-            18011
+            81% (18792)
         </td>
     </tr>
     <tr>
         <td>boolean type matches booleans, a boolean is not a boolean</td>
         <td  class="fastest">
-            53543
+            100% (52752)
         </td>
         <td  >
-            852
+            1% (886)
         </td>
         <td  >
-            11001
+            20% (11015)
         </td>
         <td  >
-            29785
+            58% (30697)
         </td>
     </tr>
     <tr>
         <td>boolean type matches booleans, null is not a boolean</td>
         <td  class="fastest">
-            24185
+            100% (24051)
         </td>
         <td  >
-            760
+            3% (770)
         </td>
         <td  >
-            13787
+            57% (13829)
         </td>
         <td  >
-            17906
+            76% (18304)
         </td>
     </tr>
     <tr>
         <td>null type matches only the null object, an integer is not null</td>
         <td  class="fastest">
-            22870
+            100% (23247)
         </td>
         <td  >
-            762
+            3% (787)
         </td>
         <td  >
-            9583
+            41% (9579)
         </td>
         <td  >
-            17993
+            81% (18946)
         </td>
     </tr>
     <tr>
         <td>null type matches only the null object, a float is not null</td>
         <td  class="fastest">
-            22853
+            100% (23298)
         </td>
         <td  >
-            765
+            3% (788)
         </td>
         <td  >
-            9635
+            40% (9449)
         </td>
         <td  >
-            17648
+            81% (19016)
         </td>
     </tr>
     <tr>
         <td>null type matches only the null object, a string is not null</td>
         <td  class="fastest">
-            24026
+            100% (23699)
         </td>
         <td  >
-            755
+            3% (778)
         </td>
         <td  >
-            10156
+            43% (10333)
         </td>
         <td  >
-            17619
+            78% (18669)
         </td>
     </tr>
     <tr>
         <td>null type matches only the null object, an object is not null</td>
         <td  class="fastest">
-            21033
+            100% (20893)
         </td>
         <td  >
-            768
+            3% (776)
         </td>
         <td  >
-            9649
+            47% (9840)
         </td>
         <td  >
-            18264
+            86% (18004)
         </td>
     </tr>
     <tr>
         <td>null type matches only the null object, an array is not null</td>
         <td  class="fastest">
-            23284
+            100% (23645)
         </td>
         <td  >
-            767
+            3% (779)
         </td>
         <td  >
-            10905
+            47% (11258)
         </td>
         <td  >
-            18234
+            79% (18884)
         </td>
     </tr>
     <tr>
         <td>null type matches only the null object, a boolean is not null</td>
         <td  class="fastest">
-            24083
+            100% (23914)
         </td>
         <td  >
-            743
+            3% (787)
         </td>
         <td  >
-            10903
+            45% (10837)
         </td>
         <td  >
-            17788
+            78% (18891)
         </td>
     </tr>
     <tr>
         <td>null type matches only the null object, null is null</td>
         <td  class="fastest">
-            54912
+            100% (51939)
         </td>
         <td  >
-            858
+            1% (887)
         </td>
         <td  >
-            13801
+            27% (14041)
         </td>
         <td  >
-            30077
+            58% (30442)
         </td>
     </tr>
     <tr>
         <td>multiple types can be specified in an array, an integer is valid</td>
         <td  class="fastest">
-            48703
+            100% (45084)
         </td>
         <td  >
-            856
+            1% (861)
         </td>
         <td  >
-            9523
+            21% (9599)
         </td>
         <td  >
-            23333
+            51% (23143)
         </td>
     </tr>
     <tr>
         <td>multiple types can be specified in an array, a string is valid</td>
         <td  class="fastest">
-            47938
+            100% (51326)
         </td>
         <td  >
-            855
+            1% (855)
         </td>
         <td  >
-            9876
+            19% (10139)
         </td>
         <td  >
-            23228
+            46% (23729)
         </td>
     </tr>
     <tr>
         <td>multiple types can be specified in an array, a float is invalid</td>
         <td  class="fastest">
-            19543
+            100% (20498)
         </td>
         <td  >
-            753
+            3% (775)
         </td>
         <td  >
-            9545
+            46% (9447)
         </td>
         <td  >
-            14974
+            77% (15797)
         </td>
     </tr>
     <tr>
         <td>multiple types can be specified in an array, an object is invalid</td>
         <td  class="fastest">
-            17870
+            100% (18478)
         </td>
         <td  >
-            752
+            4% (761)
         </td>
         <td  >
-            9570
+            51% (9602)
         </td>
         <td  >
-            15013
+            86% (15984)
         </td>
     </tr>
     <tr>
         <td>multiple types can be specified in an array, an array is invalid</td>
-        <td  >
-            14582
+        <td  class="fastest">
+            100% (20387)
         </td>
         <td  >
-            701
+            3% (764)
         </td>
         <td  >
-            10882
+            54% (11181)
         </td>
         <td  >
-            15384
+            78% (15968)
         </td>
     </tr>
     <tr>
         <td>multiple types can be specified in an array, a boolean is invalid</td>
         <td  class="fastest">
-            20371
+            100% (21483)
         </td>
         <td  >
-            750
+            3% (773)
         </td>
         <td  >
-            10874
+            50% (10878)
         </td>
         <td  >
-            14796
+            73% (15796)
         </td>
     </tr>
     <tr>
         <td>multiple types can be specified in an array, null is invalid</td>
         <td  class="fastest">
-            20448
+            100% (20851)
         </td>
         <td  >
-            738
+            3% (772)
         </td>
         <td  >
-            13411
+            64% (13422)
         </td>
         <td  >
-            15391
+            77% (16144)
         </td>
     </tr>
     <tr>
         <td>uniqueItems validation, unique array of integers is valid</td>
         <td  class="fastest">
-            53894
+            100% (55435)
         </td>
         <td  >
-            760
+            1% (796)
         </td>
         <td  >
-            12006
+            22% (12448)
         </td>
         <td  >
-            30675
+            55% (30916)
         </td>
     </tr>
     <tr>
         <td>uniqueItems validation, non-unique array of integers is invalid</td>
         <td  class="fastest">
-            22443
+            100% (23924)
         </td>
         <td  >
-            664
+            2% (687)
         </td>
         <td  >
-            12044
+            51% (12297)
         </td>
         <td  >
-            17790
+            77% (18554)
         </td>
     </tr>
     <tr>
         <td>uniqueItems validation, numbers are unique if mathematically unequal</td>
         <td  class="fastest">
-            22983
+            100% (23974)
         </td>
         <td  >
-            632
+            2% (647)
         </td>
         <td  >
-            11655
+            52% (12534)
         </td>
         <td  >
-            18431
+            78% (18754)
         </td>
     </tr>
     <tr>
         <td>uniqueItems validation, unique array of objects is valid</td>
         <td  class="fastest">
-            42186
+            100% (42899)
         </td>
         <td  >
-            772
+            1% (774)
         </td>
         <td  >
-            11270
+            27% (11954)
         </td>
         <td  >
-            28915
+            67% (29001)
         </td>
     </tr>
     <tr>
         <td>uniqueItems validation, non-unique array of objects is invalid</td>
         <td  class="fastest">
-            20456
+            100% (21217)
         </td>
         <td  >
-            677
+            3% (686)
         </td>
         <td  >
-            11160
+            55% (11864)
         </td>
         <td  >
-            17278
+            86% (18252)
         </td>
     </tr>
     <tr>
         <td>uniqueItems validation, unique array of nested objects is valid</td>
         <td  class="fastest">
-            30527
+            100% (33661)
         </td>
         <td  >
-            749
+            2% (782)
         </td>
         <td  >
-            10839
+            32% (11069)
         </td>
         <td  >
-            26900
+            82% (27706)
         </td>
     </tr>
     <tr>
         <td>uniqueItems validation, non-unique array of nested objects is invalid</td>
         <td  class="fastest">
-            18154
+            100% (18599)
         </td>
         <td  >
-            671
+            3% (685)
         </td>
         <td  >
-            10572
+            59% (11052)
         </td>
         <td  >
-            17062
+            92% (17291)
         </td>
     </tr>
     <tr>
         <td>uniqueItems validation, unique array of arrays is valid</td>
         <td  class="fastest">
-            47296
+            100% (51413)
         </td>
         <td  >
-            776
+            1% (790)
         </td>
         <td  >
-            11364
+            22% (11755)
         </td>
         <td  >
-            29498
+            58% (30014)
         </td>
     </tr>
     <tr>
         <td>uniqueItems validation, non-unique array of arrays is invalid</td>
         <td  class="fastest">
-            22210
+            100% (23521)
         </td>
         <td  >
-            669
+            2% (686)
         </td>
         <td  >
-            11385
+            50% (11920)
         </td>
         <td  >
-            17819
+            77% (18151)
         </td>
     </tr>
     <tr>
         <td>uniqueItems validation, 1 and true are unique</td>
         <td  class="fastest">
-            52868
+            100% (55337)
         </td>
         <td  >
-            778
+            1% (788)
         </td>
         <td  >
-            11870
+            22% (12261)
         </td>
         <td  >
-            30090
+            56% (31433)
         </td>
     </tr>
     <tr>
         <td>uniqueItems validation, 0 and false are unique</td>
         <td  class="fastest">
-            49046
+            100% (55752)
         </td>
         <td  >
-            776
+            1% (792)
         </td>
         <td  >
-            11882
+            22% (12435)
         </td>
         <td  >
-            30525
+            56% (31447)
         </td>
     </tr>
     <tr>
         <td>uniqueItems validation, unique heterogeneous types are valid</td>
         <td  class="fastest">
-            38772
+            100% (42611)
         </td>
         <td  >
-            757
+            1% (789)
         </td>
         <td  >
-            11521
+            28% (12008)
         </td>
         <td  >
-            28556
+            66% (28150)
         </td>
     </tr>
     <tr>
         <td>uniqueItems validation, non-unique heterogeneous types are invalid</td>
         <td  class="fastest">
-            20885
+            100% (21313)
         </td>
         <td  >
-            665
+            3% (677)
         </td>
         <td  >
-            11227
+            55% (11819)
         </td>
         <td  >
-            17796
+            84% (18046)
         </td>
     </tr>
 </table>
