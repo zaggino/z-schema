@@ -54,26 +54,35 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
 
     console.log('-');
 
-    var fastestName = suite.filter('fastest').pluck('name').toString();
+    var fastest = 0;
     var suiteResult = {
         name: testName,
         results: []
     };
     this.validators.forEach(function (validatorObject) {
+        var ops;
         var results = _.find(suite, function (obj) {
             return validatorObject.name === obj.name.substring(0, obj.name.indexOf('#'));
         });
         if (results) {
+            ops = parseInt(results.hz, 10);
             suiteResult.results.push({
-                hz: parseInt(results.hz, 10),
-                fastest: fastestName === results.name
+                hz: ops
             });
         } else {
+            ops = -1;
             suiteResult.results.push({
-                hz: -1,
+                hz: ops,
                 failed: true
             });
         }
+        if (ops > fastest) { fastest = ops; }
+    });
+    suiteResult.results.forEach(function (result) {
+        if (result.hz === fastest) {
+            result.fastest = true;
+        }
+        result.percentage = parseInt(result.hz / fastest * 100, 10);
     });
     this.results.push(suiteResult);
 };

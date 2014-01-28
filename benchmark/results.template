@@ -7,6 +7,8 @@
         }
         td {
             border: 1px solid black;
+            text-align: left;
+            padding: 3px 10px;
         }
         .failed {
             background-color: #ff6e6e;
@@ -31,7 +33,7 @@
         <td>{{name}}</td>
         {{#results}}    
         <td {{#failed}}class="failed"{{/failed}} {{#fastest}}class="fastest"{{/fastest}}>
-            {{hz}}
+            {{percentage}}% ({{hz}})
         </td>
         {{/results}}
     </tr>
