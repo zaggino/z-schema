@@ -36,1960 +36,565 @@
     <tr>
         <td>basicObject</td>
         <td  >
-            13681
+            1650
         </td>
         <td  >
-            858
+            145
+        </td>
+        <td  >
+            366
         </td>
         <td  class="fastest">
-            77118
-        </td>
-        <td  >
-            28538
+            3338
         </td>
     </tr>
     <tr>
         <td>advancedObject</td>
         <td  >
-            2595
+            312
         </td>
         <td  >
-            114
-        </td>
-        <td  class="fastest">
-            62408
-        </td>
-        <td  >
-            2858
-        </td>
-    </tr>
-    <tr>
-        <td>additionalItems as schema additional items match schema</td>
-        <td  >
-            84658
-        </td>
-        <td  >
-            3292
-        </td>
-        <td  >
-            82831
-        </td>
-        <td  class="fastest">
-            143921
-        </td>
-    </tr>
-    <tr>
-        <td>additionalItems as schema additional items do not match schema</td>
-        <td  >
-            58447
-        </td>
-        <td  >
-            3034
+            14
         </td>
         <td class="failed" >
             -1
         </td>
         <td  class="fastest">
-            81861
+            336
         </td>
     </tr>
     <tr>
-        <td>items is schema, no additionalItems all items match schema</td>
+        <td>additionalItems as schema, additional items match schema</td>
         <td  >
-            97185
+            7066
         </td>
         <td  >
-            3096
+            487
         </td>
         <td  >
-            90636
+            2121
         </td>
         <td  class="fastest">
-            178509
+            16460
         </td>
     </tr>
     <tr>
-        <td>array of items with no additionalItems no additional items present</td>
-        <td  >
-            59783
-        </td>
-        <td  >
-            3541
-        </td>
-        <td  >
-            102633
-        </td>
-        <td  class="fastest">
-            143472
-        </td>
-    </tr>
-    <tr>
-        <td>array of items with no additionalItems additional items are not permitted</td>
-        <td  class="fastest">
-            147898
-        </td>
-        <td  >
-            3279
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            116021
-        </td>
-    </tr>
-    <tr>
-        <td>additionalItems as false without items items defaults to empty schema so everything is valid</td>
-        <td  class="fastest">
-            687326
-        </td>
-        <td  >
-            5490
-        </td>
-        <td  >
-            95670
-        </td>
-        <td  >
-            261005
-        </td>
-    </tr>
-    <tr>
-        <td>additionalItems as false without items ignores non-arrays</td>
-        <td  >
-            64957
-        </td>
-        <td  >
-            6101
-        </td>
-        <td  >
-            117329
-        </td>
-        <td  class="fastest">
-            190680
-        </td>
-    </tr>
-    <tr>
-        <td>additionalItems are allowed by default only the first item is validated</td>
-        <td  >
-            65231
-        </td>
-        <td  >
-            4639
-        </td>
-        <td  >
-            88561
-        </td>
-        <td  class="fastest">
-            163003
-        </td>
-    </tr>
-    <tr>
-        <td>additionalProperties being false does not allow other properties no additional properties is valid</td>
-        <td  >
-            45992
-        </td>
-        <td  >
-            3282
-        </td>
-        <td  class="fastest">
-            103956
-        </td>
-        <td  >
-            95421
-        </td>
-    </tr>
-    <tr>
-        <td>additionalProperties being false does not allow other properties an additional property is invalid</td>
-        <td  class="fastest">
-            63720
-        </td>
-        <td  >
-            2852
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            59647
-        </td>
-    </tr>
-    <tr>
-        <td>additionalProperties being false does not allow other properties ignores non-objects</td>
-        <td  class="fastest">
-            489835
-        </td>
-        <td  >
-            5689
-        </td>
-        <td  >
-            95802
-        </td>
-        <td  >
-            138566
-        </td>
-    </tr>
-    <tr>
-        <td>additionalProperties being false does not allow other properties patternProperties are not additional properties</td>
-        <td  >
-            84663
-        </td>
-        <td  >
-            3025
-        </td>
-        <td  class="fastest">
-            90462
-        </td>
-        <td  >
-            76316
-        </td>
-    </tr>
-    <tr>
-        <td>additionalProperties allows a schema which should validate no additional properties is valid</td>
-        <td  >
-            63411
-        </td>
-        <td  >
-            3763
-        </td>
-        <td  >
-            111200
-        </td>
-        <td  class="fastest">
-            149317
-        </td>
-    </tr>
-    <tr>
-        <td>additionalProperties allows a schema which should validate an additional valid property is valid</td>
-        <td  >
-            115631
-        </td>
-        <td  >
-            3210
-        </td>
-        <td  >
-            85330
-        </td>
-        <td  class="fastest">
-            115655
-        </td>
-    </tr>
-    <tr>
-        <td>additionalProperties allows a schema which should validate an additional invalid property is invalid</td>
-        <td  >
-            66901
-        </td>
-        <td  >
-            2977
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            74840
-        </td>
-    </tr>
-    <tr>
-        <td>additionalProperties are allowed by default additional properties are allowed</td>
-        <td  >
-            123055
-        </td>
-        <td  >
-            3763
-        </td>
-        <td  >
-            87223
-        </td>
-        <td  class="fastest">
-            135109
-        </td>
-    </tr>
-    <tr>
-        <td>allOf allOf</td>
-        <td  >
-            39695
-        </td>
-        <td  >
-            2289
-        </td>
-        <td  class="fastest">
-            97526
-        </td>
-        <td  >
-            67357
-        </td>
-    </tr>
-    <tr>
-        <td>allOf mismatch second</td>
-        <td  >
-            57617
-        </td>
-        <td  >
-            2246
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            67517
-        </td>
-    </tr>
-    <tr>
-        <td>allOf mismatch first</td>
-        <td  >
-            53821
-        </td>
-        <td  >
-            2255
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            57613
-        </td>
-    </tr>
-    <tr>
-        <td>allOf wrong type</td>
-        <td  >
-            41691
-        </td>
-        <td  >
-            2158
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            55420
-        </td>
-    </tr>
-    <tr>
-        <td>allOf with base schema valid</td>
-        <td  >
-            42760
-        </td>
-        <td  >
-            1840
-        </td>
-        <td  class="fastest">
-            86205
-        </td>
-        <td  >
-            52571
-        </td>
-    </tr>
-    <tr>
-        <td>allOf with base schema mismatch base schema</td>
-        <td  >
-            29702
-        </td>
-        <td  >
-            1831
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            71010
-        </td>
-    </tr>
-    <tr>
-        <td>allOf with base schema mismatch first allOf</td>
-        <td  >
-            35082
-        </td>
-        <td  >
-            1821
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            54464
-        </td>
-    </tr>
-    <tr>
-        <td>allOf with base schema mismatch second allOf</td>
-        <td  >
-            33291
-        </td>
-        <td  >
-            1820
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            47399
-        </td>
-    </tr>
-    <tr>
-        <td>allOf with base schema mismatch both</td>
-        <td  >
-            46490
-        </td>
-        <td  >
-            1815
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            56536
-        </td>
-    </tr>
-    <tr>
-        <td>allOf simple types valid</td>
-        <td  >
-            119495
-        </td>
-        <td  >
-            3577
-        </td>
-        <td  >
-            140639
-        </td>
-        <td  >
-            161422
-        </td>
-    </tr>
-    <tr>
-        <td>allOf simple types mismatch one</td>
-        <td  >
-            51685
-        </td>
-        <td  >
-            3249
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            94323
-        </td>
-    </tr>
-    <tr>
-        <td>anyOf first anyOf valid</td>
-        <td  >
-            122264
-        </td>
-        <td  >
-            4402
-        </td>
-        <td  >
-            139570
-        </td>
-        <td  class="fastest">
-            145186
-        </td>
-    </tr>
-    <tr>
-        <td>anyOf second anyOf valid</td>
-        <td  >
-            54085
-        </td>
-        <td  >
-            3435
-        </td>
-        <td  class="fastest">
-            142071
-        </td>
-        <td  >
-            74972
-        </td>
-    </tr>
-    <tr>
-        <td>anyOf both anyOf valid</td>
-        <td  >
-            122505
-        </td>
-        <td  >
-            4621
-        </td>
-        <td  >
-            137897
-        </td>
-        <td  class="fastest">
-            152019
-        </td>
-    </tr>
-    <tr>
-        <td>anyOf neither anyOf valid</td>
-        <td  >
-            42716
-        </td>
-        <td  >
-            3033
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            53119
-        </td>
-    </tr>
-    <tr>
-        <td>anyOf with base schema mismatch base schema</td>
-        <td  >
-            78931
-        </td>
-        <td  >
-            5272
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            108215
-        </td>
-    </tr>
-    <tr>
-        <td>anyOf with base schema one anyOf valid</td>
-        <td  >
-            52472
-        </td>
-        <td  >
-            3179
-        </td>
-        <td  >
-            68507
-        </td>
-        <td  class="fastest">
-            75646
-        </td>
-    </tr>
-    <tr>
-        <td>anyOf with base schema both anyOf invalid</td>
-        <td  >
-            42287
-        </td>
-        <td  >
-            2853
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            55167
-        </td>
-    </tr>
-    <tr>
-        <td>valid definition valid definition schema</td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            1095
-        </td>
-        <td  class="fastest">
-            84948
-        </td>
-        <td  >
-            56807
-        </td>
-    </tr>
-    <tr>
-        <td>invalid definition invalid definition schema</td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            996
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-    </tr>
-    <tr>
-        <td>dependencies neither</td>
-        <td  class="fastest">
-            380324
-        </td>
-        <td  >
-            5242
-        </td>
-        <td  >
-            145125
-        </td>
-        <td  >
-            174097
-        </td>
-    </tr>
-    <tr>
-        <td>dependencies nondependant</td>
-        <td  >
-            139187
-        </td>
-        <td  >
-            5203
-        </td>
-        <td  >
-            116263
-        </td>
-        <td  class="fastest">
-            146826
-        </td>
-    </tr>
-    <tr>
-        <td>dependencies with dependency</td>
-        <td  >
-            119416
-        </td>
-        <td  >
-            5238
-        </td>
-        <td  >
-            97869
-        </td>
-        <td  class="fastest">
-            144272
-        </td>
-    </tr>
-    <tr>
-        <td>dependencies missing dependency</td>
-        <td  class="fastest">
-            97277
-        </td>
-        <td  >
-            4634
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            90228
-        </td>
-    </tr>
-    <tr>
-        <td>dependencies ignores non-objects</td>
-        <td  class="fastest">
-            534248
-        </td>
-        <td  >
-            6076
-        </td>
-        <td  >
-            91338
-        </td>
-        <td  >
-            200704
-        </td>
-    </tr>
-    <tr>
-        <td>multiple dependencies neither</td>
-        <td  class="fastest">
-            344822
-        </td>
-        <td  >
-            5134
-        </td>
-        <td  >
-            141798
-        </td>
-        <td  >
-            159275
-        </td>
-    </tr>
-    <tr>
-        <td>multiple dependencies nondependants</td>
-        <td  class="fastest">
-            164672
-        </td>
-        <td  >
-            5105
-        </td>
-        <td  >
-            96533
-        </td>
-        <td  >
-            142246
-        </td>
-    </tr>
-    <tr>
-        <td>multiple dependencies with dependencies</td>
-        <td  >
-            72282
-        </td>
-        <td  >
-            5217
-        </td>
-        <td  >
-            85801
-        </td>
-        <td  >
-            134591
-        </td>
-    </tr>
-    <tr>
-        <td>multiple dependencies missing dependency</td>
-        <td  class="fastest">
-            92504
-        </td>
-        <td  >
-            4546
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            83956
-        </td>
-    </tr>
-    <tr>
-        <td>multiple dependencies missing other dependency</td>
-        <td  >
-            85921
-        </td>
-        <td  >
-            4577
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            85835
-        </td>
-    </tr>
-    <tr>
-        <td>multiple dependencies missing both dependencies</td>
-        <td  >
-            76705
-        </td>
-        <td  >
-            4562
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            88546
-        </td>
-    </tr>
-    <tr>
-        <td>multiple dependencies subschema valid</td>
-        <td  >
-            65665
-        </td>
-        <td  >
-            3123
-        </td>
-        <td  >
-            97010
-        </td>
-        <td  class="fastest">
-            101281
-        </td>
-    </tr>
-    <tr>
-        <td>multiple dependencies subschema no dependency</td>
-        <td  class="fastest">
-            215554
-        </td>
-        <td  >
-            5024
-        </td>
-        <td  >
-            116256
-        </td>
-        <td  >
-            141200
-        </td>
-    </tr>
-    <tr>
-        <td>multiple dependencies subschema wrong type</td>
-        <td  >
-            60457
-        </td>
-        <td  >
-            2857
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            68140
-        </td>
-    </tr>
-    <tr>
-        <td>multiple dependencies subschema wrong type other</td>
-        <td  >
-            54050
-        </td>
-        <td  >
-            2885
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            62040
-        </td>
-    </tr>
-    <tr>
-        <td>multiple dependencies subschema wrong type both</td>
-        <td  >
-            36386
-        </td>
-        <td  >
-            2698
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            66846
-        </td>
-    </tr>
-    <tr>
-        <td>simple enum validation one of the enum is valid</td>
-        <td  class="fastest">
-            635495
-        </td>
-        <td  >
-            5429
-        </td>
-        <td  >
-            139015
-        </td>
-        <td  >
-            284117
-        </td>
-    </tr>
-    <tr>
-        <td>simple enum validation something else is invalid</td>
-        <td  class="fastest">
-            199038
-        </td>
-        <td  >
-            4912
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            148608
-        </td>
-    </tr>
-    <tr>
-        <td>heterogeneous enum validation one of the enum is valid</td>
-        <td  class="fastest">
-            501261
-        </td>
-        <td  >
-            5326
-        </td>
-        <td  >
-            145926
-        </td>
-        <td  >
-            257835
-        </td>
-    </tr>
-    <tr>
-        <td>heterogeneous enum validation something else is invalid</td>
-        <td  class="fastest">
-            193623
-        </td>
-        <td  >
-            4769
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            153013
-        </td>
-    </tr>
-    <tr>
-        <td>heterogeneous enum validation objects are deep compared</td>
-        <td  >
-            114595
-        </td>
-        <td  >
-            4756
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            117390
-        </td>
-    </tr>
-    <tr>
-        <td>a schema given for items valid items</td>
-        <td  >
-            55224
-        </td>
-        <td  >
-            3919
-        </td>
-        <td  >
-            101816
-        </td>
-        <td  class="fastest">
-            168121
-        </td>
-    </tr>
-    <tr>
-        <td>a schema given for items wrong type of items</td>
-        <td  >
-            74881
-        </td>
-        <td  >
-            3951
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            97915
-        </td>
-    </tr>
-    <tr>
-        <td>a schema given for items ignores non-arrays</td>
-        <td  >
-            69626
-        </td>
-        <td  >
-            6107
-        </td>
-        <td  >
-            118164
-        </td>
-        <td  class="fastest">
-            186386
-        </td>
-    </tr>
-    <tr>
-        <td>an array of schemas for items correct types</td>
-        <td  class="fastest">
-            201704
-        </td>
-        <td  >
-            4267
-        </td>
-        <td  >
-            101566
-        </td>
-        <td  >
-            143504
-        </td>
-    </tr>
-    <tr>
-        <td>an array of schemas for items wrong types</td>
-        <td  >
-            67297
-        </td>
-        <td  >
-            3607
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            88422
-        </td>
-    </tr>
-    <tr>
-        <td>maximum validation below the maximum is valid</td>
-        <td  class="fastest">
-            574773
-        </td>
-        <td  >
-            5358
-        </td>
-        <td  >
-            135479
-        </td>
-        <td  >
-            259941
-        </td>
-    </tr>
-    <tr>
-        <td>maximum validation above the maximum is invalid</td>
-        <td  class="fastest">
-            182020
-        </td>
-        <td  >
-            4850
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            136424
-        </td>
-    </tr>
-    <tr>
-        <td>maximum validation ignores non-numbers</td>
-        <td  class="fastest">
-            628244
-        </td>
-        <td  >
-            6365
-        </td>
-        <td  >
-            115571
-        </td>
-        <td  >
-            263628
-        </td>
-    </tr>
-    <tr>
-        <td>exclusiveMaximum validation below the maximum is still valid</td>
-        <td  class="fastest">
-            529821
-        </td>
-        <td  >
-            4794
-        </td>
-        <td  >
-            132345
-        </td>
-        <td  >
-            251218
-        </td>
-    </tr>
-    <tr>
-        <td>exclusiveMaximum validation boundary point is invalid</td>
-        <td  class="fastest">
-            180709
-        </td>
-        <td  >
-            4396
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            131089
-        </td>
-    </tr>
-    <tr>
-        <td>maxItems validation shorter is valid</td>
-        <td  class="fastest">
-            568484
-        </td>
-        <td  >
-            5559
-        </td>
-        <td  >
-            120397
-        </td>
-        <td  >
-            245578
-        </td>
-    </tr>
-    <tr>
-        <td>maxItems validation exact length is valid</td>
-        <td  class="fastest">
-            494255
-        </td>
-        <td  >
-            5551
-        </td>
-        <td  >
-            112298
-        </td>
-        <td  >
-            252063
-        </td>
-    </tr>
-    <tr>
-        <td>maxItems validation too long is invalid</td>
-        <td  class="fastest">
-            169678
-        </td>
-        <td  >
-            4914
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            133332
-        </td>
-    </tr>
-    <tr>
-        <td>maxItems validation ignores non-arrays</td>
-        <td  class="fastest">
-            541256
-        </td>
-        <td  >
-            6077
-        </td>
-        <td  >
-            68939
-        </td>
-        <td  >
-            254633
-        </td>
-    </tr>
-    <tr>
-        <td>maxLength validation shorter is valid</td>
-        <td  class="fastest">
-            535659
-        </td>
-        <td  >
-            5403
-        </td>
-        <td  >
-            113741
-        </td>
-        <td  >
-            253472
-        </td>
-    </tr>
-    <tr>
-        <td>maxLength validation exact length is valid</td>
-        <td  class="fastest">
-            574313
-        </td>
-        <td  >
-            5160
-        </td>
-        <td  >
-            94696
-        </td>
-        <td  >
-            247055
-        </td>
-    </tr>
-    <tr>
-        <td>maxLength validation too long is invalid</td>
-        <td  class="fastest">
-            183184
-        </td>
-        <td  >
-            4744
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            134378
-        </td>
-    </tr>
-    <tr>
-        <td>maxLength validation ignores non-strings</td>
-        <td  class="fastest">
-            622755
-        </td>
-        <td  >
-            6284
-        </td>
-        <td  >
-            140297
-        </td>
-        <td  >
-            249091
-        </td>
-    </tr>
-    <tr>
-        <td>maxProperties validation shorter is valid</td>
-        <td  class="fastest">
-            211511
-        </td>
-        <td  >
-            5437
-        </td>
-        <td  >
-            113608
-        </td>
-        <td  >
-            181201
-        </td>
-    </tr>
-    <tr>
-        <td>maxProperties validation exact length is valid</td>
-        <td  >
-            96737
-        </td>
-        <td  >
-            5151
-        </td>
-        <td  >
-            96997
-        </td>
-        <td  class="fastest">
-            176041
-        </td>
-    </tr>
-    <tr>
-        <td>maxProperties validation too long is invalid</td>
-        <td  >
-            90506
-        </td>
-        <td  >
-            4914
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            121614
-        </td>
-    </tr>
-    <tr>
-        <td>maxProperties validation ignores non-objects</td>
-        <td  class="fastest">
-            582287
-        </td>
-        <td  >
-            6465
-        </td>
-        <td  >
-            73222
-        </td>
-        <td  >
-            267964
-        </td>
-    </tr>
-    <tr>
-        <td>minimum validation above the minimum is valid</td>
-        <td  class="fastest">
-            608046
-        </td>
-        <td  >
-            5624
-        </td>
-        <td  >
-            144455
-        </td>
-        <td  >
-            264959
-        </td>
-    </tr>
-    <tr>
-        <td>minimum validation below the minimum is invalid</td>
-        <td  class="fastest">
-            189267
-        </td>
-        <td  >
-            4930
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            141653
-        </td>
-    </tr>
-    <tr>
-        <td>minimum validation ignores non-numbers</td>
-        <td  class="fastest">
-            660511
-        </td>
-        <td  >
-            6442
-        </td>
-        <td  >
-            118013
-        </td>
-        <td  >
-            266870
-        </td>
-    </tr>
-    <tr>
-        <td>exclusiveMinimum validation above the minimum is still valid</td>
-        <td  class="fastest">
-            576863
-        </td>
-        <td  >
-            4920
-        </td>
-        <td  >
-            138848
-        </td>
-        <td  >
-            256300
-        </td>
-    </tr>
-    <tr>
-        <td>exclusiveMinimum validation boundary point is invalid</td>
-        <td  class="fastest">
-            179256
-        </td>
-        <td  >
-            4423
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            143640
-        </td>
-    </tr>
-    <tr>
-        <td>minItems validation longer is valid</td>
-        <td  class="fastest">
-            592706
-        </td>
-        <td  >
-            5669
-        </td>
-        <td  >
-            109802
-        </td>
-        <td  >
-            262927
-        </td>
-    </tr>
-    <tr>
-        <td>minItems validation exact length is valid</td>
-        <td  class="fastest">
-            639627
-        </td>
-        <td  >
-            5642
-        </td>
-        <td  >
-            119406
-        </td>
-        <td  >
-            264220
-        </td>
-    </tr>
-    <tr>
-        <td>minItems validation too short is invalid</td>
-        <td  class="fastest">
-            182744
-        </td>
-        <td  >
-            5005
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            133299
-        </td>
-    </tr>
-    <tr>
-        <td>minItems validation ignores non-arrays</td>
-        <td  class="fastest">
-            588516
-        </td>
-        <td  >
-            6369
-        </td>
-        <td  >
-            144932
-        </td>
-        <td  >
-            268816
-        </td>
-    </tr>
-    <tr>
-        <td>minLength validation longer is valid</td>
-        <td  class="fastest">
-            618145
-        </td>
-        <td  >
-            5612
-        </td>
-        <td  >
-            90458
-        </td>
-        <td  >
-            272667
-        </td>
-    </tr>
-    <tr>
-        <td>minLength validation exact length is valid</td>
-        <td  class="fastest">
-            547817
-        </td>
-        <td  >
-            5591
-        </td>
-        <td  >
-            99066
-        </td>
-        <td  >
-            273217
-        </td>
-    </tr>
-    <tr>
-        <td>minLength validation too short is invalid</td>
-        <td  class="fastest">
-            180052
-        </td>
-        <td  >
-            4980
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            141218
-        </td>
-    </tr>
-    <tr>
-        <td>minLength validation ignores non-strings</td>
-        <td  class="fastest">
-            640089
-        </td>
-        <td  >
-            6445
-        </td>
-        <td  >
-            143757
-        </td>
-        <td  >
-            270581
-        </td>
-    </tr>
-    <tr>
-        <td>minProperties validation longer is valid</td>
-        <td  >
-            119585
-        </td>
+        <td>additionalItems as schema, additional items do not match schema</td>
         <td  >
             5609
         </td>
         <td  >
-            97736
+            460
         </td>
+        <td  >
+            2131
+        </td>
         <td  class="fastest">
-            189290
+            10513
         </td>
     </tr>
     <tr>
-        <td>minProperties validation exact length is valid</td>
-        <td  class="fastest">
-            223550
-        </td>
+        <td>items is schema, no additionalItems, all items match schema</td>
         <td  >
-            5566
+            15726
         </td>
         <td  >
-            113942
+            481
         </td>
         <td  >
-            197847
+            2179
         </td>
-    </tr>
-    <tr>
-        <td>minProperties validation too short is invalid</td>
         <td  class="fastest">
-            155743
-        </td>
-        <td  >
-            4973
+            19651
         </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            123234
-        </td>
     </tr>
     <tr>
-        <td>minProperties validation ignores non-objects</td>
-        <td  class="fastest">
-            628119
-        </td>
+        <td>array of items with no additionalItems, no additional items present</td>
         <td  >
-            6359
+            8407
         </td>
         <td  >
-            140165
+            532
         </td>
         <td  >
-            272409
+            2286
         </td>
-    </tr>
-    <tr>
-        <td>by int int by int</td>
         <td  class="fastest">
-            518231
+            17465
         </td>
+    </tr>
+    <tr>
+        <td>array of items with no additionalItems, additional items are not permitted</td>
         <td  >
-            5502
+            12993
         </td>
         <td  >
-            137976
+            493
         </td>
         <td  >
-            260974
+            2211
+        </td>
+        <td  class="fastest">
+            14869
         </td>
     </tr>
     <tr>
-        <td>by int int by int fail</td>
+        <td>additionalItems as false without items, items defaults to empty schema so everything is valid</td>
         <td  class="fastest">
-            166292
+            54412
         </td>
         <td  >
-            4889
+            781
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            12642
         </td>
         <td  >
-            154920
+            31710
         </td>
     </tr>
     <tr>
-        <td>by int ignores non-numbers</td>
-        <td  class="fastest">
-            612974
+        <td>additionalItems as false without items, ignores non-arrays</td>
+        <td  >
+            15795
         </td>
         <td  >
-            6403
+            882
         </td>
         <td  >
-            93206
+            10264
         </td>
         <td  >
-            267989
+            24777
         </td>
     </tr>
     <tr>
-        <td>by number zero is multiple of anything</td>
-        <td  class="fastest">
-            490935
-        </td>
+        <td>additionalItems are allowed by default, only the first item is validated</td>
         <td  >
-            5489
+            10255
         </td>
         <td  >
-            144078
+            686
         </td>
         <td  >
-            264142
+            4298
         </td>
-    </tr>
-    <tr>
-        <td>by number 4.5 is multiple of 1.5</td>
         <td  class="fastest">
-            505391
+            20717
         </td>
+    </tr>
+    <tr>
+        <td>additionalProperties being false does not allow other properties, no additional properties is valid</td>
         <td  >
-            5490
+            7170
         </td>
         <td  >
-            143021
+            510
         </td>
         <td  >
-            263686
+            2772
         </td>
-    </tr>
-    <tr>
-        <td>by number 35 is not multiple of 1.5</td>
         <td  class="fastest">
-            164018
+            12108
         </td>
+    </tr>
+    <tr>
+        <td>additionalProperties being false does not allow other properties, an additional property is invalid</td>
         <td  >
-            4931
+            7839
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            444
         </td>
         <td  >
-            156571
+            2010
+        </td>
+        <td  class="fastest">
+            8195
         </td>
     </tr>
     <tr>
-        <td>by small number 0.0075 is multiple of 0.0001</td>
+        <td>additionalProperties being false does not allow other properties, ignores non-objects</td>
         <td  class="fastest">
-            476307
+            49911
         </td>
         <td  >
-            5442
+            795
         </td>
         <td  >
-            141708
+            4438
         </td>
         <td  >
-            262217
+            16967
         </td>
     </tr>
     <tr>
-        <td>by small number 0.00751 is not multiple of 0.0001</td>
+        <td>additionalProperties being false does not allow other properties, patternProperties are not additional properties</td>
         <td  class="fastest">
-            166541
+            10757
         </td>
         <td  >
-            4897
+            479
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            2049
         </td>
         <td  >
-            152163
+            9738
         </td>
     </tr>
     <tr>
-        <td>not allowed</td>
+        <td>additionalProperties allows a schema which should validate, no additional properties is valid</td>
         <td  >
-            85980
+            9771
         </td>
         <td  >
-            3900
+            559
         </td>
         <td  >
-            94413
+            3422
         </td>
         <td  class="fastest">
-            114623
+            17724
         </td>
     </tr>
     <tr>
-        <td>not disallowed</td>
+        <td>additionalProperties allows a schema which should validate, an additional valid property is valid</td>
         <td  >
-            103694
+            11048
         </td>
         <td  >
-            4311
+            488
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            2206
         </td>
         <td  class="fastest">
-            164084
+            13905
         </td>
     </tr>
     <tr>
-        <td>not multiple types valid</td>
+        <td>additionalProperties allows a schema which should validate, an additional invalid property is invalid</td>
         <td  >
-            76948
+            6903
         </td>
         <td  >
-            4398
+            460
         </td>
         <td  >
-            93874
+            2186
         </td>
         <td  class="fastest">
-            98078
+            9922
         </td>
     </tr>
     <tr>
-        <td>not multiple types mismatch</td>
+        <td>additionalProperties are allowed by default, additional properties are allowed</td>
         <td  >
-            100983
+            13875
         </td>
         <td  >
-            4244
+            566
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            3100
         </td>
         <td  class="fastest">
-            128515
+            16131
         </td>
     </tr>
     <tr>
-        <td>not multiple types other mismatch</td>
+        <td>allOf, allOf</td>
         <td  >
-            103463
+            5546
         </td>
         <td  >
-            4292
+            362
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            1436
         </td>
         <td  class="fastest">
-            133319
+            8106
         </td>
     </tr>
     <tr>
-        <td>not more complex schema match</td>
+        <td>allOf, mismatch second</td>
         <td  >
-            80051
+            5884
         </td>
         <td  >
-            4192
-        </td>
-        <td  class="fastest">
-            139334
+            356
         </td>
         <td  >
-            104621
+            1671
+        </td>
+        <td  class="fastest">
+            8794
         </td>
     </tr>
     <tr>
-        <td>not more complex schema other match</td>
+        <td>allOf, mismatch first</td>
         <td  >
-            52186
+            4520
         </td>
         <td  >
-            3220
-        </td>
-        <td  class="fastest">
-            114812
+            355
         </td>
         <td  >
-            73127
+            1691
+        </td>
+        <td  class="fastest">
+            7119
         </td>
     </tr>
     <tr>
-        <td>not more complex schema mismatch</td>
+        <td>allOf, wrong type</td>
         <td  >
-            62633
+            3759
         </td>
         <td  >
-            3242
+            344
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            1454
         </td>
         <td  class="fastest">
-            98301
+            7232
         </td>
     </tr>
     <tr>
-        <td>oneOf first oneOf valid</td>
+        <td>allOf with base schema, valid</td>
         <td  >
-            49932
+            5046
         </td>
         <td  >
-            3506
+            298
         </td>
-        <td  class="fastest">
-            139710
-        </td>
         <td  >
-            74992
+            1168
+        </td>
+        <td  class="fastest">
+            6443
         </td>
     </tr>
     <tr>
-        <td>oneOf second oneOf valid</td>
+        <td>allOf with base schema, mismatch base schema</td>
         <td  >
-            51309
+            3610
         </td>
         <td  >
-            3536
+            288
         </td>
-        <td  class="fastest">
-            136906
-        </td>
         <td  >
-            73542
+            1353
+        </td>
+        <td  class="fastest">
+            9381
         </td>
     </tr>
     <tr>
-        <td>oneOf both oneOf valid</td>
+        <td>allOf with base schema, mismatch first allOf</td>
         <td  >
-            58748
+            3562
         </td>
         <td  >
-            3460
+            295
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            1344
         </td>
         <td  class="fastest">
-            86168
+            6955
         </td>
     </tr>
     <tr>
-        <td>oneOf neither oneOf valid</td>
+        <td>allOf with base schema, mismatch second allOf</td>
         <td  >
-            40219
+            5193
         </td>
         <td  >
-            3010
+            291
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            1293
         </td>
         <td  class="fastest">
-            50223
+            6056
         </td>
     </tr>
     <tr>
-        <td>oneOf with base schema mismatch base schema</td>
+        <td>allOf with base schema, mismatch both</td>
         <td  >
-            46796
+            3811
         </td>
         <td  >
-            5412
+            294
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            1474
         </td>
         <td  class="fastest">
-            107573
+            7488
         </td>
     </tr>
     <tr>
-        <td>oneOf with base schema one oneOf valid</td>
+        <td>allOf simple types, valid</td>
         <td  >
-            50067
+            20315
         </td>
         <td  >
-            3170
+            542
         </td>
         <td  >
-            67891
+            2820
         </td>
         <td  class="fastest">
-            73814
+            19074
         </td>
     </tr>
     <tr>
-        <td>oneOf with base schema both oneOf valid</td>
+        <td>allOf simple types, mismatch one</td>
         <td  >
-            58858
+            12534
         </td>
         <td  >
-            3211
+            490
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            2847
         </td>
         <td  class="fastest">
-            93044
+            12488
         </td>
     </tr>
     <tr>
-        <td>integer a bignum is an integer</td>
-        <td  class="fastest">
-            520461
-        </td>
+        <td>anyOf, first anyOf valid</td>
         <td  >
-            6332
+            13374
         </td>
         <td  >
-            137117
+            674
         </td>
         <td  >
-            238227
+            2800
         </td>
-    </tr>
-    <tr>
-        <td>number a bignum is a number</td>
         <td  class="fastest">
-            487848
+            18151
         </td>
+    </tr>
+    <tr>
+        <td>anyOf, second anyOf valid</td>
         <td  >
-            6019
+            6706
         </td>
         <td  >
-            137932
+            508
         </td>
         <td  >
-            257293
+            2765
         </td>
-    </tr>
-    <tr>
-        <td>string a bignum is not a string</td>
         <td  class="fastest">
-            172264
-        </td>
-        <td  >
-            5622
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            137234
+            10101
         </td>
     </tr>
     <tr>
-        <td>float comparison with high precision comparison works for high numbers</td>
-        <td  class="fastest">
-            177711
-        </td>
+        <td>anyOf, both anyOf valid</td>
         <td  >
-            4376
+            13316
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            660
         </td>
         <td  >
-            138153
+            2786
         </td>
+        <td  class="fastest">
+            18064
+        </td>
     </tr>
     <tr>
-        <td>validation of date-time strings a valid date-time string</td>
+        <td>anyOf, neither anyOf valid</td>
         <td  >
-            239268
+            5367
         </td>
         <td  >
-            5372
+            456
         </td>
         <td  >
-            35693
+            2716
         </td>
         <td  class="fastest">
-            245368
+            7309
         </td>
     </tr>
     <tr>
-        <td>validation of date-time strings an invalid date-time string</td>
-        <td  class="fastest">
-            131160
+        <td>anyOf with base schema, mismatch base schema</td>
+        <td  >
+            9768
         </td>
         <td  >
-            4882
+            728
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            2651
         </td>
-        <td class="failed" >
-            -1
+        <td  class="fastest">
+            14113
         </td>
     </tr>
     <tr>
-        <td>validation of date-time strings only RFC3339 not all of ISO 8601 are valid</td>
-        <td  class="fastest">
-            137941
+        <td>anyOf with base schema, one anyOf valid</td>
+        <td  >
+            6433
         </td>
         <td  >
-            4872
+            488
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            2729
         </td>
-        <td class="failed" >
-            -1
+        <td  class="fastest">
+            10287
         </td>
     </tr>
     <tr>
-        <td>validation of URIs a valid URI</td>
-        <td  class="fastest">
-            357068
-        </td>
+        <td>anyOf with base schema, both anyOf invalid</td>
         <td  >
-            5503
+            5299
         </td>
         <td  >
-            29340
+            429
         </td>
         <td  >
-            251977
+            2747
         </td>
+        <td  class="fastest">
+            7594
+        </td>
     </tr>
     <tr>
-        <td>validation of URIs an invalid URI</td>
+        <td>valid definition, valid definition schema</td>
         <td class="failed" >
             -1
         </td>
-        <td  class="fastest">
-            4846
+        <td  >
+            158
         </td>
-        <td class="failed" >
-            -1
+        <td  class="fastest">
+            11635
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            7955
         </td>
     </tr>
     <tr>
-        <td>validation of URIs an invalid URI though valid URI reference</td>
+        <td>invalid definition, invalid definition schema</td>
         <td class="failed" >
             -1
         </td>
-        <td class="failed" >
-            -1
+        <td  class="fastest">
+            146
         </td>
         <td class="failed" >
             -1
@@ -1999,718 +604,1588 @@
         </td>
     </tr>
     <tr>
-        <td>validation of e-mail addresses a valid e-mail address</td>
-        <td  >
-            152603
+        <td>dependencies, neither</td>
+        <td  class="fastest">
+            39678
         </td>
         <td  >
-            5459
+            722
         </td>
         <td  >
-            35567
+            9081
         </td>
-        <td  class="fastest">
-            230505
+        <td  >
+            21038
         </td>
     </tr>
     <tr>
-        <td>validation of e-mail addresses an invalid e-mail address</td>
+        <td>dependencies, nondependant</td>
         <td  class="fastest">
-            98267
+            25033
         </td>
         <td  >
-            4856
+            736
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            8419
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            18960
         </td>
     </tr>
     <tr>
-        <td>validation of IP addresses a valid IP address</td>
-        <td  class="fastest">
-            385707
-        </td>
+        <td>dependencies, with dependency</td>
         <td  >
-            5437
+            11090
         </td>
         <td  >
-            56889
+            732
         </td>
         <td  >
-            235436
+            7192
+        </td>
+        <td  class="fastest">
+            18761
         </td>
     </tr>
     <tr>
-        <td>validation of IP addresses an IP address with too many components</td>
-        <td  class="fastest">
-            150343
+        <td>dependencies, missing dependency</td>
+        <td  >
+            6728
         </td>
         <td  >
-            4914
+            643
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            7216
         </td>
-        <td class="failed" >
-            -1
+        <td  class="fastest">
+            12516
         </td>
     </tr>
     <tr>
-        <td>validation of IP addresses an IP address with out-of-range values</td>
+        <td>dependencies, ignores non-objects</td>
         <td  class="fastest">
-            157123
+            55796
         </td>
         <td  >
-            4868
+            844
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            9953
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            23868
         </td>
     </tr>
     <tr>
-        <td>validation of IPv6 addresses a valid IPv6 address</td>
+        <td>multiple dependencies, neither</td>
         <td  class="fastest">
-            273269
+            37397
         </td>
         <td  >
-            5358
+            748
         </td>
         <td  >
-            86554
+            8755
         </td>
         <td  >
-            248521
+            20092
         </td>
     </tr>
     <tr>
-        <td>validation of IPv6 addresses an IPv6 address with out-of-range values</td>
+        <td>multiple dependencies, nondependants</td>
         <td  class="fastest">
-            138805
+            20524
         </td>
         <td  >
-            4779
+            750
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            8125
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            17936
         </td>
     </tr>
     <tr>
-        <td>validation of IPv6 addresses an IPv6 address with too many components</td>
-        <td  class="fastest">
-            125063
+        <td>multiple dependencies, with dependencies</td>
+        <td  >
+            7382
         </td>
         <td  >
-            4831
+            746
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            7051
         </td>
-        <td class="failed" >
-            -1
+        <td  class="fastest">
+            17529
         </td>
     </tr>
     <tr>
-        <td>validation of IPv6 addresses an IPv6 address containing illegal characters</td>
+        <td>multiple dependencies, missing dependency</td>
         <td  class="fastest">
-            140016
+            12358
         </td>
         <td  >
-            4843
+            659
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            6862
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            11528
         </td>
     </tr>
     <tr>
-        <td>validation of host names a valid host name</td>
-        <td  class="fastest">
-            263753
-        </td>
+        <td>multiple dependencies, missing other dependency</td>
         <td  >
-            5438
+            6222
         </td>
         <td  >
-            47608
+            648
         </td>
         <td  >
-            250030
+            7035
+        </td>
+        <td  class="fastest">
+            11340
         </td>
     </tr>
     <tr>
-        <td>validation of host names a host name starting with an illegal character</td>
-        <td  class="fastest">
-            155760
+        <td>multiple dependencies, missing both dependencies</td>
+        <td  >
+            10792
         </td>
         <td  >
-            4905
+            649
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            7103
         </td>
-        <td class="failed" >
-            -1
+        <td  class="fastest">
+            11674
         </td>
     </tr>
     <tr>
-        <td>validation of host names a host name containing illegal characters</td>
-        <td  class="fastest">
-            146786
+        <td>multiple dependencies subschema, valid</td>
+        <td  >
+            6510
         </td>
         <td  >
-            4880
+            487
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            1878
         </td>
-        <td class="failed" >
-            -1
+        <td  class="fastest">
+            12027
         </td>
     </tr>
     <tr>
-        <td>validation of host names a host name with a component too long</td>
-        <td  class="fastest">
-            141516
+        <td>multiple dependencies subschema, no dependency</td>
+        <td  >
+            9616
         </td>
         <td  >
-            4857
+            709
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            4231
         </td>
-        <td class="failed" >
-            -1
+        <td  class="fastest">
+            17385
         </td>
     </tr>
     <tr>
-        <td>some languages do not distinguish between different types of numeric value a float is not an integer even without fractional part</td>
-        <td class="failed" >
-            -1
+        <td>multiple dependencies subschema, wrong type</td>
+        <td  >
+            7766
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            443
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            1908
         </td>
-        <td class="failed" >
-            -1
+        <td  class="fastest">
+            9050
         </td>
     </tr>
     <tr>
-        <td>pattern validation a matching pattern is valid</td>
-        <td  class="fastest">
-            482819
-        </td>
+        <td>multiple dependencies subschema, wrong type other</td>
         <td  >
-            5422
+            4707
         </td>
         <td  >
-            92234
+            446
         </td>
         <td  >
-            227723
+            1916
         </td>
-    </tr>
-    <tr>
-        <td>pattern validation a non-matching pattern is invalid</td>
         <td  class="fastest">
-            186440
+            8257
         </td>
+    </tr>
+    <tr>
+        <td>multiple dependencies subschema, wrong type both</td>
         <td  >
-            4895
+            4158
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            420
         </td>
         <td  >
-            131674
+            1902
+        </td>
+        <td  class="fastest">
+            9475
         </td>
     </tr>
     <tr>
-        <td>pattern validation ignores non-strings</td>
+        <td>simple enum validation, one of the enum is valid</td>
         <td  class="fastest">
-            627284
+            54197
         </td>
         <td  >
-            6384
+            782
         </td>
         <td  >
-            145387
+            9876
         </td>
         <td  >
-            265693
+            32936
         </td>
     </tr>
     <tr>
-        <td>patternProperties validates properties matching a regex a single valid match is valid</td>
+        <td>simple enum validation, something else is invalid</td>
         <td  class="fastest">
-            135806
+            24886
         </td>
         <td  >
-            4068
+            695
         </td>
         <td  >
-            116030
+            9730
         </td>
         <td  >
-            96329
+            20595
         </td>
     </tr>
     <tr>
-        <td>patternProperties validates properties matching a regex multiple valid matches is valid</td>
-        <td  >
-            69346
+        <td>heterogeneous enum validation, one of the enum is valid</td>
+        <td  class="fastest">
+            45314
         </td>
         <td  >
-            3798
+            750
         </td>
-        <td  class="fastest">
-            97931
+        <td  >
+            10347
         </td>
         <td  >
-            79425
+            30221
         </td>
     </tr>
     <tr>
-        <td>patternProperties validates properties matching a regex a single invalid match is invalid</td>
+        <td>heterogeneous enum validation, something else is invalid</td>
         <td  class="fastest">
-            70096
+            24023
         </td>
         <td  >
-            3457
+            671
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            12536
         </td>
         <td  >
-            67896
+            20260
         </td>
     </tr>
     <tr>
-        <td>patternProperties validates properties matching a regex multiple invalid matches is invalid</td>
+        <td>heterogeneous enum validation, objects are deep compared</td>
         <td  >
-            55160
+            8686
         </td>
         <td  >
-            3239
+            670
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            8292
         </td>
         <td  class="fastest">
-            66562
+            15662
         </td>
     </tr>
     <tr>
-        <td>patternProperties validates properties matching a regex ignores non-objects</td>
-        <td  class="fastest">
-            504008
-        </td>
+        <td>a schema given for items, valid items</td>
         <td  >
-            5775
+            16832
         </td>
         <td  >
-            136217
+            587
         </td>
         <td  >
-            157743
+            2781
         </td>
-    </tr>
-    <tr>
-        <td>multiple simultaneous patternProperties are validated a single valid match is valid</td>
         <td  class="fastest">
-            131096
+            20208
         </td>
+    </tr>
+    <tr>
+        <td>a schema given for items, wrong type of items</td>
         <td  >
-            4042
+            6842
         </td>
         <td  >
-            110897
+            588
         </td>
         <td  >
-            93086
+            3642
         </td>
+        <td  class="fastest">
+            13398
+        </td>
     </tr>
     <tr>
-        <td>multiple simultaneous patternProperties are validated a simultaneous match is valid</td>
+        <td>a schema given for items, ignores non-arrays</td>
         <td  >
-            105542
+            14103
         </td>
         <td  >
-            3426
+            844
         </td>
-        <td  class="fastest">
-            117807
-        </td>
         <td  >
-            87815
+            7682
         </td>
-    </tr>
+        <td  class="fastest">
+            22227
+        </td>
+    </tr>
+    <tr>
+        <td>an array of schemas for items, correct types</td>
+        <td  >
+            15648
+        </td>
+        <td  >
+            625
+        </td>
+        <td  >
+            2683
+        </td>
+        <td  class="fastest">
+            17188
+        </td>
+    </tr>
+    <tr>
+        <td>an array of schemas for items, wrong types</td>
+        <td  >
+            5832
+        </td>
+        <td  >
+            535
+        </td>
+        <td  >
+            2685
+        </td>
+        <td  class="fastest">
+            11573
+        </td>
+    </tr>
+    <tr>
+        <td>maximum validation, below the maximum is valid</td>
+        <td  class="fastest">
+            50804
+        </td>
+        <td  >
+            784
+        </td>
+        <td  >
+            10520
+        </td>
+        <td  >
+            31393
+        </td>
+    </tr>
+    <tr>
+        <td>maximum validation, above the maximum is invalid</td>
+        <td  class="fastest">
+            23364
+        </td>
+        <td  >
+            684
+        </td>
+        <td  >
+            10570
+        </td>
+        <td  >
+            18474
+        </td>
+    </tr>
+    <tr>
+        <td>maximum validation, ignores non-numbers</td>
+        <td  class="fastest">
+            57414
+        </td>
+        <td  >
+            887
+        </td>
+        <td  >
+            10775
+        </td>
+        <td  >
+            31870
+        </td>
+    </tr>
+    <tr>
+        <td>exclusiveMaximum validation, below the maximum is still valid</td>
+        <td  class="fastest">
+            51504
+        </td>
+        <td  >
+            710
+        </td>
+        <td  >
+            9372
+        </td>
+        <td  >
+            30172
+        </td>
+    </tr>
+    <tr>
+        <td>exclusiveMaximum validation, boundary point is invalid</td>
+        <td  class="fastest">
+            23400
+        </td>
+        <td  >
+            634
+        </td>
+        <td  >
+            9323
+        </td>
+        <td  >
+            18165
+        </td>
+    </tr>
+    <tr>
+        <td>maxItems validation, shorter is valid</td>
+        <td  class="fastest">
+            52571
+        </td>
+        <td  >
+            781
+        </td>
+        <td  >
+            12128
+        </td>
+        <td  >
+            30763
+        </td>
+    </tr>
+    <tr>
+        <td>maxItems validation, exact length is valid</td>
+        <td  class="fastest">
+            53851
+        </td>
+        <td  >
+            787
+        </td>
+        <td  >
+            11390
+        </td>
+        <td  >
+            30656
+        </td>
+    </tr>
+    <tr>
+        <td>maxItems validation, too long is invalid</td>
+        <td  class="fastest">
+            23847
+        </td>
+        <td  >
+            681
+        </td>
+        <td  >
+            12047
+        </td>
+        <td  >
+            18098
+        </td>
+    </tr>
+    <tr>
+        <td>maxItems validation, ignores non-arrays</td>
+        <td  class="fastest">
+            60988
+        </td>
+        <td  >
+            883
+        </td>
+        <td  >
+            10820
+        </td>
+        <td  >
+            31908
+        </td>
+    </tr>
+    <tr>
+        <td>maxLength validation, shorter is valid</td>
+        <td  class="fastest">
+            56246
+        </td>
+        <td  >
+            786
+        </td>
+        <td  >
+            10530
+        </td>
+        <td  >
+            31794
+        </td>
+    </tr>
+    <tr>
+        <td>maxLength validation, exact length is valid</td>
+        <td  class="fastest">
+            53535
+        </td>
+        <td  >
+            791
+        </td>
+        <td  >
+            10430
+        </td>
+        <td  >
+            31677
+        </td>
+    </tr>
+    <tr>
+        <td>maxLength validation, too long is invalid</td>
+        <td  class="fastest">
+            23953
+        </td>
+        <td  >
+            677
+        </td>
+        <td  >
+            10684
+        </td>
+        <td  >
+            17990
+        </td>
+    </tr>
+    <tr>
+        <td>maxLength validation, ignores non-strings</td>
+        <td  class="fastest">
+            57289
+        </td>
+        <td  >
+            871
+        </td>
+        <td  >
+            10895
+        </td>
+        <td  >
+            31549
+        </td>
+    </tr>
+    <tr>
+        <td>maxProperties validation, shorter is valid</td>
+        <td  >
+            15108
+        </td>
+        <td  >
+            757
+        </td>
+        <td  >
+            9882
+        </td>
+        <td  >
+            24318
+        </td>
+    </tr>
+    <tr>
+        <td>maxProperties validation, exact length is valid</td>
+        <td  >
+            20359
+        </td>
+        <td  >
+            763
+        </td>
+        <td  >
+            9658
+        </td>
+        <td  class="fastest">
+            23039
+        </td>
+    </tr>
+    <tr>
+        <td>maxProperties validation, too long is invalid</td>
+        <td  >
+            6193
+        </td>
+        <td  >
+            678
+        </td>
+        <td  >
+            9237
+        </td>
+        <td  class="fastest">
+            16252
+        </td>
+    </tr>
+    <tr>
+        <td>maxProperties validation, ignores non-objects</td>
+        <td  class="fastest">
+            57125
+        </td>
+        <td  >
+            859
+        </td>
+        <td  >
+            11028
+        </td>
+        <td  >
+            31122
+        </td>
+    </tr>
+    <tr>
+        <td>minimum validation, above the minimum is valid</td>
+        <td  class="fastest">
+            54727
+        </td>
+        <td  >
+            775
+        </td>
+        <td  >
+            10454
+        </td>
+        <td  >
+            31301
+        </td>
+    </tr>
+    <tr>
+        <td>minimum validation, below the minimum is invalid</td>
+        <td  class="fastest">
+            23474
+        </td>
+        <td  >
+            670
+        </td>
+        <td  >
+            10438
+        </td>
+        <td  >
+            18804
+        </td>
+    </tr>
+    <tr>
+        <td>minimum validation, ignores non-numbers</td>
+        <td  class="fastest">
+            57974
+        </td>
+        <td  >
+            871
+        </td>
+        <td  >
+            10719
+        </td>
+        <td  >
+            30730
+        </td>
+    </tr>
+    <tr>
+        <td>exclusiveMinimum validation, above the minimum is still valid</td>
+        <td  class="fastest">
+            52614
+        </td>
+        <td  >
+            714
+        </td>
+        <td  >
+            9392
+        </td>
+        <td  >
+            30435
+        </td>
+    </tr>
+    <tr>
+        <td>exclusiveMinimum validation, boundary point is invalid</td>
+        <td  class="fastest">
+            23016
+        </td>
+        <td  >
+            622
+        </td>
+        <td  >
+            9392
+        </td>
+        <td  >
+            18150
+        </td>
+    </tr>
+    <tr>
+        <td>minItems validation, longer is valid</td>
+        <td  class="fastest">
+            51630
+        </td>
+        <td  >
+            774
+        </td>
+        <td  >
+            11971
+        </td>
+        <td  >
+            30493
+        </td>
+    </tr>
+    <tr>
+        <td>minItems validation, exact length is valid</td>
+        <td  class="fastest">
+            50318
+        </td>
+        <td  >
+            768
+        </td>
+        <td  >
+            11718
+        </td>
+        <td  >
+            30862
+        </td>
+    </tr>
+    <tr>
+        <td>minItems validation, too short is invalid</td>
+        <td  class="fastest">
+            23449
+        </td>
+        <td  >
+            696
+        </td>
+        <td  >
+            11585
+        </td>
+        <td  >
+            18272
+        </td>
+    </tr>
+    <tr>
+        <td>minItems validation, ignores non-arrays</td>
+        <td  class="fastest">
+            55400
+        </td>
+        <td  >
+            870
+        </td>
+        <td  >
+            12094
+        </td>
+        <td  >
+            31481
+        </td>
+    </tr>
+    <tr>
+        <td>minLength validation, longer is valid</td>
+        <td  class="fastest">
+            57004
+        </td>
+        <td  >
+            773
+        </td>
+        <td  >
+            10800
+        </td>
+        <td  >
+            31456
+        </td>
+    </tr>
+    <tr>
+        <td>minLength validation, exact length is valid</td>
+        <td  class="fastest">
+            53917
+        </td>
+        <td  >
+            782
+        </td>
+        <td  >
+            10789
+        </td>
+        <td  >
+            31264
+        </td>
+    </tr>
+    <tr>
+        <td>minLength validation, too short is invalid</td>
+        <td  class="fastest">
+            23742
+        </td>
+        <td  >
+            697
+        </td>
+        <td  >
+            10651
+        </td>
+        <td  >
+            18389
+        </td>
+    </tr>
+    <tr>
+        <td>minLength validation, ignores non-strings</td>
+        <td  class="fastest">
+            57909
+        </td>
+        <td  >
+            884
+        </td>
+        <td  >
+            10734
+        </td>
+        <td  >
+            31697
+        </td>
+    </tr>
+    <tr>
+        <td>minProperties validation, longer is valid</td>
+        <td  >
+            20006
+        </td>
+        <td  >
+            769
+        </td>
+        <td  >
+            9559
+        </td>
+        <td  class="fastest">
+            23107
+        </td>
+    </tr>
+    <tr>
+        <td>minProperties validation, exact length is valid</td>
+        <td  class="fastest">
+            26269
+        </td>
+        <td  >
+            770
+        </td>
+        <td  >
+            9634
+        </td>
+        <td  >
+            24108
+        </td>
+    </tr>
+    <tr>
+        <td>minProperties validation, too short is invalid</td>
+        <td  class="fastest">
+            21505
+        </td>
+        <td  >
+            685
+        </td>
+        <td  >
+            10407
+        </td>
+        <td  >
+            16823
+        </td>
+    </tr>
+    <tr>
+        <td>minProperties validation, ignores non-objects</td>
+        <td  class="fastest">
+            60695
+        </td>
+        <td  >
+            883
+        </td>
+        <td  >
+            12056
+        </td>
+        <td  >
+            31757
+        </td>
+    </tr>
+    <tr>
+        <td>by int, int by int</td>
+        <td  class="fastest">
+            48411
+        </td>
+        <td  >
+            788
+        </td>
+        <td  >
+            10462
+        </td>
+        <td  >
+            31718
+        </td>
+    </tr>
+    <tr>
+        <td>by int, int by int fail</td>
+        <td  class="fastest">
+            22635
+        </td>
+        <td  >
+            681
+        </td>
+        <td  >
+            10516
+        </td>
+        <td  >
+            20371
+        </td>
+    </tr>
+    <tr>
+        <td>by int, ignores non-numbers</td>
+        <td  class="fastest">
+            55503
+        </td>
+        <td  >
+            876
+        </td>
+        <td  >
+            10926
+        </td>
+        <td  >
+            31009
+        </td>
+    </tr>
+    <tr>
+        <td>by number, zero is multiple of anything</td>
+        <td  class="fastest">
+            49707
+        </td>
+        <td  >
+            780
+        </td>
+        <td  >
+            11364
+        </td>
+        <td  >
+            31194
+        </td>
+    </tr>
     <tr>
-        <td>multiple simultaneous patternProperties are validated multiple matches is valid</td>
-        <td  >
-            41973
+        <td>by number, 4.5 is multiple of 1.5</td>
+        <td  class="fastest">
+            48478
         </td>
         <td  >
-            3149
+            778
         </td>
-        <td  class="fastest">
-            96200
+        <td  >
+            10282
         </td>
         <td  >
-            71336
+            31386
         </td>
     </tr>
     <tr>
-        <td>multiple simultaneous patternProperties are validated an invalid due to one is invalid</td>
+        <td>by number, 35 is not multiple of 1.5</td>
+        <td  class="fastest">
+            22612
+        </td>
         <td  >
-            41695
+            666
         </td>
         <td  >
-            3756
+            10486
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            20093
         </td>
+    </tr>
+    <tr>
+        <td>by small number, 0.0075 is multiple of 0.0001</td>
         <td  class="fastest">
-            66050
+            49026
+        </td>
+        <td  >
+            766
+        </td>
+        <td  >
+            10433
         </td>
+        <td  >
+            31451
+        </td>
     </tr>
     <tr>
-        <td>multiple simultaneous patternProperties are validated an invalid due to the other is invalid</td>
+        <td>by small number, 0.00751 is not multiple of 0.0001</td>
         <td  class="fastest">
-            71254
+            22679
         </td>
         <td  >
-            3159
+            690
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            10238
         </td>
         <td  >
-            61003
+            20297
         </td>
     </tr>
     <tr>
-        <td>multiple simultaneous patternProperties are validated an invalid due to both is invalid</td>
+        <td>not, allowed</td>
         <td  >
-            40678
+            10351
         </td>
         <td  >
-            2581
+            634
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            5266
         </td>
         <td  class="fastest">
-            66958
+            15305
         </td>
     </tr>
     <tr>
-        <td>regexes are not anchored by default and are case sensitive non recognized members are ignored</td>
+        <td>not, disallowed</td>
         <td  >
-            54597
+            12215
         </td>
         <td  >
-            4480
+            623
         </td>
+        <td  >
+            5153
+        </td>
         <td  class="fastest">
-            95058
+            20286
+        </td>
+    </tr>
+    <tr>
+        <td>not multiple types, valid</td>
+        <td  >
+            9868
+        </td>
+        <td  >
+            613
         </td>
         <td  >
-            93561
+            5181
         </td>
+        <td  class="fastest">
+            13216
+        </td>
     </tr>
     <tr>
-        <td>regexes are not anchored by default and are case sensitive recognized members are accounted for</td>
+        <td>not multiple types, mismatch</td>
+        <td  >
+            11959
+        </td>
+        <td  >
+            625
+        </td>
+        <td  >
+            4958
+        </td>
         <td  class="fastest">
-            82676
+            16848
         </td>
+    </tr>
+    <tr>
+        <td>not multiple types, other mismatch</td>
         <td  >
-            3722
+            11761
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            628
         </td>
         <td  >
-            67748
+            5594
+        </td>
+        <td  class="fastest">
+            17254
         </td>
     </tr>
     <tr>
-        <td>regexes are not anchored by default and are case sensitive regexes are case sensitive</td>
+        <td>not more complex schema, match</td>
+        <td  >
+            10162
+        </td>
         <td  >
-            58531
+            602
         </td>
         <td  >
-            4558
+            3836
         </td>
         <td  class="fastest">
-            117705
+            14113
+        </td>
+    </tr>
+    <tr>
+        <td>not more complex schema, other match</td>
+        <td  >
+            6800
+        </td>
+        <td  >
+            489
         </td>
         <td  >
-            103811
+            2697
+        </td>
+        <td  class="fastest">
+            9466
         </td>
     </tr>
     <tr>
-        <td>regexes are not anchored by default and are case sensitive regexes are case sensitive, 2</td>
+        <td>not more complex schema, mismatch</td>
         <td  >
-            50046
+            7854
         </td>
         <td  >
-            3772
+            485
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            2748
         </td>
         <td  class="fastest">
-            66047
+            12665
         </td>
     </tr>
     <tr>
-        <td>object properties validation both properties present and valid is valid</td>
+        <td>oneOf, first oneOf valid</td>
         <td  >
-            96702
+            6250
         </td>
         <td  >
-            3840
+            520
         </td>
         <td  >
-            96323
+            2616
         </td>
         <td  class="fastest">
-            128190
+            10072
         </td>
     </tr>
     <tr>
-        <td>object properties validation one property invalid is invalid</td>
+        <td>oneOf, second oneOf valid</td>
         <td  >
-            57474
+            6315
         </td>
         <td  >
-            3436
+            526
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            2634
         </td>
         <td  class="fastest">
-            75146
+            10010
         </td>
     </tr>
     <tr>
-        <td>object properties validation both properties invalid is invalid</td>
+        <td>oneOf, both oneOf valid</td>
         <td  >
-            53679
+            7108
         </td>
         <td  >
-            3221
+            519
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            2625
         </td>
         <td  class="fastest">
-            85235
+            12226
         </td>
     </tr>
     <tr>
-        <td>object properties validation doesn&#39;t invalidate other properties</td>
+        <td>oneOf, neither oneOf valid</td>
+        <td  >
+            5171
+        </td>
+        <td  >
+            459
+        </td>
+        <td  >
+            2596
+        </td>
         <td  class="fastest">
-            200386
+            7191
         </td>
+    </tr>
+    <tr>
+        <td>oneOf with base schema, mismatch base schema</td>
         <td  >
-            4598
+            6034
         </td>
         <td  >
-            110167
+            735
         </td>
         <td  >
-            153336
+            2482
+        </td>
+        <td  class="fastest">
+            13960
         </td>
     </tr>
     <tr>
-        <td>object properties validation ignores non-objects</td>
+        <td>oneOf with base schema, one oneOf valid</td>
+        <td  >
+            6355
+        </td>
+        <td  >
+            478
+        </td>
+        <td  >
+            2654
+        </td>
         <td  class="fastest">
-            610693
+            10119
         </td>
+    </tr>
+    <tr>
+        <td>oneOf with base schema, both oneOf valid</td>
         <td  >
-            5875
+            7163
         </td>
         <td  >
-            145935
+            480
         </td>
         <td  >
-            200631
+            2657
         </td>
+        <td  class="fastest">
+            11828
+        </td>
     </tr>
     <tr>
-        <td>properties, patternProperties, additionalProperties interaction property validates property</td>
+        <td>integer, a bignum is an integer</td>
+        <td  class="fastest">
+            48259
+        </td>
         <td  >
-            73360
+            861
         </td>
+        <td class="failed" >
+            -1
+        </td>
         <td  >
-            2721
+            29083
         </td>
+    </tr>
+    <tr>
+        <td>number, a bignum is a number</td>
         <td  class="fastest">
-            99581
+            49270
+        </td>
+        <td  >
+            871
+        </td>
+        <td  >
+            9310
         </td>
         <td  >
-            74422
+            29921
         </td>
     </tr>
     <tr>
-        <td>properties, patternProperties, additionalProperties interaction property invalidates property</td>
+        <td>string, a bignum is not a string</td>
         <td  class="fastest">
-            69690
+            22498
         </td>
         <td  >
-            2519
+            770
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            9303
         </td>
         <td  >
-            62774
+            18462
         </td>
     </tr>
     <tr>
-        <td>properties, patternProperties, additionalProperties interaction patternProperty invalidates property</td>
+        <td>float comparison with high precision, comparison works for high numbers</td>
         <td  class="fastest">
-            56655
+            22391
         </td>
         <td  >
-            2556
+            633
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            9057
         </td>
         <td  >
-            53132
+            18157
         </td>
     </tr>
     <tr>
-        <td>properties, patternProperties, additionalProperties interaction patternProperty validates nonproperty</td>
+        <td>validation of date-time strings, a valid date-time string</td>
+        <td  >
+            27431
+        </td>
         <td  >
-            55406
+            744
         </td>
         <td  >
-            3102
+            10829
+        </td>
+        <td  class="fastest">
+            29121
         </td>
+    </tr>
+    <tr>
+        <td>validation of date-time strings, an invalid date-time string</td>
         <td  class="fastest">
-            93780
+            19001
         </td>
         <td  >
-            78874
+            678
+        </td>
+        <td class="failed" >
+            -1
         </td>
+        <td class="failed" >
+            -1
+        </td>
     </tr>
     <tr>
-        <td>properties, patternProperties, additionalProperties interaction patternProperty invalidates nonproperty</td>
+        <td>validation of date-time strings, only RFC3339 not all of ISO 8601 are valid</td>
         <td  class="fastest">
-            81959
+            18974
         </td>
         <td  >
-            2884
+            680
         </td>
         <td class="failed" >
             -1
         </td>
-        <td  >
-            57459
+        <td class="failed" >
+            -1
         </td>
     </tr>
     <tr>
-        <td>properties, patternProperties, additionalProperties interaction additionalProperty ignores property</td>
+        <td>validation of URIs, a valid URI</td>
+        <td  class="fastest">
+            38249
+        </td>
         <td  >
-            53977
+            756
         </td>
         <td  >
-            3332
+            10096
         </td>
+        <td  >
+            29245
+        </td>
+    </tr>
+    <tr>
+        <td>validation of URIs, an invalid URI</td>
+        <td class="failed" >
+            -1
+        </td>
         <td  class="fastest">
-            104827
+            677
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+    </tr>
+    <tr>
+        <td>validation of URIs, an invalid URI though valid URI reference</td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
         </td>
+        <td class="failed" >
+            -1
+        </td>
+    </tr>
+    <tr>
+        <td>validation of e-mail addresses, a valid e-mail address</td>
+        <td  >
+            21558
+        </td>
+        <td  >
+            765
+        </td>
         <td  >
-            80470
+            10347
+        </td>
+        <td  class="fastest">
+            28903
         </td>
     </tr>
     <tr>
-        <td>properties, patternProperties, additionalProperties interaction additionalProperty validates others</td>
+        <td>validation of e-mail addresses, an invalid e-mail address</td>
+        <td  class="fastest">
+            14863
+        </td>
         <td  >
-            66480
+            679
         </td>
         <td  >
-            3332
+            10466
+        </td>
+        <td class="failed" >
+            -1
         </td>
+    </tr>
+    <tr>
+        <td>validation of IP addresses, a valid IP address</td>
         <td  class="fastest">
-            110298
+            38360
+        </td>
+        <td  >
+            770
         </td>
         <td  >
-            79269
+            11047
         </td>
+        <td  >
+            28953
+        </td>
     </tr>
     <tr>
-        <td>properties, patternProperties, additionalProperties interaction additionalProperty invalidates others</td>
+        <td>validation of IP addresses, an IP address with too many components</td>
+        <td  class="fastest">
+            20855
+        </td>
         <td  >
-            41706
+            681
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+    </tr>
+    <tr>
+        <td>validation of IP addresses, an IP address with out-of-range values</td>
+        <td  class="fastest">
+            20992
         </td>
         <td  >
-            3107
+            681
+        </td>
+        <td class="failed" >
+            -1
         </td>
         <td class="failed" >
             -1
         </td>
+    </tr>
+    <tr>
+        <td>validation of IPv6 addresses, a valid IPv6 address</td>
         <td  class="fastest">
-            58305
+            32113
+        </td>
+        <td  >
+            751
+        </td>
+        <td  >
+            11015
+        </td>
+        <td  >
+            28613
         </td>
     </tr>
     <tr>
-        <td>root pointer ref match</td>
+        <td>validation of IPv6 addresses, an IPv6 address with out-of-range values</td>
+        <td  class="fastest">
+            19499
+        </td>
         <td  >
-            82600
+            663
+        </td>
+        <td class="failed" >
+            -1
         </td>
         <td class="failed" >
             -1
+        </td>
+    </tr>
+    <tr>
+        <td>validation of IPv6 addresses, an IPv6 address with too many components</td>
+        <td  class="fastest">
+            18687
         </td>
         <td  >
-            117694
+            672
+        </td>
+        <td class="failed" >
+            -1
         </td>
         <td class="failed" >
             -1
         </td>
     </tr>
     <tr>
-        <td>root pointer ref recursive match</td>
+        <td>validation of IPv6 addresses, an IPv6 address containing illegal characters</td>
+        <td  class="fastest">
+            19742
+        </td>
         <td  >
-            45388
+            678
+        </td>
+        <td class="failed" >
+            -1
         </td>
         <td class="failed" >
             -1
+        </td>
+    </tr>
+    <tr>
+        <td>validation of host names, a valid host name</td>
+        <td  class="fastest">
+            31688
+        </td>
+        <td  >
+            760
+        </td>
+        <td  >
+            10917
+        </td>
+        <td  >
+            28379
         </td>
+    </tr>
+    <tr>
+        <td>validation of host names, a host name starting with an illegal character</td>
         <td  class="fastest">
-            115322
+            21274
+        </td>
+        <td  >
+            669
         </td>
         <td class="failed" >
             -1
         </td>
+        <td class="failed" >
+            -1
+        </td>
     </tr>
     <tr>
-        <td>root pointer ref mismatch</td>
+        <td>validation of host names, a host name containing illegal characters</td>
         <td  class="fastest">
-            161138
+            21090
+        </td>
+        <td  >
+            684
+        </td>
+        <td class="failed" >
+            -1
         </td>
         <td class="failed" >
             -1
+        </td>
+    </tr>
+    <tr>
+        <td>validation of host names, a host name with a component too long</td>
+        <td  class="fastest">
+            19270
         </td>
+        <td  >
+            683
+        </td>
         <td class="failed" >
             -1
         </td>
@@ -2719,9 +2194,9 @@
         </td>
     </tr>
     <tr>
-        <td>root pointer ref recursive mismatch</td>
-        <td  class="fastest">
-            49479
+        <td>some languages do not distinguish between different types of numeric value, a float is not an integer even without fractional part</td>
+        <td class="failed" >
+            -1
         </td>
         <td class="failed" >
             -1
@@ -2734,277 +2209,490 @@
         </td>
     </tr>
     <tr>
-        <td>relative pointer ref to object match</td>
+        <td>pattern validation, a matching pattern is valid</td>
+        <td  class="fastest">
+            50421
+        </td>
+        <td  >
+            766
+        </td>
         <td  >
-            63513
+            9292
         </td>
         <td  >
-            2485
+            27165
         </td>
+    </tr>
+    <tr>
+        <td>pattern validation, a non-matching pattern is invalid</td>
         <td  class="fastest">
-            118944
+            23434
+        </td>
+        <td  >
+            684
+        </td>
+        <td  >
+            9876
         </td>
         <td  >
-            44273
+            18330
         </td>
     </tr>
     <tr>
-        <td>relative pointer ref to object mismatch</td>
+        <td>pattern validation, ignores non-strings</td>
         <td  class="fastest">
-            104383
+            58118
         </td>
         <td  >
-            2344
+            868
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            11949
         </td>
         <td  >
-            36904
+            31200
         </td>
     </tr>
     <tr>
-        <td>relative pointer ref to array match array</td>
+        <td>patternProperties validates properties matching a regex, a single valid match is valid</td>
         <td  class="fastest">
-            186230
+            16006
         </td>
         <td  >
-            2597
+            600
         </td>
         <td  >
-            109405
+            3046
         </td>
         <td  >
-            43014
+            12484
         </td>
     </tr>
     <tr>
-        <td>relative pointer ref to array mismatch array</td>
+        <td>patternProperties validates properties matching a regex, multiple valid matches is valid</td>
         <td  class="fastest">
-            92441
+            12743
         </td>
         <td  >
-            2431
+            554
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            2205
         </td>
         <td  >
-            35924
+            9713
         </td>
     </tr>
     <tr>
-        <td>escaped pointer ref slash</td>
-        <td  class="fastest">
-            40732
+        <td>patternProperties validates properties matching a regex, a single invalid match is invalid</td>
+        <td  >
+            5334
+        </td>
+        <td  >
+            502
         </td>
         <td  >
             2245
         </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            22677
+        <td  class="fastest">
+            8947
         </td>
     </tr>
     <tr>
-        <td>escaped pointer ref tilda</td>
+        <td>patternProperties validates properties matching a regex, multiple invalid matches is invalid</td>
+        <td  >
+            8130
+        </td>
+        <td  >
+            474
+        </td>
+        <td  >
+            2308
+        </td>
         <td  class="fastest">
-            46508
-        </td>
-        <td  >
-            2257
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            22887
+            8914
         </td>
     </tr>
     <tr>
-        <td>escaped pointer ref percent</td>
+        <td>patternProperties validates properties matching a regex, ignores non-objects</td>
         <td  class="fastest">
-            80923
+            53441
         </td>
         <td  >
-            2256
-        </td>
-        <td class="failed" >
-            -1
+            820
         </td>
         <td  >
-            22210
+            6261
+        </td>
+        <td  >
+            18688
         </td>
     </tr>
     <tr>
-        <td>nested refs nested ref valid</td>
+        <td>multiple simultaneous patternProperties are validated, a single valid match is valid</td>
         <td  class="fastest">
-            568208
+            17564
         </td>
         <td  >
-            1571
+            592
         </td>
         <td  >
-            129535
+            2832
         </td>
         <td  >
-            37486
+            10922
         </td>
     </tr>
     <tr>
-        <td>nested refs nested ref invalid</td>
+        <td>multiple simultaneous patternProperties are validated, a simultaneous match is valid</td>
+        <td  >
+            7008
+        </td>
+        <td  >
+            519
+        </td>
+        <td  >
+            2176
+        </td>
         <td  class="fastest">
-            184016
-        </td>
-        <td  >
-            1523
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            34294
+            10738
         </td>
     </tr>
     <tr>
-        <td>remote ref, containing refs itself remote ref valid</td>
-        <td class="failed" >
-            -1
+        <td>multiple simultaneous patternProperties are validated, multiple matches is valid</td>
+        <td  >
+            7706
         </td>
         <td  >
-            1244
-        </td>
-        <td  class="fastest">
-            122266
+            480
         </td>
         <td  >
-            59074
+            1694
+        </td>
+        <td  >
+            8603
         </td>
     </tr>
     <tr>
-        <td>remote ref, containing refs itself remote ref invalid</td>
-        <td class="failed" >
-            -1
-        </td>
+        <td>multiple simultaneous patternProperties are validated, an invalid due to one is invalid</td>
         <td  class="fastest">
-            1185
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-    </tr>
-    <tr>
-        <td>remote ref remote ref valid</td>
-        <td class="failed" >
-            -1
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  class="fastest">
-            147143
+            10761
         </td>
         <td  >
-            60693
+            547
+        </td>
+        <td  >
+            2732
+        </td>
+        <td  >
+            8731
         </td>
     </tr>
     <tr>
-        <td>remote ref remote ref invalid</td>
-        <td class="failed" >
-            -1
+        <td>multiple simultaneous patternProperties are validated, an invalid due to the other is invalid</td>
+        <td  class="fastest">
+            10172
+        </td>
+        <td  >
+            477
+        </td>
+        <td  >
+            2183
+        </td>
+        <td  >
+            7749
+        </td>
+    </tr>
+    <tr>
+        <td>multiple simultaneous patternProperties are validated, an invalid due to both is invalid</td>
+        <td  >
+            4078
+        </td>
+        <td  >
+            394
+        </td>
+        <td  >
+            1497
         </td>
         <td  class="fastest">
+            8709
+        </td>
+    </tr>
+    <tr>
+        <td>regexes are not anchored by default and are case sensitive, non recognized members are ignored</td>
+        <td  class="fastest">
+            17587
+        </td>
+        <td  >
+            632
+        </td>
+        <td  >
+            3954
+        </td>
+        <td  >
+            11804
+        </td>
+    </tr>
+    <tr>
+        <td>regexes are not anchored by default and are case sensitive, recognized members are accounted for</td>
+        <td  >
+            5985
+        </td>
+        <td  >
+            542
+        </td>
+        <td  >
+            3101
+        </td>
+        <td  class="fastest">
+            8726
+        </td>
+    </tr>
+    <tr>
+        <td>regexes are not anchored by default and are case sensitive, regexes are case sensitive</td>
+        <td  class="fastest">
+            19355
+        </td>
+        <td  >
+            644
+        </td>
+        <td  >
+            4306
+        </td>
+        <td  >
+            12341
+        </td>
+    </tr>
+    <tr>
+        <td>regexes are not anchored by default and are case sensitive, regexes are case sensitive, 2</td>
+        <td  >
+            5888
+        </td>
+        <td  >
+            541
+        </td>
+        <td  >
             2845
         </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td class="failed" >
-            -1
+        <td  class="fastest">
+            8530
         </td>
     </tr>
     <tr>
-        <td>fragment within remote ref remote fragment valid</td>
-        <td class="failed" >
-            -1
+        <td>object properties validation, both properties present and valid is valid</td>
+        <td  class="fastest">
+            16248
         </td>
-        <td class="failed" >
-            -1
+        <td  >
+            563
+        </td>
+        <td  >
+            2740
+        </td>
+        <td  >
+            14973
+        </td>
+    </tr>
+    <tr>
+        <td>object properties validation, one property invalid is invalid</td>
+        <td  >
+            9768
+        </td>
+        <td  >
+            524
+        </td>
+        <td  >
+            2612
         </td>
         <td  class="fastest">
-            148779
+            10253
+        </td>
+    </tr>
+    <tr>
+        <td>object properties validation, both properties invalid is invalid</td>
+        <td  >
+            7084
         </td>
         <td  >
-            55332
+            490
         </td>
-    </tr>
-    <tr>
-        <td>fragment within remote ref remote fragment invalid</td>
-        <td class="failed" >
-            -1
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-    </tr>
-    <tr>
-        <td>ref within remote ref ref within ref valid</td>
-        <td class="failed" >
-            -1
-        </td>
-        <td class="failed" >
-            -1
+        <td  >
+            2798
         </td>
         <td  class="fastest">
-            148893
+            11539
+        </td>
+    </tr>
+    <tr>
+        <td>object properties validation, doesn&#39;t invalidate other properties</td>
+        <td  >
+            9367
         </td>
         <td  >
-            55789
+            667
         </td>
-    </tr>
-    <tr>
-        <td>ref within remote ref ref within ref invalid</td>
-        <td class="failed" >
-            -1
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-    </tr>
-    <tr>
-        <td>change resolution scope changed scope ref valid</td>
-        <td class="failed" >
-            -1
-        </td>
-        <td class="failed" >
-            -1
+        <td  >
+            5535
         </td>
         <td  class="fastest">
-            98061
+            19032
+        </td>
+    </tr>
+    <tr>
+        <td>object properties validation, ignores non-objects</td>
+        <td  class="fastest">
+            55849
+        </td>
+        <td  >
+            827
+        </td>
+        <td  >
+            6232
+        </td>
+        <td  >
+            23831
+        </td>
+    </tr>
+    <tr>
+        <td>properties, patternProperties, additionalProperties interaction, property validates property</td>
+        <td  class="fastest">
+            12410
+        </td>
+        <td  >
+            417
+        </td>
+        <td  >
+            1876
+        </td>
+        <td  >
+            9612
+        </td>
+    </tr>
+    <tr>
+        <td>properties, patternProperties, additionalProperties interaction, property invalidates property</td>
+        <td  >
+            8137
+        </td>
+        <td  >
+            384
+        </td>
+        <td  >
+            1908
+        </td>
+        <td  class="fastest">
+            8197
+        </td>
+    </tr>
+    <tr>
+        <td>properties, patternProperties, additionalProperties interaction, patternProperty invalidates property</td>
+        <td  class="fastest">
+            9821
+        </td>
+        <td  >
+            390
+        </td>
+        <td  >
+            1881
+        </td>
+        <td  >
+            6969
+        </td>
+    </tr>
+    <tr>
+        <td>properties, patternProperties, additionalProperties interaction, patternProperty validates nonproperty</td>
+        <td  >
+            7907
+        </td>
+        <td  >
+            466
+        </td>
+        <td  >
+            2188
+        </td>
+        <td  class="fastest">
+            10244
+        </td>
+    </tr>
+    <tr>
+        <td>properties, patternProperties, additionalProperties interaction, patternProperty invalidates nonproperty</td>
+        <td  class="fastest">
+            10838
+        </td>
+        <td  >
+            428
+        </td>
+        <td  >
+            2151
+        </td>
+        <td  >
+            7439
+        </td>
+    </tr>
+    <tr>
+        <td>properties, patternProperties, additionalProperties interaction, additionalProperty ignores property</td>
+        <td  class="fastest">
+            16656
+        </td>
+        <td  >
+            494
+        </td>
+        <td  >
+            2262
+        </td>
+        <td  >
+            10142
+        </td>
+    </tr>
+    <tr>
+        <td>properties, patternProperties, additionalProperties interaction, additionalProperty validates others</td>
+        <td  >
+            7862
+        </td>
+        <td  >
+            489
+        </td>
+        <td  >
+            2240
+        </td>
+        <td  class="fastest">
+            9799
+        </td>
+    </tr>
+    <tr>
+        <td>properties, patternProperties, additionalProperties interaction, additionalProperty invalidates others</td>
+        <td  class="fastest">
+            11482
+        </td>
+        <td  >
+            464
+        </td>
+        <td  >
+            2219
+        </td>
+        <td  >
+            7712
+        </td>
+    </tr>
+    <tr>
+        <td>root pointer ref, match</td>
+        <td  class="fastest">
+            8133
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
         </td>
         <td class="failed" >
             -1
         </td>
     </tr>
     <tr>
-        <td>change resolution scope changed scope ref invalid</td>
+        <td>root pointer ref, recursive match</td>
+        <td  class="fastest">
+            6324
+        </td>
         <td class="failed" >
             -1
         </td>
@@ -3014,1088 +2702,1400 @@
         <td class="failed" >
             -1
         </td>
-        <td class="failed" >
-            -1
-        </td>
     </tr>
     <tr>
-        <td>required validation present required property is valid</td>
-        <td  >
-            61542
-        </td>
-        <td  >
-            3826
-        </td>
-        <td  >
-            112047
-        </td>
+        <td>root pointer ref, mismatch</td>
         <td  class="fastest">
-            128225
-        </td>
-    </tr>
-    <tr>
-        <td>required validation non-present required property is invalid</td>
-        <td  class="fastest">
-            104817
-        </td>
-        <td  >
-            3442
+            20360
         </td>
         <td class="failed" >
             -1
         </td>
         <td  >
-            102082
+            3202
+        </td>
+        <td class="failed" >
+            -1
         </td>
     </tr>
     <tr>
-        <td>required default validation not required by default</td>
+        <td>root pointer ref, recursive mismatch</td>
         <td  class="fastest">
-            365078
-        </td>
-        <td  >
-            4754
-        </td>
-        <td  >
-            144842
-        </td>
-        <td  >
-            211788
-        </td>
-    </tr>
-    <tr>
-        <td>integer type matches integers an integer is an integer</td>
-        <td  class="fastest">
-            480893
-        </td>
-        <td  >
-            6331
-        </td>
-        <td  >
-            143782
-        </td>
-        <td  >
-            236836
-        </td>
-    </tr>
-    <tr>
-        <td>integer type matches integers a float is not an integer</td>
-        <td  class="fastest">
-            173338
-        </td>
-        <td  >
-            5639
+            6537
         </td>
         <td class="failed" >
             -1
         </td>
         <td  >
-            133241
+            3241
+        </td>
+        <td class="failed" >
+            -1
         </td>
     </tr>
     <tr>
-        <td>integer type matches integers a string is not an integer</td>
+        <td>relative pointer ref to object, match</td>
         <td  class="fastest">
-            174281
+            21447
         </td>
         <td  >
-            5689
+            325
+        </td>
+        <td  >
+            3151
+        </td>
+        <td  >
+            5961
+        </td>
+    </tr>
+    <tr>
+        <td>relative pointer ref to object, mismatch</td>
+        <td  class="fastest">
+            6849
+        </td>
+        <td  >
+            322
         </td>
         <td class="failed" >
             -1
         </td>
         <td  >
-            136518
+            5149
         </td>
     </tr>
     <tr>
-        <td>integer type matches integers an object is not an integer</td>
+        <td>relative pointer ref to array, match array</td>
         <td  class="fastest">
-            151049
+            11597
         </td>
         <td  >
-            5652
+            353
+        </td>
+        <td  >
+            2304
+        </td>
+        <td  >
+            5928
+        </td>
+    </tr>
+    <tr>
+        <td>relative pointer ref to array, mismatch array</td>
+        <td  class="fastest">
+            13482
+        </td>
+        <td  >
+            336
         </td>
         <td class="failed" >
             -1
         </td>
         <td  >
-            139706
+            4918
         </td>
     </tr>
     <tr>
-        <td>integer type matches integers an array is not an integer</td>
+        <td>escaped pointer ref, slash</td>
         <td  class="fastest">
-            168249
+            5725
         </td>
         <td  >
-            5703
+            307
         </td>
         <td class="failed" >
             -1
         </td>
         <td  >
-            137278
+            2953
         </td>
     </tr>
     <tr>
-        <td>integer type matches integers a boolean is not an integer</td>
+        <td>escaped pointer ref, tilda</td>
         <td  class="fastest">
-            185067
+            10542
         </td>
         <td  >
-            5566
+            308
         </td>
         <td class="failed" >
             -1
         </td>
         <td  >
-            137707
+            2979
         </td>
     </tr>
     <tr>
-        <td>integer type matches integers null is not an integer</td>
+        <td>escaped pointer ref, percent</td>
         <td  class="fastest">
-            179636
-        </td>
-        <td  >
-            5590
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            140263
-        </td>
-    </tr>
-    <tr>
-        <td>number type matches numbers an integer is a number</td>
-        <td  class="fastest">
-            543771
-        </td>
-        <td  >
-            6143
-        </td>
-        <td  >
-            138718
-        </td>
-        <td  >
-            263616
-        </td>
-    </tr>
-    <tr>
-        <td>number type matches numbers a float is a number</td>
-        <td  class="fastest">
-            500981
-        </td>
-        <td  >
-            6067
-        </td>
-        <td  >
-            140178
-        </td>
-        <td  >
-            261338
-        </td>
-    </tr>
-    <tr>
-        <td>number type matches numbers a string is not a number</td>
-        <td  class="fastest">
-            181933
-        </td>
-        <td  >
-            5524
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            141465
-        </td>
-    </tr>
-    <tr>
-        <td>number type matches numbers an object is not a number</td>
-        <td  class="fastest">
-            147907
-        </td>
-        <td  >
-            5557
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            140410
-        </td>
-    </tr>
-    <tr>
-        <td>number type matches numbers an array is not a number</td>
-        <td  class="fastest">
-            179398
-        </td>
-        <td  >
-            5560
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            140417
-        </td>
-    </tr>
-    <tr>
-        <td>number type matches numbers a boolean is not a number</td>
-        <td  class="fastest">
-            183636
-        </td>
-        <td  >
-            5520
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            145447
-        </td>
-    </tr>
-    <tr>
-        <td>number type matches numbers null is not a number</td>
-        <td  class="fastest">
-            186988
-        </td>
-        <td  >
-            5549
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            140070
-        </td>
-    </tr>
-    <tr>
-        <td>string type matches strings 1 is not a string</td>
-        <td  class="fastest">
-            170105
-        </td>
-        <td  >
-            5642
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            143441
-        </td>
-    </tr>
-    <tr>
-        <td>string type matches strings a float is not a string</td>
-        <td  class="fastest">
-            165337
-        </td>
-        <td  >
-            5652
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            142146
-        </td>
-    </tr>
-    <tr>
-        <td>string type matches strings a string is a string</td>
-        <td  class="fastest">
-            593740
-        </td>
-        <td  >
-            6357
-        </td>
-        <td  >
-            92940
-        </td>
-        <td  >
-            259018
-        </td>
-    </tr>
-    <tr>
-        <td>string type matches strings an object is not a string</td>
-        <td  class="fastest">
-            147866
-        </td>
-        <td  >
-            5673
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            143288
-        </td>
-    </tr>
-    <tr>
-        <td>string type matches strings an array is not a string</td>
-        <td  class="fastest">
-            168406
-        </td>
-        <td  >
-            5694
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            140425
-        </td>
-    </tr>
-    <tr>
-        <td>string type matches strings a boolean is not a string</td>
-        <td  class="fastest">
-            175975
-        </td>
-        <td  >
-            5644
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            141460
-        </td>
-    </tr>
-    <tr>
-        <td>string type matches strings null is not a string</td>
-        <td  class="fastest">
-            182821
-        </td>
-        <td  >
-            5707
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            138566
-        </td>
-    </tr>
-    <tr>
-        <td>object type matches objects an integer is not an object</td>
-        <td  class="fastest">
-            164077
-        </td>
-        <td  >
-            5664
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            141800
-        </td>
-    </tr>
-    <tr>
-        <td>object type matches objects a float is not an object</td>
-        <td  class="fastest">
-            165712
-        </td>
-        <td  >
-            5650
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            143207
-        </td>
-    </tr>
-    <tr>
-        <td>object type matches objects a string is not an object</td>
-        <td  class="fastest">
-            182339
-        </td>
-        <td  >
-            5664
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            141559
-        </td>
-    </tr>
-    <tr>
-        <td>object type matches objects an object is an object</td>
-        <td  class="fastest">
-            380537
-        </td>
-        <td  >
-            6213
-        </td>
-        <td  >
-            140384
-        </td>
-        <td  >
-            220343
-        </td>
-    </tr>
-    <tr>
-        <td>object type matches objects an array is not an object</td>
-        <td  class="fastest">
-            169236
-        </td>
-        <td  >
-            5636
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            142560
-        </td>
-    </tr>
-    <tr>
-        <td>object type matches objects a boolean is not an object</td>
-        <td  class="fastest">
-            178140
-        </td>
-        <td  >
-            5699
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            138880
-        </td>
-    </tr>
-    <tr>
-        <td>object type matches objects null is not an object</td>
-        <td  class="fastest">
-            173548
-        </td>
-        <td  >
-            5678
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            139468
-        </td>
-    </tr>
-    <tr>
-        <td>array type matches arrays an integer is not an array</td>
-        <td  class="fastest">
-            167211
-        </td>
-        <td  >
-            5636
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            141192
-        </td>
-    </tr>
-    <tr>
-        <td>array type matches arrays a float is not an array</td>
-        <td  class="fastest">
-            171133
-        </td>
-        <td  >
-            5675
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            137009
-        </td>
-    </tr>
-    <tr>
-        <td>array type matches arrays a string is not an array</td>
-        <td  class="fastest">
-            182451
-        </td>
-        <td  >
-            5655
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            139950
-        </td>
-    </tr>
-    <tr>
-        <td>array type matches arrays an object is not an array</td>
-        <td  class="fastest">
-            153117
-        </td>
-        <td  >
-            5613
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            140502
-        </td>
-    </tr>
-    <tr>
-        <td>array type matches arrays an array is not an array</td>
-        <td  class="fastest">
-            565981
-        </td>
-        <td  >
-            6405
-        </td>
-        <td  >
-            145647
-        </td>
-        <td  >
-            249019
-        </td>
-    </tr>
-    <tr>
-        <td>array type matches arrays a boolean is not an array</td>
-        <td  class="fastest">
-            185201
-        </td>
-        <td  >
-            5695
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            140301
-        </td>
-    </tr>
-    <tr>
-        <td>array type matches arrays null is not an array</td>
-        <td  class="fastest">
-            172907
-        </td>
-        <td  >
-            5656
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            144178
-        </td>
-    </tr>
-    <tr>
-        <td>boolean type matches booleans an integer is not a boolean</td>
-        <td  class="fastest">
-            157944
-        </td>
-        <td  >
-            5689
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            142926
-        </td>
-    </tr>
-    <tr>
-        <td>boolean type matches booleans a float is not a boolean</td>
-        <td  class="fastest">
-            173713
-        </td>
-        <td  >
             5681
         </td>
-        <td class="failed" >
-            -1
-        </td>
         <td  >
-            144363
-        </td>
-    </tr>
-    <tr>
-        <td>boolean type matches booleans a string is not a boolean</td>
-        <td  class="fastest">
-            175663
-        </td>
-        <td  >
-            5667
+            306
         </td>
         <td class="failed" >
             -1
         </td>
         <td  >
-            140640
+            2912
         </td>
     </tr>
     <tr>
-        <td>boolean type matches booleans an object is not a boolean</td>
+        <td>nested refs, nested ref valid</td>
         <td  class="fastest">
-            149390
+            51792
         </td>
         <td  >
-            5658
+            200
+        </td>
+        <td  >
+            1584
+        </td>
+        <td  >
+            5063
+        </td>
+    </tr>
+    <tr>
+        <td>nested refs, nested ref invalid</td>
+        <td  class="fastest">
+            25061
+        </td>
+        <td  >
+            195
         </td>
         <td class="failed" >
             -1
         </td>
         <td  >
-            137198
+            4555
         </td>
     </tr>
     <tr>
-        <td>boolean type matches booleans an array is not a boolean</td>
-        <td  class="fastest">
-            162852
-        </td>
-        <td  >
-            5644
-        </td>
+        <td>remote ref, containing refs itself, remote ref valid</td>
         <td class="failed" >
             -1
         </td>
         <td  >
-            141699
+            160
+        </td>
+        <td  class="fastest">
+            10981
+        </td>
+        <td  >
+            8198
         </td>
     </tr>
     <tr>
-        <td>boolean type matches booleans a boolean is not a boolean</td>
+        <td>remote ref, containing refs itself, remote ref invalid</td>
+        <td class="failed" >
+            -1
+        </td>
         <td  class="fastest">
-            547325
-        </td>
-        <td  >
-            6131
-        </td>
-        <td  >
-            140320
-        </td>
-        <td  >
-            258529
-        </td>
-    </tr>
-    <tr>
-        <td>boolean type matches booleans null is not a boolean</td>
-        <td  class="fastest">
-            175799
-        </td>
-        <td  >
-            5602
+            164
         </td>
         <td class="failed" >
             -1
         </td>
-        <td  >
-            141090
-        </td>
-    </tr>
-    <tr>
-        <td>null type matches only the null object an integer is not null</td>
-        <td  class="fastest">
-            170043
-        </td>
-        <td  >
-            5578
-        </td>
         <td class="failed" >
             -1
         </td>
-        <td  >
-            139783
-        </td>
     </tr>
     <tr>
-        <td>null type matches only the null object a float is not null</td>
-        <td  class="fastest">
-            165165
-        </td>
-        <td  >
-            5639
-        </td>
+        <td>remote ref, remote ref valid</td>
         <td class="failed" >
             -1
-        </td>
-        <td  >
-            136863
-        </td>
-    </tr>
-    <tr>
-        <td>null type matches only the null object a string is not null</td>
-        <td  class="fastest">
-            177595
-        </td>
-        <td  >
-            5657
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            141080
-        </td>
-    </tr>
-    <tr>
-        <td>null type matches only the null object an object is not null</td>
-        <td  class="fastest">
-            149066
-        </td>
-        <td  >
-            5628
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            143577
-        </td>
-    </tr>
-    <tr>
-        <td>null type matches only the null object an array is not null</td>
-        <td  class="fastest">
-            173854
-        </td>
-        <td  >
-            5697
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            139375
-        </td>
-    </tr>
-    <tr>
-        <td>null type matches only the null object a boolean is not null</td>
-        <td  class="fastest">
-            175677
-        </td>
-        <td  >
-            5709
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            140748
-        </td>
-    </tr>
-    <tr>
-        <td>null type matches only the null object null is null</td>
-        <td  class="fastest">
-            608289
-        </td>
-        <td  >
-            6455
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            260701
-        </td>
-    </tr>
-    <tr>
-        <td>multiple types can be specified in an array an integer is valid</td>
-        <td  class="fastest">
-            521069
-        </td>
-        <td  >
-            6319
-        </td>
-        <td  >
-            142386
-        </td>
-        <td  >
-            196843
-        </td>
-    </tr>
-    <tr>
-        <td>multiple types can be specified in an array a string is valid</td>
-        <td  class="fastest">
-            588467
-        </td>
-        <td  >
-            6307
-        </td>
-        <td  >
-            92200
-        </td>
-        <td  >
-            194697
-        </td>
-    </tr>
-    <tr>
-        <td>multiple types can be specified in an array a float is invalid</td>
-        <td  class="fastest">
-            144249
-        </td>
-        <td  >
-            5532
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            117748
-        </td>
-    </tr>
-    <tr>
-        <td>multiple types can be specified in an array an object is invalid</td>
-        <td  class="fastest">
-            124000
-        </td>
-        <td  >
-            5513
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            118187
-        </td>
-    </tr>
-    <tr>
-        <td>multiple types can be specified in an array an array is invalid</td>
-        <td  class="fastest">
-            148564
-        </td>
-        <td  >
-            5549
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            118241
-        </td>
-    </tr>
-    <tr>
-        <td>multiple types can be specified in an array a boolean is invalid</td>
-        <td  class="fastest">
-            150960
-        </td>
-        <td  >
-            5539
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            109365
-        </td>
-    </tr>
-    <tr>
-        <td>multiple types can be specified in an array null is invalid</td>
-        <td  class="fastest">
-            148094
-        </td>
-        <td  >
-            5541
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            116923
-        </td>
-    </tr>
-    <tr>
-        <td>uniqueItems validation unique array of integers is valid</td>
-        <td  class="fastest">
-            506589
-        </td>
-        <td  >
-            5537
-        </td>
-        <td  >
-            111492
-        </td>
-        <td  >
-            261465
-        </td>
-    </tr>
-    <tr>
-        <td>uniqueItems validation non-unique array of integers is invalid</td>
-        <td  class="fastest">
-            170045
-        </td>
-        <td  >
-            4895
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            135095
-        </td>
-    </tr>
-    <tr>
-        <td>uniqueItems validation numbers are unique if mathematically unequal</td>
-        <td  class="fastest">
-            168731
-        </td>
-        <td  >
-            4537
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            135633
-        </td>
-    </tr>
-    <tr>
-        <td>uniqueItems validation unique array of objects is valid</td>
-        <td  class="fastest">
-            381324
-        </td>
-        <td  >
-            5598
-        </td>
-        <td  >
-            80395
-        </td>
-        <td  >
-            239528
-        </td>
-    </tr>
-    <tr>
-        <td>uniqueItems validation non-unique array of objects is invalid</td>
-        <td  class="fastest">
-            151990
-        </td>
-        <td  >
-            4914
-        </td>
-        <td class="failed" >
-            -1
-        </td>
-        <td  >
-            128304
-        </td>
-    </tr>
-    <tr>
-        <td>uniqueItems validation unique array of nested objects is valid</td>
-        <td  class="fastest">
-            258101
-        </td>
-        <td  >
-            5412
-        </td>
-        <td  >
-            80100
-        </td>
-        <td  >
-            224167
-        </td>
-    </tr>
-    <tr>
-        <td>uniqueItems validation non-unique array of nested objects is invalid</td>
-        <td  >
-            113649
-        </td>
-        <td  >
-            4834
         </td>
         <td class="failed" >
             -1
         </td>
         <td  class="fastest">
-            122325
+            11523
+        </td>
+        <td  >
+            8463
         </td>
     </tr>
     <tr>
-        <td>uniqueItems validation unique array of arrays is valid</td>
+        <td>remote ref, remote ref invalid</td>
+        <td class="failed" >
+            -1
+        </td>
         <td  class="fastest">
-            491949
-        </td>
-        <td  >
-            5473
-        </td>
-        <td  >
-            76842
-        </td>
-        <td  >
-            249986
-        </td>
-    </tr>
-    <tr>
-        <td>uniqueItems validation non-unique array of arrays is invalid</td>
-        <td  class="fastest">
-            170494
-        </td>
-        <td  >
-            4846
+            363
         </td>
         <td class="failed" >
             -1
         </td>
-        <td  >
-            135198
+        <td class="failed" >
+            -1
         </td>
     </tr>
     <tr>
-        <td>uniqueItems validation 1 and true are unique</td>
-        <td  class="fastest">
-            545549
-        </td>
-        <td  >
-            5518
-        </td>
-        <td  >
-            101373
-        </td>
-        <td  >
-            250316
-        </td>
-    </tr>
-    <tr>
-        <td>uniqueItems validation 0 and false are unique</td>
-        <td  class="fastest">
-            557032
-        </td>
-        <td  >
-            5494
-        </td>
-        <td  >
-            98255
-        </td>
-        <td  >
-            255761
-        </td>
-    </tr>
-    <tr>
-        <td>uniqueItems validation unique heterogeneous types are valid</td>
-        <td  class="fastest">
-            394064
-        </td>
-        <td  >
-            5509
-        </td>
-        <td  >
-            62863
-        </td>
-        <td  >
-            240197
-        </td>
-    </tr>
-    <tr>
-        <td>uniqueItems validation non-unique heterogeneous types are invalid</td>
-        <td  class="fastest">
-            153414
-        </td>
-        <td  >
-            4826
+        <td>fragment within remote ref, remote fragment valid</td>
+        <td class="failed" >
+            -1
         </td>
         <td class="failed" >
             -1
         </td>
+        <td  class="fastest">
+            11797
+        </td>
         <td  >
-            134323
+            7771
+        </td>
+    </tr>
+    <tr>
+        <td>fragment within remote ref, remote fragment invalid</td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+    </tr>
+    <tr>
+        <td>ref within remote ref, ref within ref valid</td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+        <td  class="fastest">
+            11623
+        </td>
+        <td  >
+            7765
+        </td>
+    </tr>
+    <tr>
+        <td>ref within remote ref, ref within ref invalid</td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+    </tr>
+    <tr>
+        <td>change resolution scope, changed scope ref valid</td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+        <td  class="fastest">
+            1390
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+    </tr>
+    <tr>
+        <td>change resolution scope, changed scope ref invalid</td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+        <td class="failed" >
+            -1
+        </td>
+    </tr>
+    <tr>
+        <td>required validation, present required property is valid</td>
+        <td  >
+            8928
+        </td>
+        <td  >
+            553
+        </td>
+        <td  >
+            3678
+        </td>
+        <td  class="fastest">
+            16432
+        </td>
+    </tr>
+    <tr>
+        <td>required validation, non-present required property is invalid</td>
+        <td  >
+            13007
+        </td>
+        <td  >
+            504
+        </td>
+        <td  >
+            3689
+        </td>
+        <td  class="fastest">
+            13212
+        </td>
+    </tr>
+    <tr>
+        <td>required default validation, not required by default</td>
+        <td  class="fastest">
+            37748
+        </td>
+        <td  >
+            681
+        </td>
+        <td  >
+            8066
+        </td>
+        <td  >
+            25321
+        </td>
+    </tr>
+    <tr>
+        <td>integer type matches integers, an integer is an integer</td>
+        <td  class="fastest">
+            53089
+        </td>
+        <td  >
+            875
+        </td>
+        <td  >
+            9723
+        </td>
+        <td  >
+            29204
+        </td>
+    </tr>
+    <tr>
+        <td>integer type matches integers, a float is not an integer</td>
+        <td  class="fastest">
+            23037
+        </td>
+        <td  >
+            770
+        </td>
+        <td  >
+            9514
+        </td>
+        <td  >
+            17619
+        </td>
+    </tr>
+    <tr>
+        <td>integer type matches integers, a string is not an integer</td>
+        <td  class="fastest">
+            23671
+        </td>
+        <td  >
+            763
+        </td>
+        <td  >
+            10078
+        </td>
+        <td  >
+            17538
+        </td>
+    </tr>
+    <tr>
+        <td>integer type matches integers, an object is not an integer</td>
+        <td  class="fastest">
+            20893
+        </td>
+        <td  >
+            759
+        </td>
+        <td  >
+            9702
+        </td>
+        <td  >
+            17664
+        </td>
+    </tr>
+    <tr>
+        <td>integer type matches integers, an array is not an integer</td>
+        <td  class="fastest">
+            23129
+        </td>
+        <td  >
+            767
+        </td>
+        <td  >
+            10999
+        </td>
+        <td  >
+            17882
+        </td>
+    </tr>
+    <tr>
+        <td>integer type matches integers, a boolean is not an integer</td>
+        <td  class="fastest">
+            23866
+        </td>
+        <td  >
+            773
+        </td>
+        <td  >
+            10783
+        </td>
+        <td  >
+            17834
+        </td>
+    </tr>
+    <tr>
+        <td>integer type matches integers, null is not an integer</td>
+        <td  class="fastest">
+            22799
+        </td>
+        <td  >
+            769
+        </td>
+        <td  >
+            13848
+        </td>
+        <td  >
+            17704
+        </td>
+    </tr>
+    <tr>
+        <td>number type matches numbers, an integer is a number</td>
+        <td  class="fastest">
+            48403
+        </td>
+        <td  >
+            862
+        </td>
+        <td  >
+            9901
+        </td>
+        <td  >
+            29017
+        </td>
+    </tr>
+    <tr>
+        <td>number type matches numbers, a float is a number</td>
+        <td  class="fastest">
+            50159
+        </td>
+        <td  >
+            861
+        </td>
+        <td  >
+            9770
+        </td>
+        <td  >
+            29388
+        </td>
+    </tr>
+    <tr>
+        <td>number type matches numbers, a string is not a number</td>
+        <td  class="fastest">
+            23868
+        </td>
+        <td  >
+            769
+        </td>
+        <td  >
+            10103
+        </td>
+        <td  >
+            17934
+        </td>
+    </tr>
+    <tr>
+        <td>number type matches numbers, an object is not a number</td>
+        <td  class="fastest">
+            20852
+        </td>
+        <td  >
+            761
+        </td>
+        <td  >
+            9744
+        </td>
+        <td  >
+            18032
+        </td>
+    </tr>
+    <tr>
+        <td>number type matches numbers, an array is not a number</td>
+        <td  class="fastest">
+            22741
+        </td>
+        <td  >
+            772
+        </td>
+        <td  >
+            11277
+        </td>
+        <td  >
+            17825
+        </td>
+    </tr>
+    <tr>
+        <td>number type matches numbers, a boolean is not a number</td>
+        <td  class="fastest">
+            24028
+        </td>
+        <td  >
+            760
+        </td>
+        <td  >
+            10924
+        </td>
+        <td  >
+            17677
+        </td>
+    </tr>
+    <tr>
+        <td>number type matches numbers, null is not a number</td>
+        <td  class="fastest">
+            23861
+        </td>
+        <td  >
+            776
+        </td>
+        <td  >
+            13498
+        </td>
+        <td  >
+            17915
+        </td>
+    </tr>
+    <tr>
+        <td>string type matches strings, 1 is not a string</td>
+        <td  class="fastest">
+            23045
+        </td>
+        <td  >
+            773
+        </td>
+        <td  >
+            9598
+        </td>
+        <td  >
+            17970
+        </td>
+    </tr>
+    <tr>
+        <td>string type matches strings, a float is not a string</td>
+        <td  class="fastest">
+            22797
+        </td>
+        <td  >
+            773
+        </td>
+        <td  >
+            9514
+        </td>
+        <td  >
+            17645
+        </td>
+    </tr>
+    <tr>
+        <td>string type matches strings, a string is a string</td>
+        <td  class="fastest">
+            52949
+        </td>
+        <td  >
+            862
+        </td>
+        <td  >
+            10301
+        </td>
+        <td  >
+            29615
+        </td>
+    </tr>
+    <tr>
+        <td>string type matches strings, an object is not a string</td>
+        <td  class="fastest">
+            20687
+        </td>
+        <td  >
+            760
+        </td>
+        <td  >
+            9779
+        </td>
+        <td  >
+            17839
+        </td>
+    </tr>
+    <tr>
+        <td>string type matches strings, an array is not a string</td>
+        <td  class="fastest">
+            23705
+        </td>
+        <td  >
+            760
+        </td>
+        <td  >
+            10970
+        </td>
+        <td  >
+            17974
+        </td>
+    </tr>
+    <tr>
+        <td>string type matches strings, a boolean is not a string</td>
+        <td  class="fastest">
+            24274
+        </td>
+        <td  >
+            774
+        </td>
+        <td  >
+            10747
+        </td>
+        <td  >
+            17873
+        </td>
+    </tr>
+    <tr>
+        <td>string type matches strings, null is not a string</td>
+        <td  class="fastest">
+            24258
+        </td>
+        <td  >
+            761
+        </td>
+        <td  >
+            13700
+        </td>
+        <td  >
+            17732
+        </td>
+    </tr>
+    <tr>
+        <td>object type matches objects, an integer is not an object</td>
+        <td  class="fastest">
+            23100
+        </td>
+        <td  >
+            771
+        </td>
+        <td  >
+            9525
+        </td>
+        <td  >
+            17867
+        </td>
+    </tr>
+    <tr>
+        <td>object type matches objects, a float is not an object</td>
+        <td  class="fastest">
+            23536
+        </td>
+        <td  >
+            768
+        </td>
+        <td  >
+            9434
+        </td>
+        <td  >
+            17671
+        </td>
+    </tr>
+    <tr>
+        <td>object type matches objects, a string is not an object</td>
+        <td  class="fastest">
+            24100
+        </td>
+        <td  >
+            772
+        </td>
+        <td  >
+            9854
+        </td>
+        <td  >
+            17926
+        </td>
+    </tr>
+    <tr>
+        <td>object type matches objects, an object is an object</td>
+        <td  class="fastest">
+            40904
+        </td>
+        <td  >
+            874
+        </td>
+        <td  >
+            9809
+        </td>
+        <td  >
+            26529
+        </td>
+    </tr>
+    <tr>
+        <td>object type matches objects, an array is not an object</td>
+        <td  class="fastest">
+            22703
+        </td>
+        <td  >
+            761
+        </td>
+        <td  >
+            11167
+        </td>
+        <td  >
+            17666
+        </td>
+    </tr>
+    <tr>
+        <td>object type matches objects, a boolean is not an object</td>
+        <td  class="fastest">
+            24083
+        </td>
+        <td  >
+            760
+        </td>
+        <td  >
+            10708
+        </td>
+        <td  >
+            17906
+        </td>
+    </tr>
+    <tr>
+        <td>object type matches objects, null is not an object</td>
+        <td  class="fastest">
+            23764
+        </td>
+        <td  >
+            770
+        </td>
+        <td  >
+            13534
+        </td>
+        <td  >
+            18016
+        </td>
+    </tr>
+    <tr>
+        <td>array type matches arrays, an integer is not an array</td>
+        <td  class="fastest">
+            22908
+        </td>
+        <td  >
+            772
+        </td>
+        <td  >
+            9651
+        </td>
+        <td  >
+            17578
+        </td>
+    </tr>
+    <tr>
+        <td>array type matches arrays, a float is not an array</td>
+        <td  class="fastest">
+            23230
+        </td>
+        <td  >
+            758
+        </td>
+        <td  >
+            9684
+        </td>
+        <td  >
+            17771
+        </td>
+    </tr>
+    <tr>
+        <td>array type matches arrays, a string is not an array</td>
+        <td  class="fastest">
+            24114
+        </td>
+        <td  >
+            773
+        </td>
+        <td  >
+            9969
+        </td>
+        <td  >
+            18199
+        </td>
+    </tr>
+    <tr>
+        <td>array type matches arrays, an object is not an array</td>
+        <td  class="fastest">
+            20843
+        </td>
+        <td  >
+            771
+        </td>
+        <td  >
+            9518
+        </td>
+        <td  >
+            17859
+        </td>
+    </tr>
+    <tr>
+        <td>array type matches arrays, an array is not an array</td>
+        <td  class="fastest">
+            50709
+        </td>
+        <td  >
+            848
+        </td>
+        <td  >
+            11322
+        </td>
+        <td  >
+            28831
+        </td>
+    </tr>
+    <tr>
+        <td>array type matches arrays, a boolean is not an array</td>
+        <td  class="fastest">
+            23780
+        </td>
+        <td  >
+            761
+        </td>
+        <td  >
+            10897
+        </td>
+        <td  >
+            18141
+        </td>
+    </tr>
+    <tr>
+        <td>array type matches arrays, null is not an array</td>
+        <td  class="fastest">
+            23913
+        </td>
+        <td  >
+            765
+        </td>
+        <td  >
+            13579
+        </td>
+        <td  >
+            17985
+        </td>
+    </tr>
+    <tr>
+        <td>boolean type matches booleans, an integer is not a boolean</td>
+        <td  class="fastest">
+            23165
+        </td>
+        <td  >
+            764
+        </td>
+        <td  >
+            9619
+        </td>
+        <td  >
+            18039
+        </td>
+    </tr>
+    <tr>
+        <td>boolean type matches booleans, a float is not a boolean</td>
+        <td  class="fastest">
+            22933
+        </td>
+        <td  >
+            767
+        </td>
+        <td  >
+            9698
+        </td>
+        <td  >
+            17396
+        </td>
+    </tr>
+    <tr>
+        <td>boolean type matches booleans, a string is not a boolean</td>
+        <td  class="fastest">
+            23910
+        </td>
+        <td  >
+            755
+        </td>
+        <td  >
+            10204
+        </td>
+        <td  >
+            17907
+        </td>
+    </tr>
+    <tr>
+        <td>boolean type matches booleans, an object is not a boolean</td>
+        <td  class="fastest">
+            20940
+        </td>
+        <td  >
+            764
+        </td>
+        <td  >
+            9602
+        </td>
+        <td  >
+            17880
+        </td>
+    </tr>
+    <tr>
+        <td>boolean type matches booleans, an array is not a boolean</td>
+        <td  class="fastest">
+            23149
+        </td>
+        <td  >
+            755
+        </td>
+        <td  >
+            11003
+        </td>
+        <td  >
+            18011
+        </td>
+    </tr>
+    <tr>
+        <td>boolean type matches booleans, a boolean is not a boolean</td>
+        <td  class="fastest">
+            53543
+        </td>
+        <td  >
+            852
+        </td>
+        <td  >
+            11001
+        </td>
+        <td  >
+            29785
+        </td>
+    </tr>
+    <tr>
+        <td>boolean type matches booleans, null is not a boolean</td>
+        <td  class="fastest">
+            24185
+        </td>
+        <td  >
+            760
+        </td>
+        <td  >
+            13787
+        </td>
+        <td  >
+            17906
+        </td>
+    </tr>
+    <tr>
+        <td>null type matches only the null object, an integer is not null</td>
+        <td  class="fastest">
+            22870
+        </td>
+        <td  >
+            762
+        </td>
+        <td  >
+            9583
+        </td>
+        <td  >
+            17993
+        </td>
+    </tr>
+    <tr>
+        <td>null type matches only the null object, a float is not null</td>
+        <td  class="fastest">
+            22853
+        </td>
+        <td  >
+            765
+        </td>
+        <td  >
+            9635
+        </td>
+        <td  >
+            17648
+        </td>
+    </tr>
+    <tr>
+        <td>null type matches only the null object, a string is not null</td>
+        <td  class="fastest">
+            24026
+        </td>
+        <td  >
+            755
+        </td>
+        <td  >
+            10156
+        </td>
+        <td  >
+            17619
+        </td>
+    </tr>
+    <tr>
+        <td>null type matches only the null object, an object is not null</td>
+        <td  class="fastest">
+            21033
+        </td>
+        <td  >
+            768
+        </td>
+        <td  >
+            9649
+        </td>
+        <td  >
+            18264
+        </td>
+    </tr>
+    <tr>
+        <td>null type matches only the null object, an array is not null</td>
+        <td  class="fastest">
+            23284
+        </td>
+        <td  >
+            767
+        </td>
+        <td  >
+            10905
+        </td>
+        <td  >
+            18234
+        </td>
+    </tr>
+    <tr>
+        <td>null type matches only the null object, a boolean is not null</td>
+        <td  class="fastest">
+            24083
+        </td>
+        <td  >
+            743
+        </td>
+        <td  >
+            10903
+        </td>
+        <td  >
+            17788
+        </td>
+    </tr>
+    <tr>
+        <td>null type matches only the null object, null is null</td>
+        <td  class="fastest">
+            54912
+        </td>
+        <td  >
+            858
+        </td>
+        <td  >
+            13801
+        </td>
+        <td  >
+            30077
+        </td>
+    </tr>
+    <tr>
+        <td>multiple types can be specified in an array, an integer is valid</td>
+        <td  class="fastest">
+            48703
+        </td>
+        <td  >
+            856
+        </td>
+        <td  >
+            9523
+        </td>
+        <td  >
+            23333
+        </td>
+    </tr>
+    <tr>
+        <td>multiple types can be specified in an array, a string is valid</td>
+        <td  class="fastest">
+            47938
+        </td>
+        <td  >
+            855
+        </td>
+        <td  >
+            9876
+        </td>
+        <td  >
+            23228
+        </td>
+    </tr>
+    <tr>
+        <td>multiple types can be specified in an array, a float is invalid</td>
+        <td  class="fastest">
+            19543
+        </td>
+        <td  >
+            753
+        </td>
+        <td  >
+            9545
+        </td>
+        <td  >
+            14974
+        </td>
+    </tr>
+    <tr>
+        <td>multiple types can be specified in an array, an object is invalid</td>
+        <td  class="fastest">
+            17870
+        </td>
+        <td  >
+            752
+        </td>
+        <td  >
+            9570
+        </td>
+        <td  >
+            15013
+        </td>
+    </tr>
+    <tr>
+        <td>multiple types can be specified in an array, an array is invalid</td>
+        <td  >
+            14582
+        </td>
+        <td  >
+            701
+        </td>
+        <td  >
+            10882
+        </td>
+        <td  >
+            15384
+        </td>
+    </tr>
+    <tr>
+        <td>multiple types can be specified in an array, a boolean is invalid</td>
+        <td  class="fastest">
+            20371
+        </td>
+        <td  >
+            750
+        </td>
+        <td  >
+            10874
+        </td>
+        <td  >
+            14796
+        </td>
+    </tr>
+    <tr>
+        <td>multiple types can be specified in an array, null is invalid</td>
+        <td  class="fastest">
+            20448
+        </td>
+        <td  >
+            738
+        </td>
+        <td  >
+            13411
+        </td>
+        <td  >
+            15391
+        </td>
+    </tr>
+    <tr>
+        <td>uniqueItems validation, unique array of integers is valid</td>
+        <td  class="fastest">
+            53894
+        </td>
+        <td  >
+            760
+        </td>
+        <td  >
+            12006
+        </td>
+        <td  >
+            30675
+        </td>
+    </tr>
+    <tr>
+        <td>uniqueItems validation, non-unique array of integers is invalid</td>
+        <td  class="fastest">
+            22443
+        </td>
+        <td  >
+            664
+        </td>
+        <td  >
+            12044
+        </td>
+        <td  >
+            17790
+        </td>
+    </tr>
+    <tr>
+        <td>uniqueItems validation, numbers are unique if mathematically unequal</td>
+        <td  class="fastest">
+            22983
+        </td>
+        <td  >
+            632
+        </td>
+        <td  >
+            11655
+        </td>
+        <td  >
+            18431
+        </td>
+    </tr>
+    <tr>
+        <td>uniqueItems validation, unique array of objects is valid</td>
+        <td  class="fastest">
+            42186
+        </td>
+        <td  >
+            772
+        </td>
+        <td  >
+            11270
+        </td>
+        <td  >
+            28915
+        </td>
+    </tr>
+    <tr>
+        <td>uniqueItems validation, non-unique array of objects is invalid</td>
+        <td  class="fastest">
+            20456
+        </td>
+        <td  >
+            677
+        </td>
+        <td  >
+            11160
+        </td>
+        <td  >
+            17278
+        </td>
+    </tr>
+    <tr>
+        <td>uniqueItems validation, unique array of nested objects is valid</td>
+        <td  class="fastest">
+            30527
+        </td>
+        <td  >
+            749
+        </td>
+        <td  >
+            10839
+        </td>
+        <td  >
+            26900
+        </td>
+    </tr>
+    <tr>
+        <td>uniqueItems validation, non-unique array of nested objects is invalid</td>
+        <td  class="fastest">
+            18154
+        </td>
+        <td  >
+            671
+        </td>
+        <td  >
+            10572
+        </td>
+        <td  >
+            17062
+        </td>
+    </tr>
+    <tr>
+        <td>uniqueItems validation, unique array of arrays is valid</td>
+        <td  class="fastest">
+            47296
+        </td>
+        <td  >
+            776
+        </td>
+        <td  >
+            11364
+        </td>
+        <td  >
+            29498
+        </td>
+    </tr>
+    <tr>
+        <td>uniqueItems validation, non-unique array of arrays is invalid</td>
+        <td  class="fastest">
+            22210
+        </td>
+        <td  >
+            669
+        </td>
+        <td  >
+            11385
+        </td>
+        <td  >
+            17819
+        </td>
+    </tr>
+    <tr>
+        <td>uniqueItems validation, 1 and true are unique</td>
+        <td  class="fastest">
+            52868
+        </td>
+        <td  >
+            778
+        </td>
+        <td  >
+            11870
+        </td>
+        <td  >
+            30090
+        </td>
+    </tr>
+    <tr>
+        <td>uniqueItems validation, 0 and false are unique</td>
+        <td  class="fastest">
+            49046
+        </td>
+        <td  >
+            776
+        </td>
+        <td  >
+            11882
+        </td>
+        <td  >
+            30525
+        </td>
+    </tr>
+    <tr>
+        <td>uniqueItems validation, unique heterogeneous types are valid</td>
+        <td  class="fastest">
+            38772
+        </td>
+        <td  >
+            757
+        </td>
+        <td  >
+            11521
+        </td>
+        <td  >
+            28556
+        </td>
+    </tr>
+    <tr>
+        <td>uniqueItems validation, non-unique heterogeneous types are invalid</td>
+        <td  class="fastest">
+            20885
+        </td>
+        <td  >
+            665
+        </td>
+        <td  >
+            11227
+        </td>
+        <td  >
+            17796
         </td>
     </tr>
 </table>
