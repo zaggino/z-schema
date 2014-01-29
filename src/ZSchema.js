@@ -1992,11 +1992,12 @@
         },
         allOf: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
-
             if (this.options.sync) {
-                schema.allOf.forEach(function (sch) {
-                    this._validateObject(report, sch, instance);
-                }, this);
+                var i = schema.allOf.length;
+                while (i--) {
+                    // _validateObject returns isValid boolean
+                    if (!this._validateObject(report, schema.allOf[i], instance)) { break; }
+                }
             } else {
                 var self = this;
                 return Promise.all(schema.allOf.map(function (sch) {

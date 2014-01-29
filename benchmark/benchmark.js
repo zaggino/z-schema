@@ -1,7 +1,7 @@
 'use strict';
 
 var Tester = require('./tester');
-var ZSchema = require('z-schema');
+var ZSchema = require('../src/ZSchema');
 var JaySchema = require('jayschema');
 var JsonSchemaSuite = require('json-schema-suite');
 var tv4 = require('tv4');
