@@ -15,7 +15,25 @@ Tester.registerValidator = function (obj) {
     this.validators.push(obj);
 };
 
+Tester.isExcluded = function (name) {
+    var retval = true,
+        grep = null;
+    process.argv.forEach(function (val, index, arr) {
+        if (val === '--grep') {
+            grep = arr[index + 1];
+            if (name.indexOf(grep) !== -1) {
+                retval = false;
+            }
+        }
+    });
+    return grep ? retval : false;
+};
+
 Tester.runOne = function (testName, json, schema, expectedResult) {
+    if (this.isExcluded(testName)) {
+        return;
+    }
+
     var suite = new Benchmark.Suite();
 
     this.validators.forEach(function (validatorObject) {
