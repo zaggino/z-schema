@@ -7,6 +7,7 @@ var _           = require('lodash'),
     Mustache    = require('mustache');
 
 var Tester = {
+    start: process.hrtime(),
     validators: [],
     results: []
 };
@@ -166,16 +167,23 @@ Tester.runDirectory = function (directory, options) {
 };
 
 Tester.saveResults = function (filename, templateName) {
+    this.end = process.hrtime();
+    var totalTimeInMinutes = ((this.end[0] - this.start[0]) / 60);
+    totalTimeInMinutes = parseInt(totalTimeInMinutes * 100, 10) / 100;
+    var currentDate = new Date().toLocaleDateString();
+
     filename = [__dirname, filename].join(path.sep);
 
     var template = fs.readFileSync([__dirname, templateName].join(path.sep)).toString();
     var html = Mustache.render(template, {
         validators: this.validators,
-        results: this.results
+        results: this.results,
+        currentDate: currentDate,
+        totalTime: totalTimeInMinutes
     });
 
     fs.writeFileSync(filename, html);
-    console.log(filename + ' created!');
+    console.log(filename + ' created on ' + currentDate + ' in ' + totalTimeInMinutes + ' minutes');
 };
 
 module.exports = Tester;

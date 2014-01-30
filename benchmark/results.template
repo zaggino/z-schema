@@ -25,6 +25,7 @@
     </style>
 </head>
 <body>
+Generated on {{currentDate}} in {{totalTime}} minutes
 <ul>
     {{#validators}}
     <li>
