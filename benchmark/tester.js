@@ -15,6 +15,7 @@ var Tester = {
 Tester.registerValidator = function (obj) {
     obj.testsPassed = 0;
     obj.testsFailed = 0;
+    obj.timesFastest = 0;
     this.validators.push(obj);
 };
 
@@ -77,6 +78,7 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
     console.log('-');
 
     var fastest = 0;
+    var fastestValidator = null;
     var suiteResult = {
         name: testName,
         results: []
@@ -98,8 +100,12 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
                 failed: true
             });
         }
-        if (ops > fastest) { fastest = ops; }
+        if (ops > fastest) {
+            fastest = ops;
+            fastestValidator = validatorObject;
+        }
     });
+    fastestValidator.timesFastest += 1;
     suiteResult.results.forEach(function (result) {
         if (result.hz === fastest) {
             result.fastest = true;
