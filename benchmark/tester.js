@@ -12,6 +12,8 @@ var Tester = {
 };
 
 Tester.registerValidator = function (obj) {
+    obj.testsPassed = 0;
+    obj.testsFailed = 0;
     this.validators.push(obj);
 };
 
@@ -48,13 +50,14 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
         }
         if (givenResult !== expectedResult) {
             console.warn(validatorObject.name + ' failed the test ' + testName);
-            return;
-            // throw new Error(validatorObject.name + ' failed test ' + testName);
+            validatorObject.testsFailed += 1;
+        } else {
+            // add it to benchmark
+            suite.add(validatorObject.name + '#' + testName, function () {
+                validatorObject.test(instance, json, schema);
+            });
+            validatorObject.testsPassed += 1;
         }
-        // add it to benchmark
-        suite.add(validatorObject.name + '#' + testName, function () {
-            validatorObject.test(instance, json, schema);
-        });
     });
 
     suite
@@ -105,11 +108,15 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
     this.results.push(suiteResult);
 };
 
-Tester.runFileContent = function (json) {
+Tester.runFileContent = function (json, options) {
     json.forEach(function (testSuite) {
         testSuite.tests.forEach(function (test) {
-            var testName = [testSuite.description, test.description].join(', ');
-            this.runOne(testName, test.data, testSuite.schema, test.valid);
+            if (options.excludeTests.indexOf(test.description) !== -1) {
+                console.log('skipping test ' + test.description);
+            } else {
+                var testName = [testSuite.description, test.description].join(', ');
+                this.runOne(testName, test.data, testSuite.schema, test.valid);
+            }
         }, this);
     }, this);
 };
@@ -147,10 +154,14 @@ function readDirToObject(dirpath, prefix) {
     return obj;
 }
 
-Tester.runDirectory = function (directory) {
+Tester.runDirectory = function (directory, options) {
     var files = readDirToObject(directory);
     for (var fileName in files) {
-        Tester.runFileContent(files[fileName]);
+        if (options.excludeFiles.indexOf(fileName) !== -1) {
+            console.log('skipping file ' + fileName);
+        } else {
+            Tester.runFileContent(files[fileName], options);
+        }
     }
 };
 

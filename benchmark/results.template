@@ -16,9 +16,26 @@
         .fastest {
             background-color: #6eff79;
         }
+        .green {
+            color: green;
+        }
+        .red {
+            color: red;
+        }
     </style>
 </head>
 <body>
+<ul>
+    {{#validators}}
+    <li>
+        {{name}}
+        <ul>
+            <li class="green">passed: {{testsPassed}}</li>
+            <li {{#testsFailed}}class="red"{{/testsFailed}}>failed: {{testsFailed}}</li>
+        </ul>
+    </li>
+    {{/validators}}
+</ul>
 <table>
     <tr>
         <th></th>
