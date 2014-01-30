@@ -9,6 +9,7 @@
 
         "jassi": "latest",
         "jayschema": "latest",
+        "jsonschema": "latest",
         "json-schema-suite": "latest",
         "tv4": "latest"
     }
