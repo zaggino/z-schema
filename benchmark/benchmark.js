@@ -2,6 +2,7 @@
 
 var Tester = require('./tester');
 var ZSchema = require('../src/ZSchema');
+var Jassi = require('jassi');
 var JaySchema = require('jayschema');
 var JsonSchemaSuite = require('json-schema-suite');
 var tv4 = require('tv4');
@@ -13,6 +14,16 @@ Tester.registerValidator({
     },
     test: function (instance, json, schema) {
         return instance.validate(json, schema) === true;
+    }
+});
+
+Tester.registerValidator({
+    name: 'jassi',
+    setup: function () {
+        return Jassi;
+    },
+    test: function (instance, json, schema) {
+        return instance(json, schema).length === 0;
     }
 });
 

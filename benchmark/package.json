@@ -4,11 +4,12 @@
     "license": "MIT",
     "dependencies": {
         "benchmark": "latest",
+        "lodash": "latest",
         "mustache": "latest",
-        "lodash": "2.4.0",
+
+        "jassi": "latest",
         "jayschema": "latest",
         "json-schema-suite": "latest",
-        "tv4": "latest",
-        "z-schema": "latest"
+        "tv4": "latest"
     }
 }
