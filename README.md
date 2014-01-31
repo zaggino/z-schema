@@ -18,6 +18,10 @@ Passing all tests here (even optional, except zeroTerminatedFloats and some URI 
 
 Will try to maintain this as much as possible, all bug reports welcome.
 
+### How does it compare to others?
+
+[rawgithub.com/zaggino/z-schema/master/benchmark/results.html](https://rawgithub.com/zaggino/z-schema/master/benchmark/results.html)
+
 ## Basic Usage
 
 ```javascript

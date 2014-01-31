@@ -50,8 +50,10 @@ Generated on {{currentDate}} in {{totalTime}} minutes
     {{#results}}
     <tr>
         <td>{{name}}</td>
-        {{#results}}    
-        <td {{#failed}}class="failed"{{/failed}} {{#fastest}}class="fastest"{{/fastest}}>
+        {{#results}}
+        <td {{#title}}title="{{title}}"{{/title}}
+            {{#failed}}class="failed"{{/failed}}
+            {{#fastest}}class="fastest"{{/fastest}}>
             {{percentage}}% ({{hz}})
         </td>
         {{/results}}

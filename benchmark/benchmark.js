@@ -2,7 +2,7 @@
 
 var Tester = require('./tester');
 var ZSchema = require('../src/ZSchema');
-var Jassi = require('jassi');
+// var Jassi = require('jassi');
 var JaySchema = require('jayschema');
 var JsonSchema = require('jsonschema');
 var JsonSchemaSuite = require('json-schema-suite');
@@ -18,6 +18,7 @@ Tester.registerValidator({
     }
 });
 
+/* jassi is not included because it fails too many tests
 Tester.registerValidator({
     name: 'jassi',
     setup: function () {
@@ -27,6 +28,7 @@ Tester.registerValidator({
         return instance(json, schema).length === 0;
     }
 });
+*/
 
 Tester.registerValidator({
     name: 'jayschema',

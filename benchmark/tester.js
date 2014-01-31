@@ -39,6 +39,7 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
     }
 
     var suite = new Benchmark.Suite();
+    var fails = {};
 
     this.validators.forEach(function (validatorObject) {
         // setup instance
@@ -48,11 +49,15 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
         try {
             givenResult = validatorObject.test(instance, json, schema);
         } catch (e) {
+            fails[validatorObject.name] = e;
             givenResult = e;
         }
         if (givenResult !== expectedResult) {
             console.warn(validatorObject.name + ' failed the test ' + testName);
             validatorObject.testsFailed += 1;
+            if (!fails[validatorObject.name]) {
+                fails[validatorObject.name] = 'expected was ' + expectedResult + ' but validator returned ' + givenResult;
+            }
         } else {
             // add it to benchmark
             suite.add(validatorObject.name + '#' + testName, function () {
@@ -97,7 +102,8 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
             ops = -1;
             suiteResult.results.push({
                 hz: ops,
-                failed: true
+                failed: true,
+                title: fails[validatorObject.name].toString()
             });
         }
         if (ops > fastest) {
@@ -111,6 +117,7 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
             result.fastest = true;
         }
         result.percentage = parseInt(result.hz / fastest * 100, 10);
+        if (Number.isNaN(result.percentage)) { result.percentage = 0; }
     });
     this.results.push(suiteResult);
 };
