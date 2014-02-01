@@ -111,7 +111,9 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
             fastestValidator = validatorObject;
         }
     });
-    fastestValidator.timesFastest += 1;
+    if (fastestValidator) { // if all fail, no-one is the fastest
+        fastestValidator.timesFastest += 1;
+    }
     suiteResult.results.forEach(function (result) {
         if (result.hz === fastest) {
             result.fastest = true;
