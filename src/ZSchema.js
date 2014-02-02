@@ -185,15 +185,6 @@
         isAbsoluteUri: function (str) {
             return Utils.getRegExp('^https?\:\/\/').test(str);
         },
-        keys: function (obj) {
-            var rv = [], key;
-            for (key in obj) {
-                if (obj.hasOwnProperty(key)) {
-                    rv.push(key);
-                }
-            }
-            return rv;
-        },
         forEach: function (obj, callback, context) {
             if (Array.isArray(obj)) {
                 return obj.forEach(callback, context);
@@ -275,8 +266,8 @@
             // both are objects, and:
             if (this.isObject(json1) && this.isObject(json2)) {
                 // have the same set of property names; and
-                var keys1 = this.keys(json1);
-                var keys2 = this.keys(json2);
+                var keys1 = Object.keys(json1);
+                var keys2 = Object.keys(json2);
                 if (!this.areEqual(keys1, keys2)) {
                     return false;
                 }
@@ -1343,9 +1334,9 @@
             additionalProperties = {};
         }
         // p - The property set from "properties".
-        var p = Utils.keys(schema.properties || {});
+        var p = Object.keys(schema.properties || {});
         // pp - The property set from "patternProperties". Elements of this set will be called regexes for convenience.
-        var pp = Utils.keys(schema.patternProperties || {});
+        var pp = Object.keys(schema.patternProperties || {});
         // m - The property name of the child.
         Utils.forEach(instance, function (propertyValue, m) {
             // s - The set of schemas for the child instance.
@@ -1882,16 +1873,16 @@
             if (!Utils.isObject(instance)) {
                 return;
             }
-            report.expect(Utils.keys(instance).length <= schema.maxProperties,
-                          'OBJECT_PROPERTIES_MAXIMUM', {count: Utils.keys(instance).length, maximum: schema.maxProperties});
+            var keysCount = Object.keys(instance).length;
+            report.expect(keysCount <= schema.maxProperties, 'OBJECT_PROPERTIES_MAXIMUM', {count: keysCount, maximum: schema.maxProperties});
         },
         minProperties: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.2.2
             if (!Utils.isObject(instance)) {
                 return;
             }
-            report.expect(Utils.keys(instance).length >= schema.minProperties,
-                          'OBJECT_PROPERTIES_MINIMUM', {count: Utils.keys(instance).length, minimum: schema.maxProperties});
+            var keysCount = Object.keys(instance).length;
+            report.expect(keysCount >= schema.minProperties, 'OBJECT_PROPERTIES_MINIMUM', {count: keysCount, minimum: schema.minProperties});
         },
         required: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.3.2
@@ -1917,11 +1908,11 @@
             var patternProperties = schema.patternProperties !== undefined ? schema.patternProperties : {};
             if (schema.additionalProperties === false) {
                 // The property set of the instance to validate.
-                var s = Utils.keys(instance);
+                var s = Object.keys(instance);
                 // The property set from "properties".
-                var p = Utils.keys(properties);
+                var p = Object.keys(properties);
                 // The property set from "patternProperties".
-                var pp = Utils.keys(patternProperties);
+                var pp = Object.keys(patternProperties);
                 // remove from "s" all elements of "p", if any;
                 s = Utils.difference(s, p);
                 // for each regex in "pp", remove all elements of "s" which this regex matches.
