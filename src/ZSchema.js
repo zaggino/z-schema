@@ -2043,13 +2043,15 @@
             }
 
             if (this.options.sync) {
-                schema.oneOf.forEach(function (sch) {
+                var i = schema.oneOf.length;
+                while (i--) {
                     var subReport = new Report(report);
-                    this._validateObject(subReport, sch, instance);
-                    if (subReport.isValid()) { passes++; }
-                }, this);
-                finish();
-                return;
+                    subReports.push(subReport);
+                    if (this._validateObject(subReport, schema.oneOf[i], instance)) {
+                        passes++;
+                    }
+                }
+                return finish();
             } else {
                 var self = this;
                 return Promise.all(schema.oneOf.map(function (oneOf) {
