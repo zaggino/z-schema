@@ -1998,20 +1998,20 @@
         },
         anyOf: function (report, schema, instance) {
             // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.2
-            var passes = 0;
             var subReports = [];
-
             if (this.options.sync) {
-                schema.anyOf.forEach(function (sch) {
-                    if (passes > 0) { return; }
+                var passed = false,
+                    i = schema.anyOf.length;
+                while (i-- && !passed) {
                     var subReport = new Report(report);
-                    this._validateObject(subReport, sch, instance);
-                    if (subReport.isValid()) { passes++; }
-                }, this);
-                report.expect(passes >= 1, 'ANY_OF_MISSING', {}, passes === 0 ? subReports : null);
+                    subReports.push(subReport);
+                    passed = this._validateObject(subReport, schema.anyOf[i], instance);
+                }
+                report.expect(passed, 'ANY_OF_MISSING', {}, subReports);
                 return;
             } else {
                 var self = this,
+                    passes = 0,
                     p = Promise.resolve();
                 schema.anyOf.forEach(function (anyOf) {
                     p = p.then(function () {
