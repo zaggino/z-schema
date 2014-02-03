@@ -127,10 +127,10 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
 Tester.runFileContent = function (json, options) {
     json.forEach(function (testSuite) {
         testSuite.tests.forEach(function (test) {
-            if (options.excludeTests.indexOf(test.description) !== -1) {
-                console.log('skipping test ' + test.description);
+            var testName = [testSuite.description, test.description].join(', ');
+            if (options.excludeTests.indexOf(testName) !== -1) {
+                console.log('skipping test ' + testName);
             } else {
-                var testName = [testSuite.description, test.description].join(', ');
                 this.runOne(testName, test.data, testSuite.schema, test.valid);
             }
         }, this);

@@ -82,8 +82,8 @@ Tester.runDirectory(__dirname + '/../json_schema_test_suite/tests/draft4/', {
     excludeFiles: ['optional/zeroTerminatedFloats.json'],
     excludeTests: [
         // these two tests consider different uri then is desired to be valid
-        'an invalid URI',
-        'an invalid URI though valid URI reference',
+        'validation of URIs, an invalid URI',
+        'validation of URIs, an invalid URI though valid URI reference',
         // these tests require validator to work with remote schema which they can't download in sync test
         'valid definition, valid definition schema',
         'invalid definition, invalid definition schema',
