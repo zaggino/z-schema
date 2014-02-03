@@ -80,8 +80,24 @@ Tester.runOne('advancedObject', advancedObject, advancedSchema, true);
 
 Tester.runDirectory(__dirname + '/../json_schema_test_suite/tests/draft4/', {
     excludeFiles: ['optional/zeroTerminatedFloats.json'],
-    excludeTests: ['an invalid URI',
-                   'an invalid URI though valid URI reference']
+    excludeTests: [
+        // these two tests consider different uri then is desired to be valid
+        'an invalid URI',
+        'an invalid URI though valid URI reference',
+        // these tests require validator to work with remote schema which they can't download in sync test
+        'valid definition, valid definition schema',
+        'invalid definition, invalid definition schema',
+        'remote ref, containing refs itself, remote ref valid',
+        'remote ref, containing refs itself, remote ref invalid',
+        'remote ref, remote ref valid',
+        'remote ref, remote ref invalid',
+        'fragment within remote ref, remote fragment valid',
+        'fragment within remote ref, remote fragment invalid',
+        'ref within remote ref, ref within ref valid',
+        'ref within remote ref, ref within ref invalid',
+        'change resolution scope, changed scope ref valid',
+        'change resolution scope, changed scope ref invalid'
+    ]
 });
 
 Tester.saveResults('results.html', 'results.template');
