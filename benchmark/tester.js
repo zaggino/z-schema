@@ -33,7 +33,7 @@ Tester.isExcluded = function (name) {
     return grep ? retval : false;
 };
 
-Tester.runOne = function (testName, json, schema, expectedResult) {
+Tester.runOne = function (testName, testJson, testSchema, expectedResult) {
     if (this.isExcluded(testName)) {
         return;
     }
@@ -42,6 +42,9 @@ Tester.runOne = function (testName, json, schema, expectedResult) {
     var fails = {};
 
     this.validators.forEach(function (validatorObject) {
+        var json = _.cloneDeep(testJson);
+        var schema = _.cloneDeep(testSchema);
+
         // setup instance
         var instance = validatorObject.setup();
         // verify that validator really works
