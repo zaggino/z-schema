@@ -4,8 +4,9 @@ var Tester = require('./tester');
 var ZSchema = require('../src/ZSchema');
 // var Jassi = require('jassi');
 var JaySchema = require('jayschema');
-var JsonSchema = require('jsonschema');
+var jjv = require('jjv');
 var JsonSchemaSuite = require('json-schema-suite');
+var JsonSchema = require('jsonschema');
 var tv4 = require('tv4');
 
 Tester.registerValidator({
@@ -41,12 +42,12 @@ Tester.registerValidator({
 });
 
 Tester.registerValidator({
-    name: 'jsonschema',
+    name: 'jjv',
     setup: function () {
-        return new JsonSchema.Validator();
+        return jjv();
     },
     test: function (instance, json, schema) {
-        return instance.validate(json, schema).errors.length === 0;
+        return instance.validate(schema, json) === null;
     }
 });
 
@@ -57,6 +58,16 @@ Tester.registerValidator({
     },
     test: function (instance, json, schema) {
         return instance.validateRaw(schema, json) === true;
+    }
+});
+
+Tester.registerValidator({
+    name: 'jsonschema',
+    setup: function () {
+        return new JsonSchema.Validator();
+    },
+    test: function (instance, json, schema) {
+        return instance.validate(json, schema).errors.length === 0;
     }
 });
 
