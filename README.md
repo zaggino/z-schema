@@ -18,6 +18,10 @@ Passing all tests here (even optional, except zeroTerminatedFloats and some URI 
 
 Will try to maintain this as much as possible, all bug reports welcome.
 
+### Grunt automatization
+
+If you need to automatize validation of your schemas, there's a Grunt plugin [grunt-z-schema](https://github.com/petrbela/grunt-z-schema) by [Petr Bela](https://github.com/petrbela)
+
 ### How does it compare to others?
 
 [rawgithub.com/zaggino/z-schema/master/benchmark/results.html](https://rawgithub.com/zaggino/z-schema/master/benchmark/results.html)
