@@ -829,7 +829,7 @@
         var self = this;
 
         if (Array.isArray(schema)) {
-            return this.options.sync ? this.compileSchemasSync(schema) : this.compileSchemas(schema);
+            return this.options.sync ? this.compileSchemasSync(schema) : this.compileSchemas(schema, callback);
         }
 
         var report = new Report();

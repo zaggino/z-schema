@@ -93,6 +93,18 @@ describe("https://github.com/zaggino/z-schema/issues/13", function () {
         });
     });
 
+    it("mainSchema should fail compilation with only one schema", function (done) {
+        var validator = new ZSchema();
+        validator.compileSchema([mainSchema, schemaA], function (err) {
+            try {
+                assert.isDefined(err);
+                done();
+            } catch (e) {
+                done(e);
+            }
+        });
+    });
+
     it("after compiling schemaA and schemaB, mainSchema compilation should pass", function (done) {
         var validator = new ZSchema();
         validator.compileSchema(schemaA).then(function () {
