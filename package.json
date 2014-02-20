@@ -1,56 +1,65 @@
 {
-    "name": "z-schema",
-    "description": "JSON schema validator",
-    "homepage": "https://github.com/zaggino/z-schema",
-    "keywords": ["json", "schema", "validator"],
-    "license": "MIT",
-    "author": {
-        "name": "Martin Zagora",
-        "email": "zaggino@gmail.com",
-        "url": "https://github.com/zaggino"
+  "name": "z-schema",
+  "description": "JSON schema validator",
+  "homepage": "https://github.com/zaggino/z-schema",
+  "keywords": [
+    "json",
+    "schema",
+    "validator"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Martin Zagora",
+    "email": "zaggino@gmail.com",
+    "url": "https://github.com/zaggino"
+  },
+  "contributors": [
+    {
+      "name": "Martin Zagora",
+      "email": "zaggino@gmail.com",
+      "url": "https://github.com/zaggino"
     },
-    "contributors": [
-        {
-            "name": "Martin Zagora",
-            "email": "zaggino@gmail.com",
-            "url": "https://github.com/zaggino"
-        },
-        {
-            "name": "Oleksiy Krivoshey",
-            "email": "oleksiyk@gmail.com",
-            "url": "https://github.com/oleksiyk"
-        },
-        {
-            "name": "Jurie-Jan Botha",
-            "url": "https://github.com/juriejan"
-        }
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/zaggino/z-schema.git"
+    {
+      "name": "Oleksiy Krivoshey",
+      "email": "oleksiyk@gmail.com",
+      "url": "https://github.com/oleksiyk"
     },
-    "main": "src/ZSchema.js",
-    "files": ["src/ZSchema.js", "src/ZSchema.min.js", "LICENSE", "README.md"],
-    "version": "2.4.4",
-    "dependencies": {
-        "bluebird": "~1.0.*",
-        "request": "~2.*"
-    },
-    "devDependencies": {
-        "chai": "latest",
-        "grunt": "latest",
-        "grunt-contrib-uglify": "latest",
-        "grunt-contrib-jshint": "latest",
-        "grunt-simple-mocha": "latest",
-        "mocha": "latest",
-        "uglify-js": "latest"
-    },
-    "bugs": {
-        "url": "https://github.com/zaggino/z-schema/issues",
-        "email": "zaggino@gmail.com"
-    },
-    "scripts": {
-        "prepublish": "grunt",
-        "test": "grunt test"
+    {
+      "name": "Jurie-Jan Botha",
+      "url": "https://github.com/juriejan"
     }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zaggino/z-schema.git"
+  },
+  "main": "src/ZSchema.js",
+  "files": [
+    "src/ZSchema.js",
+    "src/ZSchema.min.js",
+    "LICENSE",
+    "README.md"
+  ],
+  "version": "2.4.5",
+  "dependencies": {
+    "bluebird": "~1.0.5",
+    "request": "~2.34.0"
+  },
+  "devDependencies": {
+    "chai": "latest",
+    "grunt": "~0.4.2",
+    "grunt-contrib-uglify": "latest",
+    "grunt-contrib-jshint": "latest",
+    "grunt-simple-mocha": "latest",
+    "mocha": "latest",
+    "uglify-js": "latest"
+  },
+  "bugs": {
+    "url": "https://github.com/zaggino/z-schema/issues",
+    "email": "zaggino@gmail.com"
+  },
+  "scripts": {
+    "prepublish": "grunt",
+    "test": "grunt test"
+  }
 }
