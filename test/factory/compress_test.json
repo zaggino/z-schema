@@ -1,0 +1,33 @@
+{
+    "$schema":     "http://json-schema.org/draft-04/schema#",
+    "required":    ["id", "name"],
+    "type":        "object",
+    "properties":  {
+        "id":      {
+            "type":    "number",
+            "default": 100
+        },
+        "name":    {
+            "type": "string"
+        },
+        "options": {
+            "type":  "array",
+            "items": {
+                "$ref": "#/definitions/option"
+            }
+        }
+    },
+    "definitions": {
+        "option": {
+            "type":       "object",
+            "properties": {
+                "name":  {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}

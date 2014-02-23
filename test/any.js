@@ -14,7 +14,7 @@ describe('Validations for any type:', function () {
             if (err) {
                 console.log(err);
             }
-            assert.isTrue(report.valid);
+            assert.isTrue(report && report.valid);
             done();
         });
     });
