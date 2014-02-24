@@ -2197,6 +2197,67 @@
             return this;
         },
 
+        option: function (name, def) {
+            if (this.arguments.length < 2) {
+                def = null;
+            }
+            return this.options.hasOwnProperty(name) ? this.options[name] : def;
+        },
+
+        uhtStringLength: function () {
+            var minStringLength = this.option('uhtStringLengthMin', 1);
+            var maxStringLength = this.option('uhtStringLengthMax', 10);
+            var range = maxStringLength - minStringLength;
+            var count = this._randomGenerator('__unhandledType')(range);
+            this._randomGenerator('__unhandledType').string(count);
+        },
+
+        _randomString: function () {
+            return this._randomGenerator('__unhandledType').string(this.uhtStringLength());
+        },
+
+        _randomNumber: function (minNumber, maxNumber, sigDigits) {
+            switch (arguments.length) {
+                case 0:
+                    minNumber = this.option('uhtNumberMin', -1000);
+                    maxNumber = this.option('uhtNumberMax', 1000);
+                    sigDigits = this.option('sigDigits', 4);
+                    break;
+
+                case 1:
+                    maxNumber = this.option('uhtNumberMax');
+                    sigDigits = this.option('sigDigits', 4);
+                    break;
+
+                case 2:
+                    sigDigits = this.option('sigDigits', 4);
+                    break;
+            }
+
+            var scale = Math.pow(10, sigDigits);
+
+            var range = maxNumber - minNumber;
+
+            return minNumber + this.random('__unhandledType', range * scale) / scale;
+        },
+
+        unhandledType: function (type) {
+            var out;
+            switch (type) {
+                case 'string':
+                    out = this._randomString();
+                    break;
+
+                case 'number':
+                    out = this._randomNumber();
+                    break;
+
+                default:
+                    out = {};
+            }
+            return out;
+        },
+
         /**
          * generates a random number for a given seed.
          * //@TODO: tie with index.
@@ -2209,6 +2270,11 @@
             if (!range) {
                 range = this.options.arraySize;
             }
+
+            return this._randomGenerator(seed)(range);
+        },
+
+        _randomGenerator: function (seed) {
             if (!this._randomGenerators) {
                 this._randomGenerators = {};
             }
@@ -2220,7 +2286,8 @@
 
                 this._randomGenerators[seed] = Factory._rs.create(seed);
             }
-            return this._randomGenerators[seed](range);
+
+            return this._randomGenerators[seed];
         },
 
         reset: function () {
@@ -2311,7 +2378,7 @@
                     output[name] = definition.default;
                 } else {
                     console.log('cannot handle ' + pattern);
-                    output[name] = {};
+                    output[name] = self.unhandledType(definition.type);
                 }
 
             });
@@ -2340,14 +2407,16 @@
                 out.push(handler.handle(pattern));
             } else {
                 for (var i = 0; i < count; ++i) {
-                    if (definition.items) {
-                        if (itemHandler) {
-                            out.push(itemHandler.handle(pattern, i));
-                        } else {
-                            var arrayItem = this.createSchemaObject(definition.items, pattern.concat(['items']), i);
-                            out.push(arrayItem);
-                        }
+
+                    if (itemHandler) {
+                        out.push(itemHandler.handle(pattern, i));
+                    } else if (definition.items) {
+                        var arrayItem = this.createSchemaObject(definition.items, pattern.concat(['items']), i);
+                        out.push(arrayItem);
+                    } else if (definition.type) {
+                        out.push(this.unhandledType(definition.type));
                     }
+
                 }
             }
 

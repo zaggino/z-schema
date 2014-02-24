@@ -66,7 +66,6 @@ describe('Factory', function () {
                 assert.equal(firstItem.options[2].name, 'option_2', 'name set to "option_0"');
                 assert.equal(firstItem.options[2].value, 500, 'name set to 500');
                 assert.equal(firstItem.options.length, 3, 'length is 3');
-
                 done();
             });
 
