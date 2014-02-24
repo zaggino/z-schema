@@ -1,5 +1,5 @@
     var _defaultFactoryOptions = {
-        arraySize: 4,
+        arraySize:            4,
         showOptionalElements: 0 //a number from 0 to 1 -- pseudorandom for optional
     };
 
@@ -27,7 +27,7 @@
         },
 
         option: function (name, def) {
-            if (this.arguments.length < 2) {
+            if (arguments.length < 2) {
                 def = null;
             }
             return this.options.hasOwnProperty(name) ? this.options[name] : def;
@@ -38,11 +38,15 @@
             var maxStringLength = this.option('uhtStringLengthMax', 10);
             var range = maxStringLength - minStringLength;
             var count = this._randomGenerator('__unhandledType')(range);
-            this._randomGenerator('__unhandledType').string(count);
+            return (minStringLength + count);
         },
 
         _randomString: function () {
             return this._randomGenerator('__unhandledType').string(this.uhtStringLength());
+        },
+
+        _randomBoolean: function () {
+            return Math.random() > 0.5;
         },
 
         _randomNumber: function (minNumber, maxNumber, sigDigits) {
@@ -79,6 +83,10 @@
 
                 case 'number':
                     out = this._randomNumber();
+                    break;
+
+                case 'boolean':
+                    out = this._randomBoolean();
                     break;
 
                 default:
@@ -140,25 +148,23 @@
             return null;
         },
 
-        schemaSubItem: function (schemaNode, path) {
-            var out = null;
-            switch (schemaNode.type) {
-                case 'object':
-                    out = schemaNode.properties[path];
-                    break;
-            }
-            return null;
-        },
-
         /**
          *
          * @param schemaNode {object} the item being populated
          * @param path {[string]} the current place in the schema (optional);
          */
 
-        create: function (schemaNode, path) {
-            if (!schemaNode) {
-                schemaNode = this.schema;
+        create: function () {
+            var out = this._create(this.schema, []);
+
+            ++this._count;
+            return out;
+        },
+
+        _create: function (definition, path) {
+
+            if (!definition) {
+                throw new Error('error in _create: no definition');
             }
             if (!path) {
                 path = [];
@@ -166,21 +172,30 @@
 
             var output;
 
-            switch (schemaNode.type) {
+            switch (definition.type) {
                 case 'object':
-                    output = this.createSchemaObject(schemaNode, path);
+                    output = this.createSchemaObject(definition, path);
                     break;
 
                 case 'array':
-                    output = this.createSchemaArray(schemaNode, path);
+                    output = this.createSchemaArray(definition, path);
                     break;
 
+                case 'string':
+                    output = this.createSchemaScalar(definition, path);
+                    break;
+
+                case 'number':
+                    output = this.createSchemaScalar(definition, path);
+                    break;
+
+                //@TODO: handle primitive types
+
                 default:
-                    console.log("cannot handle schema node type " + schemaNode.type);
+                    console.log("cannot handle schema node type " + definition.type);
 
             }
 
-            ++this._count;
             return output;
         },
 
@@ -203,10 +218,10 @@
                     output[name] = handler.handle(subPattern, count);
                 } else if (definition.type == 'array') {
                     output[name] = self.createSchemaArray(definition, subPattern);
-                } else if (definition.default) {
+                } else if (definition.hasOwnProperty('default')) {
                     output[name] = definition.default;
                 } else {
-                    console.log('cannot handle ' + pattern);
+                    console.log('cannot handle object property %s for pattern %s ', name, pattern);
                     output[name] = self.unhandledType(definition.type);
                 }
 
@@ -215,37 +230,63 @@
             return output;
         },
 
+        createSchemaScalar: function (definition, path) {
+            if (!definition) {
+                throw new Error('no definition passed to createSchemaArray');
+            }
+            var handler = this.getPathHandler(path);
+
+            if (handler) {
+                return handler.handle(path);
+            } else if (definition.default) {
+                return definition.default;
+            } else if (definition.type == 'string' && definition.enum) {
+                return definition.enum[Math.floor(Math.random() * definition.enum.length)];
+            } else {
+                return this.unhandledType(definition.type);
+            }
+        },
+
         createSchemaArray: function (definition, pattern) {
+            if (!definition) {
+                throw new Error('no definition passed to createSchemaArray');
+            }
             var handler = this.getPathHandler(pattern);
             var itemHandler = this.getPathHandler(pattern.concat(['items']));
 
             var minItems = definition.minItems || 0;
             var maxItems = definition.maxItems || minItems;
-            var count = minItems;
-
-            if (maxItems > minItems) {
-                count += this.random(pattern + '.count', maxItems - minItems + 1);
-            } else if (!minItems) {
-                count += this.options.arraySize;
-            }
 
             //  console.log('minItems: %s, maxItems: %s, count', minItems, maxItems, count);
 
             var out = [];
             if (handler) {
-                out.push(handler.handle(pattern));
+                out = handler.handle(pattern);
             } else {
-                for (var i = 0; i < count; ++i) {
-
-                    if (itemHandler) {
-                        out.push(itemHandler.handle(pattern, i));
-                    } else if (definition.items) {
-                        var arrayItem = this.createSchemaObject(definition.items, pattern.concat(['items']), i);
-                        out.push(arrayItem);
-                    } else if (definition.type) {
-                        out.push(this.unhandledType(definition.type));
+                if (definition.items && ZSchema.Utils.isArray(definition.items)) {
+                    for (var d = 0; d < definition.items.length; ++d) {
+                        var subDefinition = definition.items[d];
+                        out.push(this._create(subDefinition, pattern.concat(['item'])));
                     }
+                } else {
+                    var count = minItems;
 
+                    if (maxItems > minItems) {
+                        count += this.random(pattern + '.count', maxItems - minItems + 1);
+                    } else if (!minItems) {
+                        count += this.options.arraySize;
+                    }
+                    for (var i = 0; i < count; ++i) {
+
+                        if (itemHandler) {
+                            out.push(itemHandler.handle(pattern, i));
+                        } else if (definition.items) {
+                            var arrayItem = this.createSchemaObject(definition.items, pattern.concat(['items']), i);
+                            out.push(arrayItem);
+                        } else if (definition.type) {
+                            out.push(this.unhandledType(definition.type));
+                        }
+                    }
                 }
             }
 

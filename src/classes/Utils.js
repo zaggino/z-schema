@@ -211,13 +211,32 @@
                 return;
             }
 
-            request(url, function (error, response, body) {
+            utils.getUrl(url, function (error, response, body) {
                 if (error) {
                     callback(error);
                     return;
                 }
                 returnSchemaFromString(self._getRemoteSchemaCache[url] = body, url);
             });
+        },
+        getUrl: function getUrl(url, callback) {
+            if (typeof XMLHttpRequest != 'undefined') {
+                var httpRequest = new XMLHttpRequest;
+                httpRequest.open('GET', url, true);
+                httpRequest.onload = function(){
+                    if (httpRequest.status >= 200 && request.status < 400){
+                        // Success!
+                        callback(null, {}, request.responseText);
+                    } else {
+                        // We reached our target server, but it returned an error
+                        callback(new Error('bad status: ' + httpRequest.status));
+                    }
+                };
+                return;
+            } else if (!getUrl.request) {
+                getUrl.request = require('request');
+            }
+            getUrl.request.get(url, callback);
         },
         // query should be valid json pointer
         resolveSchemaQuery: function resolveSchemaQuery(schema, rootSchema, queryStr, allowNull, sync) {

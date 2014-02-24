@@ -1,16 +1,36 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "required": ["id", "name"],
-    "type": "object",
-    "properties": {
-        "id": {
-            "type": "number",
+    "$schema":     "http://json-schema.org/draft-04/schema#",
+    "required":    ["id", "name"],
+    "type":        "object",
+    "properties":  {
+        "id":   {
+            "type":    "number",
             "default": 100
         },
         "name": {
             "type": "string"
         },
 
+        "address":   {
+            "type":  "array",
+            "items": [
+                {
+                    "title": "address",
+                    "type":  "string"
+                },
+                {
+                    "title":   "city",
+                    "type":    "string",
+                    "default": "San Francisco"
+                },
+                {
+                    "title":   "state",
+                    "type":    "string",
+                    "maxSize": 2,
+                    "default": "CA"
+                }
+            ]
+        },
         "purchases": {
             "$ref": "#/definitions/productList"
         },
@@ -20,8 +40,8 @@
         },
 
         "options": {
-            "type": "array",
-            "items": {
+            "type":     "array",
+            "items":    {
                 "$ref": "#/definitions/option"
             },
             "minItems": 3,
@@ -30,7 +50,7 @@
     },
     "definitions": {
         "productList": {
-            "type": "array",
+            "type":  "array",
             "items": {
                 "$ref": "#/definitions/product"
             }
@@ -41,7 +61,7 @@
         },
 
         "product": {
-            "type": "object",
+            "type":       "object",
             "properties": {
                 "cost": {
                     "$ref": "#/definitions/currency"
@@ -53,9 +73,9 @@
         },
 
         "option": {
-            "type": "object",
+            "type":       "object",
             "properties": {
-                "name": {
+                "name":  {
                     "type": "string"
                 },
                 "value": {
