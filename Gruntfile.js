@@ -20,6 +20,7 @@ module.exports = function (grunt) {
                     'src/classes/ValidationErrors.js',
                     'src/classes/FormatValidators.js',
                     'src/classes/InstanceValidators.js',
+                    'src/classes/Factory.js',
                     'src/classes/suffix.js'
                 ],
                 dest: 'src/ZSchema.js'

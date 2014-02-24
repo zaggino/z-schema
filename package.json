@@ -45,7 +45,9 @@
     "bluebird": "~1.0.5",
     "request": "~2.34.0",
     "grunt-concat": "~0.1.6",
-    "grunt-contrib-concat": "~0.3.0"
+    "grunt-contrib-concat": "~0.3.0",
+    "underscore": "~1.6.0",
+    "random-seed": "~0.1.0"
   },
   "devDependencies": {
     "chai": "latest",
