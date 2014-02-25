@@ -379,8 +379,7 @@
                     if (!valid) {
                         report.addError('FORMAT', {format: schema.format});
                     }
-                })
-                .catch(function (err) { // validators may throw Error or return rejected promise
+                })["catch"](function (err) { // validators may throw Error or return rejected promise
                     report.addError('FORMAT', {format: schema.format, error: err});
                 });
         }

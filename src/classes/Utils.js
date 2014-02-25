@@ -9,7 +9,7 @@
             return typeof what === 'string';
         },
         isInteger: function (what) {
-            return this.isNumber(what) && what % 1 === 0;
+            return Utils.isNumber(what) && what % 1 === 0;
         },
         isNumber: function (what) {
             return typeof what === 'number' && Number.isFinite(what);
@@ -25,27 +25,27 @@
         },
         whatIs: function (what) {
             if (what === undefined) {
-                return 'undefined';
+                return "undefined";
             } else if (what === null) {
-                return 'null';
-            } else if (this.isBoolean(what)) {
-                return 'boolean';
-            } else if (this.isString(what)) {
-                return 'string';
-            } else if (this.isArray(what)) {
-                return 'array';
-            } else if (this.isInteger(what)) {
-                return 'integer';
-            } else if (this.isNumber(what)) {
-                return 'number';
-            } else if (this.isObject(what)) {
-                return 'object';
-            } else if (this.isFunction(what)) {
-                return 'function';
+                return "null";
+            } else if (Utils.isBoolean(what)) {
+                return "boolean";
+            } else if (Utils.isString(what)) {
+                return "string";
+            } else if (Utils.isArray(what)) {
+                return "array";
+            } else if (Utils.isInteger(what)) {
+                return "integer";
+            } else if (Utils.isNumber(what)) {
+                return "number";
+            } else if (Utils.isObject(what)) {
+                return "object";
+            } else if (Utils.isFunction(what)) {
+                return "function";
             } else if (Number.isNaN(what)) {
-                return 'not-a-number';
+                return "not-a-number";
             } else {
-                throw new Error('Utils.whatIs does not know what this is: ' + what);
+                throw new Error("Utils.whatIs does not know what Utils is: " + what);
             }
         },
         isUniqueArray: function (arr, match) {
@@ -53,7 +53,7 @@
             var i, j, l = arr.length;
             for (i = 0; i < l; i++) {
                 for (j = i + 1; j < l; j++) {
-                    if (this.areEqual(arr[i], arr[j])) {
+                    if (Utils.areEqual(arr[i], arr[j])) {
                         match.index1 = i;
                         match.index2 = j;
                         return false;
@@ -128,15 +128,15 @@
             var i, len;
 
             // both are arrays, and:
-            if (this.isArray(json1) && this.isArray(json2)) {
+            if (Utils.isArray(json1) && Utils.isArray(json2)) {
                 // have the same number of items; and
                 if (json1.length !== json2.length) {
                     return false;
                 }
-                // items at the same index are equal according to this definition; or
+                // items at the same index are equal according to Utils definition; or
                 len = json1.length;
                 for (i = 0; i < len; i++) {
-                    if (!this.areEqual(json1[i], json2[i])) {
+                    if (!Utils.areEqual(json1[i], json2[i])) {
                         return false;
                     }
                 }
@@ -144,17 +144,17 @@
             }
 
             // both are objects, and:
-            if (this.isObject(json1) && this.isObject(json2)) {
+            if (Utils.isObject(json1) && Utils.isObject(json2)) {
                 // have the same set of property names; and
                 var keys1 = Object.keys(json1);
                 var keys2 = Object.keys(json2);
-                if (!this.areEqual(keys1, keys2)) {
+                if (!Utils.areEqual(keys1, keys2)) {
                     return false;
                 }
-                // values for a same property name are equal according to this definition.
+                // values for a same property name are equal according to Utils definition.
                 len = keys1.length;
                 for (i = 0; i < len; i++) {
-                    if (!this.areEqual(json1[keys1[i]], json2[keys1[i]])) {
+                    if (!Utils.areEqual(json1[keys1[i]], json2[keys1[i]])) {
                         return false;
                     }
                 }
@@ -171,14 +171,14 @@
         },
         _getRegExpCache: {},
         getRegExp: function (pattern) {
-            if (!this._getRegExpCache[pattern]) {
-                this._getRegExpCache[pattern] = new RegExp(pattern);
+            if (!Utils._getRegExpCache[pattern]) {
+                Utils._getRegExpCache[pattern] = new RegExp(pattern);
             }
-            return this._getRegExpCache[pattern];
+            return Utils._getRegExpCache[pattern];
         },
         _getRemoteSchemaCache: {},
         getRemoteSchema: function (urlWithQuery, callback) {
-            var self = this,
+            var self = Utils,
                 url = urlWithQuery.split('#')[0];
 
             function returnSchemaFromString(str, url) {
@@ -211,7 +211,7 @@
                 return;
             }
 
-            utils.getUrl(url, function (error, response, body) {
+            Utils.getUrl(url, function (error, response, body) {
                 if (error) {
                     callback(error);
                     return;
@@ -221,7 +221,7 @@
         },
         getUrl: function getUrl(url, callback) {
             if (typeof XMLHttpRequest != 'undefined') {
-                var httpRequest = new XMLHttpRequest;
+                var httpRequest = new XMLHttpRequest();
                 httpRequest.open('GET', url, true);
                 httpRequest.onload = function(){
                     if (httpRequest.status >= 200 && request.status < 400){
@@ -232,11 +232,9 @@
                         callback(new Error('bad status: ' + httpRequest.status));
                     }
                 };
-                return;
-            } else if (!getUrl.request) {
-                getUrl.request = require('request');
+            } else {
+                request.get(url, callback);
             }
-            getUrl.request.get(url, callback);
         },
         // query should be valid json pointer
         resolveSchemaQuery: function resolveSchemaQuery(schema, rootSchema, queryStr, allowNull, sync) {
@@ -288,7 +286,7 @@
             return rv;
         },
         resolveSchemaId: function (schema, id) {
-            if (!this.isObject(schema) && !this.isArray(schema)) {
+            if (!Utils.isObject(schema) && !Utils.isArray(schema)) {
                 return;
             }
             if (schema.id === id) {

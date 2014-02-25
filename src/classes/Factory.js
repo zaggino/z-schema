@@ -219,7 +219,7 @@
                 } else if (definition.type == 'array') {
                     output[name] = self.createSchemaArray(definition, subPattern);
                 } else if (definition.hasOwnProperty('default')) {
-                    output[name] = definition.default;
+                    output[name] = definition["default"];
                 } else {
                     console.log('cannot handle object property %s for pattern %s ', name, pattern);
                     output[name] = self.unhandledType(definition.type);
@@ -238,8 +238,8 @@
 
             if (handler) {
                 return handler.handle(path);
-            } else if (definition.default) {
-                return definition.default;
+            } else if (definition["default"]) {
+                return definition["default"];
             } else if (definition.type == 'string' && definition.enum) {
                 return definition.enum[Math.floor(Math.random() * definition.enum.length)];
             } else {

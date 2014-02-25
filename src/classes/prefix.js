@@ -27,11 +27,5 @@
 /*jshint -W044*/
 /*global ZSchema*/
 
-(function () {
-    'use strict';
-
-    var Promise = require('bluebird');
-    var request = require('request');
-
     // z-schema used Q before bluebird, so alias is here to preserve compatibility
-    Promise.prototype.fail = Promise.prototype.catch;
+    Promise.prototype.fail = Promise.prototype["catch"];

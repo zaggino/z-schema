@@ -9,7 +9,7 @@
     "noarg": true,
     "noempty": true,
     "nonew": true,
-    "quotmark": false,
+    "quotmark": true,
     "undef": true,
     "unused": true,
     "strict": true,

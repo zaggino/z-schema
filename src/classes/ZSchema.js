@@ -37,26 +37,26 @@
      */
     ZSchema.expect = {
         typeError: function (expected, what) {
-            return 'Type mismatch, expected "' + expected + '", got "' + Utils.whatIs(what) + '"';
+            return "Type mismatch, expected \"" + expected + "\", got \"" + Utils.whatIs(what) + "\"";
         },
         boolean: function (what) {
             if (!Utils.isBoolean(what)) {
-                throw new Error(ZSchema.expect.typeError('boolean', what));
+                throw new Error(ZSchema.expect.typeError("boolean", what));
             }
         },
         string: function (what) {
             if (!Utils.isString(what)) {
-                throw new Error(ZSchema.expect.typeError('string', what));
+                throw new Error(ZSchema.expect.typeError("string", what));
             }
         },
         callable: function (what) {
             if (!Utils.isFunction(what)) {
-                throw new Error(ZSchema.expect.typeError('function', what));
+                throw new Error(ZSchema.expect.typeError("function", what));
             }
         },
         object: function (what) {
             if (!Utils.isObject(what)) {
-                throw new Error(ZSchema.expect.typeError('object', what));
+                throw new Error(ZSchema.expect.typeError("object", what));
             }
         }
     };
@@ -216,10 +216,10 @@
             var nextSchema = arr.shift();
             self.compileSchema(nextSchema).then(function () {
                 compiled.push(nextSchema);
-            }).catch(function (err) {
+            })["catch"](function (err) {
                     lastError = err;
                     failed.push(nextSchema);
-                }).finally(function () {
+                })["finally"](function () {
                     loopArray();
                 });
         }

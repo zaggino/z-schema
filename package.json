@@ -56,7 +56,12 @@
     "grunt-contrib-jshint": "latest",
     "grunt-simple-mocha": "latest",
     "mocha": "latest",
-    "uglify-js": "latest"
+    "uglify-js": "latest",
+    "grunt-umd": "~1.6.2",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-fixmyjs": "~0.1.1",
+    "grunt-jsbeautifier": "~0.2.6",
+    "grunt-contrib-copy": "~0.5.0"
   },
   "bugs": {
     "url": "https://github.com/zaggino/z-schema/issues",
