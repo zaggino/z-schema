@@ -1,0 +1,30 @@
+<html>
+<head>
+    <title>Mocha Tests</title>
+
+    <link href="css//build.css" rel="stylesheet"/>
+    <script language="javascript" src="js/build.js">
+    </script>
+</head>
+<body>
+<div id="mocha"></div>
+
+<script language="javascript">
+    var assert;
+    (function () {
+
+        assert = require('component-assert');
+        require('visionmedia-mocha');
+        mocha.setup('bdd');
+    })();
+</script>
+
+<script src="js/vendor/bluebird.js"></script>
+<script src="../src/ZSchema.js"></script>
+<script src="spec/browser_tests.js"></script>
+
+<script language="javascript">
+    mocha.run();
+</script>
+</body>
+</html>
