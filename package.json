@@ -42,8 +42,8 @@
   ],
   "version": "2.4.6",
   "dependencies": {
-    "bluebird": "~1.0.5",
-    "request": "~2.34.0"
+    "bluebird": ">=1.2.0",
+    "request": ">=2.34.0"
   },
   "devDependencies": {
     "chai": "latest",
