@@ -1128,6 +1128,19 @@
         var finish = function () {
             // run sync validations over schema keywords
             if (self.options.noTypeless === true) {
+
+                // issue #36 - inherit type to anyOf, oneOf, allOf if noTypeless is defined
+                if (schema.type !== undefined) {
+                    var schemas = [];
+                    if (Array.isArray(schema.anyOf)) { schemas = schemas.concat(schema.anyOf); }
+                    if (Array.isArray(schema.oneOf)) { schemas = schemas.concat(schema.oneOf); }
+                    if (Array.isArray(schema.allOf)) { schemas = schemas.concat(schema.allOf); }
+                    schemas.forEach(function (sch) {
+                        if (!sch.type) { sch.type = schema.type; }
+                    });
+                }
+                // end issue #36
+
                 report.expect(schema.type !== undefined || schema.anyOf !== undefined || schema.oneOf !== undefined ||
                               schema.not  !== undefined || schema.$ref  !== undefined, 'KEYWORD_UNDEFINED_STRICT', {keyword: 'type'});
             }
