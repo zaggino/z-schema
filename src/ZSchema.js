@@ -964,7 +964,7 @@
     // recurse schema and collect all references for download
     ZSchema.prototype._collectReferences = function _collectReferences(schema) {
         var arr = [];
-        if (schema.$ref) {
+        if (Utils.isString(schema.$ref)) {
             arr.push(schema);
         }
         Utils.forEach(schema, function (val, key) {
@@ -1039,7 +1039,8 @@
         if (!schema) {
             schema = rootSchema;
         }
-        if (schema.$ref && schema.__$refResolved !== null && schema.$ref.indexOf('http:') !== 0 && schema.$ref.indexOf('https:') !== 0) {
+        if (Utils.isString(schema.$ref) && schema.__$refResolved !== null && schema.$ref.indexOf('http:') !== 0 &&
+            schema.$ref.indexOf('https:') !== 0) {
             schema.__$refResolved = Utils.resolveSchemaQuery(schema, rootSchema, schema.$ref, true, this.options.sync) || null;
         }
         Utils.forEach(schema, function (val, key) {
@@ -1058,7 +1059,7 @@
         if (Utils.isString(schema.id)) {
             scope.push(schema.id);
         }
-        if (schema.$ref && !schema.__$refResolved && !Utils.isAbsoluteUri(schema.$ref)) {
+        if (Utils.isString(schema.$ref) && !schema.__$refResolved && !Utils.isAbsoluteUri(schema.$ref)) {
             if (scope.length > 0) {
                 var s = scope.join('').split('#')[0];
                 if (schema.$ref[0] === '#') {

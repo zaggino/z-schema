@@ -264,4 +264,18 @@ describe('Validations for referencing children:', function () {
         });
     });
 
+    it('should not treat non-string $ref properties as references', function (done) {
+        var schema = {
+            'type': 'object',
+            'properties': {
+                '$ref': {
+                    'type': 'string'
+                }
+            }
+        };
+        var validator = new ZSchema({ sync: true });
+        validator.compileSchema(schema);
+        done();
+    });
+
 });
