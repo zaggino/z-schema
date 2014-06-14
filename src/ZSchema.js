@@ -979,6 +979,8 @@
     };
 
     ZSchema.prototype._compileSchema = function (report, schema) {
+        var self = this;
+        
         // reusing of compiled schemas
         if (schema.__$compiled) {
             return this.options.sync ? schema : Promise.resolve(schema);
@@ -1026,7 +1028,6 @@
             });
         }
 
-        var self = this;
         if (this.options.sync) {
             download();
             afterDownload();
