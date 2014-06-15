@@ -396,7 +396,10 @@
                 return schema;
             }
             var rv = null;
-            Utils.forEach(schema, function (val) {
+            Utils.forEach(schema, function (val, key) {
+                // prevent recursing through z-schema properties
+                if (typeof key === 'string' && key.indexOf('__$') === 0) { return; }
+
                 if (!rv) {
                     rv = Utils.resolveSchemaId(val, id);
                 }

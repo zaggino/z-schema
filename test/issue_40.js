@@ -74,7 +74,7 @@ describe("https://github.com/zaggino/z-schema/issues/40", function () {
         };
     }
 
-    it("should allow validation by uri", function (done) {
+    it("should not timeout", function (done) {
         ZSchema.validate(getJson(), getSchema(), function (err, report) {
             assert.isTrue(report.valid);
             done();
