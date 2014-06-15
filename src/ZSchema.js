@@ -1215,6 +1215,15 @@
     ZSchema.prototype._validateObject = function (report, schema, instance) {
         ZSchema.expect.object(schema);
 
+        // empty schema passed, nothing to validate here
+        if (Object.keys(schema).length === 0) {
+            if (this.options.sync) {
+                return report.isValid();
+            } else {
+                return Promise.resolve(report);
+            }
+        }
+
         var self = this;
 
         var thisIsRoot = false;
