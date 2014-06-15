@@ -1014,12 +1014,19 @@
 
         function afterDownload() {
             refObjs.forEach(function (refObj) {
+                var reference = refObj.$ref;
+                if (reference.length > 1 && reference.slice(-1) === '#') {
+                    reference = reference.substring(0, reference.length - 1);
+                }
+
                 if (!refObj.__$refResolved) {
-                    refObj.__$refResolved = Utils.resolveSchemaQuery(refObj, schema, refObj.$ref, true, self.options.sync) || null;
+                    refObj.__$refResolved = Utils.resolveSchemaQuery(refObj, schema, reference, true, self.options.sync) || null;
                 }
-                if (self.schemaCache && self.schemaCache[refObj.$ref]) {
-                    refObj.__$refResolved = self.schemaCache[refObj.$ref];
+
+                if (self.schemaCache && self.schemaCache[reference]) {
+                    refObj.__$refResolved = self.schemaCache[reference];
                 }
+
                 report.expect(refObj.__$refResolved != null, 'UNRESOLVABLE_REFERENCE', {ref: refObj.$ref});
             });
             if (report.isValid()) {
