@@ -999,6 +999,10 @@
 
         // reusing of compiled schemas
         if (schema.__$compiled) {
+            // we need to add this to our schemaCache
+            if (schema.id && self.schemaCache) {
+                self.schemaCache[schema.id] = schema;
+            }
             return this.options.sync ? schema : Promise.resolve(schema);
         }
 
