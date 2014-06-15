@@ -7,6 +7,10 @@ var assert = require("chai").assert;
 describe("https://github.com/zaggino/z-schema/issues/21", function () {
 
     it("should validate schema successfully", function (done) {
+
+        // add a bigger timeout here because it takes a while to resolve remote
+        this.timeout(30000);
+
         var schema = {
             "$schema": "http://json-schema.org/schema#",
             "properties": { "text": { "type": "string" } },
