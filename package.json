@@ -52,7 +52,8 @@
     "grunt-simple-mocha": "latest",
     "chai": "latest",
     "mocha": "latest",
-    "uglify-js": "latest"
+    "uglify-js": "latest",
+    "mongodb": "latest"
   },
   "bugs": {
     "url": "https://github.com/zaggino/z-schema/issues",
