@@ -983,6 +983,17 @@
     ZSchema.prototype._compileSchema = function (report, schema) {
         var self = this;
         
+        // if schema is a string, assume it's a uri
+        if (typeof schema === 'string') {
+            // getRemoteSchema is sync when callback is not specified
+            var cachedSchema = Utils.getRemoteSchema(schema);
+            if (!cachedSchema) {
+                report.addError('SCHEMA_NOT_REACHABLE', {uri: schema});
+            } else {
+                schema = cachedSchema;
+            }
+        }
+
         // reusing of compiled schemas
         if (schema.__$compiled) {
             return this.options.sync ? schema : Promise.resolve(schema);
