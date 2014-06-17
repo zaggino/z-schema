@@ -5,7 +5,7 @@ var ZSchema = require('../src/ZSchema');
 // var Jassi = require('jassi');
 var JaySchema = require('jayschema');
 var jjv = require('jjv');
-var JsonSchemaSuite = require('json-schema-suite');
+// var JsonSchemaSuite = require('json-schema-suite');
 var JsonSchema = require('jsonschema');
 var tv4 = require('tv4');
 
@@ -51,6 +51,7 @@ Tester.registerValidator({
     }
 });
 
+/*
 Tester.registerValidator({
     name: 'json-schema-suite',
     setup: function () {
@@ -60,6 +61,7 @@ Tester.registerValidator({
         return instance.validateRaw(schema, json) === true;
     }
 });
+*/
 
 Tester.registerValidator({
     name: 'jsonschema',
