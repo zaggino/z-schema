@@ -1044,10 +1044,6 @@
 
         function download() {
             return refs.map(function (ref) {
-                // never download itself
-                if (ref.indexOf(schema.$schema) === 0) {
-                    return;
-                }
                 // download if it is a remote
                 if (ref.indexOf('http:') === 0 || ref.indexOf('https:') === 0) {
                     return self._downloadRemoteReferences(report, schema, ref.split('#')[0]);
