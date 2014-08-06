@@ -250,7 +250,11 @@ when true, disables caching of compiled schemas - cache is used to resolve refer
 
 * strictUris: ```true/false```
 
-when true, uri's need to be in full rfc3986 format, by default checks for uri-fragment, more info in [#18](https://github.com/zaggino/z-schema/issues/18)
+when true, uris need to be in full rfc3986 format, by default checks for uri-fragment, more info in [#18](https://github.com/zaggino/z-schema/issues/18)
+
+* strictEmails: ```true/false```
+
+when true, emails are validated more strictly with a defined list of allowed top level domains, more info in [#48](https://github.com/zaggino/z-schema/issues/48)
 
 # Pull requests
 

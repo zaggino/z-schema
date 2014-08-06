@@ -1,6 +1,11 @@
 {
   "name": "z-schema",
   "description": "JSON schema validator",
+  "version": "2.4.9",
+  "dependencies": {
+    "bluebird": ">=2.2.2",
+    "request": ">=2.39.0"
+  },
   "homepage": "https://github.com/zaggino/z-schema",
   "keywords": [
     "json",
@@ -40,11 +45,6 @@
     "LICENSE",
     "README.md"
   ],
-  "version": "2.4.9",
-  "dependencies": {
-    "bluebird": ">=2.2.2",
-    "request": ">=2.39.0"
-  },
   "devDependencies": {
     "grunt": "latest",
     "grunt-contrib-uglify": "latest",
