@@ -28,7 +28,6 @@
     "validateQuoteMarks":                           "\"",
     "validateIndentation":                          4,
     "disallowMixedSpacesAndTabs":                   true,
-    "disallowTrailingWhitespace":                   true,
     "disallowTrailingComma":                        true,
     "disallowKeywordsOnNewLine":                    ["else"],
     "requireLineFeedAtFileEnd":                     true,

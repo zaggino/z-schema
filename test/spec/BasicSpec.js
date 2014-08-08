@@ -4,10 +4,8 @@ var ZSchema = require("../../src/ZSchema");
 
 describe("Basic", function () {
 
-    it("ZSchema should respond 'world' to hello()", function () {
-
-        expect(ZSchema.hello()).toEqual("world");
-
+    it("ZSchema constructor should take one argument - options", function () {
+        expect(ZSchema.length).toBe(1);
     });
 
 });
