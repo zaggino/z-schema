@@ -26,6 +26,7 @@
     "README.md"
   ],
   "scripts": {
+    "prepublish": "grunt",
     "test": "grunt"
   },
   "devDependencies": {
