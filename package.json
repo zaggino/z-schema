@@ -1,0 +1,42 @@
+{
+  "name": "z-schema",
+  "version": "3.0.0",
+  "description": "JSON schema validator",
+  "homepage": "https://github.com/zaggino/z-schema-3",
+  "authors": [
+    "Martin Zagora <zaggino@gmail.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "JSON",
+    "Schema",
+    "Validator"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zaggino/z-schema-3.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zaggino/z-schema-3/issues"
+  },
+  "main": "src/ZSchema.js",
+  "files": [
+    "src/ZSchema.js",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "grunt"
+  },
+  "devDependencies": {
+    "grunt": "latest",
+    "grunt-browserify": "latest",
+    "grunt-contrib-jasmine": "latest",
+    "grunt-contrib-jshint": "latest",
+    "grunt-contrib-uglify": "latest",
+    "grunt-jasmine-node": "latest",
+    "grunt-jscs-checker": "latest",
+    "grunt-lineending": "latest",
+    "jasmine-node": "latest"
+  }
+}
