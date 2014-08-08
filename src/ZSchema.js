@@ -1,6 +1,15 @@
 "use strict";
 
+require("./Polyfills");
+var Report            = require("./Report");
+var JsonValidation    = require("./JsonValidation");
+var SchemaCache       = require("./SchemaCache");
+var SchemaCompilation = require("./SchemaCompilation");
+var SchemaValidation  = require("./SchemaValidation");
+var Utils             = require("./Utils");
+
 /*
+    // TODO: review these, make sure each has its own testcase
     default options
 */
 var defaultOptions = {
@@ -20,8 +29,6 @@ var defaultOptions = {
     noZeroLengthStrings: false,
     // forces "uri" format to be in fully rfc3986 compliant
     strictUris: false,
-    // forces "email" format to be validated more strictly
-    strictEmails: false,
     // turn on all of the above
     strict: false
 };
@@ -30,29 +37,64 @@ var defaultOptions = {
     constructor
 */
 function ZSchema(options) {
-    this.options = options;
+    this.options = options || Utils.clone(defaultOptions);
 }
 
 /*
     instance methods
 */
-ZSchema.prototype.compileSchema = function (schema, callback) {
-
+ZSchema.prototype.compileSchema = function (schema) {
+    var report = new Report();
+    SchemaCompilation.compileSchema.call(this, report, schema);
+    this.lastReport = report;
+    return report.isValid();
 };
-ZSchema.prototype.validateSchema = function (schema, callback) {
-
+ZSchema.prototype.validateSchema = function (schema) {
+    var report = new Report();
+    var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
+    if (compiled) { SchemaValidation.validateSchema.call(this, report, schema); }
+    this.lastReport = report;
+    return report.isValid();
 };
-ZSchema.prototype.validate = function (json, schema, callback) {
+ZSchema.prototype.validate = function (json, schema) {
+    var report = new Report();
 
+    var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
+    if (!compiled) {
+        this.lastReport = report;
+        return false;
+    }
+
+    var validated = SchemaValidation.validateSchema.call(this, report, schema);
+    if (!validated) {
+        this.lastReport = report;
+        return false;
+    }
+
+    JsonValidation.validate.call(this, report, schema, json);
+
+    // assign lastReport so errors are retrievable in sync mode
+    this.lastReport = report;
+
+    return report.isValid();
+};
+ZSchema.prototype.getLastError = function () {
+    return this.lastReport.errors;
 };
 
 /*
     static methods
 */
-ZSchema.registerFormat = function (formatName, validatorFunction) {
+ZSchema.setRemoteReference = function (uri, schema) {
+    if (typeof schema === "string") {
+        schema = JSON.parse(schema);
+    }
+    SchemaCache.cacheSchemaByUri(uri, schema);
+};
+ZSchema.registerFormat = function (/* formatName, validatorFunction */) {
 
 };
-ZSchema.registerFormatter = function (formatterName, formatterFunction) {
+ZSchema.registerFormatter = function (/* formatterName, formatterFunction */) {
 
 };
 

@@ -75,5 +75,6 @@ module.exports = function (grunt) {
 
     // Default task(s).
     grunt.registerTask("default", ["lineending", "jshint", "jscs", "jasmine_node", "browserify", "jasmine", "uglify"]);
+    grunt.registerTask("test", ["jasmine_node"]);
 
 };
