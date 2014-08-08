@@ -52,5 +52,8 @@ ZSchema.prototype.validate = function (json, schema, callback) {
 ZSchema.registerFormat = function (formatName, validatorFunction) {
 
 };
+ZSchema.registerFormatter = function (formatterName, formatterFunction) {
+
+};
 
 module.exports = ZSchema;
