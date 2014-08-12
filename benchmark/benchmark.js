@@ -4,10 +4,9 @@ var Tester = require("./tester");
 
 var ZSchema3 = require("../src/ZSchema");
 var ZSchema = require("z-schema");
-// var Jassi = require("jassi");
+var Jassi = require("jassi");
 var JaySchema = require("jayschema");
 var jjv = require("jjv");
-// var JsonSchemaSuite = require("json-schema-suite");
 var JsonSchema = require("jsonschema");
 var tv4 = require("tv4");
 
@@ -33,7 +32,6 @@ Tester.registerValidator({
     }
 });
 
-/* jassi is not included because it fails too many tests
 Tester.registerValidator({
     name: "jassi",
     setup: function () {
@@ -43,7 +41,6 @@ Tester.registerValidator({
         return instance(json, schema).length === 0;
     }
 });
-*/
 
 Tester.registerValidator({
     name: "jayschema",
@@ -64,18 +61,6 @@ Tester.registerValidator({
         return instance.validate(schema, json) === null;
     }
 });
-
-/*
-Tester.registerValidator({
-    name: "json-schema-suite",
-    setup: function () {
-        return new JsonSchemaSuite.Validator();
-    },
-    test: function (instance, json, schema) {
-        return instance.validateRaw(schema, json) === true;
-    }
-});
-*/
 
 Tester.registerValidator({
     name: "jsonschema",
@@ -105,7 +90,6 @@ var advancedObject = require("./advanced_object.json");
 var advancedSchema = require("./advanced_schema_v4.json");
 Tester.runOne("advancedObject", advancedObject, advancedSchema, true);
 
-/*
 Tester.runDirectory(__dirname + "/../test/jsonSchemaTestSuite/tests/draft4/", {
     excludeFiles: ["optional/zeroTerminatedFloats.json"],
     excludeTests: [
@@ -127,6 +111,5 @@ Tester.runDirectory(__dirname + "/../test/jsonSchemaTestSuite/tests/draft4/", {
         "change resolution scope, changed scope ref invalid"
     ]
 });
-*/
 
 Tester.saveResults("results.html", "results.template");
