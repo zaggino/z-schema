@@ -4,6 +4,7 @@ var FormatValidators  = require("./FormatValidators"),
     Report            = require("./Report"),
     Utils             = require("./Utils");
 
+// TODO: split these by types
 var JsonValidators = {
     multipleOf: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.1.2
