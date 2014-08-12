@@ -94,7 +94,7 @@ exports.compileSchema = function (report, schema) {
         // resolve all the collected references into __xxxResolved pointer
         var refObj = refs[idx];
         var response = SchemaCache.getSchemaByUri.call(this, report, refObj.ref, schema);
-        if (!response) {
+        if (!response && this.options.ignoreUnresolvableReferences !== true) {
             report.path.push(refObj.path);
             report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref]);
             report.path.pop();

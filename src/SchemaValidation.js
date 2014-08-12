@@ -445,7 +445,9 @@ exports.validateSchema = function (report, schema) {
                 report.addError("REMOTE_SCHEMA_INVALID", null, subReport);
             }
         } else {
-            report.addError("REF_UNRESOLVED", [schema.$schema]);
+            if (this.options.ignoreUnresolvableReferences !== true) {
+                report.addError("REF_UNRESOLVED", [schema.$schema]);
+            }
         }
     }
 
