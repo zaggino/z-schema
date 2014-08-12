@@ -13,10 +13,6 @@ Report.prototype.isValid = function () {
     return this.errors.length === 0;
 };
 
-Report.prototype.addWarning = function (errorCode, params, subReports) {
-    this.addError(errorCode, params, subReports, true);
-};
-
 Report.prototype.getPath = function () {
     var path = ["#"];
     if (this.parentReport) {
@@ -26,7 +22,7 @@ Report.prototype.getPath = function () {
     return path.length === 1 ? "#/" : path.join("/");
 };
 
-Report.prototype.addError = function (errorCode, params, subReports, asWarning) {
+Report.prototype.addError = function (errorCode, params, subReports) {
     if (!errorCode) { throw new Error("No errorCode passed into addError()"); }
     if (!Errors[errorCode]) { throw new Error("No errorMessage known for code " + errorCode); }
 
@@ -59,8 +55,7 @@ Report.prototype.addError = function (errorCode, params, subReports, asWarning) 
         }
     }
 
-    var target = asWarning ? this.warnings : this.errors;
-    target.push(err);
+    this.errors.push(err);
 };
 
 module.exports = Report;

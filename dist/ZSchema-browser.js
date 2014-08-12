@@ -231,6 +231,7 @@ var FormatValidators  = require("./FormatValidators"),
     Report            = require("./Report"),
     Utils             = require("./Utils");
 
+// TODO: split these by types
 var JsonValidators = {
     multipleOf: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.1.2
@@ -757,10 +758,6 @@ Report.prototype.isValid = function () {
     return this.errors.length === 0;
 };
 
-Report.prototype.addWarning = function (errorCode, params, subReports) {
-    this.addError(errorCode, params, subReports, true);
-};
-
 Report.prototype.getPath = function () {
     var path = ["#"];
     if (this.parentReport) {
@@ -770,7 +767,7 @@ Report.prototype.getPath = function () {
     return path.length === 1 ? "#/" : path.join("/");
 };
 
-Report.prototype.addError = function (errorCode, params, subReports, asWarning) {
+Report.prototype.addError = function (errorCode, params, subReports) {
     if (!errorCode) { throw new Error("No errorCode passed into addError()"); }
     if (!Errors[errorCode]) { throw new Error("No errorMessage known for code " + errorCode); }
 
@@ -803,8 +800,7 @@ Report.prototype.addError = function (errorCode, params, subReports, asWarning) 
         }
     }
 
-    var target = asWarning ? this.warnings : this.errors;
-    target.push(err);
+    this.errors.push(err);
 };
 
 module.exports = Report;
@@ -1474,8 +1470,6 @@ exports.validateSchema = function (report, schema) {
         } else if (!hasParentSchema) {
             if (this.options.noExtraKeywords === true) {
                 report.addError("KEYWORD_UNEXPECTED", [key]);
-            } else {
-                report.addWarning("KEYWORD_UNEXPECTED", [key]);
             }
         }
     }
@@ -1625,6 +1619,7 @@ exports.clone = function (src) {
 
 require("./Polyfills");
 var Report            = require("./Report");
+var FormatValidators  = require("./FormatValidators");
 var JsonValidation    = require("./JsonValidation");
 var SchemaCache       = require("./SchemaCache");
 var SchemaCompilation = require("./SchemaCompilation");
@@ -1704,7 +1699,7 @@ ZSchema.prototype.validate = function (json, schema) {
     return report.isValid();
 };
 ZSchema.prototype.getLastError = function () {
-    return this.lastReport.errors;
+    return this.lastReport.errors.length > 0 ? this.lastReport.errors : null;
 };
 
 /*
@@ -1716,8 +1711,8 @@ ZSchema.setRemoteReference = function (uri, schema) {
     }
     SchemaCache.cacheSchemaByUri(uri, schema);
 };
-ZSchema.registerFormat = function (/* formatName, validatorFunction */) {
-
+ZSchema.registerFormat = function (formatName, validatorFunction) {
+    FormatValidators[formatName] = validatorFunction;
 };
 ZSchema.registerFormatter = function (/* formatterName, formatterFunction */) {
 
@@ -1725,6 +1720,6 @@ ZSchema.registerFormatter = function (/* formatterName, formatterFunction */) {
 
 module.exports = ZSchema;
 
-},{"./JsonValidation":3,"./Polyfills":4,"./Report":5,"./SchemaCache":6,"./SchemaCompilation":7,"./SchemaValidation":8,"./Utils":9}],"ZSchema":[function(require,module,exports){
+},{"./FormatValidators":2,"./JsonValidation":3,"./Polyfills":4,"./Report":5,"./SchemaCache":6,"./SchemaCompilation":7,"./SchemaValidation":8,"./Utils":9}],"ZSchema":[function(require,module,exports){
 module.exports=require('C768cZ');
 },{}]},{},[1,2,3,4,5,6,7,8,9,"C768cZ"]);

@@ -2,6 +2,7 @@
 
 require("./Polyfills");
 var Report            = require("./Report");
+var FormatValidators  = require("./FormatValidators");
 var JsonValidation    = require("./JsonValidation");
 var SchemaCache       = require("./SchemaCache");
 var SchemaCompilation = require("./SchemaCompilation");
@@ -81,7 +82,7 @@ ZSchema.prototype.validate = function (json, schema) {
     return report.isValid();
 };
 ZSchema.prototype.getLastError = function () {
-    return this.lastReport.errors;
+    return this.lastReport.errors.length > 0 ? this.lastReport.errors : null;
 };
 
 /*
@@ -93,8 +94,8 @@ ZSchema.setRemoteReference = function (uri, schema) {
     }
     SchemaCache.cacheSchemaByUri(uri, schema);
 };
-ZSchema.registerFormat = function (/* formatName, validatorFunction */) {
-
+ZSchema.registerFormat = function (formatName, validatorFunction) {
+    FormatValidators[formatName] = validatorFunction;
 };
 ZSchema.registerFormatter = function (/* formatterName, formatterFunction */) {
 

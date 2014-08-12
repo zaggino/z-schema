@@ -482,8 +482,6 @@ exports.validateSchema = function (report, schema) {
         } else if (!hasParentSchema) {
             if (this.options.noExtraKeywords === true) {
                 report.addError("KEYWORD_UNEXPECTED", [key]);
-            } else {
-                report.addWarning("KEYWORD_UNEXPECTED", [key]);
             }
         }
     }
