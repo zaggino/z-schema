@@ -6,3 +6,7 @@
 [![browser support](https://ci.testling.com/zaggino/z-schema-3.png)](https://ci.testling.com/zaggino/z-schema-3)
 
 complete rewrite of [z-schema](https://github.com/zaggino/z-schema) in progress, not all tests and features have been migrated from version 2.x yet!
+
+### How does it compare to version 2.x and others?
+
+[rawgithub.com/zaggino/z-schema-3/master/benchmark/results.html](https://rawgithub.com/zaggino/z-schema-3/master/benchmark/results.html)
