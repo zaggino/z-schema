@@ -4,7 +4,6 @@ var Tester = require("./tester");
 
 var ZSchema3 = require("../src/ZSchema");
 var ZSchema = require("z-schema");
-var Jassi = require("jassi");
 var JaySchema = require("jayschema");
 var jjv = require("jjv");
 var JsonSchema = require("jsonschema");
@@ -29,16 +28,6 @@ Tester.registerValidator({
     },
     test: function (instance, json, schema) {
         return instance.validate(json, schema) === true;
-    }
-});
-
-Tester.registerValidator({
-    name: "jassi",
-    setup: function () {
-        return Jassi;
-    },
-    test: function (instance, json, schema) {
-        return instance(json, schema).length === 0;
     }
 });
 
@@ -93,6 +82,9 @@ Tester.runOne("advancedObject", advancedObject, advancedSchema, true);
 Tester.runDirectory(__dirname + "/../test/jsonSchemaTestSuite/tests/draft4/", {
     excludeFiles: ["optional/zeroTerminatedFloats.json"],
     excludeTests: [
+        // no-one supports unicode tests
+        "maxLength validation, two supplementary Unicode code points is long enough",
+        "minLength validation, one supplementary Unicode code point is not long enough",
         // these two tests consider different uri then is desired to be valid
         "validation of URIs, an invalid URI",
         "validation of URIs, an invalid URI though valid URI reference",

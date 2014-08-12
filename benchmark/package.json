@@ -6,8 +6,6 @@
         "benchmark": "latest",
         "lodash": "latest",
         "mustache": "latest",
-
-        "jassi": "latest",
         "jayschema": "latest",
         "jjv": "latest",
         "jsonschema": "latest",
