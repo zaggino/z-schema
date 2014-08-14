@@ -78,12 +78,11 @@ ZSchema.prototype.validate = function (json, schema, callback) {
 
     JsonValidation.validate.call(this, report, schema, json);
 
-    if (report.asyncTasks.length > 0) {
-        if (!callback) {
-            throw new Error("This validation has async tasks and cannot be done in sync mode, please provide callback argument.");
-        }
+    if (callback) {
         report.processAsyncTasks(this.options.asyncTimeout, callback);
         return;
+    } else if (report.asyncTasks.length > 0) {
+        throw new Error("This validation has async tasks and cannot be done in sync mode, please provide callback argument.");
     }
 
     // assign lastReport so errors are retrievable in sync mode

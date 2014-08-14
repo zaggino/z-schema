@@ -82,6 +82,14 @@ module.exports = {
                 expect(err.length).toBe(1);
                 expect(err[0].code).toBe("ASYNC_TIMEOUT");
             }
+        },
+        {
+            description: "should execute callback even if no async format is found",
+            data: "xxx",
+            schema: {
+                "type": "string"
+            },
+            valid: true
         }
     ]
 };

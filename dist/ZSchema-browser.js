@@ -1,4 +1,69 @@
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
+
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            var source = ev.source;
+            if ((source === window || source === null) && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
+
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+}
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+
+},{}],2:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56,7 +121,7 @@ module.exports = {
 
 };
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 /*jshint maxlen: false*/
 
 var FormatValidators = {
@@ -225,7 +290,7 @@ var FormatValidators = {
 
 module.exports = FormatValidators;
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 
 var FormatValidators  = require("./FormatValidators"),
@@ -739,7 +804,7 @@ exports.validate = function (report, schema, json) {
 
 };
 
-},{"./FormatValidators":2,"./Report":5,"./Utils":9}],4:[function(require,module,exports){
+},{"./FormatValidators":3,"./Report":6,"./Utils":10}],5:[function(require,module,exports){
 // Number.isFinite polyfill
 // http://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.isfinite
 if (typeof Number.isFinite !== "function") {
@@ -757,7 +822,8 @@ if (typeof Number.isFinite !== "function") {
     };
 }
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
+(function (process){
 "use strict";
 
 var Errors = require("./Errors");
@@ -788,16 +854,27 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
         timedOut          = false,
         self              = this;
 
+    function finish() {
+        process.nextTick(function () {
+            var valid = self.errors.length === 0,
+                err   = valid ? undefined : self.errors;
+            callback(err, valid);
+        });
+    }
+
     function respond(asyncTaskResultProcessFn) {
         return function (asyncTaskResult) {
             if (timedOut) { return; }
             asyncTaskResultProcessFn(asyncTaskResult);
             if (--tasksCount === 0) {
-                var valid = self.errors.length === 0,
-                    err   = valid ? undefined : self.errors;
-                callback(err, valid);
+                finish();
             }
         };
+    }
+
+    if (tasksCount === 0) {
+        finish();
+        return;
     }
 
     while (idx--) {
@@ -862,7 +939,8 @@ Report.prototype.addError = function (errorCode, params, subReports) {
 
 module.exports = Report;
 
-},{"./Errors":1}],6:[function(require,module,exports){
+}).call(this,require("+NscNm"))
+},{"+NscNm":1,"./Errors":2}],7:[function(require,module,exports){
 "use strict";
 
 var SchemaCompilation   = require("./SchemaCompilation");
@@ -923,7 +1001,7 @@ exports.getSchemaByUri = function (report, uri, root) {
     return result;
 };
 
-},{"./SchemaCompilation":7,"./SchemaValidation":8}],7:[function(require,module,exports){
+},{"./SchemaCompilation":8,"./SchemaValidation":9}],8:[function(require,module,exports){
 "use strict";
 
 var SchemaCache = require("./SchemaCache");
@@ -1042,7 +1120,7 @@ exports.compileSchema = function (report, schema) {
 
 };
 
-},{"./SchemaCache":6}],8:[function(require,module,exports){
+},{"./SchemaCache":7}],9:[function(require,module,exports){
 "use strict";
 
 var FormatValidators = require("./FormatValidators"),
@@ -1539,7 +1617,7 @@ exports.validateSchema = function (report, schema) {
 
 };
 
-},{"./FormatValidators":2,"./JsonValidation":3,"./Report":5,"./Utils":9}],9:[function(require,module,exports){
+},{"./FormatValidators":3,"./JsonValidation":4,"./Report":6,"./Utils":10}],10:[function(require,module,exports){
 "use strict";
 
 exports.whatIs = function (what) {
@@ -1752,12 +1830,11 @@ ZSchema.prototype.validate = function (json, schema, callback) {
 
     JsonValidation.validate.call(this, report, schema, json);
 
-    if (report.asyncTasks.length > 0) {
-        if (!callback) {
-            throw new Error("This validation has async tasks and cannot be done in sync mode, please provide callback argument.");
-        }
+    if (callback) {
         report.processAsyncTasks(this.options.asyncTimeout, callback);
         return;
+    } else if (report.asyncTasks.length > 0) {
+        throw new Error("This validation has async tasks and cannot be done in sync mode, please provide callback argument.");
     }
 
     // assign lastReport so errors are retrievable in sync mode
@@ -1786,6 +1863,6 @@ ZSchema.registerFormatter = function (/* formatterName, formatterFunction */) {
 
 module.exports = ZSchema;
 
-},{"./FormatValidators":2,"./JsonValidation":3,"./Polyfills":4,"./Report":5,"./SchemaCache":6,"./SchemaCompilation":7,"./SchemaValidation":8,"./Utils":9}],"ZSchema":[function(require,module,exports){
+},{"./FormatValidators":3,"./JsonValidation":4,"./Polyfills":5,"./Report":6,"./SchemaCache":7,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}],"ZSchema":[function(require,module,exports){
 module.exports=require('C768cZ');
-},{}]},{},[1,2,3,4,5,6,7,8,9,"C768cZ"]);
+},{}]},{},[2,3,4,5,6,7,8,9,10,"C768cZ"]);

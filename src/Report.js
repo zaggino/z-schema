@@ -28,16 +28,27 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
         timedOut          = false,
         self              = this;
 
+    function finish() {
+        process.nextTick(function () {
+            var valid = self.errors.length === 0,
+                err   = valid ? undefined : self.errors;
+            callback(err, valid);
+        });
+    }
+
     function respond(asyncTaskResultProcessFn) {
         return function (asyncTaskResult) {
             if (timedOut) { return; }
             asyncTaskResultProcessFn(asyncTaskResult);
             if (--tasksCount === 0) {
-                var valid = self.errors.length === 0,
-                    err   = valid ? undefined : self.errors;
-                callback(err, valid);
+                finish();
             }
         };
+    }
+
+    if (tasksCount === 0) {
+        finish();
+        return;
     }
 
     while (idx--) {
