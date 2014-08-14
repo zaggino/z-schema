@@ -16,7 +16,7 @@ complete rewrite of [z-schema](https://github.com/zaggino/z-schema) in progress,
 - [Usage](#usage)
 - [Features](#features)
 - [Options](#options)
-- [Benchmarks](#benchmark)
+- [Benchmarks](#benchmarks)
 
 #Usage
 
@@ -49,6 +49,9 @@ validator.validate(json, schema, function (err, valid) {
 #Features
 
 - [Register a custom format](#registerFormat)
+- [Define a custom timeout for all async operations](#asyncTimeout)
+- [Force additionalItems/additionalProperties to be defined in schemas](#forceAdditional)
+- [Assume additionalItems/additionalProperties are defined in schemas as false](#assumeAdditional)
 
 ##registerFormat
 
@@ -83,7 +86,27 @@ var validator = new ZSchema({
 });
 ```
 
-#Benchmark
+##forceAdditional
+
+When true, validator doesn't validate schemas where additionalItems/additionalProperties should be defined to either true or false.
+
+```javascript
+var validator = new ZSchema({
+    forceAdditional: true
+});
+```
+
+##assumeAdditional
+
+When true, validator assumes that additionalItems/additionalProperties are defined as false so you don't have to manually fix all your schemas.
+
+```javascript
+var validator = new ZSchema({
+    assumeAdditional: true
+});
+```
+
+#Benchmarks
 
 So how does it compare to version 2.x and others?
 

@@ -18,6 +18,8 @@ var defaultOptions = {
     asyncTimeout: 2000,
     // force additionalProperties and additionalItems to be defined on "object" and "array" types
     forceAdditional: false,
+    // assume additionalProperties and additionalItems are defined as "false" where appropriate
+    assumeAdditional: false,
     // force items to be defined on "array" types
     forceItems: false,
     // force maxLength to be defined on "string" types

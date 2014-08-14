@@ -114,8 +114,12 @@ var SchemaValidators = {
         }
 
         // custom - strict mode
-        if (this.options.forceAdditional === true && schema.additionalItems === undefined) {
+        if (this.options.forceAdditional === true && schema.additionalItems === undefined && Array.isArray(schema.items)) {
             report.addError("KEYWORD_UNDEFINED_STRICT", ["additionalItems"]);
+        }
+        // custome - assume defined false mode
+        if (this.options.assumeAdditional === true && schema.additionalItems === undefined && Array.isArray(schema.items)) {
+            schema.additionalItems = false;
         }
     },
     maxItems: function (report, schema) {
@@ -203,6 +207,10 @@ var SchemaValidators = {
         // custom - strict mode
         if (this.options.forceAdditional === true && schema.additionalProperties === undefined) {
             report.addError("KEYWORD_UNDEFINED_STRICT", ["additionalProperties"]);
+        }
+        // custome - assume defined false mode
+        if (this.options.assumeAdditional === true && schema.additionalProperties === undefined) {
+            schema.additionalProperties = false;
         }
     },
     patternProperties: function (report, schema) {
