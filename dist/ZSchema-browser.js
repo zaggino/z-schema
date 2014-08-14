@@ -51,7 +51,8 @@ module.exports = {
     UNRESOLVABLE_REFERENCE:                 "Reference could not be resolved: {0}",
     SCHEMA_NOT_REACHABLE:                   "Validator was not able to read schema with uri: {0}",
     SCHEMA_TYPE_EXPECTED:                   "Schema is expected to be of type 'object'",
-    SCHEMA_NOT_AN_OBJECT:                   "Schema is not an object: {0}"
+    SCHEMA_NOT_AN_OBJECT:                   "Schema is not an object: {0}",
+    ASYNC_TIMEOUT:                          "{0} asynchronous task(s) have timed out after {1} ms"
 
 };
 
@@ -544,9 +545,20 @@ var JsonValidators = {
     },
     format: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
-        if (typeof FormatValidators[schema.format] === "function") {
-            if (FormatValidators[schema.format].call(this, json) === false) {
-                report.addError("INVALID_FORMAT", [schema.format, json]);
+        var formatValidatorFn = FormatValidators[schema.format];
+        if (typeof formatValidatorFn === "function") {
+            if (formatValidatorFn.length === 2) {
+                // async
+                report.addAsyncTask(formatValidatorFn, [json], function (result) {
+                    if (result !== true) {
+                        report.addError("INVALID_FORMAT", [schema.format, json]);
+                    }
+                });
+            } else {
+                // sync
+                if (formatValidatorFn.call(this, json) !== true) {
+                    report.addError("INVALID_FORMAT", [schema.format, json]);
+                }
             }
         } else {
             report.addError("UNKNOWN_FORMAT", [schema.format]);
@@ -720,7 +732,7 @@ exports.validate = function (report, schema, json) {
     }
 
     // return valid just to be able to break at some code points
-    return report.isValid();
+    return report.errors.length === 0;
 
 };
 
@@ -750,12 +762,54 @@ var Errors = require("./Errors");
 function Report(parentReport) {
     this.parentReport = parentReport || undefined;
     this.errors = [];
-    this.warnings = [];
     this.path = [];
+    this.asyncTasks = [];
 }
 
 Report.prototype.isValid = function () {
+    if (this.asyncTasks.length > 0) {
+        throw new Error("Async tasks pending, can't answer isValid");
+    }
     return this.errors.length === 0;
+};
+
+Report.prototype.addAsyncTask = function (fn, args, asyncTaskResultProcessFn) {
+    this.asyncTasks.push([fn, args, asyncTaskResultProcessFn]);
+};
+
+Report.prototype.processAsyncTasks = function (timeout, callback) {
+
+    var validationTimeout = timeout || 2000,
+        tasksCount        = this.asyncTasks.length,
+        idx               = tasksCount,
+        timedOut          = false,
+        self              = this;
+
+    function respond(asyncTaskResultProcessFn) {
+        return function (asyncTaskResult) {
+            if (timedOut) { return; }
+            asyncTaskResultProcessFn(asyncTaskResult);
+            if (--tasksCount === 0) {
+                var valid = self.errors.length === 0,
+                    err   = valid ? undefined : self.errors;
+                callback(err, valid);
+            }
+        };
+    }
+
+    while (idx--) {
+        var task = this.asyncTasks[idx];
+        task[0].apply(null, task[1].concat(respond(task[2])));
+    }
+
+    setTimeout(function () {
+        if (tasksCount > 0) {
+            timedOut = true;
+            self.addError("ASYNC_TIMEOUT", [tasksCount, validationTimeout]);
+            callback(self.errors, false);
+        }
+    }, validationTimeout);
+
 };
 
 Report.prototype.getPath = function () {
@@ -1631,6 +1685,8 @@ var Utils             = require("./Utils");
     default options
 */
 var defaultOptions = {
+    // default timeout for all async tasks
+    asyncTimeout: 2000,
     // force additionalProperties and additionalItems to be defined on "object" and "array" types
     forceAdditional: false,
     // force items to be defined on "array" types
@@ -1676,7 +1732,7 @@ ZSchema.prototype.validateSchema = function (schema) {
     this.lastReport = report;
     return report.isValid();
 };
-ZSchema.prototype.validate = function (json, schema) {
+ZSchema.prototype.validate = function (json, schema, callback) {
     var report = new Report();
 
     var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
@@ -1693,13 +1749,20 @@ ZSchema.prototype.validate = function (json, schema) {
 
     JsonValidation.validate.call(this, report, schema, json);
 
+    if (report.asyncTasks.length > 0) {
+        if (!callback) {
+            throw new Error("This validation has async tasks and cannot be done in sync mode, please provide callback argument.");
+        }
+        report.processAsyncTasks(this.options.asyncTimeout, callback);
+        return;
+    }
+
     // assign lastReport so errors are retrievable in sync mode
     this.lastReport = report;
-
     return report.isValid();
 };
 ZSchema.prototype.getLastError = function () {
-    return this.lastReport.errors.length > 0 ? this.lastReport.errors : null;
+    return this.lastReport.errors.length > 0 ? this.lastReport.errors : undefined;
 };
 
 /*

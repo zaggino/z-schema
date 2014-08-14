@@ -13,8 +13,38 @@ complete rewrite of [z-schema](https://github.com/zaggino/z-schema) in progress,
 
 #Topics
 
+- [Usage](#usage)
 - [Features](#features)
+- [Options](#options)
 - [Benchmarks](#benchmark)
+
+#Usage
+
+Validator will try to perform sync validation when possible for speed, but supports async callbacks when they are necessary.
+
+##NodeJS:
+
+```javascript
+var ZSchema = require("z-schema");
+var options = ...
+var validator = new ZSchema(options);
+```
+
+##Sync mode:
+
+```javascript
+var valid = validator.validate(json, schema);
+var err = validator.getLastError();
+...
+```
+
+##Async mode:
+
+```javascript
+validator.validate(json, schema, function (err, valid) {
+    ...
+});
+```
 
 #Features
 
@@ -22,13 +52,36 @@ complete rewrite of [z-schema](https://github.com/zaggino/z-schema) in progress,
 
 ##registerFormat
 
-You can register any format of your own, the validator function should always respond with boolean.
+You can register any format of your own, sync validator function should always respond with boolean:
 
 ```javascript
-var ZSchema = require("z-schema");
 ZSchema.registerFormat("xstring", function (str) {
     return str === "xxx";
 });
+```
+
+Async format validators are also supported, they should accept two arguments, value and a callback to which they need to respond:
+
+```javascript
+ZSchema.registerFormat("xstring", function (str, callback) {
+    setTimeout(function () {
+        callback(str === "xxx");
+    }, 1);
+});
+```
+
+#Options
+
+##asyncTimeout
+
+Defines a time limit, which should be used when waiting for async tasks like async format validators to perform their validation,
+before the validation fails with an ```ASYNC_TIMEOUT``` error.
+
+```javascript
+var options = {
+    asyncTimeout: 2000
+};
+var validator = new ZSchema(options);
 ```
 
 #Benchmark

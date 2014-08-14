@@ -14,6 +14,8 @@ var Utils             = require("./Utils");
     default options
 */
 var defaultOptions = {
+    // default timeout for all async tasks
+    asyncTimeout: 2000,
     // force additionalProperties and additionalItems to be defined on "object" and "array" types
     forceAdditional: false,
     // force items to be defined on "array" types
@@ -59,7 +61,7 @@ ZSchema.prototype.validateSchema = function (schema) {
     this.lastReport = report;
     return report.isValid();
 };
-ZSchema.prototype.validate = function (json, schema) {
+ZSchema.prototype.validate = function (json, schema, callback) {
     var report = new Report();
 
     var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
@@ -76,13 +78,20 @@ ZSchema.prototype.validate = function (json, schema) {
 
     JsonValidation.validate.call(this, report, schema, json);
 
+    if (report.asyncTasks.length > 0) {
+        if (!callback) {
+            throw new Error("This validation has async tasks and cannot be done in sync mode, please provide callback argument.");
+        }
+        report.processAsyncTasks(this.options.asyncTimeout, callback);
+        return;
+    }
+
     // assign lastReport so errors are retrievable in sync mode
     this.lastReport = report;
-
     return report.isValid();
 };
 ZSchema.prototype.getLastError = function () {
-    return this.lastReport.errors.length > 0 ? this.lastReport.errors : null;
+    return this.lastReport.errors.length > 0 ? this.lastReport.errors : undefined;
 };
 
 /*

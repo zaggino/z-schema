@@ -317,9 +317,20 @@ var JsonValidators = {
     },
     format: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
-        if (typeof FormatValidators[schema.format] === "function") {
-            if (FormatValidators[schema.format].call(this, json) === false) {
-                report.addError("INVALID_FORMAT", [schema.format, json]);
+        var formatValidatorFn = FormatValidators[schema.format];
+        if (typeof formatValidatorFn === "function") {
+            if (formatValidatorFn.length === 2) {
+                // async
+                report.addAsyncTask(formatValidatorFn, [json], function (result) {
+                    if (result !== true) {
+                        report.addError("INVALID_FORMAT", [schema.format, json]);
+                    }
+                });
+            } else {
+                // sync
+                if (formatValidatorFn.call(this, json) !== true) {
+                    report.addError("INVALID_FORMAT", [schema.format, json]);
+                }
             }
         } else {
             report.addError("UNKNOWN_FORMAT", [schema.format]);
@@ -493,6 +504,6 @@ exports.validate = function (report, schema, json) {
     }
 
     // return valid just to be able to break at some code points
-    return report.isValid();
+    return report.errors.length === 0;
 
 };

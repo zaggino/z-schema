@@ -50,6 +50,7 @@ module.exports = {
     UNRESOLVABLE_REFERENCE:                 "Reference could not be resolved: {0}",
     SCHEMA_NOT_REACHABLE:                   "Validator was not able to read schema with uri: {0}",
     SCHEMA_TYPE_EXPECTED:                   "Schema is expected to be of type 'object'",
-    SCHEMA_NOT_AN_OBJECT:                   "Schema is not an object: {0}"
+    SCHEMA_NOT_AN_OBJECT:                   "Schema is not an object: {0}",
+    ASYNC_TIMEOUT:                          "{0} asynchronous task(s) have timed out after {1} ms"
 
 };

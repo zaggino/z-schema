@@ -36,6 +36,57 @@ module.exports = {
 };
 
 },{}],2:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+    description: "Custom formats async support",
+    async: true,
+    options: {
+        asyncTimeout: 100
+    },
+    setup: function (validator, Class) {
+        Class.registerFormat("xstring", function (str, callback) {
+            setTimeout(function () {
+                callback(str === "xxx");
+            }, 1);
+        });
+        Class.registerFormat("shouldTimeout", function (str, callback) {
+            return typeof callback === "function";
+        });
+    },
+    schema: {
+        "type": "string",
+        "format": "xstring"
+    },
+    tests: [
+        {
+            description: "should pass custom format async validation",
+            data: "xxx",
+            valid: true
+        },
+        {
+            description: "should fail custom format async validation",
+            data: "xxxx",
+            valid: false
+        },
+        {
+            description: "should timeout if callback is not called in default limit",
+            data: "xxx",
+            schema: {
+                "type": "string",
+                "format": "shouldTimeout"
+            },
+            valid: false,
+            after: function (err, valid) {
+                expect(valid).toBe(false);
+                expect(err.length).toBe(1);
+                expect(err[0].code).toBe("ASYNC_TIMEOUT");
+            }
+        }
+    ]
+};
+
+},{}],3:[function(require,module,exports){
 module.exports={
     "id": "http://json-schema.org/draft-04/schema#",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -187,13 +238,13 @@ module.exports={
     "default": {}
 }
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 module.exports={
     "type": "integer"
 }
-},{}],4:[function(require,module,exports){
-module.exports=require(3)
 },{}],5:[function(require,module,exports){
+module.exports=require(4)
+},{}],6:[function(require,module,exports){
 module.exports={
     "integer": {
         "type": "integer"
@@ -202,7 +253,7 @@ module.exports={
         "$ref": "#/integer"
     }
 }
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports=[
     {
         "description": "additionalItems as schema",
@@ -286,7 +337,7 @@ module.exports=[
     }
 ]
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -357,7 +408,7 @@ module.exports=[
     }
 ]
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports=[
     {
         "description": "allOf",
@@ -471,7 +522,7 @@ module.exports=[
     }
 ]
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 module.exports=[
     {
         "description": "anyOf",
@@ -541,7 +592,7 @@ module.exports=[
     }
 ]
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports=[
     {
         "description": "valid definition",
@@ -575,7 +626,7 @@ module.exports=[
     }
 ]
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports=[
     {
         "description": "dependencies",
@@ -690,7 +741,7 @@ module.exports=[
     }
 ]
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 module.exports=[
     {
         "description": "simple enum validation",
@@ -764,7 +815,7 @@ module.exports=[
     }
 ]
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports=[
     {
         "description": "a schema given for items",
@@ -812,7 +863,7 @@ module.exports=[
     }
 ]
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxItems validation",
@@ -842,7 +893,7 @@ module.exports=[
     }
 ]
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxLength validation",
@@ -877,7 +928,7 @@ module.exports=[
     }
 ]
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxProperties validation",
@@ -907,7 +958,7 @@ module.exports=[
     }
 ]
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 module.exports=[
     {
         "description": "maximum validation",
@@ -951,7 +1002,7 @@ module.exports=[
     }
 ]
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 module.exports=[
     {
         "description": "minItems validation",
@@ -981,7 +1032,7 @@ module.exports=[
     }
 ]
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 module.exports=[
     {
         "description": "minLength validation",
@@ -1016,7 +1067,7 @@ module.exports=[
     }
 ]
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports=[
     {
         "description": "minProperties validation",
@@ -1046,7 +1097,7 @@ module.exports=[
     }
 ]
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 module.exports=[
     {
         "description": "minimum validation",
@@ -1090,7 +1141,7 @@ module.exports=[
     }
 ]
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 module.exports=[
     {
         "description": "by int",
@@ -1152,7 +1203,7 @@ module.exports=[
     }
 ]
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 module.exports=[
     {
         "description": "not",
@@ -1250,7 +1301,7 @@ module.exports=[
 
 ]
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 module.exports=[
     {
         "description": "oneOf",
@@ -1320,7 +1371,7 @@ module.exports=[
     }
 ]
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer",
@@ -1382,7 +1433,7 @@ module.exports=[
     }
 ]
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 module.exports=[
     {
         "description": "validation of date-time strings",
@@ -1527,7 +1578,7 @@ module.exports=[
     }
 ]
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 module.exports=[
     {
         "description": "pattern validation",
@@ -1552,7 +1603,7 @@ module.exports=[
     }
 ]
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -1664,7 +1715,7 @@ module.exports=[
     }
 ]
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 module.exports=[
     {
         "description": "object properties validation",
@@ -1758,7 +1809,7 @@ module.exports=[
     }
 ]
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 module.exports=[
     {
         "description": "root pointer ref",
@@ -1904,7 +1955,7 @@ module.exports=[
     }
 ]
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 module.exports=[
     {
         "description": "remote ref",
@@ -1980,7 +2031,7 @@ module.exports=[
     }
 ]
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 module.exports=[
     {
         "description": "required validation",
@@ -2021,7 +2072,7 @@ module.exports=[
     }
 ]
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer type matches integers",
@@ -2353,7 +2404,7 @@ module.exports=[
     }
 ]
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports=[
     {
         "description": "uniqueItems validation",
@@ -2434,7 +2485,7 @@ module.exports=[
     }
 ]
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -2469,7 +2520,7 @@ describe("Basic", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":2,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":3,"../jsonSchemaTestSuite/remotes/integer.json":4,"../jsonSchemaTestSuite/remotes/subSchemas.json":5}],36:[function(require,module,exports){
+},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":3,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":4,"../jsonSchemaTestSuite/remotes/integer.json":5,"../jsonSchemaTestSuite/remotes/subSchemas.json":6}],37:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -2558,7 +2609,9 @@ describe("JsonSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":2,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":3,"../jsonSchemaTestSuite/remotes/integer.json":4,"../jsonSchemaTestSuite/remotes/subSchemas.json":5,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":6,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":7,"../jsonSchemaTestSuite/tests/draft4/allOf.json":8,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":9,"../jsonSchemaTestSuite/tests/draft4/definitions.json":10,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":11,"../jsonSchemaTestSuite/tests/draft4/enum.json":12,"../jsonSchemaTestSuite/tests/draft4/items.json":13,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":14,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":15,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":16,"../jsonSchemaTestSuite/tests/draft4/maximum.json":17,"../jsonSchemaTestSuite/tests/draft4/minItems.json":18,"../jsonSchemaTestSuite/tests/draft4/minLength.json":19,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":20,"../jsonSchemaTestSuite/tests/draft4/minimum.json":21,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":22,"../jsonSchemaTestSuite/tests/draft4/not.json":23,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":24,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":25,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":26,"../jsonSchemaTestSuite/tests/draft4/pattern.json":27,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":28,"../jsonSchemaTestSuite/tests/draft4/properties.json":29,"../jsonSchemaTestSuite/tests/draft4/ref.json":30,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":31,"../jsonSchemaTestSuite/tests/draft4/required.json":32,"../jsonSchemaTestSuite/tests/draft4/type.json":33,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":34}],37:[function(require,module,exports){
+},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":3,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":4,"../jsonSchemaTestSuite/remotes/integer.json":5,"../jsonSchemaTestSuite/remotes/subSchemas.json":6,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":7,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":8,"../jsonSchemaTestSuite/tests/draft4/allOf.json":9,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":10,"../jsonSchemaTestSuite/tests/draft4/definitions.json":11,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":12,"../jsonSchemaTestSuite/tests/draft4/enum.json":13,"../jsonSchemaTestSuite/tests/draft4/items.json":14,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":15,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":16,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":17,"../jsonSchemaTestSuite/tests/draft4/maximum.json":18,"../jsonSchemaTestSuite/tests/draft4/minItems.json":19,"../jsonSchemaTestSuite/tests/draft4/minLength.json":20,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":21,"../jsonSchemaTestSuite/tests/draft4/minimum.json":22,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":23,"../jsonSchemaTestSuite/tests/draft4/not.json":24,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":25,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":26,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":27,"../jsonSchemaTestSuite/tests/draft4/pattern.json":28,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":29,"../jsonSchemaTestSuite/tests/draft4/properties.json":30,"../jsonSchemaTestSuite/tests/draft4/ref.json":31,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":32,"../jsonSchemaTestSuite/tests/draft4/required.json":33,"../jsonSchemaTestSuite/tests/draft4/type.json":34,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":35}],38:[function(require,module,exports){
+/*jshint -W030 */
+
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -2566,38 +2619,60 @@ var ZSchema = require("../../src/ZSchema");
 ZSchema.setRemoteReference("http://json-schema.org/draft-04/schema", require("../files/draft-04-schema.json"));
 
 var testSuiteFiles = [
-    require("../ZSchemaTestSuite/CustomFormats.js")
+    require("../ZSchemaTestSuite/CustomFormats.js"),
+    require("../ZSchemaTestSuite/CustomFormatsAsync.js")
 ];
 
 describe("ZSchemaTestSuite", function () {
 
-    it("should contain 1 file", function () {
-        expect(testSuiteFiles.length).toBe(1);
+    it("should contain 2 files", function () {
+        expect(testSuiteFiles.length).toBe(2);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
 
         testSuite.tests.forEach(function (test) {
 
-            it(testSuite.description + ", " + test.description, function () {
+            var async   = test.async   || testSuite.async   || false,
+                options = test.options || testSuite.options || undefined,
+                setup   = test.setup   || testSuite.setup,
+                data    = test.data    || testSuite.data,
+                schema  = test.schema  || testSuite.schema,
+                after   = test.after   || testSuite.after;
 
-                var options = test.options || testSuite.options || undefined;
+            !async && it(testSuite.description + ", " + test.description, function () {
+
                 var validator = new ZSchema(options);
-
-                var setup = test.setup || testSuite.setup;
-                if (setup) {
-                    setup(validator, ZSchema);
-                }
-
-                var data = test.data;
-                var schema = test.schema || testSuite.schema;
+                if (setup) { setup(validator, ZSchema); }
 
                 var valid = validator.validate(data, schema);
-                expect(valid).toBe(test.valid);
+                var err = validator.getLastError();
 
+                expect(valid).toBe(test.valid);
                 if (test.valid === true) {
-                    expect(validator.getLastError()).toBe(null);
+                    expect(err).toBe(undefined);
                 }
+                if (after) {
+                    after(err, valid);
+                }
+
+            });
+
+            async && it(testSuite.description + ", " + test.description, function (done) {
+
+                var validator = new ZSchema(options);
+                if (setup) { setup(validator, ZSchema); }
+
+                validator.validate(data, schema, function (err, valid) {
+                    expect(valid).toBe(test.valid);
+                    if (test.valid === true) {
+                        expect(err).toBe(undefined);
+                    }
+                    if (after) {
+                        after(err, valid);
+                    }
+                    done();
+                });
 
             });
 
@@ -2607,4 +2682,4 @@ describe("ZSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../ZSchemaTestSuite/CustomFormats.js":1,"../files/draft-04-schema.json":2}]},{},[35,36,37]);
+},{"../../src/ZSchema":"C768cZ","../ZSchemaTestSuite/CustomFormats.js":1,"../ZSchemaTestSuite/CustomFormatsAsync.js":2,"../files/draft-04-schema.json":3}]},{},[36,37,38]);

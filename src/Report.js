@@ -5,12 +5,54 @@ var Errors = require("./Errors");
 function Report(parentReport) {
     this.parentReport = parentReport || undefined;
     this.errors = [];
-    this.warnings = [];
     this.path = [];
+    this.asyncTasks = [];
 }
 
 Report.prototype.isValid = function () {
+    if (this.asyncTasks.length > 0) {
+        throw new Error("Async tasks pending, can't answer isValid");
+    }
     return this.errors.length === 0;
+};
+
+Report.prototype.addAsyncTask = function (fn, args, asyncTaskResultProcessFn) {
+    this.asyncTasks.push([fn, args, asyncTaskResultProcessFn]);
+};
+
+Report.prototype.processAsyncTasks = function (timeout, callback) {
+
+    var validationTimeout = timeout || 2000,
+        tasksCount        = this.asyncTasks.length,
+        idx               = tasksCount,
+        timedOut          = false,
+        self              = this;
+
+    function respond(asyncTaskResultProcessFn) {
+        return function (asyncTaskResult) {
+            if (timedOut) { return; }
+            asyncTaskResultProcessFn(asyncTaskResult);
+            if (--tasksCount === 0) {
+                var valid = self.errors.length === 0,
+                    err   = valid ? undefined : self.errors;
+                callback(err, valid);
+            }
+        };
+    }
+
+    while (idx--) {
+        var task = this.asyncTasks[idx];
+        task[0].apply(null, task[1].concat(respond(task[2])));
+    }
+
+    setTimeout(function () {
+        if (tasksCount > 0) {
+            timedOut = true;
+            self.addError("ASYNC_TIMEOUT", [tasksCount, validationTimeout]);
+            callback(self.errors, false);
+        }
+    }, validationTimeout);
+
 };
 
 Report.prototype.getPath = function () {
