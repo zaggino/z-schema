@@ -51,7 +51,13 @@ describe("ZSchemaTestSuite", function () {
                 var validator = new ZSchema(options);
                 if (setup) { setup(validator, ZSchema); }
 
-                validator.validate(data, schema, function (err, valid) {
+                // see http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony
+                var zalgo = false;
+
+                var result = validator.validate(data, schema, function (err, valid) {
+                    // make sure callback wasn't called synchronously
+                    expect(zalgo).toBe(true);
+
                     expect(valid).toBe(test.valid);
                     if (test.valid === true) {
                         expect(err).toBe(undefined);
@@ -60,7 +66,12 @@ describe("ZSchemaTestSuite", function () {
                         after(err, valid);
                     }
                     done();
+
                 });
+
+                // never return anything when callback is specified
+                expect(result).toBe(undefined);
+                zalgo = true;
 
             });
 
