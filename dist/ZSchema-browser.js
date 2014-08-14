@@ -715,13 +715,16 @@ exports.validate = function (report, schema, json) {
     while (idx--) {
         if (JsonValidators[keys[idx]]) {
             JsonValidators[keys[idx]].call(this, report, schema, json);
+            if (report.errors.length) { break; }
         }
     }
 
-    if (Array.isArray(json)) {
-        recurseArray.call(this, report, schema, json);
-    } else if (typeof json === "object" && json !== null) {
-        recurseObject.call(this, report, schema, json);
+    if (typeof json === "object") {
+        if (Array.isArray(json)) {
+            recurseArray.call(this, report, schema, json);
+        } else if (json !== null) {
+            recurseObject.call(this, report, schema, json);
+        }
     }
 
     // TODO: check for existence of "postFormat" here

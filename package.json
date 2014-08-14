@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "prepublish": "grunt",
-    "test": "grunt"
+    "test": "grunt test"
   },
   "testling" : {
     "scripts": [

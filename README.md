@@ -78,10 +78,9 @@ Defines a time limit, which should be used when waiting for async tasks like asy
 before the validation fails with an ```ASYNC_TIMEOUT``` error.
 
 ```javascript
-var options = {
+var validator = new ZSchema({
     asyncTimeout: 2000
-};
-var validator = new ZSchema(options);
+});
 ```
 
 #Benchmark
