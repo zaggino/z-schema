@@ -46,7 +46,7 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
         };
     }
 
-    if (tasksCount === 0) {
+    if (tasksCount === 0 || this.errors.length > 0) {
         finish();
         return;
     }

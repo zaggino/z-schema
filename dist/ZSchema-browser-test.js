@@ -90,6 +90,20 @@ module.exports = {
                 "type": "string"
             },
             valid: true
+        },
+        {
+            description: "should not call async validator if errors have been found before",
+            data: "xxx",
+            schema: {
+                "type": "boolean",
+                "format": "shouldTimeout"
+            },
+            valid: false,
+            after: function (err, valid) {
+                expect(valid).toBe(false);
+                expect(err.length).toBe(1);
+                expect(err[0].code).toBe("INVALID_TYPE");
+            }
         }
     ]
 };
