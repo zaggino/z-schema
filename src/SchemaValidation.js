@@ -303,7 +303,7 @@ var SchemaValidators = {
             report.addError("KEYWORD_TYPE_EXPECTED", ["type", ["string", "array"]]);
         }
 
-        if (this.options.noZeroLengthStrings === true) {
+        if (this.options.noEmptyStrings === true) {
             if (schema.type === "string" || isArray && schema.type.indexOf("string") !== -1) {
                 if (schema.minLength === undefined) {
                     schema.minLength = 1;

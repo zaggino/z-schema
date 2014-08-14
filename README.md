@@ -52,6 +52,7 @@ validator.validate(json, schema, function (err, valid) {
 - [Define a custom timeout for all async operations](#asyncTimeout)
 - [Force additionalItems/additionalProperties to be defined in schemas](#forceAdditional)
 - [Assume additionalItems/additionalProperties are defined in schemas as false](#assumeAdditional)
+- [Disallow validation of empty strings as strings](#noEmptyStrings)
 
 ##registerFormat
 
@@ -103,6 +104,16 @@ When true, validator assumes that additionalItems/additionalProperties are defin
 ```javascript
 var validator = new ZSchema({
     assumeAdditional: true
+});
+```
+
+##noEmptyStrings
+
+When true, validator will assume that minimum length of any string to pass type "string" validation is 1, except when ```minLength: 0``` is explicitly defined.
+
+```javascript
+var validator = new ZSchema({
+    noEmptyStrings: true
 });
 ```
 

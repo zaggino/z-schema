@@ -6,6 +6,9 @@ module.exports = {
         Class.registerFormat("xstring", function (str) {
             return str === "xxx";
         });
+        Class.registerFormat("emptystring", function (str) {
+            return typeof str === "string" && str.length === 0 && str === "";
+        });
     },
     schema: {
         "type": "string",
@@ -30,6 +33,15 @@ module.exports = {
                 "format": "xstring2"
             },
             valid: false
+        },
+        {
+            description: "should pass validating empty string",
+            data: "",
+            schema: {
+                "type": "string",
+                "format": "emptystring"
+            },
+            valid: true
         }
     ]
 };

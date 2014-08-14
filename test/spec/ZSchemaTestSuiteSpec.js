@@ -10,23 +10,35 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/CustomFormats.js"),
     require("../ZSchemaTestSuite/CustomFormatsAsync.js"),
     require("../ZSchemaTestSuite/ForceAdditional.js"),
-    require("../ZSchemaTestSuite/AssumeAdditional.js")
+    require("../ZSchemaTestSuite/AssumeAdditional.js"),
+    require("../ZSchemaTestSuite/NoEmptyStrings.js")
 ];
 
 describe("ZSchemaTestSuite", function () {
 
-    it("should contain 4 files", function () {
-        expect(testSuiteFiles.length).toBe(4);
+    var idx = testSuiteFiles.length;
+    while (idx--) {
+        if (testSuiteFiles[idx] == null) {
+            testSuiteFiles.splice(idx, 1);
+        }
+    }
+
+    it("should contain 5 files", function () {
+        expect(testSuiteFiles.length).toBe(5);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
 
         testSuite.tests.forEach(function (test) {
 
+            var data = test.data;
+            if (typeof data === "undefined") {
+                data = testSuite.data;
+            }
+
             var async               = test.async              || testSuite.async   || false,
                 options             = test.options            || testSuite.options || undefined,
                 setup               = test.setup              || testSuite.setup,
-                data                = test.data               || testSuite.data,
                 schema              = test.schema             || testSuite.schema,
                 after               = test.after              || testSuite.after,
                 validateSchemaOnly  = test.validateSchemaOnly || testSuite.validateSchemaOnly;

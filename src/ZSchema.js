@@ -33,7 +33,7 @@ var defaultOptions = {
     // disallow usage of schema's without "type" defined
     noTypeless: false,
     // disallow zero length strings in validated objects
-    noZeroLengthStrings: false,
+    noEmptyStrings: false,
     // forces "uri" format to be in fully rfc3986 compliant
     strictUris: false,
     // turn on all of the above
