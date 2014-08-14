@@ -53,6 +53,7 @@ validator.validate(json, schema, function (err, valid) {
 - [Force additionalItems/additionalProperties to be defined in schemas](#forceAdditional)
 - [Assume additionalItems/additionalProperties are defined in schemas as false](#assumeAdditional)
 - [Disallow validation of empty strings as strings](#noEmptyStrings)
+- [Disallow schemas that don't have a type specified](#noTypeless)
 
 ##registerFormat
 
@@ -109,11 +110,21 @@ var validator = new ZSchema({
 
 ##noEmptyStrings
 
-When true, validator will assume that minimum length of any string to pass type "string" validation is 1, except when ```minLength: 0``` is explicitly defined.
+When true, validator will assume that minimum length of any string to pass type ```string``` validation is 1, except when ```minLength: 0``` is explicitly defined.
 
 ```javascript
 var validator = new ZSchema({
     noEmptyStrings: true
+});
+```
+
+##noTypeless
+
+When true, validator will fail validation for schemas that don't specify a ```type``` of object that they expect.
+
+```javascript
+var validator = new ZSchema({
+    noTypeless: true
 });
 ```
 

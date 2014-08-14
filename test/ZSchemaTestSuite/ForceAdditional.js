@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-    description: "Force additional properties/items in schemas",
+    description: "forceAdditional - Force additional properties/items in schemas",
     options: {
         forceAdditional: true
     },

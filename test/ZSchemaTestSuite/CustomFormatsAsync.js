@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-    description: "Custom formats async support",
+    description: "registerFormat - Custom formats async support",
     async: true,
     options: {
         asyncTimeout: 100

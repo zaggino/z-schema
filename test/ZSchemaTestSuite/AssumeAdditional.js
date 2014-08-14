@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-    description: "Assume additional properties/items in schemas are defined to false",
+    description: "assumeAdditional - Assume additional properties/items in schemas are defined to false",
     options: {
         assumeAdditional: true
     },

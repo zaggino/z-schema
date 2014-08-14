@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-    description: "Custom formats support",
+    description: "registerFormat - Custom formats support",
     setup: function (validator, Class) {
         Class.registerFormat("xstring", function (str) {
             return str === "xxx";
