@@ -50,10 +50,11 @@ validator.validate(json, schema, function (err, valid) {
 
 - [Register a custom format](#registerFormat)
 - [Define a custom timeout for all async operations](#asyncTimeout)
-- [Force additionalItems/additionalProperties to be defined in schemas](#forceAdditional)
-- [Assume additionalItems/additionalProperties are defined in schemas as false](#assumeAdditional)
 - [Disallow validation of empty strings as strings](#noEmptyStrings)
 - [Disallow schemas that don't have a type specified](#noTypeless)
+- [Assume additionalItems/additionalProperties are defined in schemas as false](#assumeAdditional)
+- [Force additionalItems/additionalProperties to be defined in schemas](#forceAdditional)
+- [Force items to be defined in array type schemas](#forceItems)
 
 ##registerFormat
 
@@ -88,26 +89,6 @@ var validator = new ZSchema({
 });
 ```
 
-##forceAdditional
-
-When true, validator doesn't validate schemas where additionalItems/additionalProperties should be defined to either true or false.
-
-```javascript
-var validator = new ZSchema({
-    forceAdditional: true
-});
-```
-
-##assumeAdditional
-
-When true, validator assumes that additionalItems/additionalProperties are defined as false so you don't have to manually fix all your schemas.
-
-```javascript
-var validator = new ZSchema({
-    assumeAdditional: true
-});
-```
-
 ##noEmptyStrings
 
 When true, validator will assume that minimum length of any string to pass type ```string``` validation is 1, except when ```minLength: 0``` is explicitly defined.
@@ -125,6 +106,36 @@ When true, validator will fail validation for schemas that don't specify a ```ty
 ```javascript
 var validator = new ZSchema({
     noTypeless: true
+});
+```
+
+##assumeAdditional
+
+When true, validator assumes that additionalItems/additionalProperties are defined as false so you don't have to manually fix all your schemas.
+
+```javascript
+var validator = new ZSchema({
+    assumeAdditional: true
+});
+```
+
+##forceAdditional
+
+When true, validator doesn't validate schemas where additionalItems/additionalProperties should be defined to either true or false.
+
+```javascript
+var validator = new ZSchema({
+    forceAdditional: true
+});
+```
+
+##forceItems
+
+When true, validator doesn't validate schemas where ```items``` are not defined for ```array``` type schemas. This is to avoid passing anything through an array definition.
+
+```javascript
+var validator = new ZSchema({
+    forceItems: true
 });
 ```
 
