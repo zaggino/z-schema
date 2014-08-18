@@ -52,6 +52,7 @@ validator.validate(json, schema, function (err, valid) {
 - [Define a custom timeout for all async operations](#asyncTimeout)
 - [Disallow validation of empty strings as strings](#noEmptyStrings)
 - [Disallow schemas that don't have a type specified](#noTypeless)
+- [Disallow schemas that contain unrecognized keywords and are not validated by parent schemas](#noExtraKeywords)
 - [Assume additionalItems/additionalProperties are defined in schemas as false](#assumeAdditional)
 - [Force additionalItems/additionalProperties to be defined in schemas](#forceAdditional)
 - [Force items to be defined in array type schemas](#forceItems)
@@ -109,6 +110,16 @@ When true, validator will fail validation for schemas that don't specify a ```ty
 ```javascript
 var validator = new ZSchema({
     noTypeless: true
+});
+```
+
+##noExtraKeywords
+
+When true, validator will fail for schemas that use keywords not defined in JSON Schema specification and doesn't provide a parent schema in ```$schema``` property to validate the schema.
+
+```javascript
+var validator = new ZSchema({
+    noExtraKeywords: true
 });
 ```
 

@@ -118,7 +118,8 @@ module.exports = {
     SCHEMA_NOT_REACHABLE:                   "Validator was not able to read schema with uri: {0}",
     SCHEMA_TYPE_EXPECTED:                   "Schema is expected to be of type 'object'",
     SCHEMA_NOT_AN_OBJECT:                   "Schema is not an object: {0}",
-    ASYNC_TIMEOUT:                          "{0} asynchronous task(s) have timed out after {1} ms"
+    ASYNC_TIMEOUT:                          "{0} asynchronous task(s) have timed out after {1} ms",
+    PARENT_SCHEMA_VALIDATION_FAILED:        "Schema failed to validate against its parent schema, see inner errors for details."
 
 };
 
@@ -920,6 +921,9 @@ Report.prototype.addError = function (errorCode, params, subReports) {
     };
 
     if (subReports !== undefined) {
+        if (!Array.isArray(subReports)) {
+            subReports = [subReports];
+        }
         err.inner = [];
         idx = subReports.length;
         while (idx--) {
@@ -1587,7 +1591,7 @@ exports.validateSchema = function (report, schema) {
             var subReport = new Report(report);
             var valid = JsonValidation.validate.call(this, subReport, schema.__$schemaResolved, schema);
             if (valid === false) {
-                report.addError("REMOTE_SCHEMA_INVALID", null, subReport);
+                report.addError("PARENT_SCHEMA_VALIDATION_FAILED", null, subReport);
             }
         } else {
             if (this.options.ignoreUnresolvableReferences !== true) {

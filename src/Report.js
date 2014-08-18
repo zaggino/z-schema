@@ -94,6 +94,9 @@ Report.prototype.addError = function (errorCode, params, subReports) {
     };
 
     if (subReports !== undefined) {
+        if (!Array.isArray(subReports)) {
+            subReports = [subReports];
+        }
         err.inner = [];
         idx = subReports.length;
         while (idx--) {

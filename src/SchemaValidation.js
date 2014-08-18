@@ -462,7 +462,7 @@ exports.validateSchema = function (report, schema) {
             var subReport = new Report(report);
             var valid = JsonValidation.validate.call(this, subReport, schema.__$schemaResolved, schema);
             if (valid === false) {
-                report.addError("REMOTE_SCHEMA_INVALID", null, subReport);
+                report.addError("PARENT_SCHEMA_VALIDATION_FAILED", null, subReport);
             }
         } else {
             if (this.options.ignoreUnresolvableReferences !== true) {
