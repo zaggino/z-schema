@@ -1814,8 +1814,8 @@ var defaultOptions = {
     noEmptyStrings: false,
     // forces "uri" format to be in fully rfc3986 compliant
     strictUris: false,
-    // turn on all of the above
-    strict: false
+    // turn on some of the above
+    strictMode: false
 };
 
 /*
@@ -1834,6 +1834,16 @@ function ZSchema(options) {
         this.options = options;
     } else {
         this.options = Utils.clone(defaultOptions);
+    }
+
+    if (this.options.strictMode === true) {
+        this.options.forceAdditional  = true;
+        this.options.forceItems       = true;
+        this.options.forceMaxLength   = true;
+        this.options.forceProperties  = true;
+        this.options.noExtraKeywords  = true;
+        this.options.noTypeless       = true;
+        this.options.noEmptyStrings   = true;
     }
 }
 

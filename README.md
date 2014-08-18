@@ -59,6 +59,8 @@ validator.validate(json, schema, function (err, valid) {
 - [Force maxLength to be defined in string type schemas](#forceMaxLength)
 - [Force properties or patternProperties to be defined in object type schemas](#forceProperties)
 - [Ignore remote references to schemas that are not cached or resolvable](#ignoreUnresolvableReferences)
+- [Only allow strictly absolute URIs to be used in schemas](#strictUris)
+- [Turn on z-schema strict mode](#strictMode)
 
 ##registerFormat
 
@@ -184,6 +186,38 @@ When true, validator doesn't end with error when a remote reference is unreachab
 var validator = new ZSchema({
     ignoreUnresolvableReferences: true
 });
+```
+
+##strictUris
+
+When true, all strings of format ```uri``` must be an absolute URIs and not only URI references. See more details in [this issue](https://github.com/zaggino/z-schema/issues/18).
+
+```javascript
+var validator = new ZSchema({
+    strictUris: true
+});
+```
+
+##strictMode
+
+Strict mode of z-schema is currently equal to the following:
+
+```javascript
+var validator = new ZSchema({
+    strictMode: true
+});
+```
+
+```javascript
+if (this.options.strictMode === true) {
+    this.options.forceAdditional  = true;
+    this.options.forceItems       = true;
+    this.options.forceMaxLength   = true;
+    this.options.forceProperties  = true;
+    this.options.noExtraKeywords  = true;
+    this.options.noTypeless       = true;
+    this.options.noEmptyStrings   = true;
+}
 ```
 
 #Benchmarks

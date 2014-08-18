@@ -17,7 +17,8 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/AssumeAdditional.js"),
     require("../ZSchemaTestSuite/NoEmptyStrings.js"),
     require("../ZSchemaTestSuite/NoTypeless.js"),
-    require("../ZSchemaTestSuite/NoExtraKeywords.js")
+    require("../ZSchemaTestSuite/NoExtraKeywords.js"),
+    require("../ZSchemaTestSuite/StrictUris.js")
 ];
 
 describe("ZSchemaTestSuite", function () {
@@ -29,8 +30,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 11 files", function () {
-        expect(testSuiteFiles.length).toBe(11);
+    it("should contain 12 files", function () {
+        expect(testSuiteFiles.length).toBe(12);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
