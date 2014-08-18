@@ -9,18 +9,18 @@ module.exports = {
     tests: [
         {
             schema: {
-                "type": "array"
-            },
-            description: "should fail schema validation because items are not defined",
-            valid: false
-        },
-        {
-            schema: {
                 "type": "array",
                 "items": {}
             },
             description: "should pass schema validation because items are defined",
             valid: true
+        },
+        {
+            schema: {
+                "type": "array"
+            },
+            description: "should fail schema validation because items are not defined",
+            valid: false
         }
     ]
 };

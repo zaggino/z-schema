@@ -55,6 +55,7 @@ validator.validate(json, schema, function (err, valid) {
 - [Assume additionalItems/additionalProperties are defined in schemas as false](#assumeAdditional)
 - [Force additionalItems/additionalProperties to be defined in schemas](#forceAdditional)
 - [Force items to be defined in array type schemas](#forceItems)
+- [Force maxLength to be defined in string type schemas](#forceMaxLength)
 
 ##registerFormat
 
@@ -136,6 +137,16 @@ When true, validator doesn't validate schemas where ```items``` are not defined 
 ```javascript
 var validator = new ZSchema({
     forceItems: true
+});
+```
+
+##forceMaxLength
+
+Whe true, validator doesn't validate schemas where ```maxLength``` is not defined for ```string``` type schemas. This is to avoid passing extremly large strings which application doesn't expect to handle.
+
+```javascript
+var validator = new ZSchema({
+    forceMaxLength: true
 });
 ```
 

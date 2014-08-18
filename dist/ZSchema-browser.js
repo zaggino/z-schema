@@ -1803,7 +1803,19 @@ var defaultOptions = {
     constructor
 */
 function ZSchema(options) {
-    this.options = options || Utils.clone(defaultOptions);
+    if (typeof options === "object") {
+        var keys = Object.keys(options),
+            idx = keys.length;
+        while (idx--) {
+            var key = keys[idx];
+            if (defaultOptions[key] === undefined) {
+                throw new Error("Unexpected option passed to constructor: " + key);
+            }
+        }
+        this.options = options;
+    } else {
+        this.options = Utils.clone(defaultOptions);
+    }
 }
 
 /*
