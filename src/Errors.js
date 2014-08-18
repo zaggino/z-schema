@@ -44,6 +44,7 @@ module.exports = {
     KEYWORD_PATTERN:                        "Keyword '{0}' is not a valid RegExp pattern: {1}",
     KEYWORD_VALUE_TYPE:                     "Each element of keyword '{0}' array must be a '{1}'",
     UNKNOWN_FORMAT:                         "There is no validation function for format '{0}'",
+    CUSTOM_MODE_FORCE_PROPERTIES:           "{0} must define at least one property if present",
 
     // Remote errors
     REF_UNRESOLVED:                         "Reference has not been resolved during compilation: {0}",

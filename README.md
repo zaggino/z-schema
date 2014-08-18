@@ -56,6 +56,7 @@ validator.validate(json, schema, function (err, valid) {
 - [Force additionalItems/additionalProperties to be defined in schemas](#forceAdditional)
 - [Force items to be defined in array type schemas](#forceItems)
 - [Force maxLength to be defined in string type schemas](#forceMaxLength)
+- [Force properties or patternProperties to be defined in object type schemas](#forceProperties)
 
 ##registerFormat
 
@@ -132,7 +133,8 @@ var validator = new ZSchema({
 
 ##forceItems
 
-When true, validator doesn't validate schemas where ```items``` are not defined for ```array``` type schemas. This is to avoid passing anything through an array definition.
+When true, validator doesn't validate schemas where ```items``` are not defined for ```array``` type schemas.
+This is to avoid passing anything through an array definition.
 
 ```javascript
 var validator = new ZSchema({
@@ -142,11 +144,23 @@ var validator = new ZSchema({
 
 ##forceMaxLength
 
-Whe true, validator doesn't validate schemas where ```maxLength``` is not defined for ```string``` type schemas. This is to avoid passing extremly large strings which application doesn't expect to handle.
+When true, validator doesn't validate schemas where ```maxLength``` is not defined for ```string``` type schemas.
+This is to avoid passing extremly large strings which application doesn't expect to handle.
 
 ```javascript
 var validator = new ZSchema({
     forceMaxLength: true
+});
+```
+
+##forceProperties
+
+When true, validator doesn't validate schemas where ```properties``` or ```patternProperties``` is not defined for ```object``` type schemas.
+This is to avoid having objects with unexpected properties in application.
+
+```javascript
+var validator = new ZSchema({
+    forceProperties: true
 });
 ```
 

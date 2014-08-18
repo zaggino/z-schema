@@ -110,6 +110,7 @@ module.exports = {
     KEYWORD_PATTERN:                        "Keyword '{0}' is not a valid RegExp pattern: {1}",
     KEYWORD_VALUE_TYPE:                     "Each element of keyword '{0}' array must be a '{1}'",
     UNKNOWN_FORMAT:                         "There is no validation function for format '{0}'",
+    CUSTOM_MODE_FORCE_PROPERTIES:           "{0} must define at least one property if present",
 
     // Remote errors
     REF_UNRESOLVED:                         "Reference has not been resolved during compilation: {0}",
@@ -1315,17 +1316,19 @@ var SchemaValidators = {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.1
         if (Utils.whatIs(schema.properties) !== "object") {
             report.addError("KEYWORD_TYPE_EXPECTED", ["properties", "object"]);
-        } else {
-            var keys = Object.keys(schema.properties),
-                idx = keys.length;
-            while (idx--) {
-                var key = keys[idx],
-                    val = schema.properties[key];
-                report.path.push("properties[" + key + "]");
-                exports.validateSchema.call(this, report, val);
-                report.path.pop();
-            }
+            return;
         }
+
+        var keys = Object.keys(schema.properties),
+            idx = keys.length;
+        while (idx--) {
+            var key = keys[idx],
+                val = schema.properties[key];
+            report.path.push("properties[" + key + "]");
+            exports.validateSchema.call(this, report, val);
+            report.path.pop();
+        }
+
         // custom - strict mode
         if (this.options.forceAdditional === true && schema.additionalProperties === undefined) {
             report.addError("KEYWORD_UNDEFINED_STRICT", ["additionalProperties"]);
@@ -1334,26 +1337,36 @@ var SchemaValidators = {
         if (this.options.assumeAdditional === true && schema.additionalProperties === undefined) {
             schema.additionalProperties = false;
         }
+        // custom - forceProperties
+        if (this.options.forceProperties === true && keys.length === 0) {
+            report.addError("CUSTOM_MODE_FORCE_PROPERTIES", ["properties"]);
+        }
     },
     patternProperties: function (report, schema) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.1
         if (Utils.whatIs(schema.patternProperties) !== "object") {
             report.addError("KEYWORD_TYPE_EXPECTED", ["patternProperties", "object"]);
-        } else {
-            var keys = Object.keys(schema.patternProperties),
-                idx = keys.length;
-            while (idx--) {
-                var key = keys[idx],
-                    val = schema.patternProperties[key];
-                try {
-                    RegExp(key);
-                } catch (e) {
-                    report.addError("KEYWORD_PATTERN", ["patternProperties", key]);
-                }
-                report.path.push("patternProperties[" + key + "]");
-                exports.validateSchema.call(this, report, val);
-                report.path.pop();
+            return;
+        }
+
+        var keys = Object.keys(schema.patternProperties),
+            idx = keys.length;
+        while (idx--) {
+            var key = keys[idx],
+                val = schema.patternProperties[key];
+            try {
+                RegExp(key);
+            } catch (e) {
+                report.addError("KEYWORD_PATTERN", ["patternProperties", key]);
             }
+            report.path.push("patternProperties[" + key + "]");
+            exports.validateSchema.call(this, report, val);
+            report.path.pop();
+        }
+
+        // custom - forceProperties
+        if (this.options.forceProperties === true && keys.length === 0) {
+            report.addError("CUSTOM_MODE_FORCE_PROPERTIES", ["patternProperties"]);
         }
     },
     dependencies: function (report, schema) {
