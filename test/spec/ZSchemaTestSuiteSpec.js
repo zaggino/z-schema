@@ -13,6 +13,7 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/ForceItems.js"),
     require("../ZSchemaTestSuite/ForceMaxLength.js"),
     require("../ZSchemaTestSuite/ForceProperties.js"),
+    require("../ZSchemaTestSuite/IgnoreUnresolvableReferences.js"),
     require("../ZSchemaTestSuite/AssumeAdditional.js"),
     require("../ZSchemaTestSuite/NoEmptyStrings.js"),
     require("../ZSchemaTestSuite/NoTypeless.js")
@@ -27,8 +28,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 9 files", function () {
-        expect(testSuiteFiles.length).toBe(9);
+    it("should contain 10 files", function () {
+        expect(testSuiteFiles.length).toBe(10);
     });
 
     testSuiteFiles.forEach(function (testSuite) {

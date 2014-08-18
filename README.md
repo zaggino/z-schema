@@ -57,6 +57,7 @@ validator.validate(json, schema, function (err, valid) {
 - [Force items to be defined in array type schemas](#forceItems)
 - [Force maxLength to be defined in string type schemas](#forceMaxLength)
 - [Force properties or patternProperties to be defined in object type schemas](#forceProperties)
+- [Ignore remote references to schemas that are not cached or resolvable](#ignoreUnresolvableReferences)
 
 ##registerFormat
 
@@ -161,6 +162,16 @@ This is to avoid having objects with unexpected properties in application.
 ```javascript
 var validator = new ZSchema({
     forceProperties: true
+});
+```
+
+##ignoreUnresolvableReferences
+
+When true, validator doesn't end with error when a remote reference is unreachable. **This setting is not recommended in production outside of testing.**
+
+```javascript
+var validator = new ZSchema({
+    ignoreUnresolvableReferences: true
 });
 ```
 

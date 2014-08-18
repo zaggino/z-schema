@@ -94,11 +94,13 @@ exports.compileSchema = function (report, schema) {
         // resolve all the collected references into __xxxResolved pointer
         var refObj = refs[idx];
         var response = SchemaCache.getSchemaByUri.call(this, report, refObj.ref, schema);
-        if (!response && this.options.ignoreUnresolvableReferences !== true) {
-            report.path.push(refObj.path);
-            report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref]);
-            report.path.pop();
-            return false;
+        if (!response) {
+            if (!isAbsoluteUri(refObj.ref) || this.options.ignoreUnresolvableReferences !== true) {
+                report.path.push(refObj.path);
+                report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref]);
+                report.path.pop();
+                return false;
+            }
         }
         // this might create circular references
         refObj.obj["__" + refObj.key + "Resolved"] = response;
