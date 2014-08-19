@@ -95,17 +95,23 @@ var schemas = [
         ]
     }
 ];
+
 var data = {
     firstName: "Martin",
     lastName: "Zagora",
     street: "George St",
     city: "Sydney"
 };
+
 var validator = new ZSchema();
+
 // compile & validate schemas first, z-schema will automatically handle array
-validator.validateSchema(schemas);
+var allSchemasValid = validator.validateSchema(schemas);
+// allSchemasValid === true
+
 // now validate our data against the last schema
 var valid = validator(data, schemas[2]);
+// valid === true
 ```
 
 ##registerFormat
