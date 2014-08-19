@@ -1977,19 +1977,35 @@ function ZSchema(options) {
 */
 ZSchema.prototype.compileSchema = function (schema) {
     var report = new Report();
+
+    if (typeof schema === "string") {
+        schema = SchemaCache.getSchemaByUri.call(this, report, schema);
+    }
+
     SchemaCompilation.compileSchema.call(this, report, schema);
+
     this.lastReport = report;
     return report.isValid();
 };
 ZSchema.prototype.validateSchema = function (schema) {
     var report = new Report();
+
+    if (typeof schema === "string") {
+        schema = SchemaCache.getSchemaByUri.call(this, report, schema);
+    }
+
     var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
     if (compiled) { SchemaValidation.validateSchema.call(this, report, schema); }
+
     this.lastReport = report;
     return report.isValid();
 };
 ZSchema.prototype.validate = function (json, schema, callback) {
     var report = new Report();
+
+    if (typeof schema === "string") {
+        schema = SchemaCache.getSchemaByUri.call(this, report, schema);
+    }
 
     var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
     if (!compiled) {
