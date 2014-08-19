@@ -46,6 +46,18 @@ validator.validate(json, schema, function (err, valid) {
 });
 ```
 
+##Browser:
+
+```html
+<script type="text/javascript" src="../dist/ZSchema-browser-min.js"></script>
+<script type="text/javascript">
+    var ZSchema = require("ZSchema");
+	var validator = new ZSchema();
+	var valid = validator.validate("string", { "type": "string" });
+	console.log(valid);
+</script>
+```
+
 #Features
 
 - [Compile arrays of schemas and use references between them](#compilearrays)
