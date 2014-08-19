@@ -448,7 +448,20 @@ var SchemaValidators = {
     }
 };
 
+var validateArrayOfSchemas = function (report, arr) {
+    var idx = arr.length;
+    while (idx--) {
+        exports.validateSchema.call(this, report, arr[idx]);
+    }
+    return report.isValid();
+};
+
 exports.validateSchema = function (report, schema) {
+
+    // if schema is an array, assume it's an array of schemas
+    if (Array.isArray(schema)) {
+        return validateArrayOfSchemas.call(this, report, schema);
+    }
 
     // do not revalidate schema that has already been validated once
     if (schema.__$validated) {

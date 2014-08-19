@@ -2,10 +2,16 @@
 
 var ZSchema = require("../../src/ZSchema");
 
-ZSchema.setRemoteReference("http://json-schema.org/draft-04/schema", require("../files/draft-04-schema.json"));
-ZSchema.setRemoteReference("http://localhost:1234/integer.json", require("../jsonSchemaTestSuite/remotes/integer.json"));
-ZSchema.setRemoteReference("http://localhost:1234/subSchemas.json", require("../jsonSchemaTestSuite/remotes/subSchemas.json"));
-ZSchema.setRemoteReference("http://localhost:1234/folder/folderInteger.json", require("../jsonSchemaTestSuite/remotes/folder/folderInteger.json"));
+function setRemoteReferences(validator) {
+    validator.setRemoteReference("http://json-schema.org/draft-04/schema",
+                                 require("../files/draft-04-schema.json"));
+    validator.setRemoteReference("http://localhost:1234/integer.json",
+                                 require("../jsonSchemaTestSuite/remotes/integer.json"));
+    validator.setRemoteReference("http://localhost:1234/subSchemas.json",
+                                 require("../jsonSchemaTestSuite/remotes/subSchemas.json"));
+    validator.setRemoteReference("http://localhost:1234/folder/folderInteger.json",
+                                 require("../jsonSchemaTestSuite/remotes/folder/folderInteger.json"));
+}
 
 describe("Basic", function () {
 
@@ -15,25 +21,33 @@ describe("Basic", function () {
 
     it("Work in progress test...", function () {
         var validator = new ZSchema();
+        setRemoteReferences(validator);
 
-        var schema = {
-            "id": "http://my.site/myschema#",
-            "$ref": "#/definitions/schema2",
-            "definitions": {
-                "schema1": {
-                    "id": "schema1",
-                    "type": "integer"
+        var schema = [
+                {
+                    id: "schemaA",
+                    type: "integer"
                 },
-                "schema2": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "schema1"
+                {
+                    id: "schemaB",
+                    type: "string"
+                },
+                {
+                    id: "mainSchema",
+                    type: "object",
+                    properties: {
+                        a: { "$ref": "schemaA" },
+                        b: { "$ref": "schemaB" },
+                        c: { "enum": ["C"] }
                     }
                 }
-            }
-        };
+            ];
 
-        var data = [1, 2, 3];
+        var data = {
+            a: 1,
+            b: "str",
+            c: "C"
+        };
 
         var validSchema = validator.validateSchema(schema);
         expect(validSchema).toBe(true);
@@ -43,7 +57,7 @@ describe("Basic", function () {
             return;
         }
 
-        var valid = validator.validate(data, schema);
+        var valid = validator.validate(data, schema[2]);
         expect(valid).toBe(true);
 
         if (!valid) {

@@ -4,8 +4,6 @@
 
 var ZSchema = require("../../src/ZSchema");
 
-ZSchema.setRemoteReference("http://json-schema.org/draft-04/schema", require("../files/draft-04-schema.json"));
-
 var testSuiteFiles = [
     require("../ZSchemaTestSuite/CustomFormats.js"),
     require("../ZSchemaTestSuite/CustomFormatsAsync.js"),
@@ -20,7 +18,8 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/NoExtraKeywords.js"),
     require("../ZSchemaTestSuite/StrictUris.js"),
     // issues
-    require("../ZSchemaTestSuite/Issue12.js")
+    require("../ZSchemaTestSuite/Issue12.js"),
+    require("../ZSchemaTestSuite/Issue13.js")
 ];
 
 describe("ZSchemaTestSuite", function () {
@@ -32,8 +31,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 13 files", function () {
-        expect(testSuiteFiles.length).toBe(13);
+    it("should contain 14 files", function () {
+        expect(testSuiteFiles.length).toBe(14);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -45,24 +44,29 @@ describe("ZSchemaTestSuite", function () {
                 data = testSuite.data;
             }
 
-            var async               = test.async              || testSuite.async   || false,
-                options             = test.options            || testSuite.options || undefined,
+            var async               = test.async              || testSuite.async        || false,
+                options             = test.options            || testSuite.options      || undefined,
                 setup               = test.setup              || testSuite.setup,
                 schema              = test.schema             || testSuite.schema,
+                schemaIndex         = test.schemaIndex        || testSuite.schemaIndex  || 0,
                 after               = test.after              || testSuite.after,
                 validateSchemaOnly  = test.validateSchemaOnly || testSuite.validateSchemaOnly;
 
             !async && it(testSuite.description + ", " + test.description, function () {
 
                 var validator = new ZSchema(options);
+                validator.setRemoteReference("http://json-schema.org/draft-04/schema", require("../files/draft-04-schema.json"));
                 if (setup) { setup(validator, ZSchema); }
 
-                var valid;
-                if (validateSchemaOnly) {
-                    valid = validator.validateSchema(schema);
-                } else {
+                var valid = validator.validateSchema(schema);
+
+                if (valid && !validateSchemaOnly) {
+                    if (Array.isArray(schema)) {
+                        schema = schema[schemaIndex];
+                    }
                     valid = validator.validate(data, schema);
                 }
+
                 var err = validator.getLastError();
 
                 expect(typeof valid).toBe("boolean", "returned response is not a boolean");

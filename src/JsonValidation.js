@@ -440,8 +440,9 @@ var recurseObject = function (report, schema, json) {
 exports.validate = function (report, schema, json) {
 
     // check if schema is an object
-    if (typeof schema !== "object") {
-        report.addError("SCHEMA_NOT_AN_OBJECT", [typeof schema]);
+    var to = Utils.whatIs(schema);
+    if (to !== "object") {
+        report.addError("SCHEMA_NOT_AN_OBJECT", [to]);
         return false;
     }
 

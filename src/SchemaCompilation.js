@@ -1,5 +1,6 @@
 "use strict";
 
+var Report = require("./Report");
 var SchemaCache = require("./SchemaCache");
 
 function isAbsoluteUri(uri) {
@@ -8,7 +9,15 @@ function isAbsoluteUri(uri) {
 
 function mergeReference(scope, ref) {
     if (isAbsoluteUri(ref)) { return ref; }
-    var res = scope.join("") + ref;
+
+    var joinedScope = scope.join("");
+
+    var toRemove = joinedScope.match(/[^#/]+$/);
+    if (toRemove) {
+        joinedScope = joinedScope.slice(0, toRemove.index);
+    }
+
+    var res = joinedScope + ref;
     res = res.replace(/##/, "#");
     return res;
 }
@@ -70,6 +79,53 @@ function collectReferences(obj, results, scope, path) {
     return results;
 }
 
+var compileArrayOfSchemasLoop = function (mainReport, arr) {
+    var idx = arr.length,
+        compiledCount = 0;
+
+    while (idx--) {
+
+        // try to compile each schema separately
+        var report = new Report(mainReport);
+        var isValid = exports.compileSchema.call(this, report, arr[idx]);
+        if (isValid) { compiledCount++; }
+
+        // copy errors to report
+        mainReport.errors = mainReport.errors.concat(report.errors);
+
+    }
+
+    return compiledCount;
+};
+
+var compileArrayOfSchemas = function (report, arr) {
+
+    var compiled = 0,
+        lastLoopCompiled;
+
+    do {
+
+        // remove all UNRESOLVABLE_REFERENCE errors before compiling array again
+        var idx = report.errors.length;
+        while (idx--) {
+            if (report.errors[idx].code === "UNRESOLVABLE_REFERENCE") {
+                report.errors.splice(idx, 1);
+            }
+        }
+
+        // remember how many were compiled in the last loop
+        lastLoopCompiled = compiled;
+
+        // count how many are compiled now
+        compiled = compileArrayOfSchemasLoop.call(this, report, arr);
+
+        // keep repeating if not all compiled and at least one more was compiled in the last loop
+    } while (compiled !== arr.length && compiled !== lastLoopCompiled);
+
+    return report.isValid();
+
+};
+
 exports.compileSchema = function (report, schema) {
 
     // if schema is a string, assume it's a uri
@@ -80,6 +136,11 @@ exports.compileSchema = function (report, schema) {
             return false;
         }
         schema = loadedSchema;
+    }
+
+    // if schema is an array, assume it's an array of schemas
+    if (Array.isArray(schema)) {
+        return compileArrayOfSchemas.call(this, report, schema);
     }
 
     // do not re-compile schemas

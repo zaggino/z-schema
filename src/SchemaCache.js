@@ -3,8 +3,6 @@
 var SchemaCompilation   = require("./SchemaCompilation");
 var SchemaValidation    = require("./SchemaValidation");
 
-var cache = {};
-
 function decodeJSONPointer(str) {
     // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07#section-3
     return decodeURIComponent(str).replace(/~[0-1]/g, function (x) {
@@ -56,21 +54,21 @@ function findId(schema, id) {
 exports.cacheSchemaByUri = function (uri, schema) {
     var remotePath = getRemotePath(uri);
     if (remotePath) {
-        cache[remotePath] = schema;
+        this.cache[remotePath] = schema;
     }
 };
 
 exports.removeFromCacheByUri = function (uri) {
     var remotePath = getRemotePath(uri);
     if (remotePath) {
-        cache[remotePath] = undefined;
+        this.cache[remotePath] = undefined;
     }
 };
 
 exports.getSchemaByUri = function (report, uri, root) {
     var remotePath = getRemotePath(uri),
         queryPath = getQueryPath(uri),
-        result = remotePath ? cache[remotePath] : root;
+        result = remotePath ? this.cache[remotePath] : root;
 
     if (result && remotePath) {
         // we need to avoid compiling schemas in a recursive loop

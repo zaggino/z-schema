@@ -735,8 +735,9 @@ var recurseObject = function (report, schema, json) {
 exports.validate = function (report, schema, json) {
 
     // check if schema is an object
-    if (typeof schema !== "object") {
-        report.addError("SCHEMA_NOT_AN_OBJECT", [typeof schema]);
+    var to = Utils.whatIs(schema);
+    if (to !== "object") {
+        report.addError("SCHEMA_NOT_AN_OBJECT", [to]);
         return false;
     }
 
@@ -950,8 +951,6 @@ module.exports = Report;
 var SchemaCompilation   = require("./SchemaCompilation");
 var SchemaValidation    = require("./SchemaValidation");
 
-var cache = {};
-
 function decodeJSONPointer(str) {
     // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07#section-3
     return decodeURIComponent(str).replace(/~[0-1]/g, function (x) {
@@ -1003,21 +1002,21 @@ function findId(schema, id) {
 exports.cacheSchemaByUri = function (uri, schema) {
     var remotePath = getRemotePath(uri);
     if (remotePath) {
-        cache[remotePath] = schema;
+        this.cache[remotePath] = schema;
     }
 };
 
 exports.removeFromCacheByUri = function (uri) {
     var remotePath = getRemotePath(uri);
     if (remotePath) {
-        cache[remotePath] = undefined;
+        this.cache[remotePath] = undefined;
     }
 };
 
 exports.getSchemaByUri = function (report, uri, root) {
     var remotePath = getRemotePath(uri),
         queryPath = getQueryPath(uri),
-        result = remotePath ? cache[remotePath] : root;
+        result = remotePath ? this.cache[remotePath] : root;
 
     if (result && remotePath) {
         // we need to avoid compiling schemas in a recursive loop
@@ -1050,6 +1049,7 @@ exports.getSchemaByUri = function (report, uri, root) {
 },{"./SchemaCompilation":8,"./SchemaValidation":9}],8:[function(require,module,exports){
 "use strict";
 
+var Report = require("./Report");
 var SchemaCache = require("./SchemaCache");
 
 function isAbsoluteUri(uri) {
@@ -1058,7 +1058,15 @@ function isAbsoluteUri(uri) {
 
 function mergeReference(scope, ref) {
     if (isAbsoluteUri(ref)) { return ref; }
-    var res = scope.join("") + ref;
+
+    var joinedScope = scope.join("");
+
+    var toRemove = joinedScope.match(/[^#/]+$/);
+    if (toRemove) {
+        joinedScope = joinedScope.slice(0, toRemove.index);
+    }
+
+    var res = joinedScope + ref;
     res = res.replace(/##/, "#");
     return res;
 }
@@ -1120,6 +1128,53 @@ function collectReferences(obj, results, scope, path) {
     return results;
 }
 
+var compileArrayOfSchemasLoop = function (mainReport, arr) {
+    var idx = arr.length,
+        compiledCount = 0;
+
+    while (idx--) {
+
+        // try to compile each schema separately
+        var report = new Report(mainReport);
+        var isValid = exports.compileSchema.call(this, report, arr[idx]);
+        if (isValid) { compiledCount++; }
+
+        // copy errors to report
+        mainReport.errors = mainReport.errors.concat(report.errors);
+
+    }
+
+    return compiledCount;
+};
+
+var compileArrayOfSchemas = function (report, arr) {
+
+    var compiled = 0,
+        lastLoopCompiled;
+
+    do {
+
+        // remove all UNRESOLVABLE_REFERENCE errors before compiling array again
+        var idx = report.errors.length;
+        while (idx--) {
+            if (report.errors[idx].code === "UNRESOLVABLE_REFERENCE") {
+                report.errors.splice(idx, 1);
+            }
+        }
+
+        // remember how many were compiled in the last loop
+        lastLoopCompiled = compiled;
+
+        // count how many are compiled now
+        compiled = compileArrayOfSchemasLoop.call(this, report, arr);
+
+        // keep repeating if not all compiled and at least one more was compiled in the last loop
+    } while (compiled !== arr.length && compiled !== lastLoopCompiled);
+
+    return report.isValid();
+
+};
+
 exports.compileSchema = function (report, schema) {
 
     // if schema is a string, assume it's a uri
@@ -1130,6 +1185,11 @@ exports.compileSchema = function (report, schema) {
             return false;
         }
         schema = loadedSchema;
+    }
+
+    // if schema is an array, assume it's an array of schemas
+    if (Array.isArray(schema)) {
+        return compileArrayOfSchemas.call(this, report, schema);
     }
 
     // do not re-compile schemas
@@ -1174,7 +1234,7 @@ exports.compileSchema = function (report, schema) {
 
 };
 
-},{"./SchemaCache":7}],9:[function(require,module,exports){
+},{"./Report":6,"./SchemaCache":7}],9:[function(require,module,exports){
 "use strict";
 
 var FormatValidators = require("./FormatValidators"),
@@ -1625,7 +1685,20 @@ var SchemaValidators = {
     }
 };
 
+var validateArrayOfSchemas = function (report, arr) {
+    var idx = arr.length;
+    while (idx--) {
+        exports.validateSchema.call(this, report, arr[idx]);
+    }
+    return report.isValid();
+};
+
 exports.validateSchema = function (report, schema) {
+
+    // if schema is an array, assume it's an array of schemas
+    if (Array.isArray(schema)) {
+        return validateArrayOfSchemas.call(this, report, schema);
+    }
 
     // do not revalidate schema that has already been validated once
     if (schema.__$validated) {
@@ -1823,6 +1896,8 @@ exports.clone = function (src) {
     return res;
 };
 
+},{}],"ZSchema":[function(require,module,exports){
+module.exports=require('C768cZ');
 },{}],"C768cZ":[function(require,module,exports){
 "use strict";
 
@@ -1836,7 +1911,6 @@ var SchemaValidation  = require("./SchemaValidation");
 var Utils             = require("./Utils");
 
 /*
-    // TODO: review these, make sure each has its own testcase
     default options
 */
 var defaultOptions = {
@@ -1870,6 +1944,9 @@ var defaultOptions = {
     constructor
 */
 function ZSchema(options) {
+    this.cache = {};
+
+    // options
     if (typeof options === "object") {
         var keys = Object.keys(options),
             idx = keys.length;
@@ -1942,16 +2019,16 @@ ZSchema.prototype.validate = function (json, schema, callback) {
 ZSchema.prototype.getLastError = function () {
     return this.lastReport.errors.length > 0 ? this.lastReport.errors : undefined;
 };
+ZSchema.prototype.setRemoteReference = function (uri, schema) {
+    if (typeof schema === "string") {
+        schema = JSON.parse(schema);
+    }
+    SchemaCache.cacheSchemaByUri.call(this, uri, schema);
+};
 
 /*
     static methods
 */
-ZSchema.setRemoteReference = function (uri, schema) {
-    if (typeof schema === "string") {
-        schema = JSON.parse(schema);
-    }
-    SchemaCache.cacheSchemaByUri(uri, schema);
-};
 ZSchema.registerFormat = function (formatName, validatorFunction) {
     FormatValidators[formatName] = validatorFunction;
 };
@@ -1961,6 +2038,4 @@ ZSchema.registerFormatter = function (/* formatterName, formatterFunction */) {
 
 module.exports = ZSchema;
 
-},{"./FormatValidators":3,"./JsonValidation":4,"./Polyfills":5,"./Report":6,"./SchemaCache":7,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}],"ZSchema":[function(require,module,exports){
-module.exports=require('C768cZ');
-},{}]},{},[2,3,4,5,6,7,8,9,10,"C768cZ"]);
+},{"./FormatValidators":3,"./JsonValidation":4,"./Polyfills":5,"./Report":6,"./SchemaCache":7,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}]},{},[2,3,4,5,6,7,8,9,10,"C768cZ"]);

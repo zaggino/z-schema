@@ -2,10 +2,16 @@
 
 var ZSchema = require("../../src/ZSchema");
 
-ZSchema.setRemoteReference("http://json-schema.org/draft-04/schema", require("../files/draft-04-schema.json"));
-ZSchema.setRemoteReference("http://localhost:1234/integer.json", require("../jsonSchemaTestSuite/remotes/integer.json"));
-ZSchema.setRemoteReference("http://localhost:1234/subSchemas.json", require("../jsonSchemaTestSuite/remotes/subSchemas.json"));
-ZSchema.setRemoteReference("http://localhost:1234/folder/folderInteger.json", require("../jsonSchemaTestSuite/remotes/folder/folderInteger.json"));
+function setRemoteReferences(validator) {
+    validator.setRemoteReference("http://json-schema.org/draft-04/schema",
+                                 require("../files/draft-04-schema.json"));
+    validator.setRemoteReference("http://localhost:1234/integer.json",
+                                 require("../jsonSchemaTestSuite/remotes/integer.json"));
+    validator.setRemoteReference("http://localhost:1234/subSchemas.json",
+                                 require("../jsonSchemaTestSuite/remotes/subSchemas.json"));
+    validator.setRemoteReference("http://localhost:1234/folder/folderInteger.json",
+                                 require("../jsonSchemaTestSuite/remotes/folder/folderInteger.json"));
+}
 
 var jsonSchemaTestSuiteFiles = [
     require("../jsonSchemaTestSuite/tests/draft4/additionalItems.json"),
@@ -66,6 +72,8 @@ describe("JsonSchemaTestSuite", function () {
                 it("[" + fileIndex + "]" + testDefinition.description + " - " + test.description + ": " + JSON.stringify(test.data), function () {
 
                     var validator = new ZSchema();
+                    setRemoteReferences(validator);
+
                     var valid = validator.validate(test.data, testDefinition.schema);
                     expect(valid).toBe(test.valid);
 

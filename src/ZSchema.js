@@ -10,7 +10,6 @@ var SchemaValidation  = require("./SchemaValidation");
 var Utils             = require("./Utils");
 
 /*
-    // TODO: review these, make sure each has its own testcase
     default options
 */
 var defaultOptions = {
@@ -44,6 +43,9 @@ var defaultOptions = {
     constructor
 */
 function ZSchema(options) {
+    this.cache = {};
+
+    // options
     if (typeof options === "object") {
         var keys = Object.keys(options),
             idx = keys.length;
@@ -116,16 +118,16 @@ ZSchema.prototype.validate = function (json, schema, callback) {
 ZSchema.prototype.getLastError = function () {
     return this.lastReport.errors.length > 0 ? this.lastReport.errors : undefined;
 };
+ZSchema.prototype.setRemoteReference = function (uri, schema) {
+    if (typeof schema === "string") {
+        schema = JSON.parse(schema);
+    }
+    SchemaCache.cacheSchemaByUri.call(this, uri, schema);
+};
 
 /*
     static methods
 */
-ZSchema.setRemoteReference = function (uri, schema) {
-    if (typeof schema === "string") {
-        schema = JSON.parse(schema);
-    }
-    SchemaCache.cacheSchemaByUri(uri, schema);
-};
 ZSchema.registerFormat = function (formatName, validatorFunction) {
     FormatValidators[formatName] = validatorFunction;
 };
