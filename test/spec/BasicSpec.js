@@ -15,19 +15,42 @@ describe("Basic", function () {
 
     it("Work in progress test...", function () {
         var validator = new ZSchema();
+
         var schema = {
-            "id": "http://localhost:1234/",
-            "items": {
-                "id": "folder/",
-                "items": { "$ref": "folderInteger.json" }
+            "id": "http://my.site/myschema#",
+            "$ref": "#/definitions/schema2",
+            "definitions": {
+                "schema1": {
+                    "id": "schema1",
+                    "type": "integer"
+                },
+                "schema2": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "schema1"
+                    }
+                }
             }
         };
-        var data = [[1]];
+
+        var data = [1, 2, 3];
+
+        var validSchema = validator.validateSchema(schema);
+        expect(validSchema).toBe(true);
+
+        if (!validSchema) {
+            console.log(validator.getLastError());
+            return;
+        }
+
         var valid = validator.validate(data, schema);
+        expect(valid).toBe(true);
+
         if (!valid) {
             console.log(validator.getLastError());
+            return;
         }
-        expect(valid).toBe(true);
+
     });
 
 });

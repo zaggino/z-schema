@@ -87,6 +87,11 @@ exports.compileSchema = function (report, schema) {
         return true;
     }
 
+    if (schema.id) {
+        // add this to our schemaCache (before compilation in case we have references including id)
+        SchemaCache.cacheSchemaByUri.call(this, schema.id, schema);
+    }
+
     // collect all references that need to be resolved - $ref and $schema
     var refs = collectReferences.call(this, schema),
         idx = refs.length;
@@ -109,9 +114,10 @@ exports.compileSchema = function (report, schema) {
     var isValid = report.isValid();
     if (isValid) {
         schema.__$compiled = true;
+    } else {
         if (schema.id) {
-            // add this to our schemaCache
-            SchemaCache.cacheSchemaByUri.call(this, schema.id, schema);
+            // remove this schema from schemaCache because it failed to compile
+            SchemaCache.removeFromCacheByUri.call(this, schema.id);
         }
     }
     return isValid;

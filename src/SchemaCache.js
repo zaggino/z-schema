@@ -20,13 +20,51 @@ function getRemotePath(uri) {
 function getQueryPath(uri) {
     var io = uri.indexOf("#");
     var res = io === -1 ? undefined : uri.slice(io + 1);
-    if (res && res[0] === "/") { res = res.slice(1); }
+    // WARN: do not slice slash, #/ means take root and go down from it
+    // if (res && res[0] === "/") { res = res.slice(1); }
     return res;
+}
+
+function findId(schema, id) {
+    // process only arrays and objects
+    if (typeof schema !== "object" || schema === null) {
+        return;
+    }
+
+    // no id means root so return itself
+    if (!id || schema.id === id) {
+        return schema;
+    }
+
+    var idx, result;
+    if (Array.isArray(schema)) {
+        idx = schema.length;
+        while (idx--) {
+            result = findId(schema[idx], id);
+            if (result) { return result; }
+        }
+    } else {
+        var keys = Object.keys(schema);
+        idx = keys.length;
+        while (idx--) {
+            result = findId(schema[keys[idx]], id);
+            if (result) { return result; }
+        }
+    }
 }
 
 exports.cacheSchemaByUri = function (uri, schema) {
     var remotePath = getRemotePath(uri);
-    cache[remotePath] = schema;
+    if (remotePath) {
+        cache[remotePath] = schema;
+    }
+};
+
+exports.removeFromCacheByUri = function (uri) {
+    var remotePath = getRemotePath(uri);
+    if (remotePath) {
+        cache[remotePath] = undefined;
+    }
 };
 
 exports.getSchemaByUri = function (report, uri, root) {
@@ -49,9 +87,13 @@ exports.getSchemaByUri = function (report, uri, root) {
 
     if (result && queryPath) {
         var parts = queryPath.split("/");
-        while (parts.length > 0) {
-            var key = decodeJSONPointer(parts.shift());
-            result = result[key];
+        for (var idx = 0, lim = parts.length; idx < lim; idx++) {
+            var key = decodeJSONPointer(parts[idx]);
+            if (idx === 0) { // it's an id
+                result = findId(result, key);
+            } else { // it's a path behind id
+                result = result[key];
+            }
         }
     }
 
