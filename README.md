@@ -1,14 +1,14 @@
 #z-schema validator
 
 [![npm version](https://badge.fury.io/js/z-schema.png)](http://badge.fury.io/js/z-schema)
-[![build status](https://travis-ci.org/zaggino/z-schema-3.svg?branch=master)](https://travis-ci.org/zaggino/z-schema-3)
+[![build status](https://travis-ci.org/zaggino/z-schema.svg?branch=master)](https://travis-ci.org/zaggino/z-schema)
 
-[![browser support](https://ci.testling.com/zaggino/z-schema-3.png)](https://ci.testling.com/zaggino/z-schema-3)
+[![browser support](https://ci.testling.com/zaggino/z-schema.png)](https://ci.testling.com/zaggino/z-schema)
 
 complete rewrite of [z-schema](https://github.com/zaggino/z-schema) in progress, not all tests and features have been migrated from version 2.x yet!
 
 ##Why rewrite?
-- it runs in the browser now, run tests yourself [here](https://rawgit.com/zaggino/z-schema-3/master/test/SpecRunner.html)
+- it runs in the browser now, run tests yourself [here](https://rawgit.com/zaggino/z-schema/master/test/SpecRunner.html)
 - it is much faster than the 2.x, see below
 
 #Topics
@@ -290,4 +290,4 @@ So how does it compare to version 2.x and others?
 
 **NOTE: these tests are purely orientational, they don't consider extra features any of the validator may support and implement**
 
-[rawgithub.com/zaggino/z-schema-3/master/benchmark/results.html](https://rawgithub.com/zaggino/z-schema-3/master/benchmark/results.html)
+[rawgithub.com/zaggino/z-schema/master/benchmark/results.html](https://rawgithub.com/zaggino/z-schema/master/benchmark/results.html)
