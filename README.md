@@ -48,19 +48,65 @@ validator.validate(json, schema, function (err, valid) {
 
 #Features
 
-- [Register a custom format](#registerFormat)
-- [Define a custom timeout for all async operations](#asyncTimeout)
-- [Disallow validation of empty strings as strings](#noEmptyStrings)
-- [Disallow schemas that don't have a type specified](#noTypeless)
-- [Disallow schemas that contain unrecognized keywords and are not validated by parent schemas](#noExtraKeywords)
-- [Assume additionalItems/additionalProperties are defined in schemas as false](#assumeAdditional)
-- [Force additionalItems/additionalProperties to be defined in schemas](#forceAdditional)
-- [Force items to be defined in array type schemas](#forceItems)
-- [Force maxLength to be defined in string type schemas](#forceMaxLength)
-- [Force properties or patternProperties to be defined in object type schemas](#forceProperties)
-- [Ignore remote references to schemas that are not cached or resolvable](#ignoreUnresolvableReferences)
-- [Only allow strictly absolute URIs to be used in schemas](#strictUris)
-- [Turn on z-schema strict mode](#strictMode)
+- [Compile arrays of schemas and use references between them](#compilearrays)
+- [Register a custom format](#registerformat)
+- [Define a custom timeout for all async operations](#asynctimeout)
+- [Disallow validation of empty strings as strings](#noemptystrings)
+- [Disallow schemas that don't have a type specified](#notypeless)
+- [Disallow schemas that contain unrecognized keywords and are not validated by parent schemas](#noextrakeywords)
+- [Assume additionalItems/additionalProperties are defined in schemas as false](#assumeadditional)
+- [Force additionalItems/additionalProperties to be defined in schemas](#forceadditional)
+- [Force items to be defined in array type schemas](#forceitems)
+- [Force maxLength to be defined in string type schemas](#forcemaxlength)
+- [Force properties or patternProperties to be defined in object type schemas](#forceproperties)
+- [Ignore remote references to schemas that are not cached or resolvable](#ignoreunresolvablereferences)
+- [Only allow strictly absolute URIs to be used in schemas](#stricturis)
+- [Turn on z-schema strict mode](#strictmode)
+
+##compileArrays
+
+You can use validator to compile an array of schemas that have references between them and then validate against one of those schemas:
+
+```javascript
+var schemas = [
+    {
+        id: "personDetails",
+        type: "object",
+        properties: {
+            firstName: { type: "string" },
+            lastName: { type: "string" }
+        },
+        required: ["firstName", "lastName"]
+    },
+    {
+        id: "addressDetails",
+        type: "object",
+        properties: {
+            street: { type: "string" },
+            city: { type: "string" }
+        },
+        required: ["street", "city"]
+    },
+    {
+        id: "personWithAddress",
+        allOf: [
+            { $ref: "personDetails" },
+            { $ref: "addressDetails" }
+        ]
+    }
+];
+var data = {
+    firstName: "Martin",
+    lastName: "Zagora",
+    street: "George St",
+    city: "Sydney"
+};
+var validator = new ZSchema();
+// compile & validate schemas first, z-schema will automatically handle array
+validator.validateSchema(schemas);
+// now validate our data against the last schema
+var valid = validator(data, schemas[2]);
+```
 
 ##registerFormat
 

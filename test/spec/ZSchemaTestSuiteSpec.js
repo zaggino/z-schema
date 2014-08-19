@@ -17,9 +17,11 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/NoTypeless.js"),
     require("../ZSchemaTestSuite/NoExtraKeywords.js"),
     require("../ZSchemaTestSuite/StrictUris.js"),
+    require("../ZSchemaTestSuite/MultipleSchemas.js"),
     // issues
     require("../ZSchemaTestSuite/Issue12.js"),
-    require("../ZSchemaTestSuite/Issue13.js")
+    require("../ZSchemaTestSuite/Issue13.js"),
+    require("../ZSchemaTestSuite/Issue16.js")
 ];
 
 describe("ZSchemaTestSuite", function () {
@@ -31,8 +33,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 14 files", function () {
-        expect(testSuiteFiles.length).toBe(14);
+    it("should contain 16 files", function () {
+        expect(testSuiteFiles.length).toBe(16);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -56,6 +58,7 @@ describe("ZSchemaTestSuite", function () {
 
                 var validator = new ZSchema(options);
                 validator.setRemoteReference("http://json-schema.org/draft-04/schema", require("../files/draft-04-schema.json"));
+                validator.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", require("../files/draft-04-hyper-schema.json"));
                 if (setup) { setup(validator, ZSchema); }
 
                 var valid = validator.validateSchema(schema);
