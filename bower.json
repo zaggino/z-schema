@@ -2,7 +2,7 @@
   "name": "z-schema",
   "version": "3.0.0",
   "description": "JSON schema validator",
-  "homepage": "https://github.com/zaggino/z-schema-3",
+  "homepage": "https://github.com/zaggino/z-schema",
   "authors": [
     "Martin Zagora <zaggino@gmail.com>"
   ],

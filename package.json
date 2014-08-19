@@ -2,7 +2,7 @@
   "name": "z-schema",
   "version": "3.0.0",
   "description": "JSON schema validator",
-  "homepage": "https://github.com/zaggino/z-schema-3",
+  "homepage": "https://github.com/zaggino/z-schema",
   "authors": [
     "Martin Zagora <zaggino@gmail.com>"
   ],
@@ -14,14 +14,15 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/zaggino/z-schema-3.git"
+    "url": "https://github.com/zaggino/z-schema.git"
   },
   "bugs": {
-    "url": "https://github.com/zaggino/z-schema-3/issues"
+    "url": "https://github.com/zaggino/z-schema/issues"
   },
   "main": "src/ZSchema.js",
   "files": [
-    "src/ZSchema.js",
+    "src",
+    "dist",
     "LICENSE",
     "README.md"
   ],
