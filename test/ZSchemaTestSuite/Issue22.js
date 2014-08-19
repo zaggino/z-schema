@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-    description: "Issue #22",
+    description: "Issue #22 - recursive references",
     tests: [
         {
             description: "should pass validation",

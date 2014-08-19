@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-    description: "Issue #13 - Compile multiple schemas tied together with an id",
+    description: "Issue #13 - compile multiple schemas tied together with an id",
     tests: [
         {
             description: "mainSchema should fail compilation on its own",

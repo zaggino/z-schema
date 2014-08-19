@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-    description: "Issue #12 - Validation should fail when missing a reference",
+    description: "Issue #12 - validation should fail when missing a reference",
     tests: [
         {
             description: "should pass validation",

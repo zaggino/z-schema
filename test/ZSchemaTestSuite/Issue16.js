@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-    description: "Issue #16 - Schemas should be validated by references in $schema property",
+    description: "Issue #16 - schemas should be validated by references in $schema property",
     tests: [
         {
             description: "should pass validation",

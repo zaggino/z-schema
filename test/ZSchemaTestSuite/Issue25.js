@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-    description: "Issue #25",
+    description: "Issue #25 - hostname format behaviour",
     tests: [
         {
             description: "should pass validation",
