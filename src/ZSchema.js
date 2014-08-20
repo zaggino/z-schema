@@ -137,6 +137,20 @@ ZSchema.prototype.validate = function (json, schema, callback) {
 ZSchema.prototype.getLastError = function () {
     return this.lastReport.errors.length > 0 ? this.lastReport.errors : undefined;
 };
+ZSchema.prototype.getMissingReferences = function () {
+    var res = [],
+        idx = this.lastReport.errors.length;
+    while (idx--) {
+        var error = this.lastReport.errors[idx];
+        if (error.code === "UNRESOLVABLE_REFERENCE") {
+            var remote = SchemaCache.getRemotePath(error.params[0]);
+            if (res.indexOf(remote) === -1) {
+                res.push(remote);
+            }
+        }
+    }
+    return res;
+};
 ZSchema.prototype.setRemoteReference = function (uri, schema) {
     if (typeof schema === "string") {
         schema = JSON.parse(schema);

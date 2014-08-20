@@ -102,3 +102,5 @@ exports.getSchemaByUri = function (report, uri, root) {
 
     return result;
 };
+
+exports.getRemotePath = getRemotePath;

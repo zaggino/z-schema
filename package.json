@@ -30,7 +30,7 @@
     "prepublish": "grunt",
     "test": "grunt test"
   },
-  "testling" : {
+  "testling": {
     "scripts": [
       "test/lib/jasmine-2.0.1/jasmine.js",
       "test/lib/jasmine-2.0.1/tap_reporter.js",
@@ -58,6 +58,7 @@
     "grunt-jscs-checker": "latest",
     "grunt-lineending": "latest",
     "jasmine-node": "latest",
-    "jasmine-reporters": "latest"
+    "jasmine-reporters": "latest",
+    "request": "latest"
   }
 }

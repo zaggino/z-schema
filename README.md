@@ -58,10 +58,40 @@ validator.validate(json, schema, function (err, valid) {
 </script>
 ```
 
+##Remote references and schemas:
+
+In case you have some remote references in your schemas, you have to download those schemas before using validator.
+Otherwise you'll get ```UNRESOLVABLE_REFERENCE``` error when trying to compile a schema.
+
+```javascript
+var validator = new ZSchema();
+var json = {};
+var schema = { "$ref": "http://json-schema.org/draft-04/schema#" };
+
+var valid = validator.validate(json, schema);
+var errors = validator.getLastError();
+// valid === false
+// errors.length === 1
+// errors[0].code === "UNRESOLVABLE_REFERENCE"
+
+var requiredUrl = "http://json-schema.org/draft-04/schema";
+request(requiredUrl, function (error, response, body) {
+
+    validator.setRemoteReference(requiredUrl, JSON.parse(body));
+    
+    var valid = validator.validate(json, schema);
+    var errors = validator.getLastError();
+    // valid === true
+    // errors === undefined
+    
+}
+```
+
 #Features
 
 - [Compile arrays of schemas and use references between them](#compilearrays)
 - [Register a custom format](#registerformat)
+- [Automatic downloading of remote schemas](#automaticdownloading)
 - [Prefill default values to object using format](#prefillvalues)
 - [Define a custom timeout for all async operations](#asynctimeout)
 - [Disallow validation of empty arrays as arrays](#noemptyarrays)
@@ -147,6 +177,11 @@ ZSchema.registerFormat("xstring", function (str, callback) {
     }, 1);
 });
 ```
+
+##automaticdownloading
+
+Automatic downloading of remote schemas was removed from version ```3.x``` but is still possible with a bit of extra code,
+see [this test](test/spec/AutomaticSchemaLoadingSpec.js) for more information on this.
 
 ##prefillValues
 

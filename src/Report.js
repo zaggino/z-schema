@@ -89,6 +89,7 @@ Report.prototype.addError = function (errorCode, params, subReports) {
 
     var err = {
         code: errorCode,
+        params: params,
         message: errorMessage,
         path: this.getPath()
     };

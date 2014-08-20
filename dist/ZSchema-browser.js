@@ -917,6 +917,7 @@ Report.prototype.addError = function (errorCode, params, subReports) {
 
     var err = {
         code: errorCode,
+        params: params,
         message: errorMessage,
         path: this.getPath()
     };
@@ -1050,6 +1051,8 @@ exports.getSchemaByUri = function (report, uri, root) {
 
     return result;
 };
+
+exports.getRemotePath = getRemotePath;
 
 },{"./SchemaCompilation":8,"./SchemaValidation":9}],8:[function(require,module,exports){
 "use strict";
@@ -1913,6 +1916,8 @@ exports.clone = function (src) {
     return res;
 };
 
+},{}],"ZSchema":[function(require,module,exports){
+module.exports=require('C768cZ');
 },{}],"C768cZ":[function(require,module,exports){
 "use strict";
 
@@ -2053,6 +2058,20 @@ ZSchema.prototype.validate = function (json, schema, callback) {
 ZSchema.prototype.getLastError = function () {
     return this.lastReport.errors.length > 0 ? this.lastReport.errors : undefined;
 };
+ZSchema.prototype.getMissingReferences = function () {
+    var res = [],
+        idx = this.lastReport.errors.length;
+    while (idx--) {
+        var error = this.lastReport.errors[idx];
+        if (error.code === "UNRESOLVABLE_REFERENCE") {
+            var remote = SchemaCache.getRemotePath(error.params[0]);
+            if (res.indexOf(remote) === -1) {
+                res.push(remote);
+            }
+        }
+    }
+    return res;
+};
 ZSchema.prototype.setRemoteReference = function (uri, schema) {
     if (typeof schema === "string") {
         schema = JSON.parse(schema);
@@ -2072,6 +2091,4 @@ ZSchema.registerFormatter = function (/* formatterName, formatterFunction */) {
 
 module.exports = ZSchema;
 
-},{"./FormatValidators":3,"./JsonValidation":4,"./Polyfills":5,"./Report":6,"./SchemaCache":7,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}],"ZSchema":[function(require,module,exports){
-module.exports=require('C768cZ');
-},{}]},{},[2,3,4,5,6,7,8,9,10,"C768cZ"]);
+},{"./FormatValidators":3,"./JsonValidation":4,"./Polyfills":5,"./Report":6,"./SchemaCache":7,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}]},{},[2,3,4,5,6,7,8,9,10,"C768cZ"]);
