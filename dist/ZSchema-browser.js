@@ -540,19 +540,12 @@ var JsonValidators = {
             report.addError("ENUM_MISMATCH", [json]);
         }
     },
+    /*
     type: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.2
-        var jsonType = Utils.whatIs(json);
-        if (typeof schema.type === "string") {
-            if (jsonType !== schema.type && (jsonType !== "integer" || schema.type !== "number")) {
-                report.addError("INVALID_TYPE", [schema.type, jsonType]);
-            }
-        } else {
-            if (schema.type.indexOf(jsonType) === -1 && (jsonType !== "integer" || schema.type.indexOf("number") === -1)) {
-                report.addError("INVALID_TYPE", [schema.type, jsonType]);
-            }
-        }
+        // type is handled before this is called so ignore
     },
+    */
     allOf: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
         var idx = schema.allOf.length;
@@ -775,7 +768,22 @@ exports.validate = function (report, schema, json) {
         }
     }
 
-    // TODO: check for existence of "preFormat" here
+    // type checking first
+    // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.2
+    var jsonType = Utils.whatIs(json);
+    if (schema.type) {
+        if (typeof schema.type === "string") {
+            if (jsonType !== schema.type && (jsonType !== "integer" || schema.type !== "number")) {
+                report.addError("INVALID_TYPE", [schema.type, jsonType]);
+                return false;
+            }
+        } else {
+            if (schema.type.indexOf(jsonType) === -1 && (jsonType !== "integer" || schema.type.indexOf("number") === -1)) {
+                report.addError("INVALID_TYPE", [schema.type, jsonType]);
+                return false;
+            }
+        }
+    }
 
     // now iterate all the keys in schema and execute validation methods
     var idx = keys.length;
@@ -786,15 +794,11 @@ exports.validate = function (report, schema, json) {
         }
     }
 
-    if (typeof json === "object") {
-        if (Array.isArray(json)) {
-            recurseArray.call(this, report, schema, json);
-        } else if (json !== null) {
-            recurseObject.call(this, report, schema, json);
-        }
+    if (jsonType === "array") {
+        recurseArray.call(this, report, schema, json);
+    } else if (jsonType === "object") {
+        recurseObject.call(this, report, schema, json);
     }
-
-    // TODO: check for existence of "postFormat" here
 
     // we don't need the root pointer anymore
     if (isRoot) {
