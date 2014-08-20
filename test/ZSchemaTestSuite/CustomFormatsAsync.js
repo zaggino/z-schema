@@ -4,7 +4,7 @@ module.exports = {
     description: "registerFormat - Custom formats async support",
     async: true,
     options: {
-        asyncTimeout: 100
+        asyncTimeout: 500
     },
     setup: function (validator, Class) {
         Class.registerFormat("xstring", function (str, callback) {

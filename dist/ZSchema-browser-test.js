@@ -132,7 +132,7 @@ module.exports = {
     description: "registerFormat - Custom formats async support",
     async: true,
     options: {
-        asyncTimeout: 100
+        asyncTimeout: 500
     },
     setup: function (validator, Class) {
         Class.registerFormat("xstring", function (str, callback) {
@@ -1644,6 +1644,86 @@ module.exports = {
 },{}],21:[function(require,module,exports){
 "use strict";
 
+var draft4 = require("./files/Issue47/draft4.json");
+var modifiedSchema = require("./files/Issue47/swagger_draft_modified.json");
+var realSchema = require("./files/Issue47/swagger_draft.json");
+var json = require("./files/Issue47/sample.json");
+
+module.exports = {
+    description: "Issue #47 - references to draft4 subschema are not working",
+    setup: function (validator) {
+        validator.setRemoteReference("http://json-schema.orgx/draft-04/schema", draft4);
+    },
+    tests: [
+        {
+            description: "should pass validation #1",
+            schema: modifiedSchema,
+            data: json,
+            valid: true
+        },
+        {
+            description: "should pass validation #1",
+            schema: realSchema,
+            data: json,
+            valid: true
+        }
+    ]
+};
+
+},{"./files/Issue47/draft4.json":29,"./files/Issue47/sample.json":30,"./files/Issue47/swagger_draft.json":31,"./files/Issue47/swagger_draft_modified.json":32}],22:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+    description: "Issue #48 - email validation too strict",
+    schema: {
+        type: "string",
+        format: "email"
+    },
+    tests: [
+        {
+            description: "should pass validation #1",
+            data: "zaggino@gmail.com",
+            valid: true
+        },
+        {
+            description: "should pass validation #2",
+            data: "foo@bar.baz",
+            valid: true
+        },
+        {
+            description: "should fail validation #1",
+            data: "foobar.baz",
+            valid: false
+        },
+        {
+            description: "should fail validation #2",
+            data: "foo@bar",
+            valid: false
+        }
+    ]
+};
+
+},{}],23:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+    description: "Issue #49 - pattern validations",
+    tests: [
+        {
+            description: "should pass validation",
+            schema: {
+                type: "string",
+                pattern: "^[0-9]{1}[0-9]{3}(\\s)?[A-Za-z]{2}$"
+            },
+            data: "0000 aa",
+            valid: true
+        }
+    ]
+};
+
+},{}],24:[function(require,module,exports){
+"use strict";
+
 module.exports = {
     description: "compile a schema array and validate against one of the schemas - README sample",
     tests: [
@@ -1700,7 +1780,7 @@ module.exports = {
     ]
 };
 
-},{}],22:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1725,7 +1805,7 @@ module.exports = {
     ]
 };
 
-},{}],23:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1770,7 +1850,7 @@ module.exports = {
     ]
 };
 
-},{}],24:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1795,7 +1875,7 @@ module.exports = {
     ]
 };
 
-},{}],25:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1825,7 +1905,1046 @@ module.exports = {
     ]
 };
 
-},{}],26:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
+module.exports={
+    "id": "http://json-schema.org/draft-04/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Core schema meta-schema",
+    "definitions": {
+        "schemaArray": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#" }
+        },
+        "positiveInteger": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "positiveIntegerDefault0": {
+            "allOf": [ { "$ref": "#/definitions/positiveInteger" }, { "default": 0 } ]
+        },
+        "simpleTypes": {
+            "enum": [ "array", "boolean", "integer", "null", "number", "object", "string" ]
+        },
+        "stringArray": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1,
+            "uniqueItems": true
+        }
+    },
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "format": "uri"
+        },
+        "$schema": {
+            "type": "string",
+            "format": "uri"
+        },
+        "title": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string"
+        },
+        "default": {},
+        "multipleOf": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true
+        },
+        "maximum": {
+            "type": "number"
+        },
+        "exclusiveMaximum": {
+            "type": "boolean",
+            "default": false
+        },
+        "minimum": {
+            "type": "number"
+        },
+        "exclusiveMinimum": {
+            "type": "boolean",
+            "default": false
+        },
+        "maxLength": { "$ref": "#/definitions/positiveInteger" },
+        "minLength": { "$ref": "#/definitions/positiveIntegerDefault0" },
+        "pattern": {
+            "type": "string",
+            "format": "regex"
+        },
+        "additionalItems": {
+            "anyOf": [
+                { "type": "boolean" },
+                { "$ref": "#" }
+            ],
+            "default": {}
+        },
+        "items": {
+            "anyOf": [
+                { "$ref": "#" },
+                { "$ref": "#/definitions/schemaArray" }
+            ],
+            "default": {}
+        },
+        "maxItems": { "$ref": "#/definitions/positiveInteger" },
+        "minItems": { "$ref": "#/definitions/positiveIntegerDefault0" },
+        "uniqueItems": {
+            "type": "boolean",
+            "default": false
+        },
+        "maxProperties": { "$ref": "#/definitions/positiveInteger" },
+        "minProperties": { "$ref": "#/definitions/positiveIntegerDefault0" },
+        "required": { "$ref": "#/definitions/stringArray" },
+        "additionalProperties": {
+            "anyOf": [
+                { "type": "boolean" },
+                { "$ref": "#" }
+            ],
+            "default": {}
+        },
+        "definitions": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#" },
+            "default": {}
+        },
+        "properties": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#" },
+            "default": {}
+        },
+        "patternProperties": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#" },
+            "default": {}
+        },
+        "dependencies": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    { "$ref": "#" },
+                    { "$ref": "#/definitions/stringArray" }
+                ]
+            }
+        },
+        "enum": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true
+        },
+        "type": {
+            "anyOf": [
+                { "$ref": "#/definitions/simpleTypes" },
+                {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/simpleTypes" },
+                    "minItems": 1,
+                    "uniqueItems": true
+                }
+            ]
+        },
+        "allOf": { "$ref": "#/definitions/schemaArray" },
+        "anyOf": { "$ref": "#/definitions/schemaArray" },
+        "oneOf": { "$ref": "#/definitions/schemaArray" },
+        "not": { "$ref": "#" }
+    },
+    "dependencies": {
+        "exclusiveMaximum": [ "maximum" ],
+        "exclusiveMinimum": [ "minimum" ]
+    },
+    "default": {}
+}
+
+},{}],30:[function(require,module,exports){
+module.exports={
+  "swagger": 2,
+  "info": {
+    "version": "1.0.0",
+    "title": "Swagger Petstore",
+    "contact": {
+      "name": "wordnik api team",
+      "url": "http://developer.wordnik.com"
+    },
+    "license": {
+      "name": "Creative Commons 4.0 International",
+      "url": "http://creativecommons.org/licenses/by/4.0/"
+    }
+  },
+  "host": "http://petstore.swagger.wordnik.com",
+  "basePath": "/api",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/pets": {
+      "get": {
+        "tags": [
+          "Pet Operations"
+        ],
+        "summary": "finds pets in the system",
+        "responses": {
+          "200": {
+            "description": "pet response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/models/Pet"
+              }
+            },
+            "headers": [
+              {
+                "x-expires": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/models/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "schemas": {
+    "Pet": {
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "tag": {
+          "type": "string"
+        }
+      }
+    },
+    "Error": {
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
+
+},{}],31:[function(require,module,exports){
+module.exports={
+	"title": "A JSON Schema for Swagger 2.0 API.",
+	"$schema": "http://json-schema.org/draft-04/schema#",
+
+	"type": "object",
+	"required": [ "swagger", "info", "paths" ],
+
+	"definitions": {
+		"info": {
+			"type": "object",
+			"description": "General information about the API.",
+			"required": [ "version", "title" ],
+			"additionalProperties": false,
+			"patternProperties": {
+				"^x-": {
+					"$ref": "#/definitions/vendorExtension"
+				}
+			},
+			"properties": {
+				"version": {
+					"type": "string",
+					"description": "A semantic version number of the API."
+				},
+				"title": {
+					"type": "string",
+					"description": "A unique and precise title of the API."
+				},
+				"description": {
+					"type": "string",
+					"description": "A longer description of the API. Should be different from the title."
+				},
+				"termsOfService": {
+					"type": "string",
+					"description": "The terms of service for the API."
+				},
+				"contact": {
+					"type": "object",
+					"description": "Contact information for the owners of the API.",
+					"additionalProperties": false,
+					"properties": {
+						"name": {
+							"type": "string",
+							"description": "The identifying name of the contact person/organization."
+						},
+						"url": {
+							"type": "string",
+							"description": "The URL pointing to the contact information.",
+							"format": "uri"
+						},
+						"email": {
+							"type": "string",
+							"description": "The email address of the contact person/organization.",
+							"format": "email"
+						}
+					}
+				},
+				"license": {
+					"type": "object",
+					"required": [ "name" ],
+					"additionalProperties": false,
+					"properties": {
+						"name": {
+							"type": "string",
+							"description": "The name of the license type. It's encouraged to use an OSI compatible license."
+						},
+						"url": {
+							"type": "string",
+							"description": "The URL pointing to the license.",
+							"format": "uri"
+						}
+					}
+				}
+			}
+		},
+		"example": {
+			"type": "object",
+			"patternProperties": {
+				"^[a-z0-9-]+/[a-z0-9-+]+$": {}
+			},
+			"additionalProperties": false
+		},
+		"mimeType": {
+			"type": "string",
+			"pattern": "^[a-z0-9-]+/[a-z0-9-+]+$",
+			"description": "The MIME type of the HTTP message."
+		},
+		"operation": {
+			"type": "object",
+			"required": [ "responses" ],
+			"additionalProperties": false,
+			"patternProperties": {
+				"^x-": {
+					"$ref": "#/definitions/vendorExtension"
+				}
+			},
+			"properties": {
+				"tags": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"summary": {
+					"type": "string",
+					"description": "A brief summary of the operation."
+				},
+				"description": {
+					"type": "string",
+					"description": "A longer description of the operation."
+				},
+				"operationId": {
+					"type": "string",
+					"description": "A friendly name of the operation"
+				},
+				"produces": {
+					"type": "array",
+					"description": "A list of MIME types the API can produce.",
+					"additionalItems": false,
+					"items": {
+						"$ref": "#/definitions/mimeType"
+					}
+				},
+				"parameters": {
+					"type": "array",
+					"description": "The parameters needed to send a valid API call.",
+					"minItems": 1,
+					"additionalItems": false,
+					"items": {
+						"$ref": "#/definitions/parameter"
+					}
+				},
+				"responses": {
+					"$ref": "#/definitions/responses"
+				},
+				"schemes": {
+					"type": "array",
+					"description": "The transfer protocol of the API.",
+					"items": {
+						"type": "string",
+						"enum": [ "http", "https", "ws", "wss" ]
+					}
+				}
+			}
+		},
+		"responses": {
+			"type": "object",
+			"description": "Response objects names can either be any valid HTTP status code or 'default'.",
+			"minProperties": 1,
+			"additionalProperties": false,
+			"patternProperties": {
+				"^([0-9]+)$|^(default)$": {
+					"$ref": "#/definitions/response"
+				},
+				"^x-": {
+					"$ref": "#/definitions/vendorExtension"
+				}
+			}
+		},
+		"response": {
+			"type": "object",
+			"required": [ "description" ],
+			"properties": {
+				"description": {
+					"type": "string"
+				},
+				"schema": {
+					"$ref": "#/definitions/schema"
+				},
+				"headers": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/schema"
+					}
+				},
+				"examples": {
+					"$ref": "#/definitions/example"
+				}
+			},
+			"additionalProperties": false
+		},
+		"vendorExtension": {
+			"description": "Any property starting with x- is valid.",
+			"additionalProperties": true,
+			"additionalItems": true
+		},
+		"parameter": {
+			"type": "object",
+			"required": [ "name", "in"],
+			"patternProperties": {
+				"^x-": {
+					"$ref": "#/definitions/vendorExtension"
+				}
+			},
+			"properties": {
+				"name": {
+					"type": "string",
+					"description": "The name of the parameter."
+				},
+				"in": {
+					"type": "string",
+					"description": "Determines the location of the parameter.",
+					"enum": [ "query", "header", "path", "formData", "body" ],
+					"default": "query"
+				},
+				"description": {
+					"type": "string",
+					"description": "A brief description of the parameter. This could contain examples of use."
+				},
+				"required": {
+					"type": "boolean",
+					"description": "Determines whether or not this parameter is required or optional."
+				},
+				"schema": {
+					"$ref": "#/definitions/schema"
+				}
+			}
+		},
+		"schema": {
+			"type": "object",
+			"description": "A deterministic version of a JSON Schema object.",
+			"patternProperties": {
+				"^x-": {
+					"$ref": "#/definitions/vendorExtension"
+				}
+			},
+			"properties": {
+				"$ref": { "type": "string" },
+				"format": { "type": "string" },
+				"title": { "$ref": "http://json-schema.org/draft-04/schema#/properties/title" },
+				"description": { "$ref": "http://json-schema.org/draft-04/schema#/properties/description" },
+				"default": { "$ref": "http://json-schema.org/draft-04/schema#/properties/default" },
+				"multipleOf": { "$ref": "http://json-schema.org/draft-04/schema#/properties/multipleOf" },
+				"maximum": { "$ref": "http://json-schema.org/draft-04/schema#/properties/maximum" },
+				"exclusiveMaximum": { "$ref": "http://json-schema.org/draft-04/schema#/properties/exclusiveMaximum" },
+				"minimum": { "$ref": "http://json-schema.org/draft-04/schema#/properties/minimum" },
+				"exclusiveMinimum": { "$ref": "http://json-schema.org/draft-04/schema#/properties/exclusiveMinimum" },
+				"maxLength": { "$ref": "http://json-schema.org/draft-04/schema#/definitions/positiveInteger" },
+				"minLength": { "$ref": "http://json-schema.org/draft-04/schema#/definitions/positiveIntegerDefault0" },
+				"pattern": { "$ref": "http://json-schema.org/draft-04/schema#/properties/pattern" },
+				"discriminator": { "type": "string" },
+				"xml": { "$ref": "#/definitions/xml"},
+				"items": {
+					"anyOf": [
+						{ "$ref": "#/definitions/schema" },
+						{
+							"type": "array",
+							"minItems": 1,
+							"items": { "$ref": "#/definitions/schema" }
+						}
+					],
+					"default": { }
+				},
+				"maxItems": { "$ref": "http://json-schema.org/draft-04/schema#/definitions/positiveInteger" },
+				"minItems": { "$ref": "http://json-schema.org/draft-04/schema#/definitions/positiveIntegerDefault0" },
+				"uniqueItems": { "$ref": "http://json-schema.org/draft-04/schema#/properties/uniqueItems" },
+				"maxProperties": { "$ref": "http://json-schema.org/draft-04/schema#/definitions/positiveInteger" },
+				"minProperties": { "$ref": "http://json-schema.org/draft-04/schema#/definitions/positiveIntegerDefault0" },
+				"required": { "$ref": "http://json-schema.org/draft-04/schema#/definitions/stringArray" },
+				"definitions": {
+					"type": "object",
+					"additionalProperties": { "$ref": "#/definitions/schema" },
+					"default": { }
+				},
+				"properties": {
+					"type": "object",
+					"additionalProperties": { "$ref": "#/definitions/schema" },
+					"default": { }
+				},
+				"enum": { "$ref": "http://json-schema.org/draft-04/schema#/properties/enum" },
+				"type": { "$ref": "http://json-schema.org/draft-04/schema#/properties/type" },
+				"allOf": {
+					"type": "array",
+					"minItems": 1,
+					"items": { "$ref": "#/definitions/schema" }
+				}
+			}
+		},
+		"xml": {
+			"properties": {
+				"namespace": { "type": "string" },
+				"prefix": { "type": "string" },
+				"attribute": { "type": "boolean" },
+				"wrapped": { "type": "boolean" }
+			},
+			"additionalProperties": false
+		}
+	},
+	"additionalProperties": false,
+	"patternProperties": {
+		"^x-": {
+			"$ref": "#/definitions/vendorExtension"
+		}
+	},
+	"properties": {
+		"swagger": {
+			"type": "number",
+			"enum": [ 2.0 ],
+			"description": "The Swagger version of this document."
+		},
+		"info": {
+			"$ref": "#/definitions/info"
+		},
+		"host": {
+			"type": "string",
+			"format": "uri",
+			"description": "The fully qualified URI to the host of the API."
+		},
+		"basePath": {
+			"type": "string",
+			"pattern": "^/",
+			"description": "The base path to the API. Example: '/api'."
+		},
+		"schemes": {
+			"type": "array",
+			"description": "The transfer protocol of the API.",
+			"items": {
+				"type": "string",
+				"enum": [ "http", "https", "ws", "wss" ]
+			}
+		},
+		"consumes": {
+			"type": "array",
+			"description": "A list of MIME types accepted by the API.",
+			"items": {
+				"$ref": "#/definitions/mimeType"
+			}
+		},
+		"produces": {
+			"type": "array",
+			"description": "A list of MIME types the API can produce.",
+			"items": {
+				"$ref": "#/definitions/mimeType"
+			}
+		},
+		"paths": {
+			"type": "object",
+			"description": "Relative paths to the individual endpoints. They should be relative to the 'basePath'.",
+
+			"patternProperties": {
+				"^x-": {
+					"$ref": "#/definitions/vendorExtension"
+				}
+			},
+
+			"additionalProperties": {
+				"type": "object",
+				"minProperties": 1,
+				"additionalProperties": false,
+				"patternProperties": {
+					"^x-": {
+						"$ref": "#/definitions/vendorExtension"
+					}
+				},
+				"properties": {
+					"get": {
+						"$ref": "#/definitions/operation"
+					},
+					"put": {
+						"$ref": "#/definitions/operation"
+					},
+					"post": {
+						"$ref": "#/definitions/operation"
+					},
+					"delete": {
+						"$ref": "#/definitions/operation"
+					},
+					"options": {
+						"$ref": "#/definitions/operation"
+					},
+					"head": {
+						"$ref": "#/definitions/operation"
+					},
+					"patch": {
+						"$ref": "#/definitions/operation"
+					},
+					"parameters": {
+						"type": "array",
+						"items": {
+							"$ref": "#/definitions/parameter"
+						}
+					}
+				}
+			}
+		},
+		"schemas": {
+			"type": "object",
+			"description": "One or more JSON objects describing the schemas being consumed and produced by the API.",
+			"additionalProperties": {
+				"$ref": "#/definitions/schema"
+			}
+		},
+		"security": {
+			"type": "array"
+		}
+	}
+}
+
+},{}],32:[function(require,module,exports){
+module.exports={
+	"title": "A JSON Schema for Swagger 2.0 API.",
+	"$schema": "http://json-schema.org/draft-04/schema#",
+
+	"type": "object",
+	"required": [ "swagger", "info", "paths" ],
+
+	"definitions": {
+		"info": {
+			"type": "object",
+			"description": "General information about the API.",
+			"required": [ "version", "title" ],
+			"additionalProperties": false,
+			"patternProperties": {
+				"^x-": {
+					"$ref": "#/definitions/vendorExtension"
+				}
+			},
+			"properties": {
+				"version": {
+					"type": "string",
+					"description": "A semantic version number of the API."
+				},
+				"title": {
+					"type": "string",
+					"description": "A unique and precise title of the API."
+				},
+				"description": {
+					"type": "string",
+					"description": "A longer description of the API. Should be different from the title."
+				},
+				"termsOfService": {
+					"type": "string",
+					"description": "The terms of service for the API."
+				},
+				"contact": {
+					"type": "object",
+					"description": "Contact information for the owners of the API.",
+					"additionalProperties": false,
+					"properties": {
+						"name": {
+							"type": "string",
+							"description": "The identifying name of the contact person/organization."
+						},
+						"url": {
+							"type": "string",
+							"description": "The URL pointing to the contact information.",
+							"format": "uri"
+						},
+						"email": {
+							"type": "string",
+							"description": "The email address of the contact person/organization.",
+							"format": "email"
+						}
+					}
+				},
+				"license": {
+					"type": "object",
+					"required": [ "name" ],
+					"additionalProperties": false,
+					"properties": {
+						"name": {
+							"type": "string",
+							"description": "The name of the license type. It's encouraged to use an OSI compatible license."
+						},
+						"url": {
+							"type": "string",
+							"description": "The URL pointing to the license.",
+							"format": "uri"
+						}
+					}
+				}
+			}
+		},
+		"example": {
+			"type": "object",
+			"patternProperties": {
+				"^[a-z0-9-]+/[a-z0-9-+]+$": {}
+			},
+			"additionalProperties": false
+		},
+		"mimeType": {
+			"type": "string",
+			"pattern": "^[a-z0-9-]+/[a-z0-9-+]+$",
+			"description": "The MIME type of the HTTP message."
+		},
+		"operation": {
+			"type": "object",
+			"required": [ "responses" ],
+			"additionalProperties": false,
+			"patternProperties": {
+				"^x-": {
+					"$ref": "#/definitions/vendorExtension"
+				}
+			},
+			"properties": {
+				"tags": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"summary": {
+					"type": "string",
+					"description": "A brief summary of the operation."
+				},
+				"description": {
+					"type": "string",
+					"description": "A longer description of the operation."
+				},
+				"operationId": {
+					"type": "string",
+					"description": "A friendly name of the operation"
+				},
+				"produces": {
+					"type": "array",
+					"description": "A list of MIME types the API can produce.",
+					"additionalItems": false,
+					"items": {
+						"$ref": "#/definitions/mimeType"
+					}
+				},
+				"parameters": {
+					"type": "array",
+					"description": "The parameters needed to send a valid API call.",
+					"minItems": 1,
+					"additionalItems": false,
+					"items": {
+						"$ref": "#/definitions/parameter"
+					}
+				},
+				"responses": {
+					"$ref": "#/definitions/responses"
+				},
+				"schemes": {
+					"type": "array",
+					"description": "The transfer protocol of the API.",
+					"items": {
+						"type": "string",
+						"enum": [ "http", "https", "ws", "wss" ]
+					}
+				}
+			}
+		},
+		"responses": {
+			"type": "object",
+			"description": "Response objects names can either be any valid HTTP status code or 'default'.",
+			"minProperties": 1,
+			"additionalProperties": false,
+			"patternProperties": {
+				"^([0-9]+)$|^(default)$": {
+					"$ref": "#/definitions/response"
+				},
+				"^x-": {
+					"$ref": "#/definitions/vendorExtension"
+				}
+			}
+		},
+		"response": {
+			"type": "object",
+			"required": [ "description" ],
+			"properties": {
+				"description": {
+					"type": "string"
+				},
+				"schema": {
+					"$ref": "#/definitions/schema"
+				},
+				"headers": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/schema"
+					}
+				},
+				"examples": {
+					"$ref": "#/definitions/example"
+				}
+			},
+			"additionalProperties": false
+		},
+		"vendorExtension": {
+			"description": "Any property starting with x- is valid.",
+			"additionalProperties": true,
+			"additionalItems": true
+		},
+		"parameter": {
+			"type": "object",
+			"required": [ "name", "in"],
+			"patternProperties": {
+				"^x-": {
+					"$ref": "#/definitions/vendorExtension"
+				}
+			},
+			"properties": {
+				"name": {
+					"type": "string",
+					"description": "The name of the parameter."
+				},
+				"in": {
+					"type": "string",
+					"description": "Determines the location of the parameter.",
+					"enum": [ "query", "header", "path", "formData", "body" ],
+					"default": "query"
+				},
+				"description": {
+					"type": "string",
+					"description": "A brief description of the parameter. This could contain examples of use."
+				},
+				"required": {
+					"type": "boolean",
+					"description": "Determines whether or not this parameter is required or optional."
+				},
+				"schema": {
+					"$ref": "#/definitions/schema"
+				}
+			}
+		},
+		"schema": {
+			"type": "object",
+			"description": "A deterministic version of a JSON Schema object.",
+			"patternProperties": {
+				"^x-": {
+					"$ref": "#/definitions/vendorExtension"
+				}
+			},
+			"properties": {
+				"$ref": { "type": "string" },
+				"format": { "type": "string" },
+				"title": { "$ref": "http://json-schema.orgx/draft-04/schema#/properties/title" },
+				"description": { "$ref": "http://json-schema.orgx/draft-04/schema#/properties/description" },
+				"default": { "$ref": "http://json-schema.orgx/draft-04/schema#/properties/default" },
+				"multipleOf": { "$ref": "http://json-schema.orgx/draft-04/schema#/properties/multipleOf" },
+				"maximum": { "$ref": "http://json-schema.orgx/draft-04/schema#/properties/maximum" },
+				"exclusiveMaximum": { "$ref": "http://json-schema.orgx/draft-04/schema#/properties/exclusiveMaximum" },
+				"minimum": { "$ref": "http://json-schema.orgx/draft-04/schema#/properties/minimum" },
+				"exclusiveMinimum": { "$ref": "http://json-schema.orgx/draft-04/schema#/properties/exclusiveMinimum" },
+				"maxLength": { "$ref": "http://json-schema.orgx/draft-04/schema#/definitions/positiveInteger" },
+				"minLength": { "$ref": "http://json-schema.orgx/draft-04/schema#/definitions/positiveIntegerDefault0" },
+				"pattern": { "$ref": "http://json-schema.orgx/draft-04/schema#/properties/pattern" },
+				"discriminator": { "type": "string" },
+				"xml": { "$ref": "#/definitions/xml"},
+				"items": {
+					"anyOf": [
+						{ "$ref": "#/definitions/schema" },
+						{
+							"type": "array",
+							"minItems": 1,
+							"items": { "$ref": "#/definitions/schema" }
+						}
+					],
+					"default": { }
+				},
+				"maxItems": { "$ref": "http://json-schema.orgx/draft-04/schema#/definitions/positiveInteger" },
+				"minItems": { "$ref": "http://json-schema.orgx/draft-04/schema#/definitions/positiveIntegerDefault0" },
+				"uniqueItems": { "$ref": "http://json-schema.orgx/draft-04/schema#/properties/uniqueItems" },
+				"maxProperties": { "$ref": "http://json-schema.orgx/draft-04/schema#/definitions/positiveInteger" },
+				"minProperties": { "$ref": "http://json-schema.orgx/draft-04/schema#/definitions/positiveIntegerDefault0" },
+				"required": { "$ref": "http://json-schema.orgx/draft-04/schema#/definitions/stringArray" },
+				"definitions": {
+					"type": "object",
+					"additionalProperties": { "$ref": "#/definitions/schema" },
+					"default": { }
+				},
+				"properties": {
+					"type": "object",
+					"additionalProperties": { "$ref": "#/definitions/schema" },
+					"default": { }
+				},
+				"enum": { "$ref": "http://json-schema.orgx/draft-04/schema#/properties/enum" },
+				"type": { "$ref": "http://json-schema.orgx/draft-04/schema#/properties/type" },
+				"allOf": {
+					"type": "array",
+					"minItems": 1,
+					"items": { "$ref": "#/definitions/schema" }
+				}
+			}
+		},
+		"xml": {
+			"properties": {
+				"namespace": { "type": "string" },
+				"prefix": { "type": "string" },
+				"attribute": { "type": "boolean" },
+				"wrapped": { "type": "boolean" }
+			},
+			"additionalProperties": false
+		}
+	},
+	"additionalProperties": false,
+	"patternProperties": {
+		"^x-": {
+			"$ref": "#/definitions/vendorExtension"
+		}
+	},
+	"properties": {
+		"swagger": {
+			"type": "number",
+			"enum": [ 2.0 ],
+			"description": "The Swagger version of this document."
+		},
+		"info": {
+			"$ref": "#/definitions/info"
+		},
+		"host": {
+			"type": "string",
+			"format": "uri",
+			"description": "The fully qualified URI to the host of the API."
+		},
+		"basePath": {
+			"type": "string",
+			"pattern": "^/",
+			"description": "The base path to the API. Example: '/api'."
+		},
+		"schemes": {
+			"type": "array",
+			"description": "The transfer protocol of the API.",
+			"items": {
+				"type": "string",
+				"enum": [ "http", "https", "ws", "wss" ]
+			}
+		},
+		"consumes": {
+			"type": "array",
+			"description": "A list of MIME types accepted by the API.",
+			"items": {
+				"$ref": "#/definitions/mimeType"
+			}
+		},
+		"produces": {
+			"type": "array",
+			"description": "A list of MIME types the API can produce.",
+			"items": {
+				"$ref": "#/definitions/mimeType"
+			}
+		},
+		"paths": {
+			"type": "object",
+			"description": "Relative paths to the individual endpoints. They should be relative to the 'basePath'.",
+
+			"patternProperties": {
+				"^x-": {
+					"$ref": "#/definitions/vendorExtension"
+				}
+			},
+
+			"additionalProperties": {
+				"type": "object",
+				"minProperties": 1,
+				"additionalProperties": false,
+				"patternProperties": {
+					"^x-": {
+						"$ref": "#/definitions/vendorExtension"
+					}
+				},
+				"properties": {
+					"get": {
+						"$ref": "#/definitions/operation"
+					},
+					"put": {
+						"$ref": "#/definitions/operation"
+					},
+					"post": {
+						"$ref": "#/definitions/operation"
+					},
+					"delete": {
+						"$ref": "#/definitions/operation"
+					},
+					"options": {
+						"$ref": "#/definitions/operation"
+					},
+					"head": {
+						"$ref": "#/definitions/operation"
+					},
+					"patch": {
+						"$ref": "#/definitions/operation"
+					},
+					"parameters": {
+						"type": "array",
+						"items": {
+							"$ref": "#/definitions/parameter"
+						}
+					}
+				}
+			}
+		},
+		"schemas": {
+			"type": "object",
+			"description": "One or more JSON objects describing the schemas being consumed and produced by the API.",
+			"additionalProperties": {
+				"$ref": "#/definitions/schema"
+			}
+		},
+		"security": {
+			"type": "array"
+		}
+	}
+}
+
+},{}],33:[function(require,module,exports){
 module.exports={
     "$schema": "http://json-schema.org/draft-04/hyper-schema#",
     "id": "http://json-schema.org/draft-04/hyper-schema#",
@@ -1985,7 +3104,7 @@ module.exports={
 }
 
 
-},{}],27:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 module.exports={
     "id": "http://json-schema.org/draft-04/schema#",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -2137,13 +3256,13 @@ module.exports={
     "default": {}
 }
 
-},{}],28:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports={
     "type": "integer"
 }
-},{}],29:[function(require,module,exports){
-module.exports=require(28)
-},{}],30:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
+module.exports=require(35)
+},{}],37:[function(require,module,exports){
 module.exports={
     "integer": {
         "type": "integer"
@@ -2152,7 +3271,7 @@ module.exports={
         "$ref": "#/integer"
     }
 }
-},{}],31:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 module.exports=[
     {
         "description": "additionalItems as schema",
@@ -2236,7 +3355,7 @@ module.exports=[
     }
 ]
 
-},{}],32:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -2307,7 +3426,7 @@ module.exports=[
     }
 ]
 
-},{}],33:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 module.exports=[
     {
         "description": "allOf",
@@ -2421,7 +3540,7 @@ module.exports=[
     }
 ]
 
-},{}],34:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 module.exports=[
     {
         "description": "anyOf",
@@ -2491,7 +3610,7 @@ module.exports=[
     }
 ]
 
-},{}],35:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 module.exports=[
     {
         "description": "valid definition",
@@ -2525,7 +3644,7 @@ module.exports=[
     }
 ]
 
-},{}],36:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 module.exports=[
     {
         "description": "dependencies",
@@ -2640,7 +3759,7 @@ module.exports=[
     }
 ]
 
-},{}],37:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 module.exports=[
     {
         "description": "simple enum validation",
@@ -2714,7 +3833,7 @@ module.exports=[
     }
 ]
 
-},{}],38:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 module.exports=[
     {
         "description": "a schema given for items",
@@ -2762,7 +3881,7 @@ module.exports=[
     }
 ]
 
-},{}],39:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxItems validation",
@@ -2792,7 +3911,7 @@ module.exports=[
     }
 ]
 
-},{}],40:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxLength validation",
@@ -2827,7 +3946,7 @@ module.exports=[
     }
 ]
 
-},{}],41:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxProperties validation",
@@ -2857,7 +3976,7 @@ module.exports=[
     }
 ]
 
-},{}],42:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 module.exports=[
     {
         "description": "maximum validation",
@@ -2901,7 +4020,7 @@ module.exports=[
     }
 ]
 
-},{}],43:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports=[
     {
         "description": "minItems validation",
@@ -2931,7 +4050,7 @@ module.exports=[
     }
 ]
 
-},{}],44:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 module.exports=[
     {
         "description": "minLength validation",
@@ -2966,7 +4085,7 @@ module.exports=[
     }
 ]
 
-},{}],45:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 module.exports=[
     {
         "description": "minProperties validation",
@@ -2996,7 +4115,7 @@ module.exports=[
     }
 ]
 
-},{}],46:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 module.exports=[
     {
         "description": "minimum validation",
@@ -3040,7 +4159,7 @@ module.exports=[
     }
 ]
 
-},{}],47:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 module.exports=[
     {
         "description": "by int",
@@ -3102,7 +4221,7 @@ module.exports=[
     }
 ]
 
-},{}],48:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 module.exports=[
     {
         "description": "not",
@@ -3200,7 +4319,7 @@ module.exports=[
 
 ]
 
-},{}],49:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 module.exports=[
     {
         "description": "oneOf",
@@ -3270,7 +4389,7 @@ module.exports=[
     }
 ]
 
-},{}],50:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer",
@@ -3332,7 +4451,7 @@ module.exports=[
     }
 ]
 
-},{}],51:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 module.exports=[
     {
         "description": "validation of date-time strings",
@@ -3477,7 +4596,7 @@ module.exports=[
     }
 ]
 
-},{}],52:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 module.exports=[
     {
         "description": "pattern validation",
@@ -3502,7 +4621,7 @@ module.exports=[
     }
 ]
 
-},{}],53:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -3614,7 +4733,7 @@ module.exports=[
     }
 ]
 
-},{}],54:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 module.exports=[
     {
         "description": "object properties validation",
@@ -3708,7 +4827,7 @@ module.exports=[
     }
 ]
 
-},{}],55:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 module.exports=[
     {
         "description": "root pointer ref",
@@ -3854,7 +4973,7 @@ module.exports=[
     }
 ]
 
-},{}],56:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 module.exports=[
     {
         "description": "remote ref",
@@ -3930,7 +5049,7 @@ module.exports=[
     }
 ]
 
-},{}],57:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 module.exports=[
     {
         "description": "required validation",
@@ -3971,7 +5090,7 @@ module.exports=[
     }
 ]
 
-},{}],58:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer type matches integers",
@@ -4303,7 +5422,7 @@ module.exports=[
     }
 ]
 
-},{}],59:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 module.exports=[
     {
         "description": "uniqueItems validation",
@@ -4384,7 +5503,7 @@ module.exports=[
     }
 ]
 
-},{}],60:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -4456,7 +5575,7 @@ describe("Basic", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":27,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":28,"../jsonSchemaTestSuite/remotes/integer.json":29,"../jsonSchemaTestSuite/remotes/subSchemas.json":30}],61:[function(require,module,exports){
+},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":34,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":35,"../jsonSchemaTestSuite/remotes/integer.json":36,"../jsonSchemaTestSuite/remotes/subSchemas.json":37}],68:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -4553,7 +5672,7 @@ describe("JsonSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":27,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":28,"../jsonSchemaTestSuite/remotes/integer.json":29,"../jsonSchemaTestSuite/remotes/subSchemas.json":30,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":31,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":32,"../jsonSchemaTestSuite/tests/draft4/allOf.json":33,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":34,"../jsonSchemaTestSuite/tests/draft4/definitions.json":35,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":36,"../jsonSchemaTestSuite/tests/draft4/enum.json":37,"../jsonSchemaTestSuite/tests/draft4/items.json":38,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":39,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":40,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":41,"../jsonSchemaTestSuite/tests/draft4/maximum.json":42,"../jsonSchemaTestSuite/tests/draft4/minItems.json":43,"../jsonSchemaTestSuite/tests/draft4/minLength.json":44,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":45,"../jsonSchemaTestSuite/tests/draft4/minimum.json":46,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":47,"../jsonSchemaTestSuite/tests/draft4/not.json":48,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":49,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":50,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":51,"../jsonSchemaTestSuite/tests/draft4/pattern.json":52,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":53,"../jsonSchemaTestSuite/tests/draft4/properties.json":54,"../jsonSchemaTestSuite/tests/draft4/ref.json":55,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":56,"../jsonSchemaTestSuite/tests/draft4/required.json":57,"../jsonSchemaTestSuite/tests/draft4/type.json":58,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":59}],62:[function(require,module,exports){
+},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":34,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":35,"../jsonSchemaTestSuite/remotes/integer.json":36,"../jsonSchemaTestSuite/remotes/subSchemas.json":37,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":38,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":39,"../jsonSchemaTestSuite/tests/draft4/allOf.json":40,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":41,"../jsonSchemaTestSuite/tests/draft4/definitions.json":42,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":43,"../jsonSchemaTestSuite/tests/draft4/enum.json":44,"../jsonSchemaTestSuite/tests/draft4/items.json":45,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":46,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":47,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":48,"../jsonSchemaTestSuite/tests/draft4/maximum.json":49,"../jsonSchemaTestSuite/tests/draft4/minItems.json":50,"../jsonSchemaTestSuite/tests/draft4/minLength.json":51,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":52,"../jsonSchemaTestSuite/tests/draft4/minimum.json":53,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":54,"../jsonSchemaTestSuite/tests/draft4/not.json":55,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":56,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":57,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":58,"../jsonSchemaTestSuite/tests/draft4/pattern.json":59,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":60,"../jsonSchemaTestSuite/tests/draft4/properties.json":61,"../jsonSchemaTestSuite/tests/draft4/ref.json":62,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":63,"../jsonSchemaTestSuite/tests/draft4/required.json":64,"../jsonSchemaTestSuite/tests/draft4/type.json":65,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":66}],69:[function(require,module,exports){
 /*jshint -W030 */
 
 "use strict";
@@ -4587,6 +5706,9 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/Issue43.js"),
     require("../ZSchemaTestSuite/Issue44.js"),
     require("../ZSchemaTestSuite/Issue45.js"),
+    require("../ZSchemaTestSuite/Issue47.js"),
+    require("../ZSchemaTestSuite/Issue48.js"),
+    require("../ZSchemaTestSuite/Issue49.js"),
     undefined
 ];
 
@@ -4599,8 +5721,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 25 files", function () {
-        expect(testSuiteFiles.length).toBe(25);
+    it("should contain 28 files", function () {
+        expect(testSuiteFiles.length).toBe(28);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -4684,4 +5806,4 @@ describe("ZSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../ZSchemaTestSuite/AssumeAdditional.js":1,"../ZSchemaTestSuite/CustomFormats.js":2,"../ZSchemaTestSuite/CustomFormatsAsync.js":3,"../ZSchemaTestSuite/ForceAdditional.js":4,"../ZSchemaTestSuite/ForceItems.js":5,"../ZSchemaTestSuite/ForceMaxLength.js":6,"../ZSchemaTestSuite/ForceProperties.js":7,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":8,"../ZSchemaTestSuite/Issue12.js":9,"../ZSchemaTestSuite/Issue13.js":10,"../ZSchemaTestSuite/Issue16.js":11,"../ZSchemaTestSuite/Issue22.js":12,"../ZSchemaTestSuite/Issue25.js":13,"../ZSchemaTestSuite/Issue26.js":14,"../ZSchemaTestSuite/Issue37.js":15,"../ZSchemaTestSuite/Issue40.js":16,"../ZSchemaTestSuite/Issue41.js":17,"../ZSchemaTestSuite/Issue43.js":18,"../ZSchemaTestSuite/Issue44.js":19,"../ZSchemaTestSuite/Issue45.js":20,"../ZSchemaTestSuite/MultipleSchemas.js":21,"../ZSchemaTestSuite/NoEmptyStrings.js":22,"../ZSchemaTestSuite/NoExtraKeywords.js":23,"../ZSchemaTestSuite/NoTypeless.js":24,"../ZSchemaTestSuite/StrictUris.js":25,"../files/draft-04-hyper-schema.json":26,"../files/draft-04-schema.json":27}]},{},[60,61,62]);
+},{"../../src/ZSchema":"C768cZ","../ZSchemaTestSuite/AssumeAdditional.js":1,"../ZSchemaTestSuite/CustomFormats.js":2,"../ZSchemaTestSuite/CustomFormatsAsync.js":3,"../ZSchemaTestSuite/ForceAdditional.js":4,"../ZSchemaTestSuite/ForceItems.js":5,"../ZSchemaTestSuite/ForceMaxLength.js":6,"../ZSchemaTestSuite/ForceProperties.js":7,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":8,"../ZSchemaTestSuite/Issue12.js":9,"../ZSchemaTestSuite/Issue13.js":10,"../ZSchemaTestSuite/Issue16.js":11,"../ZSchemaTestSuite/Issue22.js":12,"../ZSchemaTestSuite/Issue25.js":13,"../ZSchemaTestSuite/Issue26.js":14,"../ZSchemaTestSuite/Issue37.js":15,"../ZSchemaTestSuite/Issue40.js":16,"../ZSchemaTestSuite/Issue41.js":17,"../ZSchemaTestSuite/Issue43.js":18,"../ZSchemaTestSuite/Issue44.js":19,"../ZSchemaTestSuite/Issue45.js":20,"../ZSchemaTestSuite/Issue47.js":21,"../ZSchemaTestSuite/Issue48.js":22,"../ZSchemaTestSuite/Issue49.js":23,"../ZSchemaTestSuite/MultipleSchemas.js":24,"../ZSchemaTestSuite/NoEmptyStrings.js":25,"../ZSchemaTestSuite/NoExtraKeywords.js":26,"../ZSchemaTestSuite/NoTypeless.js":27,"../ZSchemaTestSuite/StrictUris.js":28,"../files/draft-04-hyper-schema.json":33,"../files/draft-04-schema.json":34}]},{},[67,68,69]);
