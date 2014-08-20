@@ -1569,6 +1569,13 @@ var SchemaValidators = {
                 }
             }
         }
+        if (this.options.noEmptyArrays === true) {
+            if (schema.type === "array" || isArray && schema.type.indexOf("array") !== -1) {
+                if (schema.minItems === undefined) {
+                    schema.minItems = 1;
+                }
+            }
+        }
         if (this.options.forceProperties === true) {
             if (schema.type === "object" || isArray && schema.type.indexOf("object") !== -1) {
                 if (schema.properties === undefined && schema.patternProperties === undefined) {
@@ -1906,8 +1913,6 @@ exports.clone = function (src) {
     return res;
 };
 
-},{}],"ZSchema":[function(require,module,exports){
-module.exports=require('C768cZ');
 },{}],"C768cZ":[function(require,module,exports){
 "use strict";
 
@@ -1944,6 +1949,8 @@ var defaultOptions = {
     noTypeless: false,
     // disallow zero length strings in validated objects
     noEmptyStrings: false,
+    // disallow zero length arrays in validated objects
+    noEmptyArrays: false,
     // forces "uri" format to be in fully rfc3986 compliant
     strictUris: false,
     // turn on some of the above
@@ -1979,6 +1986,7 @@ function ZSchema(options) {
         this.options.noExtraKeywords  = true;
         this.options.noTypeless       = true;
         this.options.noEmptyStrings   = true;
+        this.options.noEmptyArrays    = true;
     }
 }
 
@@ -2064,4 +2072,6 @@ ZSchema.registerFormatter = function (/* formatterName, formatterFunction */) {
 
 module.exports = ZSchema;
 
-},{"./FormatValidators":3,"./JsonValidation":4,"./Polyfills":5,"./Report":6,"./SchemaCache":7,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}]},{},[2,3,4,5,6,7,8,9,10,"C768cZ"]);
+},{"./FormatValidators":3,"./JsonValidation":4,"./Polyfills":5,"./Report":6,"./SchemaCache":7,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}],"ZSchema":[function(require,module,exports){
+module.exports=require('C768cZ');
+},{}]},{},[2,3,4,5,6,7,8,9,10,"C768cZ"]);

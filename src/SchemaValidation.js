@@ -322,6 +322,13 @@ var SchemaValidators = {
                 }
             }
         }
+        if (this.options.noEmptyArrays === true) {
+            if (schema.type === "array" || isArray && schema.type.indexOf("array") !== -1) {
+                if (schema.minItems === undefined) {
+                    schema.minItems = 1;
+                }
+            }
+        }
         if (this.options.forceProperties === true) {
             if (schema.type === "object" || isArray && schema.type.indexOf("object") !== -1) {
                 if (schema.properties === undefined && schema.patternProperties === undefined) {

@@ -64,6 +64,7 @@ validator.validate(json, schema, function (err, valid) {
 - [Register a custom format](#registerformat)
 - [Prefill default values to object using format](#prefillvalues)
 - [Define a custom timeout for all async operations](#asynctimeout)
+- [Disallow validation of empty arrays as arrays](#noemptyarrays)
 - [Disallow validation of empty strings as strings](#noemptystrings)
 - [Disallow schemas that don't have a type specified](#notypeless)
 - [Disallow schemas that contain unrecognized keywords and are not validated by parent schemas](#noextrakeywords)
@@ -178,6 +179,16 @@ before the validation fails with an ```ASYNC_TIMEOUT``` error.
 ```javascript
 var validator = new ZSchema({
     asyncTimeout: 2000
+});
+```
+
+##noEmptyArrays
+
+When true, validator will assume that minimum count of items in any ```array``` is 1, except when ```minItems: 0``` is explicitly defined.
+
+```javascript
+var validator = new ZSchema({
+    noEmptyArrays: true
 });
 ```
 
@@ -303,6 +314,7 @@ if (this.options.strictMode === true) {
     this.options.noExtraKeywords  = true;
     this.options.noTypeless       = true;
     this.options.noEmptyStrings   = true;
+    this.options.noEmptyArrays    = true;
 }
 ```
 

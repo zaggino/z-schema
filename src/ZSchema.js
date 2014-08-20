@@ -33,6 +33,8 @@ var defaultOptions = {
     noTypeless: false,
     // disallow zero length strings in validated objects
     noEmptyStrings: false,
+    // disallow zero length arrays in validated objects
+    noEmptyArrays: false,
     // forces "uri" format to be in fully rfc3986 compliant
     strictUris: false,
     // turn on some of the above
@@ -68,6 +70,7 @@ function ZSchema(options) {
         this.options.noExtraKeywords  = true;
         this.options.noTypeless       = true;
         this.options.noEmptyStrings   = true;
+        this.options.noEmptyArrays    = true;
     }
 }
 
