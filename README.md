@@ -5,9 +5,7 @@
 
 [![browser support](https://ci.testling.com/zaggino/z-schema.png)](https://ci.testling.com/zaggino/z-schema)
 
-complete rewrite of [z-schema](https://github.com/zaggino/z-schema) in progress, not all tests and features have been migrated from version 2.x yet!
-
-##Why rewrite?
+##Version 3.0 has been rewritten from scratch.
 - it runs in the browser now, run tests yourself [here](https://rawgit.com/zaggino/z-schema/master/test/SpecRunner.html)
 - it is much faster than the 2.x, see below
 
@@ -26,7 +24,7 @@ Validator will try to perform sync validation when possible for speed, but suppo
 
 ```javascript
 var ZSchema = require("z-schema");
-var options = ...
+var options = ... // see below for possible option values
 var validator = new ZSchema(options);
 ```
 
@@ -34,7 +32,7 @@ var validator = new ZSchema(options);
 
 ```javascript
 var valid = validator.validate(json, schema);
-var err = validator.getLastError();
+var err = validator.getLastErrors();
 ...
 ```
 
@@ -69,7 +67,7 @@ var json = {};
 var schema = { "$ref": "http://json-schema.org/draft-04/schema#" };
 
 var valid = validator.validate(json, schema);
-var errors = validator.getLastError();
+var errors = validator.getLastErrors();
 // valid === false
 // errors.length === 1
 // errors[0].code === "UNRESOLVABLE_REFERENCE"
@@ -80,7 +78,7 @@ request(requiredUrl, function (error, response, body) {
     validator.setRemoteReference(requiredUrl, JSON.parse(body));
     
     var valid = validator.validate(json, schema);
-    var errors = validator.getLastError();
+    var errors = validator.getLastErrors();
     // valid === true
     // errors === undefined
     
@@ -89,10 +87,10 @@ request(requiredUrl, function (error, response, body) {
 
 #Features
 
-- [Compile arrays of schemas and use references between them](#compilearrays)
-- [Register a custom format](#registerformat)
-- [Automatic downloading of remote schemas](#automaticdownloading)
-- [Prefill default values to object using format](#prefillvalues)
+- [Compile arrays of schemas and use references between them](#compile-arrays-of-schemas-and-use-references-between-them)
+- [Register a custom format](#register-a-custom-format)
+- [Automatic downloading of remote schemas](#automatic-downloading-of-remote-schemas)
+- [Prefill default values to object using format](#prefill-default-values-to-object-using-format)
 - [Define a custom timeout for all async operations](#asynctimeout)
 - [Disallow validation of empty arrays as arrays](#noemptyarrays)
 - [Disallow validation of empty strings as strings](#noemptystrings)
@@ -107,7 +105,7 @@ request(requiredUrl, function (error, response, body) {
 - [Only allow strictly absolute URIs to be used in schemas](#stricturis)
 - [Turn on z-schema strict mode](#strictmode)
 
-##compileArrays
+##Compile arrays of schemas and use references between them
 
 You can use validator to compile an array of schemas that have references between them and then validate against one of those schemas:
 
@@ -158,7 +156,7 @@ var valid = validator(data, schemas[2]);
 // valid === true
 ```
 
-##registerFormat
+##Register a custom format
 
 You can register any format of your own, sync validator function should always respond with boolean:
 
@@ -178,12 +176,12 @@ ZSchema.registerFormat("xstring", function (str, callback) {
 });
 ```
 
-##automaticdownloading
+##Automatic downloading of remote schemas
 
 Automatic downloading of remote schemas was removed from version ```3.x``` but is still possible with a bit of extra code,
 see [this test](test/spec/AutomaticSchemaLoadingSpec.js) for more information on this.
 
-##prefillValues
+##Prefill default values to object using format
 
 Using format, you can pre-fill values of your choosing into the objects like this:
 

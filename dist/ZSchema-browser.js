@@ -2055,7 +2055,7 @@ ZSchema.prototype.validate = function (json, schema, callback) {
     this.lastReport = report;
     return report.isValid();
 };
-ZSchema.prototype.getLastError = function () {
+ZSchema.prototype.getLastErrors = function () {
     return this.lastReport.errors.length > 0 ? this.lastReport.errors : undefined;
 };
 ZSchema.prototype.getMissingReferences = function () {

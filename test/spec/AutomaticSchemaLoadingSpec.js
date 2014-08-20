@@ -8,7 +8,7 @@ function validateWithAutomaticDownloads(validator, data, schema, callback) {
     var lastResult;
 
     function finish() {
-        callback(validator.getLastError(), lastResult);
+        callback(validator.getLastErrors(), lastResult);
     }
 
     function validate() {

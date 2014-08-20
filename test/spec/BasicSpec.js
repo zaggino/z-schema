@@ -53,7 +53,7 @@ describe("Basic", function () {
         expect(validSchema).toBe(true);
 
         if (!validSchema) {
-            console.log(validator.getLastError());
+            console.log(validator.getLastErrors());
             return;
         }
 
@@ -61,7 +61,7 @@ describe("Basic", function () {
         expect(valid).toBe(true);
 
         if (!valid) {
-            console.log(validator.getLastError());
+            console.log(validator.getLastErrors());
             return;
         }
 

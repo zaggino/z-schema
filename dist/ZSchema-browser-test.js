@@ -6381,7 +6381,7 @@ exports.UNZIP = 7;
 function Zlib(mode) {
   if (mode < exports.DEFLATE || mode > exports.UNZIP)
     throw new TypeError("Bad argument");
-
+    
   this.mode = mode;
   this.init_done = false;
   this.write_in_progress = false;
@@ -6399,18 +6399,18 @@ Zlib.prototype.init = function(windowBits, level, memLevel, strategy, dictionary
   this.memLevel = memLevel;
   this.strategy = strategy;
   // dictionary not supported.
-
+  
   if (this.mode === exports.GZIP || this.mode === exports.GUNZIP)
     this.windowBits += 16;
-
+    
   if (this.mode === exports.UNZIP)
     this.windowBits += 32;
-
+    
   if (this.mode === exports.DEFLATERAW || this.mode === exports.INFLATERAW)
     this.windowBits = -this.windowBits;
-
+    
   this.strm = new zstream();
-
+  
   switch (this.mode) {
     case exports.DEFLATE:
     case exports.GZIP:
@@ -6436,12 +6436,12 @@ Zlib.prototype.init = function(windowBits, level, memLevel, strategy, dictionary
     default:
       throw new Error("Unknown mode " + this.mode);
   }
-
+  
   if (status !== exports.Z_OK) {
     this._error(status);
     return;
   }
-
+  
   this.write_in_progress = false;
   this.init_done = true;
 };
@@ -6453,31 +6453,31 @@ Zlib.prototype.params = function() {
 Zlib.prototype._writeCheck = function() {
   if (!this.init_done)
     throw new Error("write before init");
-
+    
   if (this.mode === exports.NONE)
     throw new Error("already finalized");
-
+    
   if (this.write_in_progress)
     throw new Error("write already in progress");
-
+    
   if (this.pending_close)
     throw new Error("close is pending");
 };
 
-Zlib.prototype.write = function(flush, input, in_off, in_len, out, out_off, out_len) {
+Zlib.prototype.write = function(flush, input, in_off, in_len, out, out_off, out_len) {    
   this._writeCheck();
   this.write_in_progress = true;
-
+  
   var self = this;
   process.nextTick(function() {
     self.write_in_progress = false;
     var res = self._write(flush, input, in_off, in_len, out, out_off, out_len);
     self.callback(res[0], res[1]);
-
+    
     if (self.pending_close)
       self.close();
   });
-
+  
   return this;
 };
 
@@ -6495,7 +6495,7 @@ Zlib.prototype.writeSync = function(flush, input, in_off, in_len, out, out_off, 
 
 Zlib.prototype._write = function(flush, input, in_off, in_len, out, out_off, out_len) {
   this.write_in_progress = true;
-
+  
   if (flush !== exports.Z_NO_FLUSH &&
       flush !== exports.Z_PARTIAL_FLUSH &&
       flush !== exports.Z_SYNC_FLUSH &&
@@ -6504,18 +6504,18 @@ Zlib.prototype._write = function(flush, input, in_off, in_len, out, out_off, out
       flush !== exports.Z_BLOCK) {
     throw new Error("Invalid flush value");
   }
-
+  
   if (input == null) {
     input = new Buffer(0);
     in_len = 0;
     in_off = 0;
   }
-
+  
   if (out._set)
     out.set = out._set;
   else
     out.set = bufferSet;
-
+  
   var strm = this.strm;
   strm.avail_in = in_len;
   strm.input = input;
@@ -6523,7 +6523,7 @@ Zlib.prototype._write = function(flush, input, in_off, in_len, out, out_off, out
   strm.avail_out = out_len;
   strm.output = out;
   strm.next_out = out_off;
-
+  
   switch (this.mode) {
     case exports.DEFLATE:
     case exports.GZIP:
@@ -6539,11 +6539,11 @@ Zlib.prototype._write = function(flush, input, in_off, in_len, out, out_off, out
     default:
       throw new Error("Unknown mode " + this.mode);
   }
-
+  
   if (status !== exports.Z_STREAM_END && status !== exports.Z_OK) {
     this._error(status);
   }
-
+  
   this.write_in_progress = false;
   return [strm.avail_in, strm.avail_out];
 };
@@ -6553,15 +6553,15 @@ Zlib.prototype.close = function() {
     this.pending_close = true;
     return;
   }
-
+  
   this.pending_close = false;
-
+  
   if (this.mode === exports.DEFLATE || this.mode === exports.GZIP || this.mode === exports.DEFLATERAW) {
     zlib_deflate.deflateEnd(this.strm);
   } else {
     zlib_inflate.inflateEnd(this.strm);
   }
-
+  
   this.mode = exports.NONE;
 };
 
@@ -6576,7 +6576,7 @@ Zlib.prototype.reset = function() {
       var status = zlib_inflate.inflateReset(this.strm);
       break;
   }
-
+  
   if (status !== exports.Z_OK) {
     this._error(status);
   }
@@ -6584,7 +6584,7 @@ Zlib.prototype.reset = function() {
 
 Zlib.prototype._error = function(status) {
   this.onerror(msg[status] + ': ' + this.strm.msg, status);
-
+  
   this.write_in_progress = false;
   if (this.pending_close)
     this.close();
@@ -9276,7 +9276,7 @@ module.exports = function (Buffer, Hash) {
     if(!(this instanceof Sha1)) return new Sha1()
     this._w = W
     Hash.call(this, 16*4, 14*4)
-
+  
     this._h = null
     this.init()
   }
@@ -10050,7 +10050,7 @@ http.request = function (params, cb) {
     if (!params.host && params.hostname) {
         params.host = params.hostname;
     }
-
+    
     if (!params.scheme) params.scheme = window.location.protocol.split(':')[0];
     if (!params.host) {
         params.host = window.location.hostname || window.location.host;
@@ -10062,7 +10062,7 @@ http.request = function (params, cb) {
         params.host = params.host.split(':')[0];
     }
     if (!params.port) params.port = params.scheme == 'https' ? 443 : 80;
-
+    
     var req = new Request(new xhrHttp, params);
     if (cb) req.on('response', cb);
     return req;
@@ -10183,23 +10183,23 @@ var Request = module.exports = function (xhr, params) {
     self.writable = true;
     self.xhr = xhr;
     self.body = [];
-
+    
     self.uri = (params.scheme || 'http') + '://'
         + params.host
         + (params.port ? ':' + params.port : '')
         + (params.path || '/')
     ;
-
+    
     if (typeof params.withCredentials === 'undefined') {
         params.withCredentials = true;
     }
 
     try { xhr.withCredentials = params.withCredentials }
     catch (e) {}
-
+    
     if (params.responseType) try { xhr.responseType = params.responseType }
     catch (e) {}
-
+    
     xhr.open(
         params.method || 'GET',
         self.uri,
@@ -10207,7 +10207,7 @@ var Request = module.exports = function (xhr, params) {
     );
 
     self._headers = {};
-
+    
     if (params.headers) {
         var keys = objectKeys(params.headers);
         for (var i = 0; i < keys.length; i++) {
@@ -10217,7 +10217,7 @@ var Request = module.exports = function (xhr, params) {
             self.setHeader(key, value);
         }
     }
-
+    
     if (params.auth) {
         //basic auth
         this.setHeader('Authorization', 'Basic ' + Base64.btoa(params.auth));
@@ -10227,11 +10227,11 @@ var Request = module.exports = function (xhr, params) {
     res.on('close', function () {
         self.emit('close');
     });
-
+    
     res.on('ready', function () {
         self.emit('response', res);
     });
-
+    
     xhr.onreadystatechange = function () {
         // Fix for IE9 bug
         // SCRIPT575: Could not complete the operation due to error c00c023f
@@ -10300,7 +10300,7 @@ Request.prototype.end = function (s) {
         }
         var body = new(this.body[0].constructor)(len);
         var k = 0;
-
+        
         for (var i = 0; i < this.body.length; i++) {
             var b = this.body[i];
             for (var j = 0; j < b.length; j++) {
@@ -10388,13 +10388,13 @@ function parseHeaders (res) {
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
         if (line === '') continue;
-
+        
         var m = line.match(/^([^:]+):\s*(.*)/);
         if (m) {
             var key = m[1].toLowerCase(), value = m[2];
-
+            
             if (headers[key] !== undefined) {
-
+            
                 if (isArray(headers[key])) {
                     headers[key].push(value);
                 }
@@ -10433,7 +10433,7 @@ Response.prototype.handle = function (res) {
         catch (err) {
             capable.status2 = false;
         }
-
+        
         if (capable.status2) {
             this.emit('ready');
         }
@@ -10447,7 +10447,7 @@ Response.prototype.handle = function (res) {
             }
         }
         catch (err) {}
-
+        
         try {
             this._emitData(res);
         }
@@ -10461,12 +10461,12 @@ Response.prototype.handle = function (res) {
             this.emit('ready');
         }
         this._emitData(res);
-
+        
         if (res.error) {
             this.emit('error', this.getResponse(res));
         }
         else this.emit('end');
-
+        
         this.emit('close');
     }
 };
@@ -14530,7 +14530,7 @@ function ForeverAgent(options) {
     } else if (self.sockets[name].length < self.minSockets) {
       if (!self.freeSockets[name]) self.freeSockets[name] = []
       self.freeSockets[name].push(socket)
-
+      
       // if an error happens while we don't use the socket anyway, meh, throw the socket away
       var onIdleError = function() {
         socket.destroy()
@@ -14578,7 +14578,7 @@ ForeverAgent.prototype.removeSocket = function(s, name, host, port) {
     delete this.sockets[name]
     delete this.requests[name]
   }
-
+  
   if (this.freeSockets[name]) {
     var index = this.freeSockets[name].indexOf(s)
     if (index !== -1) {
@@ -18914,11 +18914,11 @@ Request.prototype.init = function (options) {
     if(self.uri.protocol == "http:") {
         self.proxy = process.env.HTTP_PROXY || process.env.http_proxy || null;
     } else if(self.uri.protocol == "https:") {
-        self.proxy = process.env.HTTPS_PROXY || process.env.https_proxy ||
+        self.proxy = process.env.HTTPS_PROXY || process.env.https_proxy || 
                      process.env.HTTP_PROXY || process.env.http_proxy || null;
     }
   }
-
+  
   if (self.proxy) {
     if (typeof self.proxy == 'string') self.proxy = url.parse(self.proxy)
 
@@ -25751,7 +25751,7 @@ function validateWithAutomaticDownloads(validator, data, schema, callback) {
     var lastResult;
 
     function finish() {
-        callback(validator.getLastError(), lastResult);
+        callback(validator.getLastErrors(), lastResult);
     }
 
     function validate() {
@@ -25882,7 +25882,7 @@ describe("Basic", function () {
         expect(validSchema).toBe(true);
 
         if (!validSchema) {
-            console.log(validator.getLastError());
+            console.log(validator.getLastErrors());
             return;
         }
 
@@ -25890,7 +25890,7 @@ describe("Basic", function () {
         expect(valid).toBe(true);
 
         if (!valid) {
-            console.log(validator.getLastError());
+            console.log(validator.getLastErrors());
             return;
         }
 
@@ -25980,7 +25980,7 @@ describe("JsonSchemaTestSuite", function () {
 
                     if (valid !== test.valid) {
                         if (!valid) {
-                            var errors = validator.getLastError();
+                            var errors = validator.getLastErrors();
                             expect(errors).toBe(null);
                         }
                     }
@@ -26082,7 +26082,7 @@ describe("ZSchemaTestSuite", function () {
                     valid = validator.validate(data, schema);
                 }
 
-                var err = validator.getLastError();
+                var err = validator.getLastErrors();
 
                 expect(typeof valid).toBe("boolean", "returned response is not a boolean");
                 expect(valid).toBe(test.valid, "test result doesn't match expected test result");

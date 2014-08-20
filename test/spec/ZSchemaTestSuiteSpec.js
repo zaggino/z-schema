@@ -84,7 +84,7 @@ describe("ZSchemaTestSuite", function () {
                     valid = validator.validate(data, schema);
                 }
 
-                var err = validator.getLastError();
+                var err = validator.getLastErrors();
 
                 expect(typeof valid).toBe("boolean", "returned response is not a boolean");
                 expect(valid).toBe(test.valid, "test result doesn't match expected test result");

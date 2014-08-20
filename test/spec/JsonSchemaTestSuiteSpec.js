@@ -79,7 +79,7 @@ describe("JsonSchemaTestSuite", function () {
 
                     if (valid !== test.valid) {
                         if (!valid) {
-                            var errors = validator.getLastError();
+                            var errors = validator.getLastErrors();
                             expect(errors).toBe(null);
                         }
                     }
