@@ -62,6 +62,7 @@ validator.validate(json, schema, function (err, valid) {
 
 - [Compile arrays of schemas and use references between them](#compilearrays)
 - [Register a custom format](#registerformat)
+- [Prefill default values to object using format](#prefillvalues)
 - [Define a custom timeout for all async operations](#asynctimeout)
 - [Disallow validation of empty strings as strings](#noemptystrings)
 - [Disallow schemas that don't have a type specified](#notypeless)
@@ -144,6 +145,27 @@ ZSchema.registerFormat("xstring", function (str, callback) {
         callback(str === "xxx");
     }, 1);
 });
+```
+
+##prefillValues
+
+Using format, you can pre-fill values of your choosing into the objects like this:
+
+```
+ZSchema.registerFormat("fillHello", function (obj) {
+    obj.hello = "world";
+    return true;
+});
+
+var data = {};
+
+var schema = {
+    "type": "object",
+    "format": "fillHello"
+};
+
+validator.validate(data, schema);
+// data.hello === "world"
 ```
 
 #Options

@@ -91,7 +91,7 @@ describe("ZSchemaTestSuite", function () {
                     expect(err).toBe(undefined, "errors are not undefined when test is valid");
                 }
                 if (after) {
-                    after(err, valid);
+                    after(err, valid, data);
                 }
 
             });
@@ -113,7 +113,7 @@ describe("ZSchemaTestSuite", function () {
                         expect(err).toBe(undefined, "errors are not undefined when test is valid");
                     }
                     if (after) {
-                        after(err, valid);
+                        after(err, valid, data);
                     }
                     done();
 

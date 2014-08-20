@@ -9,6 +9,10 @@ module.exports = {
         Class.registerFormat("emptystring", function (str) {
             return typeof str === "string" && str.length === 0 && str === "";
         });
+        Class.registerFormat("fillHello", function (obj) {
+            obj.hello = "world";
+            return true;
+        });
     },
     schema: {
         "type": "string",
@@ -42,6 +46,18 @@ module.exports = {
                 "format": "emptystring"
             },
             valid: true
+        },
+        {
+            description: "should be able to modify object using format",
+            data: {},
+            schema: {
+                "type": "object",
+                "format": "fillHello"
+            },
+            valid: true,
+            after: function (err, valid, obj) {
+                expect(obj.hello).toBe("world");
+            }
         }
     ]
 };
