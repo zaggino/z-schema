@@ -1,6 +1,7 @@
 #z-schema validator
 
-[![npm version](https://badge.fury.io/js/z-schema.png)](http://badge.fury.io/js/z-schema)
+[![npm version](https://badge.fury.io/js/z-schema.svg)](http://badge.fury.io/js/z-schema)
+[![bower version](https://badge.fury.io/bo/z-schema.svg)](http://badge.fury.io/bo/z-schema)
 [![build status](https://travis-ci.org/zaggino/z-schema.svg?branch=master)](https://travis-ci.org/zaggino/z-schema)
 
 [![browser support](https://ci.testling.com/zaggino/z-schema.png)](https://ci.testling.com/zaggino/z-schema)
