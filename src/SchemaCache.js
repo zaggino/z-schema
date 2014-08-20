@@ -65,6 +65,11 @@ exports.removeFromCacheByUri = function (uri) {
     }
 };
 
+exports.checkCacheForUri = function (uri) {
+    var remotePath = getRemotePath(uri);
+    return remotePath ? this.cache[remotePath] != null : false;
+};
+
 exports.getSchemaByUri = function (report, uri, root) {
     var remotePath = getRemotePath(uri),
         queryPath = getQueryPath(uri),

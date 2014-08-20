@@ -1013,6 +1013,11 @@ exports.removeFromCacheByUri = function (uri) {
     }
 };
 
+exports.checkCacheForUri = function (uri) {
+    var remotePath = getRemotePath(uri);
+    return remotePath ? this.cache[remotePath] != null : false;
+};
+
 exports.getSchemaByUri = function (report, uri, root) {
     var remotePath = getRemotePath(uri),
         queryPath = getQueryPath(uri),
@@ -1190,6 +1195,11 @@ exports.compileSchema = function (report, schema) {
     // if schema is an array, assume it's an array of schemas
     if (Array.isArray(schema)) {
         return compileArrayOfSchemas.call(this, report, schema);
+    }
+
+    // if we have an id than it should be cached already (if this instance has compiled it)
+    if (schema.__$compiled && schema.id && SchemaCache.checkCacheForUri.call(this, schema.id) === false) {
+        schema.__$compiled = undefined;
     }
 
     // do not re-compile schemas

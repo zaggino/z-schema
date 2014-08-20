@@ -933,6 +933,718 @@ module.exports = {
 "use strict";
 
 module.exports = {
+    description: "Issue #40 - validator ends up in infinite loop",
+    tests: [
+        {
+            description: "should pass validation",
+            schema: {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "title": "Product set",
+                "is_start": "boolean",
+                "hierarchy": {
+                    "$ref": "#/definitions/recursion"
+                },
+                "definitions": {
+                    "recursion": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "is_and": {
+                                "type": "boolean"
+                            },
+                            "filters": {
+                                "type": "array",
+                                "additionalItems": false,
+                                "items": {
+                                    "$ref": "#/definitions/recursion"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            data: {
+                "is_start": true,
+                "hierarchy": {
+                    "is_and": false,
+                    "filters": [
+                        {
+                            "is_and": false,
+                            "filters": [
+                                {
+                                    "is_and": true,
+                                    "filters": [
+                                        {
+                                            "is_and": true,
+                                            "filters": [
+                                                {
+                                                    "is_and": true,
+                                                    "filters": [
+                                                        {
+                                                            "is_and": true,
+                                                            "filters": [
+                                                                {
+                                                                    "is_and": true,
+                                                                    "filters": []
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            valid: true
+        }
+    ]
+};
+
+},{}],17:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+    description: "Issue #41 - invalid schema",
+    tests: [
+        {
+            description: "should fail schema validation",
+            schema: {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "id": "http://jsonschema.net#",
+                "type": "array",
+                "required": false,
+                "items": {
+                    "id": "http://jsonschema.net/5#",
+                    "type": "object",
+                    "required": false,
+                    "properties": {
+                        "identifiers": {
+                            "id": "http://jsonschema.net/5/identifiers#",
+                            "type": "array",
+                            "required": false,
+                            "items": {
+                                "id": "http://jsonschema.net/5/identifiers/0#",
+                                "type": "object",
+                                "required": false,
+                                "properties": {
+                                    "identifier": {
+                                        "id": "http://jsonschema.net/5/identifiers/0/identifier#",
+                                        "type": "string",
+                                        "required": false
+                                    }
+                                }
+                            }
+                        },
+                        "vital": {
+                            "id": "http://jsonschema.net/5/vital#",
+                            "type": "object",
+                            "required": false,
+                            "properties": {
+                                "name": {
+                                    "id": "http://jsonschema.net/5/vital/name#",
+                                    "type": "string",
+                                    "required": false
+                                },
+                                "code": {
+                                    "id": "http://jsonschema.net/5/vital/code#",
+                                    "type": "string",
+                                    "required": false
+                                },
+                                "code_system_name": {
+                                    "id": "http://jsonschema.net/5/vital/code_system_name#",
+                                    "type": "string",
+                                    "required": false
+                                }
+                            }
+                        },
+                        "status": {
+                            "id": "http://jsonschema.net/5/status#",
+                            "type": "string",
+                            "required": false
+                        },
+                        "date": {
+                            "id": "http://jsonschema.net/5/date#",
+                            "type": "array",
+                            "required": false,
+                            "items": {
+                                "id": "http://jsonschema.net/5/date/0#",
+                                "type": "object",
+                                "required": false,
+                                "properties": {
+                                    "date": {
+                                        "id": "http://jsonschema.net/5/date/0/date#",
+                                        "type": "string",
+                                        "required": false
+                                    },
+                                    "precision": {
+                                        "id": "http://jsonschema.net/5/date/0/precision#",
+                                        "type": "string",
+                                        "required": false
+                                    }
+                                }
+                            }
+                        },
+                        "interpretations": {
+                            "id": "http://jsonschema.net/5/interpretations#",
+                            "type": "array",
+                            "required": false,
+                            "items": {
+                                "id": "http://jsonschema.net/5/interpretations/0#",
+                                "type": "string",
+                                "required": false
+                            }
+                        },
+                        "value": {
+                            "id": "http://jsonschema.net/5/value#",
+                            "type": "integer",
+                            "required": false
+                        },
+                        "unit": {
+                            "id": "http://jsonschema.net/5/unit#",
+                            "type": "string",
+                            "required": false
+                        }
+                    }
+                }
+            },
+            validateSchemaOnly: true,
+            valid: false
+        }
+    ]
+};
+
+},{}],18:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+    description: "Issue #43 - maximum call stack size exceeded error",
+    tests: [
+        {
+            description: "should compile both schemas",
+            schema: [
+                {
+                    "id": "schemaA",
+                    "$schema": "http://json-schema.org/draft-04/schema#",
+                    "description": "Data type fields (section 4.3.3)",
+                    "type": "object",
+                    "oneOf": [
+                        {
+                            "required": ["type"]
+                        },
+                        {
+                            "required": ["$ref"]
+                        }
+                    ],
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "$ref": {
+                            "type": "string"
+                        },
+                        "format": {
+                            "type": "string"
+                        },
+                        "defaultValue": {
+                            "not": {
+                                "type": ["array", "object", "null"]
+                            }
+                        },
+                        "enum": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "uniqueItems": true,
+                            "minItems": 1
+                        },
+                        "minimum": {
+                            "type": "string"
+                        },
+                        "maximum": {
+                            "type": "string"
+                        },
+                        "items": {
+                            "$ref": "#/definitions/itemsObject"
+                        },
+                        "uniqueItems": {
+                            "type": "boolean"
+                        }
+                    },
+                    "dependencies": {
+                        "format": {
+                            "oneOf": [
+                                {
+                                    "properties": {
+                                        "type": {
+                                            "enum": ["integer"]
+                                        },
+                                        "format": {
+                                            "enum": ["int32", "int64"]
+                                        }
+                                    }
+                                },
+                                {
+                                    "properties": {
+                                        "type": {
+                                            "enum": ["number"]
+                                        },
+                                        "format": {
+                                            "enum": ["float", "double"]
+                                        }
+                                    }
+                                },
+                                {
+                                    "properties": {
+                                        "type": {
+                                            "enum": ["string"]
+                                        },
+                                        "format": {
+                                            "enum": ["byte", "date", "date-time"]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "definitions": {
+                        "itemsObject": {
+                            "oneOf": [
+                                {
+                                    "type": "object",
+                                    "required": ["$ref"],
+                                    "properties": {
+                                        "$ref": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                },
+                                {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#"
+                                        },
+                                        {
+                                            "required": ["type"],
+                                            "properties": {
+                                                "type": {},
+                                                "format": {}
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "id": "schemaB",
+                    "$schema": "http://json-schema.org/draft-04/schema#",
+                    "type": "object",
+                    "required": ["id", "properties"],
+                    "properties": {
+                        "id": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "properties": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/propertyObject"
+                            }
+                        },
+                        "subTypes": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "uniqueItems": true
+                        },
+                        "discriminator": {
+                            "type": "string"
+                        }
+                    },
+                    "dependencies": {
+                        "subTypes": ["discriminator"]
+                    },
+                    "definitions": {
+                        "propertyObject": {
+                            "allOf": [
+                                {
+                                    "not": {
+                                        "$ref": "#"
+                                    }
+                                },
+                                {
+                                    "$ref": "schemaA"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ],
+            validateSchemaOnly: true,
+            valid: true
+        }
+    ]
+};
+
+},{}],19:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+    description: "Issue #44 - unresolvable reference due to hash sign",
+    tests: [
+        {
+            description: "should pass validation #1",
+            schema: [
+                {
+                    id: "schemaA",
+                    type: "string"
+                },
+                {
+                    id: "schemaB",
+                    properties: {
+                        a: {
+                            "$ref": "schemaA"
+                        }
+                    }
+                }
+            ],
+            validateSchemaOnly: true,
+            valid: true
+        },
+        {
+            description: "should pass validation #2",
+            schema: [
+                {
+                    id: "schemaA",
+                    type: "string"
+                },
+                {
+                    id: "schemaB",
+                    properties: {
+                        a: {
+                            "$ref": "schemaA#"
+                        }
+                    }
+                }
+            ],
+            validateSchemaOnly: true,
+            valid: true
+        }
+    ]
+};
+
+},{}],20:[function(require,module,exports){
+"use strict";
+
+var resourceObject = {
+    "id": "resourceObject.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["path"],
+    "properties": {
+        "path": {
+            "type": "string",
+            "format": "uri"
+        },
+        "description": {
+            "type": "string"
+        }
+    },
+    "additionalProperties": false
+};
+var infoObject = {
+    "id": "infoObject.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "info object (section 5.1.3)",
+    "type": "object",
+    "required": ["title", "description"],
+    "properties": {
+        "title": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string"
+        },
+        "termsOfServiceUrl": {
+            "type": "string",
+            "format": "uri"
+        },
+        "contact": {
+            "type": "string",
+            "format": "email"
+        },
+        "license": {
+            "type": "string"
+        },
+        "licenseUrl": {
+            "type": "string",
+            "format": "uri"
+        }
+    },
+    "additionalProperties": false
+};
+var oauth2GrantType = {
+    "id": "oauth2GrantType.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "minProperties": 1,
+    "properties": {
+        "implicit": {
+            "$ref": "#/definitions/implicit"
+        },
+        "authorization_code": {
+            "$ref": "#/definitions/authorizationCode"
+        }
+    },
+    "definitions": {
+        "implicit": {
+            "type": "object",
+            "required": ["loginEndpoint"],
+            "properties": {
+                "loginEndpoint": {
+                    "$ref": "#/definitions/loginEndpoint"
+                },
+                "tokenName": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "authorizationCode": {
+            "type": "object",
+            "required": ["tokenEndpoint", "tokenRequestEndpoint"],
+            "properties": {
+                "tokenEndpoint": {
+                    "$ref": "#/definitions/tokenEndpoint"
+                },
+                "tokenRequestEndpoint": {
+                    "$ref": "#/definitions/tokenRequestEndpoint"
+                }
+            },
+            "additionalProperties": false
+        },
+        "loginEndpoint": {
+            "type": "object",
+            "required": ["url"],
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "format": "uri"
+                }
+            },
+            "additionalProperties": false
+        },
+        "tokenEndpoint": {
+            "type": "object",
+            "required": ["url"],
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "tokenName": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "tokenRequestEndpoint": {
+            "type": "object",
+            "required": ["url"],
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "clientIdName": {
+                    "type": "string"
+                },
+                "clientSecretName": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+};
+var authorizationObject = {
+    "id": "authorizationObject.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "additionalProperties": {
+        "oneOf": [
+            {
+                "$ref": "#/definitions/basicAuth"
+      },
+            {
+                "$ref": "#/definitions/apiKey"
+      },
+            {
+                "$ref": "#/definitions/oauth2"
+      }
+    ]
+    },
+    "definitions": {
+        "basicAuth": {
+            "required": ["type"],
+            "properties": {
+                "type": {
+                    "enum": ["basicAuth"]
+                }
+            },
+            "additionalProperties": false
+        },
+        "apiKey": {
+            "required": ["type", "passAs", "keyname"],
+            "properties": {
+                "type": {
+                    "enum": ["apiKey"]
+                },
+                "passAs": {
+                    "enum": ["header", "query"]
+                },
+                "keyname": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "oauth2": {
+            "type": "object",
+            "required": ["type", "grantTypes"],
+            "properties": {
+                "type": {
+                    "enum": ["oauth2"]
+                },
+                "scopes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/oauth2Scope"
+                    }
+                },
+                "grantTypes": {
+                    "$ref": "oauth2GrantType.json"
+                }
+            },
+            "additionalProperties": false
+        },
+        "oauth2Scope": {
+            "type": "object",
+            "required": ["scope"],
+            "properties": {
+                "scope": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+};
+var resourceListing = {
+    "id": "resourceListing.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["swaggerVersion", "apis"],
+    "properties": {
+        "swaggerVersion": {
+            "enum": ["1.2"]
+        },
+        "apis": {
+            "type": "array",
+            "items": {
+                "$ref": "resourceObject.json"
+            }
+        },
+        "apiVersion": {
+            "type": "string"
+        },
+        "info": {
+            "$ref": "infoObject.json"
+        },
+        "authorizations": {
+            "$ref": "authorizationObject.json"
+        }
+    }
+};
+
+var schemaCombinations = {
+    "authorizationObject.json": [
+        oauth2GrantType,
+        authorizationObject
+    ],
+    "infoObject.json": [
+        infoObject
+    ],
+    "oauth2GrantType.json": [
+        oauth2GrantType
+    ],
+    "resourceObject.json": [
+        resourceObject
+    ],
+    "resourceListing.json": [
+        resourceObject,
+        infoObject,
+        oauth2GrantType,
+        authorizationObject,
+        resourceListing
+    ]
+};
+
+module.exports = {
+    description: "Issue #45 - recompiling schemas results in 'Reference could not be resolved'",
+    tests: [
+        {
+            description: "should pass schema validation #1",
+            schema: schemaCombinations["authorizationObject.json"],
+            validateSchemaOnly: true,
+            valid: true
+        },
+        {
+            description: "should pass schema validation #2",
+            schema: schemaCombinations["infoObject.json"],
+            validateSchemaOnly: true,
+            valid: true
+        },
+        {
+            description: "should pass schema validation #3",
+            schema: schemaCombinations["oauth2GrantType.json"],
+            validateSchemaOnly: true,
+            valid: true
+        },
+        {
+            description: "should pass schema validation #4",
+            schema: schemaCombinations["resourceObject.json"],
+            validateSchemaOnly: true,
+            valid: true
+        },
+        {
+            description: "should pass schema validation #5",
+            schema: schemaCombinations["resourceListing.json"],
+            validateSchemaOnly: true,
+            valid: true
+        }
+    ]
+};
+
+},{}],21:[function(require,module,exports){
+"use strict";
+
+module.exports = {
     description: "compile a schema array and validate against one of the schemas - README sample",
     tests: [
         {
@@ -988,7 +1700,7 @@ module.exports = {
     ]
 };
 
-},{}],17:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1013,7 +1725,7 @@ module.exports = {
     ]
 };
 
-},{}],18:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1058,7 +1770,7 @@ module.exports = {
     ]
 };
 
-},{}],19:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1083,7 +1795,7 @@ module.exports = {
     ]
 };
 
-},{}],20:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1113,7 +1825,7 @@ module.exports = {
     ]
 };
 
-},{}],21:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 module.exports={
     "$schema": "http://json-schema.org/draft-04/hyper-schema#",
     "id": "http://json-schema.org/draft-04/hyper-schema#",
@@ -1273,7 +1985,7 @@ module.exports={
 }
 
 
-},{}],22:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 module.exports={
     "id": "http://json-schema.org/draft-04/schema#",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -1425,13 +2137,13 @@ module.exports={
     "default": {}
 }
 
-},{}],23:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 module.exports={
     "type": "integer"
 }
-},{}],24:[function(require,module,exports){
-module.exports=require(23)
-},{}],25:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
+module.exports=require(28)
+},{}],30:[function(require,module,exports){
 module.exports={
     "integer": {
         "type": "integer"
@@ -1440,7 +2152,7 @@ module.exports={
         "$ref": "#/integer"
     }
 }
-},{}],26:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 module.exports=[
     {
         "description": "additionalItems as schema",
@@ -1524,7 +2236,7 @@ module.exports=[
     }
 ]
 
-},{}],27:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -1595,7 +2307,7 @@ module.exports=[
     }
 ]
 
-},{}],28:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 module.exports=[
     {
         "description": "allOf",
@@ -1709,7 +2421,7 @@ module.exports=[
     }
 ]
 
-},{}],29:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 module.exports=[
     {
         "description": "anyOf",
@@ -1779,7 +2491,7 @@ module.exports=[
     }
 ]
 
-},{}],30:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports=[
     {
         "description": "valid definition",
@@ -1813,7 +2525,7 @@ module.exports=[
     }
 ]
 
-},{}],31:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 module.exports=[
     {
         "description": "dependencies",
@@ -1928,7 +2640,7 @@ module.exports=[
     }
 ]
 
-},{}],32:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 module.exports=[
     {
         "description": "simple enum validation",
@@ -2002,7 +2714,7 @@ module.exports=[
     }
 ]
 
-},{}],33:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 module.exports=[
     {
         "description": "a schema given for items",
@@ -2050,7 +2762,7 @@ module.exports=[
     }
 ]
 
-},{}],34:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxItems validation",
@@ -2080,7 +2792,7 @@ module.exports=[
     }
 ]
 
-},{}],35:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxLength validation",
@@ -2115,7 +2827,7 @@ module.exports=[
     }
 ]
 
-},{}],36:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxProperties validation",
@@ -2145,7 +2857,7 @@ module.exports=[
     }
 ]
 
-},{}],37:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 module.exports=[
     {
         "description": "maximum validation",
@@ -2189,7 +2901,7 @@ module.exports=[
     }
 ]
 
-},{}],38:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 module.exports=[
     {
         "description": "minItems validation",
@@ -2219,7 +2931,7 @@ module.exports=[
     }
 ]
 
-},{}],39:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 module.exports=[
     {
         "description": "minLength validation",
@@ -2254,7 +2966,7 @@ module.exports=[
     }
 ]
 
-},{}],40:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 module.exports=[
     {
         "description": "minProperties validation",
@@ -2284,7 +2996,7 @@ module.exports=[
     }
 ]
 
-},{}],41:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 module.exports=[
     {
         "description": "minimum validation",
@@ -2328,7 +3040,7 @@ module.exports=[
     }
 ]
 
-},{}],42:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 module.exports=[
     {
         "description": "by int",
@@ -2390,7 +3102,7 @@ module.exports=[
     }
 ]
 
-},{}],43:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 module.exports=[
     {
         "description": "not",
@@ -2488,7 +3200,7 @@ module.exports=[
 
 ]
 
-},{}],44:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 module.exports=[
     {
         "description": "oneOf",
@@ -2558,7 +3270,7 @@ module.exports=[
     }
 ]
 
-},{}],45:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer",
@@ -2620,7 +3332,7 @@ module.exports=[
     }
 ]
 
-},{}],46:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 module.exports=[
     {
         "description": "validation of date-time strings",
@@ -2765,7 +3477,7 @@ module.exports=[
     }
 ]
 
-},{}],47:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 module.exports=[
     {
         "description": "pattern validation",
@@ -2790,7 +3502,7 @@ module.exports=[
     }
 ]
 
-},{}],48:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -2902,7 +3614,7 @@ module.exports=[
     }
 ]
 
-},{}],49:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 module.exports=[
     {
         "description": "object properties validation",
@@ -2996,7 +3708,7 @@ module.exports=[
     }
 ]
 
-},{}],50:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 module.exports=[
     {
         "description": "root pointer ref",
@@ -3142,7 +3854,7 @@ module.exports=[
     }
 ]
 
-},{}],51:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 module.exports=[
     {
         "description": "remote ref",
@@ -3218,7 +3930,7 @@ module.exports=[
     }
 ]
 
-},{}],52:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 module.exports=[
     {
         "description": "required validation",
@@ -3259,7 +3971,7 @@ module.exports=[
     }
 ]
 
-},{}],53:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer type matches integers",
@@ -3591,7 +4303,7 @@ module.exports=[
     }
 ]
 
-},{}],54:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 module.exports=[
     {
         "description": "uniqueItems validation",
@@ -3672,7 +4384,7 @@ module.exports=[
     }
 ]
 
-},{}],55:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -3744,7 +4456,7 @@ describe("Basic", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":22,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":23,"../jsonSchemaTestSuite/remotes/integer.json":24,"../jsonSchemaTestSuite/remotes/subSchemas.json":25}],56:[function(require,module,exports){
+},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":27,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":28,"../jsonSchemaTestSuite/remotes/integer.json":29,"../jsonSchemaTestSuite/remotes/subSchemas.json":30}],61:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -3841,7 +4553,7 @@ describe("JsonSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":22,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":23,"../jsonSchemaTestSuite/remotes/integer.json":24,"../jsonSchemaTestSuite/remotes/subSchemas.json":25,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":26,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":27,"../jsonSchemaTestSuite/tests/draft4/allOf.json":28,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":29,"../jsonSchemaTestSuite/tests/draft4/definitions.json":30,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":31,"../jsonSchemaTestSuite/tests/draft4/enum.json":32,"../jsonSchemaTestSuite/tests/draft4/items.json":33,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":34,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":35,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":36,"../jsonSchemaTestSuite/tests/draft4/maximum.json":37,"../jsonSchemaTestSuite/tests/draft4/minItems.json":38,"../jsonSchemaTestSuite/tests/draft4/minLength.json":39,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":40,"../jsonSchemaTestSuite/tests/draft4/minimum.json":41,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":42,"../jsonSchemaTestSuite/tests/draft4/not.json":43,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":44,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":45,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":46,"../jsonSchemaTestSuite/tests/draft4/pattern.json":47,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":48,"../jsonSchemaTestSuite/tests/draft4/properties.json":49,"../jsonSchemaTestSuite/tests/draft4/ref.json":50,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":51,"../jsonSchemaTestSuite/tests/draft4/required.json":52,"../jsonSchemaTestSuite/tests/draft4/type.json":53,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":54}],57:[function(require,module,exports){
+},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":27,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":28,"../jsonSchemaTestSuite/remotes/integer.json":29,"../jsonSchemaTestSuite/remotes/subSchemas.json":30,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":31,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":32,"../jsonSchemaTestSuite/tests/draft4/allOf.json":33,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":34,"../jsonSchemaTestSuite/tests/draft4/definitions.json":35,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":36,"../jsonSchemaTestSuite/tests/draft4/enum.json":37,"../jsonSchemaTestSuite/tests/draft4/items.json":38,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":39,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":40,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":41,"../jsonSchemaTestSuite/tests/draft4/maximum.json":42,"../jsonSchemaTestSuite/tests/draft4/minItems.json":43,"../jsonSchemaTestSuite/tests/draft4/minLength.json":44,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":45,"../jsonSchemaTestSuite/tests/draft4/minimum.json":46,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":47,"../jsonSchemaTestSuite/tests/draft4/not.json":48,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":49,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":50,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":51,"../jsonSchemaTestSuite/tests/draft4/pattern.json":52,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":53,"../jsonSchemaTestSuite/tests/draft4/properties.json":54,"../jsonSchemaTestSuite/tests/draft4/ref.json":55,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":56,"../jsonSchemaTestSuite/tests/draft4/required.json":57,"../jsonSchemaTestSuite/tests/draft4/type.json":58,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":59}],62:[function(require,module,exports){
 /*jshint -W030 */
 
 "use strict";
@@ -3870,6 +4582,11 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/Issue25.js"),
     require("../ZSchemaTestSuite/Issue26.js"),
     require("../ZSchemaTestSuite/Issue37.js"),
+    require("../ZSchemaTestSuite/Issue40.js"),
+    require("../ZSchemaTestSuite/Issue41.js"),
+    require("../ZSchemaTestSuite/Issue43.js"),
+    require("../ZSchemaTestSuite/Issue44.js"),
+    require("../ZSchemaTestSuite/Issue45.js"),
     undefined
 ];
 
@@ -3882,8 +4599,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 20 files", function () {
-        expect(testSuiteFiles.length).toBe(20);
+    it("should contain 25 files", function () {
+        expect(testSuiteFiles.length).toBe(25);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -3967,4 +4684,4 @@ describe("ZSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../ZSchemaTestSuite/AssumeAdditional.js":1,"../ZSchemaTestSuite/CustomFormats.js":2,"../ZSchemaTestSuite/CustomFormatsAsync.js":3,"../ZSchemaTestSuite/ForceAdditional.js":4,"../ZSchemaTestSuite/ForceItems.js":5,"../ZSchemaTestSuite/ForceMaxLength.js":6,"../ZSchemaTestSuite/ForceProperties.js":7,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":8,"../ZSchemaTestSuite/Issue12.js":9,"../ZSchemaTestSuite/Issue13.js":10,"../ZSchemaTestSuite/Issue16.js":11,"../ZSchemaTestSuite/Issue22.js":12,"../ZSchemaTestSuite/Issue25.js":13,"../ZSchemaTestSuite/Issue26.js":14,"../ZSchemaTestSuite/Issue37.js":15,"../ZSchemaTestSuite/MultipleSchemas.js":16,"../ZSchemaTestSuite/NoEmptyStrings.js":17,"../ZSchemaTestSuite/NoExtraKeywords.js":18,"../ZSchemaTestSuite/NoTypeless.js":19,"../ZSchemaTestSuite/StrictUris.js":20,"../files/draft-04-hyper-schema.json":21,"../files/draft-04-schema.json":22}]},{},[55,56,57]);
+},{"../../src/ZSchema":"C768cZ","../ZSchemaTestSuite/AssumeAdditional.js":1,"../ZSchemaTestSuite/CustomFormats.js":2,"../ZSchemaTestSuite/CustomFormatsAsync.js":3,"../ZSchemaTestSuite/ForceAdditional.js":4,"../ZSchemaTestSuite/ForceItems.js":5,"../ZSchemaTestSuite/ForceMaxLength.js":6,"../ZSchemaTestSuite/ForceProperties.js":7,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":8,"../ZSchemaTestSuite/Issue12.js":9,"../ZSchemaTestSuite/Issue13.js":10,"../ZSchemaTestSuite/Issue16.js":11,"../ZSchemaTestSuite/Issue22.js":12,"../ZSchemaTestSuite/Issue25.js":13,"../ZSchemaTestSuite/Issue26.js":14,"../ZSchemaTestSuite/Issue37.js":15,"../ZSchemaTestSuite/Issue40.js":16,"../ZSchemaTestSuite/Issue41.js":17,"../ZSchemaTestSuite/Issue43.js":18,"../ZSchemaTestSuite/Issue44.js":19,"../ZSchemaTestSuite/Issue45.js":20,"../ZSchemaTestSuite/MultipleSchemas.js":21,"../ZSchemaTestSuite/NoEmptyStrings.js":22,"../ZSchemaTestSuite/NoExtraKeywords.js":23,"../ZSchemaTestSuite/NoTypeless.js":24,"../ZSchemaTestSuite/StrictUris.js":25,"../files/draft-04-hyper-schema.json":26,"../files/draft-04-schema.json":27}]},{},[60,61,62]);

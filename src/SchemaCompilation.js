@@ -143,6 +143,11 @@ exports.compileSchema = function (report, schema) {
         return compileArrayOfSchemas.call(this, report, schema);
     }
 
+    // if we have an id than it should be cached already (if this instance has compiled it)
+    if (schema.__$compiled && schema.id && SchemaCache.checkCacheForUri.call(this, schema.id) === false) {
+        schema.__$compiled = undefined;
+    }
+
     // do not re-compile schemas
     if (schema.__$compiled) {
         return true;
