@@ -45,7 +45,7 @@ module.exports = function (grunt) {
                 src: ["test/spec/**/*.js"],
                 dest: "dist/ZSchema-browser-test.js",
                 options: {
-                    external: ["src/**/*.js"]
+                    external: ["src/**/*.js", "request"]
                 }
             }
         },

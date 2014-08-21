@@ -1,7 +1,10 @@
 "use strict";
 
+var isBrowser = typeof window !== "undefined";
 var ZSchema = require("../../src/ZSchema");
-var request = require("request");
+if (!isBrowser) {
+    var request = require("request");
+}
 
 function validateWithAutomaticDownloads(validator, data, schema, callback) {
 
@@ -41,7 +44,7 @@ describe("Automatic schema loading", function () {
 
     it("should download schemas and validate successfully", function (done) {
 
-        if (typeof window !== "undefined") {
+        if (isBrowser) {
             // skip this test in browsers
             expect(1).toBe(1);
             done();
