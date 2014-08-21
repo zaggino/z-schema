@@ -33,19 +33,22 @@
   "testling": {
     "scripts": [
       "test/lib/jasmine-2.0.1/jasmine.js",
+      "test/lib/jasmine-2.0.1/jasmine-html.js",
+      "test/lib/jasmine-2.0.1/boot.js",
       "test/lib/jasmine-2.0.1/tap_reporter.js",
-      "test/spec/*.js",
-      "test/Runner.js"
+      "test/Runner.js",
+      "dist/ZSchema-browser-min.js",
+      "dist/ZSchema-browser-test.js"
     ],
     "browsers": [
-      "ie/6..latest",
-      "chrome/22..latest",
-      "firefox/16..latest",
-      "safari/latest",
-      "opera/11.0..latest",
-      "iphone/6",
-      "ipad/6",
-      "android-browser/latest"
+      "iexplore/6..latest",
+      "chrome/4..latest",
+      "firefox/3..latest",
+      "safari/4..latest",
+      "opera/10..latest",
+      "iphone/6..latest",
+      "ipad/6..latest",
+      "android-browser/4..latest"
     ]
   },
   "devDependencies": {

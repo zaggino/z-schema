@@ -1,4 +1,5 @@
+/*global jasmine, jasmineReporters*/
 var env = jasmine.getEnv();
-var reporter = new jasmine.TapReporter();
+var reporter = new jasmineReporters.TapReporter();
 env.addReporter(reporter);
 env.execute();
