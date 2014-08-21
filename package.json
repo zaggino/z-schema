@@ -41,11 +41,13 @@
       "dist/ZSchema-browser-test.js"
     ],
     "browsers": [
-      "iexplore/6..latest",
-      "chrome/4..latest",
-      "firefox/3..latest",
+      "iexplore/8..latest",
+      "chrome/4",
+      "chrome/28..latest",
+      "firefox/3..3.5",
+      "firefox/23..latest",
       "safari/4..latest",
-      "opera/10..latest",
+      "opera/12..latest",
       "iphone/6..latest",
       "ipad/6..latest",
       "android-browser/4.2..latest"
