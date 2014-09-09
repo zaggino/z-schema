@@ -10,6 +10,7 @@
         "jjv": "latest",
         "jsonschema": "latest",
         "tv4": "latest",
-        "z-schema": "2.x"
+        "z-schema": "2.x",
+        "json-model": "latest"
     }
 }

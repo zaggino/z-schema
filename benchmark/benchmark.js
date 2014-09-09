@@ -8,6 +8,7 @@ var JaySchema = require("jayschema");
 var jjv = require("jjv");
 var JsonSchema = require("jsonschema");
 var tv4 = require("tv4");
+var JsonModel = require('json-model');
 
 Tester.registerValidator({
     name: "z-schema-3",
@@ -68,6 +69,21 @@ Tester.registerValidator({
     },
     test: function (instance, json, schema) {
         return instance.validateResult(json, schema).valid === true;
+    }
+});
+
+
+var lastSchema = null, lastValidator = null;
+Tester.registerValidator({
+    name: "json-model",
+    setup: function () {
+        return JsonModel;
+    },
+    test: function (instance, json, schema) {
+        // If we're repeatedly testing the same schema, use the existing validator
+        var validator = lastValidator = (lastSchema === schema) ? lastValidator : JsonModel.validator(schema);
+        lastSchema = schema;
+        return validator(json).valid === true;
     }
 });
 
