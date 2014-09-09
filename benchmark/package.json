@@ -11,6 +11,6 @@
         "jsonschema": "latest",
         "tv4": "latest",
         "z-schema": "2.x",
-        "json-model": "latest"
+        "json-model": "^0.2.24"
     }
 }
