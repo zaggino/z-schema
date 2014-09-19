@@ -11,7 +11,7 @@ var JsonValidators = {
             return;
         }
         if (Utils.whatIs(json / schema.multipleOf) !== "integer") {
-            report.addError("MULTIPLE_OF", [json, schema.multipleOf]);
+            report.addError("MULTIPLE_OF", [json, schema.multipleOf], null, schema.description);
         }
     },
     maximum: function (report, schema, json) {
@@ -21,11 +21,11 @@ var JsonValidators = {
         }
         if (schema.exclusiveMaximum !== true) {
             if (json > schema.maximum) {
-                report.addError("MAXIMUM", [json, schema.maximum]);
+                report.addError("MAXIMUM", [json, schema.maximum], null, schema.description);
             }
         } else {
             if (json >= schema.maximum) {
-                report.addError("MAXIMUM_EXCLUSIVE", [json, schema.maximum]);
+                report.addError("MAXIMUM_EXCLUSIVE", [json, schema.maximum], null, schema.description);
             }
         }
     },
@@ -39,11 +39,11 @@ var JsonValidators = {
         }
         if (schema.exclusiveMinimum !== true) {
             if (json < schema.minimum) {
-                report.addError("MINIMUM", [json, schema.minimum]);
+                report.addError("MINIMUM", [json, schema.minimum], null, schema.description);
             }
         } else {
             if (json <= schema.minimum) {
-                report.addError("MINIMUM_EXCLUSIVE", [json, schema.minimum]);
+                report.addError("MINIMUM_EXCLUSIVE", [json, schema.minimum], null, schema.description);
             }
         }
     },
@@ -56,7 +56,7 @@ var JsonValidators = {
             return;
         }
         if (json.length > schema.maxLength) {
-            report.addError("MAX_LENGTH", [json.length, schema.maxLength]);
+            report.addError("MAX_LENGTH", [json.length, schema.maxLength], null, schema.description);
         }
     },
     minLength: function (report, schema, json) {
@@ -65,7 +65,7 @@ var JsonValidators = {
             return;
         }
         if (json.length < schema.minLength) {
-            report.addError("MIN_LENGTH", [json.length, schema.minLength]);
+            report.addError("MIN_LENGTH", [json.length, schema.minLength], null, schema.description);
         }
     },
     pattern: function (report, schema, json) {
@@ -74,7 +74,7 @@ var JsonValidators = {
             return;
         }
         if (RegExp(schema.pattern).test(json) === false) {
-            report.addError("PATTERN", [schema.pattern, json]);
+            report.addError("PATTERN", [schema.pattern, json], null, schema.description);
         }
     },
     additionalItems: function (report, schema, json) {
@@ -86,7 +86,7 @@ var JsonValidators = {
         // the json is valid if its size is less than, or equal to, the size of "items".
         if (schema.additionalItems === false && Array.isArray(schema.items)) {
             if (json.length > schema.items.length) {
-                report.addError("ARRAY_ADDITIONAL_ITEMS");
+                report.addError("ARRAY_ADDITIONAL_ITEMS", null, null, schema.description);
             }
         }
     },
@@ -99,7 +99,7 @@ var JsonValidators = {
             return;
         }
         if (json.length > schema.maxItems) {
-            report.addError("ARRAY_LENGTH_LONG", [json.length, schema.maxItems]);
+            report.addError("ARRAY_LENGTH_LONG", [json.length, schema.maxItems], null, schema.description);
         }
     },
     minItems: function (report, schema, json) {
@@ -108,7 +108,7 @@ var JsonValidators = {
             return;
         }
         if (json.length < schema.minItems) {
-            report.addError("ARRAY_LENGTH_SHORT", [json.length, schema.minItems]);
+            report.addError("ARRAY_LENGTH_SHORT", [json.length, schema.minItems], null, schema.description);
         }
     },
     uniqueItems: function (report, schema, json) {
@@ -119,7 +119,7 @@ var JsonValidators = {
         if (schema.uniqueItems === true) {
             var matches = [];
             if (Utils.isUniqueArray(json, matches) === false) {
-                report.addError("ARRAY_UNIQUE", matches);
+                report.addError("ARRAY_UNIQUE", matches, null, schema.description);
             }
         }
     },
@@ -130,7 +130,7 @@ var JsonValidators = {
         }
         var keysCount = Object.keys(json).length;
         if (keysCount > schema.maxProperties) {
-            report.addError("OBJECT_PROPERTIES_MAXIMUM", [keysCount, schema.maxProperties]);
+            report.addError("OBJECT_PROPERTIES_MAXIMUM", [keysCount, schema.maxProperties], null, schema.description);
         }
     },
     minProperties: function (report, schema, json) {
@@ -140,7 +140,7 @@ var JsonValidators = {
         }
         var keysCount = Object.keys(json).length;
         if (keysCount < schema.minProperties) {
-            report.addError("OBJECT_PROPERTIES_MINIMUM", [keysCount, schema.minProperties]);
+            report.addError("OBJECT_PROPERTIES_MINIMUM", [keysCount, schema.minProperties], null, schema.description);
         }
     },
     required: function (report, schema, json) {
@@ -152,7 +152,7 @@ var JsonValidators = {
         while (idx--) {
             var requiredPropertyName = schema.required[idx];
             if (json[requiredPropertyName] === undefined) {
-                report.addError("OBJECT_MISSING_REQUIRED_PROPERTY", [requiredPropertyName]);
+                report.addError("OBJECT_MISSING_REQUIRED_PROPERTY", [requiredPropertyName], null, schema.description);
             }
         }
     },
@@ -197,7 +197,7 @@ var JsonValidators = {
             }
             // Validation of the json succeeds if, after these two steps, set "s" is empty.
             if (s.length > 0) {
-                report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s]);
+                report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s], null, schema.description);
             }
         }
     },
@@ -224,7 +224,7 @@ var JsonValidators = {
                     while (idx2--) {
                         var requiredPropertyName = dependencyDefinition[idx2];
                         if (json[requiredPropertyName] === undefined) {
-                            report.addError("OBJECT_DEPENDENCY_KEY", [requiredPropertyName, dependencyName]);
+                            report.addError("OBJECT_DEPENDENCY_KEY", [requiredPropertyName, dependencyName], null, schema.description);
                         }
                     }
                 }
@@ -242,7 +242,7 @@ var JsonValidators = {
             }
         }
         if (match === false) {
-            report.addError("ENUM_MISMATCH", [json]);
+            report.addError("ENUM_MISMATCH", [json], null, schema.description);
         }
     },
     /*
@@ -273,7 +273,7 @@ var JsonValidators = {
         }
 
         if (passed === false) {
-            report.addError("ANY_OF_MISSING", undefined, subReports);
+            report.addError("ANY_OF_MISSING", undefined, subReports, schema.description);
         }
     },
     oneOf: function (report, schema, json) {
@@ -291,16 +291,16 @@ var JsonValidators = {
         }
 
         if (passes === 0) {
-            report.addError("ONE_OF_MISSING", undefined, subReports);
+            report.addError("ONE_OF_MISSING", undefined, subReports, schema.description);
         } else if (passes > 1) {
-            report.addError("ONE_OF_MULTIPLE");
+            report.addError("ONE_OF_MULTIPLE", null, null, schema.description);
         }
     },
     not: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
         var subReport = new Report(report);
         if (exports.validate.call(this, subReport, schema.not, json) === true) {
-            report.addError("NOT_PASSED");
+            report.addError("NOT_PASSED", null, null, schema.description);
         }
     },
     definitions: function () { /*report, schema, json*/
@@ -315,17 +315,17 @@ var JsonValidators = {
                 // async
                 report.addAsyncTask(formatValidatorFn, [json], function (result) {
                     if (result !== true) {
-                        report.addError("INVALID_FORMAT", [schema.format, json]);
+                        report.addError("INVALID_FORMAT", [schema.format, json], null, schema.description);
                     }
                 });
             } else {
                 // sync
                 if (formatValidatorFn.call(this, json) !== true) {
-                    report.addError("INVALID_FORMAT", [schema.format, json]);
+                    report.addError("INVALID_FORMAT", [schema.format, json], null, schema.description);
                 }
             }
         } else {
-            report.addError("UNKNOWN_FORMAT", [schema.format]);
+            report.addError("UNKNOWN_FORMAT", [schema.format], null, schema.description);
         }
     }
 };
@@ -435,7 +435,7 @@ exports.validate = function (report, schema, json) {
     // check if schema is an object
     var to = Utils.whatIs(schema);
     if (to !== "object") {
-        report.addError("SCHEMA_NOT_AN_OBJECT", [to]);
+        report.addError("SCHEMA_NOT_AN_OBJECT", [to], null, schema.description);
         return false;
     }
 
@@ -458,7 +458,7 @@ exports.validate = function (report, schema, json) {
         var maxRefs = 99;
         while (schema.$ref && maxRefs > 0) {
             if (!schema.__$refResolved) {
-                report.addError("REF_UNRESOLVED", [schema.$ref]);
+                report.addError("REF_UNRESOLVED", [schema.$ref], null, schema.description);
                 break;
             } else if (schema.__$refResolved === schema) {
                 break;
@@ -479,12 +479,12 @@ exports.validate = function (report, schema, json) {
     if (schema.type) {
         if (typeof schema.type === "string") {
             if (jsonType !== schema.type && (jsonType !== "integer" || schema.type !== "number")) {
-                report.addError("INVALID_TYPE", [schema.type, jsonType]);
+                report.addError("INVALID_TYPE", [schema.type, jsonType], null, schema.description);
                 return false;
             }
         } else {
             if (schema.type.indexOf(jsonType) === -1 && (jsonType !== "integer" || schema.type.indexOf("number") === -1)) {
-                report.addError("INVALID_TYPE", [schema.type, jsonType]);
+                report.addError("INVALID_TYPE", [schema.type, jsonType], null, schema.description);
                 return false;
             }
         }

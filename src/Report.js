@@ -75,7 +75,7 @@ Report.prototype.getPath = function () {
     return path.length === 1 ? "#/" : path.join("/");
 };
 
-Report.prototype.addError = function (errorCode, params, subReports) {
+Report.prototype.addError = function (errorCode, params, subReports, schemaDescription) {
     if (!errorCode) { throw new Error("No errorCode passed into addError()"); }
     if (!Errors[errorCode]) { throw new Error("No errorMessage known for code " + errorCode); }
 
@@ -94,7 +94,11 @@ Report.prototype.addError = function (errorCode, params, subReports) {
         path: this.getPath()
     };
 
-    if (subReports !== undefined) {
+    if (schemaDescription) {
+        err.description = schemaDescription;
+    }
+
+    if (subReports != null) {
         if (!Array.isArray(subReports)) {
             subReports = [subReports];
         }
