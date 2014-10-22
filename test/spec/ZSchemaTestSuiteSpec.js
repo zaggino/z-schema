@@ -36,6 +36,7 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/Issue48.js"),
     require("../ZSchemaTestSuite/Issue49.js"),
     require("../ZSchemaTestSuite/Issue53.js"),
+    require("../ZSchemaTestSuite/Issue56.js"),
     undefined
 ];
 
@@ -48,8 +49,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 30 files", function () {
-        expect(testSuiteFiles.length).toBe(30);
+    it("should contain 31 files", function () {
+        expect(testSuiteFiles.length).toBe(31);
     });
 
     testSuiteFiles.forEach(function (testSuite) {

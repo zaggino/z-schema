@@ -4,7 +4,8 @@ var Report = require("./Report");
 var SchemaCache = require("./SchemaCache");
 
 function isAbsoluteUri(uri) {
-    return /^https?:\/\//.test(uri);
+    // second test is for absolute URIs that end with a hash sign, issue #56
+    return /^https?:\/\//.test(uri) || /.+#$/.test(uri);
 }
 
 function mergeReference(scope, ref) {
