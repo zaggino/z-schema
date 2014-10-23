@@ -1686,7 +1686,7 @@ module.exports = {
     ]
 };
 
-},{"./files/Issue47/draft4.json":31,"./files/Issue47/sample.json":32,"./files/Issue47/swagger_draft.json":33,"./files/Issue47/swagger_draft_modified.json":34}],22:[function(require,module,exports){
+},{"./files/Issue47/draft4.json":33,"./files/Issue47/sample.json":34,"./files/Issue47/swagger_draft.json":35,"./files/Issue47/swagger_draft_modified.json":36}],22:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1763,6 +1763,762 @@ module.exports = {
 "use strict";
 
 module.exports = {
+    description: "Issue #56 - unresolvable reference due to hash sign",
+    tests: [
+        {
+            description: "should pass validation #1",
+            schema: [
+                {
+                    id: "schemaA#",
+                    type: "string"
+                },
+                {
+                    id: "schemaB#",
+                    properties: {
+                        a: {
+                            "$ref": "schemaA#"
+                        }
+                    }
+                }
+            ],
+            validateSchemaOnly: true,
+            valid: true
+        },
+        {
+            description: "should pass validation #2",
+            schema: [
+                {
+                    id: "http://virtual/schemaA#",
+                    type: "string"
+                },
+                {
+                    id: "http://virtual/schemaB#",
+                    properties: {
+                        a: {
+                            "$ref": "schemaA#"
+                        }
+                    }
+                }
+            ],
+            validateSchemaOnly: true,
+            valid: true
+        },
+        {
+            description: "should pass validation #3",
+            schema: [
+                {
+                    id: "http://virtual/schemaA#",
+                    type: "string",
+                    "definitions": {
+                        "stringDefinition": {
+                            "type": "string"
+                        }
+                    }
+                },
+                {
+                    id: "http://virtual/schemaB#",
+                    properties: {
+                        a: {
+                            "$ref": "schemaA#/definitions/stringDefinition"
+                        }
+                    }
+                }
+            ],
+            validateSchemaOnly: true,
+            valid: true
+        }
+    ]
+};
+
+},{}],26:[function(require,module,exports){
+"use strict";
+
+var dataTypeBaseJson = {
+    "id": "http://wordnik.github.io/schemas/v1.2/dataTypeBase.json#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Data type fields (section 4.3.3)",
+    "type": "object",
+    "oneOf": [
+        {
+            "required": [
+        "type"
+      ]
+    },
+        {
+            "required": [
+        "$ref"
+      ]
+    }
+  ],
+    "properties": {
+        "type": {
+            "type": "string"
+        },
+        "$ref": {
+            "type": "string"
+        },
+        "format": {
+            "type": "string"
+        },
+        "defaultValue": {
+            "not": {
+                "type": [
+          "array",
+          "object",
+          "null"
+        ]
+            }
+        },
+        "enum": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "uniqueItems": true,
+            "minItems": 1
+        },
+        "minimum": {
+            "type": "string"
+        },
+        "maximum": {
+            "type": "string"
+        },
+        "items": {
+            "$ref": "#/definitions/itemsObject"
+        },
+        "uniqueItems": {
+            "type": "boolean"
+        }
+    },
+    "dependencies": {
+        "format": {
+            "oneOf": [
+                {
+                    "properties": {
+                        "type": {
+                            "enum": [
+                "integer"
+              ]
+                        },
+                        "format": {
+                            "enum": [
+                "int32",
+                "int64"
+              ]
+                        }
+                    }
+        },
+                {
+                    "properties": {
+                        "type": {
+                            "enum": [
+                "number"
+              ]
+                        },
+                        "format": {
+                            "enum": [
+                "float",
+                "double"
+              ]
+                        }
+                    }
+        },
+                {
+                    "properties": {
+                        "type": {
+                            "enum": [
+                "string"
+              ]
+                        },
+                        "format": {
+                            "enum": [
+                "byte",
+                "date",
+                "date-time"
+              ]
+                        }
+                    }
+        }
+      ]
+        }
+    },
+    "definitions": {
+        "itemsObject": {
+            "oneOf": [
+                {
+                    "type": "object",
+                    "required": [
+            "$ref"
+          ],
+                    "properties": {
+                        "$ref": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+        },
+                {
+                    "allOf": [
+                        {
+                            "$ref": "#"
+            },
+                        {
+                            "required": [
+                "type"
+              ],
+                            "properties": {
+                                "type": {},
+                                "format": {}
+                            },
+                            "additionalProperties": false
+            }
+          ]
+        }
+      ]
+        }
+    }
+};
+var modelsObjectJson = {
+    "id": "http://wordnik.github.io/schemas/v1.2/modelsObject.json#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [
+    "id",
+    "properties"
+  ],
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string"
+        },
+        "properties": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/propertyObject"
+            }
+        },
+        "subTypes": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "uniqueItems": true
+        },
+        "discriminator": {
+            "type": "string"
+        }
+    },
+    "dependencies": {
+        "subTypes": [
+      "discriminator"
+    ]
+    },
+    "definitions": {
+        "propertyObject": {
+            "allOf": [
+                {
+                    "not": {
+                        "$ref": "#"
+                    }
+        },
+                {
+                    "$ref": "dataTypeBase.json#"
+        }
+      ]
+        }
+    }
+};
+var oauth2GrantTypeJson = {
+    "id": "http://wordnik.github.io/schemas/v1.2/oauth2GrantType.json#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "minProperties": 1,
+    "properties": {
+        "implicit": {
+            "$ref": "#/definitions/implicit"
+        },
+        "authorization_code": {
+            "$ref": "#/definitions/authorizationCode"
+        }
+    },
+    "definitions": {
+        "implicit": {
+            "type": "object",
+            "required": [
+        "loginEndpoint"
+      ],
+            "properties": {
+                "loginEndpoint": {
+                    "$ref": "#/definitions/loginEndpoint"
+                },
+                "tokenName": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "authorizationCode": {
+            "type": "object",
+            "required": [
+        "tokenEndpoint",
+        "tokenRequestEndpoint"
+      ],
+            "properties": {
+                "tokenEndpoint": {
+                    "$ref": "#/definitions/tokenEndpoint"
+                },
+                "tokenRequestEndpoint": {
+                    "$ref": "#/definitions/tokenRequestEndpoint"
+                }
+            },
+            "additionalProperties": false
+        },
+        "loginEndpoint": {
+            "type": "object",
+            "required": [
+        "url"
+      ],
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "format": "uri"
+                }
+            },
+            "additionalProperties": false
+        },
+        "tokenEndpoint": {
+            "type": "object",
+            "required": [
+        "url"
+      ],
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "tokenName": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "tokenRequestEndpoint": {
+            "type": "object",
+            "required": [
+        "url"
+      ],
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "clientIdName": {
+                    "type": "string"
+                },
+                "clientSecretName": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+};
+var authorizationObjectJson = {
+    "id": "http://wordnik.github.io/schemas/v1.2/authorizationObject.json#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "additionalProperties": {
+        "oneOf": [
+            {
+                "$ref": "#/definitions/basicAuth"
+      },
+            {
+                "$ref": "#/definitions/apiKey"
+      },
+            {
+                "$ref": "#/definitions/oauth2"
+      }
+    ]
+    },
+    "definitions": {
+        "basicAuth": {
+            "required": [
+        "type"
+      ],
+            "properties": {
+                "type": {
+                    "enum": [
+            "basicAuth"
+          ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "apiKey": {
+            "required": [
+        "type",
+        "passAs",
+        "keyname"
+      ],
+            "properties": {
+                "type": {
+                    "enum": [
+            "apiKey"
+          ]
+                },
+                "passAs": {
+                    "enum": [
+            "header",
+            "query"
+          ]
+                },
+                "keyname": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "oauth2": {
+            "type": "object",
+            "required": [
+        "type",
+        "grantTypes"
+      ],
+            "properties": {
+                "type": {
+                    "enum": [
+            "oauth2"
+          ]
+                },
+                "scopes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/oauth2Scope"
+                    }
+                },
+                "grantTypes": {
+                    "$ref": "oauth2GrantType.json#"
+                }
+            },
+            "additionalProperties": false
+        },
+        "oauth2Scope": {
+            "type": "object",
+            "required": [
+        "scope"
+      ],
+            "properties": {
+                "scope": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+};
+var parameterObjectJson = {
+    "id": "http://wordnik.github.io/schemas/v1.2/parameterObject.json#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "allOf": [
+        {
+            "$ref": "dataTypeBase.json#"
+    },
+        {
+            "required": [
+        "paramType",
+        "name"
+      ],
+            "properties": {
+                "paramType": {
+                    "enum": [
+            "path",
+            "query",
+            "body",
+            "header",
+            "form"
+          ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "required": {
+                    "type": "boolean"
+                },
+                "allowMultiple": {
+                    "type": "boolean"
+                }
+            }
+    },
+        {
+            "description": "type File requires special paramType and consumes",
+            "oneOf": [
+                {
+                    "properties": {
+                        "type": {
+                            "not": {
+                                "enum": [
+                  "File"
+                ]
+                            }
+                        }
+                    }
+        },
+                {
+                    "properties": {
+                        "type": {
+                            "enum": [
+                "File"
+              ]
+                        },
+                        "paramType": {
+                            "enum": [
+                "form"
+              ]
+                        },
+                        "consumes": {
+                            "enum": [
+                "multipart/form-data"
+              ]
+                        }
+                    }
+        }
+      ]
+    }
+  ]
+};
+var operationObjectJson = {
+    "id": "http://wordnik.github.io/schemas/v1.2/operationObject.json#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "allOf": [
+        {
+            "$ref": "dataTypeBase.json#"
+    },
+        {
+            "required": [
+        "method",
+        "nickname",
+        "parameters"
+      ],
+            "properties": {
+                "method": {
+                    "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE",
+            "OPTIONS"
+          ]
+                },
+                "summary": {
+                    "type": "string",
+                    "maxLength": 120
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9_]+$"
+                },
+                "authorizations": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "authorizationObject.json#/definitions/oauth2Scope"
+                        }
+                    }
+                },
+                "parameters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "parameterObject.json#"
+                    }
+                },
+                "responseMessages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/responseMessageObject"
+                    }
+                },
+                "produces": {
+                    "$ref": "#/definitions/mimeTypeArray"
+                },
+                "consumes": {
+                    "$ref": "#/definitions/mimeTypeArray"
+                },
+                "deprecated": {
+                    "enum": [
+            "true",
+            "false"
+          ]
+                }
+            }
+    }
+  ],
+    "definitions": {
+        "responseMessageObject": {
+            "type": "object",
+            "required": [
+        "code",
+        "message"
+      ],
+            "properties": {
+                "code": {
+                    "$ref": "#/definitions/rfc2616section10"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "responseModel": {
+                    "type": "string"
+                }
+            }
+        },
+        "rfc2616section10": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 600,
+            "exclusiveMaximum": true
+        },
+        "mimeTypeArray": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "mime-type"
+            }
+        }
+    }
+};
+var apiDeclarationJson = {
+    "id": "http://wordnik.github.io/schemas/v1.2/apiDeclaration.json#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [
+    "swaggerVersion",
+    "basePath",
+    "apis"
+  ],
+    "properties": {
+        "swaggerVersion": {
+            "enum": [
+        "1.2"
+      ]
+        },
+        "apiVersion": {
+            "type": "string"
+        },
+        "basePath": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https?://"
+        },
+        "resourcePath": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^/"
+        },
+        "apis": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/apiObject"
+            }
+        },
+        "models": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "modelsObject.json#"
+            }
+        },
+        "produces": {
+            "$ref": "#/definitions/mimeTypeArray"
+        },
+        "consumes": {
+            "$ref": "#/definitions/mimeTypeArray"
+        },
+        "authorizations": {
+            "$ref": "authorizationObject.json#"
+        }
+    },
+    "additionalProperties": false,
+    "definitions": {
+        "apiObject": {
+            "type": "object",
+            "required": [
+        "path",
+        "operations"
+      ],
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "format": "uri-template",
+                    "pattern": "^/"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "operations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "operationObject.json#"
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "mimeTypeArray": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "mime-type"
+            }
+        }
+    }
+};
+
+module.exports = {
+    description: "Issue #57 - maximum call stack exceeded error",
+    setup: function (validator, Class) {
+        Class.registerFormat("mime-type", function () {
+            return true;
+        });
+        Class.registerFormat("uri-template", function () {
+            return true;
+        });
+    },
+    tests: [
+        {
+            description: "should pass validation #1",
+            schema: [
+                dataTypeBaseJson,
+                modelsObjectJson,
+                oauth2GrantTypeJson,
+                authorizationObjectJson,
+                parameterObjectJson,
+                operationObjectJson,
+                apiDeclarationJson
+            ],
+            validateSchemaOnly: true,
+            valid: true
+        }
+    ]
+};
+
+},{}],27:[function(require,module,exports){
+"use strict";
+
+module.exports = {
     description: "compile a schema array and validate against one of the schemas - README sample",
     tests: [
         {
@@ -1818,7 +2574,7 @@ module.exports = {
     ]
 };
 
-},{}],26:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1843,7 +2599,7 @@ module.exports = {
     ]
 };
 
-},{}],27:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1868,7 +2624,7 @@ module.exports = {
     ]
 };
 
-},{}],28:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1913,7 +2669,7 @@ module.exports = {
     ]
 };
 
-},{}],29:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1938,7 +2694,7 @@ module.exports = {
     ]
 };
 
-},{}],30:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1968,7 +2724,7 @@ module.exports = {
     ]
 };
 
-},{}],31:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 module.exports={
     "id": "http://json-schema.org/draft-04/schema#",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -2120,7 +2876,7 @@ module.exports={
     "default": {}
 }
 
-},{}],32:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 module.exports={
   "swagger": 2,
   "info": {
@@ -2211,7 +2967,7 @@ module.exports={
   }
 }
 
-},{}],33:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -2609,7 +3365,7 @@ module.exports={
 	}
 }
 
-},{}],34:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -3007,7 +3763,7 @@ module.exports={
 	}
 }
 
-},{}],35:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 module.exports={
     "$schema": "http://json-schema.org/draft-04/hyper-schema#",
     "id": "http://json-schema.org/draft-04/hyper-schema#",
@@ -3167,15 +3923,165 @@ module.exports={
 }
 
 
-},{}],36:[function(require,module,exports){
-module.exports=require(31)
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
+module.exports={
+    "id": "http://json-schema.org/draft-04/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Core schema meta-schema",
+    "definitions": {
+        "schemaArray": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#" }
+        },
+        "positiveInteger": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "positiveIntegerDefault0": {
+            "allOf": [ { "$ref": "#/definitions/positiveInteger" }, { "default": 0 } ]
+        },
+        "simpleTypes": {
+            "enum": [ "array", "boolean", "integer", "null", "number", "object", "string" ]
+        },
+        "stringArray": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1,
+            "uniqueItems": true
+        }
+    },
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "format": "uri"
+        },
+        "$schema": {
+            "type": "string",
+            "format": "uri"
+        },
+        "title": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string"
+        },
+        "default": {},
+        "multipleOf": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true
+        },
+        "maximum": {
+            "type": "number"
+        },
+        "exclusiveMaximum": {
+            "type": "boolean",
+            "default": false
+        },
+        "minimum": {
+            "type": "number"
+        },
+        "exclusiveMinimum": {
+            "type": "boolean",
+            "default": false
+        },
+        "maxLength": { "$ref": "#/definitions/positiveInteger" },
+        "minLength": { "$ref": "#/definitions/positiveIntegerDefault0" },
+        "pattern": {
+            "type": "string",
+            "format": "regex"
+        },
+        "additionalItems": {
+            "anyOf": [
+                { "type": "boolean" },
+                { "$ref": "#" }
+            ],
+            "default": {}
+        },
+        "items": {
+            "anyOf": [
+                { "$ref": "#" },
+                { "$ref": "#/definitions/schemaArray" }
+            ],
+            "default": {}
+        },
+        "maxItems": { "$ref": "#/definitions/positiveInteger" },
+        "minItems": { "$ref": "#/definitions/positiveIntegerDefault0" },
+        "uniqueItems": {
+            "type": "boolean",
+            "default": false
+        },
+        "maxProperties": { "$ref": "#/definitions/positiveInteger" },
+        "minProperties": { "$ref": "#/definitions/positiveIntegerDefault0" },
+        "required": { "$ref": "#/definitions/stringArray" },
+        "additionalProperties": {
+            "anyOf": [
+                { "type": "boolean" },
+                { "$ref": "#" }
+            ],
+            "default": {}
+        },
+        "definitions": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#" },
+            "default": {}
+        },
+        "properties": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#" },
+            "default": {}
+        },
+        "patternProperties": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#" },
+            "default": {}
+        },
+        "dependencies": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    { "$ref": "#" },
+                    { "$ref": "#/definitions/stringArray" }
+                ]
+            }
+        },
+        "enum": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true
+        },
+        "type": {
+            "anyOf": [
+                { "$ref": "#/definitions/simpleTypes" },
+                {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/simpleTypes" },
+                    "minItems": 1,
+                    "uniqueItems": true
+                }
+            ]
+        },
+        "allOf": { "$ref": "#/definitions/schemaArray" },
+        "anyOf": { "$ref": "#/definitions/schemaArray" },
+        "oneOf": { "$ref": "#/definitions/schemaArray" },
+        "not": { "$ref": "#" }
+    },
+    "dependencies": {
+        "exclusiveMaximum": [ "maximum" ],
+        "exclusiveMinimum": [ "minimum" ]
+    },
+    "default": {}
+}
+
+},{}],39:[function(require,module,exports){
 module.exports={
     "type": "integer"
 }
-},{}],38:[function(require,module,exports){
-module.exports=require(37)
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
+module.exports=require(39)
+},{}],41:[function(require,module,exports){
 module.exports={
     "integer": {
         "type": "integer"
@@ -3184,7 +4090,7 @@ module.exports={
         "$ref": "#/integer"
     }
 }
-},{}],40:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 module.exports=[
     {
         "description": "additionalItems as schema",
@@ -3268,7 +4174,7 @@ module.exports=[
     }
 ]
 
-},{}],41:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -3339,7 +4245,7 @@ module.exports=[
     }
 ]
 
-},{}],42:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 module.exports=[
     {
         "description": "allOf",
@@ -3453,7 +4359,7 @@ module.exports=[
     }
 ]
 
-},{}],43:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 module.exports=[
     {
         "description": "anyOf",
@@ -3523,7 +4429,7 @@ module.exports=[
     }
 ]
 
-},{}],44:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 module.exports=[
     {
         "description": "valid definition",
@@ -3557,7 +4463,7 @@ module.exports=[
     }
 ]
 
-},{}],45:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 module.exports=[
     {
         "description": "dependencies",
@@ -3672,7 +4578,7 @@ module.exports=[
     }
 ]
 
-},{}],46:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 module.exports=[
     {
         "description": "simple enum validation",
@@ -3746,7 +4652,7 @@ module.exports=[
     }
 ]
 
-},{}],47:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 module.exports=[
     {
         "description": "a schema given for items",
@@ -3794,7 +4700,7 @@ module.exports=[
     }
 ]
 
-},{}],48:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxItems validation",
@@ -3824,7 +4730,7 @@ module.exports=[
     }
 ]
 
-},{}],49:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxLength validation",
@@ -3859,7 +4765,7 @@ module.exports=[
     }
 ]
 
-},{}],50:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxProperties validation",
@@ -3889,7 +4795,7 @@ module.exports=[
     }
 ]
 
-},{}],51:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 module.exports=[
     {
         "description": "maximum validation",
@@ -3933,7 +4839,7 @@ module.exports=[
     }
 ]
 
-},{}],52:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 module.exports=[
     {
         "description": "minItems validation",
@@ -3963,7 +4869,7 @@ module.exports=[
     }
 ]
 
-},{}],53:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 module.exports=[
     {
         "description": "minLength validation",
@@ -3998,7 +4904,7 @@ module.exports=[
     }
 ]
 
-},{}],54:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 module.exports=[
     {
         "description": "minProperties validation",
@@ -4028,7 +4934,7 @@ module.exports=[
     }
 ]
 
-},{}],55:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 module.exports=[
     {
         "description": "minimum validation",
@@ -4072,7 +4978,7 @@ module.exports=[
     }
 ]
 
-},{}],56:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 module.exports=[
     {
         "description": "by int",
@@ -4134,7 +5040,7 @@ module.exports=[
     }
 ]
 
-},{}],57:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 module.exports=[
     {
         "description": "not",
@@ -4232,7 +5138,7 @@ module.exports=[
 
 ]
 
-},{}],58:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 module.exports=[
     {
         "description": "oneOf",
@@ -4302,7 +5208,7 @@ module.exports=[
     }
 ]
 
-},{}],59:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer",
@@ -4364,7 +5270,7 @@ module.exports=[
     }
 ]
 
-},{}],60:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 module.exports=[
     {
         "description": "validation of date-time strings",
@@ -4509,7 +5415,7 @@ module.exports=[
     }
 ]
 
-},{}],61:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 module.exports=[
     {
         "description": "pattern validation",
@@ -4534,7 +5440,7 @@ module.exports=[
     }
 ]
 
-},{}],62:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -4646,7 +5552,7 @@ module.exports=[
     }
 ]
 
-},{}],63:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 module.exports=[
     {
         "description": "object properties validation",
@@ -4740,7 +5646,7 @@ module.exports=[
     }
 ]
 
-},{}],64:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 module.exports=[
     {
         "description": "root pointer ref",
@@ -4886,7 +5792,7 @@ module.exports=[
     }
 ]
 
-},{}],65:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 module.exports=[
     {
         "description": "remote ref",
@@ -4962,7 +5868,7 @@ module.exports=[
     }
 ]
 
-},{}],66:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 module.exports=[
     {
         "description": "required validation",
@@ -5003,7 +5909,7 @@ module.exports=[
     }
 ]
 
-},{}],67:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer type matches integers",
@@ -5335,7 +6241,7 @@ module.exports=[
     }
 ]
 
-},{}],68:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 module.exports=[
     {
         "description": "uniqueItems validation",
@@ -5416,7 +6322,7 @@ module.exports=[
     }
 ]
 
-},{}],69:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 "use strict";
 
 var isBrowser = typeof window !== "undefined";
@@ -5505,7 +6411,7 @@ describe("Automatic schema loading", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","request":"78LR48"}],70:[function(require,module,exports){
+},{"../../src/ZSchema":"C768cZ","request":"78LR48"}],72:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -5577,7 +6483,7 @@ describe("Basic", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":36,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":37,"../jsonSchemaTestSuite/remotes/integer.json":38,"../jsonSchemaTestSuite/remotes/subSchemas.json":39}],71:[function(require,module,exports){
+},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":38,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":39,"../jsonSchemaTestSuite/remotes/integer.json":40,"../jsonSchemaTestSuite/remotes/subSchemas.json":41}],73:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -5674,7 +6580,7 @@ describe("JsonSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":36,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":37,"../jsonSchemaTestSuite/remotes/integer.json":38,"../jsonSchemaTestSuite/remotes/subSchemas.json":39,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":40,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":41,"../jsonSchemaTestSuite/tests/draft4/allOf.json":42,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":43,"../jsonSchemaTestSuite/tests/draft4/definitions.json":44,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":45,"../jsonSchemaTestSuite/tests/draft4/enum.json":46,"../jsonSchemaTestSuite/tests/draft4/items.json":47,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":48,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":49,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":50,"../jsonSchemaTestSuite/tests/draft4/maximum.json":51,"../jsonSchemaTestSuite/tests/draft4/minItems.json":52,"../jsonSchemaTestSuite/tests/draft4/minLength.json":53,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":54,"../jsonSchemaTestSuite/tests/draft4/minimum.json":55,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":56,"../jsonSchemaTestSuite/tests/draft4/not.json":57,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":58,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":59,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":60,"../jsonSchemaTestSuite/tests/draft4/pattern.json":61,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":62,"../jsonSchemaTestSuite/tests/draft4/properties.json":63,"../jsonSchemaTestSuite/tests/draft4/ref.json":64,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":65,"../jsonSchemaTestSuite/tests/draft4/required.json":66,"../jsonSchemaTestSuite/tests/draft4/type.json":67,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":68}],72:[function(require,module,exports){
+},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":38,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":39,"../jsonSchemaTestSuite/remotes/integer.json":40,"../jsonSchemaTestSuite/remotes/subSchemas.json":41,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":42,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":43,"../jsonSchemaTestSuite/tests/draft4/allOf.json":44,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":45,"../jsonSchemaTestSuite/tests/draft4/definitions.json":46,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":47,"../jsonSchemaTestSuite/tests/draft4/enum.json":48,"../jsonSchemaTestSuite/tests/draft4/items.json":49,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":50,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":51,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":52,"../jsonSchemaTestSuite/tests/draft4/maximum.json":53,"../jsonSchemaTestSuite/tests/draft4/minItems.json":54,"../jsonSchemaTestSuite/tests/draft4/minLength.json":55,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":56,"../jsonSchemaTestSuite/tests/draft4/minimum.json":57,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":58,"../jsonSchemaTestSuite/tests/draft4/not.json":59,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":60,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":61,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":62,"../jsonSchemaTestSuite/tests/draft4/pattern.json":63,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":64,"../jsonSchemaTestSuite/tests/draft4/properties.json":65,"../jsonSchemaTestSuite/tests/draft4/ref.json":66,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":67,"../jsonSchemaTestSuite/tests/draft4/required.json":68,"../jsonSchemaTestSuite/tests/draft4/type.json":69,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":70}],74:[function(require,module,exports){
 /*jshint -W030 */
 
 "use strict";
@@ -5713,6 +6619,8 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/Issue48.js"),
     require("../ZSchemaTestSuite/Issue49.js"),
     require("../ZSchemaTestSuite/Issue53.js"),
+    require("../ZSchemaTestSuite/Issue56.js"),
+    require("../ZSchemaTestSuite/Issue57.js"),
     undefined
 ];
 
@@ -5725,8 +6633,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 30 files", function () {
-        expect(testSuiteFiles.length).toBe(30);
+    it("should contain 32 files", function () {
+        expect(testSuiteFiles.length).toBe(32);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -5810,4 +6718,4 @@ describe("ZSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../ZSchemaTestSuite/AssumeAdditional.js":1,"../ZSchemaTestSuite/CustomFormats.js":2,"../ZSchemaTestSuite/CustomFormatsAsync.js":3,"../ZSchemaTestSuite/ForceAdditional.js":4,"../ZSchemaTestSuite/ForceItems.js":5,"../ZSchemaTestSuite/ForceMaxLength.js":6,"../ZSchemaTestSuite/ForceProperties.js":7,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":8,"../ZSchemaTestSuite/Issue12.js":9,"../ZSchemaTestSuite/Issue13.js":10,"../ZSchemaTestSuite/Issue16.js":11,"../ZSchemaTestSuite/Issue22.js":12,"../ZSchemaTestSuite/Issue25.js":13,"../ZSchemaTestSuite/Issue26.js":14,"../ZSchemaTestSuite/Issue37.js":15,"../ZSchemaTestSuite/Issue40.js":16,"../ZSchemaTestSuite/Issue41.js":17,"../ZSchemaTestSuite/Issue43.js":18,"../ZSchemaTestSuite/Issue44.js":19,"../ZSchemaTestSuite/Issue45.js":20,"../ZSchemaTestSuite/Issue47.js":21,"../ZSchemaTestSuite/Issue48.js":22,"../ZSchemaTestSuite/Issue49.js":23,"../ZSchemaTestSuite/Issue53.js":24,"../ZSchemaTestSuite/MultipleSchemas.js":25,"../ZSchemaTestSuite/NoEmptyArrays.js":26,"../ZSchemaTestSuite/NoEmptyStrings.js":27,"../ZSchemaTestSuite/NoExtraKeywords.js":28,"../ZSchemaTestSuite/NoTypeless.js":29,"../ZSchemaTestSuite/StrictUris.js":30,"../files/draft-04-hyper-schema.json":35,"../files/draft-04-schema.json":36}]},{},[69,70,71,72]);
+},{"../../src/ZSchema":"C768cZ","../ZSchemaTestSuite/AssumeAdditional.js":1,"../ZSchemaTestSuite/CustomFormats.js":2,"../ZSchemaTestSuite/CustomFormatsAsync.js":3,"../ZSchemaTestSuite/ForceAdditional.js":4,"../ZSchemaTestSuite/ForceItems.js":5,"../ZSchemaTestSuite/ForceMaxLength.js":6,"../ZSchemaTestSuite/ForceProperties.js":7,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":8,"../ZSchemaTestSuite/Issue12.js":9,"../ZSchemaTestSuite/Issue13.js":10,"../ZSchemaTestSuite/Issue16.js":11,"../ZSchemaTestSuite/Issue22.js":12,"../ZSchemaTestSuite/Issue25.js":13,"../ZSchemaTestSuite/Issue26.js":14,"../ZSchemaTestSuite/Issue37.js":15,"../ZSchemaTestSuite/Issue40.js":16,"../ZSchemaTestSuite/Issue41.js":17,"../ZSchemaTestSuite/Issue43.js":18,"../ZSchemaTestSuite/Issue44.js":19,"../ZSchemaTestSuite/Issue45.js":20,"../ZSchemaTestSuite/Issue47.js":21,"../ZSchemaTestSuite/Issue48.js":22,"../ZSchemaTestSuite/Issue49.js":23,"../ZSchemaTestSuite/Issue53.js":24,"../ZSchemaTestSuite/Issue56.js":25,"../ZSchemaTestSuite/Issue57.js":26,"../ZSchemaTestSuite/MultipleSchemas.js":27,"../ZSchemaTestSuite/NoEmptyArrays.js":28,"../ZSchemaTestSuite/NoEmptyStrings.js":29,"../ZSchemaTestSuite/NoExtraKeywords.js":30,"../ZSchemaTestSuite/NoTypeless.js":31,"../ZSchemaTestSuite/StrictUris.js":32,"../files/draft-04-hyper-schema.json":37,"../files/draft-04-schema.json":38}]},{},[71,72,73,74]);
