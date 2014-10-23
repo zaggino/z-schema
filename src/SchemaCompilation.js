@@ -9,7 +9,7 @@ function isAbsoluteUri(uri) {
 
 function isRelativeUri(uri) {
     // relative URIs that end with a hash sign, issue #56
-    return /.+#$/.test(uri);
+    return /.+#/.test(uri);
 }
 
 function mergeReference(scope, ref) {

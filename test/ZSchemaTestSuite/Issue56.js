@@ -23,7 +23,7 @@ module.exports = {
             valid: true
         },
         {
-            description: "should pass validation #1",
+            description: "should pass validation #2",
             schema: [
                 {
                     id: "http://virtual/schemaA#",
@@ -34,6 +34,30 @@ module.exports = {
                     properties: {
                         a: {
                             "$ref": "schemaA#"
+                        }
+                    }
+                }
+            ],
+            validateSchemaOnly: true,
+            valid: true
+        },
+        {
+            description: "should pass validation #3",
+            schema: [
+                {
+                    id: "http://virtual/schemaA#",
+                    type: "string",
+                    "definitions": {
+                        "stringDefinition": {
+                            "type": "string"
+                        }
+                    }
+                },
+                {
+                    id: "http://virtual/schemaB#",
+                    properties: {
+                        a: {
+                            "$ref": "schemaA#/definitions/stringDefinition"
                         }
                     }
                 }
