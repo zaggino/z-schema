@@ -4,18 +4,37 @@ var Report = require("./Report");
 var SchemaCache = require("./SchemaCache");
 
 function isAbsoluteUri(uri) {
-    // second test is for absolute URIs that end with a hash sign, issue #56
-    return /^https?:\/\//.test(uri) || /.+#$/.test(uri);
+    return /^https?:\/\//.test(uri);
+}
+
+function isRelativeUri(uri) {
+    // relative URIs that end with a hash sign, issue #56
+    return /.+#$/.test(uri);
 }
 
 function mergeReference(scope, ref) {
-    if (isAbsoluteUri(ref)) { return ref; }
+    if (isAbsoluteUri(ref)) {
+        return ref;
+    }
 
-    var joinedScope = scope.join("");
+    var joinedScope = scope.join(""),
+        isScopeAbsolute = isAbsoluteUri(joinedScope),
+        isScopeRelative = isRelativeUri(joinedScope),
+        isRefRelative = isRelativeUri(ref),
+        toRemove;
 
-    var toRemove = joinedScope.match(/[^#/]+$/);
-    if (toRemove) {
-        joinedScope = joinedScope.slice(0, toRemove.index);
+    if (isScopeAbsolute && isRefRelative) {
+        toRemove = joinedScope.match(/\/[^\/]*$/);
+        if (toRemove) {
+            joinedScope = joinedScope.slice(0, toRemove.index + 1);
+        }
+    } else if (isScopeRelative && isRefRelative) {
+        joinedScope = "";
+    } else {
+        toRemove = joinedScope.match(/[^#/]+$/);
+        if (toRemove) {
+            joinedScope = joinedScope.slice(0, toRemove.index);
+        }
     }
 
     var res = joinedScope + ref;
