@@ -1,6 +1,6 @@
 {
   "name": "z-schema",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "JSON schema validator",
   "homepage": "https://github.com/zaggino/z-schema",
   "authors": [
@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "grunt": "latest",
-    "grunt-browserify": "latest",
+    "grunt-browserify": "2.x",
     "grunt-contrib-jasmine": "latest",
     "grunt-contrib-jshint": "latest",
     "grunt-contrib-uglify": "latest",
