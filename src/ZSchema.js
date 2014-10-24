@@ -38,7 +38,9 @@ var defaultOptions = {
     // forces "uri" format to be in fully rfc3986 compliant
     strictUris: false,
     // turn on some of the above
-    strictMode: false
+    strictMode: false,
+    // report error paths as an array of path segments to get to the offending node
+    reportPathAsArray: false
 };
 
 /*
@@ -78,7 +80,7 @@ function ZSchema(options) {
     instance methods
 */
 ZSchema.prototype.compileSchema = function (schema) {
-    var report = new Report();
+    var report = new Report(this.options);
 
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
@@ -90,7 +92,7 @@ ZSchema.prototype.compileSchema = function (schema) {
     return report.isValid();
 };
 ZSchema.prototype.validateSchema = function (schema) {
-    var report = new Report();
+    var report = new Report(this.options);
 
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
@@ -103,7 +105,7 @@ ZSchema.prototype.validateSchema = function (schema) {
     return report.isValid();
 };
 ZSchema.prototype.validate = function (json, schema, callback) {
-    var report = new Report();
+    var report = new Report(this.options);
 
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);

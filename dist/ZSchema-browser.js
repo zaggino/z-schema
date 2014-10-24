@@ -834,8 +834,18 @@ if (typeof Number.isFinite !== "function") {
 
 var Errors = require("./Errors");
 
-function Report(parentReport) {
-    this.parentReport = parentReport || undefined;
+function Report(parentOrOptions) {
+    // Reasonable defaults
+    parentOrOptions = parentOrOptions || {};
+
+    this.parentReport = parentOrOptions instanceof Report ?
+                            parentOrOptions :
+                            undefined;
+
+    this.options = parentOrOptions instanceof Report ?
+                       parentOrOptions.options :
+                       parentOrOptions;
+
     this.errors = [];
     this.path = [];
     this.asyncTasks = [];
@@ -899,12 +909,29 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
 };
 
 Report.prototype.getPath = function () {
-    var path = ["#"];
+    var path = [];
+    var response;
     if (this.parentReport) {
         path = path.concat(this.parentReport.path);
     }
     path = path.concat(this.path);
-    return path.length === 1 ? "#/" : path.join("/");
+
+    if (this.options.reportPathAsArray === true) {
+        response = [];
+        // Since path entries can have square brackets in them and we don't want them when displaying the path as an
+        // array of path segments, we need to remove them.  https://github.com/zaggino/z-schema/issues/59 would fix this
+        // as array/object indices/keys would not be surrounded by brackets to support JSON Pointer strings.
+        path.forEach(function (entry) {
+            entry.replace(/[\[\]']+/g, " ").split(" ").forEach(function (segment) {
+                if (segment) {
+                    response.push(segment);
+                }
+            });
+        });
+    } else {
+        response = "#/" + path.join("/");
+    }
+    return response;
 };
 
 Report.prototype.addError = function (errorCode, params, subReports, schemaDescription) {
@@ -953,8 +980,8 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
 
 module.exports = Report;
 
-}).call(this,require("+NscNm"))
-},{"+NscNm":1,"./Errors":2}],7:[function(require,module,exports){
+}).call(this,require("JkpR2F"))
+},{"./Errors":2,"JkpR2F":1}],7:[function(require,module,exports){
 "use strict";
 
 var SchemaCompilation   = require("./SchemaCompilation");
@@ -1944,9 +1971,7 @@ exports.clone = function (src) {
     return res;
 };
 
-},{}],"ZSchema":[function(require,module,exports){
-module.exports=require('C768cZ');
-},{}],"C768cZ":[function(require,module,exports){
+},{}],"tqACSv":[function(require,module,exports){
 "use strict";
 
 require("./Polyfills");
@@ -1987,7 +2012,9 @@ var defaultOptions = {
     // forces "uri" format to be in fully rfc3986 compliant
     strictUris: false,
     // turn on some of the above
-    strictMode: false
+    strictMode: false,
+    // report error paths as an array of path segments to get to the offending node
+    reportPathAsArray: false
 };
 
 /*
@@ -2027,7 +2054,7 @@ function ZSchema(options) {
     instance methods
 */
 ZSchema.prototype.compileSchema = function (schema) {
-    var report = new Report();
+    var report = new Report(this.options);
 
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
@@ -2039,7 +2066,7 @@ ZSchema.prototype.compileSchema = function (schema) {
     return report.isValid();
 };
 ZSchema.prototype.validateSchema = function (schema) {
-    var report = new Report();
+    var report = new Report(this.options);
 
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
@@ -2052,7 +2079,7 @@ ZSchema.prototype.validateSchema = function (schema) {
     return report.isValid();
 };
 ZSchema.prototype.validate = function (json, schema, callback) {
-    var report = new Report();
+    var report = new Report(this.options);
 
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
@@ -2119,4 +2146,6 @@ ZSchema.registerFormatter = function (/* formatterName, formatterFunction */) {
 
 module.exports = ZSchema;
 
-},{"./FormatValidators":3,"./JsonValidation":4,"./Polyfills":5,"./Report":6,"./SchemaCache":7,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}]},{},[2,3,4,5,6,7,8,9,10,"C768cZ"]);
+},{"./FormatValidators":3,"./JsonValidation":4,"./Polyfills":5,"./Report":6,"./SchemaCache":7,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}],"ZSchema":[function(require,module,exports){
+module.exports=require('tqACSv');
+},{}]},{},[2,3,4,5,6,7,8,9,10,"tqACSv"]);

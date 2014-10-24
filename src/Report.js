@@ -2,8 +2,15 @@
 
 var Errors = require("./Errors");
 
-function Report(parentReport) {
-    this.parentReport = parentReport || undefined;
+function Report(parentOrOptions) {
+    this.parentReport = parentOrOptions instanceof Report ?
+                            parentOrOptions :
+                            undefined;
+
+    this.options = parentOrOptions instanceof Report ?
+                       parentOrOptions.options :
+                       parentOrOptions || {};
+
     this.errors = [];
     this.path = [];
     this.asyncTasks = [];
@@ -67,12 +74,29 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
 };
 
 Report.prototype.getPath = function () {
-    var path = ["#"];
+    var path = [];
+    var response;
     if (this.parentReport) {
         path = path.concat(this.parentReport.path);
     }
     path = path.concat(this.path);
-    return path.length === 1 ? "#/" : path.join("/");
+
+    if (this.options.reportPathAsArray === true) {
+        response = [];
+        // Since path entries can have square brackets in them and we don't want them when displaying the path as an
+        // array of path segments, we need to remove them.  https://github.com/zaggino/z-schema/issues/59 would fix this
+        // as array/object indices/keys would not be surrounded by brackets to support JSON Pointer strings.
+        path.forEach(function (entry) {
+            entry.replace(/[\[\]']+/g, " ").split(" ").forEach(function (segment) {
+                if (segment) {
+                    response.push(segment);
+                }
+            });
+        });
+    } else {
+        response = "#/" + path.join("/");
+    }
+    return response;
 };
 
 Report.prototype.addError = function (errorCode, params, subReports, schemaDescription) {
