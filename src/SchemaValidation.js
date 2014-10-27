@@ -105,8 +105,10 @@ var SchemaValidators = {
         } else if (type === "array") {
             var idx = schema.items.length;
             while (idx--) {
-                report.path.push("items[" + idx + "]");
+                report.path.push("items");
+                report.path.push(idx.toString());
                 exports.validateSchema.call(this, report, schema.items[idx]);
+                report.path.pop();
                 report.path.pop();
             }
         } else {
@@ -201,8 +203,10 @@ var SchemaValidators = {
         while (idx--) {
             var key = keys[idx],
                 val = schema.properties[key];
-            report.path.push("properties[" + key + "]");
+            report.path.push("properties");
+            report.path.push(key);
             exports.validateSchema.call(this, report, val);
+            report.path.pop();
             report.path.pop();
         }
 
@@ -236,8 +240,10 @@ var SchemaValidators = {
             } catch (e) {
                 report.addError("KEYWORD_PATTERN", ["patternProperties", key]);
             }
-            report.path.push("patternProperties[" + key + "]");
+            report.path.push("patternProperties");
+            report.path.push(key.toString());
             exports.validateSchema.call(this, report, val);
+            report.path.pop();
             report.path.pop();
         }
 
@@ -259,8 +265,10 @@ var SchemaValidators = {
                     type = Utils.whatIs(schemaDependency);
 
                 if (type === "object") {
-                    report.path.push("dependencies[" + schemaKey + "]");
+                    report.path.push("dependencies");
+                    report.path.push(schemaKey);
                     exports.validateSchema.call(this, report, schemaDependency);
+                    report.path.pop();
                     report.path.pop();
                 } else if (type === "array") {
                     var idx2 = schemaDependency.length;
@@ -360,8 +368,10 @@ var SchemaValidators = {
         } else {
             var idx = schema.allOf.length;
             while (idx--) {
-                report.path.push("allOf[" + idx + "]");
+                report.path.push("allOf");
+                report.path.push(idx.toString());
                 exports.validateSchema.call(this, report, schema.allOf[idx]);
+                report.path.pop();
                 report.path.pop();
             }
         }
@@ -375,8 +385,10 @@ var SchemaValidators = {
         } else {
             var idx = schema.anyOf.length;
             while (idx--) {
-                report.path.push("anyOf[" + idx + "]");
+                report.path.push("anyOf");
+                report.path.push(idx.toString());
                 exports.validateSchema.call(this, report, schema.anyOf[idx]);
+                report.path.pop();
                 report.path.pop();
             }
         }
@@ -390,8 +402,10 @@ var SchemaValidators = {
         } else {
             var idx = schema.oneOf.length;
             while (idx--) {
-                report.path.push("oneOf[" + idx + "]");
+                report.path.push("oneOf");
+                report.path.push(idx.toString());
                 exports.validateSchema.call(this, report, schema.oneOf[idx]);
+                report.path.pop();
                 report.path.pop();
             }
         }
@@ -416,8 +430,10 @@ var SchemaValidators = {
             while (idx--) {
                 var key = keys[idx],
                     val = schema.definitions[key];
-                report.path.push("definitions[" + key + "]");
+                report.path.push("definitions");
+                report.path.push(key);
                 exports.validateSchema.call(this, report, val);
+                report.path.pop();
                 report.path.pop();
             }
         }

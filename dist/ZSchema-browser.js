@@ -639,13 +639,13 @@ var recurseArray = function (report, schema, json) {
         while (idx--) {
             // equal to doesnt make sense here
             if (idx < schema.items.length) {
-                report.path.push("[" + idx + "]");
+                report.path.push(idx.toString());
                 exports.validate.call(this, report, schema.items[idx], json[idx]);
                 report.path.pop();
             } else {
                 // might be boolean, so check that it's an object
                 if (typeof schema.additionalItems === "object") {
-                    report.path.push("[" + idx + "]");
+                    report.path.push(idx.toString());
                     exports.validate.call(this, report, schema.additionalItems, json[idx]);
                     report.path.pop();
                 }
@@ -657,7 +657,7 @@ var recurseArray = function (report, schema, json) {
         // If items is a schema, then the child instance must be valid against this schema,
         // regardless of its index, and regardless of the value of "additionalItems".
         while (idx--) {
-            report.path.push("[" + idx + "]");
+            report.path.push(idx.toString());
             exports.validate.call(this, report, schema.items, json[idx]);
             report.path.pop();
         }
@@ -907,28 +907,18 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
 
 Report.prototype.getPath = function () {
     var path = [];
-    var response;
     if (this.parentReport) {
         path = path.concat(this.parentReport.path);
     }
     path = path.concat(this.path);
 
-    if (this.options.reportPathAsArray === true) {
-        response = [];
-        // Since path entries can have square brackets in them and we don't want them when displaying the path as an
-        // array of path segments, we need to remove them.  https://github.com/zaggino/z-schema/issues/59 would fix this
-        // as array/object indices/keys would not be surrounded by brackets to support JSON Pointer strings.
-        path.forEach(function (entry) {
-            entry.replace(/[\[\]']+/g, " ").split(" ").forEach(function (segment) {
-                if (segment) {
-                    response.push(segment);
-                }
-            });
-        });
-    } else {
-        response = "#/" + path.join("/");
+    if (this.options.reportPathAsArray !== true) {
+        // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
+        path = "#/" + path.map(function (segment) {
+            return segment.replace("~", "~0").replace("/", "~1");
+        }).join("/");
     }
-    return response;
+    return path;
 };
 
 Report.prototype.addError = function (errorCode, params, subReports, schemaDescription) {
@@ -1407,8 +1397,10 @@ var SchemaValidators = {
         } else if (type === "array") {
             var idx = schema.items.length;
             while (idx--) {
-                report.path.push("items[" + idx + "]");
+                report.path.push("items");
+                report.path.push(idx.toString());
                 exports.validateSchema.call(this, report, schema.items[idx]);
+                report.path.pop();
                 report.path.pop();
             }
         } else {
@@ -1503,8 +1495,10 @@ var SchemaValidators = {
         while (idx--) {
             var key = keys[idx],
                 val = schema.properties[key];
-            report.path.push("properties[" + key + "]");
+            report.path.push("properties");
+            report.path.push(key);
             exports.validateSchema.call(this, report, val);
+            report.path.pop();
             report.path.pop();
         }
 
@@ -1538,8 +1532,10 @@ var SchemaValidators = {
             } catch (e) {
                 report.addError("KEYWORD_PATTERN", ["patternProperties", key]);
             }
-            report.path.push("patternProperties[" + key + "]");
+            report.path.push("patternProperties");
+            report.path.push(key.toString());
             exports.validateSchema.call(this, report, val);
+            report.path.pop();
             report.path.pop();
         }
 
@@ -1561,8 +1557,10 @@ var SchemaValidators = {
                     type = Utils.whatIs(schemaDependency);
 
                 if (type === "object") {
-                    report.path.push("dependencies[" + schemaKey + "]");
+                    report.path.push("dependencies");
+                    report.path.push(schemaKey);
                     exports.validateSchema.call(this, report, schemaDependency);
+                    report.path.pop();
                     report.path.pop();
                 } else if (type === "array") {
                     var idx2 = schemaDependency.length;
@@ -1662,8 +1660,10 @@ var SchemaValidators = {
         } else {
             var idx = schema.allOf.length;
             while (idx--) {
-                report.path.push("allOf[" + idx + "]");
+                report.path.push("allOf");
+                report.path.push(idx.toString());
                 exports.validateSchema.call(this, report, schema.allOf[idx]);
+                report.path.pop();
                 report.path.pop();
             }
         }
@@ -1677,8 +1677,10 @@ var SchemaValidators = {
         } else {
             var idx = schema.anyOf.length;
             while (idx--) {
-                report.path.push("anyOf[" + idx + "]");
+                report.path.push("anyOf");
+                report.path.push(idx.toString());
                 exports.validateSchema.call(this, report, schema.anyOf[idx]);
+                report.path.pop();
                 report.path.pop();
             }
         }
@@ -1692,8 +1694,10 @@ var SchemaValidators = {
         } else {
             var idx = schema.oneOf.length;
             while (idx--) {
-                report.path.push("oneOf[" + idx + "]");
+                report.path.push("oneOf");
+                report.path.push(idx.toString());
                 exports.validateSchema.call(this, report, schema.oneOf[idx]);
+                report.path.pop();
                 report.path.pop();
             }
         }
@@ -1718,8 +1722,10 @@ var SchemaValidators = {
             while (idx--) {
                 var key = keys[idx],
                     val = schema.definitions[key];
-                report.path.push("definitions[" + key + "]");
+                report.path.push("definitions");
+                report.path.push(key);
                 exports.validateSchema.call(this, report, val);
+                report.path.pop();
                 report.path.pop();
             }
         }

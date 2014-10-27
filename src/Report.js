@@ -75,28 +75,18 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
 
 Report.prototype.getPath = function () {
     var path = [];
-    var response;
     if (this.parentReport) {
         path = path.concat(this.parentReport.path);
     }
     path = path.concat(this.path);
 
-    if (this.options.reportPathAsArray === true) {
-        response = [];
-        // Since path entries can have square brackets in them and we don't want them when displaying the path as an
-        // array of path segments, we need to remove them.  https://github.com/zaggino/z-schema/issues/59 would fix this
-        // as array/object indices/keys would not be surrounded by brackets to support JSON Pointer strings.
-        path.forEach(function (entry) {
-            entry.replace(/[\[\]']+/g, " ").split(" ").forEach(function (segment) {
-                if (segment) {
-                    response.push(segment);
-                }
-            });
-        });
-    } else {
-        response = "#/" + path.join("/");
+    if (this.options.reportPathAsArray !== true) {
+        // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
+        path = "#/" + path.map(function (segment) {
+            return segment.replace("~", "~0").replace("/", "~1");
+        }).join("/");
     }
-    return response;
+    return path;
 };
 
 Report.prototype.addError = function (errorCode, params, subReports, schemaDescription) {
