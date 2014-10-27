@@ -18,7 +18,7 @@ function validateWithAutomaticDownloads(validator, data, schema, callback) {
 
         lastResult = validator.validate(data, schema);
 
-        var missingReferences = validator.getMissingReferences();
+        var missingReferences = validator.getMissingRemoteReferences();
         if (missingReferences.length > 0) {
             var finished = 0;
             missingReferences.forEach(function (url) {

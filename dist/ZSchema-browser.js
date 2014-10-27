@@ -1944,8 +1944,6 @@ exports.clone = function (src) {
     return res;
 };
 
-},{}],"ZSchema":[function(require,module,exports){
-module.exports=require('C768cZ');
 },{}],"C768cZ":[function(require,module,exports){
 "use strict";
 
@@ -2092,13 +2090,25 @@ ZSchema.prototype.getMissingReferences = function () {
     while (idx--) {
         var error = this.lastReport.errors[idx];
         if (error.code === "UNRESOLVABLE_REFERENCE") {
-            var remote = SchemaCache.getRemotePath(error.params[0]);
-            if (res.indexOf(remote) === -1) {
-                res.push(remote);
+            var reference = error.params[0];
+            if (res.indexOf(reference) === -1) {
+                res.push(reference);
             }
         }
     }
     return res;
+};
+ZSchema.prototype.getMissingRemoteReferences = function () {
+    var missingReferences = this.getMissingReferences(),
+        missingRemoteReferences = [],
+        idx = missingReferences.length;
+    while (idx--) {
+        var remoteReference = SchemaCache.getRemotePath(missingReferences[idx]);
+        if (remoteReference && missingRemoteReferences.indexOf(remoteReference) === -1) {
+            missingRemoteReferences.push(remoteReference);
+        }
+    }
+    return missingRemoteReferences;
 };
 ZSchema.prototype.setRemoteReference = function (uri, schema) {
     if (typeof schema === "string") {
@@ -2119,4 +2129,6 @@ ZSchema.registerFormatter = function (/* formatterName, formatterFunction */) {
 
 module.exports = ZSchema;
 
-},{"./FormatValidators":3,"./JsonValidation":4,"./Polyfills":5,"./Report":6,"./SchemaCache":7,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}]},{},[2,3,4,5,6,7,8,9,10,"C768cZ"]);
+},{"./FormatValidators":3,"./JsonValidation":4,"./Polyfills":5,"./Report":6,"./SchemaCache":7,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}],"ZSchema":[function(require,module,exports){
+module.exports=require('C768cZ');
+},{}]},{},[2,3,4,5,6,7,8,9,10,"C768cZ"]);

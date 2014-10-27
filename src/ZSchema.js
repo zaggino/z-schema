@@ -143,13 +143,25 @@ ZSchema.prototype.getMissingReferences = function () {
     while (idx--) {
         var error = this.lastReport.errors[idx];
         if (error.code === "UNRESOLVABLE_REFERENCE") {
-            var remote = SchemaCache.getRemotePath(error.params[0]);
-            if (res.indexOf(remote) === -1) {
-                res.push(remote);
+            var reference = error.params[0];
+            if (res.indexOf(reference) === -1) {
+                res.push(reference);
             }
         }
     }
     return res;
+};
+ZSchema.prototype.getMissingRemoteReferences = function () {
+    var missingReferences = this.getMissingReferences(),
+        missingRemoteReferences = [],
+        idx = missingReferences.length;
+    while (idx--) {
+        var remoteReference = SchemaCache.getRemotePath(missingReferences[idx]);
+        if (remoteReference && missingRemoteReferences.indexOf(remoteReference) === -1) {
+            missingRemoteReferences.push(remoteReference);
+        }
+    }
+    return missingRemoteReferences;
 };
 ZSchema.prototype.setRemoteReference = function (uri, schema) {
     if (typeof schema === "string") {

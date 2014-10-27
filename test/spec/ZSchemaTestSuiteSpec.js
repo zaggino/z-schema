@@ -38,6 +38,7 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/Issue53.js"),
     require("../ZSchemaTestSuite/Issue56.js"),
     require("../ZSchemaTestSuite/Issue57.js"),
+    require("../ZSchemaTestSuite/Issue58.js"),
     undefined
 ];
 
@@ -50,8 +51,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 32 files", function () {
-        expect(testSuiteFiles.length).toBe(32);
+    it("should contain 33 files", function () {
+        expect(testSuiteFiles.length).toBe(33);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -95,7 +96,7 @@ describe("ZSchemaTestSuite", function () {
                     expect(err).toBe(undefined, "errors are not undefined when test is valid");
                 }
                 if (after) {
-                    after(err, valid, data);
+                    after(err, valid, data, validator);
                 }
 
             });
