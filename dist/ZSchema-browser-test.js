@@ -218,6 +218,34 @@ module.exports = {
 "use strict";
 
 module.exports = {
+    description: "reportPathAsArray - Report error paths as an array of path segments",
+    options: {
+        reportPathAsArray: true
+    },
+    tests: [
+        {
+            description: "should fail validation and report error paths as an array of path segments",
+            schema: {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "invalid"
+                  }
+                }
+            },
+            valid: false,
+            validateSchemaOnly: true,
+            after: function (err) {
+                expect(err[0].path).toEqual(["properties", "name"]);
+            }
+        }
+    ]
+};
+
+},{}],5:[function(require,module,exports){
+"use strict";
+
+module.exports = {
     description: "forceAdditional - Force additional properties/items in schemas",
     options: {
         forceAdditional: true
@@ -287,7 +315,7 @@ module.exports = {
     ]
 };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -315,7 +343,7 @@ module.exports = {
     ]
 };
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -343,7 +371,7 @@ module.exports = {
     ]
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -399,7 +427,7 @@ module.exports = {
     ]
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -443,7 +471,7 @@ module.exports = {
     ]
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -518,7 +546,7 @@ module.exports = {
     ]
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -691,7 +719,7 @@ module.exports = {
     ]
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -718,7 +746,7 @@ module.exports = {
     ]
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -794,7 +822,7 @@ module.exports = {
     ]
 };
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -830,7 +858,7 @@ module.exports = {
     ]
 };
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -920,7 +948,7 @@ module.exports = {
     ]
 };
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -945,7 +973,7 @@ module.exports = {
     ]
 };
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1021,7 +1049,7 @@ module.exports = {
     ]
 };
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1134,7 +1162,7 @@ module.exports = {
     ]
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1314,7 +1342,7 @@ module.exports = {
     ]
 };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1361,7 +1389,7 @@ module.exports = {
     ]
 };
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 
 var resourceObject = {
@@ -1657,7 +1685,7 @@ module.exports = {
     ]
 };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict";
 
 var draft4 = require("./files/Issue47/draft4.json");
@@ -1686,7 +1714,7 @@ module.exports = {
     ]
 };
 
-},{"./files/Issue47/draft4.json":34,"./files/Issue47/sample.json":35,"./files/Issue47/swagger_draft.json":36,"./files/Issue47/swagger_draft_modified.json":37}],22:[function(require,module,exports){
+},{"./files/Issue47/draft4.json":35,"./files/Issue47/sample.json":36,"./files/Issue47/swagger_draft.json":37,"./files/Issue47/swagger_draft_modified.json":38}],23:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1719,7 +1747,7 @@ module.exports = {
     ]
 };
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1737,7 +1765,7 @@ module.exports = {
     ]
 };
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1759,7 +1787,7 @@ module.exports = {
     ]
 };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1830,7 +1858,7 @@ module.exports = {
     ]
 };
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 "use strict";
 
 var dataTypeBaseJson = {
@@ -2515,7 +2543,7 @@ module.exports = {
     ]
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -2577,7 +2605,7 @@ module.exports = {
     ]
 };
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -2636,7 +2664,7 @@ module.exports = {
     ]
 };
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -2661,7 +2689,7 @@ module.exports = {
     ]
 };
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -2686,7 +2714,7 @@ module.exports = {
     ]
 };
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -2731,7 +2759,7 @@ module.exports = {
     ]
 };
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -2756,7 +2784,7 @@ module.exports = {
     ]
 };
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -2786,7 +2814,7 @@ module.exports = {
     ]
 };
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports={
     "id": "http://json-schema.org/draft-04/schema#",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -2938,7 +2966,7 @@ module.exports={
     "default": {}
 }
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 module.exports={
   "swagger": 2,
   "info": {
@@ -3029,7 +3057,7 @@ module.exports={
   }
 }
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -3427,7 +3455,7 @@ module.exports={
 	}
 }
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -3825,7 +3853,7 @@ module.exports={
 	}
 }
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 module.exports={
     "$schema": "http://json-schema.org/draft-04/hyper-schema#",
     "id": "http://json-schema.org/draft-04/hyper-schema#",
@@ -3985,7 +4013,7 @@ module.exports={
 }
 
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 module.exports={
     "id": "http://json-schema.org/draft-04/schema#",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -4137,13 +4165,13 @@ module.exports={
     "default": {}
 }
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 module.exports={
     "type": "integer"
 }
-},{}],41:[function(require,module,exports){
-module.exports=require(40)
 },{}],42:[function(require,module,exports){
+module.exports=require(41)
+},{}],43:[function(require,module,exports){
 module.exports={
     "integer": {
         "type": "integer"
@@ -4152,7 +4180,7 @@ module.exports={
         "$ref": "#/integer"
     }
 }
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 module.exports=[
     {
         "description": "additionalItems as schema",
@@ -4236,7 +4264,7 @@ module.exports=[
     }
 ]
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -4307,7 +4335,7 @@ module.exports=[
     }
 ]
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 module.exports=[
     {
         "description": "allOf",
@@ -4421,7 +4449,7 @@ module.exports=[
     }
 ]
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 module.exports=[
     {
         "description": "anyOf",
@@ -4491,7 +4519,7 @@ module.exports=[
     }
 ]
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 module.exports=[
     {
         "description": "valid definition",
@@ -4525,7 +4553,7 @@ module.exports=[
     }
 ]
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 module.exports=[
     {
         "description": "dependencies",
@@ -4640,7 +4668,7 @@ module.exports=[
     }
 ]
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports=[
     {
         "description": "simple enum validation",
@@ -4714,7 +4742,7 @@ module.exports=[
     }
 ]
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 module.exports=[
     {
         "description": "a schema given for items",
@@ -4762,7 +4790,7 @@ module.exports=[
     }
 ]
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxItems validation",
@@ -4792,7 +4820,7 @@ module.exports=[
     }
 ]
 
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxLength validation",
@@ -4827,7 +4855,7 @@ module.exports=[
     }
 ]
 
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxProperties validation",
@@ -4857,7 +4885,7 @@ module.exports=[
     }
 ]
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 module.exports=[
     {
         "description": "maximum validation",
@@ -4901,7 +4929,7 @@ module.exports=[
     }
 ]
 
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 module.exports=[
     {
         "description": "minItems validation",
@@ -4931,7 +4959,7 @@ module.exports=[
     }
 ]
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 module.exports=[
     {
         "description": "minLength validation",
@@ -4966,7 +4994,7 @@ module.exports=[
     }
 ]
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 module.exports=[
     {
         "description": "minProperties validation",
@@ -4996,7 +5024,7 @@ module.exports=[
     }
 ]
 
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 module.exports=[
     {
         "description": "minimum validation",
@@ -5040,7 +5068,7 @@ module.exports=[
     }
 ]
 
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 module.exports=[
     {
         "description": "by int",
@@ -5102,7 +5130,7 @@ module.exports=[
     }
 ]
 
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 module.exports=[
     {
         "description": "not",
@@ -5200,7 +5228,7 @@ module.exports=[
 
 ]
 
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 module.exports=[
     {
         "description": "oneOf",
@@ -5270,7 +5298,7 @@ module.exports=[
     }
 ]
 
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer",
@@ -5332,7 +5360,7 @@ module.exports=[
     }
 ]
 
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 module.exports=[
     {
         "description": "validation of date-time strings",
@@ -5477,7 +5505,7 @@ module.exports=[
     }
 ]
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 module.exports=[
     {
         "description": "pattern validation",
@@ -5502,7 +5530,7 @@ module.exports=[
     }
 ]
 
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -5614,7 +5642,7 @@ module.exports=[
     }
 ]
 
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 module.exports=[
     {
         "description": "object properties validation",
@@ -5708,7 +5736,7 @@ module.exports=[
     }
 ]
 
-},{}],67:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 module.exports=[
     {
         "description": "root pointer ref",
@@ -5854,7 +5882,7 @@ module.exports=[
     }
 ]
 
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 module.exports=[
     {
         "description": "remote ref",
@@ -5930,7 +5958,7 @@ module.exports=[
     }
 ]
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 module.exports=[
     {
         "description": "required validation",
@@ -5971,7 +5999,7 @@ module.exports=[
     }
 ]
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer type matches integers",
@@ -6303,7 +6331,7 @@ module.exports=[
     }
 ]
 
-},{}],71:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 module.exports=[
     {
         "description": "uniqueItems validation",
@@ -6384,7 +6412,7 @@ module.exports=[
     }
 ]
 
-},{}],72:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 "use strict";
 
 var isBrowser = typeof window !== "undefined";
@@ -6473,7 +6501,7 @@ describe("Automatic schema loading", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","request":"78LR48"}],73:[function(require,module,exports){
+},{"../../src/ZSchema":"C768cZ","request":"78LR48"}],74:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -6545,7 +6573,7 @@ describe("Basic", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":39,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":40,"../jsonSchemaTestSuite/remotes/integer.json":41,"../jsonSchemaTestSuite/remotes/subSchemas.json":42}],74:[function(require,module,exports){
+},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":40,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":41,"../jsonSchemaTestSuite/remotes/integer.json":42,"../jsonSchemaTestSuite/remotes/subSchemas.json":43}],75:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -6642,7 +6670,7 @@ describe("JsonSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":39,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":40,"../jsonSchemaTestSuite/remotes/integer.json":41,"../jsonSchemaTestSuite/remotes/subSchemas.json":42,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":43,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":44,"../jsonSchemaTestSuite/tests/draft4/allOf.json":45,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":46,"../jsonSchemaTestSuite/tests/draft4/definitions.json":47,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":48,"../jsonSchemaTestSuite/tests/draft4/enum.json":49,"../jsonSchemaTestSuite/tests/draft4/items.json":50,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":51,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":52,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":53,"../jsonSchemaTestSuite/tests/draft4/maximum.json":54,"../jsonSchemaTestSuite/tests/draft4/minItems.json":55,"../jsonSchemaTestSuite/tests/draft4/minLength.json":56,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":57,"../jsonSchemaTestSuite/tests/draft4/minimum.json":58,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":59,"../jsonSchemaTestSuite/tests/draft4/not.json":60,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":61,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":62,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":63,"../jsonSchemaTestSuite/tests/draft4/pattern.json":64,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":65,"../jsonSchemaTestSuite/tests/draft4/properties.json":66,"../jsonSchemaTestSuite/tests/draft4/ref.json":67,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":68,"../jsonSchemaTestSuite/tests/draft4/required.json":69,"../jsonSchemaTestSuite/tests/draft4/type.json":70,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":71}],75:[function(require,module,exports){
+},{"../../src/ZSchema":"C768cZ","../files/draft-04-schema.json":40,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":41,"../jsonSchemaTestSuite/remotes/integer.json":42,"../jsonSchemaTestSuite/remotes/subSchemas.json":43,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":44,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":45,"../jsonSchemaTestSuite/tests/draft4/allOf.json":46,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":47,"../jsonSchemaTestSuite/tests/draft4/definitions.json":48,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":49,"../jsonSchemaTestSuite/tests/draft4/enum.json":50,"../jsonSchemaTestSuite/tests/draft4/items.json":51,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":52,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":53,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":54,"../jsonSchemaTestSuite/tests/draft4/maximum.json":55,"../jsonSchemaTestSuite/tests/draft4/minItems.json":56,"../jsonSchemaTestSuite/tests/draft4/minLength.json":57,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":58,"../jsonSchemaTestSuite/tests/draft4/minimum.json":59,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":60,"../jsonSchemaTestSuite/tests/draft4/not.json":61,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":62,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":63,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":64,"../jsonSchemaTestSuite/tests/draft4/pattern.json":65,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":66,"../jsonSchemaTestSuite/tests/draft4/properties.json":67,"../jsonSchemaTestSuite/tests/draft4/ref.json":68,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":69,"../jsonSchemaTestSuite/tests/draft4/required.json":70,"../jsonSchemaTestSuite/tests/draft4/type.json":71,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":72}],76:[function(require,module,exports){
 /*jshint -W030 */
 
 "use strict";
@@ -6664,6 +6692,7 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/NoExtraKeywords.js"),
     require("../ZSchemaTestSuite/StrictUris.js"),
     require("../ZSchemaTestSuite/MultipleSchemas.js"),
+    require("../ZSchemaTestSuite/ErrorPathAsArray.js"),
     // issues
     require("../ZSchemaTestSuite/Issue12.js"),
     require("../ZSchemaTestSuite/Issue13.js"),
@@ -6696,8 +6725,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 33 files", function () {
-        expect(testSuiteFiles.length).toBe(33);
+    it("should contain 34 files", function () {
+        expect(testSuiteFiles.length).toBe(34);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -6781,4 +6810,4 @@ describe("ZSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":"C768cZ","../ZSchemaTestSuite/AssumeAdditional.js":1,"../ZSchemaTestSuite/CustomFormats.js":2,"../ZSchemaTestSuite/CustomFormatsAsync.js":3,"../ZSchemaTestSuite/ForceAdditional.js":4,"../ZSchemaTestSuite/ForceItems.js":5,"../ZSchemaTestSuite/ForceMaxLength.js":6,"../ZSchemaTestSuite/ForceProperties.js":7,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":8,"../ZSchemaTestSuite/Issue12.js":9,"../ZSchemaTestSuite/Issue13.js":10,"../ZSchemaTestSuite/Issue16.js":11,"../ZSchemaTestSuite/Issue22.js":12,"../ZSchemaTestSuite/Issue25.js":13,"../ZSchemaTestSuite/Issue26.js":14,"../ZSchemaTestSuite/Issue37.js":15,"../ZSchemaTestSuite/Issue40.js":16,"../ZSchemaTestSuite/Issue41.js":17,"../ZSchemaTestSuite/Issue43.js":18,"../ZSchemaTestSuite/Issue44.js":19,"../ZSchemaTestSuite/Issue45.js":20,"../ZSchemaTestSuite/Issue47.js":21,"../ZSchemaTestSuite/Issue48.js":22,"../ZSchemaTestSuite/Issue49.js":23,"../ZSchemaTestSuite/Issue53.js":24,"../ZSchemaTestSuite/Issue56.js":25,"../ZSchemaTestSuite/Issue57.js":26,"../ZSchemaTestSuite/Issue58.js":27,"../ZSchemaTestSuite/MultipleSchemas.js":28,"../ZSchemaTestSuite/NoEmptyArrays.js":29,"../ZSchemaTestSuite/NoEmptyStrings.js":30,"../ZSchemaTestSuite/NoExtraKeywords.js":31,"../ZSchemaTestSuite/NoTypeless.js":32,"../ZSchemaTestSuite/StrictUris.js":33,"../files/draft-04-hyper-schema.json":38,"../files/draft-04-schema.json":39}]},{},[72,73,74,75]);
+},{"../../src/ZSchema":"C768cZ","../ZSchemaTestSuite/AssumeAdditional.js":1,"../ZSchemaTestSuite/CustomFormats.js":2,"../ZSchemaTestSuite/CustomFormatsAsync.js":3,"../ZSchemaTestSuite/ErrorPathAsArray.js":4,"../ZSchemaTestSuite/ForceAdditional.js":5,"../ZSchemaTestSuite/ForceItems.js":6,"../ZSchemaTestSuite/ForceMaxLength.js":7,"../ZSchemaTestSuite/ForceProperties.js":8,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":9,"../ZSchemaTestSuite/Issue12.js":10,"../ZSchemaTestSuite/Issue13.js":11,"../ZSchemaTestSuite/Issue16.js":12,"../ZSchemaTestSuite/Issue22.js":13,"../ZSchemaTestSuite/Issue25.js":14,"../ZSchemaTestSuite/Issue26.js":15,"../ZSchemaTestSuite/Issue37.js":16,"../ZSchemaTestSuite/Issue40.js":17,"../ZSchemaTestSuite/Issue41.js":18,"../ZSchemaTestSuite/Issue43.js":19,"../ZSchemaTestSuite/Issue44.js":20,"../ZSchemaTestSuite/Issue45.js":21,"../ZSchemaTestSuite/Issue47.js":22,"../ZSchemaTestSuite/Issue48.js":23,"../ZSchemaTestSuite/Issue49.js":24,"../ZSchemaTestSuite/Issue53.js":25,"../ZSchemaTestSuite/Issue56.js":26,"../ZSchemaTestSuite/Issue57.js":27,"../ZSchemaTestSuite/Issue58.js":28,"../ZSchemaTestSuite/MultipleSchemas.js":29,"../ZSchemaTestSuite/NoEmptyArrays.js":30,"../ZSchemaTestSuite/NoEmptyStrings.js":31,"../ZSchemaTestSuite/NoExtraKeywords.js":32,"../ZSchemaTestSuite/NoTypeless.js":33,"../ZSchemaTestSuite/StrictUris.js":34,"../files/draft-04-hyper-schema.json":39,"../files/draft-04-schema.json":40}]},{},[73,74,75,76]);

@@ -77,12 +77,12 @@ var requiredUrl = "http://json-schema.org/draft-04/schema";
 request(requiredUrl, function (error, response, body) {
 
     validator.setRemoteReference(requiredUrl, JSON.parse(body));
-    
+
     var valid = validator.validate(json, schema);
     var errors = validator.getLastErrors();
     // valid === true
     // errors === undefined
-    
+
 }
 ```
 
@@ -336,6 +336,16 @@ Strict mode of z-schema is currently equal to the following:
 ```javascript
 var validator = new ZSchema({
     strictMode: true
+});
+```
+
+##reportPathAsArray
+
+Report error paths as an array of path segments instead of a string:
+
+```javascript
+var validator = new ZSchema({
+    reportPathAsArray: true
 });
 ```
 

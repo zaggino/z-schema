@@ -834,8 +834,15 @@ if (typeof Number.isFinite !== "function") {
 
 var Errors = require("./Errors");
 
-function Report(parentReport) {
-    this.parentReport = parentReport || undefined;
+function Report(parentOrOptions) {
+    this.parentReport = parentOrOptions instanceof Report ?
+                            parentOrOptions :
+                            undefined;
+
+    this.options = parentOrOptions instanceof Report ?
+                       parentOrOptions.options :
+                       parentOrOptions || {};
+
     this.errors = [];
     this.path = [];
     this.asyncTasks = [];
@@ -899,12 +906,29 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
 };
 
 Report.prototype.getPath = function () {
-    var path = ["#"];
+    var path = [];
+    var response;
     if (this.parentReport) {
         path = path.concat(this.parentReport.path);
     }
     path = path.concat(this.path);
-    return path.length === 1 ? "#/" : path.join("/");
+
+    if (this.options.reportPathAsArray === true) {
+        response = [];
+        // Since path entries can have square brackets in them and we don't want them when displaying the path as an
+        // array of path segments, we need to remove them.  https://github.com/zaggino/z-schema/issues/59 would fix this
+        // as array/object indices/keys would not be surrounded by brackets to support JSON Pointer strings.
+        path.forEach(function (entry) {
+            entry.replace(/[\[\]']+/g, " ").split(" ").forEach(function (segment) {
+                if (segment) {
+                    response.push(segment);
+                }
+            });
+        });
+    } else {
+        response = "#/" + path.join("/");
+    }
+    return response;
 };
 
 Report.prototype.addError = function (errorCode, params, subReports, schemaDescription) {
@@ -1985,7 +2009,9 @@ var defaultOptions = {
     // forces "uri" format to be in fully rfc3986 compliant
     strictUris: false,
     // turn on some of the above
-    strictMode: false
+    strictMode: false,
+    // report error paths as an array of path segments to get to the offending node
+    reportPathAsArray: false
 };
 
 /*
@@ -2025,7 +2051,7 @@ function ZSchema(options) {
     instance methods
 */
 ZSchema.prototype.compileSchema = function (schema) {
-    var report = new Report();
+    var report = new Report(this.options);
 
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
@@ -2037,7 +2063,7 @@ ZSchema.prototype.compileSchema = function (schema) {
     return report.isValid();
 };
 ZSchema.prototype.validateSchema = function (schema) {
-    var report = new Report();
+    var report = new Report(this.options);
 
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
@@ -2050,7 +2076,7 @@ ZSchema.prototype.validateSchema = function (schema) {
     return report.isValid();
 };
 ZSchema.prototype.validate = function (json, schema, callback) {
-    var report = new Report();
+    var report = new Report(this.options);
 
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
