@@ -16,6 +16,7 @@
 - [Features](#features)
 - [Options](#options)
 - [Benchmarks](#benchmarks)
+- [Contributors](#contributors)
 
 #Usage
 
@@ -369,3 +370,12 @@ So how does it compare to version 2.x and others?
 **NOTE: these tests are purely orientational, they don't consider extra features any of the validator may support and implement**
 
 [rawgithub.com/zaggino/z-schema/master/benchmark/results.html](https://rawgithub.com/zaggino/z-schema/master/benchmark/results.html)
+
+#Contributors
+
+Thanks for contributing to:
+
+- [Jeremy Whitlock](https://github.com/whitlockjc)
+- [Oleksiy Krivoshey](https://github.com/oleksiyk)
+
+and to everyone submitting [issues](https://github.com/zaggino/z-schema/issues) on GitHub
