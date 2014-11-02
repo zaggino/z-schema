@@ -51,7 +51,11 @@ function findId(schema, id) {
         var keys = Object.keys(schema);
         idx = keys.length;
         while (idx--) {
-            result = findId(schema[keys[idx]], id);
+            var k = keys[idx];
+            if (k.indexOf("__$") === 0) {
+                continue;
+            }
+            result = findId(schema[k], id);
             if (result) { return result; }
         }
     }
