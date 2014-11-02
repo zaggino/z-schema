@@ -30,8 +30,14 @@ function findId(schema, id) {
     }
 
     // no id means root so return itself
-    if (!id || schema.id === id) {
+    if (!id) {
         return schema;
+    }
+
+    if (schema.id) {
+        if (schema.id === id || schema.id[0] === "#" && schema.id.substring(1) === id) {
+            return schema;
+        }
     }
 
     var idx, result;
