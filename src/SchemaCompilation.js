@@ -60,7 +60,7 @@ function collectReferences(obj, results, scope, path) {
             ref: mergeReference(scope, obj.$ref),
             key: "$ref",
             obj: obj,
-            path: path.join("/")
+            path: path.slice(0)
         });
     }
     if (typeof obj.$schema === "string") {
@@ -68,7 +68,7 @@ function collectReferences(obj, results, scope, path) {
             ref: mergeReference(scope, obj.$schema),
             key: "$schema",
             obj: obj,
-            path: path.join("/")
+            path: path.slice(0)
         });
     }
 
@@ -76,7 +76,7 @@ function collectReferences(obj, results, scope, path) {
     if (Array.isArray(obj)) {
         idx = obj.length;
         while (idx--) {
-            path.push(idx);
+            path.push(idx.toString());
             collectReferences(obj[idx], results, scope, path);
             path.pop();
         }
@@ -187,9 +187,9 @@ exports.compileSchema = function (report, schema) {
         var response = SchemaCache.getSchemaByUri.call(this, report, refObj.ref, schema);
         if (!response) {
             if (!isAbsoluteUri(refObj.ref) || this.options.ignoreUnresolvableReferences !== true) {
-                report.path.push(refObj.path);
+                Array.prototype.push.apply(report.path, refObj.path);
                 report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref]);
-                report.path.pop();
+                report.path.slice(0, -refObj.path.length);
                 return false;
             }
         }
