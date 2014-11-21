@@ -190,7 +190,6 @@ exports.compileSchema = function (report, schema) {
                 Array.prototype.push.apply(report.path, refObj.path);
                 report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref]);
                 report.path.slice(0, -refObj.path.length);
-                return false;
             }
         }
         // this might create circular references
