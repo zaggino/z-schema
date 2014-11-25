@@ -1,5 +1,6 @@
 "use strict";
 
+var Report              = require("./Report");
 var SchemaCompilation   = require("./SchemaCompilation");
 var SchemaValidation    = require("./SchemaValidation");
 
@@ -90,11 +91,23 @@ exports.getSchemaByUri = function (report, uri, root) {
         var compileRemote = result !== root;
         // now we need to compile and validate resolved schema (in case it's not already)
         if (compileRemote) {
+
             report.path.push(remotePath);
-            var ok = SchemaCompilation.compileSchema.call(this, report, result);
-            if (ok) { ok = SchemaValidation.validateSchema.call(this, report, result); }
+
+            var remoteReport = new Report(report);
+            if (SchemaCompilation.compileSchema.call(this, remoteReport, result)) {
+                SchemaValidation.validateSchema.call(this, remoteReport, result);
+            }
+            var remoteReportIsValid = remoteReport.isValid();
+            if (!remoteReportIsValid) {
+                report.addError("REMOTE_NOT_VALID", [uri], remoteReport);
+            }
+
             report.path.pop();
-            if (!ok) { return undefined; }
+
+            if (!remoteReportIsValid) {
+                return undefined;
+            }
         }
     }
 

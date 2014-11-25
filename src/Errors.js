@@ -53,6 +53,7 @@ module.exports = {
     SCHEMA_TYPE_EXPECTED:                   "Schema is expected to be of type 'object'",
     SCHEMA_NOT_AN_OBJECT:                   "Schema is not an object: {0}",
     ASYNC_TIMEOUT:                          "{0} asynchronous task(s) have timed out after {1} ms",
-    PARENT_SCHEMA_VALIDATION_FAILED:        "Schema failed to validate against its parent schema, see inner errors for details."
+    PARENT_SCHEMA_VALIDATION_FAILED:        "Schema failed to validate against its parent schema, see inner errors for details.",
+    REMOTE_NOT_VALID:                       "Remote reference didn't compile successfully: {0}"
 
 };
