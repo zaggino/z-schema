@@ -119,7 +119,8 @@ module.exports = {
     SCHEMA_TYPE_EXPECTED:                   "Schema is expected to be of type 'object'",
     SCHEMA_NOT_AN_OBJECT:                   "Schema is not an object: {0}",
     ASYNC_TIMEOUT:                          "{0} asynchronous task(s) have timed out after {1} ms",
-    PARENT_SCHEMA_VALIDATION_FAILED:        "Schema failed to validate against its parent schema, see inner errors for details."
+    PARENT_SCHEMA_VALIDATION_FAILED:        "Schema failed to validate against its parent schema, see inner errors for details.",
+    REMOTE_NOT_VALID:                       "Remote reference didn't compile successfully: {0}"
 
 };
 
@@ -971,6 +972,7 @@ module.exports = Report;
 },{"+NscNm":1,"./Errors":2}],7:[function(require,module,exports){
 "use strict";
 
+var Report              = require("./Report");
 var SchemaCompilation   = require("./SchemaCompilation");
 var SchemaValidation    = require("./SchemaValidation");
 
@@ -1061,11 +1063,23 @@ exports.getSchemaByUri = function (report, uri, root) {
         var compileRemote = result !== root;
         // now we need to compile and validate resolved schema (in case it's not already)
         if (compileRemote) {
+
             report.path.push(remotePath);
-            var ok = SchemaCompilation.compileSchema.call(this, report, result);
-            if (ok) { ok = SchemaValidation.validateSchema.call(this, report, result); }
+
+            var remoteReport = new Report(report);
+            if (SchemaCompilation.compileSchema.call(this, remoteReport, result)) {
+                SchemaValidation.validateSchema.call(this, remoteReport, result);
+            }
+            var remoteReportIsValid = remoteReport.isValid();
+            if (!remoteReportIsValid) {
+                report.addError("REMOTE_NOT_VALID", [uri], remoteReport);
+            }
+
             report.path.pop();
-            if (!ok) { return undefined; }
+
+            if (!remoteReportIsValid) {
+                return undefined;
+            }
         }
     }
 
@@ -1086,7 +1100,7 @@ exports.getSchemaByUri = function (report, uri, root) {
 
 exports.getRemotePath = getRemotePath;
 
-},{"./SchemaCompilation":8,"./SchemaValidation":9}],8:[function(require,module,exports){
+},{"./Report":6,"./SchemaCompilation":8,"./SchemaValidation":9}],8:[function(require,module,exports){
 "use strict";
 
 var Report = require("./Report");
