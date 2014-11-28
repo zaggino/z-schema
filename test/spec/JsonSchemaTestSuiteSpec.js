@@ -18,18 +18,19 @@ var jsonSchemaTestSuiteFiles = [
     require("../jsonSchemaTestSuite/tests/draft4/additionalProperties.json"),
     require("../jsonSchemaTestSuite/tests/draft4/allOf.json"),
     require("../jsonSchemaTestSuite/tests/draft4/anyOf.json"),
+    require("../jsonSchemaTestSuite/tests/draft4/default.json"),
     require("../jsonSchemaTestSuite/tests/draft4/definitions.json"),
     require("../jsonSchemaTestSuite/tests/draft4/dependencies.json"),
     require("../jsonSchemaTestSuite/tests/draft4/enum.json"),
     require("../jsonSchemaTestSuite/tests/draft4/items.json"),
+    require("../jsonSchemaTestSuite/tests/draft4/maximum.json"),
     require("../jsonSchemaTestSuite/tests/draft4/maxItems.json"),
     require("../jsonSchemaTestSuite/tests/draft4/maxLength.json"),
     require("../jsonSchemaTestSuite/tests/draft4/maxProperties.json"),
-    require("../jsonSchemaTestSuite/tests/draft4/maximum.json"),
+    require("../jsonSchemaTestSuite/tests/draft4/minimum.json"),
     require("../jsonSchemaTestSuite/tests/draft4/minItems.json"),
     require("../jsonSchemaTestSuite/tests/draft4/minLength.json"),
     require("../jsonSchemaTestSuite/tests/draft4/minProperties.json"),
-    require("../jsonSchemaTestSuite/tests/draft4/minimum.json"),
     require("../jsonSchemaTestSuite/tests/draft4/multipleOf.json"),
     require("../jsonSchemaTestSuite/tests/draft4/not.json"),
     require("../jsonSchemaTestSuite/tests/draft4/oneOf.json"),
@@ -57,8 +58,8 @@ var testExcludes = [
 
 describe("JsonSchemaTestSuite", function () {
 
-    it("should contain 29 files", function () {
-        expect(jsonSchemaTestSuiteFiles.length).toBe(29);
+    it("should contain 30 files", function () {
+        expect(jsonSchemaTestSuiteFiles.length).toBe(30);
     });
 
     jsonSchemaTestSuiteFiles.forEach(function (testDefinitions, fileIndex) {
