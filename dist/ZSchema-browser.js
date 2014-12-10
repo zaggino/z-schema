@@ -1,4 +1,4 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.ZSchema=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -6,6 +6,8 @@ var process = module.exports = {};
 process.nextTick = (function () {
     var canSetImmediate = typeof window !== 'undefined'
     && window.setImmediate;
+    var canMutationObserver = typeof window !== 'undefined'
+    && window.MutationObserver;
     var canPost = typeof window !== 'undefined'
     && window.postMessage && window.addEventListener
     ;
@@ -14,8 +16,29 @@ process.nextTick = (function () {
         return function (f) { return window.setImmediate(f) };
     }
 
+    var queue = [];
+
+    if (canMutationObserver) {
+        var hiddenDiv = document.createElement("div");
+        var observer = new MutationObserver(function () {
+            var queueList = queue.slice();
+            queue.length = 0;
+            queueList.forEach(function (fn) {
+                fn();
+            });
+        });
+
+        observer.observe(hiddenDiv, { attributes: true });
+
+        return function nextTick(fn) {
+            if (!queue.length) {
+                hiddenDiv.setAttribute('yes', 'no');
+            }
+            queue.push(fn);
+        };
+    }
+
     if (canPost) {
-        var queue = [];
         window.addEventListener('message', function (ev) {
             var source = ev.source;
             if ((source === window || source === null) && ev.data === 'process-tick') {
@@ -55,7 +78,7 @@ process.emit = noop;
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
-}
+};
 
 // TODO(shtylman)
 process.cwd = function () { return '/' };
@@ -968,8 +991,8 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
 
 module.exports = Report;
 
-}).call(this,require("+NscNm"))
-},{"+NscNm":1,"./Errors":2}],7:[function(require,module,exports){
+}).call(this,require('_process'))
+},{"./Errors":2,"_process":1}],7:[function(require,module,exports){
 "use strict";
 
 var Report              = require("./Report");
@@ -1997,7 +2020,7 @@ exports.clone = function (src) {
     return res;
 };
 
-},{}],"C768cZ":[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 require("./Polyfills");
@@ -2178,12 +2201,8 @@ ZSchema.prototype.setRemoteReference = function (uri, schema) {
 ZSchema.registerFormat = function (formatName, validatorFunction) {
     FormatValidators[formatName] = validatorFunction;
 };
-ZSchema.registerFormatter = function (/* formatterName, formatterFunction */) {
-
-};
 
 module.exports = ZSchema;
 
-},{"./FormatValidators":3,"./JsonValidation":4,"./Polyfills":5,"./Report":6,"./SchemaCache":7,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}],"ZSchema":[function(require,module,exports){
-module.exports=require('C768cZ');
-},{}]},{},[2,3,4,5,6,7,8,9,10,"C768cZ"]);
+},{"./FormatValidators":3,"./JsonValidation":4,"./Polyfills":5,"./Report":6,"./SchemaCache":7,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}]},{},[2,3,4,5,6,7,8,9,10,11])(11)
+});
