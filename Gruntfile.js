@@ -1,3 +1,7 @@
+/*global require,module*/
+
+var remapify = require("remapify");
+
 module.exports = function (grunt) {
 
     // Project configuration.
@@ -38,15 +42,22 @@ module.exports = function (grunt) {
                 src: ["src/**/*.js"],
                 dest: "dist/ZSchema-browser.js",
                 options: {
-                    alias: ["src/ZSchema.js:ZSchema"]
+                    preBundleCB: function (b) {
+                        b.plugin(remapify, [
+                            {
+                                src: "src/ZSchema.js",
+                                expose: "ZSchema"
+                            }
+                        ]);
+                    },
+                    browserifyOptions: {
+                        standalone: "ZSchema"
+                    }
                 }
             },
             test: {
                 src: ["test/spec/**/*.js"],
-                dest: "dist/ZSchema-browser-test.js",
-                options: {
-                    external: ["src/**/*.js", "request"]
-                }
+                dest: "dist/ZSchema-browser-test.js"
             }
         },
         jasmine: {
@@ -59,6 +70,9 @@ module.exports = function (grunt) {
             src: {
                 files: {
                     "dist/ZSchema-browser-min.js": ["dist/ZSchema-browser.js"]
+                },
+                options: {
+                    sourceMap: true
                 }
             }
         }
@@ -67,7 +81,7 @@ module.exports = function (grunt) {
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks("grunt-lineending");
     grunt.loadNpmTasks("grunt-contrib-jshint");
-    grunt.loadNpmTasks("grunt-jscs-checker");
+    grunt.loadNpmTasks("grunt-jscs");
     grunt.loadNpmTasks("grunt-jasmine-node");
     grunt.loadNpmTasks("grunt-browserify");
     grunt.loadNpmTasks("grunt-contrib-jasmine");

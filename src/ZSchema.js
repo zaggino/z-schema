@@ -178,8 +178,5 @@ ZSchema.prototype.setRemoteReference = function (uri, schema) {
 ZSchema.registerFormat = function (formatName, validatorFunction) {
     FormatValidators[formatName] = validatorFunction;
 };
-ZSchema.registerFormatter = function (/* formatterName, formatterFunction */) {
-
-};
 
 module.exports = ZSchema;

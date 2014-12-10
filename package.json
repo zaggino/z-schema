@@ -55,15 +55,16 @@
   },
   "devDependencies": {
     "grunt": "latest",
-    "grunt-browserify": "2.x",
+    "grunt-browserify": "latest",
     "grunt-contrib-jasmine": "latest",
     "grunt-contrib-jshint": "latest",
     "grunt-contrib-uglify": "latest",
     "grunt-jasmine-node": "latest",
-    "grunt-jscs-checker": "latest",
+    "grunt-jscs": "latest",
     "grunt-lineending": "latest",
     "jasmine-node": "latest",
     "jasmine-reporters": "latest",
+    "remapify": "latest",
     "request": "latest"
   }
 }
