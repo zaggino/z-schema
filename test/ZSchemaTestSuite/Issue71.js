@@ -7,12 +7,12 @@ module.exports = {
             description: "should have two errors",
 
             schema: {
-                type: 'object',
+                type: "object",
                 minProperties: 1,
                 additionalProperties: false,
                 properties: {
                     foo: {
-                        type: 'object',
+                        type: "object",
                         minProperties: 1
                     }
                 }
@@ -22,8 +22,8 @@ module.exports = {
 
             valid: false,
 
-            after: function(errors) {
-                expect(errors.length).toBe(2);
+            after: function (errors) {
+                expect(errors.length).toBe(1);
             }
         },
 
@@ -31,12 +31,12 @@ module.exports = {
             description: "should have two errors",
 
             schema: {
-                type: 'object',
+                type: "object",
                 minProperties: 1,
                 additionalProperties: false,
                 properties: {
                     foo: {
-                        type: 'object',
+                        type: "object",
                         minProperties: 1,
                         additionalProperties: false,
                         properties: {
@@ -50,8 +50,8 @@ module.exports = {
 
             valid: false,
 
-            after: function(errors) {
-                expect(errors.length).toBe(2);
+            after: function (errors) {
+                expect(errors.length).toBe(1);
             }
         }
     ]

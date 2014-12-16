@@ -499,10 +499,12 @@ exports.validate = function (report, schema, json) {
         }
     }
 
-    if (jsonType === "array") {
-        recurseArray.call(this, report, schema, json);
-    } else if (jsonType === "object") {
-        recurseObject.call(this, report, schema, json);
+    if (report.errors.length === 0) {
+        if (jsonType === "array") {
+            recurseArray.call(this, report, schema, json);
+        } else if (jsonType === "object") {
+            recurseObject.call(this, report, schema, json);
+        }
     }
 
     // we don't need the root pointer anymore
