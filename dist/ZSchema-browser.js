@@ -799,12 +799,16 @@ exports.validate = function (report, schema, json) {
         if (typeof schema.type === "string") {
             if (jsonType !== schema.type && (jsonType !== "integer" || schema.type !== "number")) {
                 report.addError("INVALID_TYPE", [schema.type, jsonType], null, schema.description);
-                return false;
+                if (this.options.breakOnFirstError) {
+                    return false;
+                }
             }
         } else {
             if (schema.type.indexOf(jsonType) === -1 && (jsonType !== "integer" || schema.type.indexOf("number") === -1)) {
                 report.addError("INVALID_TYPE", [schema.type, jsonType], null, schema.description);
-                return false;
+                if (this.options.breakOnFirstError) {
+                    return false;
+                }
             }
         }
     }
@@ -814,14 +818,16 @@ exports.validate = function (report, schema, json) {
     while (idx--) {
         if (JsonValidators[keys[idx]]) {
             JsonValidators[keys[idx]].call(this, report, schema, json);
-            if (report.errors.length) { break; }
+            if (report.errors.length && this.options.breakOnFirstError) { break; }
         }
     }
 
-    if (jsonType === "array") {
-        recurseArray.call(this, report, schema, json);
-    } else if (jsonType === "object") {
-        recurseObject.call(this, report, schema, json);
+    if (report.errors.length === 0 || this.options.breakOnFirstError === false) {
+        if (jsonType === "array") {
+            recurseArray.call(this, report, schema, json);
+        } else if (jsonType === "object") {
+            recurseObject.call(this, report, schema, json);
+        }
     }
 
     // we don't need the root pointer anymore
@@ -2063,7 +2069,9 @@ var defaultOptions = {
     // turn on some of the above
     strictMode: false,
     // report error paths as an array of path segments to get to the offending node
-    reportPathAsArray: false
+    reportPathAsArray: false,
+    // stops validation as soon as an error is found, true by default but can be turned off
+    breakOnFirstError: true
 };
 
 /*
@@ -2097,6 +2105,7 @@ function ZSchema(options) {
         this.options.noEmptyStrings   = true;
         this.options.noEmptyArrays    = true;
     }
+
 }
 
 /*
