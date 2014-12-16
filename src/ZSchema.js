@@ -40,7 +40,9 @@ var defaultOptions = {
     // turn on some of the above
     strictMode: false,
     // report error paths as an array of path segments to get to the offending node
-    reportPathAsArray: false
+    reportPathAsArray: false,
+    // stops validation as soon as an error is found, true by default but can be turned off
+    breakOnFirstError: true
 };
 
 /*
@@ -74,6 +76,7 @@ function ZSchema(options) {
         this.options.noEmptyStrings   = true;
         this.options.noEmptyArrays    = true;
     }
+
 }
 
 /*

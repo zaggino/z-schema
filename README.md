@@ -106,6 +106,8 @@ request(requiredUrl, function (error, response, body) {
 - [Ignore remote references to schemas that are not cached or resolvable](#ignoreunresolvablereferences)
 - [Only allow strictly absolute URIs to be used in schemas](#stricturis)
 - [Turn on z-schema strict mode](#strictmode)
+- [Set validator to collect as many errors as possible](#breakonfirsterror)
+- [Report paths in errors as arrays so they can be processed easier](#reportpathasarray)
 
 ##Compile arrays of schemas and use references between them
 
@@ -337,6 +339,16 @@ Strict mode of z-schema is currently equal to the following:
 ```javascript
 var validator = new ZSchema({
     strictMode: true
+});
+```
+
+##breakOnFirstError
+
+By default, z-schema stops validation after the first error is found. With this you can tell it to continue validating anyway:
+
+```javascript
+var validator = new ZSchema({
+    breakOnFirstError: false
 });
 ```
 
