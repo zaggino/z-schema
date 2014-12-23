@@ -1187,7 +1187,7 @@ function collectReferences(obj, results, scope, path) {
         scope.push(obj.id);
     }
 
-    if (typeof obj.$ref === "string") {
+    if (typeof obj.$ref === "string" && typeof obj.__$refResolved === "undefined") {
         results.push({
             ref: mergeReference(scope, obj.$ref),
             key: "$ref",
@@ -1195,7 +1195,7 @@ function collectReferences(obj, results, scope, path) {
             path: path.slice(0)
         });
     }
-    if (typeof obj.$schema === "string") {
+    if (typeof obj.$schema === "string" && typeof obj.__$schemaResolved === "undefined") {
         results.push({
             ref: mergeReference(scope, obj.$schema),
             key: "$schema",
@@ -1250,6 +1250,16 @@ var compileArrayOfSchemasLoop = function (mainReport, arr) {
     return compiledCount;
 };
 
+function findId(arr, id) {
+    var idx = arr.length;
+    while (idx--) {
+        if (arr[idx].id === id) {
+            return arr[idx];
+        }
+    }
+    return null;
+}
+
 var compileArrayOfSchemas = function (report, arr) {
 
     var compiled = 0,
@@ -1270,6 +1280,28 @@ var compileArrayOfSchemas = function (report, arr) {
 
         // count how many are compiled now
         compiled = compileArrayOfSchemasLoop.call(this, report, arr);
+
+        // fix __$missingReferences if possible
+        idx = arr.length;
+        while (idx--) {
+            var sch = arr[idx];
+            if (sch.__$missingReferences) {
+                var idx2 = sch.__$missingReferences.length;
+                while (idx2--) {
+                    var refObj = sch.__$missingReferences[idx2];
+                    var response = findId(arr, refObj.ref);
+                    if (response) {
+                        // this might create circular references
+                        refObj.obj["__" + refObj.key + "Resolved"] = response;
+                        // it's resolved now so delete it
+                        sch.__$missingReferences.splice(idx2, 1);
+                    }
+                }
+                if (sch.__$missingReferences.length === 0) {
+                    delete sch.__$missingReferences;
+                }
+            }
+        }
 
         // keep repeating if not all compiled and at least one more was compiled in the last loop
     } while (compiled !== arr.length && compiled !== lastLoopCompiled);
@@ -1310,6 +1342,10 @@ exports.compileSchema = function (report, schema) {
         SchemaCache.cacheSchemaByUri.call(this, schema.id, schema);
     }
 
+    // delete all __$missingReferences from previous compilation attempts
+    var isValidExceptReferences = report.isValid();
+    delete schema.__$missingReferences;
+
     // collect all references that need to be resolved - $ref and $schema
     var refs = collectReferences.call(this, schema),
         idx = refs.length;
@@ -1322,6 +1358,12 @@ exports.compileSchema = function (report, schema) {
                 Array.prototype.push.apply(report.path, refObj.path);
                 report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref]);
                 report.path.slice(0, -refObj.path.length);
+
+                // pusblish unresolved references out
+                if (isValidExceptReferences) {
+                    schema.__$missingReferences = schema.__$missingReferences || [];
+                    schema.__$missingReferences.push(refObj);
+                }
             }
         }
         // this might create circular references
