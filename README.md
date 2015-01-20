@@ -156,7 +156,7 @@ var allSchemasValid = validator.validateSchema(schemas);
 // allSchemasValid === true
 
 // now validate our data against the last schema
-var valid = validator(data, schemas[2]);
+var valid = validator.validate(data, schemas[2]);
 // valid === true
 ```
 
