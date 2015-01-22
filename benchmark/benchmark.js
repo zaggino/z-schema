@@ -14,6 +14,7 @@ var jjv = require("jjv");
 var Jsck = require("jsck");
 var JsonModel = require("json-model");
 var JsonSchema = require("jsonschema");
+// var RequestValidator = require("request-validator");
 var tv4 = require("tv4");
 
 Tester.registerValidator({
@@ -122,6 +123,24 @@ Tester.registerValidator({
         return instance.validate(json, schema).errors.length === 0;
     }
 });
+
+/*
+Tester.registerValidator({
+    name: "request-validator",
+    setup: function () {
+        return RequestValidator;
+    },
+    test: function (validator, json, schema) {
+        try {
+            // expect to throw
+            validator(schema).validate(json);
+        } catch (e) {
+            return false;
+        }
+        return true;
+    }
+});
+*/
 
 Tester.registerValidator({
     name: "tv4",

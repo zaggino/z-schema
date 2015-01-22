@@ -13,6 +13,7 @@
         "jsck": "latest",
         "json-model": "latest",
         "jsonschema": "latest",
+        "request-validator": "latest",
         "tv4": "latest",
         "z-schema": "2.x"
     }
