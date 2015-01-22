@@ -14,6 +14,7 @@
         "json-model": "latest",
         "jsonschema": "latest",
         "request-validator": "latest",
+        "skeemas": "latest",
         "tv4": "latest",
         "z-schema": "2.x"
     }

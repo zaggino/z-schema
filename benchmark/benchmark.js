@@ -15,6 +15,7 @@ var Jsck = require("jsck");
 var JsonModel = require("json-model");
 var JsonSchema = require("jsonschema");
 // var RequestValidator = require("request-validator");
+var Skeemas = require("skeemas");
 var tv4 = require("tv4");
 
 Tester.registerValidator({
@@ -141,6 +142,16 @@ Tester.registerValidator({
     }
 });
 */
+
+Tester.registerValidator({
+    name: "skeemas",
+    setup: function () {
+        return Skeemas;
+    },
+    test: function (skeemas, json, schema) {
+        return skeemas.validate(json, schema).valid;
+    }
+});
 
 Tester.registerValidator({
     name: "tv4",
