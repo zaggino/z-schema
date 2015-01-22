@@ -1,3 +1,6 @@
+/*jshint node:true*/
+/*global require*/
+
 "use strict";
 
 var Tester = require("./tester");
@@ -8,7 +11,8 @@ var JaySchema = require("jayschema");
 var jjv = require("jjv");
 var JsonSchema = require("jsonschema");
 var tv4 = require("tv4");
-var JsonModel = require('json-model');
+var JsonModel = require("json-model");
+var IsMyJsonValid = require("is-my-json-valid");
 
 Tester.registerValidator({
     name: "z-schema-3",
@@ -33,6 +37,21 @@ Tester.registerValidator({
 });
 
 Tester.registerValidator({
+    name: "is-my-json-valid",
+    setup: function () {
+        return IsMyJsonValid;
+    },
+    test: function (validator, json, schema) {
+        // If we're repeatedly testing the same schema, use the existing validate
+        if (this.lastSchema !== schema) {
+            this.lastSchema = schema;
+            this.validate = validator(schema);
+        }
+        return this.validate(json);
+    }
+});
+
+Tester.registerValidator({
     name: "jayschema",
     setup: function () {
         return new JaySchema();
@@ -53,6 +72,21 @@ Tester.registerValidator({
 });
 
 Tester.registerValidator({
+    name: "json-model",
+    setup: function () {
+        return JsonModel;
+    },
+    test: function (instance, json, schema) {
+        // If we're repeatedly testing the same schema, use the existing validator
+        if (this.lastSchema !== schema) {
+            this.lastSchema = schema;
+            this.validator = JsonModel.validator(schema);
+        }
+        return this.validator(json).valid === true;
+    }
+});
+
+Tester.registerValidator({
     name: "jsonschema",
     setup: function () {
         return new JsonSchema.Validator();
@@ -69,21 +103,6 @@ Tester.registerValidator({
     },
     test: function (instance, json, schema) {
         return instance.validateResult(json, schema).valid === true;
-    }
-});
-
-
-var lastSchema = null, lastValidator = null;
-Tester.registerValidator({
-    name: "json-model",
-    setup: function () {
-        return JsonModel;
-    },
-    test: function (instance, json, schema) {
-        // If we're repeatedly testing the same schema, use the existing validator
-        var validator = lastValidator = (lastSchema === schema) ? lastValidator : JsonModel.validator(schema);
-        lastSchema = schema;
-        return validator(json).valid === true;
     }
 });
 

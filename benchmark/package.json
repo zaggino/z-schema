@@ -6,11 +6,12 @@
         "benchmark": "latest",
         "lodash": "latest",
         "mustache": "latest",
+        "is-my-json-valid": "latest",
         "jayschema": "latest",
         "jjv": "latest",
+        "json-model": "latest",
         "jsonschema": "latest",
         "tv4": "latest",
-        "z-schema": "2.x",
-        "json-model": "^0.2.24"
+        "z-schema": "2.x"
     }
 }
