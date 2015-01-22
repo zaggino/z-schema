@@ -7,12 +7,14 @@ var Tester = require("./tester");
 
 var ZSchema3 = require("../src/ZSchema");
 var ZSchema = require("z-schema");
+var IsMyJsonValid = require("is-my-json-valid");
+var Jassi = require("jassi");
 var JaySchema = require("jayschema");
 var jjv = require("jjv");
+var Jsck = require("jsck");
+var JsonModel = require("json-model");
 var JsonSchema = require("jsonschema");
 var tv4 = require("tv4");
-var JsonModel = require("json-model");
-var IsMyJsonValid = require("is-my-json-valid");
 
 Tester.registerValidator({
     name: "z-schema-3",
@@ -52,6 +54,16 @@ Tester.registerValidator({
 });
 
 Tester.registerValidator({
+    name: "jassi",
+    setup: function () {
+        return Jassi;
+    },
+    test: function (jassi, json, schema) {
+        return jassi(json, schema).length === 0;
+    }
+});
+
+Tester.registerValidator({
     name: "jayschema",
     setup: function () {
         return new JaySchema();
@@ -83,6 +95,21 @@ Tester.registerValidator({
             this.validator = JsonModel.validator(schema);
         }
         return this.validator(json).valid === true;
+    }
+});
+
+Tester.registerValidator({
+    name: "jsck",
+    setup: function () {
+        return Jsck;
+    },
+    test: function (jsck, json, schema) {
+        // Use validateRaw for the first time, validate for the rest with the same schema
+        if (this.lastSchema !== schema) {
+            this.lastSchema = schema;
+            this.validator = new jsck.draft4(schema);
+        }
+        return this.validator.validate(json).valid;
     }
 });
 
