@@ -98,7 +98,7 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
     var idx = params.length,
         errorMessage = Errors[errorCode];
     while (idx--) {
-        errorMessage = errorMessage.replace("{" + idx + "}", params[idx]);
+        errorMessage = errorMessage.replace("{" + idx + "}", JSON.stringify(params[idx]) || "undefined");
     }
 
     var err = {
