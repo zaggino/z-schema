@@ -94,14 +94,13 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
     if (!Errors[errorCode]) { throw new Error("No errorMessage known for code " + errorCode); }
 
     params = params || [];
-
-	var m = "";
-	var idx = params.length,
-		errorMessage = Errors[errorCode];
-	while (idx--) {
-		m = (typeof params[idx] === "object" ? JSON.stringify(params[idx]) : params[idx]);
-		errorMessage = errorMessage.replace("{" + idx + "}", (m ? m : "null"));
-	}
+    var m = "";
+    var idx = params.length,
+        errorMessage = Errors[errorCode];
+    while (idx--) {
+        m = (typeof params[idx] === "object" ? JSON.stringify(params[idx]) : params[idx]);
+        errorMessage = errorMessage.replace("{" + idx + "}", (m ? m : "null"));
+    }
 
     var err = {
         code: errorCode,
