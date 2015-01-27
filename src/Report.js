@@ -96,11 +96,11 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
     params = params || [];
 
 
-	var m = '';
+	var m = "";
 	var idx = params.length,
 		errorMessage = Errors[errorCode];
 	while (idx--) {
-		m = ( typeof params[idx] === 'object' ? JSON.stringify(params[idx]) : params[idx]);
+		m = ( typeof params[idx] === "object" ? JSON.stringify(params[idx]) : params[idx]);
 		errorMessage = errorMessage.replace("{" + idx + "}", m);
 	}
 
