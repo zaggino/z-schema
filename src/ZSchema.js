@@ -139,6 +139,16 @@ ZSchema.prototype.validate = function (json, schema, callback) {
     this.lastReport = report;
     return report.isValid();
 };
+ZSchema.prototype.getLastError = function () {
+    if (this.lastReport.errors.length === 0) {
+        return null;
+    }
+    var e = new Error();
+    e.name = "z-schema validation error";
+    e.message = this.lastReport.commonErrorMessage;
+    e.details = this.lastReport.errors;
+    return e;
+};
 ZSchema.prototype.getLastErrors = function () {
     return this.lastReport.errors.length > 0 ? this.lastReport.errors : undefined;
 };

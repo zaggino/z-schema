@@ -481,6 +481,8 @@ var validateArrayOfSchemas = function (report, arr) {
 
 exports.validateSchema = function (report, schema) {
 
+    report.commonErrorMessage = "SCHEMA_VALIDATION_FAILED";
+
     // if schema is an array, assume it's an array of schemas
     if (Array.isArray(schema)) {
         return validateArrayOfSchemas.call(this, report, schema);

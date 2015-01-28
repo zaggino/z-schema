@@ -34,7 +34,10 @@ var validator = new ZSchema(options);
 
 ```javascript
 var valid = validator.validate(json, schema);
-var err = validator.getLastErrors();
+// this will return a native error object with name and message
+var error = validator.getLastError();
+// this will return an array of validation errors encountered
+var errors = validator.getLastErrors();
 ...
 ```
 

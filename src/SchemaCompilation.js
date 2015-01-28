@@ -180,6 +180,8 @@ var compileArrayOfSchemas = function (report, arr) {
 
 exports.compileSchema = function (report, schema) {
 
+    report.commonErrorMessage = "SCHEMA_COMPILATION_FAILED";
+
     // if schema is a string, assume it's a uri
     if (typeof schema === "string") {
         var loadedSchema = SchemaCache.getSchemaByUri.call(this, report, schema);
