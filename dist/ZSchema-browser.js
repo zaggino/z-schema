@@ -751,6 +751,8 @@ var recurseObject = function (report, schema, json) {
 
 exports.validate = function (report, schema, json) {
 
+    report.commonErrorMessage = "JSON_OJBECT_VALIDATION_FAILED";
+
     // check if schema is an object
     var to = Utils.whatIs(schema);
     if (to !== "object") {
@@ -960,7 +962,7 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
     var idx = params.length,
         errorMessage = Errors[errorCode];
     while (idx--) {
-        errorMessage = errorMessage.replace("{" + idx + "}", params[idx]);
+        errorMessage = errorMessage.replace("{" + idx + "}", JSON.stringify(params[idx]) || "undefined");
     }
 
     var err = {
@@ -1311,6 +1313,8 @@ var compileArrayOfSchemas = function (report, arr) {
 };
 
 exports.compileSchema = function (report, schema) {
+
+    report.commonErrorMessage = "SCHEMA_COMPILATION_FAILED";
 
     // if schema is a string, assume it's a uri
     if (typeof schema === "string") {
@@ -1867,6 +1871,8 @@ var validateArrayOfSchemas = function (report, arr) {
 
 exports.validateSchema = function (report, schema) {
 
+    report.commonErrorMessage = "SCHEMA_VALIDATION_FAILED";
+
     // if schema is an array, assume it's an array of schemas
     if (Array.isArray(schema)) {
         return validateArrayOfSchemas.call(this, report, schema);
@@ -2209,6 +2215,16 @@ ZSchema.prototype.validate = function (json, schema, callback) {
     // assign lastReport so errors are retrievable in sync mode
     this.lastReport = report;
     return report.isValid();
+};
+ZSchema.prototype.getLastError = function () {
+    if (this.lastReport.errors.length === 0) {
+        return null;
+    }
+    var e = new Error();
+    e.name = "z-schema validation error";
+    e.message = this.lastReport.commonErrorMessage;
+    e.details = this.lastReport.errors;
+    return e;
 };
 ZSchema.prototype.getLastErrors = function () {
     return this.lastReport.errors.length > 0 ? this.lastReport.errors : undefined;
