@@ -1,6 +1,7 @@
 "use strict";
 
 var Errors = require("./Errors");
+var Utils  = require("./Utils");
 
 function Report(parentOrOptions) {
     this.parentReport = parentOrOptions instanceof Report ?
@@ -98,7 +99,9 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
     var idx = params.length,
         errorMessage = Errors[errorCode];
     while (idx--) {
-        errorMessage = errorMessage.replace("{" + idx + "}", JSON.stringify(params[idx]) || "undefined");
+        var whatIs = Utils.whatIs(params[idx]);
+        var param = (whatIs === "object" || whatIs === "null") ? JSON.stringify(params[idx]) : params[idx];
+        errorMessage = errorMessage.replace("{" + idx + "}", param);
     }
 
     var err = {
