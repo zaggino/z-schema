@@ -865,6 +865,7 @@ if (typeof Number.isFinite !== "function") {
 "use strict";
 
 var Errors = require("./Errors");
+var Utils  = require("./Utils");
 
 function Report(parentOrOptions) {
     this.parentReport = parentOrOptions instanceof Report ?
@@ -962,7 +963,9 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
     var idx = params.length,
         errorMessage = Errors[errorCode];
     while (idx--) {
-        errorMessage = errorMessage.replace("{" + idx + "}", JSON.stringify(params[idx]) || "undefined");
+        var whatIs = Utils.whatIs(params[idx]);
+        var param = (whatIs === "object" || whatIs === "null") ? JSON.stringify(params[idx]) : params[idx];
+        errorMessage = errorMessage.replace("{" + idx + "}", param);
     }
 
     var err = {
@@ -1000,7 +1003,7 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
 module.exports = Report;
 
 }).call(this,require('_process'))
-},{"./Errors":2,"_process":1}],7:[function(require,module,exports){
+},{"./Errors":2,"./Utils":10,"_process":1}],7:[function(require,module,exports){
 "use strict";
 
 var Report              = require("./Report");
