@@ -17,6 +17,7 @@ var JsonSchema = require("jsonschema");
 // var RequestValidator = require("request-validator");
 var Skeemas = require("skeemas");
 var tv4 = require("tv4");
+var Themis = require('themis');
 
 Tester.registerValidator({
     name: "z-schema-3",
@@ -52,6 +53,20 @@ Tester.registerValidator({
             this.validate = validator(schema);
         }
         return this.validate(json);
+    }
+});
+
+Tester.registerValidator({
+    name: "themis",
+    setup: function () {
+        return Themis;
+    },
+    test: function (Themis, json, schema) {
+        if (this.lastSchema !== schema) {
+            this.lastSchema = schema;
+            this.validator = Themis.validator(schema);
+        }
+        return this.validator(json, '0').valid === true;
     }
 });
 
