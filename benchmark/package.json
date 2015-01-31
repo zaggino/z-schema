@@ -1,21 +1,22 @@
 {
-    "name": "benchmark",
-    "main": "benchmark.js",
-    "license": "MIT",
-    "dependencies": {
-        "benchmark": "latest",
-        "lodash": "latest",
-        "mustache": "latest",
-        "is-my-json-valid": "latest",
-        "jassi": "latest",
-        "jayschema": "latest",
-        "jjv": "latest",
-        "jsck": "latest",
-        "json-model": "latest",
-        "jsonschema": "latest",
-        "request-validator": "latest",
-        "skeemas": "latest",
-        "tv4": "latest",
-        "z-schema": "2.x"
-    }
+  "name": "benchmark",
+  "main": "benchmark.js",
+  "license": "MIT",
+  "dependencies": {
+    "benchmark": "latest",
+    "is-my-json-valid": "latest",
+    "jassi": "latest",
+    "jayschema": "latest",
+    "jjv": "latest",
+    "jsck": "latest",
+    "json-model": "latest",
+    "jsonschema": "latest",
+    "lodash": "latest",
+    "mustache": "latest",
+    "request-validator": "latest",
+    "skeemas": "latest",
+    "themis": "^1.1.4",
+    "tv4": "latest",
+    "z-schema": "2.x"
+  }
 }
