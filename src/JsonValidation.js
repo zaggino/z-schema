@@ -432,7 +432,7 @@ var recurseObject = function (report, schema, json) {
 
 exports.validate = function (report, schema, json) {
 
-    report.commonErrorMessage = "JSON_OJBECT_VALIDATION_FAILED";
+    report.commonErrorMessage = "JSON_OBJECT_VALIDATION_FAILED";
 
     // check if schema is an object
     var to = Utils.whatIs(schema);

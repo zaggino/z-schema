@@ -49,7 +49,7 @@ module.exports = {
             after: function (err, valid, data, validator) {
                 var e = validator.getLastError();
                 expect(e instanceof Error).toBe(true);
-                expect(e.message).toBe("JSON_OJBECT_VALIDATION_FAILED");
+                expect(e.message).toBe("JSON_OBJECT_VALIDATION_FAILED");
             }
         }
     ]
