@@ -50,6 +50,7 @@ var defaultOptions = {
 */
 function ZSchema(options) {
     this.cache = {};
+    this.referenceCache = [];
 
     // options
     if (typeof options === "object") {
@@ -85,6 +86,9 @@ function ZSchema(options) {
 ZSchema.prototype.compileSchema = function (schema) {
     var report = new Report(this.options);
 
+    if (typeof schema === "object") {
+        schema = SchemaCache.getSchemaByReference.call(this, schema);
+    }
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
     }
@@ -97,6 +101,9 @@ ZSchema.prototype.compileSchema = function (schema) {
 ZSchema.prototype.validateSchema = function (schema) {
     var report = new Report(this.options);
 
+    if (typeof schema === "object") {
+        schema = SchemaCache.getSchemaByReference.call(this, schema);
+    }
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
     }
@@ -110,6 +117,9 @@ ZSchema.prototype.validateSchema = function (schema) {
 ZSchema.prototype.validate = function (json, schema, callback) {
     var report = new Report(this.options);
 
+    if (typeof schema === "object") {
+        schema = SchemaCache.getSchemaByReference.call(this, schema);
+    }
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
     }

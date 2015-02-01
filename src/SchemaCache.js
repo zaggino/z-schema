@@ -3,6 +3,7 @@
 var Report              = require("./Report");
 var SchemaCompilation   = require("./SchemaCompilation");
 var SchemaValidation    = require("./SchemaValidation");
+var Utils               = require("./Utils");
 
 function decodeJSONPointer(str) {
     // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07#section-3
@@ -79,6 +80,19 @@ exports.removeFromCacheByUri = function (uri) {
 exports.checkCacheForUri = function (uri) {
     var remotePath = getRemotePath(uri);
     return remotePath ? this.cache[remotePath] != null : false;
+};
+
+exports.getSchemaByReference = function (key) {
+    var i = this.referenceCache.length;
+    while (i--) {
+        if (this.referenceCache[i][0] === key) {
+            return this.referenceCache[i][1];
+        }
+    }
+    // not found
+    var schema = Utils.cloneDeep(key);
+    this.referenceCache.push([key, schema]);
+    return schema;
 };
 
 exports.getSchemaByUri = function (report, uri, root) {
