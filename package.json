@@ -58,6 +58,7 @@
     ]
   },
   "devDependencies": {
+    "coveralls": "latest",
     "grunt": "latest",
     "grunt-browserify": "~3.2.1",
     "grunt-contrib-jasmine": "latest",
