@@ -751,7 +751,7 @@ var recurseObject = function (report, schema, json) {
 
 exports.validate = function (report, schema, json) {
 
-    report.commonErrorMessage = "JSON_OJBECT_VALIDATION_FAILED";
+    report.commonErrorMessage = "JSON_OBJECT_VALIDATION_FAILED";
 
     // check if schema is an object
     var to = Utils.whatIs(schema);
@@ -1009,6 +1009,7 @@ module.exports = Report;
 var Report              = require("./Report");
 var SchemaCompilation   = require("./SchemaCompilation");
 var SchemaValidation    = require("./SchemaValidation");
+var Utils               = require("./Utils");
 
 function decodeJSONPointer(str) {
     // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07#section-3
@@ -1087,6 +1088,19 @@ exports.checkCacheForUri = function (uri) {
     return remotePath ? this.cache[remotePath] != null : false;
 };
 
+exports.getSchemaByReference = function (key) {
+    var i = this.referenceCache.length;
+    while (i--) {
+        if (this.referenceCache[i][0] === key) {
+            return this.referenceCache[i][1];
+        }
+    }
+    // not found
+    var schema = Utils.cloneDeep(key);
+    this.referenceCache.push([key, schema]);
+    return schema;
+};
+
 exports.getSchemaByUri = function (report, uri, root) {
     var remotePath = getRemotePath(uri),
         queryPath = getQueryPath(uri),
@@ -1134,7 +1148,7 @@ exports.getSchemaByUri = function (report, uri, root) {
 
 exports.getRemotePath = getRemotePath;
 
-},{"./Report":6,"./SchemaCompilation":8,"./SchemaValidation":9}],8:[function(require,module,exports){
+},{"./Report":6,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}],8:[function(require,module,exports){
 "use strict";
 
 var Report = require("./Report");
@@ -2077,6 +2091,27 @@ exports.clone = function (src) {
     return res;
 };
 
+exports.cloneDeep = function cloneDeep(src) {
+    if (typeof src !== "object" || src === null) { return src; }
+    var res, idx;
+    if (Array.isArray(src)) {
+        res = [];
+        idx = src.length;
+        while (idx--) {
+            res[idx] = cloneDeep(src[idx]);
+        }
+    } else {
+        res = {};
+        var keys = Object.keys(src);
+        idx = keys.length;
+        while (idx--) {
+            var key = keys[idx];
+            res[key] = cloneDeep(src[key]);
+        }
+    }
+    return res;
+};
+
 },{}],11:[function(require,module,exports){
 "use strict";
 
@@ -2130,6 +2165,7 @@ var defaultOptions = {
 */
 function ZSchema(options) {
     this.cache = {};
+    this.referenceCache = [];
 
     // options
     if (typeof options === "object") {
@@ -2165,6 +2201,9 @@ function ZSchema(options) {
 ZSchema.prototype.compileSchema = function (schema) {
     var report = new Report(this.options);
 
+    if (typeof schema === "object") {
+        schema = SchemaCache.getSchemaByReference.call(this, schema);
+    }
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
     }
@@ -2177,6 +2216,9 @@ ZSchema.prototype.compileSchema = function (schema) {
 ZSchema.prototype.validateSchema = function (schema) {
     var report = new Report(this.options);
 
+    if (typeof schema === "object") {
+        schema = SchemaCache.getSchemaByReference.call(this, schema);
+    }
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
     }
@@ -2190,6 +2232,9 @@ ZSchema.prototype.validateSchema = function (schema) {
 ZSchema.prototype.validate = function (json, schema, callback) {
     var report = new Report(this.options);
 
+    if (typeof schema === "object") {
+        schema = SchemaCache.getSchemaByReference.call(this, schema);
+    }
     if (typeof schema === "string") {
         schema = SchemaCache.getSchemaByUri.call(this, report, schema);
     }
@@ -2270,6 +2315,9 @@ ZSchema.prototype.setRemoteReference = function (uri, schema) {
 */
 ZSchema.registerFormat = function (formatName, validatorFunction) {
     FormatValidators[formatName] = validatorFunction;
+};
+ZSchema.getDefaultOptions = function () {
+    return Utils.cloneDeep(defaultOptions);
 };
 
 module.exports = ZSchema;
