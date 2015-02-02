@@ -1,0 +1,69 @@
+#!/usr/bin/env node
+
+var fs      = require("fs");
+var program = require("commander");
+var package = require("./../package.json");
+var ZSchema = require("./../src/ZSchema");
+
+program
+  .version(package.version)
+  .usage("[options] <schema> <?json>")
+  .option("--asyncTimeout <n>", "default timeout for all async tasks", parseInt)
+  .option("--forceAdditional", "force additionalProperties and additionalItems to be defined on \"object\" and \"array\" types")
+  .option("--assumeAdditional", "assume additionalProperties and additionalItems are defined as \"false\" where appropriate")
+  .option("--forceItems", "force items to be defined on \"array\" types")
+  .option("--forceMaxLength", "force maxLength to be defined on \"string\" types")
+  .option("--forceProperties", "force properties or patternProperties to be defined on \"object\" types")
+  .option("--ignoreUnresolvableReferences", "ignore references that cannot be resolved (remote schemas)")
+  .option("--noExtraKeywords", "disallow usage of keywords that this validator can't handle")
+  .option("--noTypeless", "disallow usage of schema's without \"type\" defined")
+  .option("--noEmptyStrings", "disallow zero length strings in validated objects")
+  .option("--noEmptyArrays", "disallow zero length arrays in validated objects")
+  .option("--strictUris", "forces \"uri\" format to be in fully rfc3986 compliant")
+  .option("--strictMode", "turn on some of the above")
+  .option("--reportPathAsArray", "report error paths as an array of path segments to get to the offending node")
+  .option("--breakOnFirstError", "stops validation as soon as an error is found, true by default but can be turned off")
+  .parse(process.argv);
+  
+var options = {};  
+var defaultOptions = ZSchema.getDefaultOptions();
+
+for (var key in defaultOptions) {
+    if (program[key]) {
+        options[key] = program[key];
+    }
+}
+
+if (program.args.length === 0) {
+    console.error("no schema to validate specified, use z-schema <schema>");
+    process.exit(1);
+}
+
+function readJson(fileName) {
+    return JSON.parse(fs.readFileSync(fileName, { encoding: "utf8" }));
+}
+
+var validator = new ZSchema(options);
+
+// validate schema
+var schema = readJson(program.args.shift());
+var valid = validator.validateSchema(schema);
+if (!valid) {
+    console.log(validator.getLastErrors());
+    console.log("schema validation failed");
+    process.exit(0);
+}
+console.log("schema validation passed");
+
+// treat rest of the files as jsons
+var i = 0;
+while (program.args.length > 0) {
+    i++;
+    var valid = validator.validate(readJson(program.args.shift()), schema);
+    if (!valid) {
+        console.log(validator.getLastErrors());
+        console.log("json #" + i + " validation failed");
+    } else {
+        console.log("json #" + i + " validation passed");
+    }
+}

@@ -20,7 +20,11 @@
     "url": "https://github.com/zaggino/z-schema/issues"
   },
   "main": "src/ZSchema.js",
+  "bin": {
+    "z-schema": "./bin/z-schema"
+  },
   "files": [
+    "bin",
     "src",
     "dist",
     "LICENSE",
@@ -66,5 +70,8 @@
     "jasmine-reporters": "latest",
     "remapify": "latest",
     "request": "latest"
+  },
+  "dependencies": {
+    "commander": "^2.6.0"
   }
 }

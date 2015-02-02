@@ -16,6 +16,7 @@ module.exports = function (grunt) {
                 files: {
                     "": [
                         "Gruntfile.js",
+                        "bin/**/*",
                         "src/**/*.js",
                         "test/**/*.js"
                     ]
@@ -23,7 +24,7 @@ module.exports = function (grunt) {
             }
         },
         jshint: {
-            all: ["*.js", "src/**/*.js", "test/spec/**/*.js"],
+            all: ["*.js", "bin/**/*", "src/**/*.js", "test/spec/**/*.js"],
             options: {
                 jshintrc: ".jshintrc"
             }
