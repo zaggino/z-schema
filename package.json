@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "grunt": "latest",
-    "grunt-browserify": "latest",
+    "grunt-browserify": "~3.2.1",
     "grunt-contrib-jasmine": "latest",
     "grunt-contrib-jshint": "latest",
     "grunt-contrib-uglify": "latest",
