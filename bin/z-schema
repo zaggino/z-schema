@@ -2,6 +2,7 @@
 
 var fs      = require("fs");
 var program = require("commander");
+var request = require("request");
 var package = require("./../package.json");
 var ZSchema = require("./../src/ZSchema");
 
@@ -44,26 +45,82 @@ function readJson(fileName) {
 }
 
 var validator = new ZSchema(options);
+var schema = readJson(program.args.shift());
+
+function validateWithAutomaticDownloads(data, schema, callback) {
+
+    var lastResult;
+
+    function finish() {
+        callback(validator.getLastErrors(), lastResult);
+    }
+
+    function validate() {
+
+        if (data !== undefined) {
+            lastResult = validator.validate(data, schema);
+        } else {
+            lastResult = validator.validateSchema(schema);
+        }
+
+        var missingReferences = validator.getMissingRemoteReferences();
+        if (missingReferences.length > 0) {
+            var finished = 0;
+            missingReferences.forEach(function (url) {
+                request(url, function (error, response, body) {
+                    
+                    var urlString = "request: " + url + " - ";
+                    
+                    if (error) {
+                        console.error(urlString + response.statusCode);
+                        console.error(error);
+                        process.exit(1);
+                    } else {
+                        console.log(urlString + response.statusCode);
+                    }
+                    
+                    validator.setRemoteReference(url, JSON.parse(body));
+                    finished++;
+                    if (finished === missingReferences.length) {
+                        validate();
+                    }
+                    
+                });
+            });
+        } else {
+            finish();
+        }
+
+    }
+
+    validate();
+
+}
+
+var i = 0;
+function validateJsons() {
+    if (program.args.length === 0) { return; }
+    i++;
+    
+    var json = readJson(program.args.shift());
+    validateWithAutomaticDownloads(json, schema, function (errs, isValid) {    
+        if (!isValid) {
+            console.log(validator.getLastErrors());
+            console.log("json #" + i + " validation failed");
+        } else {
+            console.log("json #" + i + " validation passed");
+        }
+        validateJsons();
+    });
+}
 
 // validate schema
-var schema = readJson(program.args.shift());
-var valid = validator.validateSchema(schema);
-if (!valid) {
-    console.log(validator.getLastErrors());
-    console.log("schema validation failed");
-    process.exit(0);
-}
-console.log("schema validation passed");
-
-// treat rest of the files as jsons
-var i = 0;
-while (program.args.length > 0) {
-    i++;
-    var valid = validator.validate(readJson(program.args.shift()), schema);
-    if (!valid) {
+validateWithAutomaticDownloads(undefined, schema, function (errs, isValid) {
+    if (!isValid) {
         console.log(validator.getLastErrors());
-        console.log("json #" + i + " validation failed");
+        console.log("schema validation failed");
     } else {
-        console.log("json #" + i + " validation passed");
-    }
-}
+        console.log("schema validation passed");
+        validateJsons();
+    }    
+});

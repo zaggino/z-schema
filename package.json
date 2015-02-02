@@ -70,10 +70,10 @@
     "grunt-lineending": "latest",
     "jasmine-node": "latest",
     "jasmine-reporters": "latest",
-    "remapify": "latest",
-    "request": "latest"
+    "remapify": "latest"
   },
   "dependencies": {
-    "commander": "^2.6.0"
+    "commander": "^2.6.0",
+    "request": "^2.53.0"
   }
 }
