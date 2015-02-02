@@ -362,9 +362,7 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":157}],3:[function(require,module,exports){
-module.exports=require(1)
-},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\lib\\_empty.js":1}],4:[function(require,module,exports){
+},{"util/":186}],3:[function(require,module,exports){
 'use strict';
 
 
@@ -467,7 +465,7 @@ exports.setTyped = function (on) {
 };
 
 exports.setTyped(TYPED_OK);
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
@@ -500,7 +498,7 @@ function adler32(adler, buf, len, pos) {
 
 
 module.exports = adler32;
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 module.exports = {
 
   /* Allowed flush values; see deflate() and inflate() below for details */
@@ -548,7 +546,7 @@ module.exports = {
   Z_DEFLATED:               8
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 // Note: we can't get significant speed boost here.
@@ -590,7 +588,7 @@ function crc32(crc, buf, len, pos) {
 
 
 module.exports = crc32;
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 var utils   = require('../utils/common');
@@ -2356,7 +2354,7 @@ exports.deflatePending = deflatePending;
 exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
-},{"../utils/common":4,"./adler32":5,"./crc32":7,"./messages":12,"./trees":13}],9:[function(require,module,exports){
+},{"../utils/common":3,"./adler32":4,"./crc32":6,"./messages":11,"./trees":12}],8:[function(require,module,exports){
 'use strict';
 
 // See state defs from inflate.js
@@ -2683,7 +2681,7 @@ module.exports = function inflate_fast(strm, start) {
   return;
 };
 
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 
@@ -4187,7 +4185,7 @@ exports.inflateSync = inflateSync;
 exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
 */
-},{"../utils/common":4,"./adler32":5,"./crc32":7,"./inffast":9,"./inftrees":11}],11:[function(require,module,exports){
+},{"../utils/common":3,"./adler32":4,"./crc32":6,"./inffast":8,"./inftrees":10}],10:[function(require,module,exports){
 'use strict';
 
 
@@ -4514,7 +4512,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   return 0;
 };
 
-},{"../utils/common":4}],12:[function(require,module,exports){
+},{"../utils/common":3}],11:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -4528,7 +4526,7 @@ module.exports = {
   '-5':   'buffer error',        /* Z_BUF_ERROR     (-5) */
   '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
 };
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 
@@ -5728,7 +5726,7 @@ exports._tr_stored_block = _tr_stored_block;
 exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
-},{"../utils/common":4}],14:[function(require,module,exports){
+},{"../utils/common":3}],13:[function(require,module,exports){
 'use strict';
 
 
@@ -5758,7 +5756,7 @@ function ZStream() {
 }
 
 module.exports = ZStream;
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function (process,Buffer){
 var msg = require('pako/lib/zlib/messages');
 var zstream = require('pako/lib/zlib/zstream');
@@ -5998,7 +5996,7 @@ Zlib.prototype._error = function(status) {
 exports.Zlib = Zlib;
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":137,"buffer":17,"pako/lib/zlib/constants":6,"pako/lib/zlib/deflate.js":8,"pako/lib/zlib/inflate.js":10,"pako/lib/zlib/messages":12,"pako/lib/zlib/zstream":14}],16:[function(require,module,exports){
+},{"_process":166,"buffer":16,"pako/lib/zlib/constants":5,"pako/lib/zlib/deflate.js":7,"pako/lib/zlib/inflate.js":9,"pako/lib/zlib/messages":11,"pako/lib/zlib/zstream":13}],15:[function(require,module,exports){
 (function (process,Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -6612,7 +6610,7 @@ util.inherits(InflateRaw, Zlib);
 util.inherits(Unzip, Zlib);
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./binding":15,"_process":137,"_stream_transform":151,"assert":2,"buffer":17,"util":157}],17:[function(require,module,exports){
+},{"./binding":14,"_process":166,"_stream_transform":180,"assert":2,"buffer":16,"util":186}],16:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -7666,7 +7664,7 @@ function decodeUtf8Char (str) {
   }
 }
 
-},{"base64-js":18,"ieee754":19,"is-array":20}],18:[function(require,module,exports){
+},{"base64-js":17,"ieee754":18,"is-array":19}],17:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -7788,7 +7786,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],19:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -7874,7 +7872,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],20:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 
 /**
  * isArray
@@ -7909,206 +7907,10 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],21:[function(require,module,exports){
-(function (Buffer){
+},{}],20:[function(require,module,exports){
 'use strict';
-var createHash = require('sha.js')
 
-var md5 = require('./md5')
-var rmd160 = require('ripemd160')
-var Transform = require('stream').Transform;
-var inherits = require('util').inherits
-
-module.exports = function (alg) {
-  if('md5' === alg) return new HashNoConstructor(md5)
-  if('rmd160' === alg) return new HashNoConstructor(rmd160)
-  return new Hash(createHash(alg))
-}
-inherits(HashNoConstructor, Transform)
-
-function HashNoConstructor(hash) {
-  Transform.call(this);
-  this._hash = hash
-  this.buffers = []
-}
-
-HashNoConstructor.prototype._transform = function (data, _, done) {
-  this.buffers.push(data)
-  done()
-}
-HashNoConstructor.prototype._flush = function (done) {
-  var buf = Buffer.concat(this.buffers)
-  var r = this._hash(buf)
-  this.buffers = null
-  this.push(r)
-  done()
-}
-HashNoConstructor.prototype.update = function (data, enc) {
-  this.write(data, enc)
-  return this
-}
-
-HashNoConstructor.prototype.digest = function (enc) {
-  this.end()
-  var outData = new Buffer('')
-  var chunk
-  while ((chunk = this.read())) {
-    outData = Buffer.concat([outData, chunk])
-  }
-  if (enc) {
-    outData = outData.toString(enc)
-  }
-  return outData
-}
-
-inherits(Hash, Transform)
-
-function Hash(hash) {
-  Transform.call(this);
-  this._hash = hash
-}
-
-Hash.prototype._transform = function (data, _, done) {
-  this._hash.update(data)
-  done()
-}
-Hash.prototype._flush = function (done) {
-  this.push(this._hash.digest())
-  this._hash = null
-  done()
-}
-Hash.prototype.update = function (data, enc) {
-  this.write(data, enc)
-  return this
-}
-
-Hash.prototype.digest = function (enc) {
-  this.end()
-  var outData = new Buffer('')
-  var chunk
-  while ((chunk = this.read())) {
-    outData = Buffer.concat([outData, chunk])
-  }
-  if (enc) {
-    outData = outData.toString(enc)
-  }
-  return outData
-}
-
-}).call(this,require("buffer").Buffer)
-},{"./md5":25,"buffer":17,"ripemd160":118,"sha.js":120,"stream":153,"util":157}],22:[function(require,module,exports){
-(function (Buffer){
-'use strict';
-var createHash = require('./create-hash')
-var Transform = require('stream').Transform;
-var inherits = require('util').inherits
-var zeroBuffer = new Buffer(128)
-zeroBuffer.fill(0)
-
-module.exports = Hmac
-inherits(Hmac, Transform)
-function Hmac (alg, key) {
-  if(!(this instanceof Hmac)) return new Hmac(alg, key)
-
-  Transform.call(this)
-  this._opad = opad
-  this._alg = alg
-
-  var blocksize = (alg === 'sha512' || alg === 'sha384') ? 128 : 64
-
-  key = this._key = !Buffer.isBuffer(key) ? new Buffer(key) : key
-
-  if(key.length > blocksize) {
-    key = createHash(alg).update(key).digest()
-  } else if(key.length < blocksize) {
-    key = Buffer.concat([key, zeroBuffer], blocksize)
-  }
-
-  var ipad = this._ipad = new Buffer(blocksize)
-  var opad = this._opad = new Buffer(blocksize)
-
-  for(var i = 0; i < blocksize; i++) {
-    ipad[i] = key[i] ^ 0x36
-    opad[i] = key[i] ^ 0x5C
-  }
-
-  this._hash = createHash(alg).update(ipad)
-}
-
-Hmac.prototype.update = function (data, enc) {
-  this.write(data, enc)
-  return this
-}
-
-Hmac.prototype._transform = function (data, _, next) {
-  this._hash.update(data)
-  next()
-}
-
-Hmac.prototype._flush = function (next) {
-  var h = this._hash.digest()
-  this.push(createHash(this._alg).update(this._opad).update(h).digest())
-  next()
-}
-
-Hmac.prototype.digest = function (enc) {
-  this.end()
-  var outData = new Buffer('')
-  var chunk
-  while ((chunk = this.read())) {
-    outData = Buffer.concat([outData, chunk])
-  }
-  if (enc) {
-    outData = outData.toString(enc)
-  }
-  return outData
-}
-
-
-}).call(this,require("buffer").Buffer)
-},{"./create-hash":21,"buffer":17,"stream":153,"util":157}],23:[function(require,module,exports){
-(function (Buffer){
-'use strict';
-var intSize = 4;
-var zeroBuffer = new Buffer(intSize); zeroBuffer.fill(0);
-var chrsz = 8;
-
-function toArray(buf, bigEndian) {
-  if ((buf.length % intSize) !== 0) {
-    var len = buf.length + (intSize - (buf.length % intSize));
-    buf = Buffer.concat([buf, zeroBuffer], len);
-  }
-
-  var arr = [];
-  var fn = bigEndian ? buf.readInt32BE : buf.readInt32LE;
-  for (var i = 0; i < buf.length; i += intSize) {
-    arr.push(fn.call(buf, i));
-  }
-  return arr;
-}
-
-function toBuffer(arr, size, bigEndian) {
-  var buf = new Buffer(size);
-  var fn = bigEndian ? buf.writeInt32BE : buf.writeInt32LE;
-  for (var i = 0; i < arr.length; i++) {
-    fn.call(buf, arr[i], i * 4, true);
-  }
-  return buf;
-}
-
-function hash(buf, fn, hashSize, bigEndian) {
-  if (!Buffer.isBuffer(buf)) buf = new Buffer(buf);
-  var arr = fn(toArray(buf, bigEndian), buf.length * chrsz);
-  return toBuffer(arr, hashSize, bigEndian);
-}
-
-module.exports = { hash: hash };
-
-}).call(this,require("buffer").Buffer)
-},{"buffer":17}],24:[function(require,module,exports){
-(function (Buffer){
-'use strict';
-var rng = require('./rng')
+exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = require('randombytes')
 
 function error () {
   var m = [].slice.call(arguments).join(' ')
@@ -8119,25 +7921,15 @@ function error () {
     ].join('\n'))
 }
 
-exports.createHash = require('./create-hash')
+exports.createHash = exports.Hash = require('create-hash')
 
-exports.createHmac = require('./create-hmac')
-
-exports.randomBytes = function(size, callback) {
-  if (callback && callback.call) {
-    try {
-      callback.call(this, undefined, new Buffer(rng(size)))
-    } catch (err) { callback(err) }
-  } else {
-    return new Buffer(rng(size))
-  }
-}
+exports.createHmac = exports.Hmac = require('create-hmac')
 
 function each(a, f) {
   for(var i in a)
     f(a[i], i)
 }
-var hashes = ['sha1', 'sha256', 'sha512', 'md5', 'rmd160'].concat(Object.keys(require('browserify-sign/algos')))
+var hashes = ['sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'md5', 'rmd160'].concat(Object.keys(require('browserify-sign/algos')))
 exports.getHashes = function () {
   return hashes;
 }
@@ -8145,183 +7937,55 @@ exports.getHashes = function () {
 var p = require('./pbkdf2')(exports)
 exports.pbkdf2 = p.pbkdf2
 exports.pbkdf2Sync = p.pbkdf2Sync
-require('browserify-aes/inject')(exports, module.exports);
+
+var aes = require('browserify-aes');
+[
+  'Cipher',
+  'createCipher',
+  'Cipheriv',
+  'createCipheriv',
+  'Decipher',
+  'createDecipher',
+  'Decipheriv',
+  'createDecipheriv',
+  'getCiphers',
+  'listCiphers'
+].forEach(function (key) {
+  exports[key] = aes[key];
+})
+
+var dh = require('diffie-hellman');
+[
+  'DiffieHellmanGroup',
+  'createDiffieHellmanGroup',
+  'getDiffieHellman',
+  'createDiffieHellman',
+  'DiffieHellman'
+].forEach(function (key) {
+  exports[key] = dh[key];
+})
+
 require('browserify-sign/inject')(module.exports, exports);
-require('diffie-hellman/inject')(exports, module.exports);
 require('create-ecdh/inject')(module.exports, exports);
+require('public-encrypt/inject')(module.exports, exports);
 
 // the least I can do is make error messages for the rest of the node.js/crypto api.
 each([
-  'createCredentials', 'publicEncrypt', 'privateDecrypt'
+  'createCredentials'
 ], function (name) {
   exports[name] = function () {
     error('sorry,', name, 'is not implemented yet')
   }
 })
 
-}).call(this,require("buffer").Buffer)
-},{"./create-hash":21,"./create-hmac":22,"./pbkdf2":126,"./rng":127,"browserify-aes/inject":33,"browserify-sign/algos":45,"browserify-sign/inject":48,"buffer":17,"create-ecdh/inject":88,"diffie-hellman/inject":112}],25:[function(require,module,exports){
-'use strict';
-/*
- * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
- * Digest Algorithm, as defined in RFC 1321.
- * Version 2.1 Copyright (C) Paul Johnston 1999 - 2002.
- * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
- * Distributed under the BSD License
- * See http://pajhome.org.uk/crypt/md5 for more info.
- */
-
-var helpers = require('./helpers');
-
-/*
- * Calculate the MD5 of an array of little-endian words, and a bit length
- */
-function core_md5(x, len)
-{
-  /* append padding */
-  x[len >> 5] |= 0x80 << ((len) % 32);
-  x[(((len + 64) >>> 9) << 4) + 14] = len;
-
-  var a =  1732584193;
-  var b = -271733879;
-  var c = -1732584194;
-  var d =  271733878;
-
-  for(var i = 0; i < x.length; i += 16)
-  {
-    var olda = a;
-    var oldb = b;
-    var oldc = c;
-    var oldd = d;
-
-    a = md5_ff(a, b, c, d, x[i+ 0], 7 , -680876936);
-    d = md5_ff(d, a, b, c, x[i+ 1], 12, -389564586);
-    c = md5_ff(c, d, a, b, x[i+ 2], 17,  606105819);
-    b = md5_ff(b, c, d, a, x[i+ 3], 22, -1044525330);
-    a = md5_ff(a, b, c, d, x[i+ 4], 7 , -176418897);
-    d = md5_ff(d, a, b, c, x[i+ 5], 12,  1200080426);
-    c = md5_ff(c, d, a, b, x[i+ 6], 17, -1473231341);
-    b = md5_ff(b, c, d, a, x[i+ 7], 22, -45705983);
-    a = md5_ff(a, b, c, d, x[i+ 8], 7 ,  1770035416);
-    d = md5_ff(d, a, b, c, x[i+ 9], 12, -1958414417);
-    c = md5_ff(c, d, a, b, x[i+10], 17, -42063);
-    b = md5_ff(b, c, d, a, x[i+11], 22, -1990404162);
-    a = md5_ff(a, b, c, d, x[i+12], 7 ,  1804603682);
-    d = md5_ff(d, a, b, c, x[i+13], 12, -40341101);
-    c = md5_ff(c, d, a, b, x[i+14], 17, -1502002290);
-    b = md5_ff(b, c, d, a, x[i+15], 22,  1236535329);
-
-    a = md5_gg(a, b, c, d, x[i+ 1], 5 , -165796510);
-    d = md5_gg(d, a, b, c, x[i+ 6], 9 , -1069501632);
-    c = md5_gg(c, d, a, b, x[i+11], 14,  643717713);
-    b = md5_gg(b, c, d, a, x[i+ 0], 20, -373897302);
-    a = md5_gg(a, b, c, d, x[i+ 5], 5 , -701558691);
-    d = md5_gg(d, a, b, c, x[i+10], 9 ,  38016083);
-    c = md5_gg(c, d, a, b, x[i+15], 14, -660478335);
-    b = md5_gg(b, c, d, a, x[i+ 4], 20, -405537848);
-    a = md5_gg(a, b, c, d, x[i+ 9], 5 ,  568446438);
-    d = md5_gg(d, a, b, c, x[i+14], 9 , -1019803690);
-    c = md5_gg(c, d, a, b, x[i+ 3], 14, -187363961);
-    b = md5_gg(b, c, d, a, x[i+ 8], 20,  1163531501);
-    a = md5_gg(a, b, c, d, x[i+13], 5 , -1444681467);
-    d = md5_gg(d, a, b, c, x[i+ 2], 9 , -51403784);
-    c = md5_gg(c, d, a, b, x[i+ 7], 14,  1735328473);
-    b = md5_gg(b, c, d, a, x[i+12], 20, -1926607734);
-
-    a = md5_hh(a, b, c, d, x[i+ 5], 4 , -378558);
-    d = md5_hh(d, a, b, c, x[i+ 8], 11, -2022574463);
-    c = md5_hh(c, d, a, b, x[i+11], 16,  1839030562);
-    b = md5_hh(b, c, d, a, x[i+14], 23, -35309556);
-    a = md5_hh(a, b, c, d, x[i+ 1], 4 , -1530992060);
-    d = md5_hh(d, a, b, c, x[i+ 4], 11,  1272893353);
-    c = md5_hh(c, d, a, b, x[i+ 7], 16, -155497632);
-    b = md5_hh(b, c, d, a, x[i+10], 23, -1094730640);
-    a = md5_hh(a, b, c, d, x[i+13], 4 ,  681279174);
-    d = md5_hh(d, a, b, c, x[i+ 0], 11, -358537222);
-    c = md5_hh(c, d, a, b, x[i+ 3], 16, -722521979);
-    b = md5_hh(b, c, d, a, x[i+ 6], 23,  76029189);
-    a = md5_hh(a, b, c, d, x[i+ 9], 4 , -640364487);
-    d = md5_hh(d, a, b, c, x[i+12], 11, -421815835);
-    c = md5_hh(c, d, a, b, x[i+15], 16,  530742520);
-    b = md5_hh(b, c, d, a, x[i+ 2], 23, -995338651);
-
-    a = md5_ii(a, b, c, d, x[i+ 0], 6 , -198630844);
-    d = md5_ii(d, a, b, c, x[i+ 7], 10,  1126891415);
-    c = md5_ii(c, d, a, b, x[i+14], 15, -1416354905);
-    b = md5_ii(b, c, d, a, x[i+ 5], 21, -57434055);
-    a = md5_ii(a, b, c, d, x[i+12], 6 ,  1700485571);
-    d = md5_ii(d, a, b, c, x[i+ 3], 10, -1894986606);
-    c = md5_ii(c, d, a, b, x[i+10], 15, -1051523);
-    b = md5_ii(b, c, d, a, x[i+ 1], 21, -2054922799);
-    a = md5_ii(a, b, c, d, x[i+ 8], 6 ,  1873313359);
-    d = md5_ii(d, a, b, c, x[i+15], 10, -30611744);
-    c = md5_ii(c, d, a, b, x[i+ 6], 15, -1560198380);
-    b = md5_ii(b, c, d, a, x[i+13], 21,  1309151649);
-    a = md5_ii(a, b, c, d, x[i+ 4], 6 , -145523070);
-    d = md5_ii(d, a, b, c, x[i+11], 10, -1120210379);
-    c = md5_ii(c, d, a, b, x[i+ 2], 15,  718787259);
-    b = md5_ii(b, c, d, a, x[i+ 9], 21, -343485551);
-
-    a = safe_add(a, olda);
-    b = safe_add(b, oldb);
-    c = safe_add(c, oldc);
-    d = safe_add(d, oldd);
-  }
-  return Array(a, b, c, d);
-
-}
-
-/*
- * These functions implement the four basic operations the algorithm uses.
- */
-function md5_cmn(q, a, b, x, s, t)
-{
-  return safe_add(bit_rol(safe_add(safe_add(a, q), safe_add(x, t)), s),b);
-}
-function md5_ff(a, b, c, d, x, s, t)
-{
-  return md5_cmn((b & c) | ((~b) & d), a, b, x, s, t);
-}
-function md5_gg(a, b, c, d, x, s, t)
-{
-  return md5_cmn((b & d) | (c & (~d)), a, b, x, s, t);
-}
-function md5_hh(a, b, c, d, x, s, t)
-{
-  return md5_cmn(b ^ c ^ d, a, b, x, s, t);
-}
-function md5_ii(a, b, c, d, x, s, t)
-{
-  return md5_cmn(c ^ (b | (~d)), a, b, x, s, t);
-}
-
-/*
- * Add integers, wrapping at 2^32. This uses 16-bit operations internally
- * to work around bugs in some JS interpreters.
- */
-function safe_add(x, y)
-{
-  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
-  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-  return (msw << 16) | (lsw & 0xFFFF);
-}
-
-/*
- * Bitwise rotate a 32-bit number to the left.
- */
-function bit_rol(num, cnt)
-{
-  return (num << cnt) | (num >>> (32 - cnt));
-}
-
-module.exports = function md5(buf) {
-  return helpers.hash(buf, core_md5, 16);
-};
-
-},{"./helpers":23}],26:[function(require,module,exports){
+},{"./pbkdf2":156,"browserify-aes":24,"browserify-sign/algos":39,"browserify-sign/inject":40,"create-ecdh/inject":86,"create-hash":108,"create-hmac":119,"diffie-hellman":120,"public-encrypt/inject":128,"randombytes":155}],21:[function(require,module,exports){
 (function (Buffer){
-
-module.exports = function (crypto, password, keyLen, ivLen) {
+var md5 = require('create-hash/md5');
+module.exports = EVP_BytesToKey;
+function EVP_BytesToKey(password, keyLen, ivLen) {
+  if (!Buffer.isBuffer(password)) {
+    password = new Buffer(password, 'binary');
+  }
   keyLen = keyLen/8;
   ivLen = ivLen || 0;
   var ki = 0;
@@ -8329,15 +7993,16 @@ module.exports = function (crypto, password, keyLen, ivLen) {
   var key = new Buffer(keyLen);
   var iv = new Buffer(ivLen);
   var addmd = 0;
-  var md, md_buf;
+  var md_buf;
   var i;
+  var bufs =  [];
   while (true) {
-    md = crypto.createHash('md5');
     if(addmd++ > 0) {
-       md.update(md_buf);
+       bufs.push(md_buf);
     }
-    md.update(password);
-    md_buf = md.digest();
+    bufs.push(password);
+    md_buf = md5(Buffer.concat(bufs));
+    bufs = [];
     i = 0;
     if(keyLen > 0) {
       while(true) {
@@ -8376,10 +8041,16 @@ module.exports = function (crypto, password, keyLen, ivLen) {
     key: key,
     iv: iv
   };
-};
+}
 }).call(this,require("buffer").Buffer)
-},{"buffer":17}],27:[function(require,module,exports){
+},{"buffer":16,"create-hash/md5":110}],22:[function(require,module,exports){
 (function (Buffer){
+// based on the aes implimentation in triple sec
+// https://github.com/keybase/triplesec
+
+// which is in turn based on the one from crypto-js
+// https://code.google.com/p/crypto-js/
+
 var uint_max = Math.pow(2, 32);
 function fixup_uint32(x) {
     var ret, x_pos;
@@ -8472,10 +8143,6 @@ AES.prototype.blockSize = AES.blockSize;
 AES.keySize = 256 / 8;
 
 AES.prototype.keySize = AES.keySize;
-
-AES.ivSize = AES.blockSize;
-
-AES.prototype.ivSize = AES.ivSize;
 
  function bufferToArray(buf) {
   var len = buf.length/4;
@@ -8577,7 +8244,7 @@ AES.prototype._doCryptBlock = function(M, keySchedule, SUB_MIX, SBOX) {
 
   exports.AES = AES;
 }).call(this,require("buffer").Buffer)
-},{"buffer":17}],28:[function(require,module,exports){
+},{"buffer":16}],23:[function(require,module,exports){
 (function (Buffer){
 var aes = require('./aes');
 var Transform = require('./cipherBase');
@@ -8609,7 +8276,7 @@ function StreamCipher(mode, key, iv, decrypt) {
   this._authTag = null;
   this._called = false;
 }
-StreamCipher.prototype._transform = function (chunk, _, next) {
+StreamCipher.prototype._update = function (chunk) {
   if (!this._called && this._alen) {
     var rump = 16 - (this._alen % 16);
     if (rump <16) {
@@ -8626,9 +8293,9 @@ StreamCipher.prototype._transform = function (chunk, _, next) {
     this._ghash.update(out);
   }
   this._len += chunk.length;
-  next(null, out);
+  return out;
 };
-StreamCipher.prototype._flush = function (next) {
+StreamCipher.prototype._final = function () {
   if (this._decrypt && !this._authTag) {
     throw new Error('Unsupported state or unable to authenticate data');
   }
@@ -8641,7 +8308,6 @@ StreamCipher.prototype._flush = function (next) {
     this._authTag = tag;
   }
   this._cipher.scrub();
-  next();
 };
 StreamCipher.prototype.getAuthTag = function getAuthTag () {
   if (!this._decrypt && Buffer.isBuffer(this._authTag)) {
@@ -8681,7 +8347,20 @@ function xorTest(a, b) {
 
 
 }).call(this,require("buffer").Buffer)
-},{"./aes":27,"./cipherBase":29,"./ghash":32,"./xor":43,"buffer":17,"inherits":134}],29:[function(require,module,exports){
+},{"./aes":22,"./cipherBase":25,"./ghash":28,"./xor":38,"buffer":16,"inherits":163}],24:[function(require,module,exports){
+var ciphers = require('./encrypter');
+exports.createCipher = exports.Cipher = ciphers.createCipher;
+exports.createCipheriv = exports.Cipheriv = ciphers.createCipheriv;
+var deciphers = require('./decrypter');
+exports.createDecipher = exports.Decipher = deciphers.createDecipher;
+exports.createDecipheriv = exports.Decipheriv = deciphers.createDecipheriv;
+var modes = require('./modes');
+function getCiphers () {
+  return Object.keys(modes);
+}
+exports.listCiphers = exports.getCiphers = getCiphers;
+
+},{"./decrypter":26,"./encrypter":27,"./modes":29}],25:[function(require,module,exports){
 (function (Buffer){
 var Transform = require('stream').Transform;
 var inherits = require('inherits');
@@ -8691,32 +8370,37 @@ inherits(CipherBase, Transform);
 function CipherBase() {
   Transform.call(this);
 }
-CipherBase.prototype.update = function (data, inputEnd, outputEnc) {
-  this.write(data, inputEnd);
-  var outData = new Buffer('');
-  var chunk;
-  while ((chunk = this.read())) {
-    outData = Buffer.concat([outData, chunk]);
+CipherBase.prototype.update = function (data, inputEnc, outputEnc) {
+  if (typeof data === 'string') {
+    data = new Buffer(data, inputEnc);
   }
+  var outData = this._update(data);
   if (outputEnc) {
     outData = outData.toString(outputEnc);
   }
   return outData;
 };
-CipherBase.prototype.final = function (outputEnc) {
-  this.end();
-  var outData = new Buffer('');
-  var chunk;
-  while ((chunk = this.read())) {
-    outData = Buffer.concat([outData, chunk]);
+CipherBase.prototype._transform = function (data, _, next) {
+  this.push(this._update(data));
+  next();
+};
+CipherBase.prototype._flush = function (next) {
+  try {
+    this.push(this._final());
+  } catch(e) {
+    return next(e);
   }
+  next();
+};
+CipherBase.prototype.final = function (outputEnc) {
+  var outData = this._final() || new Buffer('');
   if (outputEnc) {
     outData = outData.toString(outputEnc);
   }
   return outData;
 };
 }).call(this,require("buffer").Buffer)
-},{"buffer":17,"inherits":134,"stream":153}],30:[function(require,module,exports){
+},{"buffer":16,"inherits":163,"stream":182}],26:[function(require,module,exports){
 (function (Buffer){
 var aes = require('./aes');
 var Transform = require('./cipherBase');
@@ -8738,28 +8422,30 @@ function Decipher(mode, key, iv) {
   this._prev = new Buffer(iv.length);
   iv.copy(this._prev);
   this._mode = mode;
+  this._autopadding = true;
 }
-Decipher.prototype._transform = function (data, _, next) {
+Decipher.prototype._update = function (data) {
   this._cache.add(data);
   var chunk;
   var thing;
-  while ((chunk = this._cache.get())) {
+  var out = [];
+  while ((chunk = this._cache.get(this._autopadding))) {
     thing = this._mode.decrypt(this, chunk);
-    this.push(thing);
+    out.push(thing);
   }
-  next();
+  return Buffer.concat(out);
 };
-Decipher.prototype._flush = function (next) {
+Decipher.prototype._final = function () {
   var chunk = this._cache.flush();
-  if (!chunk) {
-    return next;
+  if (this._autopadding) {
+    return unpad(this._mode.decrypt(this, chunk));
+  } else if (chunk) {
+    throw new Error('data not multiple of block length');
   }
-
-  this.push(unpad(this._mode.decrypt(this, chunk)));
-
-  next();
 };
-
+Decipher.prototype.setAutoPadding = function (setTo) {
+  this._autopadding = !!setTo;
+};
 function Splitter() {
    if (!(this instanceof Splitter)) {
     return new Splitter();
@@ -8770,11 +8456,20 @@ Splitter.prototype.add = function (data) {
   this.cache = Buffer.concat([this.cache, data]);
 };
 
-Splitter.prototype.get = function () {
-  if (this.cache.length > 16) {
-    var out = this.cache.slice(0, 16);
-    this.cache = this.cache.slice(16);
-    return out;
+Splitter.prototype.get = function (autoPadding) {
+  var out;
+  if (autoPadding) {
+    if (this.cache.length > 16) {
+      out = this.cache.slice(0, 16);
+      this.cache = this.cache.slice(16);
+      return out;
+    }
+  } else {
+    if (this.cache.length >= 16) {
+      out = this.cache.slice(0, 16);
+      this.cache = this.cache.slice(16);
+      return out;
+    }
   }
   return null;
 };
@@ -8785,6 +8480,12 @@ Splitter.prototype.flush = function () {
 };
 function unpad(last) {
   var padded = last[15];
+  var i = -1;
+  while (++i < padded) {
+    if (last[(i + (16 - padded))] !== padded) {
+      throw new Error('unable to decrypt data');
+    }
+  }
   if (padded === 16) {
     return;
   }
@@ -8802,48 +8503,44 @@ var modelist = {
   GCM: require('./modes/ctr')
 };
 
-module.exports = function (crypto) {
-  function createDecipheriv(suite, password, iv) {
-    var config = modes[suite];
-    if (!config) {
-      throw new TypeError('invalid suite type');
-    }
-    if (typeof iv === 'string') {
-      iv = new Buffer(iv);
-    }
-    if (typeof password === 'string') {
-      password = new Buffer(password);
-    }
-    if (password.length !== config.key/8) {
-      throw new TypeError('invalid key length ' + password.length);
-    }
-    if (iv.length !== config.iv) {
-      throw new TypeError('invalid iv length ' + iv.length);
-    }
-    if (config.type === 'stream') {
-      return new StreamCipher(modelist[config.mode], password, iv, true);
-    } else if (config.type === 'auth') {
-      return new AuthCipher(modelist[config.mode], password, iv, true);
-    }
-    return new Decipher(modelist[config.mode], password, iv);
-  }
 
-  function createDecipher (suite, password) {
-    var config = modes[suite];
-    if (!config) {
-      throw new TypeError('invalid suite type');
-    }
-    var keys = ebtk(crypto, password, config.key, config.iv);
-    return createDecipheriv(suite, keys.key, keys.iv);
+function createDecipheriv(suite, password, iv) {
+  var config = modes[suite.toLowerCase()];
+  if (!config) {
+    throw new TypeError('invalid suite type');
   }
-  return {
-    createDecipher: createDecipher,
-    createDecipheriv: createDecipheriv
-  };
-};
+  if (typeof iv === 'string') {
+    iv = new Buffer(iv);
+  }
+  if (typeof password === 'string') {
+    password = new Buffer(password);
+  }
+  if (password.length !== config.key/8) {
+    throw new TypeError('invalid key length ' + password.length);
+  }
+  if (iv.length !== config.iv) {
+    throw new TypeError('invalid iv length ' + iv.length);
+  }
+  if (config.type === 'stream') {
+    return new StreamCipher(modelist[config.mode], password, iv, true);
+  } else if (config.type === 'auth') {
+    return new AuthCipher(modelist[config.mode], password, iv, true);
+  }
+  return new Decipher(modelist[config.mode], password, iv);
+}
 
+function createDecipher (suite, password) {
+  var config = modes[suite.toLowerCase()];
+  if (!config) {
+    throw new TypeError('invalid suite type');
+  }
+  var keys = ebtk(password, config.key, config.iv);
+  return createDecipheriv(suite, keys.key, keys.iv);
+}
+exports.createDecipher = createDecipher;
+exports.createDecipheriv = createDecipheriv;
 }).call(this,require("buffer").Buffer)
-},{"./EVP_BytesToKey":26,"./aes":27,"./authCipher":28,"./cipherBase":29,"./modes":34,"./modes/cbc":35,"./modes/cfb":36,"./modes/cfb1":37,"./modes/cfb8":38,"./modes/ctr":39,"./modes/ecb":40,"./modes/ofb":41,"./streamCipher":42,"buffer":17,"inherits":134}],31:[function(require,module,exports){
+},{"./EVP_BytesToKey":21,"./aes":22,"./authCipher":23,"./cipherBase":25,"./modes":29,"./modes/cbc":30,"./modes/cfb":31,"./modes/cfb1":32,"./modes/cfb8":33,"./modes/ctr":34,"./modes/ecb":35,"./modes/ofb":36,"./streamCipher":37,"buffer":16,"inherits":163}],27:[function(require,module,exports){
 (function (Buffer){
 var aes = require('./aes');
 var Transform = require('./cipherBase');
@@ -8863,24 +8560,33 @@ function Cipher(mode, key, iv) {
   this._prev = new Buffer(iv.length);
   iv.copy(this._prev);
   this._mode = mode;
+  this._autopadding = true;
 }
-Cipher.prototype._transform = function (data, _, next) {
+Cipher.prototype._update = function (data) {
   this._cache.add(data);
   var chunk;
   var thing;
+  var out = [];
   while ((chunk = this._cache.get())) {
     thing = this._mode.encrypt(this, chunk);
-    this.push(thing);
+    out.push(thing);
   }
-  next();
+  return Buffer.concat(out);
 };
-Cipher.prototype._flush = function (next) {
+Cipher.prototype._final = function () {
   var chunk = this._cache.flush();
-  this.push(this._mode.encrypt(this, chunk));
-  this._cipher.scrub();
-  next();
+  if (this._autopadding) {
+    chunk = this._mode.encrypt(this, chunk);
+    this._cipher.scrub();
+    return chunk;
+  } else if (chunk.toString('hex') !== '10101010101010101010101010101010') {
+    this._cipher.scrub();
+    throw new Error('data not multiple of block length');
+  }
 };
-
+Cipher.prototype.setAutoPadding = function (setTo) {
+  this._autopadding = !!setTo;
+};
 
 function Splitter() {
    if (!(this instanceof Splitter)) {
@@ -8921,47 +8627,44 @@ var modelist = {
   CTR: require('./modes/ctr'),
   GCM: require('./modes/ctr')
 };
-module.exports = function (crypto) {
-  function createCipheriv(suite, password, iv) {
-    var config = modes[suite];
-    if (!config) {
-      throw new TypeError('invalid suite type');
-    }
-    if (typeof iv === 'string') {
-      iv = new Buffer(iv);
-    }
-    if (typeof password === 'string') {
-      password = new Buffer(password);
-    }
-    if (password.length !== config.key/8) {
-      throw new TypeError('invalid key length ' + password.length);
-    }
-    if (iv.length !== config.iv) {
-      throw new TypeError('invalid iv length ' + iv.length);
-    }
-    if (config.type === 'stream') {
-      return new StreamCipher(modelist[config.mode], password, iv);
-    } else if (config.type === 'auth') {
-      return new AuthCipher(modelist[config.mode], password, iv);
-    }
-    return new Cipher(modelist[config.mode], password, iv);
-  }
-  function createCipher (suite, password) {
-    var config = modes[suite];
-    if (!config) {
-      throw new TypeError('invalid suite type');
-    }
-    var keys = ebtk(crypto, password, config.key, config.iv);
-    return createCipheriv(suite, keys.key, keys.iv);
-  }
-  return {
-    createCipher: createCipher,
-    createCipheriv: createCipheriv
-  };
-};
 
+function createCipheriv(suite, password, iv) {
+  var config = modes[suite.toLowerCase()];
+  if (!config) {
+    throw new TypeError('invalid suite type');
+  }
+  if (typeof iv === 'string') {
+    iv = new Buffer(iv);
+  }
+  if (typeof password === 'string') {
+    password = new Buffer(password);
+  }
+  if (password.length !== config.key/8) {
+    throw new TypeError('invalid key length ' + password.length);
+  }
+  if (iv.length !== config.iv) {
+    throw new TypeError('invalid iv length ' + iv.length);
+  }
+  if (config.type === 'stream') {
+    return new StreamCipher(modelist[config.mode], password, iv);
+  } else if (config.type === 'auth') {
+    return new AuthCipher(modelist[config.mode], password, iv);
+  }
+  return new Cipher(modelist[config.mode], password, iv);
+}
+function createCipher (suite, password) {
+  var config = modes[suite.toLowerCase()];
+  if (!config) {
+    throw new TypeError('invalid suite type');
+  }
+  var keys = ebtk(password, config.key, config.iv);
+  return createCipheriv(suite, keys.key, keys.iv);
+}
+
+exports.createCipheriv = createCipheriv;
+exports.createCipher = createCipher;
 }).call(this,require("buffer").Buffer)
-},{"./EVP_BytesToKey":26,"./aes":27,"./authCipher":28,"./cipherBase":29,"./modes":34,"./modes/cbc":35,"./modes/cfb":36,"./modes/cfb1":37,"./modes/cfb8":38,"./modes/ctr":39,"./modes/ecb":40,"./modes/ofb":41,"./streamCipher":42,"buffer":17,"inherits":134}],32:[function(require,module,exports){
+},{"./EVP_BytesToKey":21,"./aes":22,"./authCipher":23,"./cipherBase":25,"./modes":29,"./modes/cbc":30,"./modes/cfb":31,"./modes/cfb1":32,"./modes/cfb8":33,"./modes/ctr":34,"./modes/ecb":35,"./modes/ofb":36,"./streamCipher":37,"buffer":16,"inherits":163}],28:[function(require,module,exports){
 (function (Buffer){
 var zeros = new Buffer(16);
 zeros.fill(0);
@@ -8977,7 +8680,7 @@ function GHASH(key){
 GHASH.prototype.ghash = function (block) {
   var i = -1;
   while (++i < block.length) {
-   this.state[i] ^= 0xff & block[i];
+   this.state[i] ^= block[i];
   }
   this._multiply();
 };
@@ -9062,24 +8765,7 @@ function xor(a, b) {
   ];
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":17}],33:[function(require,module,exports){
-module.exports = function (crypto, exports) {
-  exports = exports || {};
-  var ciphers = require('./encrypter')(crypto);
-  exports.createCipher = ciphers.createCipher;
-  exports.createCipheriv = ciphers.createCipheriv;
-  var deciphers = require('./decrypter')(crypto);
-  exports.createDecipher = deciphers.createDecipher;
-  exports.createDecipheriv = deciphers.createDecipheriv;
-  var modes = require('./modes');
-  function listCiphers () {
-    return Object.keys(modes);
-  }
-  exports.listCiphers = listCiphers;
-};
-
-
-},{"./decrypter":30,"./encrypter":31,"./modes":34}],34:[function(require,module,exports){
+},{"buffer":16}],29:[function(require,module,exports){
 exports['aes-128-ecb'] = {
   cipher: 'AES',
   key: 128,
@@ -9251,7 +8937,7 @@ exports['aes-256-gcm'] = {
   mode: 'GCM',
   type: 'auth'
 };
-},{}],35:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var xor = require('../xor');
 exports.encrypt = function (self, block) {
   var data = xor(block, self._prev);
@@ -9264,7 +8950,7 @@ exports.decrypt = function (self, block) {
   var out = self._cipher.decryptBlock(block);
   return xor(out, pad);
 };
-},{"../xor":43}],36:[function(require,module,exports){
+},{"../xor":38}],31:[function(require,module,exports){
 (function (Buffer){
 var xor = require('../xor');
 exports.encrypt = function (self, data, decrypt) {
@@ -9294,7 +8980,7 @@ function encryptStart(self, data, decrypt) {
   return out;
 }
 }).call(this,require("buffer").Buffer)
-},{"../xor":43,"buffer":17}],37:[function(require,module,exports){
+},{"../xor":38,"buffer":16}],32:[function(require,module,exports){
 (function (Buffer){
 
 function encryptByte(self, byte, decrypt) {
@@ -9332,7 +9018,7 @@ function shiftIn(buffer, value) {
   return out;
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":17}],38:[function(require,module,exports){
+},{"buffer":16}],33:[function(require,module,exports){
 (function (Buffer){
 function encryptByte(self, byte, decrypt) {
   var pad = self._cipher.encryptBlock(self._prev);
@@ -9350,7 +9036,7 @@ exports.encrypt = function (self, chunk, decrypt) {
   return out;
 };
 }).call(this,require("buffer").Buffer)
-},{"buffer":17}],39:[function(require,module,exports){
+},{"buffer":16}],34:[function(require,module,exports){
 (function (Buffer){
 var xor = require('../xor');
 function getBlock(self) {
@@ -9381,14 +9067,14 @@ function incr32(iv) {
   }
 }
 }).call(this,require("buffer").Buffer)
-},{"../xor":43,"buffer":17}],40:[function(require,module,exports){
+},{"../xor":38,"buffer":16}],35:[function(require,module,exports){
 exports.encrypt = function (self, block) {
   return self._cipher.encryptBlock(block);
 };
 exports.decrypt = function (self, block) {
   return self._cipher.decryptBlock(block);
 };
-},{}],41:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 (function (Buffer){
 var xor = require('../xor');
 function getBlock(self) {
@@ -9404,7 +9090,7 @@ exports.encrypt = function (self, chunk) {
   return xor(chunk, pad);
 };
 }).call(this,require("buffer").Buffer)
-},{"../xor":43,"buffer":17}],42:[function(require,module,exports){
+},{"../xor":38,"buffer":16}],37:[function(require,module,exports){
 (function (Buffer){
 var aes = require('./aes');
 var Transform = require('./cipherBase');
@@ -9425,15 +9111,14 @@ function StreamCipher(mode, key, iv, decrypt) {
   iv.copy(this._prev);
   this._mode = mode;
 }
-StreamCipher.prototype._transform = function (chunk, _, next) {
-  next(null, this._mode.encrypt(this, chunk, this._decrypt));
+StreamCipher.prototype._update = function (chunk) {
+  return this._mode.encrypt(this, chunk, this._decrypt);
 };
-StreamCipher.prototype._flush = function (next) {
+StreamCipher.prototype._final = function () {
   this._cipher.scrub();
-  next();
 };
 }).call(this,require("buffer").Buffer)
-},{"./aes":27,"./cipherBase":29,"buffer":17,"inherits":134}],43:[function(require,module,exports){
+},{"./aes":22,"./cipherBase":25,"buffer":16,"inherits":163}],38:[function(require,module,exports){
 (function (Buffer){
 module.exports = xor;
 function xor(a, b) {
@@ -9446,21 +9131,7 @@ function xor(a, b) {
   return out;
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":17}],44:[function(require,module,exports){
-module.exports={"2.16.840.1.101.3.4.1.1": "aes-128-ecb",
-"2.16.840.1.101.3.4.1.2": "aes-128-cbc",
-"2.16.840.1.101.3.4.1.3": "aes-128-ofb",
-"2.16.840.1.101.3.4.1.4": "aes-128-cfb",
-"2.16.840.1.101.3.4.1.21": "aes-192-ecb",
-"2.16.840.1.101.3.4.1.22": "aes-192-cbc",
-"2.16.840.1.101.3.4.1.23": "aes-192-ofb",
-"2.16.840.1.101.3.4.1.24": "aes-192-cfb",
-"2.16.840.1.101.3.4.1.41": "aes-256-ecb",
-"2.16.840.1.101.3.4.1.42": "aes-256-cbc",
-"2.16.840.1.101.3.4.1.43": "aes-256-ofb",
-"2.16.840.1.101.3.4.1.44": "aes-256-cfb"
-}
-},{}],45:[function(require,module,exports){
+},{"buffer":16}],39:[function(require,module,exports){
 (function (Buffer){
 exports['RSA-SHA224'] = exports.sha224WithRSAEncryption = {
   sign: 'rsa',
@@ -9486,156 +9157,88 @@ exports['RSA-SHA1'] = {
 	sign: 'rsa',
 	hash: 'sha1',
 	id: new Buffer('3021300906052b0e03021a05000414', 'hex')
-}
+};
 exports['ecdsa-with-SHA1'] = {
 	sign: 'ecdsa',
 	hash: 'sha1',
-	id: new Buffer(/*'3021300906052b0e03021a05000414'*/'', 'hex')
-}
+	id: new Buffer('', 'hex')
+};
+exports.DSA = exports['DSA-SHA1'] = exports['DSA-SHA'] = {
+  sign: 'dsa',
+  hash: 'sha1',
+  id: new Buffer('', 'hex')
+};
+exports['DSA-SHA224'] = exports['DSA-WITH-SHA224'] = {
+  sign: 'dsa',
+  hash: 'sha224',
+  id: new Buffer('', 'hex')
+};
+exports['DSA-SHA256'] = exports['DSA-WITH-SHA256'] = {
+  sign: 'dsa',
+  hash: 'sha256',
+  id: new Buffer('', 'hex')
+};
+exports['DSA-SHA384'] = exports['DSA-WITH-SHA384'] = {
+  sign: 'dsa',
+  hash: 'sha384',
+  id: new Buffer('', 'hex')
+};
+exports['DSA-SHA512'] = exports['DSA-WITH-SHA512'] = {
+  sign: 'dsa',
+  hash: 'sha512',
+  id: new Buffer('', 'hex')
+};
+exports['DSA-RIPEMD160'] = {
+  sign: 'dsa',
+  hash: 'rmd160',
+  id: new Buffer('', 'hex')
+};
+exports['RSA-RIPEMD160'] = exports.ripemd160WithRSA = {
+  sign: 'rsa',
+  hash: 'rmd160',
+  id: new Buffer('3021300906052b2403020105000414', 'hex')
+};
+exports['RSA-MD5'] = exports.md5WithRSAEncryption = {
+  sign: 'rsa',
+  hash: 'md5',
+  id: new Buffer('3020300c06082a864886f70d020505000410', 'hex')
+};
 }).call(this,require("buffer").Buffer)
-},{"buffer":17}],46:[function(require,module,exports){
-// from https://github.com/indutny/self-signed/blob/gh-pages/lib/asn1.js
-// Fedor, you are amazing.
-
-var asn1 = require('asn1.js');
-var rfc3280 = require('asn1.js-rfc3280');
-
-var RSAPrivateKey = asn1.define('RSAPrivateKey', function() {
-  this.seq().obj(
-    this.key('version').int(),
-    this.key('modulus').int(),
-    this.key('publicExponent').int(),
-    this.key('privateExponent').int(),
-    this.key('prime1').int(),
-    this.key('prime2').int(),
-    this.key('exponent1').int(),
-    this.key('exponent2').int(),
-    this.key('coefficient').int()
-  );
-});
-exports.RSAPrivateKey = RSAPrivateKey;
-
-var RSAPublicKey = asn1.define('RSAPublicKey', function() {
-  this.seq().obj(
-    this.key('modulus').int(),
-    this.key('publicExponent').int()
-  );
-});
-exports.RSAPublicKey = RSAPublicKey;
-
-var PublicKey = rfc3280.SubjectPublicKeyInfo;
-exports.PublicKey = PublicKey;
-var ECPublicKey =  asn1.define('ECPublicKey', function() {
-  this.seq().obj(
-    this.key('algorithm').seq().obj(
-      this.key('id').objid(),
-      this.key('curve').objid()
-    ),
-    this.key('subjectPrivateKey').bitstr()
-  );
-});
-exports.ECPublicKey = ECPublicKey;
-var ECPrivateWrap =  asn1.define('ECPrivateWrap', function() {
-  this.seq().obj(
-    this.key('version').int(),
-    this.key('algorithm').seq().obj(
-      this.key('id').objid(),
-      this.key('curve').objid()
-    ),
-    this.key('subjectPrivateKey').octstr()
-  );
-});
-exports.ECPrivateWrap = ECPrivateWrap;
-var PrivateKeyInfo = asn1.define('PrivateKeyInfo', function() {
-  this.seq().obj(
-    this.key('version').int(),
-    this.key('algorithm').use(rfc3280.AlgorithmIdentifier),
-    this.key('subjectPrivateKey').octstr()
-  );
-});
-exports.PrivateKey = PrivateKeyInfo;
-var EncryptedPrivateKeyInfo = asn1.define('EncryptedPrivateKeyInfo', function() {
-  this.seq().obj(
-    this.key('algorithm').seq().obj(
-      this.key('id').objid(),
-      this.key('decrypt').seq().obj(
-        this.key('kde').seq().obj(
-          this.key('id').objid(),
-          this.key('kdeparams').seq().obj(
-            this.key('salt').octstr(),
-            this.key('iters').int()
-          )
-        ),
-        this.key('cipher').seq().obj(
-          this.key('algo').objid(),
-          this.key('iv').octstr()
-        )
-      )
-    ),
-    this.key('subjectPrivateKey').octstr()
-  );
-});
-exports.EncryptedPrivateKey = EncryptedPrivateKeyInfo;
-
-
-
-var ECPrivateKey = asn1.define('ECPrivateKey', function() {
-  this.seq().obj(
-    this.key('version').int(),
-    this.key('privateKey').octstr(),
-    this.key('parameters').optional().explicit(0).use(ECParameters),
-    this.key('publicKey').optional().explicit(1).bitstr()
-  );
-});
-exports.ECPrivateKey = ECPrivateKey;
-var ECParameters = asn1.define('ECParameters', function() {
-  this.choice({
-    namedCurve: this.objid()
-  });
-});
-
-var ECPrivateKey2 = asn1.define('ECPrivateKey2', function() {
-  this.seq().obj(
-    this.key('version').int(),
-    this.key('privateKey').octstr(),
-    this.key('publicKey').seq().obj(
-      this.key('key').bitstr()
-    )
-  );
-});
-exports.ECPrivateKey2 = ECPrivateKey2;
-},{"asn1.js":50,"asn1.js-rfc3280":49}],47:[function(require,module,exports){
-require('./inject')(module.exports, require('crypto'));
-},{"./inject":48,"crypto":24}],48:[function(require,module,exports){
+},{"buffer":16}],40:[function(require,module,exports){
 (function (Buffer){
 var sign = require('./sign');
 var verify = require('./verify');
-var Writable = require('readable-stream').Writable;
+var stream = require('stream');
 var inherits = require('inherits');
-var algos = require('./algos');
+var _algos = require('./algos');
+var algos = {};
+Object.keys(_algos).forEach(function (key) {
+	algos[key] = algos[key.toLowerCase()] = _algos[key];
+});
 'use strict';
 module.exports = function (exports, crypto) {
-	exports.createSign = createSign;
+	exports.createSign = exports.Sign = createSign;
 	function createSign(algorithm) {
 
 		return new Sign(algorithm, crypto);
 	}
-	exports.createVerify = createVerify;
+	exports.createVerify = exports.Verify = createVerify;
 	function createVerify(algorithm) {
 		return new Verify(algorithm, crypto);
 	}
 };
-inherits(Sign, Writable);
+inherits(Sign, stream.Writable);
 function Sign(algorithm, crypto) {
-	Writable.call(this);
+	stream.Writable.call(this);
 	var data = algos[algorithm];
 	if (!data) {
 		throw new Error('Unknown message digest');
 	}
+	this._hashType = data.hash;
 	this._hash = crypto.createHash(data.hash);
 	this._tag = data.id;
 	this._crypto = crypto;
-};
+}
 Sign.prototype._write = function _write(data, _, done) {
 	this._hash.update(data);
 	done();
@@ -9648,23 +9251,23 @@ Sign.prototype.update = function update(data) {
 Sign.prototype.sign = function signMethod(key, enc) {
 	this.end();
 	var hash = this._hash.digest();
-	var sig = sign(Buffer.concat([this._tag, hash]), key, this._crypto);
+	var sig = sign(Buffer.concat([this._tag, hash]), key, this._hashType, this._crypto);
 	if (enc) {
 		sig = sig.toString(enc);
 	}
 	return sig;
 };
 
-inherits(Verify, Writable);
+inherits(Verify, stream.Writable);
 function Verify(algorithm, crypto) {
-	Writable.call(this);
+	stream.Writable.call(this);
 	var data = algos[algorithm];
 	if (!data) {
 		throw new Error('Unknown message digest');
 	}
 	this._hash = crypto.createHash(data.hash);
 	this._tag = data.id;
-};
+}
 Verify.prototype._write = function _write(data, _, done) {
 	this._hash.update(data);
 	done();
@@ -9683,1668 +9286,7 @@ Verify.prototype.verify = function verifyMethod(key, sig, enc) {
 	return verify(sig, Buffer.concat([this._tag, hash]), key);
 };
 }).call(this,require("buffer").Buffer)
-},{"./algos":45,"./sign":85,"./verify":86,"buffer":17,"inherits":134,"readable-stream":150}],49:[function(require,module,exports){
-try {
-  var asn1 = require('asn1.js');
-} catch (e) {
-  var asn1 = require('../..');
-}
-
-var CRLReason = asn1.define('CRLReason', function() {
-  this.enum({
-    0: 'unspecified',
-    1: 'keyCompromise',
-    2: 'CACompromise',
-    3: 'affiliationChanged',
-    4: 'superseded',
-    5: 'cessationOfOperation',
-    6: 'certificateHold',
-    8: 'removeFromCRL',
-    9: 'privilegeWithdrawn',
-    10: 'AACompromise'
-  });
-});
-exports.CRLReason = CRLReason;
-
-var AlgorithmIdentifier = asn1.define('AlgorithmIdentifier', function() {
-  this.seq().obj(
-    this.key('algorithm').objid(),
-    this.key('parameters').optional().any()
-  );
-});
-exports.AlgorithmIdentifier = AlgorithmIdentifier;
-
-var Certificate = asn1.define('Certificate', function() {
-  this.seq().obj(
-    this.key('tbsCertificate').use(TBSCertificate),
-    this.key('signatureAlgorithm').use(AlgorithmIdentifier),
-    this.key('signature').bitstr()
-  );
-});
-exports.Certificate = Certificate;
-
-var TBSCertificate = asn1.define('TBSCertificate', function() {
-  this.seq().obj(
-    this.key('version').def('v1').explicit(0).use(Version),
-    this.key('serialNumber').use(CertificateSerialNumber),
-    this.key('signature').use(AlgorithmIdentifier),
-    this.key('issuer').use(Name),
-    this.key('validity').use(Validity),
-    this.key('subject').use(Name),
-    this.key('subjectPublicKeyInfo').use(SubjectPublicKeyInfo),
-
-    // TODO(indutny): validate that version is v2 or v3
-    this.key('issuerUniqueID').optional().explicit(1).use(UniqueIdentifier),
-    this.key('subjectUniqueID').optional().explicit(2).use(UniqueIdentifier),
-
-    // TODO(indutny): validate that version is v3
-    this.key('extensions').optional().explicit(3).use(Extensions)
-  );
-});
-exports.TBSCertificate = TBSCertificate;
-
-var Version = asn1.define('Version', function() {
-  this.int({
-    0: 'v1',
-    1: 'v2',
-    2: 'v3'
-  });
-});
-exports.Version = Version;
-
-var CertificateSerialNumber = asn1.define('CertificateSerialNumber',
-                                          function() {
-  this.int();
-});
-exports.CertificateSerialNumber = CertificateSerialNumber;
-
-var Validity = asn1.define('Validity', function() {
-  this.seq().obj(
-    this.key('notBefore').use(Time),
-    this.key('notAfter').use(Time)
-  );
-});
-exports.Validity = Validity;
-
-var Time = asn1.define('Time', function() {
-  this.choice({
-    utcTime: this.utctime(),
-    genTime: this.gentime()
-  });
-});
-exports.Time = Time;
-
-var UniqueIdentifier = asn1.define('UniqueIdentifier', function() {
-  this.bitstr();
-});
-exports.UniqueIdentifier = UniqueIdentifier;
-
-var SubjectPublicKeyInfo = asn1.define('SubjectPublicKeyInfo', function() {
-  this.seq().obj(
-    this.key('algorithm').use(AlgorithmIdentifier),
-    this.key('subjectPublicKey').bitstr()
-  );
-});
-exports.SubjectPublicKeyInfo = SubjectPublicKeyInfo;
-
-var Extensions = asn1.define('Extensions', function() {
-  this.seqof(Extension);
-});
-exports.Extensions = Extensions;
-
-var Extension = asn1.define('Extension', function() {
-  this.seq().obj(
-    this.key('extnID').objid(),
-    this.key('critical').bool().def(false),
-    this.key('extnValue').octstr()
-  );
-});
-exports.Extension = Extension;
-
-var Name = asn1.define('Name', function() {
-  this.choice({
-    rdn: this.use(RDNSequence)
-  });
-});
-exports.Name = Name;
-
-var RDNSequence = asn1.define('RDNSequence', function() {
-  this.seqof(RelativeDistinguishedName);
-});
-exports.RDNSequence = RDNSequence;
-
-var RelativeDistinguishedName = asn1.define('RelativeDistinguishedName',
-                                            function() {
-  this.setof(AttributeTypeAndValue);
-});
-exports.RelativeDistinguishedName = RelativeDistinguishedName;
-
-var AttributeTypeAndValue = asn1.define('AttributeTypeAndValue', function() {
-  this.seq().obj(
-    this.key('type').use(AttributeType),
-    this.key('value').use(AttributeValue)
-  );
-});
-exports.AttributeTypeAndValue = AttributeTypeAndValue;
-
-var AttributeType = asn1.define('AttributeType', function() {
-  this.objid();
-});
-exports.AttributeType = AttributeType;
-
-var AttributeValue = asn1.define('AttributeValue', function() {
-  this.any();
-});
-exports.AttributeValue = AttributeValue;
-
-},{"../..":47,"asn1.js":50}],50:[function(require,module,exports){
-var asn1 = exports;
-
-asn1.bignum = require('bn.js');
-
-asn1.define = require('./asn1/api').define;
-asn1.base = require('./asn1/base');
-asn1.constants = require('./asn1/constants');
-asn1.decoders = require('./asn1/decoders');
-asn1.encoders = require('./asn1/encoders');
-
-},{"./asn1/api":51,"./asn1/base":53,"./asn1/constants":57,"./asn1/decoders":59,"./asn1/encoders":61,"bn.js":62}],51:[function(require,module,exports){
-var asn1 = require('../asn1');
-var util = require('util');
-var vm = require('vm');
-
-var api = exports;
-
-api.define = function define(name, body) {
-  return new Entity(name, body);
-};
-
-function Entity(name, body) {
-  this.name = name;
-  this.body = body;
-
-  this.decoders = {};
-  this.encoders = {};
-};
-
-Entity.prototype._createNamed = function createNamed(base) {
-  var named = vm.runInThisContext('(function ' + this.name + '(entity) {\n' +
-    '  this._initNamed(entity);\n' +
-    '})');
-  util.inherits(named, base);
-  named.prototype._initNamed = function initnamed(entity) {
-    base.call(this, entity);
-  };
-
-  return new named(this);
-};
-
-Entity.prototype._getDecoder = function _getDecoder(enc) {
-  // Lazily create decoder
-  if (!this.decoders.hasOwnProperty(enc))
-    this.decoders[enc] = this._createNamed(asn1.decoders[enc]);
-  return this.decoders[enc];
-};
-
-Entity.prototype.decode = function decode(data, enc, options) {
-  return this._getDecoder(enc).decode(data, options);
-};
-
-Entity.prototype._getEncoder = function _getEncoder(enc) {
-  // Lazily create encoder
-  if (!this.encoders.hasOwnProperty(enc))
-    this.encoders[enc] = this._createNamed(asn1.encoders[enc]);
-  return this.encoders[enc];
-};
-
-Entity.prototype.encode = function encode(data, enc, /* internal */ reporter) {
-  return this._getEncoder(enc).encode(data, reporter);
-};
-
-},{"../asn1":50,"util":157,"vm":158}],52:[function(require,module,exports){
-var assert = require('assert');
-var util = require('util');
-var Reporter = require('../base').Reporter;
-var Buffer = require('buffer').Buffer;
-
-function DecoderBuffer(base, options) {
-  Reporter.call(this, options);
-  if (!Buffer.isBuffer(base)) {
-    this.error('Input not Buffer');
-    return;
-  }
-
-  this.base = base;
-  this.offset = 0;
-  this.length = base.length;
-}
-util.inherits(DecoderBuffer, Reporter);
-exports.DecoderBuffer = DecoderBuffer;
-
-DecoderBuffer.prototype.save = function save() {
-  return { offset: this.offset };
-};
-
-DecoderBuffer.prototype.restore = function restore(save) {
-  // Return skipped data
-  var res = new DecoderBuffer(this.base);
-  res.offset = save.offset;
-  res.length = this.offset;
-
-  this.offset = save.offset;
-
-  return res;
-};
-
-DecoderBuffer.prototype.isEmpty = function isEmpty() {
-  return this.offset === this.length;
-};
-
-DecoderBuffer.prototype.readUInt8 = function readUInt8(fail) {
-  if (this.offset + 1 <= this.length)
-    return this.base.readUInt8(this.offset++, true);
-  else
-    return this.error(fail || 'DecoderBuffer overrun');
-}
-
-DecoderBuffer.prototype.skip = function skip(bytes, fail) {
-  if (!(this.offset + bytes <= this.length))
-    return this.error(fail || 'DecoderBuffer overrun');
-
-  var res = new DecoderBuffer(this.base);
-
-  // Share reporter state
-  res._reporterState = this._reporterState;
-
-  res.offset = this.offset;
-  res.length = this.offset + bytes;
-  this.offset += bytes;
-  return res;
-}
-
-DecoderBuffer.prototype.raw = function raw(save) {
-  return this.base.slice(save ? save.offset : this.offset, this.length);
-}
-
-function EncoderBuffer(value, reporter) {
-  if (Array.isArray(value)) {
-    this.length = 0;
-    this.value = value.map(function(item) {
-      if (!(item instanceof EncoderBuffer))
-        item = new EncoderBuffer(item, reporter);
-      this.length += item.length;
-      return item;
-    }, this);
-  } else if (typeof value === 'number') {
-    if (!(0 <= value && value <= 0xff))
-      return reporter.error('non-byte EncoderBuffer value');
-    this.value = value;
-    this.length = 1;
-  } else if (typeof value === 'string') {
-    this.value = value;
-    this.length = Buffer.byteLength(value);
-  } else if (Buffer.isBuffer(value)) {
-    this.value = value;
-    this.length = value.length;
-  } else {
-    return reporter.error('Unsupported type: ' + typeof value);
-  }
-}
-exports.EncoderBuffer = EncoderBuffer;
-
-EncoderBuffer.prototype.join = function join(out, offset) {
-  if (!out)
-    out = new Buffer(this.length);
-  if (!offset)
-    offset = 0;
-
-  if (this.length === 0)
-    return out;
-
-  if (Array.isArray(this.value)) {
-    this.value.forEach(function(item) {
-      item.join(out, offset);
-      offset += item.length;
-    });
-  } else {
-    if (typeof this.value === 'number')
-      out[offset] = this.value;
-    else if (typeof this.value === 'string')
-      out.write(this.value, offset);
-    else if (Buffer.isBuffer(this.value))
-      this.value.copy(out, offset);
-    offset += this.length;
-  }
-
-  return out;
-};
-
-},{"../base":53,"assert":2,"buffer":17,"util":157}],53:[function(require,module,exports){
-var base = exports;
-
-base.Reporter = require('./reporter').Reporter;
-base.DecoderBuffer = require('./buffer').DecoderBuffer;
-base.EncoderBuffer = require('./buffer').EncoderBuffer;
-base.Node = require('./node');
-
-},{"./buffer":52,"./node":54,"./reporter":55}],54:[function(require,module,exports){
-var assert = require('assert');
-var Reporter = require('../base').Reporter;
-var EncoderBuffer = require('../base').EncoderBuffer;
-
-// Supported tags
-var tags = [
-  'seq', 'seqof', 'set', 'setof', 'octstr', 'bitstr', 'objid', 'bool',
-  'gentime', 'utctime', 'null_', 'enum', 'int', 'ia5str'
-];
-
-// Public methods list
-var methods = [
-  'key', 'obj', 'use', 'optional', 'explicit', 'implicit', 'def', 'choice',
-  'any'
-].concat(tags);
-
-// Overrided methods list
-var overrided = [
-  '_peekTag', '_decodeTag', '_use',
-  '_decodeStr', '_decodeObjid', '_decodeTime',
-  '_decodeNull', '_decodeInt', '_decodeBool', '_decodeList',
-
-  '_encodeComposite', '_encodeStr', '_encodeObjid', '_encodeTime',
-  '_encodeNull', '_encodeInt', '_encodeBool'
-];
-
-function Node(enc, parent) {
-  var state = {};
-  this._baseState = state;
-
-  state.enc = enc;
-
-  state.parent = parent || null;
-  state.children = null;
-
-  // State
-  state.tag = null;
-  state.args = null;
-  state.reverseArgs = null;
-  state.choice = null;
-  state.optional = false;
-  state.any = false;
-  state.obj = false;
-  state.use = null;
-  state.useDecoder = null;
-  state.key = null;
-  state['default'] = null;
-  state.explicit = null;
-  state.implicit = null;
-
-  // Should create new instance on each method
-  if (!state.parent) {
-    state.children = [];
-    this._wrap();
-  }
-}
-module.exports = Node;
-
-var stateProps = [
-  'enc', 'parent', 'children', 'tag', 'args', 'reverseArgs', 'choice',
-  'optional', 'any', 'obj', 'use', 'alteredUse', 'key', 'default', 'explicit',
-  'implicit'
-];
-
-Node.prototype.clone = function clone() {
-  var state = this._baseState;
-  var cstate = {};
-  stateProps.forEach(function(prop) {
-    cstate[prop] = state[prop];
-  });
-  var res = new this.constructor(cstate.parent);
-  res._baseState = cstate;
-  return res;
-};
-
-Node.prototype._wrap = function wrap() {
-  var state = this._baseState;
-  methods.forEach(function(method) {
-    this[method] = function _wrappedMethod() {
-      var clone = new this.constructor(this);
-      state.children.push(clone);
-      return clone[method].apply(clone, arguments);
-    };
-  }, this);
-};
-
-Node.prototype._init = function init(body) {
-  var state = this._baseState;
-
-  assert(state.parent === null);
-  body.call(this);
-
-  // Filter children
-  state.children = state.children.filter(function(child) {
-    return child._baseState.parent === this;
-  }, this);
-  assert.equal(state.children.length, 1, 'Root node can have only one child');
-};
-
-Node.prototype._useArgs = function useArgs(args) {
-  var state = this._baseState;
-
-  // Filter children and args
-  var children = args.filter(function(arg) {
-    return arg instanceof this.constructor;
-  }, this);
-  args = args.filter(function(arg) {
-    return !(arg instanceof this.constructor);
-  }, this);
-
-  if (children.length !== 0) {
-    assert(state.children === null);
-    state.children = children;
-
-    // Replace parent to maintain backward link
-    children.forEach(function(child) {
-      child._baseState.parent = this;
-    }, this);
-  }
-  if (args.length !== 0) {
-    assert(state.args === null);
-    state.args = args;
-    state.reverseArgs = args.map(function(arg) {
-      if (typeof arg !== 'object' || arg.constructor !== Object)
-        return arg;
-
-      var res = {};
-      Object.keys(arg).forEach(function(key) {
-        if (key == (key | 0))
-          key |= 0;
-        var value = arg[key];
-        res[value] = key;
-      });
-      return res;
-    });
-  }
-};
-
-//
-// Overrided methods
-//
-
-overrided.forEach(function(method) {
-  Node.prototype[method] = function _overrided() {
-    var state = this._baseState;
-    throw new Error(method + ' not implemented for encoding: ' + state.enc);
-  };
-});
-
-//
-// Public methods
-//
-
-tags.forEach(function(tag) {
-  Node.prototype[tag] = function _tagMethod() {
-    var state = this._baseState;
-    var args = Array.prototype.slice.call(arguments);
-
-    assert(state.tag === null);
-    state.tag = tag;
-
-    this._useArgs(args);
-
-    return this;
-  };
-});
-
-Node.prototype.use = function use(item) {
-  var state = this._baseState;
-
-  assert(state.use === null);
-  state.use = item;
-
-  return this;
-};
-
-Node.prototype.optional = function optional() {
-  var state = this._baseState;
-
-  state.optional = true;
-
-  return this;
-};
-
-Node.prototype.def = function def(val) {
-  var state = this._baseState;
-
-  assert(state['default'] === null);
-  state['default'] = val;
-  state.optional = true;
-
-  return this;
-};
-
-Node.prototype.explicit = function explicit(num) {
-  var state = this._baseState;
-
-  assert(state.explicit === null && state.implicit === null);
-  state.explicit = num;
-
-  return this;
-};
-
-Node.prototype.implicit = function implicit(num) {
-  var state = this._baseState;
-
-  assert(state.explicit === null && state.implicit === null);
-  state.implicit = num;
-
-  return this;
-};
-
-Node.prototype.obj = function obj() {
-  var state = this._baseState;
-  var args = Array.prototype.slice.call(arguments);
-
-  state.obj = true;
-
-  if (args.length !== 0)
-    this._useArgs(args);
-
-  return this;
-};
-
-Node.prototype.key = function key(key) {
-  var state = this._baseState;
-
-  assert(state.key === null);
-  state.key = key;
-
-  return this;
-};
-
-Node.prototype.any = function any() {
-  var state = this._baseState;
-
-  state.any = true;
-
-  return this;
-};
-
-Node.prototype.choice = function choice(obj) {
-  var state = this._baseState;
-
-  assert(state.choice === null);
-  state.choice = obj;
-  this._useArgs(Object.keys(obj).map(function(key) {
-    return obj[key];
-  }));
-
-  return this;
-};
-
-//
-// Decoding
-//
-
-Node.prototype._decode = function decode(input) {
-  var state = this._baseState;
-
-  // Decode root node
-  if (state.parent === null)
-    return input.wrapResult(state.children[0]._decode(input));
-
-  var result = state['default'];
-  var present = true;
-
-  var prevKey;
-  if (state.key !== null)
-    prevKey = input.enterKey(state.key);
-
-  // Check if tag is there
-  if (state.optional) {
-    present = this._peekTag(
-      input,
-      state.explicit !== null ? state.explicit :
-          state.implicit !== null ? state.implicit :
-              state.tag || 0
-    );
-    if (input.isError(present))
-      return present;
-  }
-
-  // Push object on stack
-  var prevObj;
-  if (state.obj && present)
-    prevObj = input.enterObject();
-
-  if (present) {
-    // Unwrap explicit values
-    if (state.explicit !== null) {
-      var explicit = this._decodeTag(input, state.explicit);
-      if (input.isError(explicit))
-        return explicit;
-      input = explicit;
-    }
-
-    // Unwrap implicit and normal values
-    if (state.use === null && state.choice === null) {
-      if (state.any)
-        var save = input.save();
-      var body = this._decodeTag(
-        input,
-        state.implicit !== null ? state.implicit : state.tag,
-        state.any
-      );
-      if (input.isError(body))
-        return body;
-
-      if (state.any)
-        result = input.raw(save);
-      else
-        input = body;
-    }
-
-    // Select proper method for tag
-    if (state.any)
-      result = result;
-    else if (state.choice === null)
-      result = this._decodeGeneric(state.tag, input);
-    else
-      result = this._decodeChoice(input);
-
-    if (input.isError(result))
-      return result;
-
-    // Decode children
-    if (!state.any && state.choice === null && state.children !== null) {
-      var fail = state.children.some(function decodeChildren(child) {
-        // NOTE: We are ignoring errors here, to let parser continue with other
-        // parts of encoded data
-        child._decode(input);
-      });
-      if (fail)
-        return err;
-    }
-  }
-
-  // Pop object
-  if (state.obj && present)
-    result = input.leaveObject(prevObj);
-
-  // Set key
-  if (state.key !== null && (result !== null || present === true))
-    input.leaveKey(prevKey, state.key, result);
-
-  return result;
-};
-
-Node.prototype._decodeGeneric = function decodeGeneric(tag, input) {
-  var state = this._baseState;
-
-  if (tag === 'seq' || tag === 'set')
-    return null;
-  if (tag === 'seqof' || tag === 'setof')
-    return this._decodeList(input, tag, state.args[0]);
-  else if (tag === 'octstr' || tag === 'bitstr' || tag === 'ia5str')
-    return this._decodeStr(input, tag);
-  else if (tag === 'objid' && state.args)
-    return this._decodeObjid(input, state.args[0], state.args[1]);
-  else if (tag === 'objid')
-    return this._decodeObjid(input, null, null);
-  else if (tag === 'gentime' || tag === 'utctime')
-    return this._decodeTime(input, tag);
-  else if (tag === 'null_')
-    return this._decodeNull(input);
-  else if (tag === 'bool')
-    return this._decodeBool(input);
-  else if (tag === 'int' || tag === 'enum')
-    return this._decodeInt(input, state.args && state.args[0]);
-  else if (state.use !== null)
-    return this._getUse(state.use, input._reporterState.obj)._decode(input);
-  else
-    return input.error('unknown tag: ' + tag);
-
-  return null;
-};
-
-Node.prototype._getUse = function _getUse(entity, obj) {
-
-  var state = this._baseState;
-  // Create altered use decoder if implicit is set
-  state.useDecoder = this._use(entity, obj);
-  assert(state.useDecoder._baseState.parent === null);
-  state.useDecoder = state.useDecoder._baseState.children[0];
-  if (state.implicit !== state.useDecoder._baseState.implicit) {
-    state.useDecoder = state.useDecoder.clone();
-    state.useDecoder._baseState.implicit = state.implicit;
-  }
-  return state.useDecoder;
-};
-
-Node.prototype._decodeChoice = function decodeChoice(input) {
-  var state = this._baseState;
-  var result = null;
-  var match = false;
-
-  Object.keys(state.choice).some(function(key) {
-    var save = input.save();
-    var node = state.choice[key];
-    try {
-      var value = node._decode(input);
-      if (input.isError(value))
-        return false;
-
-      result = { type: key, value: value };
-      match = true;
-    } catch (e) {
-      input.restore(save);
-      return false;
-    }
-    return true;
-  }, this);
-
-  if (!match)
-    return input.error('Choice not matched');
-
-  return result;
-};
-
-//
-// Encoding
-//
-
-Node.prototype._createEncoderBuffer = function createEncoderBuffer(data) {
-  return new EncoderBuffer(data, this.reporter);
-};
-
-Node.prototype._encode = function encode(data, reporter, parent) {
-  var state = this._baseState;
-  if (state['default'] !== null && state['default'] === data)
-    return;
-
-  var result = this._encodeValue(data, reporter, parent);
-  if (result === undefined)
-    return;
-
-  if (this._skipDefault(result, reporter, parent))
-    return;
-
-  return result;
-};
-
-Node.prototype._encodeValue = function encode(data, reporter, parent) {
-  var state = this._baseState;
-
-  // Decode root node
-  if (state.parent === null)
-    return state.children[0]._encode(data, reporter || new Reporter());
-
-  var result = null;
-  var present = true;
-
-  // Set reporter to share it with a child class
-  this.reporter = reporter;
-
-  // Check if data is there
-  if (state.optional && data === undefined) {
-    if (state['default'] !== null)
-      data = state['default']
-    else
-      return;
-  }
-
-  // For error reporting
-  var prevKey;
-
-  // Encode children first
-  var content = null;
-  var primitive = false;
-  if (state.any) {
-    // Anything that was given is translated to buffer
-    result = this._createEncoderBuffer(data);
-  } else if (state.choice) {
-    result = this._encodeChoice(data, reporter);
-  } else if (state.children) {
-    content = state.children.map(function(child) {
-      if (child._baseState.tag === 'null_')
-        return child._encode(null, reporter, data);
-
-      if (child._baseState.key === null)
-        return reporter.error('Child should have a key');
-      var prevKey = reporter.enterKey(child._baseState.key);
-
-      if (typeof data !== 'object')
-        return reporter.error('Child expected, but input is not object');
-
-      var res = child._encode(data[child._baseState.key], reporter, data);
-      reporter.leaveKey(prevKey);
-
-      return res;
-    }, this).filter(function(child) {
-      return child;
-    });
-
-    content = this._createEncoderBuffer(content);
-  } else {
-    if (state.tag === 'seqof' || state.tag === 'setof') {
-      // TODO(indutny): this should be thrown on DSL level
-      if (!(state.args && state.args.length === 1))
-        return reporter.error('Too many args for : ' + state.tag);
-
-      if (!Array.isArray(data))
-        return reporter.error('seqof/setof, but data is not Array');
-
-      var child = this.clone();
-      child._baseState.implicit = null;
-      content = this._createEncoderBuffer(data.map(function(item) {
-        var state = this._baseState;
-
-        return this._getUse(state.args[0], data)._encode(item, reporter);
-      }, child));
-    } else if (state.use !== null) {
-      result = this._getUse(state.use, parent)._encode(data, reporter);
-    } else {
-      content = this._encodePrimitive(state.tag, data);
-      primitive = true;
-    }
-  }
-
-  // Encode data itself
-  var result;
-  if (!state.any && state.choice === null) {
-    var tag = state.implicit !== null ? state.implicit : state.tag;
-    var cls = state.implicit === null ? 'universal' : 'context';
-
-    if (tag === null) {
-      if (state.use === null)
-        reporter.error('Tag could be ommited only for .use()');
-    } else {
-      if (state.use === null)
-        result = this._encodeComposite(tag, primitive, cls, content);
-    }
-  }
-
-  // Wrap in explicit
-  if (state.explicit !== null)
-    result = this._encodeComposite(state.explicit, false, 'context', result);
-
-  return result;
-};
-
-Node.prototype._encodeChoice = function encodeChoice(data, reporter) {
-  var state = this._baseState;
-
-  var node = state.choice[data.type];
-  if (!node) {
-    assert(
-        false,
-        data.type + ' not found in ' +
-            JSON.stringify(Object.keys(state.choice)));
-  }
-  return node._encode(data.value, reporter);
-};
-
-Node.prototype._encodePrimitive = function encodePrimitive(tag, data) {
-  var state = this._baseState;
-
-  if (tag === 'octstr' || tag === 'bitstr' || tag === 'ia5str')
-    return this._encodeStr(data, tag);
-  else if (tag === 'objid' && state.args)
-    return this._encodeObjid(data, state.reverseArgs[0], state.args[1]);
-  else if (tag === 'objid')
-    return this._encodeObjid(data, null, null);
-  else if (tag === 'gentime' || tag === 'utctime')
-    return this._encodeTime(data, tag);
-  else if (tag === 'null_')
-    return this._encodeNull();
-  else if (tag === 'int' || tag === 'enum')
-    return this._encodeInt(data, state.args && state.reverseArgs[0]);
-  else if (tag === 'bool')
-    return this._encodeBool(data);
-  else
-    throw new Error('Unsupported tag: ' + tag);
-};
-
-},{"../base":53,"assert":2}],55:[function(require,module,exports){
-var util = require('util');
-
-function Reporter(options) {
-  this._reporterState = {
-    obj: null,
-    path: [],
-    options: options || {},
-    errors: []
-  };
-}
-exports.Reporter = Reporter;
-
-Reporter.prototype.isError = function isError(obj) {
-  return obj instanceof ReporterError;
-};
-
-Reporter.prototype.enterKey = function enterKey(key) {
-  return this._reporterState.path.push(key);
-};
-
-Reporter.prototype.leaveKey = function leaveKey(index, key, value) {
-  var state = this._reporterState;
-
-  state.path = state.path.slice(0, index - 1);
-  if (state.obj !== null)
-    state.obj[key] = value;
-};
-
-Reporter.prototype.enterObject = function enterObject() {
-  var state = this._reporterState;
-
-  var prev = state.obj;
-  state.obj = {};
-  return prev;
-};
-
-Reporter.prototype.leaveObject = function leaveObject(prev) {
-  var state = this._reporterState;
-
-  var now = state.obj;
-  state.obj = prev;
-  return now;
-};
-
-Reporter.prototype.error = function error(msg) {
-  var err;
-  var state = this._reporterState;
-
-  var inherited = msg instanceof ReporterError;
-  if (inherited) {
-    err = msg;
-  } else {
-    err = new ReporterError(state.path.map(function(elem) {
-      return '[' + JSON.stringify(elem) + ']';
-    }).join(''), msg.message || msg, msg.stack);
-  }
-
-  if (!state.options.partial)
-    throw err;
-
-  if (!inherited)
-    state.errors.push(err);
-
-  return err;
-};
-
-Reporter.prototype.wrapResult = function wrapResult(result) {
-  var state = this._reporterState;
-  if (!state.options.partial)
-    return result;
-
-  return {
-    result: this.isError(result) ? null : result,
-    errors: state.errors
-  };
-};
-
-function ReporterError(path, msg) {
-  this.path = path;
-  this.rethrow(msg);
-};
-util.inherits(ReporterError, Error);
-
-ReporterError.prototype.rethrow = function rethrow(msg) {
-  this.message = msg + ' at: ' + (this.path || '(shallow)');
-  Error.captureStackTrace(this, ReporterError);
-
-  return this;
-};
-
-},{"util":157}],56:[function(require,module,exports){
-var constants = require('../constants');
-
-exports.tagClass = {
-  0: 'universal',
-  1: 'application',
-  2: 'context',
-  3: 'private'
-};
-exports.tagClassByName = constants._reverse(exports.tagClass);
-
-exports.tag = {
-  0x00: 'end',
-  0x01: 'bool',
-  0x02: 'int',
-  0x03: 'bitstr',
-  0x04: 'octstr',
-  0x05: 'null_',
-  0x06: 'objid',
-  0x07: 'objDesc',
-  0x08: 'external',
-  0x09: 'real',
-  0x0a: 'enum',
-  0x0b: 'embed',
-  0x0c: 'utf8str',
-  0x0d: 'relativeOid',
-  0x10: 'seq',
-  0x11: 'set',
-  0x12: 'numstr',
-  0x13: 'printstr',
-  0x14: 't61str',
-  0x15: 'videostr',
-  0x16: 'ia5str',
-  0x17: 'utctime',
-  0x18: 'gentime',
-  0x19: 'graphstr',
-  0x1a: 'iso646str',
-  0x1b: 'genstr',
-  0x1c: 'unistr',
-  0x1d: 'charstr',
-  0x1e: 'bmpstr'
-};
-exports.tagByName = constants._reverse(exports.tag);
-
-},{"../constants":57}],57:[function(require,module,exports){
-var constants = exports;
-
-// Helper
-constants._reverse = function reverse(map) {
-  var res = {};
-
-  Object.keys(map).forEach(function(key) {
-    // Convert key to integer if it is stringified
-    if ((key | 0) == key)
-      key = key | 0;
-
-    var value = map[key];
-    res[value] = key;
-  });
-
-  return res;
-};
-
-constants.der = require('./der');
-
-},{"./der":56}],58:[function(require,module,exports){
-var util = require('util');
-
-var asn1 = require('../../asn1');
-var base = asn1.base;
-var bignum = asn1.bignum;
-
-// Import DER constants
-var der = asn1.constants.der;
-
-function DERDecoder(entity) {
-  this.enc = 'der';
-  this.name = entity.name;
-  this.entity = entity;
-
-  // Construct base tree
-  this.tree = new DERNode();
-  this.tree._init(entity.body);
-};
-module.exports = DERDecoder;
-
-DERDecoder.prototype.decode = function decode(data, options) {
-  if (!(data instanceof base.DecoderBuffer))
-    data = new base.DecoderBuffer(data, options);
-
-  return this.tree._decode(data, options);
-};
-
-// Tree methods
-
-function DERNode(parent) {
-  base.Node.call(this, 'der', parent);
-}
-util.inherits(DERNode, base.Node);
-
-DERNode.prototype._peekTag = function peekTag(buffer, tag) {
-  if (buffer.isEmpty())
-    return false;
-
-  var state = buffer.save();
-  var decodedTag = derDecodeTag(buffer, 'Failed to peek tag: "' + tag + '"');
-  if (buffer.isError(decodedTag))
-    return decodedTag;
-
-  buffer.restore(state);
-
-  return decodedTag.tag === tag || decodedTag.tagStr === tag;
-};
-
-DERNode.prototype._decodeTag = function decodeTag(buffer, tag, any) {
-  var decodedTag = derDecodeTag(buffer,
-                                'Failed to decode tag of "' + tag + '"');
-  if (buffer.isError(decodedTag))
-    return decodedTag;
-
-  var len = derDecodeLen(buffer,
-                         decodedTag.primitive,
-                         'Failed to get length of "' + tag + '"');
-
-  // Failure
-  if (buffer.isError(len))
-    return len;
-
-  if (!any &&
-      decodedTag.tag !== tag &&
-      decodedTag.tagStr !== tag &&
-      decodedTag.tagStr + 'of' !== tag) {
-    return buffer.error('Failed to match tag: "' + tag + '"');
-  }
-
-  if (decodedTag.primitive || len !== null)
-    return buffer.skip(len, 'Failed to match body of: "' + tag + '"');
-
-  // Indefinite length... find END tag
-  var state = buffer.start();
-  var res = this._skipUntilEnd(
-      buffer,
-      'Failed to skip indefinite length body: "' + this.tag + '"');
-  if (buffer.isError(res))
-    return res;
-
-  return buffer.cut(state);
-};
-
-DERNode.prototype._skipUntilEnd = function skipUntilEnd(buffer, fail) {
-  while (true) {
-    var tag = derDecodeTag(buffer, fail);
-    if (buffer.isError(tag))
-      return tag;
-    var len = derDecodeLen(buffer, tag.primitive, fail);
-    if (buffer.isError(len))
-      return len;
-
-    var res;
-    if (tag.primitive || len !== null)
-      res = buffer.skip(len)
-    else
-      res = this._skipUntilEnd(buffer, fail);
-
-    // Failure
-    if (buffer.isError(res))
-      return res;
-
-    if (tag.tagStr === 'end')
-      break;
-  }
-};
-
-DERNode.prototype._decodeList = function decodeList(buffer, tag, decoder) {
-  var result = [];
-  while (!buffer.isEmpty()) {
-    var possibleEnd = this._peekTag(buffer, 'end');
-    if (buffer.isError(possibleEnd))
-      return possibleEnd;
-
-    var res = decoder.decode(buffer, 'der');
-    if (buffer.isError(res) && possibleEnd)
-      break;
-    result.push(res);
-  }
-  return result;
-};
-
-DERNode.prototype._decodeStr = function decodeStr(buffer, tag) {
-  if (tag === 'octstr') {
-    return buffer.raw();
-  } else if (tag === 'bitstr') {
-    var unused = buffer.readUInt8();
-    if (buffer.isError(unused))
-      return unused;
-
-    return { unused: unused, data: buffer.raw() };
-  } else if (tag === 'ia5str') {
-    return buffer.raw().toString();
-  } else {
-    return this.error('Decoding of string type: ' + tag + ' unsupported');
-  }
-};
-
-DERNode.prototype._decodeObjid = function decodeObjid(buffer, values, relative) {
-  var identifiers = [];
-  var ident = 0;
-  while (!buffer.isEmpty()) {
-    var subident = buffer.readUInt8();
-    ident <<= 7;
-    ident |= subident & 0x7f;
-    if ((subident & 0x80) === 0) {
-      identifiers.push(ident);
-      ident = 0;
-    }
-  }
-  if (subident & 0x80)
-    identifiers.push(ident);
-
-  var first = (identifiers[0] / 40) | 0;
-  var second = identifiers[0] % 40;
-
-  if (relative)
-    result = identifiers;
-  else
-    result = [first, second].concat(identifiers.slice(1));
-
-  if (values)
-    result = values[result.join(' ')];
-
-  return result;
-};
-
-DERNode.prototype._decodeTime = function decodeTime(buffer, tag) {
-  var str = buffer.raw().toString();
-  if (tag === 'gentime') {
-    var year = str.slice(0, 4) | 0;
-    var mon = str.slice(4, 6) | 0;
-    var day = str.slice(6, 8) | 0;
-    var hour = str.slice(8, 10) | 0;
-    var min = str.slice(10, 12) | 0;
-    var sec = str.slice(12, 14) | 0;
-  } else if (tag === 'utctime') {
-    var year = str.slice(0, 2) | 0;
-    var mon = str.slice(2, 4) | 0;
-    var day = str.slice(4, 6) | 0;
-    var hour = str.slice(6, 8) | 0;
-    var min = str.slice(8, 10) | 0;
-    var sec = str.slice(10, 12) | 0;
-    if (year < 70)
-      year = 2000 + year;
-    else
-      year = 1900 + year;
-  } else {
-    return this.error('Decoding ' + tag + ' time is not supported yet');
-  }
-
-  return Date.UTC(year, mon - 1, day, hour, min, sec, 0);
-};
-
-DERNode.prototype._decodeNull = function decodeNull(buffer) {
-  return null;
-};
-
-DERNode.prototype._decodeBool = function decodeBool(buffer) {
-  var res = buffer.readUInt8();
-  if (buffer.isError(res))
-    return res;
-  else
-    return res !== 0;
-};
-
-DERNode.prototype._decodeInt = function decodeInt(buffer, values) {
-  var res = 0;
-
-  // Bigint, return as it is (assume big endian)
-  var raw = buffer.raw();
-  if (raw.length > 3)
-    return new bignum(raw);
-
-  while (!buffer.isEmpty()) {
-    res <<= 8;
-    var i = buffer.readUInt8();
-    if (buffer.isError(i))
-      return i;
-    res |= i;
-  }
-
-  if (values)
-    res = values[res] || res;
-
-  return res;
-};
-
-DERNode.prototype._use = function use(entity, obj) {
-  if (typeof entity === 'function')
-    entity = entity(obj);
-  return entity._getDecoder('der').tree;
-};
-
-// Utility methods
-
-function derDecodeTag(buf, fail) {
-  var tag = buf.readUInt8(fail);
-  if (buf.isError(tag))
-    return tag;
-
-  var cls = der.tagClass[tag >> 6];
-  var primitive = (tag & 0x20) === 0;
-
-  // Multi-octet tag - load
-  if ((tag & 0x1f) === 0x1f) {
-    var oct = tag;
-    tag = 0;
-    while ((oct & 0x80) === 0x80) {
-      oct = buf.readUInt8(fail);
-      if (buf.isError(oct))
-        return oct;
-
-      tag <<= 7;
-      tag |= oct & 0x7f;
-    }
-  } else {
-    tag &= 0x1f;
-  }
-  var tagStr = der.tag[tag];
-
-  return {
-    cls: cls,
-    primitive: primitive,
-    tag: tag,
-    tagStr: tagStr
-  };
-}
-
-function derDecodeLen(buf, primitive, fail) {
-  var len = buf.readUInt8(fail);
-  if (buf.isError(len))
-    return len;
-
-  // Indefinite form
-  if (!primitive && len === 0x80)
-    return null;
-
-  // Definite form
-  if ((len & 0x80) === 0) {
-    // Short form
-    return len;
-  }
-
-  // Long form
-  var num = len & 0x7f;
-  if (num >= 4)
-    return buf.error('length octect is too long');
-
-  len = 0;
-  for (var i = 0; i < num; i++) {
-    len <<= 8;
-    var j = buf.readUInt8(fail);
-    if (buf.isError(j))
-      return j;
-    len |= j;
-  }
-
-  return len;
-}
-
-},{"../../asn1":50,"util":157}],59:[function(require,module,exports){
-var decoders = exports;
-
-decoders.der = require('./der');
-
-},{"./der":58}],60:[function(require,module,exports){
-var util = require('util');
-var Buffer = require('buffer').Buffer;
-
-var asn1 = require('../../asn1');
-var base = asn1.base;
-var bignum = asn1.bignum;
-
-// Import DER constants
-var der = asn1.constants.der;
-
-function DEREncoder(entity) {
-  this.enc = 'der';
-  this.name = entity.name;
-  this.entity = entity;
-
-  // Construct base tree
-  this.tree = new DERNode();
-  this.tree._init(entity.body);
-};
-module.exports = DEREncoder;
-
-DEREncoder.prototype.encode = function encode(data, reporter) {
-  return this.tree._encode(data, reporter).join();
-};
-
-// Tree methods
-
-function DERNode(parent) {
-  base.Node.call(this, 'der', parent);
-}
-util.inherits(DERNode, base.Node);
-
-DERNode.prototype._encodeComposite = function encodeComposite(tag,
-                                                              primitive,
-                                                              cls,
-                                                              content) {
-  var encodedTag = encodeTag(tag, primitive, cls, this.reporter);
-
-  // Short form
-  if (content.length < 0x80) {
-    var header = new Buffer(2);
-    header[0] = encodedTag;
-    header[1] = content.length;
-    return this._createEncoderBuffer([ header, content ]);
-  }
-
-  // Long form
-  // Count octets required to store length
-  var lenOctets = 1;
-  for (var i = content.length; i >= 0x100; i >>= 8)
-    lenOctets++;
-
-  var header = new Buffer(1 + 1 + lenOctets);
-  header[0] = encodedTag;
-  header[1] = 0x80 | lenOctets;
-
-  for (var i = 1 + lenOctets, j = content.length; j > 0; i--, j >>= 8)
-    header[i] = j & 0xff;
-
-  return this._createEncoderBuffer([ header, content ]);
-};
-
-DERNode.prototype._encodeStr = function encodeStr(str, tag) {
-  if (tag === 'octstr')
-    return this._createEncoderBuffer(str);
-  else if (tag === 'bitstr')
-    return this._createEncoderBuffer([ str.unused | 0, str.data ]);
-  else if (tag === 'ia5str')
-    return this._createEncoderBuffer(str);
-  return this.reporter.error('Encoding of string type: ' + tag +
-                             ' unsupported');
-};
-
-DERNode.prototype._encodeObjid = function encodeObjid(id, values, relative) {
-  if (typeof id === 'string') {
-    if (!values)
-      return this.reporter.error('string objid given, but no values map found');
-    if (!values.hasOwnProperty(id))
-      return this.reporter.error('objid not found in values map');
-    id = values[id].split(/\s+/g);
-    for (var i = 0; i < id.length; i++)
-      id[i] |= 0;
-  } else if (Array.isArray(id)) {
-    id = id.slice();
-  }
-
-  if (!Array.isArray(id)) {
-    return this.reporter.error('objid() should be either array or string, ' +
-                               'got: ' + JSON.stringify(id));
-  }
-
-  if (!relative) {
-    if (id[1] >= 40)
-      return this.reporter.error('Second objid identifier OOB');
-    id.splice(0, 2, id[0] * 40 + id[1]);
-  }
-
-  // Count number of octets
-  var size = 0;
-  for (var i = 0; i < id.length; i++) {
-    var ident = id[i];
-    for (size++; ident >= 0x80; ident >>= 7)
-      size++;
-  }
-
-  var objid = new Buffer(size);
-  var offset = objid.length - 1;
-  for (var i = id.length - 1; i >= 0; i--) {
-    var ident = id[i];
-    objid[offset--] = ident & 0x7f;
-    while ((ident >>= 7) > 0)
-      objid[offset--] = 0x80 | (ident & 0x7f);
-  }
-
-  return this._createEncoderBuffer(objid);
-};
-
-function two(num) {
-  if (num <= 10)
-    return '0' + num;
-  else
-    return num;
-}
-
-DERNode.prototype._encodeTime = function encodeTime(time, tag) {
-  var str;
-  var date = new Date(time);
-
-  if (tag === 'gentime') {
-    str = [
-      date.getFullYear(),
-      two(date.getUTCMonth() + 1),
-      two(date.getUTCDate()),
-      two(date.getUTCHours()),
-      two(date.getUTCMinutes()),
-      two(date.getUTCSeconds()),
-      'Z'
-    ].join('');
-  } else if (tag === 'utctime') {
-    str = [
-      date.getFullYear() % 100,
-      two(date.getUTCMonth() + 1),
-      two(date.getUTCDate()),
-      two(date.getUTCHours()),
-      two(date.getUTCMinutes()),
-      two(date.getUTCSeconds()),
-      'Z'
-    ].join('');
-  } else {
-    this.reporter.error('Encoding ' + tag + ' time is not supported yet');
-  }
-
-  return this._encodeStr(str, 'octstr');
-};
-
-DERNode.prototype._encodeNull = function encodeNull() {
-  return this._createEncoderBuffer('');
-};
-
-DERNode.prototype._encodeInt = function encodeInt(num, values) {
-  if (typeof num === 'string') {
-    if (!values)
-      return this.reporter.error('String int or enum given, but no values map');
-    if (!values.hasOwnProperty(num)) {
-      return this.reporter.error('Values map doesn\'t contain: ' +
-                                 JSON.stringify(num));
-    }
-    num = values[num];
-  }
-
-  // Bignum, assume big endian
-  if (bignum !== null && num instanceof bignum) {
-    var numArray = num.toArray();
-    if(num.sign === false && numArray[0] & 0x80) {
-      numArray.unshift(0);
-    }
-    num = new Buffer(numArray);
-  }
-
-  if (Buffer.isBuffer(num)) {
-    var size = num.length;
-    if (num.length === 0)
-      size++;
-
-    var out = new Buffer(size);
-    num.copy(out);
-    if (num.length === 0)
-      out[0] = 0
-    return this._createEncoderBuffer(out);
-  }
-
-  if (num < 0x80)
-    return this._createEncoderBuffer(num);
-
-  if (num < 0x100)
-    return this._createEncoderBuffer([0, num]);
-
-  var size = 1;
-  for (var i = num; i >= 0x100; i >>= 8)
-    size++;
-
-  var out = new Array(size);
-  for (var i = out.length - 1; i >= 0; i--) {
-    out[i] = num & 0xff;
-    num >>= 8;
-  }
-  if(out[0] & 0x80) {
-    out.unshift(0);
-  }
-
-  return this._createEncoderBuffer(new Buffer(out));
-};
-
-DERNode.prototype._encodeBool = function encodeBool(value) {
-  return this._createEncoderBuffer(value ? 0xff : 0);
-};
-
-DERNode.prototype._use = function use(entity, obj) {
-  if (typeof entity === 'function')
-    entity = entity(obj);
-  return entity._getEncoder('der').tree;
-};
-
-DERNode.prototype._skipDefault = function skipDefault(dataBuffer, reporter, parent) {
-  var state = this._baseState;
-  var i;
-  if (state['default'] === null)
-    return false;
-
-  var data = dataBuffer.join();
-  if (state.defaultBuffer === undefined)
-    state.defaultBuffer = this._encodeValue(state['default'], reporter, parent).join();
-
-  if (data.length !== state.defaultBuffer.length)
-    return false;
-
-  for (i=0; i < data.length; i++)
-    if (data[i] !== state.defaultBuffer[i])
-      return false;
-
-  return true;
-};
-
-// Utility methods
-
-function encodeTag(tag, primitive, cls, reporter) {
-  var res;
-
-  if (tag === 'seqof')
-    tag = 'seq';
-  else if (tag === 'setof')
-    tag = 'set';
-
-  if (der.tagByName.hasOwnProperty(tag))
-    res = der.tagByName[tag];
-  else if (typeof tag === 'number' && (tag | 0) === tag)
-    res = tag;
-  else
-    return reporter.error('Unknown tag: ' + tag);
-
-  if (res >= 0x1f)
-    return reporter.error('Multi-octet tag encoding unsupported');
-
-  if (!primitive)
-    res |= 0x20;
-
-  res |= (der.tagClassByName[cls || 'universal'] << 6);
-
-  return res;
-}
-
-},{"../../asn1":50,"buffer":17,"util":157}],61:[function(require,module,exports){
-var encoders = exports;
-
-encoders.der = require('./der');
-
-},{"./der":60}],62:[function(require,module,exports){
+},{"./algos":39,"./sign":83,"./verify":84,"buffer":16,"inherits":163,"stream":182}],41:[function(require,module,exports){
 // Utils
 
 function assert(val, msg) {
@@ -11369,7 +9311,7 @@ function inherits(ctor, superCtor) {
 
 // BN
 
-function BN(number, base) {
+function BN(number, base, endian) {
   // May be `new BN(bn)` ?
   if (number !== null &&
       typeof number === 'object' &&
@@ -11384,8 +9326,13 @@ function BN(number, base) {
   // Reduction context
   this.red = null;
 
+  if (base === 'le' || base === 'be') {
+    endian = base;
+    base = 10;
+  }
+
   if (number !== null)
-    this._init(number || 0, base || 10);
+    this._init(number || 0, base || 10, endian || 'be');
 }
 if (typeof module === 'object')
   module.exports = BN;
@@ -11393,7 +9340,7 @@ if (typeof module === 'object')
 BN.BN = BN;
 BN.wordSize = 26;
 
-BN.prototype._init = function init(number, base) {
+BN.prototype._init = function init(number, base, endian) {
   if (typeof number === 'number') {
     if (number < 0) {
       this.sign = true;
@@ -11411,27 +9358,7 @@ BN.prototype._init = function init(number, base) {
     }
     return;
   } else if (typeof number === 'object') {
-    // Perhaps a Uint8Array
-    assert(typeof number.length === 'number');
-    this.length = Math.ceil(number.length / 3);
-    this.words = new Array(this.length);
-    for (var i = 0; i < this.length; i++)
-      this.words[i] = 0;
-
-    // Assume big-endian
-    var off = 0;
-    for (var i = number.length - 1, j = 0; i >= 0; i -= 3) {
-      var w = number[i] | (number[i - 1] << 8) | (number[i - 2] << 16);
-      this.words[j] |= (w << off) & 0x3ffffff;
-      this.words[j + 1] = (w >>> (26 - off)) & 0x3ffffff;
-      off += 24;
-      if (off >= 26) {
-        off -= 26;
-        j++;
-      }
-    }
-
-    return this.strip();
+    return this._initArray(number, base, endian);
   }
   if (base === 'hex')
     base = 16;
@@ -11453,7 +9380,65 @@ BN.prototype._init = function init(number, base) {
   this.strip();
 };
 
-BN.prototype._parseHex = function parseHex(number, start) {
+BN.prototype._initArray = function _initArray(number, base, endian) {
+  // Perhaps a Uint8Array
+  assert(typeof number.length === 'number');
+  this.length = Math.ceil(number.length / 3);
+  this.words = new Array(this.length);
+  for (var i = 0; i < this.length; i++)
+    this.words[i] = 0;
+
+  var off = 0;
+  if (endian === 'be') {
+    for (var i = number.length - 1, j = 0; i >= 0; i -= 3) {
+      var w = number[i] | (number[i - 1] << 8) | (number[i - 2] << 16);
+      this.words[j] |= (w << off) & 0x3ffffff;
+      this.words[j + 1] = (w >>> (26 - off)) & 0x3ffffff;
+      off += 24;
+      if (off >= 26) {
+        off -= 26;
+        j++;
+      }
+    }
+  } else if (endian === 'le') {
+    for (var i = 0, j = 0; i < number.length; i += 3) {
+      var w = number[i] | (number[i + 1] << 8) | (number[i + 2] << 16);
+      this.words[j] |= (w << off) & 0x3ffffff;
+      this.words[j + 1] = (w >>> (26 - off)) & 0x3ffffff;
+      off += 24;
+      if (off >= 26) {
+        off -= 26;
+        j++;
+      }
+    }
+  }
+  return this.strip();
+};
+
+function parseHex(str, start, end) {
+  var r = 0;
+  var len = Math.min(str.length, end);
+  for (var i = start; i < len; i++) {
+    var c = str.charCodeAt(i) - 48;
+
+    r <<= 4;
+
+    // 'a' - 'f'
+    if (c >= 49 && c <= 54)
+      r |= c - 49 + 0xa;
+
+    // 'A' - 'F'
+    else if (c >= 17 && c <= 22)
+      r |= c - 17 + 0xa;
+
+    // '0' - '9'
+    else
+      r |= c & 0xf;
+  }
+  return r;
+}
+
+BN.prototype._parseHex = function _parseHex(number, start) {
   // Create possibly bigger array to ensure that it fits the number
   this.length = Math.ceil((number.length - start) / 6);
   this.words = new Array(this.length);
@@ -11463,7 +9448,7 @@ BN.prototype._parseHex = function parseHex(number, start) {
   // Scan 24-bit chunks and add them to the number
   var off = 0;
   for (var i = number.length - 6, j = 0; i >= start; i -= 6) {
-    var w = parseInt(number.slice(i, i + 6), 16);
+    var w = parseHex(number, i, i + 6);
     this.words[j] |= (w << off) & 0x3ffffff;
     this.words[j + 1] |= w >>> (26 - off) & 0x3fffff;
     off += 24;
@@ -11473,50 +9458,67 @@ BN.prototype._parseHex = function parseHex(number, start) {
     }
   }
   if (i + 6 !== start) {
-    var w = parseInt(number.slice(start, i + 6), 16);
+    var w = parseHex(number, start, i + 6);
     this.words[j] |= (w << off) & 0x3ffffff;
     this.words[j + 1] |= w >>> (26 - off) & 0x3fffff;
   }
   this.strip();
 };
 
-BN.prototype._parseBase = function parseBase(number, base, start) {
+function parseBase(str, start, end, mul) {
+  var r = 0;
+  var len = Math.min(str.length, end);
+  for (var i = start; i < len; i++) {
+    var c = str.charCodeAt(i) - 48;
+
+    r *= mul;
+
+    // 'a'
+    if (c >= 49)
+      r += c - 49 + 0xa;
+
+    // 'A'
+    else if (c >= 17)
+      r += c - 17 + 0xa;
+
+    // '0' - '9'
+    else
+      r += c;
+  }
+  return r;
+}
+
+BN.prototype._parseBase = function _parseBase(number, base, start) {
   // Initialize as zero
   this.words = [ 0 ];
   this.length = 1;
 
-  var word = 0;
-  var q = 1;
-  var p = 0;
-  var bigQ = null;
-  for (var i = start; i < number.length; i++) {
-    var digit;
-    var ch = number[i];
-    if (base === 10 || ch <= '9')
-      digit = ch | 0;
-    else if (ch >= 'a')
-      digit = ch.charCodeAt(0) - 97 + 10;
-    else
-      digit = ch.charCodeAt(0) - 65 + 10;
-    word *= base;
-    word += digit;
-    q *= base;
-    p++;
+  // Find length of limb in base
+  for (var limbLen = 0, limbPow = 1; limbPow <= 0x3ffffff; limbPow *= base)
+    limbLen++;
+  limbLen--;
+  limbPow = (limbPow / base) | 0;
 
-    if (q > 0xfffff) {
-      assert(q <= 0x3ffffff);
-      if (!bigQ)
-        bigQ = new BN(q);
-      this.mul(bigQ).copy(this);
-      this.iadd(new BN(word));
-      word = 0;
-      q = 1;
-      p = 0;
-    }
+  var total = number.length - start;
+  var mod = total % limbLen;
+  var end = Math.min(total, total - mod) + start;
+
+  var word = 0;
+  for (var i = start; i < end; i += limbLen) {
+    word = parseBase(number, i, i + limbLen, base);
+
+    this.imuln(limbPow);
+    this.words[0] += word;
   }
-  if (p !== 0) {
-    this.mul(new BN(q)).copy(this);
-    this.iadd(new BN(word));
+
+  if (mod !== 0) {
+    var pow = 1;
+    var word = parseBase(number, i, number.length, base);
+
+    for (var i = 0; i < mod; i++)
+      pow *= base;
+    this.imuln(pow);
+    this.words[0] += word;
   }
 };
 
@@ -12104,6 +10106,26 @@ BN.prototype.imul = function imul(num) {
   }
 
   return this.strip();
+};
+
+BN.prototype.imuln = function imuln(num) {
+  assert(typeof num === 'number');
+
+  // Carry
+  var carry = 0;
+  for (var i = 0; i < this.length; i++) {
+    var w = this.words[i] * num;
+    var lo = (w & 0x3ffffff) + carry;
+    carry = (w / 0x4000000) | 0;
+    this.words[i] = lo;
+  }
+
+  if (carry !== 0) {
+    this.words[i] = carry;
+    this.length++;
+  }
+
+  return this;
 };
 
 // `this` * `this`
@@ -12882,24 +10904,27 @@ K256.prototype.imulK = function imulK(num) {
   num.words[num.length] = 0;
   num.words[num.length + 1] = 0;
   num.length += 2;
-  for (var i = num.length - 3; i >= 0; i--) {
+
+  var uhi = 0;
+  var hi = 0;
+  var lo = 0;
+  for (var i = 0; i < num.length; i++) {
     var w = num.words[i];
-    var hi = w * 0x40;
-    var lo = w * 0x3d1;
+    hi += w * 0x40;
+    lo += w * 0x3d1;
     hi += (lo / 0x4000000) | 0;
-    var uhi = (hi / 0x4000000) | 0;
+    uhi += (hi / 0x4000000) | 0;
     hi &= 0x3ffffff;
     lo &= 0x3ffffff;
 
-    num.words[i + 2] += uhi;
-    num.words[i + 1] += hi;
     num.words[i] = lo;
+
+    lo = hi;
+    hi = uhi;
+    uhi = 0;
   }
-  var w = num.words[num.length - 2];
-  if (w >= 0x4000000) {
-    num.words[num.length - 1] += w >>> 26;
-    num.words[num.length - 2] = w & 0x3ffffff;
-  }
+
+  // Fast length reduction
   if (num.words[num.length - 1] === 0)
     num.length--;
   if (num.words[num.length - 1] === 0)
@@ -13245,7 +11270,55 @@ Mont.prototype.invm = function invm(a) {
   return res._forceRed(this);
 };
 
-},{}],63:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
+(function (Buffer){
+var bn = require('bn.js');
+module.exports = crt;
+function blind(priv, crypto) {
+  var r = getr(priv, crypto);
+  var blinder = r.toRed(bn.mont(priv.modulus))
+  .redPow(new bn(priv.publicExponent)).fromRed();
+  return {
+    blinder: blinder,
+    unblinder:r.invm(priv.modulus)
+  };
+}
+function crt(msg, priv, crypto) {
+  var blinds = blind(priv, crypto);
+  var len = priv.modulus.byteLength();
+  var mod = bn.mont(priv.modulus);
+  var blinded = new bn(msg).mul(blinds.blinder).mod(priv.modulus);
+  var c1 = blinded.toRed(bn.mont(priv.prime1));
+  var c2 = blinded.toRed(bn.mont(priv.prime2));
+  var qinv = priv.coefficient;
+  var p = priv.prime1;
+  var q = priv.prime2;
+  var m1 = c1.redPow(priv.exponent1);
+  var m2 = c2.redPow(priv.exponent2);
+  m1 = m1.fromRed();
+  m2 = m2.fromRed();
+  var h = m1.isub(m2).imul(qinv).mod(p);
+  h.imul(q);
+  m2.iadd(h);
+  var out = new Buffer(m2.imul(blinds.unblinder).mod(priv.modulus).toArray());
+  if (out.length < len) {
+    var prefix = new Buffer(len - out.length);
+    prefix.fill(0);
+    out = Buffer.concat([prefix, out], len);
+  }
+  return out;
+}
+crt.getr = getr;
+function getr(priv, crypto) {
+  var len = priv.modulus.byteLength();
+  var r = new bn(crypto.randomBytes(len));
+  while (r.cmp(priv.modulus) >=  0 || !r.mod(priv.prime1) || !r.mod(priv.prime2)) {
+    r = new bn(crypto.randomBytes(len));
+  }
+  return r;
+}
+}).call(this,require("buffer").Buffer)
+},{"bn.js":41,"buffer":16}],43:[function(require,module,exports){
 var elliptic = exports;
 
 elliptic.version = require('../package.json').version;
@@ -13258,13 +11331,13 @@ elliptic.curves = require('./elliptic/curves');
 // Protocols
 elliptic.ec = require('./elliptic/ec');
 
-},{"../package.json":82,"./elliptic/curve":66,"./elliptic/curves":69,"./elliptic/ec":70,"./elliptic/hmac-drbg":73,"./elliptic/utils":74,"brorand":75}],64:[function(require,module,exports){
-var assert = require('assert');
+},{"../package.json":62,"./elliptic/curve":46,"./elliptic/curves":49,"./elliptic/ec":50,"./elliptic/hmac-drbg":53,"./elliptic/utils":54,"brorand":55}],44:[function(require,module,exports){
 var bn = require('bn.js');
 var elliptic = require('../../elliptic');
 
 var getNAF = elliptic.utils.getNAF;
 var getJSF = elliptic.utils.getJSF;
+var assert = elliptic.utils.assert;
 
 function BaseCurve(type, conf) {
   this.type = type;
@@ -13562,8 +11635,7 @@ BasePoint.prototype.dblp = function dblp(k) {
   return r;
 };
 
-},{"../../elliptic":63,"assert":2,"bn.js":62}],65:[function(require,module,exports){
-var assert = require('assert');
+},{"../../elliptic":43,"bn.js":41}],45:[function(require,module,exports){
 var curve = require('../curve');
 var elliptic = require('../../elliptic');
 var bn = require('bn.js');
@@ -13571,6 +11643,7 @@ var inherits = require('inherits');
 var Base = curve.base;
 
 var getNAF = elliptic.utils.getNAF;
+var assert = elliptic.utils.assert;
 
 function EdwardsCurve(conf) {
   // NOTE: Important as we are creating point in Base.call()
@@ -13925,7 +11998,7 @@ Point.prototype.getY = function getY() {
 Point.prototype.toP = Point.prototype.normalize;
 Point.prototype.mixedAdd = Point.prototype.add;
 
-},{"../../elliptic":63,"../curve":66,"assert":2,"bn.js":62,"inherits":134}],66:[function(require,module,exports){
+},{"../../elliptic":43,"../curve":46,"bn.js":41,"inherits":163}],46:[function(require,module,exports){
 var curve = exports;
 
 curve.base = require('./base');
@@ -13933,8 +12006,7 @@ curve.short = require('./short');
 curve.mont = require('./mont');
 curve.edwards = require('./edwards');
 
-},{"./base":64,"./edwards":65,"./mont":67,"./short":68}],67:[function(require,module,exports){
-var assert = require('assert');
+},{"./base":44,"./edwards":45,"./mont":47,"./short":48}],47:[function(require,module,exports){
 var curve = require('../curve');
 var elliptic = require('../../elliptic');
 var bn = require('bn.js');
@@ -13942,6 +12014,7 @@ var inherits = require('inherits');
 var Base = curve.base;
 
 var getNAF = elliptic.utils.getNAF;
+var assert = elliptic.utils.assert;
 
 function MontCurve(conf) {
   Base.call(this, 'mont', conf);
@@ -14098,8 +12171,7 @@ Point.prototype.getX = function getX() {
   return this.x.fromRed();
 };
 
-},{"../../elliptic":63,"../curve":66,"assert":2,"bn.js":62,"inherits":134}],68:[function(require,module,exports){
-var assert = require('assert');
+},{"../../elliptic":43,"../curve":46,"bn.js":41,"inherits":163}],48:[function(require,module,exports){
 var curve = require('../curve');
 var elliptic = require('../../elliptic');
 var bn = require('bn.js');
@@ -14107,6 +12179,7 @@ var inherits = require('inherits');
 var Base = curve.base;
 
 var getNAF = elliptic.utils.getNAF;
+var assert = elliptic.utils.assert;
 
 function ShortCurve(conf) {
   Base.call(this, 'short', conf);
@@ -14996,13 +13069,14 @@ JPoint.prototype.isInfinity = function isInfinity() {
   return this.z.cmpn(0) === 0;
 };
 
-},{"../../elliptic":63,"../curve":66,"assert":2,"bn.js":62,"inherits":134}],69:[function(require,module,exports){
+},{"../../elliptic":43,"../curve":46,"bn.js":41,"inherits":163}],49:[function(require,module,exports){
 var curves = exports;
 
-var assert = require('assert');
 var hash = require('hash.js');
 var bn = require('bn.js');
 var elliptic = require('../elliptic');
+
+var assert = elliptic.utils.assert;
 
 function PresetCurve(options) {
   if (options.type === 'short')
@@ -15925,11 +13999,11 @@ defineCurve('secp256k1', {
   ]
 });
 
-},{"../elliptic":63,"assert":2,"bn.js":62,"hash.js":76}],70:[function(require,module,exports){
-var assert = require('assert');
+},{"../elliptic":43,"bn.js":41,"hash.js":56}],50:[function(require,module,exports){
 var bn = require('bn.js');
 var elliptic = require('../../elliptic');
 var utils = elliptic.utils;
+var assert = utils.assert;
 
 var KeyPair = require('./key');
 var Signature = require('./signature');
@@ -16078,12 +14152,12 @@ EC.prototype.verify = function verify(msg, signature, key) {
   return p.getX().mod(this.n).cmp(r) === 0;
 };
 
-},{"../../elliptic":63,"./key":71,"./signature":72,"assert":2,"bn.js":62}],71:[function(require,module,exports){
-var assert = require('assert');
+},{"../../elliptic":43,"./key":51,"./signature":52,"bn.js":41}],51:[function(require,module,exports){
 var bn = require('bn.js');
 
 var elliptic = require('../../elliptic');
 var utils = elliptic.utils;
+var assert = utils.assert;
 
 function KeyPair(ec, priv, pub) {
   if (priv instanceof KeyPair)
@@ -16224,12 +14298,12 @@ KeyPair.prototype.inspect = function inspect() {
          ' pub: ' + (this.pub && this.pub.inspect()) + ' >';
 };
 
-},{"../../elliptic":63,"assert":2,"bn.js":62}],72:[function(require,module,exports){
-var assert = require('assert');
+},{"../../elliptic":43,"bn.js":41}],52:[function(require,module,exports){
 var bn = require('bn.js');
 
 var elliptic = require('../../elliptic');
 var utils = elliptic.utils;
+var assert = utils.assert;
 
 function Signature(r, s) {
   if (r instanceof Signature)
@@ -16289,12 +14363,11 @@ Signature.prototype.toDER = function toDER(enc) {
   return utils.encode(res, enc);
 };
 
-},{"../../elliptic":63,"assert":2,"bn.js":62}],73:[function(require,module,exports){
-var assert = require('assert');
-
+},{"../../elliptic":43,"bn.js":41}],53:[function(require,module,exports){
 var hash = require('hash.js');
 var elliptic = require('../elliptic');
 var utils = elliptic.utils;
+var assert = utils.assert;
 
 function HmacDRBG(options) {
   if (!(this instanceof HmacDRBG))
@@ -16404,11 +14477,15 @@ HmacDRBG.prototype.generate = function generate(len, enc, add, addEnc) {
   return utils.encode(res, enc);
 };
 
-},{"../elliptic":63,"assert":2,"hash.js":76}],74:[function(require,module,exports){
-var assert = require('assert');
+},{"../elliptic":43,"hash.js":56}],54:[function(require,module,exports){
 var bn = require('bn.js');
 
 var utils = exports;
+
+utils.assert = function assert(val, msg) {
+  if (!val)
+    throw new Error(msg || 'Assertion failed');
+};
 
 function toArray(msg, enc) {
   if (Array.isArray(msg))
@@ -16552,7 +14629,7 @@ function getJSF(k1, k2) {
 }
 utils.getJSF = getJSF;
 
-},{"assert":2,"bn.js":62}],75:[function(require,module,exports){
+},{"bn.js":41}],55:[function(require,module,exports){
 var r;
 
 module.exports = function rand(len) {
@@ -16611,7 +14688,7 @@ if (typeof window === 'object') {
   }
 }
 
-},{}],76:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 var hash = exports;
 
 hash.utils = require('./hash/utils');
@@ -16621,11 +14698,14 @@ hash.ripemd = require('./hash/ripemd');
 hash.hmac = require('./hash/hmac');
 
 // Proxy hash functions to the main object
+hash.sha1 = hash.sha.sha1;
 hash.sha256 = hash.sha.sha256;
 hash.sha224 = hash.sha.sha224;
+hash.sha384 = hash.sha.sha384;
+hash.sha512 = hash.sha.sha512;
 hash.ripemd160 = hash.ripemd.ripemd160;
 
-},{"./hash/common":77,"./hash/hmac":78,"./hash/ripemd":79,"./hash/sha":80,"./hash/utils":81}],77:[function(require,module,exports){
+},{"./hash/common":57,"./hash/hmac":58,"./hash/ripemd":59,"./hash/sha":60,"./hash/utils":61}],57:[function(require,module,exports){
 var hash = require('../hash');
 var utils = hash.utils;
 var assert = utils.assert;
@@ -16636,7 +14716,11 @@ function BlockHash() {
   this.blockSize = this.constructor.blockSize;
   this.outSize = this.constructor.outSize;
   this.hmacStrength = this.constructor.hmacStrength;
+  this.padLength = this.constructor.padLength / 8;
   this.endian = 'big';
+
+  this._delta8 = this.blockSize / 8;
+  this._delta32 = this.blockSize / 32;
 }
 exports.BlockHash = BlockHash;
 
@@ -16650,18 +14734,18 @@ BlockHash.prototype.update = function update(msg, enc) {
   this.pendingTotal += msg.length;
 
   // Enough data, try updating
-  if (this.pending.length >= this.blockSize / 8) {
+  if (this.pending.length >= this._delta8) {
     msg = this.pending;
 
     // Process pending data in blocks
-    var r = msg.length % (this.blockSize / 8);
+    var r = msg.length % this._delta8;
     this.pending = msg.slice(msg.length - r, msg.length);
     if (this.pending.length === 0)
       this.pending = null;
 
-    msg = utils.join32(msg.slice(0, msg.length - r), this.endian);
-    for (var i = 0; i < msg.length; i += this.blockSize / 32)
-      this._update(msg.slice(i, i + this.blockSize / 32));
+    msg = utils.join32(msg, 0, msg.length - r, this.endian);
+    for (var i = 0; i < msg.length; i += this._delta32)
+      this._update(msg, i, i + this._delta32);
   }
 
   return this;
@@ -16676,9 +14760,9 @@ BlockHash.prototype.digest = function digest(enc) {
 
 BlockHash.prototype._pad = function pad() {
   var len = this.pendingTotal;
-  var bytes = this.blockSize / 8;
-  var k = bytes - ((len + 8) % bytes);
-  var res = new Array(k + 8);
+  var bytes = this._delta8;
+  var k = bytes - ((len + this.padLength) % bytes);
+  var res = new Array(k + this.padLength);
   res[0] = 0x80;
   for (var i = 1; i < k; i++)
     res[i] = 0;
@@ -16686,6 +14770,9 @@ BlockHash.prototype._pad = function pad() {
   // Append length
   len <<= 3;
   if (this.endian === 'big') {
+    for (var t = 8; t < this.padLength; t++)
+      res[i++] = 0;
+
     res[i++] = 0;
     res[i++] = 0;
     res[i++] = 0;
@@ -16703,12 +14790,15 @@ BlockHash.prototype._pad = function pad() {
     res[i++] = 0;
     res[i++] = 0;
     res[i++] = 0;
+
+    for (var t = 8; t < this.padLength; t++)
+      res[i++] = 0;
   }
 
   return res;
-}
+};
 
-},{"../hash":76}],78:[function(require,module,exports){
+},{"../hash":56}],58:[function(require,module,exports){
 var hmac = exports;
 
 var hash = require('../hash');
@@ -16721,6 +14811,9 @@ function Hmac(hash, key, enc) {
   this.Hash = hash;
   this.blockSize = hash.blockSize / 8;
   this.outSize = hash.outSize / 8;
+  this.inner = null;
+  this.outer = null;
+
   this._init(utils.toArray(key, enc));
 }
 module.exports = Hmac;
@@ -16735,29 +14828,27 @@ Hmac.prototype._init = function init(key) {
   for (var i = key.length; i < this.blockSize; i++)
     key.push(0);
 
-  var okey = key.slice();
-  for (var i = 0; i < key.length; i++) {
+  for (var i = 0; i < key.length; i++)
     key[i] ^= 0x36;
-    okey[i] ^= 0x5c;
-  }
+  this.inner = new this.Hash().update(key);
 
-  this.hash = {
-    inner: new this.Hash().update(key),
-    outer: new this.Hash().update(okey)
-  };
+  // 0x36 ^ 0x5c = 0x6a
+  for (var i = 0; i < key.length; i++)
+    key[i] ^= 0x6a;
+  this.outer = new this.Hash().update(key);
 };
 
 Hmac.prototype.update = function update(msg, enc) {
-  this.hash.inner.update(msg, enc);
+  this.inner.update(msg, enc);
   return this;
 };
 
 Hmac.prototype.digest = function digest(enc) {
-  this.hash.outer.update(this.hash.inner.digest());
-  return this.hash.outer.digest(enc);
+  this.outer.update(this.inner.digest());
+  return this.outer.digest(enc);
 };
 
-},{"../hash":76}],79:[function(require,module,exports){
+},{"../hash":56}],59:[function(require,module,exports){
 var hash = require('../hash');
 var utils = hash.utils;
 
@@ -16782,8 +14873,9 @@ exports.ripemd160 = RIPEMD160;
 RIPEMD160.blockSize = 512;
 RIPEMD160.outSize = 160;
 RIPEMD160.hmacStrength = 192;
+RIPEMD160.padLength = 64;
 
-RIPEMD160.prototype._update = function update(msg) {
+RIPEMD160.prototype._update = function update(msg, start) {
   var A = this.h[0];
   var B = this.h[1];
   var C = this.h[2];
@@ -16797,7 +14889,7 @@ RIPEMD160.prototype._update = function update(msg) {
   for (var j = 0; j < 80; j++) {
     var T = sum32(
       rotl32(
-        sum32_4(A, f(j, B, C, D), msg[r[j]], K(j)),
+        sum32_4(A, f(j, B, C, D), msg[r[j] + start], K(j)),
         s[j]),
       E);
     A = E;
@@ -16807,7 +14899,7 @@ RIPEMD160.prototype._update = function update(msg) {
     B = T;
     T = sum32(
       rotl32(
-        sum32_4(Ah, f(79 - j, Bh, Ch, Dh), msg[rh[j]], Kh(j)),
+        sum32_4(Ah, f(79 - j, Bh, Ch, Dh), msg[rh[j] + start], Kh(j)),
         sh[j]),
       Eh);
     Ah = Eh;
@@ -16902,7 +14994,7 @@ var sh = [
   8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11
 ];
 
-},{"../hash":76}],80:[function(require,module,exports){
+},{"../hash":56}],60:[function(require,module,exports){
 var hash = require('../hash');
 var utils = hash.utils;
 var assert = utils.assert;
@@ -16912,6 +15004,17 @@ var rotl32 = utils.rotl32;
 var sum32 = utils.sum32;
 var sum32_4 = utils.sum32_4;
 var sum32_5 = utils.sum32_5;
+var rotr64_hi = utils.rotr64_hi;
+var rotr64_lo = utils.rotr64_lo;
+var shr64_hi = utils.shr64_hi;
+var shr64_lo = utils.shr64_lo;
+var sum64 = utils.sum64;
+var sum64_hi = utils.sum64_hi;
+var sum64_lo = utils.sum64_lo;
+var sum64_4_hi = utils.sum64_4_hi;
+var sum64_4_lo = utils.sum64_4_lo;
+var sum64_5_hi = utils.sum64_5_hi;
+var sum64_5_lo = utils.sum64_5_lo;
 var BlockHash = hash.common.BlockHash;
 
 var sha256_K = [
@@ -16933,6 +15036,54 @@ var sha256_K = [
   0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 ];
 
+var sha512_K = [
+  0x428a2f98, 0xd728ae22, 0x71374491, 0x23ef65cd,
+  0xb5c0fbcf, 0xec4d3b2f, 0xe9b5dba5, 0x8189dbbc,
+  0x3956c25b, 0xf348b538, 0x59f111f1, 0xb605d019,
+  0x923f82a4, 0xaf194f9b, 0xab1c5ed5, 0xda6d8118,
+  0xd807aa98, 0xa3030242, 0x12835b01, 0x45706fbe,
+  0x243185be, 0x4ee4b28c, 0x550c7dc3, 0xd5ffb4e2,
+  0x72be5d74, 0xf27b896f, 0x80deb1fe, 0x3b1696b1,
+  0x9bdc06a7, 0x25c71235, 0xc19bf174, 0xcf692694,
+  0xe49b69c1, 0x9ef14ad2, 0xefbe4786, 0x384f25e3,
+  0x0fc19dc6, 0x8b8cd5b5, 0x240ca1cc, 0x77ac9c65,
+  0x2de92c6f, 0x592b0275, 0x4a7484aa, 0x6ea6e483,
+  0x5cb0a9dc, 0xbd41fbd4, 0x76f988da, 0x831153b5,
+  0x983e5152, 0xee66dfab, 0xa831c66d, 0x2db43210,
+  0xb00327c8, 0x98fb213f, 0xbf597fc7, 0xbeef0ee4,
+  0xc6e00bf3, 0x3da88fc2, 0xd5a79147, 0x930aa725,
+  0x06ca6351, 0xe003826f, 0x14292967, 0x0a0e6e70,
+  0x27b70a85, 0x46d22ffc, 0x2e1b2138, 0x5c26c926,
+  0x4d2c6dfc, 0x5ac42aed, 0x53380d13, 0x9d95b3df,
+  0x650a7354, 0x8baf63de, 0x766a0abb, 0x3c77b2a8,
+  0x81c2c92e, 0x47edaee6, 0x92722c85, 0x1482353b,
+  0xa2bfe8a1, 0x4cf10364, 0xa81a664b, 0xbc423001,
+  0xc24b8b70, 0xd0f89791, 0xc76c51a3, 0x0654be30,
+  0xd192e819, 0xd6ef5218, 0xd6990624, 0x5565a910,
+  0xf40e3585, 0x5771202a, 0x106aa070, 0x32bbd1b8,
+  0x19a4c116, 0xb8d2d0c8, 0x1e376c08, 0x5141ab53,
+  0x2748774c, 0xdf8eeb99, 0x34b0bcb5, 0xe19b48a8,
+  0x391c0cb3, 0xc5c95a63, 0x4ed8aa4a, 0xe3418acb,
+  0x5b9cca4f, 0x7763e373, 0x682e6ff3, 0xd6b2b8a3,
+  0x748f82ee, 0x5defb2fc, 0x78a5636f, 0x43172f60,
+  0x84c87814, 0xa1f0ab72, 0x8cc70208, 0x1a6439ec,
+  0x90befffa, 0x23631e28, 0xa4506ceb, 0xde82bde9,
+  0xbef9a3f7, 0xb2c67915, 0xc67178f2, 0xe372532b,
+  0xca273ece, 0xea26619c, 0xd186b8c7, 0x21c0c207,
+  0xeada7dd6, 0xcde0eb1e, 0xf57d4f7f, 0xee6ed178,
+  0x06f067aa, 0x72176fba, 0x0a637dc5, 0xa2c898a6,
+  0x113f9804, 0xbef90dae, 0x1b710b35, 0x131c471b,
+  0x28db77f5, 0x23047d84, 0x32caab7b, 0x40c72493,
+  0x3c9ebe0a, 0x15c9bebc, 0x431d67c4, 0x9c100d4c,
+  0x4cc5d4be, 0xcb3e42b6, 0x597f299c, 0xfc657e2a,
+  0x5fcb6fab, 0x3ad6faec, 0x6c44198c, 0x4a475817
+];
+
+var sha1_K = [
+  0x5A827999, 0x6ED9EBA1,
+  0x8F1BBCDC, 0xCA62C1D6
+];
+
 function SHA256() {
   if (!(this instanceof SHA256))
     return new SHA256();
@@ -16941,6 +15092,7 @@ function SHA256() {
   this.h = [ 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
              0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 ];
   this.k = sha256_K;
+  this.W = new Array(64);
 }
 utils.inherits(SHA256, BlockHash);
 exports.sha256 = SHA256;
@@ -16948,11 +15100,13 @@ exports.sha256 = SHA256;
 SHA256.blockSize = 512;
 SHA256.outSize = 256;
 SHA256.hmacStrength = 192;
+SHA256.padLength = 64;
 
-SHA256.prototype._update = function _update(msg) {
-  var W = new Array(64);
+SHA256.prototype._update = function _update(msg, start) {
+  var W = this.W;
+
   for (var i = 0; i < 16; i++)
-    W[i] = msg[i];
+    W[i] = msg[start + i];
   for (; i < W.length; i++)
     W[i] = sum32_4(g1_256(W[i - 2]), W[i - 7], g0_256(W[i - 15]), W[i - 16]);
 
@@ -17010,6 +15164,7 @@ exports.sha224 = SHA224;
 SHA224.blockSize = 512;
 SHA224.outSize = 224;
 SHA224.hmacStrength = 192;
+SHA224.padLength = 64;
 
 SHA224.prototype._digest = function digest(enc) {
   // Just truncate output
@@ -17019,12 +15174,249 @@ SHA224.prototype._digest = function digest(enc) {
     return utils.split32(this.h.slice(0, 7), 'big');
 };
 
+function SHA512() {
+  if (!(this instanceof SHA512))
+    return new SHA512();
+
+  BlockHash.call(this);
+  this.h = [ 0x6a09e667, 0xf3bcc908,
+             0xbb67ae85, 0x84caa73b,
+             0x3c6ef372, 0xfe94f82b,
+             0xa54ff53a, 0x5f1d36f1,
+             0x510e527f, 0xade682d1,
+             0x9b05688c, 0x2b3e6c1f,
+             0x1f83d9ab, 0xfb41bd6b,
+             0x5be0cd19, 0x137e2179 ];
+  this.k = sha512_K;
+  this.W = new Array(160);
+}
+utils.inherits(SHA512, BlockHash);
+exports.sha512 = SHA512;
+
+SHA512.blockSize = 1024;
+SHA512.outSize = 512;
+SHA512.hmacStrength = 192;
+SHA512.padLength = 128;
+
+SHA512.prototype._prepareBlock = function _prepareBlock(msg, start) {
+  var W = this.W;
+
+  // 32 x 32bit words
+  for (var i = 0; i < 32; i++)
+    W[i] = msg[start + i];
+  for (; i < W.length; i += 2) {
+    var c0_hi = g1_512_hi(W[i - 4], W[i - 3]);  // i - 2
+    var c0_lo = g1_512_lo(W[i - 4], W[i - 3]);
+    var c1_hi = W[i - 14];  // i - 7
+    var c1_lo = W[i - 13];
+    var c2_hi = g0_512_hi(W[i - 30], W[i - 29]);  // i - 15
+    var c2_lo = g0_512_lo(W[i - 30], W[i - 29]);
+    var c3_hi = W[i - 32];  // i - 16
+    var c3_lo = W[i - 31];
+
+    W[i] = sum64_4_hi(c0_hi, c0_lo,
+                      c1_hi, c1_lo,
+                      c2_hi, c2_lo,
+                      c3_hi, c3_lo);
+    W[i + 1] = sum64_4_lo(c0_hi, c0_lo,
+                          c1_hi, c1_lo,
+                          c2_hi, c2_lo,
+                          c3_hi, c3_lo);
+  }
+};
+
+SHA512.prototype._update = function _update(msg, start) {
+  this._prepareBlock(msg, start);
+
+  var W = this.W;
+
+  var ah = this.h[0];
+  var al = this.h[1];
+  var bh = this.h[2];
+  var bl = this.h[3];
+  var ch = this.h[4];
+  var cl = this.h[5];
+  var dh = this.h[6];
+  var dl = this.h[7];
+  var eh = this.h[8];
+  var el = this.h[9];
+  var fh = this.h[10];
+  var fl = this.h[11];
+  var gh = this.h[12];
+  var gl = this.h[13];
+  var hh = this.h[14];
+  var hl = this.h[15];
+
+  assert(this.k.length === W.length);
+  for (var i = 0; i < W.length; i += 2) {
+    var c0_hi = hh;
+    var c0_lo = hl;
+    var c1_hi = s1_512_hi(eh, el);
+    var c1_lo = s1_512_lo(eh, el);
+    var c2_hi = ch64_hi(eh, el, fh, fl, gh, gl);
+    var c2_lo = ch64_lo(eh, el, fh, fl, gh, gl);
+    var c3_hi = this.k[i];
+    var c3_lo = this.k[i + 1];
+    var c4_hi = W[i];
+    var c4_lo = W[i + 1];
+
+    var T1_hi = sum64_5_hi(c0_hi, c0_lo,
+                           c1_hi, c1_lo,
+                           c2_hi, c2_lo,
+                           c3_hi, c3_lo,
+                           c4_hi, c4_lo);
+    var T1_lo = sum64_5_lo(c0_hi, c0_lo,
+                           c1_hi, c1_lo,
+                           c2_hi, c2_lo,
+                           c3_hi, c3_lo,
+                           c4_hi, c4_lo);
+
+    var c0_hi = s0_512_hi(ah, al);
+    var c0_lo = s0_512_lo(ah, al);
+    var c1_hi = maj64_hi(ah, al, bh, bl, ch, cl);
+    var c1_lo = maj64_lo(ah, al, bh, bl, ch, cl);
+
+    var T2_hi = sum64_hi(c0_hi, c0_lo, c1_hi, c1_lo);
+    var T2_lo = sum64_lo(c0_hi, c0_lo, c1_hi, c1_lo);
+
+    hh = gh;
+    hl = gl;
+
+    gh = fh;
+    gl = fl;
+
+    fh = eh;
+    fl = el;
+
+    eh = sum64_hi(dh, dl, T1_hi, T1_lo);
+    el = sum64_lo(dl, dl, T1_hi, T1_lo);
+
+    dh = ch;
+    dl = cl;
+
+    ch = bh;
+    cl = bl;
+
+    bh = ah;
+    bl = al;
+
+    ah = sum64_hi(T1_hi, T1_lo, T2_hi, T2_lo);
+    al = sum64_lo(T1_hi, T1_lo, T2_hi, T2_lo);
+  }
+
+  sum64(this.h, 0, ah, al);
+  sum64(this.h, 2, bh, bl);
+  sum64(this.h, 4, ch, cl);
+  sum64(this.h, 6, dh, dl);
+  sum64(this.h, 8, eh, el);
+  sum64(this.h, 10, fh, fl);
+  sum64(this.h, 12, gh, gl);
+  sum64(this.h, 14, hh, hl);
+};
+
+SHA512.prototype._digest = function digest(enc) {
+  if (enc === 'hex')
+    return utils.toHex32(this.h, 'big');
+  else
+    return utils.split32(this.h, 'big');
+};
+
+function SHA384() {
+  if (!(this instanceof SHA384))
+    return new SHA384();
+
+  SHA512.call(this);
+  this.h = [ 0xcbbb9d5d, 0xc1059ed8,
+             0x629a292a, 0x367cd507,
+             0x9159015a, 0x3070dd17,
+             0x152fecd8, 0xf70e5939,
+             0x67332667, 0xffc00b31,
+             0x8eb44a87, 0x68581511,
+             0xdb0c2e0d, 0x64f98fa7,
+             0x47b5481d, 0xbefa4fa4 ];
+}
+utils.inherits(SHA384, SHA512);
+exports.sha384 = SHA384;
+
+SHA384.blockSize = 1024;
+SHA384.outSize = 384;
+SHA384.hmacStrength = 192;
+SHA384.padLength = 128;
+
+SHA384.prototype._digest = function digest(enc) {
+  if (enc === 'hex')
+    return utils.toHex32(this.h.slice(0, 12), 'big');
+  else
+    return utils.split32(this.h.slice(0, 12), 'big');
+};
+
+function SHA1() {
+  if (!(this instanceof SHA1))
+    return new SHA1();
+
+  BlockHash.call(this);
+  this.h = [ 0x67452301, 0xefcdab89, 0x98badcfe,
+             0x10325476, 0xc3d2e1f0 ];
+  this.W = new Array(80);
+}
+
+utils.inherits(SHA1, BlockHash);
+exports.sha1 = SHA1;
+
+SHA1.blockSize = 512;
+SHA1.outSize = 160;
+SHA1.hmacStrength = 80;
+SHA1.padLength = 64;
+
+SHA1.prototype._update = function _update(msg, start) {
+  var W = this.W;
+
+  for (var i = 0; i < 16; i++)
+    W[i] = msg[start + i];
+
+  for(; i < W.length; i++)
+    W[i] = rotl32(W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16], 1);
+
+  var a = this.h[0];
+  var b = this.h[1];
+  var c = this.h[2];
+  var d = this.h[3];
+  var e = this.h[4];
+
+  for (var i = 0; i < W.length; i++) {
+    var s = ~~(i / 20);
+    var t = sum32_5(rotl32(a, 5), ft_1(s, b, c, d), e, W[i], sha1_K[s]);
+    e = d;
+    d = c;
+    c = rotl32(b, 30);
+    b = a;
+    a = t;
+  }
+
+  this.h[0] = sum32(this.h[0], a);
+  this.h[1] = sum32(this.h[1], b);
+  this.h[2] = sum32(this.h[2], c);
+  this.h[3] = sum32(this.h[3], d);
+  this.h[4] = sum32(this.h[4], e);
+};
+
+SHA1.prototype._digest = function digest(enc) {
+  if (enc === 'hex')
+    return utils.toHex32(this.h, 'big');
+  else
+    return utils.split32(this.h, 'big');
+};
+
 function ch32(x, y, z) {
   return (x & y) ^ ((~x) & z);
 }
 
 function maj32(x, y, z) {
   return (x & y) ^ (x & z) ^ (y & z);
+}
+
+function p32(x, y, z) {
+  return x ^ y ^ z;
 }
 
 function s0_256(x) {
@@ -17043,8 +15435,134 @@ function g1_256(x) {
   return rotr32(x, 17) ^ rotr32(x, 19) ^ (x >>> 10);
 }
 
-},{"../hash":76}],81:[function(require,module,exports){
+function ft_1(s, x, y, z) {
+  if (s === 0)
+    return ch32(x, y, z);
+  if (s === 1 || s === 3)
+    return p32(x, y, z);
+  if (s === 2)
+    return maj32(x, y, z);
+}
+
+function ch64_hi(xh, xl, yh, yl, zh, zl) {
+  var r = (xh & yh) ^ ((~xh) & zh);
+  if (r < 0)
+    r += 0x100000000;
+  return r;
+}
+
+function ch64_lo(xh, xl, yh, yl, zh, zl) {
+  var r = (xl & yl) ^ ((~xl) & zl);
+  if (r < 0)
+    r += 0x100000000;
+  return r;
+}
+
+function maj64_hi(xh, xl, yh, yl, zh, zl) {
+  var r = (xh & yh) ^ (xh & zh) ^ (yh & zh);
+  if (r < 0)
+    r += 0x100000000;
+  return r;
+}
+
+function maj64_lo(xh, xl, yh, yl, zh, zl) {
+  var r = (xl & yl) ^ (xl & zl) ^ (yl & zl);
+  if (r < 0)
+    r += 0x100000000;
+  return r;
+}
+
+function s0_512_hi(xh, xl) {
+  var c0_hi = rotr64_hi(xh, xl, 28);
+  var c1_hi = rotr64_hi(xl, xh, 2);  // 34
+  var c2_hi = rotr64_hi(xl, xh, 7);  // 39
+
+  var r = c0_hi ^ c1_hi ^ c2_hi;
+  if (r < 0)
+    r += 0x100000000;
+  return r;
+}
+
+function s0_512_lo(xh, xl) {
+  var c0_lo = rotr64_lo(xh, xl, 28);
+  var c1_lo = rotr64_lo(xl, xh, 2);  // 34
+  var c2_lo = rotr64_lo(xl, xh, 7);  // 39
+
+  var r = c0_lo ^ c1_lo ^ c2_lo;
+  if (r < 0)
+    r += 0x100000000;
+  return r;
+}
+
+function s1_512_hi(xh, xl) {
+  var c0_hi = rotr64_hi(xh, xl, 14);
+  var c1_hi = rotr64_hi(xh, xl, 18);
+  var c2_hi = rotr64_hi(xl, xh, 9);  // 41
+
+  var r = c0_hi ^ c1_hi ^ c2_hi;
+  if (r < 0)
+    r += 0x100000000;
+  return r;
+}
+
+function s1_512_lo(xh, xl) {
+  var c0_lo = rotr64_lo(xh, xl, 14);
+  var c1_lo = rotr64_lo(xh, xl, 18);
+  var c2_lo = rotr64_lo(xl, xh, 9);  // 41
+
+  var r = c0_lo ^ c1_lo ^ c2_lo;
+  if (r < 0)
+    r += 0x100000000;
+  return r;
+}
+
+function g0_512_hi(xh, xl) {
+  var c0_hi = rotr64_hi(xh, xl, 1);
+  var c1_hi = rotr64_hi(xh, xl, 8);
+  var c2_hi = shr64_hi(xh, xl, 7);
+
+  var r = c0_hi ^ c1_hi ^ c2_hi;
+  if (r < 0)
+    r += 0x100000000;
+  return r;
+}
+
+function g0_512_lo(xh, xl) {
+  var c0_lo = rotr64_lo(xh, xl, 1);
+  var c1_lo = rotr64_lo(xh, xl, 8);
+  var c2_lo = shr64_lo(xh, xl, 7);
+
+  var r = c0_lo ^ c1_lo ^ c2_lo;
+  if (r < 0)
+    r += 0x100000000;
+  return r;
+}
+
+function g1_512_hi(xh, xl) {
+  var c0_hi = rotr64_hi(xh, xl, 19);
+  var c1_hi = rotr64_hi(xl, xh, 29);  // 61
+  var c2_hi = shr64_hi(xh, xl, 6);
+
+  var r = c0_hi ^ c1_hi ^ c2_hi;
+  if (r < 0)
+    r += 0x100000000;
+  return r;
+}
+
+function g1_512_lo(xh, xl) {
+  var c0_lo = rotr64_lo(xh, xl, 19);
+  var c1_lo = rotr64_lo(xl, xh, 29);  // 61
+  var c2_lo = shr64_lo(xh, xl, 6);
+
+  var r = c0_lo ^ c1_lo ^ c2_lo;
+  if (r < 0)
+    r += 0x100000000;
+  return r;
+}
+
+},{"../hash":56}],61:[function(require,module,exports){
 var utils = exports;
+var inherits = require('inherits');
 
 function toArray(msg, enc) {
   if (Array.isArray(msg))
@@ -17065,7 +15583,7 @@ function toArray(msg, enc) {
       }
     } else if (enc === 'hex') {
       msg = msg.replace(/[^a-z0-9]+/ig, '');
-      if (msg.length % 2 != 0)
+      if (msg.length % 2 !== 0)
         msg = '0' + msg;
       for (var i = 0; i < msg.length; i += 2)
         res.push(parseInt(msg[i] + msg[i + 1], 16));
@@ -17086,18 +15604,21 @@ function toHex(msg) {
 }
 utils.toHex = toHex;
 
+function htonl(w) {
+  var res = (w >>> 24) |
+            ((w >>> 8) & 0xff00) |
+            ((w << 8) & 0xff0000) |
+            ((w & 0xff) << 24);
+  return res >>> 0;
+}
+utils.htonl = htonl;
+
 function toHex32(msg, endian) {
   var res = '';
   for (var i = 0; i < msg.length; i++) {
     var w = msg[i];
-    if (endian === 'little') {
-      w = (w >>> 24) |
-          ((w >>> 8) & 0xff00) |
-          ((w << 8) & 0xff0000) |
-          ((w & 0xff) << 24);
-      if (w < 0)
-        w += 0x100000000;
-    }
+    if (endian === 'little')
+      w = htonl(w);
     res += zero8(w.toString(16));
   }
   return res;
@@ -17132,18 +15653,17 @@ function zero8(word) {
 }
 utils.zero8 = zero8;
 
-function join32(msg, endian) {
-  assert(msg.length % 4 === 0);
-  var res = new Array(msg.length / 4);
-  for (var i = 0, k = 0; i < res.length; i++, k += 4) {
+function join32(msg, start, end, endian) {
+  var len = end - start;
+  assert(len % 4 === 0);
+  var res = new Array(len / 4);
+  for (var i = 0, k = start; i < res.length; i++, k += 4) {
     var w;
     if (endian === 'big')
       w = (msg[k] << 24) | (msg[k + 1] << 16) | (msg[k + 2] << 8) | msg[k + 3];
     else
       w = (msg[k + 3] << 24) | (msg[k + 2] << 16) | (msg[k + 1] << 8) | msg[k];
-    if (w < 0)
-      w += 0x100000000;
-    res[i] = w;
+    res[i] = w >>> 0;
   }
   return res;
 }
@@ -17180,34 +15700,22 @@ function rotl32(w, b) {
 utils.rotl32 = rotl32;
 
 function sum32(a, b) {
-  var r = (a + b) & 0xffffffff;
-  if (r < 0)
-    r += 0x100000000;
-  return r;
+  return (a + b) >>> 0;
 }
 utils.sum32 = sum32;
 
 function sum32_3(a, b, c) {
-  var r = (a + b + c) & 0xffffffff;
-  if (r < 0)
-    r += 0x100000000;
-  return r;
+  return (a + b + c) >>> 0;
 }
 utils.sum32_3 = sum32_3;
 
 function sum32_4(a, b, c, d) {
-  var r = (a + b + c + d) & 0xffffffff;
-  if (r < 0)
-    r += 0x100000000;
-  return r;
+  return (a + b + c + d) >>> 0;
 }
 utils.sum32_4 = sum32_4;
 
 function sum32_5(a, b, c, d, e) {
-  var r = (a + b + c + d + e) & 0xffffffff;
-  if (r < 0)
-    r += 0x100000000;
-  return r;
+  return (a + b + c + d + e) >>> 0;
 }
 utils.sum32_5 = sum32_5;
 
@@ -17217,35 +15725,104 @@ function assert(cond, msg) {
 }
 utils.assert = assert;
 
-// Shamelessly copied from browserify
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  utils.inherits = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  utils.inherits = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
+utils.inherits = inherits;
 
-},{}],82:[function(require,module,exports){
+function sum64(buf, pos, ah, al) {
+  var bh = buf[pos];
+  var bl = buf[pos + 1];
+
+  var lo = (al + bl) >>> 0;
+  var hi = (lo < al ? 1 : 0) + ah + bh;
+  buf[pos] = hi >>> 0;
+  buf[pos + 1] = lo;
+}
+exports.sum64 = sum64;
+
+function sum64_hi(ah, al, bh, bl) {
+  var lo = (al + bl) >>> 0;
+  var hi = (lo < al ? 1 : 0) + ah + bh;
+  return hi >>> 0;
+};
+exports.sum64_hi = sum64_hi;
+
+function sum64_lo(ah, al, bh, bl) {
+  var lo = al + bl;
+  return lo >>> 0;
+};
+exports.sum64_lo = sum64_lo;
+
+function sum64_4_hi(ah, al, bh, bl, ch, cl, dh, dl) {
+  var carry = 0;
+  var lo = al;
+  lo = (lo + bl) >>> 0;
+  carry += lo < al ? 1 : 0;
+  lo = (lo + cl) >>> 0;
+  carry += lo < cl ? 1 : 0;
+  lo = (lo + dl) >>> 0;
+  carry += lo < dl ? 1 : 0;
+
+  var hi = ah + bh + ch + dh + carry;
+  return hi >>> 0;
+};
+exports.sum64_4_hi = sum64_4_hi;
+
+function sum64_4_lo(ah, al, bh, bl, ch, cl, dh, dl) {
+  var lo = al + bl + cl + dl;
+  return lo >>> 0;
+};
+exports.sum64_4_lo = sum64_4_lo;
+
+function sum64_5_hi(ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
+  var carry = 0;
+  var lo = al;
+  lo = (lo + bl) >>> 0;
+  carry += lo < al ? 1 : 0;
+  lo = (lo + cl) >>> 0;
+  carry += lo < cl ? 1 : 0;
+  lo = (lo + dl) >>> 0;
+  carry += lo < dl ? 1 : 0;
+  lo = (lo + el) >>> 0;
+  carry += lo < el ? 1 : 0;
+
+  var hi = ah + bh + ch + dh + eh + carry;
+  return hi >>> 0;
+};
+exports.sum64_5_hi = sum64_5_hi;
+
+function sum64_5_lo(ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
+  var lo = al + bl + cl + dl + el;
+
+  return lo >>> 0;
+};
+exports.sum64_5_lo = sum64_5_lo;
+
+function rotr64_hi(ah, al, num) {
+  var r = (al << (32 - num)) | (ah >>> num);
+  return r >>> 0;
+};
+exports.rotr64_hi = rotr64_hi;
+
+function rotr64_lo(ah, al, num) {
+  var r = (ah << (32 - num)) | (al >>> num);
+  return r >>> 0;
+};
+exports.rotr64_lo = rotr64_lo;
+
+function shr64_hi(ah, al, num) {
+  return ah >>> num;
+};
+exports.shr64_hi = shr64_hi;
+
+function shr64_lo(ah, al, num) {
+  var r = (ah << (32 - num)) | (al >>> num);
+  return r >>> 0;
+};
+exports.shr64_lo = shr64_lo;
+
+},{"inherits":163}],62:[function(require,module,exports){
 module.exports={
   "name": "elliptic",
-  "version": "0.15.15",
+  "version": "1.0.1",
   "description": "EC cryptography",
   "main": "lib/elliptic.js",
   "scripts": {
@@ -17276,17 +15853,16 @@ module.exports={
     "uglify-js": "^2.4.13"
   },
   "dependencies": {
-    "bn.js": "^0.15.0",
+    "bn.js": "^1.0.0",
     "brorand": "^1.0.1",
-    "hash.js": "^0.2.0",
+    "hash.js": "^1.0.0",
     "inherits": "^2.0.1"
   },
-  "gitHead": "4bf1f50607285bff4ae19521217dbc801c3d36af",
-  "_id": "elliptic@0.15.15",
-  "_shasum": "63269184a856d6e00871e84f37a8401ff84e4aea",
-  "_from": "elliptic@>=0.15.14 <0.16.0",
-  "_npmVersion": "2.1.6",
-  "_nodeVersion": "0.10.33",
+  "gitHead": "17dc013761dd1efcfb868e2b06b0b897627b40be",
+  "_id": "elliptic@1.0.1",
+  "_shasum": "d180376b66a17d74995c837796362ac4d22aefe3",
+  "_from": "elliptic@>=1.0.0 <2.0.0",
+  "_npmVersion": "1.4.28",
   "_npmUser": {
     "name": "indutny",
     "email": "fedor@indutny.com"
@@ -17298,15 +15874,2052 @@ module.exports={
     }
   ],
   "dist": {
-    "shasum": "63269184a856d6e00871e84f37a8401ff84e4aea",
-    "tarball": "http://registry.npmjs.org/elliptic/-/elliptic-0.15.15.tgz"
+    "shasum": "d180376b66a17d74995c837796362ac4d22aefe3",
+    "tarball": "http://registry.npmjs.org/elliptic/-/elliptic-1.0.1.tgz"
   },
   "directories": {},
-  "_resolved": "http://registry.npmjs.org/elliptic/-/elliptic-0.15.15.tgz",
+  "_resolved": "http://registry.npmjs.org/elliptic/-/elliptic-1.0.1.tgz",
   "readme": "ERROR: No README data found!"
 }
 
-},{}],83:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
+(function (Buffer){
+
+module.exports = function evp(crypto, password, salt, keyLen) {
+  keyLen = keyLen/8;
+  var ki = 0;
+  var ii = 0;
+  var key = new Buffer(keyLen);
+  var addmd = 0;
+  var md, md_buf;
+  var i;
+  while (true) {
+    md = crypto.createHash('md5');
+    if(addmd++ > 0) {
+       md.update(md_buf);
+    }
+    md.update(password);
+    md.update(salt);
+    md_buf = md.digest();
+    i = 0;
+    if(keyLen > 0) {
+      while(true) {
+        if(keyLen === 0) {
+          break;
+        }
+        if(i === md_buf.length) {
+          break;
+        }
+        key[ki++] = md_buf[i++];
+        keyLen--;
+       }
+    }
+   if(keyLen === 0) {
+      break;
+    }
+  }
+  for(i=0;i<md_buf.length;i++) {
+    md_buf[i] = 0;
+  }
+  return key;
+};
+}).call(this,require("buffer").Buffer)
+},{"buffer":16}],64:[function(require,module,exports){
+module.exports={"2.16.840.1.101.3.4.1.1": "aes-128-ecb",
+"2.16.840.1.101.3.4.1.2": "aes-128-cbc",
+"2.16.840.1.101.3.4.1.3": "aes-128-ofb",
+"2.16.840.1.101.3.4.1.4": "aes-128-cfb",
+"2.16.840.1.101.3.4.1.21": "aes-192-ecb",
+"2.16.840.1.101.3.4.1.22": "aes-192-cbc",
+"2.16.840.1.101.3.4.1.23": "aes-192-ofb",
+"2.16.840.1.101.3.4.1.24": "aes-192-cfb",
+"2.16.840.1.101.3.4.1.41": "aes-256-ecb",
+"2.16.840.1.101.3.4.1.42": "aes-256-cbc",
+"2.16.840.1.101.3.4.1.43": "aes-256-ofb",
+"2.16.840.1.101.3.4.1.44": "aes-256-cfb"
+}
+},{}],65:[function(require,module,exports){
+// from https://github.com/indutny/self-signed/blob/gh-pages/lib/asn1.js
+// Fedor, you are amazing.
+
+var asn1 = require('asn1.js');
+var rfc3280 = require('asn1.js-rfc3280');
+
+var RSAPrivateKey = asn1.define('RSAPrivateKey', function() {
+  this.seq().obj(
+    this.key('version').int(),
+    this.key('modulus').int(),
+    this.key('publicExponent').int(),
+    this.key('privateExponent').int(),
+    this.key('prime1').int(),
+    this.key('prime2').int(),
+    this.key('exponent1').int(),
+    this.key('exponent2').int(),
+    this.key('coefficient').int()
+  );
+});
+exports.RSAPrivateKey = RSAPrivateKey;
+
+var RSAPublicKey = asn1.define('RSAPublicKey', function() {
+  this.seq().obj(
+    this.key('modulus').int(),
+    this.key('publicExponent').int()
+  );
+});
+exports.RSAPublicKey = RSAPublicKey;
+
+var PublicKey = rfc3280.SubjectPublicKeyInfo;
+exports.PublicKey = PublicKey;
+var ECPublicKey =  asn1.define('ECPublicKey', function() {
+  this.seq().obj(
+    this.key('algorithm').seq().obj(
+      this.key('id').objid(),
+      this.key('curve').objid()
+    ),
+    this.key('subjectPrivateKey').bitstr()
+  );
+});
+exports.ECPublicKey = ECPublicKey;
+var ECPrivateWrap =  asn1.define('ECPrivateWrap', function() {
+  this.seq().obj(
+    this.key('version').int(),
+    this.key('algorithm').seq().obj(
+      this.key('id').objid(),
+      this.key('curve').objid()
+    ),
+    this.key('subjectPrivateKey').octstr()
+  );
+});
+exports.ECPrivateWrap = ECPrivateWrap;
+
+var PrivateKeyInfo = asn1.define('PrivateKeyInfo', function() {
+  this.seq().obj(
+    this.key('version').int(),
+    this.key('algorithm').use(rfc3280.AlgorithmIdentifier),
+    this.key('subjectPrivateKey').octstr()
+  );
+});
+exports.PrivateKey = PrivateKeyInfo;
+var EncryptedPrivateKeyInfo = asn1.define('EncryptedPrivateKeyInfo', function() {
+  this.seq().obj(
+    this.key('algorithm').seq().obj(
+      this.key('id').objid(),
+      this.key('decrypt').seq().obj(
+        this.key('kde').seq().obj(
+          this.key('id').objid(),
+          this.key('kdeparams').seq().obj(
+            this.key('salt').octstr(),
+            this.key('iters').int()
+          )
+        ),
+        this.key('cipher').seq().obj(
+          this.key('algo').objid(),
+          this.key('iv').octstr()
+        )
+      )
+    ),
+    this.key('subjectPrivateKey').octstr()
+  );
+});
+var dsaParams = asn1.define('dsaParams', function() {
+  this.seq().obj(
+    this.key('algorithm').objid(),
+    this.key('parameters').seq().obj(
+        this.key('p').int(),
+        this.key('q').int(),
+        this.key('g').int()
+      )
+  );
+});
+exports.EncryptedPrivateKey = EncryptedPrivateKeyInfo;
+var DSAPublicKey = asn1.define('DSAPublicKey', function() {
+  this.seq().obj(
+    this.key('algorithm').use(dsaParams),
+    this.key('subjectPublicKey').bitstr()
+  );
+});
+exports.DSAPublicKey = DSAPublicKey;
+var DSAPrivateWrap =  asn1.define('DSAPrivateWrap', function() {
+  this.seq().obj(
+    this.key('version').int(),
+    this.key('algorithm').seq().obj(
+      this.key('id').objid(),
+      this.key('parameters').seq().obj(
+        this.key('p').int(),
+        this.key('q').int(),
+        this.key('g').int()
+      )
+    ),
+    this.key('subjectPrivateKey').octstr()
+  );
+});
+exports.DSAPrivateWrap = DSAPrivateWrap;
+var DSAPrivateKey = asn1.define('DSAPrivateKey', function() {
+  this.seq().obj(
+    this.key('version').int(),
+    this.key('p').int(),
+    this.key('q').int(),
+    this.key('g').int(),
+    this.key('pub_key').int(),
+    this.key('priv_key').int()
+  );
+});
+exports.DSAPrivateKey = DSAPrivateKey;
+
+exports.DSAparam = asn1.define('DSAparam', function () {
+  this.int();
+});
+var ECPrivateKey = asn1.define('ECPrivateKey', function() {
+  this.seq().obj(
+    this.key('version').int(),
+    this.key('privateKey').octstr(),
+    this.key('parameters').optional().explicit(0).use(ECParameters),
+    this.key('publicKey').optional().explicit(1).bitstr()
+  );
+});
+exports.ECPrivateKey = ECPrivateKey;
+var ECParameters = asn1.define('ECParameters', function() {
+  this.choice({
+    namedCurve: this.objid()
+  });
+});
+
+var ECPrivateKey2 = asn1.define('ECPrivateKey2', function() {
+  this.seq().obj(
+    this.key('version').int(),
+    this.key('privateKey').octstr(),
+    this.key('publicKey').seq().obj(
+      this.key('key').bitstr()
+    )
+  );
+});
+exports.ECPrivateKey2 = ECPrivateKey2;
+
+exports.signature = asn1.define('signature', function() {
+  this.seq().obj(
+    this.key('r').int(),
+    this.key('s').int()
+  );
+});
+},{"asn1.js":69,"asn1.js-rfc3280":68}],66:[function(require,module,exports){
+(function (Buffer){
+var findProc = /Proc-Type: 4,ENCRYPTED\n\r?DEK-Info: AES-((?:128)|(?:192)|(?:256))-CBC,([0-9A-H]+)\n\r?\n\r?([0-9A-z\n\r\+\/\=]+)\n\r?/m;
+var startRegex = /^-----BEGIN (.*)-----\n/;
+var evp = require('./EVP_BytesToKey');
+module.exports = function (okey, password, crypto) {
+  var key = okey.toString();
+  var match = key.match(findProc);
+  if (!match) {
+    return okey;
+  }
+  var suite = 'aes' + match[1];
+  var iv = new Buffer(match[2], 'hex');
+  var cipherText = new Buffer(match[3].replace(/\n\r?/g, ''), 'base64');
+  var cipherKey = evp(crypto, password, iv.slice(0,8), parseInt(match[1]));
+  var out = [];
+  var cipher = crypto.createDecipheriv(suite, cipherKey, iv);
+  out.push(cipher.update(cipherText));
+  out.push(cipher.final());
+  var decrypted = Buffer.concat(out).toString('base64');
+  var tag = key.match(startRegex)[1];
+  return '-----BEGIN ' + tag + "-----\n" + wrap(decrypted) + "\n" + '-----END ' + tag + "-----\n";
+};
+// http://stackoverflow.com/a/7033705
+function wrap(str) {
+  var chunks = [];
+  while (str) {
+    if (str.length < 64) {
+      chunks.push(str);
+      break;
+    }
+    else {
+      chunks.push(str.slice(0, 64));
+      str = str.slice(64);
+    }
+  }
+  return chunks.join("\n");
+}
+}).call(this,require("buffer").Buffer)
+},{"./EVP_BytesToKey":63,"buffer":16}],67:[function(require,module,exports){
+(function (Buffer){
+var pemstrip = require('pemstrip');
+var asn1 = require('./asn1');
+var aesid = require('./aesid.json');
+var fixProc = require('./fixProc');
+module.exports = parseKeys;
+
+function parseKeys(buffer, crypto) {
+  var password;
+  if (typeof buffer === 'object' && !Buffer.isBuffer(buffer)) {
+    password = buffer.passphrase;
+    buffer = buffer.key;
+  }
+  if (typeof buffer === 'string') {
+    buffer = new Buffer(buffer);
+  }
+  if (password) {
+    buffer = fixProc(buffer, password, crypto);
+  }
+  var stripped = pemstrip.strip(buffer);
+  var type = stripped.tag;
+  var data = new Buffer(stripped.base64, 'base64');
+  var subtype,ndata;
+  switch (type) {
+    case 'PUBLIC KEY':
+      ndata = asn1.PublicKey.decode(data, 'der');
+      subtype = ndata.algorithm.algorithm.join('.');
+      switch(subtype) {
+        case '1.2.840.113549.1.1.1':
+          return asn1.RSAPublicKey.decode(ndata.subjectPublicKey.data, 'der');
+        case '1.2.840.10045.2.1':
+          return {
+            type: 'ec',
+            data:  asn1.ECPublicKey.decode(data, 'der')
+          };
+        case '1.2.840.10040.4.1':
+          ndata = asn1.DSAPublicKey.decode(data, 'der');
+          ndata.algorithm.parameters.pub_key = asn1.DSAparam.decode(ndata.subjectPublicKey.data, 'der');
+          return {
+            type: 'dsa',
+            data: ndata.algorithm.parameters
+          };
+        default: throw new Error('unknown key id ' +  subtype);
+      }
+      throw new Error('unknown key type ' +  type);
+    case 'ENCRYPTED PRIVATE KEY':
+      data = asn1.EncryptedPrivateKey.decode(data, 'der');
+      data = decrypt(crypto, data, password);
+      //falling through
+    case 'PRIVATE KEY':
+      ndata = asn1.PrivateKey.decode(data, 'der');
+      subtype = ndata.algorithm.algorithm.join('.');
+      switch(subtype) {
+        case '1.2.840.113549.1.1.1':
+          return asn1.RSAPrivateKey.decode(ndata.subjectPrivateKey, 'der');
+        case '1.2.840.10045.2.1':
+          ndata =  asn1.ECPrivateWrap.decode(data, 'der');
+          return {
+            curve: ndata.algorithm.curve,
+            privateKey: asn1.ECPrivateKey.decode(ndata.subjectPrivateKey, 'der').privateKey
+          };
+        case '1.2.840.10040.4.1':
+          ndata =  asn1.DSAPrivateWrap.decode(data, 'der');
+          ndata.algorithm.parameters.priv_key = asn1.DSAparam.decode(ndata.subjectPrivateKey, 'der');
+          return {
+            type: 'dsa',
+            params: ndata.algorithm.parameters
+          };
+        default: throw new Error('unknown key id ' +  subtype);
+      }
+      throw new Error('unknown key type ' +  type);
+    case 'RSA PUBLIC KEY':
+      return asn1.RSAPublicKey.decode(data, 'der');
+    case 'RSA PRIVATE KEY':
+      return asn1.RSAPrivateKey.decode(data, 'der');
+    case 'DSA PRIVATE KEY':
+      return {
+        type: 'dsa',
+        params: asn1.DSAPrivateKey.decode(data, 'der')
+      };
+    case 'EC PRIVATE KEY':
+      data = asn1.ECPrivateKey.decode(data, 'der');
+      return {
+        curve: data.parameters.value,
+        privateKey: data.privateKey
+      };
+    default: throw new Error('unknown key type ' +  type);
+  }
+}
+parseKeys.signature = asn1.signature;
+function decrypt(crypto, data, password) {
+  var salt = data.algorithm.decrypt.kde.kdeparams.salt;
+  var iters = data.algorithm.decrypt.kde.kdeparams.iters;
+  var algo = aesid[data.algorithm.decrypt.cipher.algo.join('.')];
+  var iv = data.algorithm.decrypt.cipher.iv;
+  var cipherText = data.subjectPrivateKey;
+  var keylen = parseInt(algo.split('-')[1], 10)/8;
+  var key = crypto.pbkdf2Sync(password, salt, iters, keylen);
+  var cipher = crypto.createDecipheriv(algo, key, iv);
+  var out = [];
+  out.push(cipher.update(cipherText));
+  out.push(cipher.final());
+  return Buffer.concat(out);
+}
+}).call(this,require("buffer").Buffer)
+},{"./aesid.json":64,"./asn1":65,"./fixProc":66,"buffer":16,"pemstrip":82}],68:[function(require,module,exports){
+try {
+  var asn1 = require('asn1.js');
+} catch (e) {
+  var asn1 = require('../' + '..');
+}
+
+var CRLReason = asn1.define('CRLReason', function() {
+  this.enum({
+    0: 'unspecified',
+    1: 'keyCompromise',
+    2: 'CACompromise',
+    3: 'affiliationChanged',
+    4: 'superseded',
+    5: 'cessationOfOperation',
+    6: 'certificateHold',
+    8: 'removeFromCRL',
+    9: 'privilegeWithdrawn',
+    10: 'AACompromise'
+  });
+});
+exports.CRLReason = CRLReason;
+
+var AlgorithmIdentifier = asn1.define('AlgorithmIdentifier', function() {
+  this.seq().obj(
+    this.key('algorithm').objid(),
+    this.key('parameters').optional().any()
+  );
+});
+exports.AlgorithmIdentifier = AlgorithmIdentifier;
+
+var Certificate = asn1.define('Certificate', function() {
+  this.seq().obj(
+    this.key('tbsCertificate').use(TBSCertificate),
+    this.key('signatureAlgorithm').use(AlgorithmIdentifier),
+    this.key('signature').bitstr()
+  );
+});
+exports.Certificate = Certificate;
+
+var TBSCertificate = asn1.define('TBSCertificate', function() {
+  this.seq().obj(
+    this.key('version').def('v1').explicit(0).use(Version),
+    this.key('serialNumber').use(CertificateSerialNumber),
+    this.key('signature').use(AlgorithmIdentifier),
+    this.key('issuer').use(Name),
+    this.key('validity').use(Validity),
+    this.key('subject').use(Name),
+    this.key('subjectPublicKeyInfo').use(SubjectPublicKeyInfo),
+
+    // TODO(indutny): validate that version is v2 or v3
+    this.key('issuerUniqueID').optional().explicit(1).use(UniqueIdentifier),
+    this.key('subjectUniqueID').optional().explicit(2).use(UniqueIdentifier),
+
+    // TODO(indutny): validate that version is v3
+    this.key('extensions').optional().explicit(3).use(Extensions)
+  );
+});
+exports.TBSCertificate = TBSCertificate;
+
+var Version = asn1.define('Version', function() {
+  this.int({
+    0: 'v1',
+    1: 'v2',
+    2: 'v3'
+  });
+});
+exports.Version = Version;
+
+var CertificateSerialNumber = asn1.define('CertificateSerialNumber',
+                                          function() {
+  this.int();
+});
+exports.CertificateSerialNumber = CertificateSerialNumber;
+
+var Validity = asn1.define('Validity', function() {
+  this.seq().obj(
+    this.key('notBefore').use(Time),
+    this.key('notAfter').use(Time)
+  );
+});
+exports.Validity = Validity;
+
+var Time = asn1.define('Time', function() {
+  this.choice({
+    utcTime: this.utctime(),
+    genTime: this.gentime()
+  });
+});
+exports.Time = Time;
+
+var UniqueIdentifier = asn1.define('UniqueIdentifier', function() {
+  this.bitstr();
+});
+exports.UniqueIdentifier = UniqueIdentifier;
+
+var SubjectPublicKeyInfo = asn1.define('SubjectPublicKeyInfo', function() {
+  this.seq().obj(
+    this.key('algorithm').use(AlgorithmIdentifier),
+    this.key('subjectPublicKey').bitstr()
+  );
+});
+exports.SubjectPublicKeyInfo = SubjectPublicKeyInfo;
+
+var Extensions = asn1.define('Extensions', function() {
+  this.seqof(Extension);
+});
+exports.Extensions = Extensions;
+
+var Extension = asn1.define('Extension', function() {
+  this.seq().obj(
+    this.key('extnID').objid(),
+    this.key('critical').bool().def(false),
+    this.key('extnValue').octstr()
+  );
+});
+exports.Extension = Extension;
+
+var Name = asn1.define('Name', function() {
+  this.choice({
+    rdn: this.use(RDNSequence)
+  });
+});
+exports.Name = Name;
+
+var RDNSequence = asn1.define('RDNSequence', function() {
+  this.seqof(RelativeDistinguishedName);
+});
+exports.RDNSequence = RDNSequence;
+
+var RelativeDistinguishedName = asn1.define('RelativeDistinguishedName',
+                                            function() {
+  this.setof(AttributeTypeAndValue);
+});
+exports.RelativeDistinguishedName = RelativeDistinguishedName;
+
+var AttributeTypeAndValue = asn1.define('AttributeTypeAndValue', function() {
+  this.seq().obj(
+    this.key('type').use(AttributeType),
+    this.key('value').use(AttributeValue)
+  );
+});
+exports.AttributeTypeAndValue = AttributeTypeAndValue;
+
+var AttributeType = asn1.define('AttributeType', function() {
+  this.objid();
+});
+exports.AttributeType = AttributeType;
+
+var AttributeValue = asn1.define('AttributeValue', function() {
+  this.any();
+});
+exports.AttributeValue = AttributeValue;
+
+},{"asn1.js":69}],69:[function(require,module,exports){
+var asn1 = exports;
+
+asn1.bignum = require('bn.js');
+
+asn1.define = require('./asn1/api').define;
+asn1.base = require('./asn1/base');
+asn1.constants = require('./asn1/constants');
+asn1.decoders = require('./asn1/decoders');
+asn1.encoders = require('./asn1/encoders');
+
+},{"./asn1/api":70,"./asn1/base":72,"./asn1/constants":76,"./asn1/decoders":78,"./asn1/encoders":80,"bn.js":41}],70:[function(require,module,exports){
+var asn1 = require('../asn1');
+var inherits = require('inherits');
+var vm = require('vm');
+
+var api = exports;
+
+api.define = function define(name, body) {
+  return new Entity(name, body);
+};
+
+function Entity(name, body) {
+  this.name = name;
+  this.body = body;
+
+  this.decoders = {};
+  this.encoders = {};
+};
+
+Entity.prototype._createNamed = function createNamed(base) {
+  var named = vm.runInThisContext('(function ' + this.name + '(entity) {\n' +
+    '  this._initNamed(entity);\n' +
+    '})');
+  inherits(named, base);
+  named.prototype._initNamed = function initnamed(entity) {
+    base.call(this, entity);
+  };
+
+  return new named(this);
+};
+
+Entity.prototype._getDecoder = function _getDecoder(enc) {
+  // Lazily create decoder
+  if (!this.decoders.hasOwnProperty(enc))
+    this.decoders[enc] = this._createNamed(asn1.decoders[enc]);
+  return this.decoders[enc];
+};
+
+Entity.prototype.decode = function decode(data, enc, options) {
+  return this._getDecoder(enc).decode(data, options);
+};
+
+Entity.prototype._getEncoder = function _getEncoder(enc) {
+  // Lazily create encoder
+  if (!this.encoders.hasOwnProperty(enc))
+    this.encoders[enc] = this._createNamed(asn1.encoders[enc]);
+  return this.encoders[enc];
+};
+
+Entity.prototype.encode = function encode(data, enc, /* internal */ reporter) {
+  return this._getEncoder(enc).encode(data, reporter);
+};
+
+},{"../asn1":69,"inherits":163,"vm":187}],71:[function(require,module,exports){
+var inherits = require('inherits');
+var Reporter = require('../base').Reporter;
+var Buffer = require('buffer').Buffer;
+
+function DecoderBuffer(base, options) {
+  Reporter.call(this, options);
+  if (!Buffer.isBuffer(base)) {
+    this.error('Input not Buffer');
+    return;
+  }
+
+  this.base = base;
+  this.offset = 0;
+  this.length = base.length;
+}
+inherits(DecoderBuffer, Reporter);
+exports.DecoderBuffer = DecoderBuffer;
+
+DecoderBuffer.prototype.save = function save() {
+  return { offset: this.offset };
+};
+
+DecoderBuffer.prototype.restore = function restore(save) {
+  // Return skipped data
+  var res = new DecoderBuffer(this.base);
+  res.offset = save.offset;
+  res.length = this.offset;
+
+  this.offset = save.offset;
+
+  return res;
+};
+
+DecoderBuffer.prototype.isEmpty = function isEmpty() {
+  return this.offset === this.length;
+};
+
+DecoderBuffer.prototype.readUInt8 = function readUInt8(fail) {
+  if (this.offset + 1 <= this.length)
+    return this.base.readUInt8(this.offset++, true);
+  else
+    return this.error(fail || 'DecoderBuffer overrun');
+}
+
+DecoderBuffer.prototype.skip = function skip(bytes, fail) {
+  if (!(this.offset + bytes <= this.length))
+    return this.error(fail || 'DecoderBuffer overrun');
+
+  var res = new DecoderBuffer(this.base);
+
+  // Share reporter state
+  res._reporterState = this._reporterState;
+
+  res.offset = this.offset;
+  res.length = this.offset + bytes;
+  this.offset += bytes;
+  return res;
+}
+
+DecoderBuffer.prototype.raw = function raw(save) {
+  return this.base.slice(save ? save.offset : this.offset, this.length);
+}
+
+function EncoderBuffer(value, reporter) {
+  if (Array.isArray(value)) {
+    this.length = 0;
+    this.value = value.map(function(item) {
+      if (!(item instanceof EncoderBuffer))
+        item = new EncoderBuffer(item, reporter);
+      this.length += item.length;
+      return item;
+    }, this);
+  } else if (typeof value === 'number') {
+    if (!(0 <= value && value <= 0xff))
+      return reporter.error('non-byte EncoderBuffer value');
+    this.value = value;
+    this.length = 1;
+  } else if (typeof value === 'string') {
+    this.value = value;
+    this.length = Buffer.byteLength(value);
+  } else if (Buffer.isBuffer(value)) {
+    this.value = value;
+    this.length = value.length;
+  } else {
+    return reporter.error('Unsupported type: ' + typeof value);
+  }
+}
+exports.EncoderBuffer = EncoderBuffer;
+
+EncoderBuffer.prototype.join = function join(out, offset) {
+  if (!out)
+    out = new Buffer(this.length);
+  if (!offset)
+    offset = 0;
+
+  if (this.length === 0)
+    return out;
+
+  if (Array.isArray(this.value)) {
+    this.value.forEach(function(item) {
+      item.join(out, offset);
+      offset += item.length;
+    });
+  } else {
+    if (typeof this.value === 'number')
+      out[offset] = this.value;
+    else if (typeof this.value === 'string')
+      out.write(this.value, offset);
+    else if (Buffer.isBuffer(this.value))
+      this.value.copy(out, offset);
+    offset += this.length;
+  }
+
+  return out;
+};
+
+},{"../base":72,"buffer":16,"inherits":163}],72:[function(require,module,exports){
+var base = exports;
+
+base.Reporter = require('./reporter').Reporter;
+base.DecoderBuffer = require('./buffer').DecoderBuffer;
+base.EncoderBuffer = require('./buffer').EncoderBuffer;
+base.Node = require('./node');
+
+},{"./buffer":71,"./node":73,"./reporter":74}],73:[function(require,module,exports){
+var Reporter = require('../base').Reporter;
+var EncoderBuffer = require('../base').EncoderBuffer;
+var assert = require('minimalistic-assert');
+
+// Supported tags
+var tags = [
+  'seq', 'seqof', 'set', 'setof', 'octstr', 'bitstr', 'objid', 'bool',
+  'gentime', 'utctime', 'null_', 'enum', 'int', 'ia5str'
+];
+
+// Public methods list
+var methods = [
+  'key', 'obj', 'use', 'optional', 'explicit', 'implicit', 'def', 'choice',
+  'any'
+].concat(tags);
+
+// Overrided methods list
+var overrided = [
+  '_peekTag', '_decodeTag', '_use',
+  '_decodeStr', '_decodeObjid', '_decodeTime',
+  '_decodeNull', '_decodeInt', '_decodeBool', '_decodeList',
+
+  '_encodeComposite', '_encodeStr', '_encodeObjid', '_encodeTime',
+  '_encodeNull', '_encodeInt', '_encodeBool'
+];
+
+function Node(enc, parent) {
+  var state = {};
+  this._baseState = state;
+
+  state.enc = enc;
+
+  state.parent = parent || null;
+  state.children = null;
+
+  // State
+  state.tag = null;
+  state.args = null;
+  state.reverseArgs = null;
+  state.choice = null;
+  state.optional = false;
+  state.any = false;
+  state.obj = false;
+  state.use = null;
+  state.useDecoder = null;
+  state.key = null;
+  state['default'] = null;
+  state.explicit = null;
+  state.implicit = null;
+
+  // Should create new instance on each method
+  if (!state.parent) {
+    state.children = [];
+    this._wrap();
+  }
+}
+module.exports = Node;
+
+var stateProps = [
+  'enc', 'parent', 'children', 'tag', 'args', 'reverseArgs', 'choice',
+  'optional', 'any', 'obj', 'use', 'alteredUse', 'key', 'default', 'explicit',
+  'implicit'
+];
+
+Node.prototype.clone = function clone() {
+  var state = this._baseState;
+  var cstate = {};
+  stateProps.forEach(function(prop) {
+    cstate[prop] = state[prop];
+  });
+  var res = new this.constructor(cstate.parent);
+  res._baseState = cstate;
+  return res;
+};
+
+Node.prototype._wrap = function wrap() {
+  var state = this._baseState;
+  methods.forEach(function(method) {
+    this[method] = function _wrappedMethod() {
+      var clone = new this.constructor(this);
+      state.children.push(clone);
+      return clone[method].apply(clone, arguments);
+    };
+  }, this);
+};
+
+Node.prototype._init = function init(body) {
+  var state = this._baseState;
+
+  assert(state.parent === null);
+  body.call(this);
+
+  // Filter children
+  state.children = state.children.filter(function(child) {
+    return child._baseState.parent === this;
+  }, this);
+  assert.equal(state.children.length, 1, 'Root node can have only one child');
+};
+
+Node.prototype._useArgs = function useArgs(args) {
+  var state = this._baseState;
+
+  // Filter children and args
+  var children = args.filter(function(arg) {
+    return arg instanceof this.constructor;
+  }, this);
+  args = args.filter(function(arg) {
+    return !(arg instanceof this.constructor);
+  }, this);
+
+  if (children.length !== 0) {
+    assert(state.children === null);
+    state.children = children;
+
+    // Replace parent to maintain backward link
+    children.forEach(function(child) {
+      child._baseState.parent = this;
+    }, this);
+  }
+  if (args.length !== 0) {
+    assert(state.args === null);
+    state.args = args;
+    state.reverseArgs = args.map(function(arg) {
+      if (typeof arg !== 'object' || arg.constructor !== Object)
+        return arg;
+
+      var res = {};
+      Object.keys(arg).forEach(function(key) {
+        if (key == (key | 0))
+          key |= 0;
+        var value = arg[key];
+        res[value] = key;
+      });
+      return res;
+    });
+  }
+};
+
+//
+// Overrided methods
+//
+
+overrided.forEach(function(method) {
+  Node.prototype[method] = function _overrided() {
+    var state = this._baseState;
+    throw new Error(method + ' not implemented for encoding: ' + state.enc);
+  };
+});
+
+//
+// Public methods
+//
+
+tags.forEach(function(tag) {
+  Node.prototype[tag] = function _tagMethod() {
+    var state = this._baseState;
+    var args = Array.prototype.slice.call(arguments);
+
+    assert(state.tag === null);
+    state.tag = tag;
+
+    this._useArgs(args);
+
+    return this;
+  };
+});
+
+Node.prototype.use = function use(item) {
+  var state = this._baseState;
+
+  assert(state.use === null);
+  state.use = item;
+
+  return this;
+};
+
+Node.prototype.optional = function optional() {
+  var state = this._baseState;
+
+  state.optional = true;
+
+  return this;
+};
+
+Node.prototype.def = function def(val) {
+  var state = this._baseState;
+
+  assert(state['default'] === null);
+  state['default'] = val;
+  state.optional = true;
+
+  return this;
+};
+
+Node.prototype.explicit = function explicit(num) {
+  var state = this._baseState;
+
+  assert(state.explicit === null && state.implicit === null);
+  state.explicit = num;
+
+  return this;
+};
+
+Node.prototype.implicit = function implicit(num) {
+  var state = this._baseState;
+
+  assert(state.explicit === null && state.implicit === null);
+  state.implicit = num;
+
+  return this;
+};
+
+Node.prototype.obj = function obj() {
+  var state = this._baseState;
+  var args = Array.prototype.slice.call(arguments);
+
+  state.obj = true;
+
+  if (args.length !== 0)
+    this._useArgs(args);
+
+  return this;
+};
+
+Node.prototype.key = function key(newKey) {
+  var state = this._baseState;
+
+  assert(state.key === null);
+  state.key = newKey;
+
+  return this;
+};
+
+Node.prototype.any = function any() {
+  var state = this._baseState;
+
+  state.any = true;
+
+  return this;
+};
+
+Node.prototype.choice = function choice(obj) {
+  var state = this._baseState;
+
+  assert(state.choice === null);
+  state.choice = obj;
+  this._useArgs(Object.keys(obj).map(function(key) {
+    return obj[key];
+  }));
+
+  return this;
+};
+
+//
+// Decoding
+//
+
+Node.prototype._decode = function decode(input) {
+  var state = this._baseState;
+
+  // Decode root node
+  if (state.parent === null)
+    return input.wrapResult(state.children[0]._decode(input));
+
+  var result = state['default'];
+  var present = true;
+
+  var prevKey;
+  if (state.key !== null)
+    prevKey = input.enterKey(state.key);
+
+  // Check if tag is there
+  if (state.optional) {
+    present = this._peekTag(
+      input,
+      state.explicit !== null ? state.explicit :
+          state.implicit !== null ? state.implicit :
+              state.tag || 0
+    );
+    if (input.isError(present))
+      return present;
+  }
+
+  // Push object on stack
+  var prevObj;
+  if (state.obj && present)
+    prevObj = input.enterObject();
+
+  if (present) {
+    // Unwrap explicit values
+    if (state.explicit !== null) {
+      var explicit = this._decodeTag(input, state.explicit);
+      if (input.isError(explicit))
+        return explicit;
+      input = explicit;
+    }
+
+    // Unwrap implicit and normal values
+    if (state.use === null && state.choice === null) {
+      if (state.any)
+        var save = input.save();
+      var body = this._decodeTag(
+        input,
+        state.implicit !== null ? state.implicit : state.tag,
+        state.any
+      );
+      if (input.isError(body))
+        return body;
+
+      if (state.any)
+        result = input.raw(save);
+      else
+        input = body;
+    }
+
+    // Select proper method for tag
+    if (state.any)
+      result = result;
+    else if (state.choice === null)
+      result = this._decodeGeneric(state.tag, input);
+    else
+      result = this._decodeChoice(input);
+
+    if (input.isError(result))
+      return result;
+
+    // Decode children
+    if (!state.any && state.choice === null && state.children !== null) {
+      var fail = state.children.some(function decodeChildren(child) {
+        // NOTE: We are ignoring errors here, to let parser continue with other
+        // parts of encoded data
+        child._decode(input);
+      });
+      if (fail)
+        return err;
+    }
+  }
+
+  // Pop object
+  if (state.obj && present)
+    result = input.leaveObject(prevObj);
+
+  // Set key
+  if (state.key !== null && (result !== null || present === true))
+    input.leaveKey(prevKey, state.key, result);
+
+  return result;
+};
+
+Node.prototype._decodeGeneric = function decodeGeneric(tag, input) {
+  var state = this._baseState;
+
+  if (tag === 'seq' || tag === 'set')
+    return null;
+  if (tag === 'seqof' || tag === 'setof')
+    return this._decodeList(input, tag, state.args[0]);
+  else if (tag === 'octstr' || tag === 'bitstr' || tag === 'ia5str')
+    return this._decodeStr(input, tag);
+  else if (tag === 'objid' && state.args)
+    return this._decodeObjid(input, state.args[0], state.args[1]);
+  else if (tag === 'objid')
+    return this._decodeObjid(input, null, null);
+  else if (tag === 'gentime' || tag === 'utctime')
+    return this._decodeTime(input, tag);
+  else if (tag === 'null_')
+    return this._decodeNull(input);
+  else if (tag === 'bool')
+    return this._decodeBool(input);
+  else if (tag === 'int' || tag === 'enum')
+    return this._decodeInt(input, state.args && state.args[0]);
+  else if (state.use !== null)
+    return this._getUse(state.use, input._reporterState.obj)._decode(input);
+  else
+    return input.error('unknown tag: ' + tag);
+
+  return null;
+};
+
+Node.prototype._getUse = function _getUse(entity, obj) {
+
+  var state = this._baseState;
+  // Create altered use decoder if implicit is set
+  state.useDecoder = this._use(entity, obj);
+  assert(state.useDecoder._baseState.parent === null);
+  state.useDecoder = state.useDecoder._baseState.children[0];
+  if (state.implicit !== state.useDecoder._baseState.implicit) {
+    state.useDecoder = state.useDecoder.clone();
+    state.useDecoder._baseState.implicit = state.implicit;
+  }
+  return state.useDecoder;
+};
+
+Node.prototype._decodeChoice = function decodeChoice(input) {
+  var state = this._baseState;
+  var result = null;
+  var match = false;
+
+  Object.keys(state.choice).some(function(key) {
+    var save = input.save();
+    var node = state.choice[key];
+    try {
+      var value = node._decode(input);
+      if (input.isError(value))
+        return false;
+
+      result = { type: key, value: value };
+      match = true;
+    } catch (e) {
+      input.restore(save);
+      return false;
+    }
+    return true;
+  }, this);
+
+  if (!match)
+    return input.error('Choice not matched');
+
+  return result;
+};
+
+//
+// Encoding
+//
+
+Node.prototype._createEncoderBuffer = function createEncoderBuffer(data) {
+  return new EncoderBuffer(data, this.reporter);
+};
+
+Node.prototype._encode = function encode(data, reporter, parent) {
+  var state = this._baseState;
+  if (state['default'] !== null && state['default'] === data)
+    return;
+
+  var result = this._encodeValue(data, reporter, parent);
+  if (result === undefined)
+    return;
+
+  if (this._skipDefault(result, reporter, parent))
+    return;
+
+  return result;
+};
+
+Node.prototype._encodeValue = function encode(data, reporter, parent) {
+  var state = this._baseState;
+
+  // Decode root node
+  if (state.parent === null)
+    return state.children[0]._encode(data, reporter || new Reporter());
+
+  var result = null;
+  var present = true;
+
+  // Set reporter to share it with a child class
+  this.reporter = reporter;
+
+  // Check if data is there
+  if (state.optional && data === undefined) {
+    if (state['default'] !== null)
+      data = state['default']
+    else
+      return;
+  }
+
+  // For error reporting
+  var prevKey;
+
+  // Encode children first
+  var content = null;
+  var primitive = false;
+  if (state.any) {
+    // Anything that was given is translated to buffer
+    result = this._createEncoderBuffer(data);
+  } else if (state.choice) {
+    result = this._encodeChoice(data, reporter);
+  } else if (state.children) {
+    content = state.children.map(function(child) {
+      if (child._baseState.tag === 'null_')
+        return child._encode(null, reporter, data);
+
+      if (child._baseState.key === null)
+        return reporter.error('Child should have a key');
+      var prevKey = reporter.enterKey(child._baseState.key);
+
+      if (typeof data !== 'object')
+        return reporter.error('Child expected, but input is not object');
+
+      var res = child._encode(data[child._baseState.key], reporter, data);
+      reporter.leaveKey(prevKey);
+
+      return res;
+    }, this).filter(function(child) {
+      return child;
+    });
+
+    content = this._createEncoderBuffer(content);
+  } else {
+    if (state.tag === 'seqof' || state.tag === 'setof') {
+      // TODO(indutny): this should be thrown on DSL level
+      if (!(state.args && state.args.length === 1))
+        return reporter.error('Too many args for : ' + state.tag);
+
+      if (!Array.isArray(data))
+        return reporter.error('seqof/setof, but data is not Array');
+
+      var child = this.clone();
+      child._baseState.implicit = null;
+      content = this._createEncoderBuffer(data.map(function(item) {
+        var state = this._baseState;
+
+        return this._getUse(state.args[0], data)._encode(item, reporter);
+      }, child));
+    } else if (state.use !== null) {
+      result = this._getUse(state.use, parent)._encode(data, reporter);
+    } else {
+      content = this._encodePrimitive(state.tag, data);
+      primitive = true;
+    }
+  }
+
+  // Encode data itself
+  var result;
+  if (!state.any && state.choice === null) {
+    var tag = state.implicit !== null ? state.implicit : state.tag;
+    var cls = state.implicit === null ? 'universal' : 'context';
+
+    if (tag === null) {
+      if (state.use === null)
+        reporter.error('Tag could be ommited only for .use()');
+    } else {
+      if (state.use === null)
+        result = this._encodeComposite(tag, primitive, cls, content);
+    }
+  }
+
+  // Wrap in explicit
+  if (state.explicit !== null)
+    result = this._encodeComposite(state.explicit, false, 'context', result);
+
+  return result;
+};
+
+Node.prototype._encodeChoice = function encodeChoice(data, reporter) {
+  var state = this._baseState;
+
+  var node = state.choice[data.type];
+  if (!node) {
+    assert(
+        false,
+        data.type + ' not found in ' +
+            JSON.stringify(Object.keys(state.choice)));
+  }
+  return node._encode(data.value, reporter);
+};
+
+Node.prototype._encodePrimitive = function encodePrimitive(tag, data) {
+  var state = this._baseState;
+
+  if (tag === 'octstr' || tag === 'bitstr' || tag === 'ia5str')
+    return this._encodeStr(data, tag);
+  else if (tag === 'objid' && state.args)
+    return this._encodeObjid(data, state.reverseArgs[0], state.args[1]);
+  else if (tag === 'objid')
+    return this._encodeObjid(data, null, null);
+  else if (tag === 'gentime' || tag === 'utctime')
+    return this._encodeTime(data, tag);
+  else if (tag === 'null_')
+    return this._encodeNull();
+  else if (tag === 'int' || tag === 'enum')
+    return this._encodeInt(data, state.args && state.reverseArgs[0]);
+  else if (tag === 'bool')
+    return this._encodeBool(data);
+  else
+    throw new Error('Unsupported tag: ' + tag);
+};
+
+},{"../base":72,"minimalistic-assert":81}],74:[function(require,module,exports){
+var inherits = require('inherits');
+
+function Reporter(options) {
+  this._reporterState = {
+    obj: null,
+    path: [],
+    options: options || {},
+    errors: []
+  };
+}
+exports.Reporter = Reporter;
+
+Reporter.prototype.isError = function isError(obj) {
+  return obj instanceof ReporterError;
+};
+
+Reporter.prototype.enterKey = function enterKey(key) {
+  return this._reporterState.path.push(key);
+};
+
+Reporter.prototype.leaveKey = function leaveKey(index, key, value) {
+  var state = this._reporterState;
+
+  state.path = state.path.slice(0, index - 1);
+  if (state.obj !== null)
+    state.obj[key] = value;
+};
+
+Reporter.prototype.enterObject = function enterObject() {
+  var state = this._reporterState;
+
+  var prev = state.obj;
+  state.obj = {};
+  return prev;
+};
+
+Reporter.prototype.leaveObject = function leaveObject(prev) {
+  var state = this._reporterState;
+
+  var now = state.obj;
+  state.obj = prev;
+  return now;
+};
+
+Reporter.prototype.error = function error(msg) {
+  var err;
+  var state = this._reporterState;
+
+  var inherited = msg instanceof ReporterError;
+  if (inherited) {
+    err = msg;
+  } else {
+    err = new ReporterError(state.path.map(function(elem) {
+      return '[' + JSON.stringify(elem) + ']';
+    }).join(''), msg.message || msg, msg.stack);
+  }
+
+  if (!state.options.partial)
+    throw err;
+
+  if (!inherited)
+    state.errors.push(err);
+
+  return err;
+};
+
+Reporter.prototype.wrapResult = function wrapResult(result) {
+  var state = this._reporterState;
+  if (!state.options.partial)
+    return result;
+
+  return {
+    result: this.isError(result) ? null : result,
+    errors: state.errors
+  };
+};
+
+function ReporterError(path, msg) {
+  this.path = path;
+  this.rethrow(msg);
+};
+inherits(ReporterError, Error);
+
+ReporterError.prototype.rethrow = function rethrow(msg) {
+  this.message = msg + ' at: ' + (this.path || '(shallow)');
+  Error.captureStackTrace(this, ReporterError);
+
+  return this;
+};
+
+},{"inherits":163}],75:[function(require,module,exports){
+var constants = require('../constants');
+
+exports.tagClass = {
+  0: 'universal',
+  1: 'application',
+  2: 'context',
+  3: 'private'
+};
+exports.tagClassByName = constants._reverse(exports.tagClass);
+
+exports.tag = {
+  0x00: 'end',
+  0x01: 'bool',
+  0x02: 'int',
+  0x03: 'bitstr',
+  0x04: 'octstr',
+  0x05: 'null_',
+  0x06: 'objid',
+  0x07: 'objDesc',
+  0x08: 'external',
+  0x09: 'real',
+  0x0a: 'enum',
+  0x0b: 'embed',
+  0x0c: 'utf8str',
+  0x0d: 'relativeOid',
+  0x10: 'seq',
+  0x11: 'set',
+  0x12: 'numstr',
+  0x13: 'printstr',
+  0x14: 't61str',
+  0x15: 'videostr',
+  0x16: 'ia5str',
+  0x17: 'utctime',
+  0x18: 'gentime',
+  0x19: 'graphstr',
+  0x1a: 'iso646str',
+  0x1b: 'genstr',
+  0x1c: 'unistr',
+  0x1d: 'charstr',
+  0x1e: 'bmpstr'
+};
+exports.tagByName = constants._reverse(exports.tag);
+
+},{"../constants":76}],76:[function(require,module,exports){
+var constants = exports;
+
+// Helper
+constants._reverse = function reverse(map) {
+  var res = {};
+
+  Object.keys(map).forEach(function(key) {
+    // Convert key to integer if it is stringified
+    if ((key | 0) == key)
+      key = key | 0;
+
+    var value = map[key];
+    res[value] = key;
+  });
+
+  return res;
+};
+
+constants.der = require('./der');
+
+},{"./der":75}],77:[function(require,module,exports){
+var inherits = require('inherits');
+
+var asn1 = require('../../asn1');
+var base = asn1.base;
+var bignum = asn1.bignum;
+
+// Import DER constants
+var der = asn1.constants.der;
+
+function DERDecoder(entity) {
+  this.enc = 'der';
+  this.name = entity.name;
+  this.entity = entity;
+
+  // Construct base tree
+  this.tree = new DERNode();
+  this.tree._init(entity.body);
+};
+module.exports = DERDecoder;
+
+DERDecoder.prototype.decode = function decode(data, options) {
+  if (!(data instanceof base.DecoderBuffer))
+    data = new base.DecoderBuffer(data, options);
+
+  return this.tree._decode(data, options);
+};
+
+// Tree methods
+
+function DERNode(parent) {
+  base.Node.call(this, 'der', parent);
+}
+inherits(DERNode, base.Node);
+
+DERNode.prototype._peekTag = function peekTag(buffer, tag) {
+  if (buffer.isEmpty())
+    return false;
+
+  var state = buffer.save();
+  var decodedTag = derDecodeTag(buffer, 'Failed to peek tag: "' + tag + '"');
+  if (buffer.isError(decodedTag))
+    return decodedTag;
+
+  buffer.restore(state);
+
+  return decodedTag.tag === tag || decodedTag.tagStr === tag;
+};
+
+DERNode.prototype._decodeTag = function decodeTag(buffer, tag, any) {
+  var decodedTag = derDecodeTag(buffer,
+                                'Failed to decode tag of "' + tag + '"');
+  if (buffer.isError(decodedTag))
+    return decodedTag;
+
+  var len = derDecodeLen(buffer,
+                         decodedTag.primitive,
+                         'Failed to get length of "' + tag + '"');
+
+  // Failure
+  if (buffer.isError(len))
+    return len;
+
+  if (!any &&
+      decodedTag.tag !== tag &&
+      decodedTag.tagStr !== tag &&
+      decodedTag.tagStr + 'of' !== tag) {
+    return buffer.error('Failed to match tag: "' + tag + '"');
+  }
+
+  if (decodedTag.primitive || len !== null)
+    return buffer.skip(len, 'Failed to match body of: "' + tag + '"');
+
+  // Indefinite length... find END tag
+  var state = buffer.start();
+  var res = this._skipUntilEnd(
+      buffer,
+      'Failed to skip indefinite length body: "' + this.tag + '"');
+  if (buffer.isError(res))
+    return res;
+
+  return buffer.cut(state);
+};
+
+DERNode.prototype._skipUntilEnd = function skipUntilEnd(buffer, fail) {
+  while (true) {
+    var tag = derDecodeTag(buffer, fail);
+    if (buffer.isError(tag))
+      return tag;
+    var len = derDecodeLen(buffer, tag.primitive, fail);
+    if (buffer.isError(len))
+      return len;
+
+    var res;
+    if (tag.primitive || len !== null)
+      res = buffer.skip(len)
+    else
+      res = this._skipUntilEnd(buffer, fail);
+
+    // Failure
+    if (buffer.isError(res))
+      return res;
+
+    if (tag.tagStr === 'end')
+      break;
+  }
+};
+
+DERNode.prototype._decodeList = function decodeList(buffer, tag, decoder) {
+  var result = [];
+  while (!buffer.isEmpty()) {
+    var possibleEnd = this._peekTag(buffer, 'end');
+    if (buffer.isError(possibleEnd))
+      return possibleEnd;
+
+    var res = decoder.decode(buffer, 'der');
+    if (buffer.isError(res) && possibleEnd)
+      break;
+    result.push(res);
+  }
+  return result;
+};
+
+DERNode.prototype._decodeStr = function decodeStr(buffer, tag) {
+  if (tag === 'octstr') {
+    return buffer.raw();
+  } else if (tag === 'bitstr') {
+    var unused = buffer.readUInt8();
+    if (buffer.isError(unused))
+      return unused;
+
+    return { unused: unused, data: buffer.raw() };
+  } else if (tag === 'ia5str') {
+    return buffer.raw().toString();
+  } else {
+    return this.error('Decoding of string type: ' + tag + ' unsupported');
+  }
+};
+
+DERNode.prototype._decodeObjid = function decodeObjid(buffer, values, relative) {
+  var identifiers = [];
+  var ident = 0;
+  while (!buffer.isEmpty()) {
+    var subident = buffer.readUInt8();
+    ident <<= 7;
+    ident |= subident & 0x7f;
+    if ((subident & 0x80) === 0) {
+      identifiers.push(ident);
+      ident = 0;
+    }
+  }
+  if (subident & 0x80)
+    identifiers.push(ident);
+
+  var first = (identifiers[0] / 40) | 0;
+  var second = identifiers[0] % 40;
+
+  if (relative)
+    result = identifiers;
+  else
+    result = [first, second].concat(identifiers.slice(1));
+
+  if (values)
+    result = values[result.join(' ')];
+
+  return result;
+};
+
+DERNode.prototype._decodeTime = function decodeTime(buffer, tag) {
+  var str = buffer.raw().toString();
+  if (tag === 'gentime') {
+    var year = str.slice(0, 4) | 0;
+    var mon = str.slice(4, 6) | 0;
+    var day = str.slice(6, 8) | 0;
+    var hour = str.slice(8, 10) | 0;
+    var min = str.slice(10, 12) | 0;
+    var sec = str.slice(12, 14) | 0;
+  } else if (tag === 'utctime') {
+    var year = str.slice(0, 2) | 0;
+    var mon = str.slice(2, 4) | 0;
+    var day = str.slice(4, 6) | 0;
+    var hour = str.slice(6, 8) | 0;
+    var min = str.slice(8, 10) | 0;
+    var sec = str.slice(10, 12) | 0;
+    if (year < 70)
+      year = 2000 + year;
+    else
+      year = 1900 + year;
+  } else {
+    return this.error('Decoding ' + tag + ' time is not supported yet');
+  }
+
+  return Date.UTC(year, mon - 1, day, hour, min, sec, 0);
+};
+
+DERNode.prototype._decodeNull = function decodeNull(buffer) {
+  return null;
+};
+
+DERNode.prototype._decodeBool = function decodeBool(buffer) {
+  var res = buffer.readUInt8();
+  if (buffer.isError(res))
+    return res;
+  else
+    return res !== 0;
+};
+
+DERNode.prototype._decodeInt = function decodeInt(buffer, values) {
+  var res = 0;
+
+  // Bigint, return as it is (assume big endian)
+  var raw = buffer.raw();
+  if (raw.length > 3)
+    return new bignum(raw);
+
+  while (!buffer.isEmpty()) {
+    res <<= 8;
+    var i = buffer.readUInt8();
+    if (buffer.isError(i))
+      return i;
+    res |= i;
+  }
+
+  if (values)
+    res = values[res] || res;
+
+  return res;
+};
+
+DERNode.prototype._use = function use(entity, obj) {
+  if (typeof entity === 'function')
+    entity = entity(obj);
+  return entity._getDecoder('der').tree;
+};
+
+// Utility methods
+
+function derDecodeTag(buf, fail) {
+  var tag = buf.readUInt8(fail);
+  if (buf.isError(tag))
+    return tag;
+
+  var cls = der.tagClass[tag >> 6];
+  var primitive = (tag & 0x20) === 0;
+
+  // Multi-octet tag - load
+  if ((tag & 0x1f) === 0x1f) {
+    var oct = tag;
+    tag = 0;
+    while ((oct & 0x80) === 0x80) {
+      oct = buf.readUInt8(fail);
+      if (buf.isError(oct))
+        return oct;
+
+      tag <<= 7;
+      tag |= oct & 0x7f;
+    }
+  } else {
+    tag &= 0x1f;
+  }
+  var tagStr = der.tag[tag];
+
+  return {
+    cls: cls,
+    primitive: primitive,
+    tag: tag,
+    tagStr: tagStr
+  };
+}
+
+function derDecodeLen(buf, primitive, fail) {
+  var len = buf.readUInt8(fail);
+  if (buf.isError(len))
+    return len;
+
+  // Indefinite form
+  if (!primitive && len === 0x80)
+    return null;
+
+  // Definite form
+  if ((len & 0x80) === 0) {
+    // Short form
+    return len;
+  }
+
+  // Long form
+  var num = len & 0x7f;
+  if (num >= 4)
+    return buf.error('length octect is too long');
+
+  len = 0;
+  for (var i = 0; i < num; i++) {
+    len <<= 8;
+    var j = buf.readUInt8(fail);
+    if (buf.isError(j))
+      return j;
+    len |= j;
+  }
+
+  return len;
+}
+
+},{"../../asn1":69,"inherits":163}],78:[function(require,module,exports){
+var decoders = exports;
+
+decoders.der = require('./der');
+
+},{"./der":77}],79:[function(require,module,exports){
+var inherits = require('inherits');
+var Buffer = require('buffer').Buffer;
+
+var asn1 = require('../../asn1');
+var base = asn1.base;
+var bignum = asn1.bignum;
+
+// Import DER constants
+var der = asn1.constants.der;
+
+function DEREncoder(entity) {
+  this.enc = 'der';
+  this.name = entity.name;
+  this.entity = entity;
+
+  // Construct base tree
+  this.tree = new DERNode();
+  this.tree._init(entity.body);
+};
+module.exports = DEREncoder;
+
+DEREncoder.prototype.encode = function encode(data, reporter) {
+  return this.tree._encode(data, reporter).join();
+};
+
+// Tree methods
+
+function DERNode(parent) {
+  base.Node.call(this, 'der', parent);
+}
+inherits(DERNode, base.Node);
+
+DERNode.prototype._encodeComposite = function encodeComposite(tag,
+                                                              primitive,
+                                                              cls,
+                                                              content) {
+  var encodedTag = encodeTag(tag, primitive, cls, this.reporter);
+
+  // Short form
+  if (content.length < 0x80) {
+    var header = new Buffer(2);
+    header[0] = encodedTag;
+    header[1] = content.length;
+    return this._createEncoderBuffer([ header, content ]);
+  }
+
+  // Long form
+  // Count octets required to store length
+  var lenOctets = 1;
+  for (var i = content.length; i >= 0x100; i >>= 8)
+    lenOctets++;
+
+  var header = new Buffer(1 + 1 + lenOctets);
+  header[0] = encodedTag;
+  header[1] = 0x80 | lenOctets;
+
+  for (var i = 1 + lenOctets, j = content.length; j > 0; i--, j >>= 8)
+    header[i] = j & 0xff;
+
+  return this._createEncoderBuffer([ header, content ]);
+};
+
+DERNode.prototype._encodeStr = function encodeStr(str, tag) {
+  if (tag === 'octstr')
+    return this._createEncoderBuffer(str);
+  else if (tag === 'bitstr')
+    return this._createEncoderBuffer([ str.unused | 0, str.data ]);
+  else if (tag === 'ia5str')
+    return this._createEncoderBuffer(str);
+  return this.reporter.error('Encoding of string type: ' + tag +
+                             ' unsupported');
+};
+
+DERNode.prototype._encodeObjid = function encodeObjid(id, values, relative) {
+  if (typeof id === 'string') {
+    if (!values)
+      return this.reporter.error('string objid given, but no values map found');
+    if (!values.hasOwnProperty(id))
+      return this.reporter.error('objid not found in values map');
+    id = values[id].split(/\s+/g);
+    for (var i = 0; i < id.length; i++)
+      id[i] |= 0;
+  } else if (Array.isArray(id)) {
+    id = id.slice();
+  }
+
+  if (!Array.isArray(id)) {
+    return this.reporter.error('objid() should be either array or string, ' +
+                               'got: ' + JSON.stringify(id));
+  }
+
+  if (!relative) {
+    if (id[1] >= 40)
+      return this.reporter.error('Second objid identifier OOB');
+    id.splice(0, 2, id[0] * 40 + id[1]);
+  }
+
+  // Count number of octets
+  var size = 0;
+  for (var i = 0; i < id.length; i++) {
+    var ident = id[i];
+    for (size++; ident >= 0x80; ident >>= 7)
+      size++;
+  }
+
+  var objid = new Buffer(size);
+  var offset = objid.length - 1;
+  for (var i = id.length - 1; i >= 0; i--) {
+    var ident = id[i];
+    objid[offset--] = ident & 0x7f;
+    while ((ident >>= 7) > 0)
+      objid[offset--] = 0x80 | (ident & 0x7f);
+  }
+
+  return this._createEncoderBuffer(objid);
+};
+
+function two(num) {
+  if (num <= 10)
+    return '0' + num;
+  else
+    return num;
+}
+
+DERNode.prototype._encodeTime = function encodeTime(time, tag) {
+  var str;
+  var date = new Date(time);
+
+  if (tag === 'gentime') {
+    str = [
+      date.getFullYear(),
+      two(date.getUTCMonth() + 1),
+      two(date.getUTCDate()),
+      two(date.getUTCHours()),
+      two(date.getUTCMinutes()),
+      two(date.getUTCSeconds()),
+      'Z'
+    ].join('');
+  } else if (tag === 'utctime') {
+    str = [
+      date.getFullYear() % 100,
+      two(date.getUTCMonth() + 1),
+      two(date.getUTCDate()),
+      two(date.getUTCHours()),
+      two(date.getUTCMinutes()),
+      two(date.getUTCSeconds()),
+      'Z'
+    ].join('');
+  } else {
+    this.reporter.error('Encoding ' + tag + ' time is not supported yet');
+  }
+
+  return this._encodeStr(str, 'octstr');
+};
+
+DERNode.prototype._encodeNull = function encodeNull() {
+  return this._createEncoderBuffer('');
+};
+
+DERNode.prototype._encodeInt = function encodeInt(num, values) {
+  if (typeof num === 'string') {
+    if (!values)
+      return this.reporter.error('String int or enum given, but no values map');
+    if (!values.hasOwnProperty(num)) {
+      return this.reporter.error('Values map doesn\'t contain: ' +
+                                 JSON.stringify(num));
+    }
+    num = values[num];
+  }
+
+  // Bignum, assume big endian
+  if (bignum !== null && num instanceof bignum) {
+    var numArray = num.toArray();
+    if(num.sign === false && numArray[0] & 0x80) {
+      numArray.unshift(0);
+    }
+    num = new Buffer(numArray);
+  }
+
+  if (Buffer.isBuffer(num)) {
+    var size = num.length;
+    if (num.length === 0)
+      size++;
+
+    var out = new Buffer(size);
+    num.copy(out);
+    if (num.length === 0)
+      out[0] = 0
+    return this._createEncoderBuffer(out);
+  }
+
+  if (num < 0x80)
+    return this._createEncoderBuffer(num);
+
+  if (num < 0x100)
+    return this._createEncoderBuffer([0, num]);
+
+  var size = 1;
+  for (var i = num; i >= 0x100; i >>= 8)
+    size++;
+
+  var out = new Array(size);
+  for (var i = out.length - 1; i >= 0; i--) {
+    out[i] = num & 0xff;
+    num >>= 8;
+  }
+  if(out[0] & 0x80) {
+    out.unshift(0);
+  }
+
+  return this._createEncoderBuffer(new Buffer(out));
+};
+
+DERNode.prototype._encodeBool = function encodeBool(value) {
+  return this._createEncoderBuffer(value ? 0xff : 0);
+};
+
+DERNode.prototype._use = function use(entity, obj) {
+  if (typeof entity === 'function')
+    entity = entity(obj);
+  return entity._getEncoder('der').tree;
+};
+
+DERNode.prototype._skipDefault = function skipDefault(dataBuffer, reporter, parent) {
+  var state = this._baseState;
+  var i;
+  if (state['default'] === null)
+    return false;
+
+  var data = dataBuffer.join();
+  if (state.defaultBuffer === undefined)
+    state.defaultBuffer = this._encodeValue(state['default'], reporter, parent).join();
+
+  if (data.length !== state.defaultBuffer.length)
+    return false;
+
+  for (i=0; i < data.length; i++)
+    if (data[i] !== state.defaultBuffer[i])
+      return false;
+
+  return true;
+};
+
+// Utility methods
+
+function encodeTag(tag, primitive, cls, reporter) {
+  var res;
+
+  if (tag === 'seqof')
+    tag = 'seq';
+  else if (tag === 'setof')
+    tag = 'set';
+
+  if (der.tagByName.hasOwnProperty(tag))
+    res = der.tagByName[tag];
+  else if (typeof tag === 'number' && (tag | 0) === tag)
+    res = tag;
+  else
+    return reporter.error('Unknown tag: ' + tag);
+
+  if (res >= 0x1f)
+    return reporter.error('Multi-octet tag encoding unsupported');
+
+  if (!primitive)
+    res |= 0x20;
+
+  res |= (der.tagClassByName[cls || 'universal'] << 6);
+
+  return res;
+}
+
+},{"../../asn1":69,"buffer":16,"inherits":163}],80:[function(require,module,exports){
+var encoders = exports;
+
+encoders.der = require('./der');
+
+},{"./der":79}],81:[function(require,module,exports){
+module.exports = assert;
+
+function assert(val, msg) {
+  if (!val)
+    throw new Error(msg || 'Assertion failed');
+}
+
+assert.equal = function assertEqual(l, r, msg) {
+  if (l != r)
+    throw new Error(msg || ('Assertion failed: ' + l + ' != ' + r));
+};
+
+},{}],82:[function(require,module,exports){
 exports.strip = function strip(artifact) {
   artifact = artifact.toString()
   var startRegex = /^-----BEGIN (.*)-----\n/;
@@ -17340,96 +17953,20 @@ exports.assemble = function assemble(info) {
   var endLine = "-----END " + tag + "-----";
   return startLine + "\n" + wrap(base64, 64) + "\n" + endLine + "\n";
 }
-},{}],84:[function(require,module,exports){
-(function (Buffer){
-var pemstrip = require('pemstrip');
-var asn1 = require('./asn1');
-var aesid = require('./aesid.json');
-module.exports = parseKeys;
-
-function parseKeys(buffer, crypto) {
-	var password;
-	if (typeof buffer === 'object' && !Buffer.isBuffer(buffer)) {
-		password = buffer.passphrase;
-		buffer = buffer.key;
-	}
-	var stripped = pemstrip.strip(buffer);
-	var type = stripped.tag;
-	var data = new Buffer(stripped.base64, 'base64');
-	var subtype,ndata;
-	switch (type) {
-		case 'PUBLIC KEY':
-		  ndata = asn1.PublicKey.decode(data, 'der');
-		  subtype = ndata.algorithm.algorithm.join('.');
-		  switch(subtype) {
-		  	case '1.2.840.113549.1.1.1':
-		  	  return asn1.RSAPublicKey.decode(ndata.subjectPublicKey.data, 'der');
-		  	case '1.2.840.10045.2.1':
-		  		return {
-		  			type: 'ec',
-		  			data:  asn1.ECPublicKey.decode(data, 'der')
-		  		};
-		  	default: throw new Error('unknown key id ' +  subtype);
-		  }
-		  throw new Error('unknown key type ' +  type);
-		case 'ENCRYPTED PRIVATE KEY':
-		  data = asn1.EncryptedPrivateKey.decode(data, 'der');
-		  data = decrypt(crypto, data, password);
-		  //falling through
-		case 'PRIVATE KEY':
-		  ndata = asn1.PrivateKey.decode(data, 'der');
-		  subtype = ndata.algorithm.algorithm.join('.');
-		  switch(subtype) {
-		  	case '1.2.840.113549.1.1.1':
-		  	  return asn1.RSAPrivateKey.decode(ndata.subjectPrivateKey, 'der');
-		  	case '1.2.840.10045.2.1':
-		  	  ndata =  asn1.ECPrivateWrap.decode(data, 'der');
-		  	  return {
-		  	  	curve: ndata.algorithm.curve,
-		  	  	privateKey: asn1.ECPrivateKey.decode(ndata.subjectPrivateKey, 'der').privateKey
-		  	  };
-		  	default: throw new Error('unknown key id ' +  subtype);
-		  }
-		  throw new Error('unknown key type ' +  type);
-		case 'RSA PUBLIC KEY':
-		  return asn1.RSAPublicKey.decode(data, 'der');
-		case 'RSA PRIVATE KEY':
-		  return asn1.RSAPrivateKey.decode(data, 'der');
-		case 'EC PRIVATE KEY':
-		  data = asn1.ECPrivateKey.decode(data, 'der');
-		  return {
-		  	curve: data.parameters.value,
-		  	privateKey: data.privateKey
-		  }
-		default: throw new Error('unknown key type ' +  type);
-	}
-}
-function decrypt(crypto, data, password) {
-  var salt = data.algorithm.decrypt.kde.kdeparams.salt;
-  var iters = data.algorithm.decrypt.kde.kdeparams.iters;
-  var algo = aesid[data.algorithm.decrypt.cipher.algo.join('.')];
-  var iv = data.algorithm.decrypt.cipher.iv;
-  var cipherText = data.subjectPrivateKey;
-  var keylen = parseInt(algo.split('-')[1], 10)/8;
-  var key = crypto.pbkdf2Sync(password, salt, iters, keylen);
-  var cipher = crypto.createDecipheriv(algo, key, iv);
-  var out = [];
-  out.push(cipher.update(cipherText));
-  out.push(cipher.final());
-  return Buffer.concat(out);
-}
-}).call(this,require("buffer").Buffer)
-},{"./aesid.json":44,"./asn1":46,"buffer":17,"pemstrip":83}],85:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 (function (Buffer){
 // much of this based on https://github.com/indutny/self-signed/blob/gh-pages/lib/rsa.js
-var parseKeys = require('./parseKeys');
+var parseKeys = require('parse-asn1');
 var bn = require('bn.js');
 var elliptic = require('elliptic');
+var crt = require("browserify-rsa");
 module.exports = sign;
-function sign(hash, key, crypto) {
+function sign(hash, key, hashType, crypto) {
   var priv = parseKeys(key, crypto);
   if (priv.curve) {
     return ecSign(hash, priv, crypto);
+  } else if (priv.type === 'dsa') {
+    return dsaSign(hash, priv, hashType, crypto);
   }
   var len = priv.modulus.byteLength();
   var pad = [ 0, 1 ];
@@ -17442,28 +17979,8 @@ function sign(hash, key, crypto) {
     pad.push(hash[i]);
   }
   
-  var out = crt(pad, priv);
-  if (out.length < len) {
-    var prefix = new Buffer(len - out.length);
-    prefix.fill(0);
-    out = Buffer.concat([prefix, out], len);
-  }
+  var out = crt(pad, priv, crypto);
   return out;
-}
-function crt(msg, priv) {
-  var c1 = new bn(msg).toRed(bn.mont(priv.prime1));
-  var c2 = new bn(msg).toRed(bn.mont(priv.prime2));
-  var qinv = new bn(priv.coefficient);
-  var p = new bn(priv.prime1);
-  var q = new bn(priv.prime2);
-  var m1 = c1.redPow(priv.exponent1)
-  var m2 = c2.redPow(priv.exponent2);
-  m1 = m1.fromRed();
-  m2 = m2.fromRed();
-  var h = m1.isub(m2).imul(qinv).mod(p);
-  h.imul(q);
-  m2.iadd(h);
-  return new Buffer(m2.toArray());
 }
 function ecSign(hash, priv, crypto) {
   elliptic.rand = crypto.randomBytes;
@@ -17476,11 +17993,133 @@ function ecSign(hash, priv, crypto) {
   var out = key.sign(hash);
   return new Buffer(out.toDER());
 }
+function dsaSign(hash, priv, algo, crypto) {
+  var x = priv.params.priv_key;
+  var p = priv.params.p;
+  var q = priv.params.q;
+  var montq = bn.mont(q);
+  var g = priv.params.g;
+  var r = new bn(0);
+  var k;
+  var H = bits2int(hash, q).mod(q);
+  var s = false;
+  var kv = getKay(x, q, hash, algo, crypto);
+  while (s === false) {
+    k = makeKey(q, kv, algo, crypto);
+    r = makeR(g, k, p, q);
+    s = k.invm(q).imul(H.add(x.mul(r))).mod(q);
+    if (!s.cmpn(0)) {
+      s = false;
+      r = new bn(0);
+    }
+  }
+  return toDER(r,s);
+}
+function toDER(r, s) {
+  r = r.toArray();
+  s = s.toArray();
+
+  // Pad values
+  if (r[0] & 0x80)
+    r = [ 0 ].concat(r);
+  // Pad values
+  if (s[0] & 0x80)
+    s = [0].concat(s);
+
+  var total = r.length + s.length + 4;
+  var res = [ 0x30, total, 0x02, r.length ];
+  res = res.concat(r, [ 0x02, s.length ], s);
+  return new Buffer(res);
+}
+module.exports.getKay = getKay;
+function getKay(x, q, hash, algo, crypto) {
+  x = new Buffer(x.toArray());
+  if (x.length < q.byteLength()) {
+    var zeros = new Buffer(q.byteLength() - x.length);
+    zeros.fill(0);
+    x = Buffer.concat([zeros, x]);
+  }
+  var hlen = hash.length;
+  var hbits = bits2octets(hash, q);
+  var v = new Buffer(hlen);
+  v.fill(1);
+  var k = new Buffer(hlen);
+  k.fill(0);
+  k = crypto.createHmac(algo, k)
+    .update(v)
+    .update(new Buffer([0]))
+    .update(x)
+    .update(hbits)
+    .digest();
+  v = crypto.createHmac(algo, k)
+    .update(v)
+    .digest();
+  k = crypto.createHmac(algo, k)
+    .update(v)
+    .update(new Buffer([1]))
+    .update(x)
+    .update(hbits)
+    .digest();
+  v = crypto.createHmac(algo, k)
+    .update(v)
+    .digest();
+  return {
+    k:k,
+    v:v
+  };
+}
+function bits2int(obits, q) {
+  bits = new bn(obits);
+  var shift = obits.length * 8 - q.bitLength();
+  if (shift > 0) {
+    bits.ishrn(shift);
+  }
+  return bits;
+}
+function bits2octets (bits, q) {
+  bits = bits2int(bits, q);
+  bits = bits.mod(q);
+  var out = new Buffer(bits.toArray());
+  if (out.length < q.byteLength()) {
+    var zeros = new Buffer(q.byteLength() - out.length);
+    zeros.fill(0);
+    out = Buffer.concat([zeros, out]);
+  }
+  return out;
+}
+module.exports.makeKey = makeKey;
+function makeKey(q, kv, algo, crypto) {
+  var t;
+  var k;
+  while (true) {
+    t = new Buffer('');
+    while (t.length * 8 < q.bitLength()) {
+      kv.v = crypto.createHmac(algo, kv.k)
+        .update(kv.v)
+        .digest();
+      t = Buffer.concat([t, kv.v]);
+    }
+    k = bits2int(t, q);
+    kv.k =  crypto.createHmac(algo, kv.k)
+        .update(kv.v)
+        .update(new Buffer([0]))
+        .digest();
+    kv.v = crypto.createHmac(algo, kv.k)
+        .update(kv.v)
+        .digest();
+    if (k.cmp(q) === -1) {
+      return k;
+    }
+  }
+}
+function makeR(g, k, p, q) {
+  return g.toRed(bn.mont(p)).redPow(k).fromRed().mod(q);
+}
 }).call(this,require("buffer").Buffer)
-},{"./parseKeys":84,"bn.js":62,"buffer":17,"elliptic":63}],86:[function(require,module,exports){
+},{"bn.js":41,"browserify-rsa":42,"buffer":16,"elliptic":43,"parse-asn1":67}],84:[function(require,module,exports){
 (function (Buffer){
 // much of this based on https://github.com/indutny/self-signed/blob/gh-pages/lib/rsa.js
-var parseKeys = require('./parseKeys');
+var parseKeys = require('parse-asn1');
 var elliptic = require('elliptic');
 var bn = require('bn.js');
 module.exports = verify;
@@ -17488,7 +18127,20 @@ function verify(sig, hash, key) {
   var pub = parseKeys(key);
   if (pub.type === 'ec') {
     return ecVerify(sig, hash, pub);
+  } else if (pub.type === 'dsa') {
+    return dsaVerify(sig, hash, pub);
   }
+  var len = pub.modulus.byteLength();
+  var pad = [ 0, 1 ];
+  while (hash.length + pad.length + 1 < len) {
+    pad.push(0xff);
+  }
+  pad.push(0x00);
+  var i = -1;
+  while (++i < hash.length) {
+    pad.push(hash[i]);
+  }
+  pad = hash;
   var red = bn.mont(pub.modulus);
   sig = new bn(sig).toRed(red);
 
@@ -17497,8 +18149,8 @@ function verify(sig, hash, key) {
   sig = new Buffer(sig.fromRed().toArray());
   sig = sig.slice(sig.length - hash.length);
   var out = 0;
-  var len = sig.length;
-  var i = -1;
+  len = sig.length;
+  i = -1;
   while (++i < len) {
     out += (sig[i] ^ hash[i]);
   }
@@ -17512,9 +18164,39 @@ function ecVerify(sig, hash, pub) {
   var pubkey = pub.data.subjectPrivateKey.data;
   return curve.verify(hash.toString('hex'), sig.toString('hex'), pubkey.toString('hex'));
 }
-
+function dsaVerify(sig, hash, pub) {
+  var p = pub.data.p;
+  var q = pub.data.q;
+  var g = pub.data.g;
+  var y = pub.data.pub_key;
+  var unpacked = parseKeys.signature.decode(sig, 'der');
+  var s = unpacked.s;
+  var r = unpacked.r;
+  checkValue(s, q);
+  checkValue(r, q);
+  var montq = bn.mont(q);
+  var montp = bn.mont(p);
+  var w =  s.invm(q);
+  var v = g.toRed(montp)
+  .redPow(new bn(hash).mul(w).mod(q))
+  .fromRed()
+  .mul(
+    y.toRed(montp)
+    .redPow(r.mul(w).mod(q))
+    .fromRed()
+  ).mod(p).mod(q);
+  return !v.cmp(r);
+}
+function checkValue(b, q) {
+  if (b.cmpn(0) <= 0) {
+    throw new Error('invalid sig');
+  }
+  if (b.cmp(q) >= q) {
+    throw new Error('invalid sig');
+  }
+}
 }).call(this,require("buffer").Buffer)
-},{"./parseKeys":84,"bn.js":62,"buffer":17,"elliptic":63}],87:[function(require,module,exports){
+},{"bn.js":41,"buffer":16,"elliptic":43,"parse-asn1":67}],85:[function(require,module,exports){
 (function (Buffer){
 var elliptic = require('elliptic');
 var BN = require('bn.js');
@@ -17586,56 +18268,1367 @@ function returnValue(bn, enc) {
 	}
 }
 }).call(this,require("buffer").Buffer)
-},{"bn.js":89,"buffer":17,"elliptic":90}],88:[function(require,module,exports){
+},{"bn.js":87,"buffer":16,"elliptic":88}],86:[function(require,module,exports){
 var ECDH = require('./ecdh');
 module.exports = function (crypto, exports) {
 	exports.createECDH = function (curve) {
 		return new ECDH(curve, crypto);
 	};
 };
-},{"./ecdh":87}],89:[function(require,module,exports){
+},{"./ecdh":85}],87:[function(require,module,exports){
+module.exports=require(41)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\bn.js\\lib\\bn.js":41}],88:[function(require,module,exports){
+module.exports=require(43)
+},{"../package.json":107,"./elliptic/curve":91,"./elliptic/curves":94,"./elliptic/ec":95,"./elliptic/hmac-drbg":98,"./elliptic/utils":99,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic.js":43,"brorand":100}],89:[function(require,module,exports){
+module.exports=require(44)
+},{"../../elliptic":88,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\base.js":44,"bn.js":87}],90:[function(require,module,exports){
+module.exports=require(45)
+},{"../../elliptic":88,"../curve":91,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\edwards.js":45,"bn.js":87,"inherits":163}],91:[function(require,module,exports){
+module.exports=require(46)
+},{"./base":89,"./edwards":90,"./mont":92,"./short":93,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\index.js":46}],92:[function(require,module,exports){
+module.exports=require(47)
+},{"../../elliptic":88,"../curve":91,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\mont.js":47,"bn.js":87,"inherits":163}],93:[function(require,module,exports){
+module.exports=require(48)
+},{"../../elliptic":88,"../curve":91,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\short.js":48,"bn.js":87,"inherits":163}],94:[function(require,module,exports){
+module.exports=require(49)
+},{"../elliptic":88,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curves.js":49,"bn.js":87,"hash.js":101}],95:[function(require,module,exports){
+module.exports=require(50)
+},{"../../elliptic":88,"./key":96,"./signature":97,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\ec\\index.js":50,"bn.js":87}],96:[function(require,module,exports){
+module.exports=require(51)
+},{"../../elliptic":88,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\ec\\key.js":51,"bn.js":87}],97:[function(require,module,exports){
+module.exports=require(52)
+},{"../../elliptic":88,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\ec\\signature.js":52,"bn.js":87}],98:[function(require,module,exports){
+module.exports=require(53)
+},{"../elliptic":88,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\hmac-drbg.js":53,"hash.js":101}],99:[function(require,module,exports){
+module.exports=require(54)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\utils.js":54,"bn.js":87}],100:[function(require,module,exports){
+module.exports=require(55)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\brorand\\index.js":55}],101:[function(require,module,exports){
+module.exports=require(56)
+},{"./hash/common":102,"./hash/hmac":103,"./hash/ripemd":104,"./hash/sha":105,"./hash/utils":106,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash.js":56}],102:[function(require,module,exports){
+module.exports=require(57)
+},{"../hash":101,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\common.js":57}],103:[function(require,module,exports){
+module.exports=require(58)
+},{"../hash":101,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\hmac.js":58}],104:[function(require,module,exports){
+module.exports=require(59)
+},{"../hash":101,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\ripemd.js":59}],105:[function(require,module,exports){
+module.exports=require(60)
+},{"../hash":101,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\sha.js":60}],106:[function(require,module,exports){
+module.exports=require(61)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\utils.js":61,"inherits":163}],107:[function(require,module,exports){
 module.exports=require(62)
-},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\bn.js\\lib\\bn.js":62}],90:[function(require,module,exports){
-module.exports=require(63)
-},{"../package.json":109,"./elliptic/curve":93,"./elliptic/curves":96,"./elliptic/ec":97,"./elliptic/hmac-drbg":100,"./elliptic/utils":101,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic.js":63,"brorand":102}],91:[function(require,module,exports){
-module.exports=require(64)
-},{"../../elliptic":90,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\base.js":64,"assert":2,"bn.js":89}],92:[function(require,module,exports){
-module.exports=require(65)
-},{"../../elliptic":90,"../curve":93,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\edwards.js":65,"assert":2,"bn.js":89,"inherits":134}],93:[function(require,module,exports){
-module.exports=require(66)
-},{"./base":91,"./edwards":92,"./mont":94,"./short":95,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\index.js":66}],94:[function(require,module,exports){
-module.exports=require(67)
-},{"../../elliptic":90,"../curve":93,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\mont.js":67,"assert":2,"bn.js":89,"inherits":134}],95:[function(require,module,exports){
-module.exports=require(68)
-},{"../../elliptic":90,"../curve":93,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\short.js":68,"assert":2,"bn.js":89,"inherits":134}],96:[function(require,module,exports){
-module.exports=require(69)
-},{"../elliptic":90,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curves.js":69,"assert":2,"bn.js":89,"hash.js":103}],97:[function(require,module,exports){
-module.exports=require(70)
-},{"../../elliptic":90,"./key":98,"./signature":99,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\ec\\index.js":70,"assert":2,"bn.js":89}],98:[function(require,module,exports){
-module.exports=require(71)
-},{"../../elliptic":90,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\ec\\key.js":71,"assert":2,"bn.js":89}],99:[function(require,module,exports){
-module.exports=require(72)
-},{"../../elliptic":90,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\ec\\signature.js":72,"assert":2,"bn.js":89}],100:[function(require,module,exports){
-module.exports=require(73)
-},{"../elliptic":90,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\hmac-drbg.js":73,"assert":2,"hash.js":103}],101:[function(require,module,exports){
-module.exports=require(74)
-},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\utils.js":74,"assert":2,"bn.js":89}],102:[function(require,module,exports){
-module.exports=require(75)
-},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\brorand\\index.js":75}],103:[function(require,module,exports){
-module.exports=require(76)
-},{"./hash/common":104,"./hash/hmac":105,"./hash/ripemd":106,"./hash/sha":107,"./hash/utils":108,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash.js":76}],104:[function(require,module,exports){
-module.exports=require(77)
-},{"../hash":103,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\common.js":77}],105:[function(require,module,exports){
-module.exports=require(78)
-},{"../hash":103,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\hmac.js":78}],106:[function(require,module,exports){
-module.exports=require(79)
-},{"../hash":103,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\ripemd.js":79}],107:[function(require,module,exports){
-module.exports=require(80)
-},{"../hash":103,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\sha.js":80}],108:[function(require,module,exports){
-module.exports=require(81)
-},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\utils.js":81}],109:[function(require,module,exports){
-module.exports=require(82)
-},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\package.json":82}],110:[function(require,module,exports){
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\package.json":62}],108:[function(require,module,exports){
+(function (Buffer){
+'use strict';
+var createHash = require('sha.js')
+
+var md5 = require('./md5')
+var rmd160 = require('ripemd160')
+var Transform = require('stream').Transform;
+var inherits = require('inherits')
+
+module.exports = function (alg) {
+  if('md5' === alg) return new HashNoConstructor(md5)
+  if('rmd160' === alg) return new HashNoConstructor(rmd160)
+  return new Hash(createHash(alg))
+}
+inherits(HashNoConstructor, Transform)
+
+function HashNoConstructor(hash) {
+  Transform.call(this);
+  this._hash = hash
+  this.buffers = []
+}
+
+HashNoConstructor.prototype._transform = function (data, _, done) {
+  this.buffers.push(data)
+  done()
+}
+HashNoConstructor.prototype._flush = function (done) {
+  var buf = Buffer.concat(this.buffers)
+  var r = this._hash(buf)
+  this.buffers = null
+  this.push(r)
+  done()
+}
+HashNoConstructor.prototype.update = function (data, enc) {
+  this.write(data, enc)
+  return this
+}
+
+HashNoConstructor.prototype.digest = function (enc) {
+  this.end()
+  var outData = new Buffer('')
+  var chunk
+  while ((chunk = this.read())) {
+    outData = Buffer.concat([outData, chunk])
+  }
+  if (enc) {
+    outData = outData.toString(enc)
+  }
+  return outData
+}
+
+inherits(Hash, Transform)
+
+function Hash(hash) {
+  Transform.call(this);
+  this._hash = hash
+}
+
+Hash.prototype._transform = function (data, _, done) {
+  this._hash.update(data)
+  done()
+}
+Hash.prototype._flush = function (done) {
+  this.push(this._hash.digest())
+  this._hash = null
+  done()
+}
+Hash.prototype.update = function (data, enc) {
+  this.write(data, enc)
+  return this
+}
+
+Hash.prototype.digest = function (enc) {
+  this.end()
+  var outData = new Buffer('')
+  var chunk
+  while ((chunk = this.read())) {
+    outData = Buffer.concat([outData, chunk])
+  }
+  if (enc) {
+    outData = outData.toString(enc)
+  }
+  return outData
+}
+}).call(this,require("buffer").Buffer)
+},{"./md5":110,"buffer":16,"inherits":163,"ripemd160":111,"sha.js":113,"stream":182}],109:[function(require,module,exports){
+(function (Buffer){
+'use strict';
+var intSize = 4;
+var zeroBuffer = new Buffer(intSize); zeroBuffer.fill(0);
+var chrsz = 8;
+
+function toArray(buf, bigEndian) {
+  if ((buf.length % intSize) !== 0) {
+    var len = buf.length + (intSize - (buf.length % intSize));
+    buf = Buffer.concat([buf, zeroBuffer], len);
+  }
+
+  var arr = [];
+  var fn = bigEndian ? buf.readInt32BE : buf.readInt32LE;
+  for (var i = 0; i < buf.length; i += intSize) {
+    arr.push(fn.call(buf, i));
+  }
+  return arr;
+}
+
+function toBuffer(arr, size, bigEndian) {
+  var buf = new Buffer(size);
+  var fn = bigEndian ? buf.writeInt32BE : buf.writeInt32LE;
+  for (var i = 0; i < arr.length; i++) {
+    fn.call(buf, arr[i], i * 4, true);
+  }
+  return buf;
+}
+
+function hash(buf, fn, hashSize, bigEndian) {
+  if (!Buffer.isBuffer(buf)) buf = new Buffer(buf);
+  var arr = fn(toArray(buf, bigEndian), buf.length * chrsz);
+  return toBuffer(arr, hashSize, bigEndian);
+}
+exports.hash = hash;
+}).call(this,require("buffer").Buffer)
+},{"buffer":16}],110:[function(require,module,exports){
+'use strict';
+/*
+ * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
+ * Digest Algorithm, as defined in RFC 1321.
+ * Version 2.1 Copyright (C) Paul Johnston 1999 - 2002.
+ * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+ * Distributed under the BSD License
+ * See http://pajhome.org.uk/crypt/md5 for more info.
+ */
+
+var helpers = require('./helpers');
+
+/*
+ * Calculate the MD5 of an array of little-endian words, and a bit length
+ */
+function core_md5(x, len)
+{
+  /* append padding */
+  x[len >> 5] |= 0x80 << ((len) % 32);
+  x[(((len + 64) >>> 9) << 4) + 14] = len;
+
+  var a =  1732584193;
+  var b = -271733879;
+  var c = -1732584194;
+  var d =  271733878;
+
+  for(var i = 0; i < x.length; i += 16)
+  {
+    var olda = a;
+    var oldb = b;
+    var oldc = c;
+    var oldd = d;
+
+    a = md5_ff(a, b, c, d, x[i+ 0], 7 , -680876936);
+    d = md5_ff(d, a, b, c, x[i+ 1], 12, -389564586);
+    c = md5_ff(c, d, a, b, x[i+ 2], 17,  606105819);
+    b = md5_ff(b, c, d, a, x[i+ 3], 22, -1044525330);
+    a = md5_ff(a, b, c, d, x[i+ 4], 7 , -176418897);
+    d = md5_ff(d, a, b, c, x[i+ 5], 12,  1200080426);
+    c = md5_ff(c, d, a, b, x[i+ 6], 17, -1473231341);
+    b = md5_ff(b, c, d, a, x[i+ 7], 22, -45705983);
+    a = md5_ff(a, b, c, d, x[i+ 8], 7 ,  1770035416);
+    d = md5_ff(d, a, b, c, x[i+ 9], 12, -1958414417);
+    c = md5_ff(c, d, a, b, x[i+10], 17, -42063);
+    b = md5_ff(b, c, d, a, x[i+11], 22, -1990404162);
+    a = md5_ff(a, b, c, d, x[i+12], 7 ,  1804603682);
+    d = md5_ff(d, a, b, c, x[i+13], 12, -40341101);
+    c = md5_ff(c, d, a, b, x[i+14], 17, -1502002290);
+    b = md5_ff(b, c, d, a, x[i+15], 22,  1236535329);
+
+    a = md5_gg(a, b, c, d, x[i+ 1], 5 , -165796510);
+    d = md5_gg(d, a, b, c, x[i+ 6], 9 , -1069501632);
+    c = md5_gg(c, d, a, b, x[i+11], 14,  643717713);
+    b = md5_gg(b, c, d, a, x[i+ 0], 20, -373897302);
+    a = md5_gg(a, b, c, d, x[i+ 5], 5 , -701558691);
+    d = md5_gg(d, a, b, c, x[i+10], 9 ,  38016083);
+    c = md5_gg(c, d, a, b, x[i+15], 14, -660478335);
+    b = md5_gg(b, c, d, a, x[i+ 4], 20, -405537848);
+    a = md5_gg(a, b, c, d, x[i+ 9], 5 ,  568446438);
+    d = md5_gg(d, a, b, c, x[i+14], 9 , -1019803690);
+    c = md5_gg(c, d, a, b, x[i+ 3], 14, -187363961);
+    b = md5_gg(b, c, d, a, x[i+ 8], 20,  1163531501);
+    a = md5_gg(a, b, c, d, x[i+13], 5 , -1444681467);
+    d = md5_gg(d, a, b, c, x[i+ 2], 9 , -51403784);
+    c = md5_gg(c, d, a, b, x[i+ 7], 14,  1735328473);
+    b = md5_gg(b, c, d, a, x[i+12], 20, -1926607734);
+
+    a = md5_hh(a, b, c, d, x[i+ 5], 4 , -378558);
+    d = md5_hh(d, a, b, c, x[i+ 8], 11, -2022574463);
+    c = md5_hh(c, d, a, b, x[i+11], 16,  1839030562);
+    b = md5_hh(b, c, d, a, x[i+14], 23, -35309556);
+    a = md5_hh(a, b, c, d, x[i+ 1], 4 , -1530992060);
+    d = md5_hh(d, a, b, c, x[i+ 4], 11,  1272893353);
+    c = md5_hh(c, d, a, b, x[i+ 7], 16, -155497632);
+    b = md5_hh(b, c, d, a, x[i+10], 23, -1094730640);
+    a = md5_hh(a, b, c, d, x[i+13], 4 ,  681279174);
+    d = md5_hh(d, a, b, c, x[i+ 0], 11, -358537222);
+    c = md5_hh(c, d, a, b, x[i+ 3], 16, -722521979);
+    b = md5_hh(b, c, d, a, x[i+ 6], 23,  76029189);
+    a = md5_hh(a, b, c, d, x[i+ 9], 4 , -640364487);
+    d = md5_hh(d, a, b, c, x[i+12], 11, -421815835);
+    c = md5_hh(c, d, a, b, x[i+15], 16,  530742520);
+    b = md5_hh(b, c, d, a, x[i+ 2], 23, -995338651);
+
+    a = md5_ii(a, b, c, d, x[i+ 0], 6 , -198630844);
+    d = md5_ii(d, a, b, c, x[i+ 7], 10,  1126891415);
+    c = md5_ii(c, d, a, b, x[i+14], 15, -1416354905);
+    b = md5_ii(b, c, d, a, x[i+ 5], 21, -57434055);
+    a = md5_ii(a, b, c, d, x[i+12], 6 ,  1700485571);
+    d = md5_ii(d, a, b, c, x[i+ 3], 10, -1894986606);
+    c = md5_ii(c, d, a, b, x[i+10], 15, -1051523);
+    b = md5_ii(b, c, d, a, x[i+ 1], 21, -2054922799);
+    a = md5_ii(a, b, c, d, x[i+ 8], 6 ,  1873313359);
+    d = md5_ii(d, a, b, c, x[i+15], 10, -30611744);
+    c = md5_ii(c, d, a, b, x[i+ 6], 15, -1560198380);
+    b = md5_ii(b, c, d, a, x[i+13], 21,  1309151649);
+    a = md5_ii(a, b, c, d, x[i+ 4], 6 , -145523070);
+    d = md5_ii(d, a, b, c, x[i+11], 10, -1120210379);
+    c = md5_ii(c, d, a, b, x[i+ 2], 15,  718787259);
+    b = md5_ii(b, c, d, a, x[i+ 9], 21, -343485551);
+
+    a = safe_add(a, olda);
+    b = safe_add(b, oldb);
+    c = safe_add(c, oldc);
+    d = safe_add(d, oldd);
+  }
+  return Array(a, b, c, d);
+
+}
+
+/*
+ * These functions implement the four basic operations the algorithm uses.
+ */
+function md5_cmn(q, a, b, x, s, t)
+{
+  return safe_add(bit_rol(safe_add(safe_add(a, q), safe_add(x, t)), s),b);
+}
+function md5_ff(a, b, c, d, x, s, t)
+{
+  return md5_cmn((b & c) | ((~b) & d), a, b, x, s, t);
+}
+function md5_gg(a, b, c, d, x, s, t)
+{
+  return md5_cmn((b & d) | (c & (~d)), a, b, x, s, t);
+}
+function md5_hh(a, b, c, d, x, s, t)
+{
+  return md5_cmn(b ^ c ^ d, a, b, x, s, t);
+}
+function md5_ii(a, b, c, d, x, s, t)
+{
+  return md5_cmn(c ^ (b | (~d)), a, b, x, s, t);
+}
+
+/*
+ * Add integers, wrapping at 2^32. This uses 16-bit operations internally
+ * to work around bugs in some JS interpreters.
+ */
+function safe_add(x, y)
+{
+  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+  return (msw << 16) | (lsw & 0xFFFF);
+}
+
+/*
+ * Bitwise rotate a 32-bit number to the left.
+ */
+function bit_rol(num, cnt)
+{
+  return (num << cnt) | (num >>> (32 - cnt));
+}
+
+module.exports = function md5(buf) {
+  return helpers.hash(buf, core_md5, 16);
+};
+},{"./helpers":109}],111:[function(require,module,exports){
+(function (Buffer){
+/*
+CryptoJS v3.1.2
+code.google.com/p/crypto-js
+(c) 2009-2013 by Jeff Mott. All rights reserved.
+code.google.com/p/crypto-js/wiki/License
+*/
+/** @preserve
+(c) 2012 by Cédric Mesnil. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    - Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+// constants table
+var zl = [
+    0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,
+    7,  4, 13,  1, 10,  6, 15,  3, 12,  0,  9,  5,  2, 14, 11,  8,
+    3, 10, 14,  4,  9, 15,  8,  1,  2,  7,  0,  6, 13, 11,  5, 12,
+    1,  9, 11, 10,  0,  8, 12,  4, 13,  3,  7, 15, 14,  5,  6,  2,
+    4,  0,  5,  9,  7, 12,  2, 10, 14,  1,  3,  8, 11,  6, 15, 13]
+
+var zr = [
+    5, 14,  7,  0,  9,  2, 11,  4, 13,  6, 15,  8,  1, 10,  3, 12,
+    6, 11,  3,  7,  0, 13,  5, 10, 14, 15,  8, 12,  4,  9,  1,  2,
+    15,  5,  1,  3,  7, 14,  6,  9, 11,  8, 12,  2, 10,  0,  4, 13,
+    8,  6,  4,  1,  3, 11, 15,  0,  5, 12,  2, 13,  9,  7, 10, 14,
+    12, 15, 10,  4,  1,  5,  8,  7,  6,  2, 13, 14,  0,  3,  9, 11]
+
+var sl = [
+     11, 14, 15, 12,  5,  8,  7,  9, 11, 13, 14, 15,  6,  7,  9,  8,
+    7, 6,   8, 13, 11,  9,  7, 15,  7, 12, 15,  9, 11,  7, 13, 12,
+    11, 13,  6,  7, 14,  9, 13, 15, 14,  8, 13,  6,  5, 12,  7,  5,
+      11, 12, 14, 15, 14, 15,  9,  8,  9, 14,  5,  6,  8,  6,  5, 12,
+    9, 15,  5, 11,  6,  8, 13, 12,  5, 12, 13, 14, 11,  8,  5,  6 ]
+
+var sr = [
+    8,  9,  9, 11, 13, 15, 15,  5,  7,  7,  8, 11, 14, 14, 12,  6,
+    9, 13, 15,  7, 12,  8,  9, 11,  7,  7, 12,  7,  6, 15, 13, 11,
+    9,  7, 15, 11,  8,  6,  6, 14, 12, 13,  5, 14, 13, 13,  7,  5,
+    15,  5,  8, 11, 14, 14,  6, 14,  6,  9, 12,  9, 12,  5, 15,  8,
+    8,  5, 12,  9, 12,  5, 14,  6,  8, 13,  6,  5, 15, 13, 11, 11 ]
+
+
+var hl =  [0x00000000, 0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xA953FD4E]
+var hr =  [0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x7A6D76E9, 0x00000000]
+
+function bytesToWords(bytes) {
+  var words = []
+  for (var i = 0, b = 0; i < bytes.length; i++, b += 8) {
+    words[b >>> 5] |= bytes[i] << (24 - b % 32)
+  }
+  return words
+}
+
+function wordsToBytes(words) {
+  var bytes = []
+  for (var b = 0; b < words.length * 32; b += 8) {
+    bytes.push((words[b >>> 5] >>> (24 - b % 32)) & 0xFF)
+  }
+  return bytes
+}
+
+function processBlock(H, M, offset) {
+  // swap endian
+  for (var i = 0; i < 16; i++) {
+    var offset_i = offset + i;
+    var M_offset_i = M[offset_i]
+
+    // Swap
+    M[offset_i] = (
+        (((M_offset_i << 8)  | (M_offset_i >>> 24)) & 0x00ff00ff) |
+        (((M_offset_i << 24) | (M_offset_i >>> 8))  & 0xff00ff00)
+    )
+  }
+
+  // Working variables
+  var al, bl, cl, dl, el
+  var ar, br, cr, dr, er
+
+  ar = al = H[0]
+  br = bl = H[1]
+  cr = cl = H[2]
+  dr = dl = H[3]
+  er = el = H[4]
+
+  // computation
+  var t
+  for (var i = 0; i < 80; i += 1) {
+    t = (al +  M[offset+zl[i]])|0
+    if (i<16){
+        t +=  f1(bl,cl,dl) + hl[0]
+    } else if (i<32) {
+        t +=  f2(bl,cl,dl) + hl[1]
+    } else if (i<48) {
+        t +=  f3(bl,cl,dl) + hl[2]
+    } else if (i<64) {
+        t +=  f4(bl,cl,dl) + hl[3]
+    } else {// if (i<80) {
+        t +=  f5(bl,cl,dl) + hl[4]
+    }
+    t = t|0
+    t =  rotl(t,sl[i])
+    t = (t+el)|0
+    al = el
+    el = dl
+    dl = rotl(cl, 10)
+    cl = bl
+    bl = t
+
+    t = (ar + M[offset+zr[i]])|0
+    if (i<16) {
+      t +=  f5(br,cr,dr) + hr[0]
+    } else if (i<32) {
+      t +=  f4(br,cr,dr) + hr[1]
+    } else if (i<48) {
+      t +=  f3(br,cr,dr) + hr[2]
+    } else if (i<64) {
+      t +=  f2(br,cr,dr) + hr[3]
+    } else {// if (i<80) {
+      t +=  f1(br,cr,dr) + hr[4]
+    }
+
+    t = t|0
+    t =  rotl(t,sr[i]) 
+    t = (t+er)|0
+    ar = er
+    er = dr
+    dr = rotl(cr, 10)
+    cr = br
+    br = t
+  }
+
+  // intermediate hash value
+  t    = (H[1] + cl + dr)|0
+  H[1] = (H[2] + dl + er)|0
+  H[2] = (H[3] + el + ar)|0
+  H[3] = (H[4] + al + br)|0
+  H[4] = (H[0] + bl + cr)|0
+  H[0] =  t
+}
+
+function f1(x, y, z) {
+  return ((x) ^ (y) ^ (z))
+}
+
+function f2(x, y, z) {
+  return (((x)&(y)) | ((~x)&(z)))
+}
+
+function f3(x, y, z) {
+  return (((x) | (~(y))) ^ (z))
+}
+
+function f4(x, y, z) {
+  return (((x) & (z)) | ((y)&(~(z))))
+}
+
+function f5(x, y, z) {
+  return ((x) ^ ((y) |(~(z))))
+}
+
+function rotl(x,n) {
+  return (x<<n) | (x>>>(32-n))
+}
+
+function ripemd160(message) {
+  var H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0]
+
+  if (typeof message == 'string')
+    message = new Buffer(message, 'utf8')
+
+  var m = bytesToWords(message)
+
+  var nBitsLeft = message.length * 8
+  var nBitsTotal = message.length * 8
+
+  // Add padding
+  m[nBitsLeft >>> 5] |= 0x80 << (24 - nBitsLeft % 32)
+  m[(((nBitsLeft + 64) >>> 9) << 4) + 14] = (
+      (((nBitsTotal << 8)  | (nBitsTotal >>> 24)) & 0x00ff00ff) |
+      (((nBitsTotal << 24) | (nBitsTotal >>> 8))  & 0xff00ff00)
+  )
+
+  for (var i=0 ; i<m.length; i += 16) {
+    processBlock(H, m, i)
+  }
+
+  // swap endian
+  for (var i = 0; i < 5; i++) {
+      // shortcut
+    var H_i = H[i]
+
+    // Swap
+    H[i] = (((H_i << 8)  | (H_i >>> 24)) & 0x00ff00ff) |
+          (((H_i << 24) | (H_i >>> 8))  & 0xff00ff00)
+  }
+
+  var digestbytes = wordsToBytes(H)
+  return new Buffer(digestbytes)
+}
+
+module.exports = ripemd160
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":16}],112:[function(require,module,exports){
+(function (Buffer){
+//prototype class for hash functions
+function Hash (blockSize, finalSize) {
+  this._block = new Buffer(blockSize) //new Uint32Array(blockSize/4)
+  this._finalSize = finalSize
+  this._blockSize = blockSize
+  this._len = 0
+  this._s = 0
+}
+
+Hash.prototype.update = function (data, enc) {
+  if ("string" === typeof data) {
+    enc = enc || "utf8"
+    data = new Buffer(data, enc)
+  }
+
+  var l = this._len += data.length
+  var s = this._s || 0
+  var f = 0
+  var buffer = this._block
+
+  while (s < l) {
+    var t = Math.min(data.length, f + this._blockSize - (s % this._blockSize))
+    var ch = (t - f)
+
+    for (var i = 0; i < ch; i++) {
+      buffer[(s % this._blockSize) + i] = data[i + f]
+    }
+
+    s += ch
+    f += ch
+
+    if ((s % this._blockSize) === 0) {
+      this._update(buffer)
+    }
+  }
+  this._s = s
+
+  return this
+}
+
+Hash.prototype.digest = function (enc) {
+  // Suppose the length of the message M, in bits, is l
+  var l = this._len * 8
+
+  // Append the bit 1 to the end of the message
+  this._block[this._len % this._blockSize] = 0x80
+
+  // and then k zero bits, where k is the smallest non-negative solution to the equation (l + 1 + k) === finalSize mod blockSize
+  this._block.fill(0, this._len % this._blockSize + 1)
+
+  if (l % (this._blockSize * 8) >= this._finalSize * 8) {
+    this._update(this._block)
+    this._block.fill(0)
+  }
+
+  // to this append the block which is equal to the number l written in binary
+  // TODO: handle case where l is > Math.pow(2, 29)
+  this._block.writeInt32BE(l, this._blockSize - 4)
+
+  var hash = this._update(this._block) || this._hash()
+
+  return enc ? hash.toString(enc) : hash
+}
+
+Hash.prototype._update = function () {
+  throw new Error('_update must be implemented by subclass')
+}
+
+module.exports = Hash
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":16}],113:[function(require,module,exports){
+var exports = module.exports = function (alg) {
+  var Alg = exports[alg.toLowerCase()]
+  if(!Alg) throw new Error(alg + ' is not supported (we accept pull requests)')
+  return new Alg()
+}
+
+
+exports.sha1 = require('./sha1')
+exports.sha224 = require('./sha224')
+exports.sha256 = require('./sha256')
+exports.sha384 = require('./sha384')
+exports.sha512 = require('./sha512')
+
+},{"./sha1":114,"./sha224":115,"./sha256":116,"./sha384":117,"./sha512":118}],114:[function(require,module,exports){
+(function (Buffer){
+/*
+ * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
+ * in FIPS PUB 180-1
+ * Version 2.1a Copyright Paul Johnston 2000 - 2002.
+ * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+ * Distributed under the BSD License
+ * See http://pajhome.org.uk/crypt/md5 for details.
+ */
+
+var inherits = require('inherits')
+var Hash = require('./hash')
+
+var W = new Array(80)
+
+function Sha1() {
+  this.init()
+  this._w = W
+
+  Hash.call(this, 64, 56)
+}
+
+inherits(Sha1, Hash)
+
+Sha1.prototype.init = function () {
+  this._a = 0x67452301
+  this._b = 0xefcdab89
+  this._c = 0x98badcfe
+  this._d = 0x10325476
+  this._e = 0xc3d2e1f0
+
+  return this
+}
+
+/*
+ * Bitwise rotate a 32-bit number to the left.
+ */
+function rol(num, cnt) {
+  return (num << cnt) | (num >>> (32 - cnt));
+}
+
+Sha1.prototype._update = function (M) {
+  var W = this._w
+
+  var a = this._a
+  var b = this._b
+  var c = this._c
+  var d = this._d
+  var e = this._e
+
+  var j = 0, k
+
+  function calcW() { return rol(W[j - 3] ^ W[j -  8] ^ W[j - 14] ^ W[j - 16], 1) }
+  function loop(w, f) {
+    W[j] = w
+
+    var t = rol(a, 5) + f + e + w + k
+
+    e = d
+    d = c
+    c = rol(b, 30)
+    b = a
+    a = t
+    j++
+  }
+
+  k = 1518500249
+  while (j < 16) loop(M.readInt32BE(j * 4), (b & c) | ((~b) & d))
+  while (j < 20) loop(calcW(), (b & c) | ((~b) & d))
+  k = 1859775393
+  while (j < 40) loop(calcW(), b ^ c ^ d)
+  k = -1894007588
+  while (j < 60) loop(calcW(), (b & c) | (b & d) | (c & d))
+  k = -899497514
+  while (j < 80) loop(calcW(), b ^ c ^ d)
+
+  this._a = (a + this._a) | 0
+  this._b = (b + this._b) | 0
+  this._c = (c + this._c) | 0
+  this._d = (d + this._d) | 0
+  this._e = (e + this._e) | 0
+}
+
+Sha1.prototype._hash = function () {
+  var H = new Buffer(20)
+
+  H.writeInt32BE(this._a|0, 0)
+  H.writeInt32BE(this._b|0, 4)
+  H.writeInt32BE(this._c|0, 8)
+  H.writeInt32BE(this._d|0, 12)
+  H.writeInt32BE(this._e|0, 16)
+
+  return H
+}
+
+module.exports = Sha1
+
+
+}).call(this,require("buffer").Buffer)
+},{"./hash":112,"buffer":16,"inherits":163}],115:[function(require,module,exports){
+(function (Buffer){
+/**
+ * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
+ * in FIPS 180-2
+ * Version 2.2-beta Copyright Angel Marin, Paul Johnston 2000 - 2009.
+ * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+ *
+ */
+
+var inherits = require('inherits')
+var SHA256 = require('./sha256')
+var Hash = require('./hash')
+
+var W = new Array(64)
+
+function Sha224() {
+  this.init()
+
+  this._w = W // new Array(64)
+
+  Hash.call(this, 64, 56)
+}
+
+inherits(Sha224, SHA256)
+
+Sha224.prototype.init = function () {
+  this._a = 0xc1059ed8|0
+  this._b = 0x367cd507|0
+  this._c = 0x3070dd17|0
+  this._d = 0xf70e5939|0
+  this._e = 0xffc00b31|0
+  this._f = 0x68581511|0
+  this._g = 0x64f98fa7|0
+  this._h = 0xbefa4fa4|0
+
+  return this
+}
+
+Sha224.prototype._hash = function () {
+  var H = new Buffer(28)
+
+  H.writeInt32BE(this._a,  0)
+  H.writeInt32BE(this._b,  4)
+  H.writeInt32BE(this._c,  8)
+  H.writeInt32BE(this._d, 12)
+  H.writeInt32BE(this._e, 16)
+  H.writeInt32BE(this._f, 20)
+  H.writeInt32BE(this._g, 24)
+
+  return H
+}
+
+module.exports = Sha224
+
+}).call(this,require("buffer").Buffer)
+},{"./hash":112,"./sha256":116,"buffer":16,"inherits":163}],116:[function(require,module,exports){
+(function (Buffer){
+/**
+ * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
+ * in FIPS 180-2
+ * Version 2.2-beta Copyright Angel Marin, Paul Johnston 2000 - 2009.
+ * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+ *
+ */
+
+var inherits = require('inherits')
+var Hash = require('./hash')
+
+var K = [
+  0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
+  0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
+  0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3,
+  0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
+  0xE49B69C1, 0xEFBE4786, 0x0FC19DC6, 0x240CA1CC,
+  0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA,
+  0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7,
+  0xC6E00BF3, 0xD5A79147, 0x06CA6351, 0x14292967,
+  0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13,
+  0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85,
+  0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3,
+  0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070,
+  0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5,
+  0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
+  0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208,
+  0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
+]
+
+var W = new Array(64)
+
+function Sha256() {
+  this.init()
+
+  this._w = W // new Array(64)
+
+  Hash.call(this, 64, 56)
+}
+
+inherits(Sha256, Hash)
+
+Sha256.prototype.init = function () {
+  this._a = 0x6a09e667|0
+  this._b = 0xbb67ae85|0
+  this._c = 0x3c6ef372|0
+  this._d = 0xa54ff53a|0
+  this._e = 0x510e527f|0
+  this._f = 0x9b05688c|0
+  this._g = 0x1f83d9ab|0
+  this._h = 0x5be0cd19|0
+
+  return this
+}
+
+function S (X, n) {
+  return (X >>> n) | (X << (32 - n));
+}
+
+function R (X, n) {
+  return (X >>> n);
+}
+
+function Ch (x, y, z) {
+  return ((x & y) ^ ((~x) & z));
+}
+
+function Maj (x, y, z) {
+  return ((x & y) ^ (x & z) ^ (y & z));
+}
+
+function Sigma0256 (x) {
+  return (S(x, 2) ^ S(x, 13) ^ S(x, 22));
+}
+
+function Sigma1256 (x) {
+  return (S(x, 6) ^ S(x, 11) ^ S(x, 25));
+}
+
+function Gamma0256 (x) {
+  return (S(x, 7) ^ S(x, 18) ^ R(x, 3));
+}
+
+function Gamma1256 (x) {
+  return (S(x, 17) ^ S(x, 19) ^ R(x, 10));
+}
+
+Sha256.prototype._update = function(M) {
+  var W = this._w
+
+  var a = this._a | 0
+  var b = this._b | 0
+  var c = this._c | 0
+  var d = this._d | 0
+  var e = this._e | 0
+  var f = this._f | 0
+  var g = this._g | 0
+  var h = this._h | 0
+
+  var j = 0
+
+  function calcW() { return Gamma1256(W[j - 2]) + W[j - 7] + Gamma0256(W[j - 15]) + W[j - 16] }
+  function loop(w) {
+    W[j] = w
+
+    var T1 = h + Sigma1256(e) + Ch(e, f, g) + K[j] + w
+    var T2 = Sigma0256(a) + Maj(a, b, c);
+
+    h = g;
+    g = f;
+    f = e;
+    e = d + T1;
+    d = c;
+    c = b;
+    b = a;
+    a = T1 + T2;
+
+    j++
+  }
+
+  while (j < 16) loop(M.readInt32BE(j * 4))
+  while (j < 64) loop(calcW())
+
+  this._a = (a + this._a) | 0
+  this._b = (b + this._b) | 0
+  this._c = (c + this._c) | 0
+  this._d = (d + this._d) | 0
+  this._e = (e + this._e) | 0
+  this._f = (f + this._f) | 0
+  this._g = (g + this._g) | 0
+  this._h = (h + this._h) | 0
+};
+
+Sha256.prototype._hash = function () {
+  var H = new Buffer(32)
+
+  H.writeInt32BE(this._a,  0)
+  H.writeInt32BE(this._b,  4)
+  H.writeInt32BE(this._c,  8)
+  H.writeInt32BE(this._d, 12)
+  H.writeInt32BE(this._e, 16)
+  H.writeInt32BE(this._f, 20)
+  H.writeInt32BE(this._g, 24)
+  H.writeInt32BE(this._h, 28)
+
+  return H
+}
+
+module.exports = Sha256
+
+}).call(this,require("buffer").Buffer)
+},{"./hash":112,"buffer":16,"inherits":163}],117:[function(require,module,exports){
+(function (Buffer){
+var inherits = require('inherits')
+var SHA512 = require('./sha512');
+var Hash = require('./hash')
+
+var W = new Array(160)
+
+function Sha384() {
+  this.init()
+  this._w = W
+
+  Hash.call(this, 128, 112)
+}
+
+inherits(Sha384, SHA512)
+
+Sha384.prototype.init = function () {
+  this._a = 0xcbbb9d5d|0
+  this._b = 0x629a292a|0
+  this._c = 0x9159015a|0
+  this._d = 0x152fecd8|0
+  this._e = 0x67332667|0
+  this._f = 0x8eb44a87|0
+  this._g = 0xdb0c2e0d|0
+  this._h = 0x47b5481d|0
+
+  this._al = 0xc1059ed8|0
+  this._bl = 0x367cd507|0
+  this._cl = 0x3070dd17|0
+  this._dl = 0xf70e5939|0
+  this._el = 0xffc00b31|0
+  this._fl = 0x68581511|0
+  this._gl = 0x64f98fa7|0
+  this._hl = 0xbefa4fa4|0
+
+  return this
+}
+
+Sha384.prototype._hash = function () {
+  var H = new Buffer(48)
+
+  function writeInt64BE(h, l, offset) {
+    H.writeInt32BE(h, offset)
+    H.writeInt32BE(l, offset + 4)
+  }
+
+  writeInt64BE(this._a, this._al, 0)
+  writeInt64BE(this._b, this._bl, 8)
+  writeInt64BE(this._c, this._cl, 16)
+  writeInt64BE(this._d, this._dl, 24)
+  writeInt64BE(this._e, this._el, 32)
+  writeInt64BE(this._f, this._fl, 40)
+
+  return H
+}
+
+module.exports = Sha384
+
+}).call(this,require("buffer").Buffer)
+},{"./hash":112,"./sha512":118,"buffer":16,"inherits":163}],118:[function(require,module,exports){
+(function (Buffer){
+var inherits = require('inherits')
+var Hash = require('./hash')
+
+var K = [
+  0x428a2f98, 0xd728ae22, 0x71374491, 0x23ef65cd,
+  0xb5c0fbcf, 0xec4d3b2f, 0xe9b5dba5, 0x8189dbbc,
+  0x3956c25b, 0xf348b538, 0x59f111f1, 0xb605d019,
+  0x923f82a4, 0xaf194f9b, 0xab1c5ed5, 0xda6d8118,
+  0xd807aa98, 0xa3030242, 0x12835b01, 0x45706fbe,
+  0x243185be, 0x4ee4b28c, 0x550c7dc3, 0xd5ffb4e2,
+  0x72be5d74, 0xf27b896f, 0x80deb1fe, 0x3b1696b1,
+  0x9bdc06a7, 0x25c71235, 0xc19bf174, 0xcf692694,
+  0xe49b69c1, 0x9ef14ad2, 0xefbe4786, 0x384f25e3,
+  0x0fc19dc6, 0x8b8cd5b5, 0x240ca1cc, 0x77ac9c65,
+  0x2de92c6f, 0x592b0275, 0x4a7484aa, 0x6ea6e483,
+  0x5cb0a9dc, 0xbd41fbd4, 0x76f988da, 0x831153b5,
+  0x983e5152, 0xee66dfab, 0xa831c66d, 0x2db43210,
+  0xb00327c8, 0x98fb213f, 0xbf597fc7, 0xbeef0ee4,
+  0xc6e00bf3, 0x3da88fc2, 0xd5a79147, 0x930aa725,
+  0x06ca6351, 0xe003826f, 0x14292967, 0x0a0e6e70,
+  0x27b70a85, 0x46d22ffc, 0x2e1b2138, 0x5c26c926,
+  0x4d2c6dfc, 0x5ac42aed, 0x53380d13, 0x9d95b3df,
+  0x650a7354, 0x8baf63de, 0x766a0abb, 0x3c77b2a8,
+  0x81c2c92e, 0x47edaee6, 0x92722c85, 0x1482353b,
+  0xa2bfe8a1, 0x4cf10364, 0xa81a664b, 0xbc423001,
+  0xc24b8b70, 0xd0f89791, 0xc76c51a3, 0x0654be30,
+  0xd192e819, 0xd6ef5218, 0xd6990624, 0x5565a910,
+  0xf40e3585, 0x5771202a, 0x106aa070, 0x32bbd1b8,
+  0x19a4c116, 0xb8d2d0c8, 0x1e376c08, 0x5141ab53,
+  0x2748774c, 0xdf8eeb99, 0x34b0bcb5, 0xe19b48a8,
+  0x391c0cb3, 0xc5c95a63, 0x4ed8aa4a, 0xe3418acb,
+  0x5b9cca4f, 0x7763e373, 0x682e6ff3, 0xd6b2b8a3,
+  0x748f82ee, 0x5defb2fc, 0x78a5636f, 0x43172f60,
+  0x84c87814, 0xa1f0ab72, 0x8cc70208, 0x1a6439ec,
+  0x90befffa, 0x23631e28, 0xa4506ceb, 0xde82bde9,
+  0xbef9a3f7, 0xb2c67915, 0xc67178f2, 0xe372532b,
+  0xca273ece, 0xea26619c, 0xd186b8c7, 0x21c0c207,
+  0xeada7dd6, 0xcde0eb1e, 0xf57d4f7f, 0xee6ed178,
+  0x06f067aa, 0x72176fba, 0x0a637dc5, 0xa2c898a6,
+  0x113f9804, 0xbef90dae, 0x1b710b35, 0x131c471b,
+  0x28db77f5, 0x23047d84, 0x32caab7b, 0x40c72493,
+  0x3c9ebe0a, 0x15c9bebc, 0x431d67c4, 0x9c100d4c,
+  0x4cc5d4be, 0xcb3e42b6, 0x597f299c, 0xfc657e2a,
+  0x5fcb6fab, 0x3ad6faec, 0x6c44198c, 0x4a475817
+]
+
+var W = new Array(160)
+
+function Sha512() {
+  this.init()
+  this._w = W
+
+  Hash.call(this, 128, 112)
+}
+
+inherits(Sha512, Hash)
+
+Sha512.prototype.init = function () {
+  this._a = 0x6a09e667|0
+  this._b = 0xbb67ae85|0
+  this._c = 0x3c6ef372|0
+  this._d = 0xa54ff53a|0
+  this._e = 0x510e527f|0
+  this._f = 0x9b05688c|0
+  this._g = 0x1f83d9ab|0
+  this._h = 0x5be0cd19|0
+
+  this._al = 0xf3bcc908|0
+  this._bl = 0x84caa73b|0
+  this._cl = 0xfe94f82b|0
+  this._dl = 0x5f1d36f1|0
+  this._el = 0xade682d1|0
+  this._fl = 0x2b3e6c1f|0
+  this._gl = 0xfb41bd6b|0
+  this._hl = 0x137e2179|0
+
+  return this
+}
+
+function S (X, Xl, n) {
+  return (X >>> n) | (Xl << (32 - n))
+}
+
+function Ch (x, y, z) {
+  return ((x & y) ^ ((~x) & z));
+}
+
+function Maj (x, y, z) {
+  return ((x & y) ^ (x & z) ^ (y & z));
+}
+
+Sha512.prototype._update = function(M) {
+  var W = this._w
+
+  var a = this._a | 0
+  var b = this._b | 0
+  var c = this._c | 0
+  var d = this._d | 0
+  var e = this._e | 0
+  var f = this._f | 0
+  var g = this._g | 0
+  var h = this._h | 0
+
+  var al = this._al | 0
+  var bl = this._bl | 0
+  var cl = this._cl | 0
+  var dl = this._dl | 0
+  var el = this._el | 0
+  var fl = this._fl | 0
+  var gl = this._gl | 0
+  var hl = this._hl | 0
+
+  var i = 0, j = 0
+  var Wi, Wil
+  function calcW() {
+    var x  = W[j - 15*2]
+    var xl = W[j - 15*2 + 1]
+    var gamma0  = S(x, xl, 1) ^ S(x, xl, 8) ^ (x >>> 7)
+    var gamma0l = S(xl, x, 1) ^ S(xl, x, 8) ^ S(xl, x, 7)
+
+    x  = W[j - 2*2]
+    xl = W[j - 2*2 + 1]
+    var gamma1  = S(x, xl, 19) ^ S(xl, x, 29) ^ (x >>> 6)
+    var gamma1l = S(xl, x, 19) ^ S(x, xl, 29) ^ S(xl, x, 6)
+
+    // W[i] = gamma0 + W[i - 7] + gamma1 + W[i - 16]
+    var Wi7  = W[j - 7*2]
+    var Wi7l = W[j - 7*2 + 1]
+
+    var Wi16  = W[j - 16*2]
+    var Wi16l = W[j - 16*2 + 1]
+
+    Wil = gamma0l + Wi7l
+    Wi  = gamma0  + Wi7 + ((Wil >>> 0) < (gamma0l >>> 0) ? 1 : 0)
+    Wil = Wil + gamma1l
+    Wi  = Wi  + gamma1  + ((Wil >>> 0) < (gamma1l >>> 0) ? 1 : 0)
+    Wil = Wil + Wi16l
+    Wi  = Wi  + Wi16 + ((Wil >>> 0) < (Wi16l >>> 0) ? 1 : 0)
+  }
+
+  function loop() {
+    W[j] = Wi
+    W[j + 1] = Wil
+
+    var maj = Maj(a, b, c)
+    var majl = Maj(al, bl, cl)
+
+    var sigma0h = S(a, al, 28) ^ S(al, a, 2) ^ S(al, a, 7)
+    var sigma0l = S(al, a, 28) ^ S(a, al, 2) ^ S(a, al, 7)
+    var sigma1h = S(e, el, 14) ^ S(e, el, 18) ^ S(el, e, 9)
+    var sigma1l = S(el, e, 14) ^ S(el, e, 18) ^ S(e, el, 9)
+
+    // t1 = h + sigma1 + ch + K[i] + W[i]
+    var Ki = K[j]
+    var Kil = K[j + 1]
+
+    var ch = Ch(e, f, g)
+    var chl = Ch(el, fl, gl)
+
+    var t1l = hl + sigma1l
+    var t1 = h + sigma1h + ((t1l >>> 0) < (hl >>> 0) ? 1 : 0)
+    t1l = t1l + chl
+    t1 = t1 + ch + ((t1l >>> 0) < (chl >>> 0) ? 1 : 0)
+    t1l = t1l + Kil
+    t1 = t1 + Ki + ((t1l >>> 0) < (Kil >>> 0) ? 1 : 0)
+    t1l = t1l + Wil
+    t1 = t1 + Wi + ((t1l >>> 0) < (Wil >>> 0) ? 1 : 0)
+
+    // t2 = sigma0 + maj
+    var t2l = sigma0l + majl
+    var t2 = sigma0h + maj + ((t2l >>> 0) < (sigma0l >>> 0) ? 1 : 0)
+
+    h  = g
+    hl = gl
+    g  = f
+    gl = fl
+    f  = e
+    fl = el
+    el = (dl + t1l) | 0
+    e  = (d + t1 + ((el >>> 0) < (dl >>> 0) ? 1 : 0)) | 0
+    d  = c
+    dl = cl
+    c  = b
+    cl = bl
+    b  = a
+    bl = al
+    al = (t1l + t2l) | 0
+    a  = (t1 + t2 + ((al >>> 0) < (t1l >>> 0) ? 1 : 0)) | 0
+
+    i++
+    j += 2
+  }
+
+  while (i < 16) {
+    Wi = M.readInt32BE(j * 4)
+    Wil = M.readInt32BE(j * 4 + 4)
+
+    loop()
+  }
+
+  while (i < 80) {
+    calcW()
+    loop()
+  }
+
+  this._al = (this._al + al) | 0
+  this._bl = (this._bl + bl) | 0
+  this._cl = (this._cl + cl) | 0
+  this._dl = (this._dl + dl) | 0
+  this._el = (this._el + el) | 0
+  this._fl = (this._fl + fl) | 0
+  this._gl = (this._gl + gl) | 0
+  this._hl = (this._hl + hl) | 0
+
+  this._a = (this._a + a + ((this._al >>> 0) < (al >>> 0) ? 1 : 0)) | 0
+  this._b = (this._b + b + ((this._bl >>> 0) < (bl >>> 0) ? 1 : 0)) | 0
+  this._c = (this._c + c + ((this._cl >>> 0) < (cl >>> 0) ? 1 : 0)) | 0
+  this._d = (this._d + d + ((this._dl >>> 0) < (dl >>> 0) ? 1 : 0)) | 0
+  this._e = (this._e + e + ((this._el >>> 0) < (el >>> 0) ? 1 : 0)) | 0
+  this._f = (this._f + f + ((this._fl >>> 0) < (fl >>> 0) ? 1 : 0)) | 0
+  this._g = (this._g + g + ((this._gl >>> 0) < (gl >>> 0) ? 1 : 0)) | 0
+  this._h = (this._h + h + ((this._hl >>> 0) < (hl >>> 0) ? 1 : 0)) | 0
+}
+
+Sha512.prototype._hash = function () {
+  var H = new Buffer(64)
+
+  function writeInt64BE(h, l, offset) {
+    H.writeInt32BE(h, offset)
+    H.writeInt32BE(l, offset + 4)
+  }
+
+  writeInt64BE(this._a, this._al, 0)
+  writeInt64BE(this._b, this._bl, 8)
+  writeInt64BE(this._c, this._cl, 16)
+  writeInt64BE(this._d, this._dl, 24)
+  writeInt64BE(this._e, this._el, 32)
+  writeInt64BE(this._f, this._fl, 40)
+  writeInt64BE(this._g, this._gl, 48)
+  writeInt64BE(this._h, this._hl, 56)
+
+  return H
+}
+
+module.exports = Sha512
+
+}).call(this,require("buffer").Buffer)
+},{"./hash":112,"buffer":16,"inherits":163}],119:[function(require,module,exports){
+(function (Buffer){
+'use strict';
+var createHash = require('create-hash/browser');
+var inherits = require('inherits')
+
+var Transform = require('stream').Transform
+
+var ZEROS = new Buffer(128)
+ZEROS.fill(0)
+
+function Hmac(alg, key) {
+  Transform.call(this)
+
+  if (typeof key === 'string') {
+    key = new Buffer(key)
+  }
+
+  var blocksize = (alg === 'sha512' || alg === 'sha384') ? 128 : 64
+
+  this._alg = alg
+  this._key = key
+
+  if (key.length > blocksize) {
+    key = createHash(alg).update(key).digest()
+
+  } else if (key.length < blocksize) {
+    key = Buffer.concat([key, ZEROS], blocksize)
+  }
+
+  var ipad = this._ipad = new Buffer(blocksize)
+  var opad = this._opad = new Buffer(blocksize)
+
+  for (var i = 0; i < blocksize; i++) {
+    ipad[i] = key[i] ^ 0x36
+    opad[i] = key[i] ^ 0x5C
+  }
+
+  this._hash = createHash(alg).update(ipad)
+}
+
+inherits(Hmac, Transform)
+
+Hmac.prototype.update = function (data, enc) {
+  this._hash.update(data, enc)
+
+  return this
+}
+
+Hmac.prototype._transform = function (data, _, next) {
+  this._hash.update(data)
+
+  next()
+}
+
+Hmac.prototype._flush = function (next) {
+  this.push(this.digest())
+
+  next()
+}
+
+Hmac.prototype.digest = function (enc) {
+  var h = this._hash.digest()
+
+  return createHash(this._alg).update(this._opad).update(h).digest(enc)
+}
+
+module.exports = function createHmac(alg, key) {
+  return new Hmac(alg, key)
+}
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":16,"create-hash/browser":108,"inherits":163,"stream":182}],120:[function(require,module,exports){
+(function (Buffer){
+var generatePrime = require('./lib/generatePrime');
+var primes = require('./lib/primes');
+
+var DH = require('./lib/dh');
+
+function getDiffieHellman(mod) {
+  var prime = new Buffer(primes[mod].prime, 'hex');
+  var gen = new Buffer(primes[mod].gen, 'hex');
+
+  return new DH(prime, gen);
+}
+
+function createDiffieHellman(prime, enc, generator, genc) {
+  if (Buffer.isBuffer(enc) || (typeof enc === 'string' && ['hex', 'binary', 'base64'].indexOf(enc) === -1)) {
+    genc = generator;
+    generator = enc;
+    enc = undefined;
+  }
+
+  enc = enc || 'binary';
+  genc = genc || 'binary';
+  generator = generator || new Buffer([2]);
+
+  if (!Buffer.isBuffer(generator)) {
+    generator = new Buffer(generator, genc);
+  }
+
+  if (typeof prime === 'number') {
+    return new DH(generatePrime(prime, generator), generator, true);
+  }
+
+  if (!Buffer.isBuffer(prime)) {
+    prime = new Buffer(prime, enc);
+  }
+
+  return new DH(prime, generator, true);
+}
+
+exports.DiffieHellmanGroup = exports.createDiffieHellmanGroup = exports.getDiffieHellman = getDiffieHellman;
+exports.createDiffieHellman = exports.DiffieHellman = createDiffieHellman;
+
+}).call(this,require("buffer").Buffer)
+},{"./lib/dh":121,"./lib/generatePrime":122,"./lib/primes":123,"buffer":16}],121:[function(require,module,exports){
 (function (Buffer){
 var BN = require('bn.js');
 var MillerRabin = require('miller-rabin');
@@ -17646,157 +19639,167 @@ var TEN = new BN(10);
 var THREE = new BN(3);
 var SEVEN = new BN(7);
 var primes = require('./generatePrime');
+var randomBytes = require('randombytes');
 module.exports = DH;
+
 function setPublicKey(pub, enc) {
-	enc = enc || 'utf8';
-	if (!Buffer.isBuffer(pub)) {
-		pub = new Buffer(pub, enc);
-	}
-	this._pub = new BN(pub);
+  enc = enc || 'utf8';
+  if (!Buffer.isBuffer(pub)) {
+    pub = new Buffer(pub, enc);
+  }
+  this._pub = new BN(pub);
+  return this;
 }
+
 function setPrivateKey(priv, enc) {
-	enc = enc || 'utf8';
-	if (!Buffer.isBuffer(priv)) {
-		priv = new Buffer(priv, enc);
-	}
-	this._priv = new BN(priv);
+  enc = enc || 'utf8';
+  if (!Buffer.isBuffer(priv)) {
+    priv = new Buffer(priv, enc);
+  }
+  this._priv = new BN(priv);
+  return this;
 }
+
 var primeCache = {};
 function checkPrime(prime, generator) {
-	var gen = generator.toString('hex');
-	var hex = [gen, prime.toString(16)].join('_');
-	if (hex in primeCache) {
-		return primeCache[hex];
-	}
-	var error = 0;
-	
-	if (prime.isEven() ||
-		!primes.simpleSieve ||
-		!primes.fermatTest(prime) ||
-		!millerRabin.test(prime)) {
-		//not a prime so +1
-		error += 1;
-		
-		if (gen === '02' || gen === '05') {
-			// we'd be able to check the generator
-			// it would fail so +8
-			error += 8;
-		} else {
-			//we wouldn't be able to test the generator
-			// so +4
-			error += 4;
-		}
-		primeCache[hex] = error;
-		return error;
-	}
-	if (!millerRabin.test(prime.shrn(1))) {
-		//not a safe prime
-		error += 2;
-	}
-	var gen = generator.toString('hex');
-	var rem;
-	switch (gen) {
-		case '02':
-		  if (prime.mod(TWENTYFOUR).cmp(ELEVEN)) {
-		  	// unsuidable generator
-		  	error += 8;
-		  }
-		  break;
-		case '05':
-		  rem = prime.mod(TEN);
-		  if (rem.cmp(THREE) && rem.cmp(SEVEN)) {
-		  	// prime mod 10 needs to equal 3 or 7
-		  	error += 8;
-		  } 
-		  break;
-		default: 
-		  error += 4;
-	}
-	primeCache[hex] = error;
-	return error;
+  var gen = generator.toString('hex');
+  var hex = [gen, prime.toString(16)].join('_');
+  if (hex in primeCache) {
+    return primeCache[hex];
+  }
+  var error = 0;
+  
+  if (prime.isEven() ||
+    !primes.simpleSieve ||
+    !primes.fermatTest(prime) ||
+    !millerRabin.test(prime)) {
+    //not a prime so +1
+    error += 1;
+    
+    if (gen === '02' || gen === '05') {
+      // we'd be able to check the generator
+      // it would fail so +8
+      error += 8;
+    } else {
+      //we wouldn't be able to test the generator
+      // so +4
+      error += 4;
+    }
+    primeCache[hex] = error;
+    return error;
+  }
+  if (!millerRabin.test(prime.shrn(1))) {
+    //not a safe prime
+    error += 2;
+  }
+  var rem;
+  switch (gen) {
+    case '02':
+      if (prime.mod(TWENTYFOUR).cmp(ELEVEN)) {
+        // unsuidable generator
+        error += 8;
+      }
+      break;
+    case '05':
+      rem = prime.mod(TEN);
+      if (rem.cmp(THREE) && rem.cmp(SEVEN)) {
+        // prime mod 10 needs to equal 3 or 7
+        error += 8;
+      } 
+      break;
+    default: 
+      error += 4;
+  }
+  primeCache[hex] = error;
+  return error;
 }
+
 function defineError (self, error) {
-	try {
-		Object.defineProperty(self, 'verifyError', {
-	    enumerable: true,
-	    value: error,
-	    writable: false
-	  });
-	} catch(e) {
-		self.verifyError = error;
-	}
+  try {
+    Object.defineProperty(self, 'verifyError', {
+      enumerable: true,
+      value: error,
+      writable: false
+    });
+  } catch(e) {
+    self.verifyError = error;
+  }
 }
-function DH(prime, generator,crypto, malleable) {
-	this.setGenerator(generator);
-	this.__prime = new BN(prime);
-	this._prime = BN.mont(this.__prime);
-	this._pub = void 0;
-	this._priv = void 0;
-	
-	if (malleable) {
-		this.setPublicKey = setPublicKey;
-		this.setPrivateKey = setPrivateKey;
-		defineError(this, checkPrime(this.__prime, generator));
-	} else {
-		defineError(this, 8);
-	}
-	this._makeNum = function makeNum() {
-		return crypto.randomBytes(192);
-	};
+function DH(prime, generator, malleable) {
+  this.setGenerator(generator);
+  this.__prime = new BN(prime);
+  this._prime = BN.mont(this.__prime);
+  this._primeLen = prime.length;
+  this._pub = void 0;
+  this._priv = void 0;
+  
+  if (malleable) {
+    this.setPublicKey = setPublicKey;
+    this.setPrivateKey = setPrivateKey;
+    defineError(this, checkPrime(this.__prime, generator));
+  } else {
+    defineError(this, 8);
+  }
 }
+
 DH.prototype.generateKeys = function () {
-	if (!this._priv) {
-		this._priv = new BN(this._makeNum());
-	}
-	this._pub = this._gen.toRed(this._prime).redPow(this._priv).fromRed();
-	return this.getPublicKey();
+  if (!this._priv) {
+    this._priv = new BN(randomBytes(this._primeLen));
+  }
+  this._pub = this._gen.toRed(this._prime).redPow(this._priv).fromRed();
+  return this.getPublicKey();
 };
 
 DH.prototype.computeSecret = function (other) {
-	other = new BN(other);
-	other = other.toRed(this._prime);
-	var secret = other.redPow(this._priv).fromRed();
-	var out = new Buffer(secret.toArray());
-	var prime = this.getPrime();
-	if (out.length < prime.length) {
-		var front = new Buffer(prime.length - out.length);
-		front.fill(0);
-		out = Buffer.concat([front, out]);
-	}
-	return out;
+  other = new BN(other);
+  other = other.toRed(this._prime);
+  var secret = other.redPow(this._priv).fromRed();
+  var out = new Buffer(secret.toArray());
+  var prime = this.getPrime();
+  if (out.length < prime.length) {
+    var front = new Buffer(prime.length - out.length);
+    front.fill(0);
+    out = Buffer.concat([front, out]);
+  }
+  return out;
 };
+
 DH.prototype.getPublicKey = function getPublicKey(enc) {
-	return returnValue(this._pub, enc);
+  return formatReturnValue(this._pub, enc);
 };
+
 DH.prototype.getPrivateKey = function getPrivateKey(enc) {
-	return returnValue(this._priv, enc);
+  return formatReturnValue(this._priv, enc);
 };
 
 DH.prototype.getPrime = function (enc) {
-	return returnValue(this.__prime, enc);
-};
-DH.prototype.getGenerator = function (enc) {
-	return returnValue(this._gen, enc);
-};
-DH.prototype.setGenerator = function (gen, enc) {
-	enc = enc || 'utf8';
-	if (!Buffer.isBuffer(gen)) {
-		gen = new Buffer(gen, enc);
-	}
-	this._gen = new BN(gen);
+  return formatReturnValue(this.__prime, enc);
 };
 
-function returnValue(bn, enc) {
-	var buf = new Buffer(bn.toArray());
-	if (!enc) {
-		return buf;
-	} else {
-		return buf.toString(enc);
-	}
+DH.prototype.getGenerator = function (enc) {
+  return formatReturnValue(this._gen, enc);
+};
+
+DH.prototype.setGenerator = function (gen, enc) {
+  enc = enc || 'utf8';
+  if (!Buffer.isBuffer(gen)) {
+    gen = new Buffer(gen, enc);
+  }
+  this._gen = new BN(gen);
+  return this;
+};
+
+function formatReturnValue(bn, enc) {
+  var buf = new Buffer(bn.toArray());
+  if (!enc) {
+    return buf;
+  } else {
+    return buf.toString(enc);
+  }
 }
 }).call(this,require("buffer").Buffer)
-},{"./generatePrime":111,"bn.js":113,"buffer":17,"miller-rabin":114}],111:[function(require,module,exports){
-
+},{"./generatePrime":122,"bn.js":124,"buffer":16,"miller-rabin":125,"randombytes":155}],122:[function(require,module,exports){
+var randomBytes = require('randombytes');
 module.exports = findPrime;
 findPrime.simpleSieve = simpleSieve;
 findPrime.fermatTest = fermatTest;
@@ -17838,29 +19841,50 @@ function _getPrimes() {
   primes = res;
   return res;
 }
+
 function simpleSieve(p) {
   var primes = _getPrimes();
 
   for (var i = 0; i < primes.length; i++)
-    if (p.modn(primes[i]) === 0)
-      return false;
+    if (p.modn(primes[i]) === 0) {
+      if (p.cmpn(primes[i]) === 0) {
+        return true;
+      } else {
+        return false;
+      }
+    }
 
   return true;
 }
+
 function fermatTest(p) {
   var red = BN.mont(p);
   return TWO.toRed(red).redPow(p.subn(1)).fromRed().cmpn(1) === 0;
 }
-function findPrime(bits, gen ,crypto) {
+
+function findPrime(bits, gen) {
+  if (bits < 16) {
+    // this is what openssl does
+    if (gen === 2 || gen === 5) {
+      return new BN([0x8c, 0x7b]);
+    } else {
+      return new BN([0x8c, 0x27]);
+    }
+  }
   gen = new BN(gen);
   var runs, comp;
   function generateRandom(bits) {
     runs = -1;
-    var r = crypto.randomBytes(Math.ceil(bits / 8));
-    r[0] |= 0xc0;
-    r[r.length - 1] |= 3;
-    var rem;
-    var out = new BN(r);
+    var out = new BN(randomBytes(Math.ceil(bits / 8)));
+    while (out.bitLength() > bits) {
+      out.ishrn(1);
+    }
+    if (out.isEven()) {
+      out.iadd(ONE);
+    }
+    if (!out.testn(1)) {
+      out.iadd(TWO);
+    }
     if (!gen.cmp(TWO)) {
       while (out.mod(TWENTYFOUR).cmp(ELEVEN)) {
         out.iadd(FOUR);
@@ -17883,28 +19907,23 @@ function findPrime(bits, gen ,crypto) {
       comp = {
         major: [FOUR],
         minor: [TWO]
-      }
+      };
     }
     return out;
   }
   var num = generateRandom(bits);
 
-
-
   var n2 = num.shrn(1);
 
   while (true) {
-    if (num.bitLength() > bits) {
+    while (num.bitLength() > bits) {
       num = generateRandom(bits);
       n2 = num.shrn(1);
     }
     runs++;
-    if (simpleSieve(n2) &&
-      fermatTest(n2) &&
-      millerRabin.test(n2) &&
-      simpleSieve(num) &&
-      fermatTest(num) &&
-      millerRabin.test(num)) {
+    if (simpleSieve(n2) &&  simpleSieve(num) &&
+      fermatTest(n2) &&  fermatTest(num) &&
+      millerRabin.test(n2) && millerRabin.test(num)) {
       return num;
     }
     num.iadd(comp.major[runs%comp.major.length]);
@@ -17912,48 +19931,44 @@ function findPrime(bits, gen ,crypto) {
   }
 
 }
-},{"bn.js":113,"miller-rabin":114}],112:[function(require,module,exports){
-(function (Buffer){
-var primes = require('./primes.json');
-var DH = require('./dh');
-var generatePrime = require('./generatePrime');
-module.exports = function (crypto, exports) {
-	exports.DiffieHellmanGroup =
-    exports.createDiffieHellmanGroup =
-    exports.getDiffieHellman = DiffieHellmanGroup;
-	function DiffieHellmanGroup(mod) {
-		return new DH(new Buffer(primes[mod].prime, 'hex'),
-			new Buffer(primes[mod].gen, 'hex'), crypto);
-	}
-	exports.createDiffieHellman = exports.DiffieHellman = DiffieHellman;
-	function DiffieHellman(prime, enc, generator, genc) {
-		
-		if (Buffer.isBuffer(enc) ||
-			(typeof enc === 'string' && ['hex', 'binary', 'base64'].indexOf(enc) === -1)) {
-			genc = generator;
-			generator = enc
-			enc = void 0;
-		}
-		enc = enc || 'binary';
-		genc = genc || 'binary';
-		generator = generator || new Buffer([2]);
-		if (!Buffer.isBuffer(generator)) {
-			generator = new Buffer(generator, genc);
-		}
-		if (typeof prime === 'number') {
-			return new DH(generatePrime(prime, generator, crypto), generator, crypto, true);
-		}
-		if (!Buffer.isBuffer(prime)) {
-			prime = new Buffer(prime, enc);
-		}
-		
-		return new DH(prime, generator, crypto, true);
-	};
+},{"bn.js":124,"miller-rabin":125,"randombytes":155}],123:[function(require,module,exports){
+module.exports={
+    "modp1": {
+        "gen": "02",
+        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a63a3620ffffffffffffffff"
+    },
+    "modp2": {
+        "gen": "02",
+        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece65381ffffffffffffffff"
+    },
+    "modp5": {
+        "gen": "02",
+        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca237327ffffffffffffffff"
+    },
+    "modp14": {
+        "gen": "02",
+        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aacaa68ffffffffffffffff"
+    },
+    "modp15": {
+        "gen": "02",
+        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a93ad2caffffffffffffffff"
+    },
+    "modp16": {
+        "gen": "02",
+        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a92108011a723c12a787e6d788719a10bdba5b2699c327186af4e23c1a946834b6150bda2583e9ca2ad44ce8dbbbc2db04de8ef92e8efc141fbecaa6287c59474e6bc05d99b2964fa090c3a2233ba186515be7ed1f612970cee2d7afb81bdd762170481cd0069127d5b05aa993b4ea988d8fddc186ffb7dc90a6c08f4df435c934063199ffffffffffffffff"
+    },
+    "modp17": {
+        "gen": "02",
+        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a92108011a723c12a787e6d788719a10bdba5b2699c327186af4e23c1a946834b6150bda2583e9ca2ad44ce8dbbbc2db04de8ef92e8efc141fbecaa6287c59474e6bc05d99b2964fa090c3a2233ba186515be7ed1f612970cee2d7afb81bdd762170481cd0069127d5b05aa993b4ea988d8fddc186ffb7dc90a6c08f4df435c93402849236c3fab4d27c7026c1d4dcb2602646dec9751e763dba37bdf8ff9406ad9e530ee5db382f413001aeb06a53ed9027d831179727b0865a8918da3edbebcf9b14ed44ce6cbaced4bb1bdb7f1447e6cc254b332051512bd7af426fb8f401378cd2bf5983ca01c64b92ecf032ea15d1721d03f482d7ce6e74fef6d55e702f46980c82b5a84031900b1c9e59e7c97fbec7e8f323a97a7e36cc88be0f1d45b7ff585ac54bd407b22b4154aacc8f6d7ebf48e1d814cc5ed20f8037e0a79715eef29be32806a1d58bb7c5da76f550aa3d8a1fbff0eb19ccb1a313d55cda56c9ec2ef29632387fe8d76e3c0468043e8f663f4860ee12bf2d5b0b7474d6e694f91e6dcc4024ffffffffffffffff"
+    },
+    "modp18": {
+        "gen": "02",
+        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a92108011a723c12a787e6d788719a10bdba5b2699c327186af4e23c1a946834b6150bda2583e9ca2ad44ce8dbbbc2db04de8ef92e8efc141fbecaa6287c59474e6bc05d99b2964fa090c3a2233ba186515be7ed1f612970cee2d7afb81bdd762170481cd0069127d5b05aa993b4ea988d8fddc186ffb7dc90a6c08f4df435c93402849236c3fab4d27c7026c1d4dcb2602646dec9751e763dba37bdf8ff9406ad9e530ee5db382f413001aeb06a53ed9027d831179727b0865a8918da3edbebcf9b14ed44ce6cbaced4bb1bdb7f1447e6cc254b332051512bd7af426fb8f401378cd2bf5983ca01c64b92ecf032ea15d1721d03f482d7ce6e74fef6d55e702f46980c82b5a84031900b1c9e59e7c97fbec7e8f323a97a7e36cc88be0f1d45b7ff585ac54bd407b22b4154aacc8f6d7ebf48e1d814cc5ed20f8037e0a79715eef29be32806a1d58bb7c5da76f550aa3d8a1fbff0eb19ccb1a313d55cda56c9ec2ef29632387fe8d76e3c0468043e8f663f4860ee12bf2d5b0b7474d6e694f91e6dbe115974a3926f12fee5e438777cb6a932df8cd8bec4d073b931ba3bc832b68d9dd300741fa7bf8afc47ed2576f6936ba424663aab639c5ae4f5683423b4742bf1c978238f16cbe39d652de3fdb8befc848ad922222e04a4037c0713eb57a81a23f0c73473fc646cea306b4bcbc8862f8385ddfa9d4b7fa2c087e879683303ed5bdd3a062b3cf5b3a278a66d2a13f83f44f82ddf310ee074ab6a364597e899a0255dc164f31cc50846851df9ab48195ded7ea1b1d510bd7ee74d73faf36bc31ecfa268359046f4eb879f924009438b481c6cd7889a002ed5ee382bc9190da6fc026e479558e4475677e9aa9e3050e2765694dfc81f56e880b96e7160c980dd98edd3dfffffffffffffffff"
+    }
 }
-}).call(this,require("buffer").Buffer)
-},{"./dh":110,"./generatePrime":111,"./primes.json":116,"buffer":17}],113:[function(require,module,exports){
-module.exports=require(62)
-},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\bn.js\\lib\\bn.js":62}],114:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
+module.exports=require(41)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\bn.js\\lib\\bn.js":41}],125:[function(require,module,exports){
 var bn = require('bn.js');
 var brorand = require('brorand');
 
@@ -18069,44 +20084,9 @@ MillerRabin.prototype.getDivisor = function getDivisor(n, k) {
   return prime;
 };
 
-},{"bn.js":113,"brorand":115}],115:[function(require,module,exports){
-module.exports=require(75)
-},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\brorand\\index.js":75}],116:[function(require,module,exports){
-module.exports={
-    "modp1": {
-        "gen": "02",
-        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a63a3620ffffffffffffffff"
-    },
-    "modp2": {
-        "gen": "02",
-        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece65381ffffffffffffffff"
-    },
-    "modp5": {
-        "gen": "02",
-        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca237327ffffffffffffffff"
-    },
-    "modp14": {
-        "gen": "02",
-        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aacaa68ffffffffffffffff"
-    },
-    "modp15": {
-        "gen": "02",
-        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a93ad2caffffffffffffffff"
-    },
-    "modp16": {
-        "gen": "02",
-        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a92108011a723c12a787e6d788719a10bdba5b2699c327186af4e23c1a946834b6150bda2583e9ca2ad44ce8dbbbc2db04de8ef92e8efc141fbecaa6287c59474e6bc05d99b2964fa090c3a2233ba186515be7ed1f612970cee2d7afb81bdd762170481cd0069127d5b05aa993b4ea988d8fddc186ffb7dc90a6c08f4df435c934063199ffffffffffffffff"
-    },
-    "modp17": {
-        "gen": "02",
-        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a92108011a723c12a787e6d788719a10bdba5b2699c327186af4e23c1a946834b6150bda2583e9ca2ad44ce8dbbbc2db04de8ef92e8efc141fbecaa6287c59474e6bc05d99b2964fa090c3a2233ba186515be7ed1f612970cee2d7afb81bdd762170481cd0069127d5b05aa993b4ea988d8fddc186ffb7dc90a6c08f4df435c93402849236c3fab4d27c7026c1d4dcb2602646dec9751e763dba37bdf8ff9406ad9e530ee5db382f413001aeb06a53ed9027d831179727b0865a8918da3edbebcf9b14ed44ce6cbaced4bb1bdb7f1447e6cc254b332051512bd7af426fb8f401378cd2bf5983ca01c64b92ecf032ea15d1721d03f482d7ce6e74fef6d55e702f46980c82b5a84031900b1c9e59e7c97fbec7e8f323a97a7e36cc88be0f1d45b7ff585ac54bd407b22b4154aacc8f6d7ebf48e1d814cc5ed20f8037e0a79715eef29be32806a1d58bb7c5da76f550aa3d8a1fbff0eb19ccb1a313d55cda56c9ec2ef29632387fe8d76e3c0468043e8f663f4860ee12bf2d5b0b7474d6e694f91e6dcc4024ffffffffffffffff"
-    },
-    "modp18": {
-        "gen": "02",
-        "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a92108011a723c12a787e6d788719a10bdba5b2699c327186af4e23c1a946834b6150bda2583e9ca2ad44ce8dbbbc2db04de8ef92e8efc141fbecaa6287c59474e6bc05d99b2964fa090c3a2233ba186515be7ed1f612970cee2d7afb81bdd762170481cd0069127d5b05aa993b4ea988d8fddc186ffb7dc90a6c08f4df435c93402849236c3fab4d27c7026c1d4dcb2602646dec9751e763dba37bdf8ff9406ad9e530ee5db382f413001aeb06a53ed9027d831179727b0865a8918da3edbebcf9b14ed44ce6cbaced4bb1bdb7f1447e6cc254b332051512bd7af426fb8f401378cd2bf5983ca01c64b92ecf032ea15d1721d03f482d7ce6e74fef6d55e702f46980c82b5a84031900b1c9e59e7c97fbec7e8f323a97a7e36cc88be0f1d45b7ff585ac54bd407b22b4154aacc8f6d7ebf48e1d814cc5ed20f8037e0a79715eef29be32806a1d58bb7c5da76f550aa3d8a1fbff0eb19ccb1a313d55cda56c9ec2ef29632387fe8d76e3c0468043e8f663f4860ee12bf2d5b0b7474d6e694f91e6dbe115974a3926f12fee5e438777cb6a932df8cd8bec4d073b931ba3bc832b68d9dd300741fa7bf8afc47ed2576f6936ba424663aab639c5ae4f5683423b4742bf1c978238f16cbe39d652de3fdb8befc848ad922222e04a4037c0713eb57a81a23f0c73473fc646cea306b4bcbc8862f8385ddfa9d4b7fa2c087e879683303ed5bdd3a062b3cf5b3a278a66d2a13f83f44f82ddf310ee074ab6a364597e899a0255dc164f31cc50846851df9ab48195ded7ea1b1d510bd7ee74d73faf36bc31ecfa268359046f4eb879f924009438b481c6cd7889a002ed5ee382bc9190da6fc026e479558e4475677e9aa9e3050e2765694dfc81f56e880b96e7160c980dd98edd3dfffffffffffffffff"
-    }
-}
-},{}],117:[function(require,module,exports){
+},{"bn.js":124,"brorand":126}],126:[function(require,module,exports){
+module.exports=require(55)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\brorand\\index.js":55}],127:[function(require,module,exports){
 (function (Buffer){
 module.exports = function(crypto) {
   function pbkdf2(password, salt, iterations, keylen, digest, callback) {
@@ -18194,974 +20174,305 @@ module.exports = function(crypto) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":17}],118:[function(require,module,exports){
+},{"buffer":16}],128:[function(require,module,exports){
+
+module.exports = function (exports, crypto) {
+  exports.publicEncrypt = require('./publicEncrypt')(crypto);
+  exports.privateDecrypt = require('./privateDecrypt')(crypto);
+};
+},{"./privateDecrypt":152,"./publicEncrypt":153}],129:[function(require,module,exports){
 (function (Buffer){
-
-module.exports = ripemd160
-
-
-
-/*
-CryptoJS v3.1.2
-code.google.com/p/crypto-js
-(c) 2009-2013 by Jeff Mott. All rights reserved.
-code.google.com/p/crypto-js/wiki/License
-*/
-/** @preserve
-(c) 2012 by Cédric Mesnil. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-    - Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-    - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-// Constants table
-var zl = [
-    0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,
-    7,  4, 13,  1, 10,  6, 15,  3, 12,  0,  9,  5,  2, 14, 11,  8,
-    3, 10, 14,  4,  9, 15,  8,  1,  2,  7,  0,  6, 13, 11,  5, 12,
-    1,  9, 11, 10,  0,  8, 12,  4, 13,  3,  7, 15, 14,  5,  6,  2,
-    4,  0,  5,  9,  7, 12,  2, 10, 14,  1,  3,  8, 11,  6, 15, 13];
-var zr = [
-    5, 14,  7,  0,  9,  2, 11,  4, 13,  6, 15,  8,  1, 10,  3, 12,
-    6, 11,  3,  7,  0, 13,  5, 10, 14, 15,  8, 12,  4,  9,  1,  2,
-    15,  5,  1,  3,  7, 14,  6,  9, 11,  8, 12,  2, 10,  0,  4, 13,
-    8,  6,  4,  1,  3, 11, 15,  0,  5, 12,  2, 13,  9,  7, 10, 14,
-    12, 15, 10,  4,  1,  5,  8,  7,  6,  2, 13, 14,  0,  3,  9, 11];
-var sl = [
-     11, 14, 15, 12,  5,  8,  7,  9, 11, 13, 14, 15,  6,  7,  9,  8,
-    7, 6,   8, 13, 11,  9,  7, 15,  7, 12, 15,  9, 11,  7, 13, 12,
-    11, 13,  6,  7, 14,  9, 13, 15, 14,  8, 13,  6,  5, 12,  7,  5,
-      11, 12, 14, 15, 14, 15,  9,  8,  9, 14,  5,  6,  8,  6,  5, 12,
-    9, 15,  5, 11,  6,  8, 13, 12,  5, 12, 13, 14, 11,  8,  5,  6 ];
-var sr = [
-    8,  9,  9, 11, 13, 15, 15,  5,  7,  7,  8, 11, 14, 14, 12,  6,
-    9, 13, 15,  7, 12,  8,  9, 11,  7,  7, 12,  7,  6, 15, 13, 11,
-    9,  7, 15, 11,  8,  6,  6, 14, 12, 13,  5, 14, 13, 13,  7,  5,
-    15,  5,  8, 11, 14, 14,  6, 14,  6,  9, 12,  9, 12,  5, 15,  8,
-    8,  5, 12,  9, 12,  5, 14,  6,  8, 13,  6,  5, 15, 13, 11, 11 ];
-
-var hl =  [ 0x00000000, 0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xA953FD4E];
-var hr =  [ 0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x7A6D76E9, 0x00000000];
-
-var bytesToWords = function (bytes) {
-  var words = [];
-  for (var i = 0, b = 0; i < bytes.length; i++, b += 8) {
-    words[b >>> 5] |= bytes[i] << (24 - b % 32);
+module.exports = function (seed, len, crypto) {
+  var t = new Buffer('');
+  var  i = 0, c;
+  while (t.length < len) {
+    c = i2ops(i++);
+    t = Buffer.concat([t, crypto.createHash('sha1').update(seed).update(c).digest()]);
   }
-  return words;
+  return t.slice(0, len);
 };
 
-var wordsToBytes = function (words) {
-  var bytes = [];
-  for (var b = 0; b < words.length * 32; b += 8) {
-    bytes.push((words[b >>> 5] >>> (24 - b % 32)) & 0xFF);
+function i2ops(c) {
+  var out = new Buffer(4);
+  out.writeUInt32BE(c,0);
+  return out;
+}
+}).call(this,require("buffer").Buffer)
+},{"buffer":16}],130:[function(require,module,exports){
+module.exports=require(41)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\bn.js\\lib\\bn.js":41}],131:[function(require,module,exports){
+module.exports=require(42)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\browserify-rsa\\index.js":42,"bn.js":130,"buffer":16}],132:[function(require,module,exports){
+module.exports=require(63)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\EVP_BytesToKey.js":63,"buffer":16}],133:[function(require,module,exports){
+module.exports=require(64)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\aesid.json":64}],134:[function(require,module,exports){
+module.exports=require(65)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\asn1.js":65,"asn1.js":138,"asn1.js-rfc3280":137}],135:[function(require,module,exports){
+module.exports=require(66)
+},{"./EVP_BytesToKey":132,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\fixProc.js":66,"buffer":16}],136:[function(require,module,exports){
+module.exports=require(67)
+},{"./aesid.json":133,"./asn1":134,"./fixProc":135,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\index.js":67,"buffer":16,"pemstrip":151}],137:[function(require,module,exports){
+module.exports=require(68)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js-rfc3280\\index.js":68,"asn1.js":138}],138:[function(require,module,exports){
+module.exports=require(69)
+},{"./asn1/api":139,"./asn1/base":141,"./asn1/constants":145,"./asn1/decoders":147,"./asn1/encoders":149,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1.js":69,"bn.js":130}],139:[function(require,module,exports){
+module.exports=require(70)
+},{"../asn1":138,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\api.js":70,"inherits":163,"vm":187}],140:[function(require,module,exports){
+module.exports=require(71)
+},{"../base":141,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\base\\buffer.js":71,"buffer":16,"inherits":163}],141:[function(require,module,exports){
+module.exports=require(72)
+},{"./buffer":140,"./node":142,"./reporter":143,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\base\\index.js":72}],142:[function(require,module,exports){
+module.exports=require(73)
+},{"../base":141,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\base\\node.js":73,"minimalistic-assert":150}],143:[function(require,module,exports){
+module.exports=require(74)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\base\\reporter.js":74,"inherits":163}],144:[function(require,module,exports){
+module.exports=require(75)
+},{"../constants":145,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\constants\\der.js":75}],145:[function(require,module,exports){
+module.exports=require(76)
+},{"./der":144,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\constants\\index.js":76}],146:[function(require,module,exports){
+module.exports=require(77)
+},{"../../asn1":138,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\decoders\\der.js":77,"inherits":163}],147:[function(require,module,exports){
+module.exports=require(78)
+},{"./der":146,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\decoders\\index.js":78}],148:[function(require,module,exports){
+module.exports=require(79)
+},{"../../asn1":138,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\encoders\\der.js":79,"buffer":16,"inherits":163}],149:[function(require,module,exports){
+module.exports=require(80)
+},{"./der":148,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\encoders\\index.js":80}],150:[function(require,module,exports){
+module.exports=require(81)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\node_modules\\minimalistic-assert\\index.js":81}],151:[function(require,module,exports){
+module.exports=require(82)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\pemstrip\\index.js":82}],152:[function(require,module,exports){
+(function (Buffer){
+var parseKeys = require('parse-asn1');
+var mgf = require('./mgf');
+var xor = require('./xor');
+var bn = require('bn.js');
+var crt = require('browserify-rsa');
+module.exports = function (crypto) {
+  return privateDecrypt;
+  function privateDecrypt(private_key, enc) {
+    var padding;
+    if (private_key.padding) {
+      padding = private_key.padding;
+    } else {
+      padding = 4;
+    }
+    
+    var key = parseKeys(private_key, crypto);
+    var k = key.modulus.byteLength();
+    if (enc.length > k || new bn(enc).cmp(key.modulus) >= 0) {
+      throw new Error('decryption error');
+    }
+    var msg = crt(enc, key, crypto);
+    var zBuffer = new Buffer(k - msg.length);
+    zBuffer.fill(0);
+    msg = Buffer.concat([zBuffer, msg], k);
+    if (padding === 4) {
+      return oaep(key, msg, crypto);
+    } else if (padding === 1) {
+      return pkcs1(key, msg, crypto);
+    } else if (padding === 3) {
+      return msg;
+    } else {
+      throw new Error('unknown padding');
+    }
+  }
+};
+
+function oaep(key, msg, crypto){
+  var n = key.modulus;
+  var k = key.modulus.byteLength();
+  var mLen = msg.length;
+  var iHash = crypto.createHash('sha1').update(new Buffer('')).digest();
+  var hLen = iHash.length;
+  var hLen2 = 2 * hLen;
+  if (msg[0] !== 0) {
+    throw new Error('decryption error');
+  }
+  var maskedSeed = msg.slice(1, hLen + 1);
+  var maskedDb =  msg.slice(hLen + 1);
+  var seed = xor(maskedSeed, mgf(maskedDb, hLen, crypto));
+  var db = xor(maskedDb, mgf(seed, k - hLen - 1, crypto));
+  if (compare(iHash, db.slice(0, hLen))) {
+    throw new Error('decryption error');
+  }
+  var i = hLen;
+  while (db[i] === 0) {
+    i++;
+  }
+  if (db[i++] !== 1) {
+    throw new Error('decryption error');
+  }
+  return db.slice(i);
+}
+
+function pkcs1(key, msg, crypto){
+  var p1 = msg.slice(0, 2);
+  var i = 2;
+  var status = 0;
+  while (msg[i++] !== 0) {
+    if (i >= msg.length) {
+      status++;
+      break;
+    }
+  }
+  var ps = msg.slice(2, i - 1);
+  var p2 = msg.slice(i - 1, i);
+
+  if (p1.toString('hex') !== '0002') {
+    status++;
+  }
+  if (ps.length < 8) {
+    status++;
+  }
+  return  msg.slice(i);
+}
+function compare(a, b){
+  var dif = 0;
+  var len = a.length;
+  if (a.length !== b.length) {
+    dif++;
+    len = Math.min(a.length, b.length);
+  }
+  var i = -1;
+  while (++i < len) {
+    dif += (a[i] ^ b[i]);
+  }
+  return dif;
+}
+}).call(this,require("buffer").Buffer)
+},{"./mgf":129,"./xor":154,"bn.js":130,"browserify-rsa":131,"buffer":16,"parse-asn1":136}],153:[function(require,module,exports){
+(function (Buffer){
+var parseKeys = require('parse-asn1');
+var mgf = require('./mgf');
+var xor = require('./xor');
+var bn = require('bn.js');
+var constants = {
+  RSA_PKCS1_OAEP_PADDING: 4,
+  RSA_PKCS1_PADDIN: 1,
+  RSA_NO_PADDING: 3
+};
+
+module.exports = function (crypto) {
+  return publicEncrypt;
+  function publicEncrypt(public_key, msg) {
+    var padding;
+    if (public_key.padding) {
+      padding = public_key.padding;
+    } else {
+      padding = 4;
+    }
+    var key = parseKeys(public_key);
+    var paddedMsg;
+    if (padding === 4) {
+      paddedMsg = oaep(key, msg, crypto);
+    } else if (padding === 1) {
+      paddedMsg = pkcs1(key, msg, crypto);
+    } else if (padding === 3) {
+      paddedMsg = new bn(msg);
+      if (paddedMsg.cmp(key.modulus) >= 0) {
+        throw new Error('data too long for modulus');
+      }
+    } else {
+      throw new Error('unknown padding');
+    }
+    var enc = paddedMsg
+      .toRed(bn.mont(key.modulus))
+      .redPow(new bn(key.publicExponent))
+      .fromRed()
+      .toArray();
+    return new Buffer(enc);
+  }
+};
+
+function oaep(key, msg, crypto){
+  var k = key.modulus.byteLength();
+  var mLen = msg.length;
+  var iHash = crypto.createHash('sha1').update(new Buffer('')).digest();
+  var hLen = iHash.length;
+  var hLen2 = 2 * hLen;
+  if (mLen > k - hLen2 - 2) {
+    throw new Error('message too long');
+  }
+  var ps = new Buffer(k - mLen - hLen2 - 2);
+  ps.fill(0);
+  var dblen = k - hLen - 1;
+  var seed = crypto.randomBytes(hLen);
+  var maskedDb = xor(Buffer.concat([iHash, ps, new Buffer([1]), msg], dblen), mgf(seed, dblen, crypto));
+  var maskedSeed = xor(seed, mgf(maskedDb, hLen, crypto));
+  return new bn(Buffer.concat([new Buffer([0]), maskedSeed, maskedDb], k));
+}
+function pkcs1(key, msg, crypto){
+  var mLen = msg.length;
+  var k = key.modulus.byteLength();
+  if (mLen > k - 11) {
+    throw new Error('message too long');
+  }
+  var ps = nonZero(k - mLen - 3, crypto);
+  return new bn(Buffer.concat([new Buffer([0, 2]), ps, new Buffer([0]), msg], k));
+}
+function nonZero(len, crypto) {
+  var out = new Buffer(len);
+  var i = 0;
+  var cache = crypto.randomBytes(len*2);
+  var cur = 0;
+  var num;
+  while (i < len) {
+    if (cur === cache.length) {
+      cache = crypto.randomBytes(len*2);
+      cur = 0;
+    }
+    num = cache[cur++];
+    if (num) {
+      out[i++] = num;
+    }
+  }
+  return out;
+}
+}).call(this,require("buffer").Buffer)
+},{"./mgf":129,"./xor":154,"bn.js":130,"buffer":16,"parse-asn1":136}],154:[function(require,module,exports){
+module.exports = function xor(a, b) {
+  var len = a.length;
+  var i = -1;
+  while (++i < len) {
+    a[i] ^= b[i];
+  }
+  return a
+};
+},{}],155:[function(require,module,exports){
+(function (process,global,Buffer){
+'use strict';
+
+var crypto = global.crypto || global.msCrypto
+if(crypto && crypto.getRandomValues) {
+  module.exports = randomBytes;
+} else {
+  module.exports = oldBrowser;
+}
+function randomBytes(size, cb) {
+  var bytes = new Buffer(size); //in browserify, this is an extended Uint8Array
+    /* This will not work in older browsers.
+     * See https://developer.mozilla.org/en-US/docs/Web/API/window.crypto.getRandomValues
+     */
+
+  crypto.getRandomValues(bytes);
+  if (typeof cb === 'function') {
+    return process.nextTick(function () {
+      cb(null, bytes);
+    });
   }
   return bytes;
-};
-
-var processBlock = function (H, M, offset) {
-
-  // Swap endian
-  for (var i = 0; i < 16; i++) {
-    var offset_i = offset + i;
-    var M_offset_i = M[offset_i];
-
-    // Swap
-    M[offset_i] = (
-        (((M_offset_i << 8)  | (M_offset_i >>> 24)) & 0x00ff00ff) |
-        (((M_offset_i << 24) | (M_offset_i >>> 8))  & 0xff00ff00)
-    );
-  }
-
-  // Working variables
-  var al, bl, cl, dl, el;
-  var ar, br, cr, dr, er;
-
-  ar = al = H[0];
-  br = bl = H[1];
-  cr = cl = H[2];
-  dr = dl = H[3];
-  er = el = H[4];
-  // Computation
-  var t;
-  for (var i = 0; i < 80; i += 1) {
-    t = (al +  M[offset+zl[i]])|0;
-    if (i<16){
-        t +=  f1(bl,cl,dl) + hl[0];
-    } else if (i<32) {
-        t +=  f2(bl,cl,dl) + hl[1];
-    } else if (i<48) {
-        t +=  f3(bl,cl,dl) + hl[2];
-    } else if (i<64) {
-        t +=  f4(bl,cl,dl) + hl[3];
-    } else {// if (i<80) {
-        t +=  f5(bl,cl,dl) + hl[4];
-    }
-    t = t|0;
-    t =  rotl(t,sl[i]);
-    t = (t+el)|0;
-    al = el;
-    el = dl;
-    dl = rotl(cl, 10);
-    cl = bl;
-    bl = t;
-
-    t = (ar + M[offset+zr[i]])|0;
-    if (i<16){
-        t +=  f5(br,cr,dr) + hr[0];
-    } else if (i<32) {
-        t +=  f4(br,cr,dr) + hr[1];
-    } else if (i<48) {
-        t +=  f3(br,cr,dr) + hr[2];
-    } else if (i<64) {
-        t +=  f2(br,cr,dr) + hr[3];
-    } else {// if (i<80) {
-        t +=  f1(br,cr,dr) + hr[4];
-    }
-    t = t|0;
-    t =  rotl(t,sr[i]) ;
-    t = (t+er)|0;
-    ar = er;
-    er = dr;
-    dr = rotl(cr, 10);
-    cr = br;
-    br = t;
-  }
-  // Intermediate hash value
-  t    = (H[1] + cl + dr)|0;
-  H[1] = (H[2] + dl + er)|0;
-  H[2] = (H[3] + el + ar)|0;
-  H[3] = (H[4] + al + br)|0;
-  H[4] = (H[0] + bl + cr)|0;
-  H[0] =  t;
-};
-
-function f1(x, y, z) {
-  return ((x) ^ (y) ^ (z));
 }
-
-function f2(x, y, z) {
-  return (((x)&(y)) | ((~x)&(z)));
-}
-
-function f3(x, y, z) {
-  return (((x) | (~(y))) ^ (z));
-}
-
-function f4(x, y, z) {
-  return (((x) & (z)) | ((y)&(~(z))));
-}
-
-function f5(x, y, z) {
-  return ((x) ^ ((y) |(~(z))));
-}
-
-function rotl(x,n) {
-  return (x<<n) | (x>>>(32-n));
-}
-
-function ripemd160(message) {
-  var H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
-
-  if (typeof message == 'string')
-    message = new Buffer(message, 'utf8');
-
-  var m = bytesToWords(message);
-
-  var nBitsLeft = message.length * 8;
-  var nBitsTotal = message.length * 8;
-
-  // Add padding
-  m[nBitsLeft >>> 5] |= 0x80 << (24 - nBitsLeft % 32);
-  m[(((nBitsLeft + 64) >>> 9) << 4) + 14] = (
-      (((nBitsTotal << 8)  | (nBitsTotal >>> 24)) & 0x00ff00ff) |
-      (((nBitsTotal << 24) | (nBitsTotal >>> 8))  & 0xff00ff00)
-  );
-
-  for (var i=0 ; i<m.length; i += 16) {
-    processBlock(H, m, i);
-  }
-
-  // Swap endian
-  for (var i = 0; i < 5; i++) {
-      // Shortcut
-    var H_i = H[i];
-
-    // Swap
-    H[i] = (((H_i << 8)  | (H_i >>> 24)) & 0x00ff00ff) |
-          (((H_i << 24) | (H_i >>> 8))  & 0xff00ff00);
-  }
-
-  var digestbytes = wordsToBytes(H);
-  return new Buffer(digestbytes);
-}
-
-
-
-}).call(this,require("buffer").Buffer)
-},{"buffer":17}],119:[function(require,module,exports){
-(function (Buffer){
-
-
-//prototype class for hash functions
-function Hash (blockSize, finalSize) {
-  this._block = new Buffer(blockSize) //new Uint32Array(blockSize/4)
-  this._finalSize = finalSize
-  this._blockSize = blockSize
-  this._len = 0
-  this._s = 0
-}
-
-Hash.prototype.init = function () {
-  this._s = 0
-  this._len = 0
-}
-
-Hash.prototype.update = function (data, enc) {
-  if ("string" === typeof data) {
-    enc = enc || "utf8"
-    data = new Buffer(data, enc)
-  }
-
-  var l = this._len += data.length
-  var s = this._s = (this._s || 0)
-  var f = 0
-  var buffer = this._block
-
-  while (s < l) {
-    var t = Math.min(data.length, f + this._blockSize - (s % this._blockSize))
-    var ch = (t - f)
-
-    for (var i = 0; i < ch; i++) {
-      buffer[(s % this._blockSize) + i] = data[i + f]
-    }
-
-    s += ch
-    f += ch
-
-    if ((s % this._blockSize) === 0) {
-      this._update(buffer)
-    }
-  }
-  this._s = s
-
-  return this
-}
-
-Hash.prototype.digest = function (enc) {
-  // Suppose the length of the message M, in bits, is l
-  var l = this._len * 8
-
-  // Append the bit 1 to the end of the message
-  this._block[this._len % this._blockSize] = 0x80
-
-  // and then k zero bits, where k is the smallest non-negative solution to the equation (l + 1 + k) === finalSize mod blockSize
-  this._block.fill(0, this._len % this._blockSize + 1)
-
-  if (l % (this._blockSize * 8) >= this._finalSize * 8) {
-    this._update(this._block)
-    this._block.fill(0)
-  }
-
-  // to this append the block which is equal to the number l written in binary
-  // TODO: handle case where l is > Math.pow(2, 29)
-  this._block.writeInt32BE(l, this._blockSize - 4)
-
-  var hash = this._update(this._block) || this._hash()
-
-  return enc ? hash.toString(enc) : hash
-}
-
-Hash.prototype._update = function () {
-  throw new Error('_update must be implemented by subclass')
-}
-
-module.exports = Hash
-
-}).call(this,require("buffer").Buffer)
-},{"buffer":17}],120:[function(require,module,exports){
-var exports = module.exports = function (alg) {
-  var Alg = exports[alg.toLowerCase()]
-  if(!Alg) throw new Error(alg + ' is not supported (we accept pull requests)')
-  return new Alg()
-}
-
-
-exports.sha1 = require('./sha1')
-exports.sha224 = require('./sha224')
-exports.sha256 = require('./sha256')
-exports.sha384 = require('./sha384')
-exports.sha512 = require('./sha512')
-
-},{"./sha1":121,"./sha224":122,"./sha256":123,"./sha384":124,"./sha512":125}],121:[function(require,module,exports){
-(function (Buffer){
-/*
- * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
- * in FIPS PUB 180-1
- * Version 2.1a Copyright Paul Johnston 2000 - 2002.
- * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
- * Distributed under the BSD License
- * See http://pajhome.org.uk/crypt/md5 for details.
- */
-
-var inherits = require('util').inherits
-
-var Hash = require('./hash')
-
-var A = 0|0
-var B = 4|0
-var C = 8|0
-var D = 12|0
-var E = 16|0
-
-var W = new (typeof Int32Array === 'undefined' ? Array : Int32Array)(80)
-
-var POOL = []
-
-function Sha1 () {
-  if(POOL.length)
-    return POOL.pop().init()
-
-  if(!(this instanceof Sha1)) return new Sha1()
-  this._w = W
-  Hash.call(this, 16*4, 14*4)
-
-  this._h = null
-  this.init()
-}
-
-inherits(Sha1, Hash)
-
-Sha1.prototype.init = function () {
-  this._a = 0x67452301
-  this._b = 0xefcdab89
-  this._c = 0x98badcfe
-  this._d = 0x10325476
-  this._e = 0xc3d2e1f0
-
-  Hash.prototype.init.call(this)
-  return this
-}
-
-Sha1.prototype._POOL = POOL
-Sha1.prototype._update = function (X) {
-
-  var a, b, c, d, e, _a, _b, _c, _d, _e
-
-  a = _a = this._a
-  b = _b = this._b
-  c = _c = this._c
-  d = _d = this._d
-  e = _e = this._e
-
-  var w = this._w
-
-  for(var j = 0; j < 80; j++) {
-    var W = w[j] = j < 16 ? X.readInt32BE(j*4)
-      : rol(w[j - 3] ^ w[j -  8] ^ w[j - 14] ^ w[j - 16], 1)
-
-    var t = add(
-      add(rol(a, 5), sha1_ft(j, b, c, d)),
-      add(add(e, W), sha1_kt(j))
+function oldBrowser() {
+  throw new Error(
+      'secure random number generation not supported by this browser\n'+
+      'use chrome, FireFox or Internet Explorer 11'
     )
-
-    e = d
-    d = c
-    c = rol(b, 30)
-    b = a
-    a = t
-  }
-
-  this._a = add(a, _a)
-  this._b = add(b, _b)
-  this._c = add(c, _c)
-  this._d = add(d, _d)
-  this._e = add(e, _e)
 }
 
-Sha1.prototype._hash = function () {
-  if(POOL.length < 100) POOL.push(this)
-  var H = new Buffer(20)
-  //console.log(this._a|0, this._b|0, this._c|0, this._d|0, this._e|0)
-  H.writeInt32BE(this._a|0, A)
-  H.writeInt32BE(this._b|0, B)
-  H.writeInt32BE(this._c|0, C)
-  H.writeInt32BE(this._d|0, D)
-  H.writeInt32BE(this._e|0, E)
-  return H
-}
-
-/*
- * Perform the appropriate triplet combination function for the current
- * iteration
- */
-function sha1_ft(t, b, c, d) {
-  if(t < 20) return (b & c) | ((~b) & d);
-  if(t < 40) return b ^ c ^ d;
-  if(t < 60) return (b & c) | (b & d) | (c & d);
-  return b ^ c ^ d;
-}
-
-/*
- * Determine the appropriate additive constant for the current iteration
- */
-function sha1_kt(t) {
-  return (t < 20) ?  1518500249 : (t < 40) ?  1859775393 :
-         (t < 60) ? -1894007588 : -899497514;
-}
-
-/*
- * Add integers, wrapping at 2^32. This uses 16-bit operations internally
- * to work around bugs in some JS interpreters.
- * //dominictarr: this is 10 years old, so maybe this can be dropped?)
- *
- */
-function add(x, y) {
-  return (x + y ) | 0
-//lets see how this goes on testling.
-//  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
-//  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-//  return (msw << 16) | (lsw & 0xFFFF);
-}
-
-/*
- * Bitwise rotate a 32-bit number to the left.
- */
-function rol(num, cnt) {
-  return (num << cnt) | (num >>> (32 - cnt));
-}
-
-module.exports = Sha1
-
-
-}).call(this,require("buffer").Buffer)
-},{"./hash":119,"buffer":17,"util":157}],122:[function(require,module,exports){
-(function (Buffer){
-
-/**
- * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
- * in FIPS 180-2
- * Version 2.2-beta Copyright Angel Marin, Paul Johnston 2000 - 2009.
- * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
- *
- */
-
-var inherits = require('util').inherits
-var SHA256 = require('./sha256')
-var Hash = require('./hash')
-
-var W = new Array(64)
-
-function Sha224() {
-  this.init()
-
-  this._w = W //new Array(64)
-
-  Hash.call(this, 16*4, 14*4)
-}
-
-inherits(Sha224, SHA256)
-
-Sha224.prototype.init = function () {
-
-  this._a = 0xc1059ed8|0
-  this._b = 0x367cd507|0
-  this._c = 0x3070dd17|0
-  this._d = 0xf70e5939|0
-  this._e = 0xffc00b31|0
-  this._f = 0x68581511|0
-  this._g = 0x64f98fa7|0
-  this._h = 0xbefa4fa4|0
-
-  this._len = this._s = 0
-
-  return this
-}
-
-
-Sha224.prototype._hash = function () {
-  var H = new Buffer(28)
-
-  H.writeInt32BE(this._a,  0)
-  H.writeInt32BE(this._b,  4)
-  H.writeInt32BE(this._c,  8)
-  H.writeInt32BE(this._d, 12)
-  H.writeInt32BE(this._e, 16)
-  H.writeInt32BE(this._f, 20)
-  H.writeInt32BE(this._g, 24)
-
-  return H
-}
-
-module.exports = Sha224
-
-}).call(this,require("buffer").Buffer)
-},{"./hash":119,"./sha256":123,"buffer":17,"util":157}],123:[function(require,module,exports){
-(function (Buffer){
-
-/**
- * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
- * in FIPS 180-2
- * Version 2.2-beta Copyright Angel Marin, Paul Johnston 2000 - 2009.
- * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
- *
- */
-
-var inherits = require('util').inherits
-
-var Hash = require('./hash')
-
-var K = [
-    0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
-    0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
-    0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3,
-    0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
-    0xE49B69C1, 0xEFBE4786, 0x0FC19DC6, 0x240CA1CC,
-    0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA,
-    0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7,
-    0xC6E00BF3, 0xD5A79147, 0x06CA6351, 0x14292967,
-    0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13,
-    0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85,
-    0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3,
-    0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070,
-    0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5,
-    0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
-    0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208,
-    0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
-  ]
-
-var W = new Array(64)
-
-function Sha256() {
-  this.init()
-
-  this._w = W //new Array(64)
-
-  Hash.call(this, 16*4, 14*4)
-}
-
-inherits(Sha256, Hash)
-
-Sha256.prototype.init = function () {
-
-  this._a = 0x6a09e667|0
-  this._b = 0xbb67ae85|0
-  this._c = 0x3c6ef372|0
-  this._d = 0xa54ff53a|0
-  this._e = 0x510e527f|0
-  this._f = 0x9b05688c|0
-  this._g = 0x1f83d9ab|0
-  this._h = 0x5be0cd19|0
-
-  this._len = this._s = 0
-
-  return this
-}
-
-function S (X, n) {
-  return (X >>> n) | (X << (32 - n));
-}
-
-function R (X, n) {
-  return (X >>> n);
-}
-
-function Ch (x, y, z) {
-  return ((x & y) ^ ((~x) & z));
-}
-
-function Maj (x, y, z) {
-  return ((x & y) ^ (x & z) ^ (y & z));
-}
-
-function Sigma0256 (x) {
-  return (S(x, 2) ^ S(x, 13) ^ S(x, 22));
-}
-
-function Sigma1256 (x) {
-  return (S(x, 6) ^ S(x, 11) ^ S(x, 25));
-}
-
-function Gamma0256 (x) {
-  return (S(x, 7) ^ S(x, 18) ^ R(x, 3));
-}
-
-function Gamma1256 (x) {
-  return (S(x, 17) ^ S(x, 19) ^ R(x, 10));
-}
-
-Sha256.prototype._update = function(M) {
-
-  var W = this._w
-  var a, b, c, d, e, f, g, h
-  var T1, T2
-
-  a = this._a | 0
-  b = this._b | 0
-  c = this._c | 0
-  d = this._d | 0
-  e = this._e | 0
-  f = this._f | 0
-  g = this._g | 0
-  h = this._h | 0
-
-  for (var j = 0; j < 64; j++) {
-    var w = W[j] = j < 16
-      ? M.readInt32BE(j * 4)
-      : Gamma1256(W[j - 2]) + W[j - 7] + Gamma0256(W[j - 15]) + W[j - 16]
-
-    T1 = h + Sigma1256(e) + Ch(e, f, g) + K[j] + w
-
-    T2 = Sigma0256(a) + Maj(a, b, c);
-    h = g; g = f; f = e; e = d + T1; d = c; c = b; b = a; a = T1 + T2;
-  }
-
-  this._a = (a + this._a) | 0
-  this._b = (b + this._b) | 0
-  this._c = (c + this._c) | 0
-  this._d = (d + this._d) | 0
-  this._e = (e + this._e) | 0
-  this._f = (f + this._f) | 0
-  this._g = (g + this._g) | 0
-  this._h = (h + this._h) | 0
-
-};
-
-Sha256.prototype._hash = function () {
-  var H = new Buffer(32)
-
-  H.writeInt32BE(this._a,  0)
-  H.writeInt32BE(this._b,  4)
-  H.writeInt32BE(this._c,  8)
-  H.writeInt32BE(this._d, 12)
-  H.writeInt32BE(this._e, 16)
-  H.writeInt32BE(this._f, 20)
-  H.writeInt32BE(this._g, 24)
-  H.writeInt32BE(this._h, 28)
-
-  return H
-}
-
-module.exports = Sha256
-
-}).call(this,require("buffer").Buffer)
-},{"./hash":119,"buffer":17,"util":157}],124:[function(require,module,exports){
-(function (Buffer){
-var inherits = require('util').inherits
-var SHA512 = require('./sha512');
-var Hash = require('./hash')
-
-var W = new Array(160)
-
-function Sha384() {
-  this.init()
-  this._w = W
-
-  Hash.call(this, 128, 112)
-}
-
-inherits(Sha384, SHA512)
-
-Sha384.prototype.init = function () {
-
-  this._a = 0xcbbb9d5d|0
-  this._b = 0x629a292a|0
-  this._c = 0x9159015a|0
-  this._d = 0x152fecd8|0
-  this._e = 0x67332667|0
-  this._f = 0x8eb44a87|0
-  this._g = 0xdb0c2e0d|0
-  this._h = 0x47b5481d|0
-
-  this._al = 0xc1059ed8|0
-  this._bl = 0x367cd507|0
-  this._cl = 0x3070dd17|0
-  this._dl = 0xf70e5939|0
-  this._el = 0xffc00b31|0
-  this._fl = 0x68581511|0
-  this._gl = 0x64f98fa7|0
-  this._hl = 0xbefa4fa4|0
-
-  this._len = this._s = 0
-
-  return this
-}
-
-
-
-Sha384.prototype._hash = function () {
-  var H = new Buffer(48)
-
-  function writeInt64BE(h, l, offset) {
-    H.writeInt32BE(h, offset)
-    H.writeInt32BE(l, offset + 4)
-  }
-
-  writeInt64BE(this._a, this._al, 0)
-  writeInt64BE(this._b, this._bl, 8)
-  writeInt64BE(this._c, this._cl, 16)
-  writeInt64BE(this._d, this._dl, 24)
-  writeInt64BE(this._e, this._el, 32)
-  writeInt64BE(this._f, this._fl, 40)
-
-  return H
-}
-
-module.exports = Sha384
-
-}).call(this,require("buffer").Buffer)
-},{"./hash":119,"./sha512":125,"buffer":17,"util":157}],125:[function(require,module,exports){
-(function (Buffer){
-var inherits = require('util').inherits
-
-var Hash = require('./hash')
-
-var K = [
-  0x428a2f98, 0xd728ae22, 0x71374491, 0x23ef65cd,
-  0xb5c0fbcf, 0xec4d3b2f, 0xe9b5dba5, 0x8189dbbc,
-  0x3956c25b, 0xf348b538, 0x59f111f1, 0xb605d019,
-  0x923f82a4, 0xaf194f9b, 0xab1c5ed5, 0xda6d8118,
-  0xd807aa98, 0xa3030242, 0x12835b01, 0x45706fbe,
-  0x243185be, 0x4ee4b28c, 0x550c7dc3, 0xd5ffb4e2,
-  0x72be5d74, 0xf27b896f, 0x80deb1fe, 0x3b1696b1,
-  0x9bdc06a7, 0x25c71235, 0xc19bf174, 0xcf692694,
-  0xe49b69c1, 0x9ef14ad2, 0xefbe4786, 0x384f25e3,
-  0x0fc19dc6, 0x8b8cd5b5, 0x240ca1cc, 0x77ac9c65,
-  0x2de92c6f, 0x592b0275, 0x4a7484aa, 0x6ea6e483,
-  0x5cb0a9dc, 0xbd41fbd4, 0x76f988da, 0x831153b5,
-  0x983e5152, 0xee66dfab, 0xa831c66d, 0x2db43210,
-  0xb00327c8, 0x98fb213f, 0xbf597fc7, 0xbeef0ee4,
-  0xc6e00bf3, 0x3da88fc2, 0xd5a79147, 0x930aa725,
-  0x06ca6351, 0xe003826f, 0x14292967, 0x0a0e6e70,
-  0x27b70a85, 0x46d22ffc, 0x2e1b2138, 0x5c26c926,
-  0x4d2c6dfc, 0x5ac42aed, 0x53380d13, 0x9d95b3df,
-  0x650a7354, 0x8baf63de, 0x766a0abb, 0x3c77b2a8,
-  0x81c2c92e, 0x47edaee6, 0x92722c85, 0x1482353b,
-  0xa2bfe8a1, 0x4cf10364, 0xa81a664b, 0xbc423001,
-  0xc24b8b70, 0xd0f89791, 0xc76c51a3, 0x0654be30,
-  0xd192e819, 0xd6ef5218, 0xd6990624, 0x5565a910,
-  0xf40e3585, 0x5771202a, 0x106aa070, 0x32bbd1b8,
-  0x19a4c116, 0xb8d2d0c8, 0x1e376c08, 0x5141ab53,
-  0x2748774c, 0xdf8eeb99, 0x34b0bcb5, 0xe19b48a8,
-  0x391c0cb3, 0xc5c95a63, 0x4ed8aa4a, 0xe3418acb,
-  0x5b9cca4f, 0x7763e373, 0x682e6ff3, 0xd6b2b8a3,
-  0x748f82ee, 0x5defb2fc, 0x78a5636f, 0x43172f60,
-  0x84c87814, 0xa1f0ab72, 0x8cc70208, 0x1a6439ec,
-  0x90befffa, 0x23631e28, 0xa4506ceb, 0xde82bde9,
-  0xbef9a3f7, 0xb2c67915, 0xc67178f2, 0xe372532b,
-  0xca273ece, 0xea26619c, 0xd186b8c7, 0x21c0c207,
-  0xeada7dd6, 0xcde0eb1e, 0xf57d4f7f, 0xee6ed178,
-  0x06f067aa, 0x72176fba, 0x0a637dc5, 0xa2c898a6,
-  0x113f9804, 0xbef90dae, 0x1b710b35, 0x131c471b,
-  0x28db77f5, 0x23047d84, 0x32caab7b, 0x40c72493,
-  0x3c9ebe0a, 0x15c9bebc, 0x431d67c4, 0x9c100d4c,
-  0x4cc5d4be, 0xcb3e42b6, 0x597f299c, 0xfc657e2a,
-  0x5fcb6fab, 0x3ad6faec, 0x6c44198c, 0x4a475817
-]
-
-var W = new Array(160)
-
-function Sha512() {
-  this.init()
-  this._w = W
-
-  Hash.call(this, 128, 112)
-}
-
-inherits(Sha512, Hash)
-
-Sha512.prototype.init = function () {
-
-  this._a = 0x6a09e667|0
-  this._b = 0xbb67ae85|0
-  this._c = 0x3c6ef372|0
-  this._d = 0xa54ff53a|0
-  this._e = 0x510e527f|0
-  this._f = 0x9b05688c|0
-  this._g = 0x1f83d9ab|0
-  this._h = 0x5be0cd19|0
-
-  this._al = 0xf3bcc908|0
-  this._bl = 0x84caa73b|0
-  this._cl = 0xfe94f82b|0
-  this._dl = 0x5f1d36f1|0
-  this._el = 0xade682d1|0
-  this._fl = 0x2b3e6c1f|0
-  this._gl = 0xfb41bd6b|0
-  this._hl = 0x137e2179|0
-
-  this._len = this._s = 0
-
-  return this
-}
-
-function S (X, Xl, n) {
-  return (X >>> n) | (Xl << (32 - n))
-}
-
-function Ch (x, y, z) {
-  return ((x & y) ^ ((~x) & z));
-}
-
-function Maj (x, y, z) {
-  return ((x & y) ^ (x & z) ^ (y & z));
-}
-
-Sha512.prototype._update = function(M) {
-
-  var W = this._w
-  var a, b, c, d, e, f, g, h
-  var al, bl, cl, dl, el, fl, gl, hl
-
-  a = this._a | 0
-  b = this._b | 0
-  c = this._c | 0
-  d = this._d | 0
-  e = this._e | 0
-  f = this._f | 0
-  g = this._g | 0
-  h = this._h | 0
-
-  al = this._al | 0
-  bl = this._bl | 0
-  cl = this._cl | 0
-  dl = this._dl | 0
-  el = this._el | 0
-  fl = this._fl | 0
-  gl = this._gl | 0
-  hl = this._hl | 0
-
-  for (var i = 0; i < 80; i++) {
-    var j = i * 2
-
-    var Wi, Wil
-
-    if (i < 16) {
-      Wi = W[j] = M.readInt32BE(j * 4)
-      Wil = W[j + 1] = M.readInt32BE(j * 4 + 4)
-
-    } else {
-      var x  = W[j - 15*2]
-      var xl = W[j - 15*2 + 1]
-      var gamma0  = S(x, xl, 1) ^ S(x, xl, 8) ^ (x >>> 7)
-      var gamma0l = S(xl, x, 1) ^ S(xl, x, 8) ^ S(xl, x, 7)
-
-      x  = W[j - 2*2]
-      xl = W[j - 2*2 + 1]
-      var gamma1  = S(x, xl, 19) ^ S(xl, x, 29) ^ (x >>> 6)
-      var gamma1l = S(xl, x, 19) ^ S(x, xl, 29) ^ S(xl, x, 6)
-
-      // W[i] = gamma0 + W[i - 7] + gamma1 + W[i - 16]
-      var Wi7  = W[j - 7*2]
-      var Wi7l = W[j - 7*2 + 1]
-
-      var Wi16  = W[j - 16*2]
-      var Wi16l = W[j - 16*2 + 1]
-
-      Wil = gamma0l + Wi7l
-      Wi  = gamma0  + Wi7 + ((Wil >>> 0) < (gamma0l >>> 0) ? 1 : 0)
-      Wil = Wil + gamma1l
-      Wi  = Wi  + gamma1  + ((Wil >>> 0) < (gamma1l >>> 0) ? 1 : 0)
-      Wil = Wil + Wi16l
-      Wi  = Wi  + Wi16 + ((Wil >>> 0) < (Wi16l >>> 0) ? 1 : 0)
-
-      W[j] = Wi
-      W[j + 1] = Wil
-    }
-
-    var maj = Maj(a, b, c)
-    var majl = Maj(al, bl, cl)
-
-    var sigma0h = S(a, al, 28) ^ S(al, a, 2) ^ S(al, a, 7)
-    var sigma0l = S(al, a, 28) ^ S(a, al, 2) ^ S(a, al, 7)
-    var sigma1h = S(e, el, 14) ^ S(e, el, 18) ^ S(el, e, 9)
-    var sigma1l = S(el, e, 14) ^ S(el, e, 18) ^ S(e, el, 9)
-
-    // t1 = h + sigma1 + ch + K[i] + W[i]
-    var Ki = K[j]
-    var Kil = K[j + 1]
-
-    var ch = Ch(e, f, g)
-    var chl = Ch(el, fl, gl)
-
-    var t1l = hl + sigma1l
-    var t1 = h + sigma1h + ((t1l >>> 0) < (hl >>> 0) ? 1 : 0)
-    t1l = t1l + chl
-    t1 = t1 + ch + ((t1l >>> 0) < (chl >>> 0) ? 1 : 0)
-    t1l = t1l + Kil
-    t1 = t1 + Ki + ((t1l >>> 0) < (Kil >>> 0) ? 1 : 0)
-    t1l = t1l + Wil
-    t1 = t1 + Wi + ((t1l >>> 0) < (Wil >>> 0) ? 1 : 0)
-
-    // t2 = sigma0 + maj
-    var t2l = sigma0l + majl
-    var t2 = sigma0h + maj + ((t2l >>> 0) < (sigma0l >>> 0) ? 1 : 0)
-
-    h  = g
-    hl = gl
-    g  = f
-    gl = fl
-    f  = e
-    fl = el
-    el = (dl + t1l) | 0
-    e  = (d + t1 + ((el >>> 0) < (dl >>> 0) ? 1 : 0)) | 0
-    d  = c
-    dl = cl
-    c  = b
-    cl = bl
-    b  = a
-    bl = al
-    al = (t1l + t2l) | 0
-    a  = (t1 + t2 + ((al >>> 0) < (t1l >>> 0) ? 1 : 0)) | 0
-  }
-
-  this._al = (this._al + al) | 0
-  this._bl = (this._bl + bl) | 0
-  this._cl = (this._cl + cl) | 0
-  this._dl = (this._dl + dl) | 0
-  this._el = (this._el + el) | 0
-  this._fl = (this._fl + fl) | 0
-  this._gl = (this._gl + gl) | 0
-  this._hl = (this._hl + hl) | 0
-
-  this._a = (this._a + a + ((this._al >>> 0) < (al >>> 0) ? 1 : 0)) | 0
-  this._b = (this._b + b + ((this._bl >>> 0) < (bl >>> 0) ? 1 : 0)) | 0
-  this._c = (this._c + c + ((this._cl >>> 0) < (cl >>> 0) ? 1 : 0)) | 0
-  this._d = (this._d + d + ((this._dl >>> 0) < (dl >>> 0) ? 1 : 0)) | 0
-  this._e = (this._e + e + ((this._el >>> 0) < (el >>> 0) ? 1 : 0)) | 0
-  this._f = (this._f + f + ((this._fl >>> 0) < (fl >>> 0) ? 1 : 0)) | 0
-  this._g = (this._g + g + ((this._gl >>> 0) < (gl >>> 0) ? 1 : 0)) | 0
-  this._h = (this._h + h + ((this._hl >>> 0) < (hl >>> 0) ? 1 : 0)) | 0
-}
-
-Sha512.prototype._hash = function () {
-  var H = new Buffer(64)
-
-  function writeInt64BE(h, l, offset) {
-    H.writeInt32BE(h, offset)
-    H.writeInt32BE(l, offset + 4)
-  }
-
-  writeInt64BE(this._a, this._al, 0)
-  writeInt64BE(this._b, this._bl, 8)
-  writeInt64BE(this._c, this._cl, 16)
-  writeInt64BE(this._d, this._dl, 24)
-  writeInt64BE(this._e, this._el, 32)
-  writeInt64BE(this._f, this._fl, 40)
-  writeInt64BE(this._g, this._gl, 48)
-  writeInt64BE(this._h, this._hl, 56)
-
-  return H
-}
-
-module.exports = Sha512
-
-}).call(this,require("buffer").Buffer)
-},{"./hash":119,"buffer":17,"util":157}],126:[function(require,module,exports){
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
+},{"_process":166,"buffer":16}],156:[function(require,module,exports){
 'use strict';
 var pbkdf2Export = require('pbkdf2-compat/pbkdf2')
 
@@ -19176,38 +20487,7 @@ module.exports = function (crypto, exports) {
   return exports
 }
 
-},{"pbkdf2-compat/pbkdf2":117}],127:[function(require,module,exports){
-(function (global,Buffer){
-'use strict';
-(function() {
-  var g = ('undefined' === typeof window ? global : window) || {}
-  var _crypto = (
-    g.crypto || g.msCrypto || require('crypto')
-  )
-  module.exports = function(size) {
-    // Modern Browsers
-    if(_crypto.getRandomValues) {
-      var bytes = new Buffer(size); //in browserify, this is an extended Uint8Array
-      /* This will not work in older browsers.
-       * See https://developer.mozilla.org/en-US/docs/Web/API/window.crypto.getRandomValues
-       */
-
-      _crypto.getRandomValues(bytes);
-      return bytes;
-    }
-    else if (_crypto.randomBytes) {
-      return _crypto.randomBytes(size)
-    }
-    else
-      throw new Error(
-        'secure random number generation not supported by this browser\n'+
-        'use chrome, FireFox or Internet Explorer 11'
-      )
-  }
-}())
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"buffer":17,"crypto":3}],128:[function(require,module,exports){
+},{"pbkdf2-compat/pbkdf2":127}],157:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -19510,7 +20790,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],129:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 var http = module.exports;
 var EventEmitter = require('events').EventEmitter;
 var Request = require('./lib/request');
@@ -19656,7 +20936,7 @@ http.STATUS_CODES = {
     510 : 'Not Extended',               // RFC 2774
     511 : 'Network Authentication Required' // RFC 6585
 };
-},{"./lib/request":130,"events":128,"url":155}],130:[function(require,module,exports){
+},{"./lib/request":159,"events":157,"url":184}],159:[function(require,module,exports){
 var Stream = require('stream');
 var Response = require('./response');
 var Base64 = require('Base64');
@@ -19867,7 +21147,7 @@ var isXHR2Compatible = function (obj) {
     if (typeof FormData !== 'undefined' && obj instanceof FormData) return true;
 };
 
-},{"./response":131,"Base64":132,"inherits":134,"stream":153}],131:[function(require,module,exports){
+},{"./response":160,"Base64":161,"inherits":163,"stream":182}],160:[function(require,module,exports){
 var Stream = require('stream');
 var util = require('util');
 
@@ -19989,7 +21269,7 @@ var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{"stream":153,"util":157}],132:[function(require,module,exports){
+},{"stream":182,"util":186}],161:[function(require,module,exports){
 ;(function () {
 
   var object = typeof exports != 'undefined' ? exports : this; // #8: web workers
@@ -20051,7 +21331,7 @@ var isArray = Array.isArray || function (xs) {
 
 }());
 
-},{}],133:[function(require,module,exports){
+},{}],162:[function(require,module,exports){
 var http = require('http');
 
 var https = module.exports;
@@ -20066,7 +21346,7 @@ https.request = function (params, cb) {
     return http.request.call(this, params, cb);
 }
 
-},{"http":129}],134:[function(require,module,exports){
+},{"http":158}],163:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -20091,12 +21371,12 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],135:[function(require,module,exports){
+},{}],164:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],136:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -20324,7 +21604,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":137}],137:[function(require,module,exports){
+},{"_process":166}],166:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -20412,7 +21692,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],138:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -20923,7 +22203,7 @@ process.chdir = function (dir) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],139:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -21009,7 +22289,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],140:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -21096,16 +22376,16 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],141:[function(require,module,exports){
+},{}],170:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":139,"./encode":140}],142:[function(require,module,exports){
+},{"./decode":168,"./encode":169}],171:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":143}],143:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":172}],172:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -21198,7 +22478,7 @@ function forEach (xs, f) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_readable":145,"./_stream_writable":147,"_process":137,"core-util-is":148,"inherits":134}],144:[function(require,module,exports){
+},{"./_stream_readable":174,"./_stream_writable":176,"_process":166,"core-util-is":177,"inherits":163}],173:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -21246,7 +22526,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":146,"core-util-is":148,"inherits":134}],145:[function(require,module,exports){
+},{"./_stream_transform":175,"core-util-is":177,"inherits":163}],174:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -22232,7 +23512,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"_process":137,"buffer":17,"core-util-is":148,"events":128,"inherits":134,"isarray":135,"stream":153,"string_decoder/":154}],146:[function(require,module,exports){
+},{"_process":166,"buffer":16,"core-util-is":177,"events":157,"inherits":163,"isarray":164,"stream":182,"string_decoder/":183}],175:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -22444,7 +23724,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":143,"core-util-is":148,"inherits":134}],147:[function(require,module,exports){
+},{"./_stream_duplex":172,"core-util-is":177,"inherits":163}],176:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -22834,7 +24114,7 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":143,"_process":137,"buffer":17,"core-util-is":148,"inherits":134,"stream":153}],148:[function(require,module,exports){
+},{"./_stream_duplex":172,"_process":166,"buffer":16,"core-util-is":177,"inherits":163,"stream":182}],177:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -22944,10 +24224,10 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":17}],149:[function(require,module,exports){
+},{"buffer":16}],178:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":144}],150:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":173}],179:[function(require,module,exports){
 var Stream = require('stream'); // hack to fix a circular dependency issue when used with browserify
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = Stream;
@@ -22957,13 +24237,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":143,"./lib/_stream_passthrough.js":144,"./lib/_stream_readable.js":145,"./lib/_stream_transform.js":146,"./lib/_stream_writable.js":147,"stream":153}],151:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":172,"./lib/_stream_passthrough.js":173,"./lib/_stream_readable.js":174,"./lib/_stream_transform.js":175,"./lib/_stream_writable.js":176,"stream":182}],180:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":146}],152:[function(require,module,exports){
+},{"./lib/_stream_transform.js":175}],181:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":147}],153:[function(require,module,exports){
+},{"./lib/_stream_writable.js":176}],182:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -23092,7 +24372,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":128,"inherits":134,"readable-stream/duplex.js":142,"readable-stream/passthrough.js":149,"readable-stream/readable.js":150,"readable-stream/transform.js":151,"readable-stream/writable.js":152}],154:[function(require,module,exports){
+},{"events":157,"inherits":163,"readable-stream/duplex.js":171,"readable-stream/passthrough.js":178,"readable-stream/readable.js":179,"readable-stream/transform.js":180,"readable-stream/writable.js":181}],183:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -23315,7 +24595,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":17}],155:[function(require,module,exports){
+},{"buffer":16}],184:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -24024,14 +25304,14 @@ function isNullOrUndefined(arg) {
   return  arg == null;
 }
 
-},{"punycode":138,"querystring":141}],156:[function(require,module,exports){
+},{"punycode":167,"querystring":170}],185:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],157:[function(require,module,exports){
+},{}],186:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -24621,7 +25901,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":156,"_process":137,"inherits":134}],158:[function(require,module,exports){
+},{"./support/isBuffer":185,"_process":166,"inherits":163}],187:[function(require,module,exports){
 var indexOf = require('indexof');
 
 var Object_keys = function (obj) {
@@ -24761,7 +26041,7 @@ exports.createContext = Script.createContext = function (context) {
     return copy;
 };
 
-},{"indexof":159}],159:[function(require,module,exports){
+},{"indexof":188}],188:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -24772,8 +26052,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],160:[function(require,module,exports){
-(function (process){
+},{}],189:[function(require,module,exports){
 // Copyright 2010-2012 Mikeal Rogers
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
@@ -24948,11 +26227,155 @@ request.forever = function (agentOptions, optionsArg) {
 
 module.exports = request
 request.Request = require('./request')
-request.debug = process.env.NODE_DEBUG && /\brequest\b/.test(process.env.NODE_DEBUG)
 request.initParams = initParams
 
-}).call(this,require('_process'))
-},{"./lib/cookies":161,"./lib/helpers":164,"./request":234,"_process":137,"util":157}],161:[function(require,module,exports){
+// Backwards compatibility for request.debug
+Object.defineProperty(request, 'debug', {
+  enumerable : true,
+  get : function() {
+    return request.Request.debug
+  },
+  set : function(debug) {
+    request.Request.debug = debug
+  }
+})
+
+},{"./lib/cookies":191,"./lib/helpers":194,"./request":246,"util":186}],190:[function(require,module,exports){
+'use strict'
+
+var caseless = require('caseless')
+  , uuid = require('node-uuid')
+  , helpers = require('./helpers')
+
+var md5 = helpers.md5
+  , toBase64 = helpers.toBase64
+
+
+function Auth () {
+  // define all public properties here
+  this.hasAuth = false
+  this.sentAuth = false
+  this.bearerToken = null
+  this.user = null
+  this.pass = null
+}
+
+Auth.prototype.basic = function (user, pass, sendImmediately) {
+  var self = this
+  if (typeof user !== 'string' || (pass !== undefined && typeof pass !== 'string')) {
+    throw new Error('auth() received invalid user or password')
+  }
+  self.user = user
+  self.pass = pass
+  self.hasAuth = true
+  var header = typeof pass !== 'undefined' ? user + ':' + pass : user
+  if (sendImmediately || typeof sendImmediately === 'undefined') {
+    var authHeader = 'Basic ' + toBase64(header)
+    self.sentAuth = true
+    return authHeader
+  }
+}
+
+Auth.prototype.bearer = function (bearer, sendImmediately) {
+  var self = this
+  self.bearerToken = bearer
+  self.hasAuth = true
+  if (sendImmediately || typeof sendImmediately === 'undefined') {
+    if (typeof bearer === 'function') {
+      bearer = bearer()
+    }
+    var authHeader = 'Bearer ' + bearer
+    self.sentAuth = true
+    return authHeader
+  }
+}
+
+Auth.prototype.digest = function (method, path, authHeader) {
+  // TODO: More complete implementation of RFC 2617.
+  //   - check challenge.algorithm
+  //   - support algorithm="MD5-sess"
+  //   - handle challenge.domain
+  //   - support qop="auth-int" only
+  //   - handle Authentication-Info (not necessarily?)
+  //   - check challenge.stale (not necessarily?)
+  //   - increase nc (not necessarily?)
+  // For reference:
+  // http://tools.ietf.org/html/rfc2617#section-3
+  // https://github.com/bagder/curl/blob/master/lib/http_digest.c
+
+  var self = this
+
+  var challenge = {}
+  var re = /([a-z0-9_-]+)=(?:"([^"]+)"|([a-z0-9_-]+))/gi
+  for (;;) {
+    var match = re.exec(authHeader)
+    if (!match) {
+      break
+    }
+    challenge[match[1]] = match[2] || match[3]
+  }
+
+  var ha1 = md5(self.user + ':' + challenge.realm + ':' + self.pass)
+  var ha2 = md5(method + ':' + path)
+  var qop = /(^|,)\s*auth\s*($|,)/.test(challenge.qop) && 'auth'
+  var nc = qop && '00000001'
+  var cnonce = qop && uuid().replace(/-/g, '')
+  var digestResponse = qop
+    ? md5(ha1 + ':' + challenge.nonce + ':' + nc + ':' + cnonce + ':' + qop + ':' + ha2)
+    : md5(ha1 + ':' + challenge.nonce + ':' + ha2)
+  var authValues = {
+    username: self.user,
+    realm: challenge.realm,
+    nonce: challenge.nonce,
+    uri: path,
+    qop: qop,
+    response: digestResponse,
+    nc: nc,
+    cnonce: cnonce,
+    algorithm: challenge.algorithm,
+    opaque: challenge.opaque
+  }
+
+  authHeader = []
+  for (var k in authValues) {
+    if (authValues[k]) {
+      if (k === 'qop' || k === 'nc' || k === 'algorithm') {
+        authHeader.push(k + '=' + authValues[k])
+      } else {
+        authHeader.push(k + '="' + authValues[k] + '"')
+      }
+    }
+  }
+  authHeader = 'Digest ' + authHeader.join(', ')
+  self.sentAuth = true
+  return authHeader
+}
+
+Auth.prototype.response = function (method, path, headers) {
+  var self = this
+  if (!self.hasAuth || self.sentAuth) { return null }
+
+  var c = caseless(headers)
+
+  var authHeader = c.get('www-authenticate')
+  var authVerb = authHeader && authHeader.split(' ')[0].toLowerCase()
+  // debug('reauth', authVerb)
+
+  switch (authVerb) {
+    case 'basic':
+      return self.basic(self.user, self.pass, true)
+
+    case 'bearer':
+      return self.bearer(self.bearerToken, true)
+
+    case 'digest':
+      return self.digest(method, path, authHeader)
+  }
+}
+
+exports.Auth = Auth
+
+},{"./helpers":194,"caseless":206,"node-uuid":233}],191:[function(require,module,exports){
 'use strict'
 
 var tough = require('tough-cookie')
@@ -24993,7 +26416,7 @@ exports.jar = function(store) {
   return new RequestJar(store)
 }
 
-},{"tough-cookie":229}],162:[function(require,module,exports){
+},{"tough-cookie":241}],192:[function(require,module,exports){
 'use strict'
 
 module.exports =
@@ -25005,20 +26428,90 @@ function copy (obj) {
   return o
 }
 
-},{}],163:[function(require,module,exports){
+},{}],193:[function(require,module,exports){
+(function (process){
 'use strict'
 
-var util = require('util')
-  , request = require('../index')
-
-
-module.exports = function debug() {
-  if (request.debug) {
-    console.error('REQUEST %s', util.format.apply(util, arguments))
-  }
+function formatHostname(hostname) {
+  // canonicalize the hostname, so that 'oogle.com' won't match 'google.com'
+  return hostname.replace(/^\.*/, '.').toLowerCase()
 }
 
-},{"../index":160,"util":157}],164:[function(require,module,exports){
+function parseNoProxyZone(zone) {
+  zone = zone.trim().toLowerCase()
+
+  var zoneParts = zone.split(':', 2)
+    , zoneHost = formatHostname(zoneParts[0])
+    , zonePort = zoneParts[1]
+    , hasPort = zone.indexOf(':') > -1
+
+  return {hostname: zoneHost, port: zonePort, hasPort: hasPort}
+}
+
+function uriInNoProxy(uri, noProxy) {
+  var port = uri.port || (uri.protocol === 'https:' ? '443' : '80')
+    , hostname = formatHostname(uri.hostname)
+    , noProxyList = noProxy.split(',')
+
+  // iterate through the noProxyList until it finds a match.
+  return noProxyList.map(parseNoProxyZone).some(function(noProxyZone) {
+    var isMatchedAt = hostname.indexOf(noProxyZone.hostname)
+      , hostnameMatched = (
+          isMatchedAt > -1 &&
+          (isMatchedAt === hostname.length - noProxyZone.hostname.length)
+        )
+
+    if (noProxyZone.hasPort) {
+      return (port === noProxyZone.port) && hostnameMatched
+    }
+
+    return hostnameMatched
+  })
+}
+
+function getProxyFromURI(uri) {
+  // Decide the proper request proxy to use based on the request URI object and the
+  // environmental variables (NO_PROXY, HTTP_PROXY, etc.)
+  // respect NO_PROXY environment variables (see: http://lynx.isc.org/current/breakout/lynx_help/keystrokes/environments.html)
+
+  var noProxy = process.env.NO_PROXY || process.env.no_proxy || ''
+
+  // if the noProxy is a wildcard then return null
+
+  if (noProxy === '*') {
+    return null
+  }
+  
+  // if the noProxy is not empty and the uri is found return null
+
+  if (noProxy !== '' && uriInNoProxy(uri, noProxy)) {
+    return null
+  }
+
+  // Check for HTTP or HTTPS Proxy in environment Else default to null
+
+  if (uri.protocol === 'http:') {
+    return process.env.HTTP_PROXY ||
+           process.env.http_proxy || null
+  }
+  
+  if (uri.protocol === 'https:') {
+    return process.env.HTTPS_PROXY ||
+           process.env.https_proxy ||
+           process.env.HTTP_PROXY  ||
+           process.env.http_proxy  || null
+  }
+
+  // if none of that works, return null
+  // (What uri protocol are you using then?)
+
+  return null
+}
+
+module.exports = getProxyFromURI
+
+}).call(this,require('_process'))
+},{"_process":166}],194:[function(require,module,exports){
 (function (process,Buffer){
 'use strict'
 
@@ -25111,7 +26604,130 @@ exports.toBase64              = toBase64
 exports.defer                 = deferMethod()
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":137,"buffer":17,"crypto":24,"json-stringify-safe":216,"util":157}],165:[function(require,module,exports){
+},{"_process":166,"buffer":16,"crypto":20,"json-stringify-safe":229,"util":186}],195:[function(require,module,exports){
+'use strict'
+
+var querystring = require('querystring')
+  , qs = require('qs')
+  , caseless = require('caseless')
+  , uuid = require('node-uuid')
+  , oauth = require('oauth-sign')
+
+
+exports.buildParams = function (_oauth, uri, method, query, form, qsLib) {
+  var oa = {}
+  for (var i in _oauth) {
+    oa['oauth_' + i] = _oauth[i]
+  }
+  if (!oa.oauth_version) {
+    oa.oauth_version = '1.0'
+  }
+  if (!oa.oauth_timestamp) {
+    oa.oauth_timestamp = Math.floor( Date.now() / 1000 ).toString()
+  }
+  if (!oa.oauth_nonce) {
+    oa.oauth_nonce = uuid().replace(/-/g, '')
+  }
+  if (!oa.oauth_signature_method) {
+    oa.oauth_signature_method = 'HMAC-SHA1'
+  }
+
+  var consumer_secret_or_private_key = oa.oauth_consumer_secret || oa.oauth_private_key
+  delete oa.oauth_consumer_secret
+  delete oa.oauth_private_key
+
+  var token_secret = oa.oauth_token_secret
+  delete oa.oauth_token_secret
+
+  var realm = oa.oauth_realm
+  delete oa.oauth_realm
+  delete oa.oauth_transport_method
+
+  var baseurl = uri.protocol + '//' + uri.host + uri.pathname
+  var params = qsLib.parse([].concat(query, form, qsLib.stringify(oa)).join('&'))
+
+  oa.oauth_signature = oauth.sign(
+    oa.oauth_signature_method,
+    method,
+    baseurl,
+    params,
+    consumer_secret_or_private_key,
+    token_secret)
+
+  if (realm) {
+    oa.realm = realm
+  }
+
+  return oa
+}
+
+exports.concatParams = function (oa, sep, wrap) {
+  wrap = wrap || ''
+
+  var params = Object.keys(oa).filter(function (i) {
+    return i !== 'realm' && i !== 'oauth_signature'
+  }).sort()
+
+  if (oa.realm) {
+    params.splice(0, 1, 'realm')
+  }
+  params.push('oauth_signature')
+
+  return params.map(function (i) {
+    return i + '=' + wrap + oauth.rfc3986(oa[i]) + wrap
+  }).join(sep)
+}
+
+exports.oauth = function (args) {
+  var uri = args.uri || {}
+    , method = args.method || ''
+    , headers = caseless(args.headers)
+    , body = args.body || ''
+    , _oauth = args.oauth || {}
+    , qsLib = args.qsLib || qs
+
+  var form
+    , query
+    , contentType = headers.get('content-type') || ''
+    , formContentType = 'application/x-www-form-urlencoded'
+    , transport = _oauth.transport_method || 'header'
+
+  if (contentType.slice(0, formContentType.length) === formContentType) {
+    contentType = formContentType
+    form = body
+  }
+  if (uri.query) {
+    query = uri.query
+  }
+  if (transport === 'body' && (method !== 'POST' || contentType !== formContentType)) {
+    throw new Error('oauth: transport_method of \'body\' requires \'POST\' ' +
+      'and content-type \'' + formContentType + '\'')
+  }
+
+  var oa = this.buildParams(_oauth, uri, method, query, form, qsLib)
+
+  var data
+  switch (transport) {
+    case 'header':
+      data = 'OAuth ' + this.concatParams(oa, ',', '"')
+      break
+
+    case 'query':
+      data = (query ? '&' : '?') + this.concatParams(oa, '&')
+      break
+
+    case 'body':
+      data = (form ? form + '&' : '') + this.concatParams(oa, '&')
+      break
+
+    default:
+      throw new Error('oauth: transport_method invalid')
+  }
+
+  return {oauth:data, transport:transport}
+}
+
+},{"caseless":206,"node-uuid":233,"oauth-sign":234,"qs":235,"querystring":170}],196:[function(require,module,exports){
 
 /*!
  * knox - auth
@@ -25315,9 +26931,9 @@ function canonicalizeResource (resource) {
 }
 module.exports.canonicalizeResource = canonicalizeResource
 
-},{"crypto":24,"url":155}],166:[function(require,module,exports){
+},{"crypto":20,"url":184}],197:[function(require,module,exports){
 (function (Buffer){
-var DuplexStream = require('readable-stream').Duplex
+var DuplexStream = require('readable-stream/duplex')
   , util         = require('util')
 
 function BufferList (callback) {
@@ -25535,29 +27151,25 @@ BufferList.prototype.destroy = function () {
 module.exports = BufferList
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":17,"readable-stream":176,"util":157}],167:[function(require,module,exports){
-module.exports=require(143)
-},{"./_stream_readable":169,"./_stream_writable":171,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_duplex.js":143,"_process":137,"core-util-is":172,"inherits":173}],168:[function(require,module,exports){
-module.exports=require(144)
-},{"./_stream_transform":170,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_passthrough.js":144,"core-util-is":172,"inherits":173}],169:[function(require,module,exports){
-module.exports=require(145)
-},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_readable.js":145,"_process":137,"buffer":17,"core-util-is":172,"events":128,"inherits":173,"isarray":174,"stream":153,"string_decoder/":175}],170:[function(require,module,exports){
-module.exports=require(146)
-},{"./_stream_duplex":167,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_transform.js":146,"core-util-is":172,"inherits":173}],171:[function(require,module,exports){
-module.exports=require(147)
-},{"./_stream_duplex":167,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_writable.js":147,"_process":137,"buffer":17,"core-util-is":172,"inherits":173,"stream":153}],172:[function(require,module,exports){
-module.exports=require(148)
-},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\node_modules\\core-util-is\\lib\\util.js":148,"buffer":17}],173:[function(require,module,exports){
-module.exports=require(134)
-},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\inherits\\inherits_browser.js":134}],174:[function(require,module,exports){
-module.exports=require(135)
-},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\isarray\\index.js":135}],175:[function(require,module,exports){
-module.exports=require(154)
-},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\string_decoder\\index.js":154,"buffer":17}],176:[function(require,module,exports){
-module.exports=require(150)
-},{"./lib/_stream_duplex.js":167,"./lib/_stream_passthrough.js":168,"./lib/_stream_readable.js":169,"./lib/_stream_transform.js":170,"./lib/_stream_writable.js":171,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\readable.js":150,"stream":153}],177:[function(require,module,exports){
+},{"buffer":16,"readable-stream/duplex":198,"util":186}],198:[function(require,module,exports){
+module.exports=require(171)
+},{"./lib/_stream_duplex.js":199,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\duplex.js":171}],199:[function(require,module,exports){
+module.exports=require(172)
+},{"./_stream_readable":200,"./_stream_writable":201,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_duplex.js":172,"_process":166,"core-util-is":202,"inherits":203}],200:[function(require,module,exports){
+module.exports=require(174)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_readable.js":174,"_process":166,"buffer":16,"core-util-is":202,"events":157,"inherits":203,"isarray":204,"stream":182,"string_decoder/":205}],201:[function(require,module,exports){
+module.exports=require(176)
+},{"./_stream_duplex":199,"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_writable.js":176,"_process":166,"buffer":16,"core-util-is":202,"inherits":203,"stream":182}],202:[function(require,module,exports){
+module.exports=require(177)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\node_modules\\core-util-is\\lib\\util.js":177,"buffer":16}],203:[function(require,module,exports){
+module.exports=require(163)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\inherits\\inherits_browser.js":163}],204:[function(require,module,exports){
+module.exports=require(164)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\isarray\\index.js":164}],205:[function(require,module,exports){
+module.exports=require(183)
+},{"C:\\DEV\\github\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\string_decoder\\index.js":183,"buffer":16}],206:[function(require,module,exports){
 function Caseless (dict) {
-  this.dict = dict
+  this.dict = dict || {}
 }
 Caseless.prototype.set = function (name, value, clobber) {
   if (typeof name === 'object') {
@@ -25622,7 +27234,7 @@ module.exports.httpify = function (resp, headers) {
   return c
 }
 
-},{}],178:[function(require,module,exports){
+},{}],207:[function(require,module,exports){
 (function (Buffer){
 var util = require('util');
 var Stream = require('stream').Stream;
@@ -25814,7 +27426,7 @@ CombinedStream.prototype._emitError = function(err) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":17,"delayed-stream":179,"stream":153,"util":157}],179:[function(require,module,exports){
+},{"buffer":16,"delayed-stream":208,"stream":182,"util":186}],208:[function(require,module,exports){
 var Stream = require('stream').Stream;
 var util = require('util');
 
@@ -25915,7 +27527,7 @@ DelayedStream.prototype._checkIfMaxDataSizeExceeded = function() {
   this.emit('error', new Error(message));
 };
 
-},{"stream":153,"util":157}],180:[function(require,module,exports){
+},{"stream":182,"util":186}],209:[function(require,module,exports){
 module.exports = ForeverAgent
 ForeverAgent.SSL = ForeverAgentSSL
 
@@ -26036,7 +27648,7 @@ function createConnectionSSL (port, host, options) {
   return tls.connect(options);
 }
 
-},{"http":129,"https":133,"net":1,"tls":1,"util":157}],181:[function(require,module,exports){
+},{"http":158,"https":162,"net":1,"tls":1,"util":186}],210:[function(require,module,exports){
 (function (process,Buffer){
 var CombinedStream = require('combined-stream');
 var util = require('util');
@@ -26391,7 +28003,7 @@ function populate(dst, src) {
 }
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":137,"async":182,"buffer":17,"combined-stream":178,"fs":1,"http":129,"https":133,"mime-types":183,"path":136,"url":155,"util":157}],182:[function(require,module,exports){
+},{"_process":166,"async":211,"buffer":16,"combined-stream":207,"fs":1,"http":158,"https":162,"mime-types":230,"path":165,"url":184,"util":186}],211:[function(require,module,exports){
 (function (process){
 /*!
  * async
@@ -27518,9120 +29130,650 @@ function populate(dst, src) {
 }());
 
 }).call(this,require('_process'))
-},{"_process":137}],183:[function(require,module,exports){
-
-var db = require('mime-db')
-
-// types[extension] = type
-exports.types = Object.create(null)
-// extensions[type] = [extensions]
-exports.extensions = Object.create(null)
-
-Object.keys(db).forEach(function (name) {
-  var mime = db[name]
-  var exts = mime.extensions
-  if (!exts || !exts.length) return
-  exports.extensions[name] = exts
-  exts.forEach(function (ext) {
-    exports.types[ext] = name
-  })
-})
-
-exports.lookup = function (string) {
-  if (!string || typeof string !== "string") return false
-  // remove any leading paths, though we should just use path.basename
-  string = string.replace(/.*[\.\/\\]/, '').toLowerCase()
-  if (!string) return false
-  return exports.types[string] || false
-}
-
-exports.extension = function (type) {
-  if (!type || typeof type !== "string") return false
-  // to do: use media-typer
-  type = type.match(/^\s*([^;\s]*)(?:;|\s|$)/)
-  if (!type) return false
-  var exts = exports.extensions[type[1].toLowerCase()]
-  if (!exts || !exts.length) return false
-  return exts[0]
-}
-
-// type has to be an exact mime type
-exports.charset = function (type) {
-  var mime = db[type]
-  if (mime && mime.charset) return mime.charset
-
-  // default text/* to utf-8
-  if (/^text\//.test(type)) return 'UTF-8'
-
-  return false
-}
-
-// backwards compatibility
-exports.charsets = {
-  lookup: exports.charset
-}
-
-// to do: maybe use set-type module or something
-exports.contentType = function (type) {
-  if (!type || typeof type !== "string") return false
-  if (!~type.indexOf('/')) type = exports.lookup(type)
-  if (!type) return false
-  if (!~type.indexOf('charset')) {
-    var charset = exports.charset(type)
-    if (charset) type += '; charset=' + charset.toLowerCase()
-  }
-  return type
-}
-
-},{"mime-db":185}],184:[function(require,module,exports){
-module.exports={
-  "application/1d-interleaved-parityfec": {
-    "source": "iana"
-  },
-  "application/3gpdash-qoe-report+xml": {
-    "source": "iana"
-  },
-  "application/3gpp-ims+xml": {
-    "source": "iana"
-  },
-  "application/a2l": {
-    "source": "iana"
-  },
-  "application/activemessage": {
-    "source": "iana"
-  },
-  "application/alto-costmap+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/alto-costmapfilter+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/alto-directory+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/alto-endpointcost+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/alto-endpointcostparams+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/alto-endpointprop+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/alto-endpointpropparams+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/alto-error+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/alto-networkmap+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/alto-networkmapfilter+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/aml": {
-    "source": "iana"
-  },
-  "application/andrew-inset": {
-    "source": "iana",
-    "extensions": ["ez"]
-  },
-  "application/applefile": {
-    "source": "iana"
-  },
-  "application/applixware": {
-    "source": "apache",
-    "extensions": ["aw"]
-  },
-  "application/atf": {
-    "source": "iana"
-  },
-  "application/atfx": {
-    "source": "iana"
-  },
-  "application/atom+xml": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["atom"]
-  },
-  "application/atomcat+xml": {
-    "source": "iana",
-    "extensions": ["atomcat"]
-  },
-  "application/atomdeleted+xml": {
-    "source": "iana"
-  },
-  "application/atomicmail": {
-    "source": "iana"
-  },
-  "application/atomsvc+xml": {
-    "source": "iana",
-    "extensions": ["atomsvc"]
-  },
-  "application/atxml": {
-    "source": "iana"
-  },
-  "application/auth-policy+xml": {
-    "source": "iana"
-  },
-  "application/bacnet-xdd+zip": {
-    "source": "iana"
-  },
-  "application/batch-smtp": {
-    "source": "iana"
-  },
-  "application/beep+xml": {
-    "source": "iana"
-  },
-  "application/calendar+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/calendar+xml": {
-    "source": "iana"
-  },
-  "application/call-completion": {
-    "source": "iana"
-  },
-  "application/cals-1840": {
-    "source": "iana"
-  },
-  "application/cbor": {
-    "source": "iana"
-  },
-  "application/ccmp+xml": {
-    "source": "iana"
-  },
-  "application/ccxml+xml": {
-    "source": "iana",
-    "extensions": ["ccxml"]
-  },
-  "application/cdfx+xml": {
-    "source": "iana"
-  },
-  "application/cdmi-capability": {
-    "source": "iana",
-    "extensions": ["cdmia"]
-  },
-  "application/cdmi-container": {
-    "source": "iana",
-    "extensions": ["cdmic"]
-  },
-  "application/cdmi-domain": {
-    "source": "iana",
-    "extensions": ["cdmid"]
-  },
-  "application/cdmi-object": {
-    "source": "iana",
-    "extensions": ["cdmio"]
-  },
-  "application/cdmi-queue": {
-    "source": "iana",
-    "extensions": ["cdmiq"]
-  },
-  "application/cea": {
-    "source": "iana"
-  },
-  "application/cea-2018+xml": {
-    "source": "iana"
-  },
-  "application/cellml+xml": {
-    "source": "iana"
-  },
-  "application/cfw": {
-    "source": "iana"
-  },
-  "application/cms": {
-    "source": "iana"
-  },
-  "application/cnrp+xml": {
-    "source": "iana"
-  },
-  "application/coap-group+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/commonground": {
-    "source": "iana"
-  },
-  "application/conference-info+xml": {
-    "source": "iana"
-  },
-  "application/cpl+xml": {
-    "source": "iana"
-  },
-  "application/csrattrs": {
-    "source": "iana"
-  },
-  "application/csta+xml": {
-    "source": "iana"
-  },
-  "application/cstadata+xml": {
-    "source": "iana"
-  },
-  "application/cu-seeme": {
-    "source": "apache",
-    "extensions": ["cu"]
-  },
-  "application/cybercash": {
-    "source": "iana"
-  },
-  "application/dart": {
-    "compressible": true
-  },
-  "application/dash+xml": {
-    "source": "iana",
-    "extensions": ["mdp"]
-  },
-  "application/dashdelta": {
-    "source": "iana"
-  },
-  "application/davmount+xml": {
-    "source": "iana",
-    "extensions": ["davmount"]
-  },
-  "application/dca-rft": {
-    "source": "iana"
-  },
-  "application/dcd": {
-    "source": "iana"
-  },
-  "application/dec-dx": {
-    "source": "iana"
-  },
-  "application/dialog-info+xml": {
-    "source": "iana"
-  },
-  "application/dicom": {
-    "source": "iana"
-  },
-  "application/dii": {
-    "source": "iana"
-  },
-  "application/dit": {
-    "source": "iana"
-  },
-  "application/dns": {
-    "source": "iana"
-  },
-  "application/docbook+xml": {
-    "source": "apache",
-    "extensions": ["dbk"]
-  },
-  "application/dskpp+xml": {
-    "source": "iana"
-  },
-  "application/dssc+der": {
-    "source": "iana",
-    "extensions": ["dssc"]
-  },
-  "application/dssc+xml": {
-    "source": "iana",
-    "extensions": ["xdssc"]
-  },
-  "application/dvcs": {
-    "source": "iana"
-  },
-  "application/ecmascript": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["ecma"]
-  },
-  "application/edi-consent": {
-    "source": "iana"
-  },
-  "application/edi-x12": {
-    "source": "iana",
-    "compressible": false
-  },
-  "application/edifact": {
-    "source": "iana",
-    "compressible": false
-  },
-  "application/emma+xml": {
-    "source": "iana",
-    "extensions": ["emma"]
-  },
-  "application/emotionml+xml": {
-    "source": "iana"
-  },
-  "application/encaprtp": {
-    "source": "iana"
-  },
-  "application/epp+xml": {
-    "source": "iana"
-  },
-  "application/epub+zip": {
-    "source": "iana",
-    "extensions": ["epub"]
-  },
-  "application/eshop": {
-    "source": "iana"
-  },
-  "application/example": {
-    "source": "iana"
-  },
-  "application/exi": {
-    "source": "iana",
-    "extensions": ["exi"]
-  },
-  "application/fastinfoset": {
-    "source": "iana"
-  },
-  "application/fastsoap": {
-    "source": "iana"
-  },
-  "application/fdt+xml": {
-    "source": "iana"
-  },
-  "application/fits": {
-    "source": "iana"
-  },
-  "application/font-sfnt": {
-    "source": "iana"
-  },
-  "application/font-tdpfr": {
-    "source": "iana",
-    "extensions": ["pfr"]
-  },
-  "application/font-woff": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["woff"]
-  },
-  "application/font-woff2": {
-    "compressible": false,
-    "extensions": ["woff2"]
-  },
-  "application/framework-attributes+xml": {
-    "source": "iana"
-  },
-  "application/gml+xml": {
-    "source": "apache",
-    "extensions": ["gml"]
-  },
-  "application/gpx+xml": {
-    "source": "apache",
-    "extensions": ["gpx"]
-  },
-  "application/gxf": {
-    "source": "apache",
-    "extensions": ["gxf"]
-  },
-  "application/gzip": {
-    "source": "iana",
-    "compressible": false
-  },
-  "application/h224": {
-    "source": "iana"
-  },
-  "application/held+xml": {
-    "source": "iana"
-  },
-  "application/http": {
-    "source": "iana"
-  },
-  "application/hyperstudio": {
-    "source": "iana",
-    "extensions": ["stk"]
-  },
-  "application/ibe-key-request+xml": {
-    "source": "iana"
-  },
-  "application/ibe-pkg-reply+xml": {
-    "source": "iana"
-  },
-  "application/ibe-pp-data": {
-    "source": "iana"
-  },
-  "application/iges": {
-    "source": "iana"
-  },
-  "application/im-iscomposing+xml": {
-    "source": "iana"
-  },
-  "application/index": {
-    "source": "iana"
-  },
-  "application/index.cmd": {
-    "source": "iana"
-  },
-  "application/index.obj": {
-    "source": "iana"
-  },
-  "application/index.response": {
-    "source": "iana"
-  },
-  "application/index.vnd": {
-    "source": "iana"
-  },
-  "application/inkml+xml": {
-    "source": "iana",
-    "extensions": ["ink","inkml"]
-  },
-  "application/iotp": {
-    "source": "iana"
-  },
-  "application/ipfix": {
-    "source": "iana",
-    "extensions": ["ipfix"]
-  },
-  "application/ipp": {
-    "source": "iana"
-  },
-  "application/isup": {
-    "source": "iana"
-  },
-  "application/its+xml": {
-    "source": "iana"
-  },
-  "application/java-archive": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["jar"]
-  },
-  "application/java-serialized-object": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["ser"]
-  },
-  "application/java-vm": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["class"]
-  },
-  "application/javascript": {
-    "source": "iana",
-    "charset": "UTF-8",
-    "compressible": true,
-    "extensions": ["js"]
-  },
-  "application/jrd+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/json": {
-    "source": "iana",
-    "charset": "UTF-8",
-    "compressible": true,
-    "extensions": ["json","map"]
-  },
-  "application/json-patch+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/jsonml+json": {
-    "source": "apache",
-    "compressible": true,
-    "extensions": ["jsonml"]
-  },
-  "application/kpml-request+xml": {
-    "source": "iana"
-  },
-  "application/kpml-response+xml": {
-    "source": "iana"
-  },
-  "application/ld+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/link-format": {
-    "source": "iana"
-  },
-  "application/load-control+xml": {
-    "source": "iana"
-  },
-  "application/lost+xml": {
-    "source": "iana",
-    "extensions": ["lostxml"]
-  },
-  "application/lostsync+xml": {
-    "source": "iana"
-  },
-  "application/lxf": {
-    "source": "iana"
-  },
-  "application/mac-binhex40": {
-    "source": "iana",
-    "extensions": ["hqx"]
-  },
-  "application/mac-compactpro": {
-    "source": "apache",
-    "extensions": ["cpt"]
-  },
-  "application/macwriteii": {
-    "source": "iana"
-  },
-  "application/mads+xml": {
-    "source": "iana",
-    "extensions": ["mads"]
-  },
-  "application/marc": {
-    "source": "iana",
-    "extensions": ["mrc"]
-  },
-  "application/marcxml+xml": {
-    "source": "iana",
-    "extensions": ["mrcx"]
-  },
-  "application/mathematica": {
-    "source": "iana",
-    "extensions": ["ma","nb","mb"]
-  },
-  "application/mathml+xml": {
-    "source": "iana",
-    "extensions": ["mathml"]
-  },
-  "application/mathml-content+xml": {
-    "source": "iana"
-  },
-  "application/mathml-presentation+xml": {
-    "source": "iana"
-  },
-  "application/mbms-associated-procedure-description+xml": {
-    "source": "iana"
-  },
-  "application/mbms-deregister+xml": {
-    "source": "iana"
-  },
-  "application/mbms-envelope+xml": {
-    "source": "iana"
-  },
-  "application/mbms-msk+xml": {
-    "source": "iana"
-  },
-  "application/mbms-msk-response+xml": {
-    "source": "iana"
-  },
-  "application/mbms-protection-description+xml": {
-    "source": "iana"
-  },
-  "application/mbms-reception-report+xml": {
-    "source": "iana"
-  },
-  "application/mbms-register+xml": {
-    "source": "iana"
-  },
-  "application/mbms-register-response+xml": {
-    "source": "iana"
-  },
-  "application/mbms-schedule+xml": {
-    "source": "iana"
-  },
-  "application/mbms-user-service-description+xml": {
-    "source": "iana"
-  },
-  "application/mbox": {
-    "source": "apache",
-    "extensions": ["mbox"]
-  },
-  "application/mbox+xml": {
-    "source": "iana"
-  },
-  "application/media-policy-dataset+xml": {
-    "source": "iana"
-  },
-  "application/media_control+xml": {
-    "source": "iana"
-  },
-  "application/mediaservercontrol+xml": {
-    "source": "iana",
-    "extensions": ["mscml"]
-  },
-  "application/merge-patch+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/metalink+xml": {
-    "source": "apache",
-    "extensions": ["metalink"]
-  },
-  "application/metalink4+xml": {
-    "source": "iana",
-    "extensions": ["meta4"]
-  },
-  "application/mets+xml": {
-    "source": "iana",
-    "extensions": ["mets"]
-  },
-  "application/mf4": {
-    "source": "iana"
-  },
-  "application/mikey": {
-    "source": "iana"
-  },
-  "application/mods+xml": {
-    "source": "iana",
-    "extensions": ["mods"]
-  },
-  "application/moss-keys": {
-    "source": "iana"
-  },
-  "application/moss-signature": {
-    "source": "iana"
-  },
-  "application/mosskey-data": {
-    "source": "iana"
-  },
-  "application/mosskey-request": {
-    "source": "iana"
-  },
-  "application/mp21": {
-    "source": "iana",
-    "extensions": ["m21","mp21"]
-  },
-  "application/mp4": {
-    "source": "iana",
-    "extensions": ["mp4s","m4p"]
-  },
-  "application/mpeg4-generic": {
-    "source": "iana"
-  },
-  "application/mpeg4-iod": {
-    "source": "iana"
-  },
-  "application/mpeg4-iod-xmt": {
-    "source": "iana"
-  },
-  "application/mrb-consumer+xml": {
-    "source": "iana"
-  },
-  "application/mrb-publish+xml": {
-    "source": "iana"
-  },
-  "application/msc-ivr+xml": {
-    "source": "iana"
-  },
-  "application/msc-mixer+xml": {
-    "source": "iana"
-  },
-  "application/msword": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["doc","dot"]
-  },
-  "application/mxf": {
-    "source": "iana",
-    "extensions": ["mxf"]
-  },
-  "application/nasdata": {
-    "source": "iana"
-  },
-  "application/news-checkgroups": {
-    "source": "iana"
-  },
-  "application/news-groupinfo": {
-    "source": "iana"
-  },
-  "application/news-transmission": {
-    "source": "iana"
-  },
-  "application/nlsml+xml": {
-    "source": "iana"
-  },
-  "application/nss": {
-    "source": "iana"
-  },
-  "application/ocsp-request": {
-    "source": "iana"
-  },
-  "application/ocsp-response": {
-    "source": "apache"
-  },
-  "application/octet-stream": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["bin","dms","lrf","mar","so","dist","distz","pkg","bpk","dump","elc","deploy","buffer"]
-  },
-  "application/oda": {
-    "source": "iana",
-    "extensions": ["oda"]
-  },
-  "application/odx": {
-    "source": "iana"
-  },
-  "application/oebps-package+xml": {
-    "source": "iana",
-    "extensions": ["opf"]
-  },
-  "application/ogg": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["ogx"]
-  },
-  "application/omdoc+xml": {
-    "source": "apache",
-    "extensions": ["omdoc"]
-  },
-  "application/onenote": {
-    "source": "apache",
-    "extensions": ["onetoc","onetoc2","onetmp","onepkg"]
-  },
-  "application/oscp-response": {
-    "source": "iana"
-  },
-  "application/oxps": {
-    "source": "iana",
-    "extensions": ["oxps"]
-  },
-  "application/p2p-overlay+xml": {
-    "source": "iana"
-  },
-  "application/parityfec": {
-    "source": "iana"
-  },
-  "application/patch-ops-error+xml": {
-    "source": "iana",
-    "extensions": ["xer"]
-  },
-  "application/pdf": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["pdf"]
-  },
-  "application/pdx": {
-    "source": "iana"
-  },
-  "application/pgp-encrypted": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["pgp"]
-  },
-  "application/pgp-keys": {
-    "source": "iana"
-  },
-  "application/pgp-signature": {
-    "source": "iana",
-    "extensions": ["asc","sig"]
-  },
-  "application/pics-rules": {
-    "source": "apache",
-    "extensions": ["prf"]
-  },
-  "application/pidf+xml": {
-    "source": "iana"
-  },
-  "application/pidf-diff+xml": {
-    "source": "iana"
-  },
-  "application/pkcs10": {
-    "source": "iana",
-    "extensions": ["p10"]
-  },
-  "application/pkcs7-mime": {
-    "source": "iana",
-    "extensions": ["p7m","p7c"]
-  },
-  "application/pkcs7-signature": {
-    "source": "iana",
-    "extensions": ["p7s"]
-  },
-  "application/pkcs8": {
-    "source": "iana",
-    "extensions": ["p8"]
-  },
-  "application/pkix-attr-cert": {
-    "source": "iana",
-    "extensions": ["ac"]
-  },
-  "application/pkix-cert": {
-    "source": "iana",
-    "extensions": ["cer"]
-  },
-  "application/pkix-crl": {
-    "source": "iana",
-    "extensions": ["crl"]
-  },
-  "application/pkix-pkipath": {
-    "source": "iana",
-    "extensions": ["pkipath"]
-  },
-  "application/pkixcmp": {
-    "source": "iana",
-    "extensions": ["pki"]
-  },
-  "application/pls+xml": {
-    "source": "iana",
-    "extensions": ["pls"]
-  },
-  "application/poc-settings+xml": {
-    "source": "iana"
-  },
-  "application/postscript": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["ai","eps","ps"]
-  },
-  "application/provenance+xml": {
-    "source": "iana"
-  },
-  "application/prs.alvestrand.titrax-sheet": {
-    "source": "iana"
-  },
-  "application/prs.cww": {
-    "source": "iana",
-    "extensions": ["cww"]
-  },
-  "application/prs.hpub+zip": {
-    "source": "iana"
-  },
-  "application/prs.nprend": {
-    "source": "iana"
-  },
-  "application/prs.plucker": {
-    "source": "iana"
-  },
-  "application/prs.rdf-xml-crypt": {
-    "source": "iana"
-  },
-  "application/prs.xsf+xml": {
-    "source": "iana"
-  },
-  "application/pskc+xml": {
-    "source": "iana",
-    "extensions": ["pskcxml"]
-  },
-  "application/qsig": {
-    "source": "iana"
-  },
-  "application/raptorfec": {
-    "source": "iana"
-  },
-  "application/rdf+xml": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["rdf"]
-  },
-  "application/reginfo+xml": {
-    "source": "iana",
-    "extensions": ["rif"]
-  },
-  "application/relax-ng-compact-syntax": {
-    "source": "iana",
-    "extensions": ["rnc"]
-  },
-  "application/remote-printing": {
-    "source": "iana"
-  },
-  "application/reputon+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/resource-lists+xml": {
-    "source": "iana",
-    "extensions": ["rl"]
-  },
-  "application/resource-lists-diff+xml": {
-    "source": "iana",
-    "extensions": ["rld"]
-  },
-  "application/riscos": {
-    "source": "iana"
-  },
-  "application/rlmi+xml": {
-    "source": "iana"
-  },
-  "application/rls-services+xml": {
-    "source": "iana",
-    "extensions": ["rs"]
-  },
-  "application/rpki-ghostbusters": {
-    "source": "iana",
-    "extensions": ["gbr"]
-  },
-  "application/rpki-manifest": {
-    "source": "iana",
-    "extensions": ["mft"]
-  },
-  "application/rpki-roa": {
-    "source": "iana",
-    "extensions": ["roa"]
-  },
-  "application/rpki-updown": {
-    "source": "iana"
-  },
-  "application/rsd+xml": {
-    "source": "apache",
-    "extensions": ["rsd"]
-  },
-  "application/rss+xml": {
-    "source": "apache",
-    "compressible": true,
-    "extensions": ["rss"]
-  },
-  "application/rtf": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["rtf"]
-  },
-  "application/rtploopback": {
-    "source": "iana"
-  },
-  "application/rtx": {
-    "source": "iana"
-  },
-  "application/samlassertion+xml": {
-    "source": "iana"
-  },
-  "application/samlmetadata+xml": {
-    "source": "iana"
-  },
-  "application/sbml+xml": {
-    "source": "iana",
-    "extensions": ["sbml"]
-  },
-  "application/scaip+xml": {
-    "source": "iana"
-  },
-  "application/scvp-cv-request": {
-    "source": "iana",
-    "extensions": ["scq"]
-  },
-  "application/scvp-cv-response": {
-    "source": "iana",
-    "extensions": ["scs"]
-  },
-  "application/scvp-vp-request": {
-    "source": "iana",
-    "extensions": ["spq"]
-  },
-  "application/scvp-vp-response": {
-    "source": "iana",
-    "extensions": ["spp"]
-  },
-  "application/sdp": {
-    "source": "iana",
-    "extensions": ["sdp"]
-  },
-  "application/sep+xml": {
-    "source": "iana"
-  },
-  "application/sep-exi": {
-    "source": "iana"
-  },
-  "application/session-info": {
-    "source": "iana"
-  },
-  "application/set-payment": {
-    "source": "iana"
-  },
-  "application/set-payment-initiation": {
-    "source": "iana",
-    "extensions": ["setpay"]
-  },
-  "application/set-registration": {
-    "source": "iana"
-  },
-  "application/set-registration-initiation": {
-    "source": "iana",
-    "extensions": ["setreg"]
-  },
-  "application/sgml": {
-    "source": "iana"
-  },
-  "application/sgml-open-catalog": {
-    "source": "iana"
-  },
-  "application/shf+xml": {
-    "source": "iana",
-    "extensions": ["shf"]
-  },
-  "application/sieve": {
-    "source": "iana"
-  },
-  "application/simple-filter+xml": {
-    "source": "iana"
-  },
-  "application/simple-message-summary": {
-    "source": "iana"
-  },
-  "application/simplesymbolcontainer": {
-    "source": "iana"
-  },
-  "application/slate": {
-    "source": "iana"
-  },
-  "application/smil": {
-    "source": "iana"
-  },
-  "application/smil+xml": {
-    "source": "iana",
-    "extensions": ["smi","smil"]
-  },
-  "application/smpte336m": {
-    "source": "iana"
-  },
-  "application/soap+fastinfoset": {
-    "source": "iana"
-  },
-  "application/soap+xml": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/sparql-query": {
-    "source": "iana",
-    "extensions": ["rq"]
-  },
-  "application/sparql-results+xml": {
-    "source": "iana",
-    "extensions": ["srx"]
-  },
-  "application/spirits-event+xml": {
-    "source": "iana"
-  },
-  "application/sql": {
-    "source": "iana"
-  },
-  "application/srgs": {
-    "source": "iana",
-    "extensions": ["gram"]
-  },
-  "application/srgs+xml": {
-    "source": "iana",
-    "extensions": ["grxml"]
-  },
-  "application/sru+xml": {
-    "source": "iana",
-    "extensions": ["sru"]
-  },
-  "application/ssdl+xml": {
-    "source": "apache",
-    "extensions": ["ssdl"]
-  },
-  "application/ssml+xml": {
-    "source": "iana",
-    "extensions": ["ssml"]
-  },
-  "application/tamp-apex-update": {
-    "source": "iana"
-  },
-  "application/tamp-apex-update-confirm": {
-    "source": "iana"
-  },
-  "application/tamp-community-update": {
-    "source": "iana"
-  },
-  "application/tamp-community-update-confirm": {
-    "source": "iana"
-  },
-  "application/tamp-error": {
-    "source": "iana"
-  },
-  "application/tamp-sequence-adjust": {
-    "source": "iana"
-  },
-  "application/tamp-sequence-adjust-confirm": {
-    "source": "iana"
-  },
-  "application/tamp-status-query": {
-    "source": "iana"
-  },
-  "application/tamp-status-response": {
-    "source": "iana"
-  },
-  "application/tamp-update": {
-    "source": "iana"
-  },
-  "application/tamp-update-confirm": {
-    "source": "iana"
-  },
-  "application/tar": {
-    "compressible": true
-  },
-  "application/tei+xml": {
-    "source": "iana",
-    "extensions": ["tei","teicorpus"]
-  },
-  "application/thraud+xml": {
-    "source": "iana",
-    "extensions": ["tfi"]
-  },
-  "application/timestamp-query": {
-    "source": "iana"
-  },
-  "application/timestamp-reply": {
-    "source": "iana"
-  },
-  "application/timestamped-data": {
-    "source": "iana",
-    "extensions": ["tsd"]
-  },
-  "application/ttml+xml": {
-    "source": "iana"
-  },
-  "application/tve-trigger": {
-    "source": "iana"
-  },
-  "application/ulpfec": {
-    "source": "iana"
-  },
-  "application/urc-grpsheet+xml": {
-    "source": "iana"
-  },
-  "application/urc-ressheet+xml": {
-    "source": "iana"
-  },
-  "application/urc-targetdesc+xml": {
-    "source": "iana"
-  },
-  "application/urc-uisocketdesc+xml": {
-    "source": "iana"
-  },
-  "application/vcard+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vcard+xml": {
-    "source": "iana"
-  },
-  "application/vemmi": {
-    "source": "iana"
-  },
-  "application/vividence.scriptfile": {
-    "source": "apache"
-  },
-  "application/vnd-acucobol": {
-    "source": "iana"
-  },
-  "application/vnd-curl": {
-    "source": "iana"
-  },
-  "application/vnd-dart": {
-    "source": "iana"
-  },
-  "application/vnd-dxr": {
-    "source": "iana"
-  },
-  "application/vnd-fdf": {
-    "source": "iana"
-  },
-  "application/vnd-mif": {
-    "source": "iana"
-  },
-  "application/vnd-sema": {
-    "source": "iana"
-  },
-  "application/vnd-wap-wmlc": {
-    "source": "iana"
-  },
-  "application/vnd.3gpp.bsf+xml": {
-    "source": "iana"
-  },
-  "application/vnd.3gpp.pic-bw-large": {
-    "source": "iana",
-    "extensions": ["plb"]
-  },
-  "application/vnd.3gpp.pic-bw-small": {
-    "source": "iana",
-    "extensions": ["psb"]
-  },
-  "application/vnd.3gpp.pic-bw-var": {
-    "source": "iana",
-    "extensions": ["pvb"]
-  },
-  "application/vnd.3gpp.sms": {
-    "source": "iana"
-  },
-  "application/vnd.3gpp2.bcmcsinfo+xml": {
-    "source": "iana"
-  },
-  "application/vnd.3gpp2.sms": {
-    "source": "iana"
-  },
-  "application/vnd.3gpp2.tcap": {
-    "source": "iana",
-    "extensions": ["tcap"]
-  },
-  "application/vnd.3m.post-it-notes": {
-    "source": "iana",
-    "extensions": ["pwn"]
-  },
-  "application/vnd.accpac.simply.aso": {
-    "source": "iana",
-    "extensions": ["aso"]
-  },
-  "application/vnd.accpac.simply.imp": {
-    "source": "iana",
-    "extensions": ["imp"]
-  },
-  "application/vnd.acucobol": {
-    "source": "apache",
-    "extensions": ["acu"]
-  },
-  "application/vnd.acucorp": {
-    "source": "iana",
-    "extensions": ["atc","acutc"]
-  },
-  "application/vnd.adobe.air-application-installer-package+zip": {
-    "source": "apache",
-    "extensions": ["air"]
-  },
-  "application/vnd.adobe.flash-movie": {
-    "source": "iana"
-  },
-  "application/vnd.adobe.formscentral.fcdt": {
-    "source": "iana",
-    "extensions": ["fcdt"]
-  },
-  "application/vnd.adobe.fxp": {
-    "source": "iana",
-    "extensions": ["fxp","fxpl"]
-  },
-  "application/vnd.adobe.partial-upload": {
-    "source": "iana"
-  },
-  "application/vnd.adobe.xdp+xml": {
-    "source": "iana",
-    "extensions": ["xdp"]
-  },
-  "application/vnd.adobe.xfdf": {
-    "source": "iana",
-    "extensions": ["xfdf"]
-  },
-  "application/vnd.aether.imp": {
-    "source": "iana"
-  },
-  "application/vnd.ah-barcode": {
-    "source": "iana"
-  },
-  "application/vnd.ahead.space": {
-    "source": "iana",
-    "extensions": ["ahead"]
-  },
-  "application/vnd.airzip.filesecure.azf": {
-    "source": "iana",
-    "extensions": ["azf"]
-  },
-  "application/vnd.airzip.filesecure.azs": {
-    "source": "iana",
-    "extensions": ["azs"]
-  },
-  "application/vnd.amazon.ebook": {
-    "source": "apache",
-    "extensions": ["azw"]
-  },
-  "application/vnd.americandynamics.acc": {
-    "source": "iana",
-    "extensions": ["acc"]
-  },
-  "application/vnd.amiga.ami": {
-    "source": "iana",
-    "extensions": ["ami"]
-  },
-  "application/vnd.amundsen.maze+xml": {
-    "source": "iana"
-  },
-  "application/vnd.android.package-archive": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["apk"]
-  },
-  "application/vnd.anser-web-certificate-issue-initiation": {
-    "source": "iana",
-    "extensions": ["cii"]
-  },
-  "application/vnd.anser-web-funds-transfer-initiation": {
-    "source": "apache",
-    "extensions": ["fti"]
-  },
-  "application/vnd.antix.game-component": {
-    "source": "iana",
-    "extensions": ["atx"]
-  },
-  "application/vnd.apache.thrift.binary": {
-    "source": "iana"
-  },
-  "application/vnd.apache.thrift.compact": {
-    "source": "iana"
-  },
-  "application/vnd.apache.thrift.json": {
-    "source": "iana"
-  },
-  "application/vnd.api+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.apple.installer+xml": {
-    "source": "iana",
-    "extensions": ["mpkg"]
-  },
-  "application/vnd.apple.mpegurl": {
-    "source": "iana",
-    "extensions": ["m3u8"]
-  },
-  "application/vnd.arastra.swi": {
-    "source": "iana"
-  },
-  "application/vnd.aristanetworks.swi": {
-    "source": "iana",
-    "extensions": ["swi"]
-  },
-  "application/vnd.artsquare": {
-    "source": "iana"
-  },
-  "application/vnd.astraea-software.iota": {
-    "source": "iana",
-    "extensions": ["iota"]
-  },
-  "application/vnd.audiograph": {
-    "source": "iana",
-    "extensions": ["aep"]
-  },
-  "application/vnd.autopackage": {
-    "source": "iana"
-  },
-  "application/vnd.avistar+xml": {
-    "source": "iana"
-  },
-  "application/vnd.balsamiq.bmml+xml": {
-    "source": "iana"
-  },
-  "application/vnd.bekitzur-stech+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.blueice.multipass": {
-    "source": "iana",
-    "extensions": ["mpm"]
-  },
-  "application/vnd.bluetooth.ep.oob": {
-    "source": "iana"
-  },
-  "application/vnd.bluetooth.le.oob": {
-    "source": "iana"
-  },
-  "application/vnd.bmi": {
-    "source": "iana",
-    "extensions": ["bmi"]
-  },
-  "application/vnd.businessobjects": {
-    "source": "iana",
-    "extensions": ["rep"]
-  },
-  "application/vnd.cab-jscript": {
-    "source": "iana"
-  },
-  "application/vnd.canon-cpdl": {
-    "source": "iana"
-  },
-  "application/vnd.canon-lips": {
-    "source": "iana"
-  },
-  "application/vnd.cendio.thinlinc.clientconf": {
-    "source": "iana"
-  },
-  "application/vnd.century-systems.tcp_stream": {
-    "source": "iana"
-  },
-  "application/vnd.chemdraw+xml": {
-    "source": "iana",
-    "extensions": ["cdxml"]
-  },
-  "application/vnd.chipnuts.karaoke-mmd": {
-    "source": "iana",
-    "extensions": ["mmd"]
-  },
-  "application/vnd.cinderella": {
-    "source": "iana",
-    "extensions": ["cdy"]
-  },
-  "application/vnd.cirpack.isdn-ext": {
-    "source": "iana"
-  },
-  "application/vnd.claymore": {
-    "source": "iana",
-    "extensions": ["cla"]
-  },
-  "application/vnd.cloanto.rp9": {
-    "source": "iana",
-    "extensions": ["rp9"]
-  },
-  "application/vnd.clonk.c4group": {
-    "source": "iana",
-    "extensions": ["c4g","c4d","c4f","c4p","c4u"]
-  },
-  "application/vnd.cluetrust.cartomobile-config": {
-    "source": "iana",
-    "extensions": ["c11amc"]
-  },
-  "application/vnd.cluetrust.cartomobile-config-pkg": {
-    "source": "iana",
-    "extensions": ["c11amz"]
-  },
-  "application/vnd.coffeescript": {
-    "source": "iana"
-  },
-  "application/vnd.collection+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.collection.doc+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.collection.next+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.commerce-battelle": {
-    "source": "iana"
-  },
-  "application/vnd.commonspace": {
-    "source": "iana",
-    "extensions": ["csp"]
-  },
-  "application/vnd.contact.cmsg": {
-    "source": "iana",
-    "extensions": ["cdbcmsg"]
-  },
-  "application/vnd.cosmocaller": {
-    "source": "iana",
-    "extensions": ["cmc"]
-  },
-  "application/vnd.crick.clicker": {
-    "source": "iana",
-    "extensions": ["clkx"]
-  },
-  "application/vnd.crick.clicker.keyboard": {
-    "source": "iana",
-    "extensions": ["clkk"]
-  },
-  "application/vnd.crick.clicker.palette": {
-    "source": "iana",
-    "extensions": ["clkp"]
-  },
-  "application/vnd.crick.clicker.template": {
-    "source": "iana",
-    "extensions": ["clkt"]
-  },
-  "application/vnd.crick.clicker.wordbank": {
-    "source": "iana",
-    "extensions": ["clkw"]
-  },
-  "application/vnd.criticaltools.wbs+xml": {
-    "source": "iana",
-    "extensions": ["wbs"]
-  },
-  "application/vnd.ctc-posml": {
-    "source": "iana",
-    "extensions": ["pml"]
-  },
-  "application/vnd.ctct.ws+xml": {
-    "source": "iana"
-  },
-  "application/vnd.cups-pdf": {
-    "source": "iana"
-  },
-  "application/vnd.cups-postscript": {
-    "source": "iana"
-  },
-  "application/vnd.cups-ppd": {
-    "source": "iana",
-    "extensions": ["ppd"]
-  },
-  "application/vnd.cups-raster": {
-    "source": "iana"
-  },
-  "application/vnd.cups-raw": {
-    "source": "iana"
-  },
-  "application/vnd.curl": {
-    "source": "apache"
-  },
-  "application/vnd.curl.car": {
-    "source": "apache",
-    "extensions": ["car"]
-  },
-  "application/vnd.curl.pcurl": {
-    "source": "apache",
-    "extensions": ["pcurl"]
-  },
-  "application/vnd.cyan.dean.root+xml": {
-    "source": "iana"
-  },
-  "application/vnd.cybank": {
-    "source": "iana"
-  },
-  "application/vnd.dart": {
-    "source": "apache",
-    "compressible": true,
-    "extensions": ["dart"]
-  },
-  "application/vnd.data-vision.rdz": {
-    "source": "iana",
-    "extensions": ["rdz"]
-  },
-  "application/vnd.debian.binary-package": {
-    "source": "iana"
-  },
-  "application/vnd.dece-zip": {
-    "source": "iana"
-  },
-  "application/vnd.dece.data": {
-    "source": "iana",
-    "extensions": ["uvf","uvvf","uvd","uvvd"]
-  },
-  "application/vnd.dece.ttml+xml": {
-    "source": "iana",
-    "extensions": ["uvt","uvvt"]
-  },
-  "application/vnd.dece.unspecified": {
-    "source": "iana",
-    "extensions": ["uvx","uvvx"]
-  },
-  "application/vnd.dece.zip": {
-    "source": "apache",
-    "extensions": ["uvz","uvvz"]
-  },
-  "application/vnd.denovo.fcselayout-link": {
-    "source": "iana",
-    "extensions": ["fe_launch"]
-  },
-  "application/vnd.desmume-movie": {
-    "source": "iana"
-  },
-  "application/vnd.dir-bi.plate-dl-nosuffix": {
-    "source": "iana"
-  },
-  "application/vnd.dm.delegation+xml": {
-    "source": "iana"
-  },
-  "application/vnd.dna": {
-    "source": "iana",
-    "extensions": ["dna"]
-  },
-  "application/vnd.document+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.dolby.mlp": {
-    "source": "apache",
-    "extensions": ["mlp"]
-  },
-  "application/vnd.dolby.mobile.1": {
-    "source": "iana"
-  },
-  "application/vnd.dolby.mobile.2": {
-    "source": "iana"
-  },
-  "application/vnd.doremir.scorecloud-binary-document": {
-    "source": "iana"
-  },
-  "application/vnd.dpgraph": {
-    "source": "iana",
-    "extensions": ["dpg"]
-  },
-  "application/vnd.dreamfactory": {
-    "source": "iana",
-    "extensions": ["dfac"]
-  },
-  "application/vnd.ds-keypoint": {
-    "source": "apache",
-    "extensions": ["kpxx"]
-  },
-  "application/vnd.dtg.local": {
-    "source": "iana"
-  },
-  "application/vnd.dtg.local.flash": {
-    "source": "iana"
-  },
-  "application/vnd.dtg.local.html": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.ait": {
-    "source": "iana",
-    "extensions": ["ait"]
-  },
-  "application/vnd.dvb.dvbj": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.esgcontainer": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.ipdcdftnotifaccess": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.ipdcesgaccess": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.ipdcesgaccess2": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.ipdcesgpdd": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.ipdcroaming": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.iptv.alfec-base": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.iptv.alfec-enhancement": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.notif-aggregate-root+xml": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.notif-container+xml": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.notif-generic+xml": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.notif-ia-msglist+xml": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.notif-ia-registration-request+xml": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.notif-ia-registration-response+xml": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.notif-init+xml": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.pfr": {
-    "source": "iana"
-  },
-  "application/vnd.dvb.service": {
-    "source": "apache",
-    "extensions": ["svc"]
-  },
-  "application/vnd.dvb_service": {
-    "source": "iana"
-  },
-  "application/vnd.dxr": {
-    "source": "apache"
-  },
-  "application/vnd.dynageo": {
-    "source": "iana",
-    "extensions": ["geo"]
-  },
-  "application/vnd.dzr": {
-    "source": "iana"
-  },
-  "application/vnd.easykaraoke.cdgdownload": {
-    "source": "iana"
-  },
-  "application/vnd.ecdis-update": {
-    "source": "iana"
-  },
-  "application/vnd.ecowin.chart": {
-    "source": "iana",
-    "extensions": ["mag"]
-  },
-  "application/vnd.ecowin.filerequest": {
-    "source": "iana"
-  },
-  "application/vnd.ecowin.fileupdate": {
-    "source": "iana"
-  },
-  "application/vnd.ecowin.series": {
-    "source": "iana"
-  },
-  "application/vnd.ecowin.seriesrequest": {
-    "source": "iana"
-  },
-  "application/vnd.ecowin.seriesupdate": {
-    "source": "iana"
-  },
-  "application/vnd.emclient.accessrequest+xml": {
-    "source": "iana"
-  },
-  "application/vnd.enliven": {
-    "source": "iana",
-    "extensions": ["nml"]
-  },
-  "application/vnd.enphase.envoy": {
-    "source": "iana"
-  },
-  "application/vnd.eprints.data+xml": {
-    "source": "iana"
-  },
-  "application/vnd.epson.esf": {
-    "source": "iana",
-    "extensions": ["esf"]
-  },
-  "application/vnd.epson.msf": {
-    "source": "iana",
-    "extensions": ["msf"]
-  },
-  "application/vnd.epson.quickanime": {
-    "source": "iana",
-    "extensions": ["qam"]
-  },
-  "application/vnd.epson.salt": {
-    "source": "iana",
-    "extensions": ["slt"]
-  },
-  "application/vnd.epson.ssf": {
-    "source": "iana",
-    "extensions": ["ssf"]
-  },
-  "application/vnd.ericsson.quickcall": {
-    "source": "iana"
-  },
-  "application/vnd.eszigno3+xml": {
-    "source": "iana",
-    "extensions": ["es3","et3"]
-  },
-  "application/vnd.etsi.aoc+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.asic-e+zip": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.asic-s+zip": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.cug+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.iptvcommand+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.iptvdiscovery+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.iptvprofile+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.iptvsad-bc+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.iptvsad-cod+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.iptvsad-npvr+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.iptvservice+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.iptvsync+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.iptvueprofile+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.mcid+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.mheg5": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.overload-control-policy-dataset+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.pstn+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.sci+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.simservs+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.timestamp-token": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.tsl+xml": {
-    "source": "iana"
-  },
-  "application/vnd.etsi.tsl.der": {
-    "source": "iana"
-  },
-  "application/vnd.eudora.data": {
-    "source": "iana"
-  },
-  "application/vnd.ezpix-album": {
-    "source": "iana",
-    "extensions": ["ez2"]
-  },
-  "application/vnd.ezpix-package": {
-    "source": "iana",
-    "extensions": ["ez3"]
-  },
-  "application/vnd.f-secure.mobile": {
-    "source": "iana"
-  },
-  "application/vnd.fdf": {
-    "source": "apache",
-    "extensions": ["fdf"]
-  },
-  "application/vnd.fdsn.mseed": {
-    "source": "iana",
-    "extensions": ["mseed"]
-  },
-  "application/vnd.fdsn.seed": {
-    "source": "iana",
-    "extensions": ["seed","dataless"]
-  },
-  "application/vnd.ffsns": {
-    "source": "iana"
-  },
-  "application/vnd.fints": {
-    "source": "iana"
-  },
-  "application/vnd.flographit": {
-    "source": "iana",
-    "extensions": ["gph"]
-  },
-  "application/vnd.fluxtime.clip": {
-    "source": "iana",
-    "extensions": ["ftc"]
-  },
-  "application/vnd.font-fontforge-sfd": {
-    "source": "iana"
-  },
-  "application/vnd.framemaker": {
-    "source": "iana",
-    "extensions": ["fm","frame","maker","book"]
-  },
-  "application/vnd.frogans.fnc": {
-    "source": "iana",
-    "extensions": ["fnc"]
-  },
-  "application/vnd.frogans.ltf": {
-    "source": "iana",
-    "extensions": ["ltf"]
-  },
-  "application/vnd.fsc.weblaunch": {
-    "source": "iana",
-    "extensions": ["fsc"]
-  },
-  "application/vnd.fujitsu.oasys": {
-    "source": "iana",
-    "extensions": ["oas"]
-  },
-  "application/vnd.fujitsu.oasys2": {
-    "source": "iana",
-    "extensions": ["oa2"]
-  },
-  "application/vnd.fujitsu.oasys3": {
-    "source": "iana",
-    "extensions": ["oa3"]
-  },
-  "application/vnd.fujitsu.oasysgp": {
-    "source": "iana",
-    "extensions": ["fg5"]
-  },
-  "application/vnd.fujitsu.oasysprs": {
-    "source": "iana",
-    "extensions": ["bh2"]
-  },
-  "application/vnd.fujixerox.art-ex": {
-    "source": "iana"
-  },
-  "application/vnd.fujixerox.art4": {
-    "source": "iana"
-  },
-  "application/vnd.fujixerox.ddd": {
-    "source": "iana",
-    "extensions": ["ddd"]
-  },
-  "application/vnd.fujixerox.docuworks": {
-    "source": "iana",
-    "extensions": ["xdw"]
-  },
-  "application/vnd.fujixerox.docuworks.binder": {
-    "source": "iana",
-    "extensions": ["xbd"]
-  },
-  "application/vnd.fujixerox.docuworks.container": {
-    "source": "iana"
-  },
-  "application/vnd.fujixerox.hbpl": {
-    "source": "iana"
-  },
-  "application/vnd.fut-misnet": {
-    "source": "iana"
-  },
-  "application/vnd.fuzzysheet": {
-    "source": "iana",
-    "extensions": ["fzs"]
-  },
-  "application/vnd.genomatix.tuxedo": {
-    "source": "iana",
-    "extensions": ["txd"]
-  },
-  "application/vnd.geo+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.geocube+xml": {
-    "source": "iana"
-  },
-  "application/vnd.geogebra.file": {
-    "source": "iana",
-    "extensions": ["ggb"]
-  },
-  "application/vnd.geogebra.tool": {
-    "source": "iana",
-    "extensions": ["ggt"]
-  },
-  "application/vnd.geometry-explorer": {
-    "source": "iana",
-    "extensions": ["gex","gre"]
-  },
-  "application/vnd.geonext": {
-    "source": "iana",
-    "extensions": ["gxt"]
-  },
-  "application/vnd.geoplan": {
-    "source": "iana",
-    "extensions": ["g2w"]
-  },
-  "application/vnd.geospace": {
-    "source": "iana",
-    "extensions": ["g3w"]
-  },
-  "application/vnd.globalplatform.card-content-mgt": {
-    "source": "iana"
-  },
-  "application/vnd.globalplatform.card-content-mgt-response": {
-    "source": "iana"
-  },
-  "application/vnd.gmx": {
-    "source": "iana",
-    "extensions": ["gmx"]
-  },
-  "application/vnd.google-earth.kml+xml": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["kml"]
-  },
-  "application/vnd.google-earth.kmz": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["kmz"]
-  },
-  "application/vnd.gov.sk.e-form+zip": {
-    "source": "iana"
-  },
-  "application/vnd.grafeq": {
-    "source": "iana",
-    "extensions": ["gqf","gqs"]
-  },
-  "application/vnd.gridmp": {
-    "source": "iana"
-  },
-  "application/vnd.groove-account": {
-    "source": "iana",
-    "extensions": ["gac"]
-  },
-  "application/vnd.groove-help": {
-    "source": "iana",
-    "extensions": ["ghf"]
-  },
-  "application/vnd.groove-identity-message": {
-    "source": "iana",
-    "extensions": ["gim"]
-  },
-  "application/vnd.groove-injector": {
-    "source": "iana",
-    "extensions": ["grv"]
-  },
-  "application/vnd.groove-tool-message": {
-    "source": "iana",
-    "extensions": ["gtm"]
-  },
-  "application/vnd.groove-tool-template": {
-    "source": "iana",
-    "extensions": ["tpl"]
-  },
-  "application/vnd.groove-vcard": {
-    "source": "iana",
-    "extensions": ["vcg"]
-  },
-  "application/vnd.hal+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.hal+xml": {
-    "source": "iana",
-    "extensions": ["hal"]
-  },
-  "application/vnd.handheld-entertainment+xml": {
-    "source": "iana",
-    "extensions": ["zmm"]
-  },
-  "application/vnd.hbci": {
-    "source": "iana",
-    "extensions": ["hbci"]
-  },
-  "application/vnd.hcl-bireports": {
-    "source": "iana"
-  },
-  "application/vnd.heroku+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.hhe.lesson-player": {
-    "source": "iana",
-    "extensions": ["les"]
-  },
-  "application/vnd.hp-hpgl": {
-    "source": "iana",
-    "extensions": ["hpgl"]
-  },
-  "application/vnd.hp-hpid": {
-    "source": "iana",
-    "extensions": ["hpid"]
-  },
-  "application/vnd.hp-hps": {
-    "source": "iana",
-    "extensions": ["hps"]
-  },
-  "application/vnd.hp-jlyt": {
-    "source": "iana",
-    "extensions": ["jlt"]
-  },
-  "application/vnd.hp-pcl": {
-    "source": "iana",
-    "extensions": ["pcl"]
-  },
-  "application/vnd.hp-pclxl": {
-    "source": "iana",
-    "extensions": ["pclxl"]
-  },
-  "application/vnd.httphone": {
-    "source": "iana"
-  },
-  "application/vnd.hydrostatix.sof-data": {
-    "source": "iana"
-  },
-  "application/vnd.hzn-3d-crossword": {
-    "source": "iana"
-  },
-  "application/vnd.ibm.afplinedata": {
-    "source": "iana"
-  },
-  "application/vnd.ibm.electronic-media": {
-    "source": "iana"
-  },
-  "application/vnd.ibm.minipay": {
-    "source": "iana",
-    "extensions": ["mpy"]
-  },
-  "application/vnd.ibm.modcap": {
-    "source": "iana",
-    "extensions": ["afp","listafp","list3820"]
-  },
-  "application/vnd.ibm.rights-management": {
-    "source": "iana",
-    "extensions": ["irm"]
-  },
-  "application/vnd.ibm.secure-container": {
-    "source": "iana",
-    "extensions": ["sc"]
-  },
-  "application/vnd.iccprofile": {
-    "source": "iana",
-    "extensions": ["icc","icm"]
-  },
-  "application/vnd.ieee.1905": {
-    "source": "iana"
-  },
-  "application/vnd.igloader": {
-    "source": "iana",
-    "extensions": ["igl"]
-  },
-  "application/vnd.immervision-ivp": {
-    "source": "iana",
-    "extensions": ["ivp"]
-  },
-  "application/vnd.immervision-ivu": {
-    "source": "iana",
-    "extensions": ["ivu"]
-  },
-  "application/vnd.ims.imsccv1p1": {
-    "source": "iana"
-  },
-  "application/vnd.ims.lis.v2.result+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.ims.lti.v2.toolconsumerprofile+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.ims.lti.v2.toolproxy+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.ims.lti.v2.toolproxy.id+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.ims.lti.v2.toolsettings+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.ims.lti.v2.toolsettings.simple+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.informedcontrol.rms+xml": {
-    "source": "iana"
-  },
-  "application/vnd.informix-visionary": {
-    "source": "iana"
-  },
-  "application/vnd.infotech.project": {
-    "source": "iana"
-  },
-  "application/vnd.infotech.project+xml": {
-    "source": "iana"
-  },
-  "application/vnd.innopath.wamp.notification": {
-    "source": "iana"
-  },
-  "application/vnd.insors.igm": {
-    "source": "iana",
-    "extensions": ["igm"]
-  },
-  "application/vnd.intercon.formnet": {
-    "source": "iana",
-    "extensions": ["xpw","xpx"]
-  },
-  "application/vnd.intergeo": {
-    "source": "iana",
-    "extensions": ["i2g"]
-  },
-  "application/vnd.intertrust.digibox": {
-    "source": "iana"
-  },
-  "application/vnd.intertrust.nncp": {
-    "source": "iana"
-  },
-  "application/vnd.intu.qbo": {
-    "source": "iana",
-    "extensions": ["qbo"]
-  },
-  "application/vnd.intu.qfx": {
-    "source": "iana",
-    "extensions": ["qfx"]
-  },
-  "application/vnd.iptc.g2.catalogitem+xml": {
-    "source": "iana"
-  },
-  "application/vnd.iptc.g2.conceptitem+xml": {
-    "source": "iana"
-  },
-  "application/vnd.iptc.g2.knowledgeitem+xml": {
-    "source": "iana"
-  },
-  "application/vnd.iptc.g2.newsitem+xml": {
-    "source": "iana"
-  },
-  "application/vnd.iptc.g2.newsmessage+xml": {
-    "source": "iana"
-  },
-  "application/vnd.iptc.g2.packageitem+xml": {
-    "source": "iana"
-  },
-  "application/vnd.iptc.g2.planningitem+xml": {
-    "source": "iana"
-  },
-  "application/vnd.ipunplugged.rcprofile": {
-    "source": "iana",
-    "extensions": ["rcprofile"]
-  },
-  "application/vnd.irepository.package+xml": {
-    "source": "iana",
-    "extensions": ["irp"]
-  },
-  "application/vnd.is-xpr": {
-    "source": "iana",
-    "extensions": ["xpr"]
-  },
-  "application/vnd.isac.fcs": {
-    "source": "iana",
-    "extensions": ["fcs"]
-  },
-  "application/vnd.jam": {
-    "source": "iana",
-    "extensions": ["jam"]
-  },
-  "application/vnd.japannet-directory-service": {
-    "source": "iana"
-  },
-  "application/vnd.japannet-jpnstore-wakeup": {
-    "source": "iana"
-  },
-  "application/vnd.japannet-payment-wakeup": {
-    "source": "iana"
-  },
-  "application/vnd.japannet-registration": {
-    "source": "iana"
-  },
-  "application/vnd.japannet-registration-wakeup": {
-    "source": "iana"
-  },
-  "application/vnd.japannet-setstore-wakeup": {
-    "source": "iana"
-  },
-  "application/vnd.japannet-verification": {
-    "source": "iana"
-  },
-  "application/vnd.japannet-verification-wakeup": {
-    "source": "iana"
-  },
-  "application/vnd.jcp.javame.midlet-rms": {
-    "source": "iana",
-    "extensions": ["rms"]
-  },
-  "application/vnd.jisp": {
-    "source": "iana",
-    "extensions": ["jisp"]
-  },
-  "application/vnd.joost.joda-archive": {
-    "source": "iana",
-    "extensions": ["joda"]
-  },
-  "application/vnd.jsk.isdn-ngn": {
-    "source": "iana"
-  },
-  "application/vnd.kahootz": {
-    "source": "iana",
-    "extensions": ["ktz","ktr"]
-  },
-  "application/vnd.kde.karbon": {
-    "source": "iana",
-    "extensions": ["karbon"]
-  },
-  "application/vnd.kde.kchart": {
-    "source": "iana",
-    "extensions": ["chrt"]
-  },
-  "application/vnd.kde.kformula": {
-    "source": "iana",
-    "extensions": ["kfo"]
-  },
-  "application/vnd.kde.kivio": {
-    "source": "iana",
-    "extensions": ["flw"]
-  },
-  "application/vnd.kde.kontour": {
-    "source": "iana",
-    "extensions": ["kon"]
-  },
-  "application/vnd.kde.kpresenter": {
-    "source": "iana",
-    "extensions": ["kpr","kpt"]
-  },
-  "application/vnd.kde.kspread": {
-    "source": "iana",
-    "extensions": ["ksp"]
-  },
-  "application/vnd.kde.kword": {
-    "source": "iana",
-    "extensions": ["kwd","kwt"]
-  },
-  "application/vnd.kenameaapp": {
-    "source": "iana",
-    "extensions": ["htke"]
-  },
-  "application/vnd.kidspiration": {
-    "source": "iana",
-    "extensions": ["kia"]
-  },
-  "application/vnd.kinar": {
-    "source": "iana",
-    "extensions": ["kne","knp"]
-  },
-  "application/vnd.koan": {
-    "source": "iana",
-    "extensions": ["skp","skd","skt","skm"]
-  },
-  "application/vnd.kodak-descriptor": {
-    "source": "iana",
-    "extensions": ["sse"]
-  },
-  "application/vnd.las.las+xml": {
-    "source": "iana",
-    "extensions": ["lasxml"]
-  },
-  "application/vnd.liberty-request+xml": {
-    "source": "iana"
-  },
-  "application/vnd.llamagraphics.life-balance.desktop": {
-    "source": "iana",
-    "extensions": ["lbd"]
-  },
-  "application/vnd.llamagraphics.life-balance.exchange+xml": {
-    "source": "iana",
-    "extensions": ["lbe"]
-  },
-  "application/vnd.lotus-1-2-3": {
-    "source": "iana",
-    "extensions": ["123"]
-  },
-  "application/vnd.lotus-approach": {
-    "source": "iana",
-    "extensions": ["apr"]
-  },
-  "application/vnd.lotus-freelance": {
-    "source": "iana",
-    "extensions": ["pre"]
-  },
-  "application/vnd.lotus-notes": {
-    "source": "iana",
-    "extensions": ["nsf"]
-  },
-  "application/vnd.lotus-organizer": {
-    "source": "iana",
-    "extensions": ["org"]
-  },
-  "application/vnd.lotus-screencam": {
-    "source": "iana",
-    "extensions": ["scm"]
-  },
-  "application/vnd.lotus-wordpro": {
-    "source": "iana",
-    "extensions": ["lwp"]
-  },
-  "application/vnd.macports.portpkg": {
-    "source": "iana",
-    "extensions": ["portpkg"]
-  },
-  "application/vnd.marlin.drm.actiontoken+xml": {
-    "source": "iana"
-  },
-  "application/vnd.marlin.drm.conftoken+xml": {
-    "source": "iana"
-  },
-  "application/vnd.marlin.drm.license+xml": {
-    "source": "iana"
-  },
-  "application/vnd.marlin.drm.mdcf": {
-    "source": "iana"
-  },
-  "application/vnd.mason+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.maxmind.maxmind-db": {
-    "source": "iana"
-  },
-  "application/vnd.mcd": {
-    "source": "iana",
-    "extensions": ["mcd"]
-  },
-  "application/vnd.medcalcdata": {
-    "source": "iana",
-    "extensions": ["mc1"]
-  },
-  "application/vnd.mediastation.cdkey": {
-    "source": "iana",
-    "extensions": ["cdkey"]
-  },
-  "application/vnd.meridian-slingshot": {
-    "source": "iana"
-  },
-  "application/vnd.mfer": {
-    "source": "iana",
-    "extensions": ["mwf"]
-  },
-  "application/vnd.mfmp": {
-    "source": "iana",
-    "extensions": ["mfm"]
-  },
-  "application/vnd.micrografx-igx": {
-    "source": "iana"
-  },
-  "application/vnd.micrografx.flo": {
-    "source": "iana",
-    "extensions": ["flo"]
-  },
-  "application/vnd.micrografx.igx": {
-    "source": "apache",
-    "extensions": ["igx"]
-  },
-  "application/vnd.miele+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.mif": {
-    "source": "apache",
-    "extensions": ["mif"]
-  },
-  "application/vnd.minisoft-hp3000-save": {
-    "source": "iana"
-  },
-  "application/vnd.mitsubishi.misty-guard.trustweb": {
-    "source": "iana"
-  },
-  "application/vnd.mobius.daf": {
-    "source": "iana",
-    "extensions": ["daf"]
-  },
-  "application/vnd.mobius.dis": {
-    "source": "iana",
-    "extensions": ["dis"]
-  },
-  "application/vnd.mobius.mbk": {
-    "source": "iana",
-    "extensions": ["mbk"]
-  },
-  "application/vnd.mobius.mqy": {
-    "source": "iana",
-    "extensions": ["mqy"]
-  },
-  "application/vnd.mobius.msl": {
-    "source": "iana",
-    "extensions": ["msl"]
-  },
-  "application/vnd.mobius.plc": {
-    "source": "iana",
-    "extensions": ["plc"]
-  },
-  "application/vnd.mobius.txf": {
-    "source": "iana",
-    "extensions": ["txf"]
-  },
-  "application/vnd.mophun.application": {
-    "source": "iana",
-    "extensions": ["mpn"]
-  },
-  "application/vnd.mophun.certificate": {
-    "source": "iana",
-    "extensions": ["mpc"]
-  },
-  "application/vnd.motorola.flexsuite": {
-    "source": "iana"
-  },
-  "application/vnd.motorola.flexsuite.adsi": {
-    "source": "iana"
-  },
-  "application/vnd.motorola.flexsuite.fis": {
-    "source": "iana"
-  },
-  "application/vnd.motorola.flexsuite.gotap": {
-    "source": "iana"
-  },
-  "application/vnd.motorola.flexsuite.kmr": {
-    "source": "iana"
-  },
-  "application/vnd.motorola.flexsuite.ttc": {
-    "source": "iana"
-  },
-  "application/vnd.motorola.flexsuite.wem": {
-    "source": "iana"
-  },
-  "application/vnd.motorola.iprm": {
-    "source": "iana"
-  },
-  "application/vnd.mozilla.xul+xml": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["xul"]
-  },
-  "application/vnd.ms-3mfdocument": {
-    "source": "iana"
-  },
-  "application/vnd.ms-artgalry": {
-    "source": "iana",
-    "extensions": ["cil"]
-  },
-  "application/vnd.ms-asf": {
-    "source": "iana"
-  },
-  "application/vnd.ms-cab-compressed": {
-    "source": "iana",
-    "extensions": ["cab"]
-  },
-  "application/vnd.ms-color.iccprofile": {
-    "source": "apache"
-  },
-  "application/vnd.ms-excel": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["xls","xlm","xla","xlc","xlt","xlw"]
-  },
-  "application/vnd.ms-excel.addin.macroenabled.12": {
-    "source": "iana",
-    "extensions": ["xlam"]
-  },
-  "application/vnd.ms-excel.sheet.binary.macroenabled.12": {
-    "source": "iana",
-    "extensions": ["xlsb"]
-  },
-  "application/vnd.ms-excel.sheet.macroenabled.12": {
-    "source": "iana",
-    "extensions": ["xlsm"]
-  },
-  "application/vnd.ms-excel.template.macroenabled.12": {
-    "source": "iana",
-    "extensions": ["xltm"]
-  },
-  "application/vnd.ms-fontobject": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["eot"]
-  },
-  "application/vnd.ms-htmlhelp": {
-    "source": "iana",
-    "extensions": ["chm"]
-  },
-  "application/vnd.ms-ims": {
-    "source": "iana",
-    "extensions": ["ims"]
-  },
-  "application/vnd.ms-lrm": {
-    "source": "iana",
-    "extensions": ["lrm"]
-  },
-  "application/vnd.ms-office.activex+xml": {
-    "source": "iana"
-  },
-  "application/vnd.ms-officetheme": {
-    "source": "iana",
-    "extensions": ["thmx"]
-  },
-  "application/vnd.ms-opentype": {
-    "source": "apache",
-    "compressible": true
-  },
-  "application/vnd.ms-package.obfuscated-opentype": {
-    "source": "apache"
-  },
-  "application/vnd.ms-pki.seccat": {
-    "source": "apache",
-    "extensions": ["cat"]
-  },
-  "application/vnd.ms-pki.stl": {
-    "source": "apache",
-    "extensions": ["stl"]
-  },
-  "application/vnd.ms-playready.initiator+xml": {
-    "source": "iana"
-  },
-  "application/vnd.ms-powerpoint": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["ppt","pps","pot"]
-  },
-  "application/vnd.ms-powerpoint.addin.macroenabled.12": {
-    "source": "iana",
-    "extensions": ["ppam"]
-  },
-  "application/vnd.ms-powerpoint.presentation.macroenabled.12": {
-    "source": "iana",
-    "extensions": ["pptm"]
-  },
-  "application/vnd.ms-powerpoint.slide.macroenabled.12": {
-    "source": "iana",
-    "extensions": ["sldm"]
-  },
-  "application/vnd.ms-powerpoint.slideshow.macroenabled.12": {
-    "source": "iana",
-    "extensions": ["ppsm"]
-  },
-  "application/vnd.ms-powerpoint.template.macroenabled.12": {
-    "source": "iana",
-    "extensions": ["potm"]
-  },
-  "application/vnd.ms-printing.printticket+xml": {
-    "source": "apache"
-  },
-  "application/vnd.ms-project": {
-    "source": "iana",
-    "extensions": ["mpp","mpt"]
-  },
-  "application/vnd.ms-tnef": {
-    "source": "iana"
-  },
-  "application/vnd.ms-windows.printerpairing": {
-    "source": "iana"
-  },
-  "application/vnd.ms-wmdrm.lic-chlg-req": {
-    "source": "iana"
-  },
-  "application/vnd.ms-wmdrm.lic-resp": {
-    "source": "iana"
-  },
-  "application/vnd.ms-wmdrm.meter-chlg-req": {
-    "source": "iana"
-  },
-  "application/vnd.ms-wmdrm.meter-resp": {
-    "source": "iana"
-  },
-  "application/vnd.ms-word.document.macroenabled.12": {
-    "source": "iana",
-    "extensions": ["docm"]
-  },
-  "application/vnd.ms-word.template.macroenabled.12": {
-    "source": "iana",
-    "extensions": ["dotm"]
-  },
-  "application/vnd.ms-works": {
-    "source": "iana",
-    "extensions": ["wps","wks","wcm","wdb"]
-  },
-  "application/vnd.ms-wpl": {
-    "source": "iana",
-    "extensions": ["wpl"]
-  },
-  "application/vnd.ms-xpsdocument": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["xps"]
-  },
-  "application/vnd.mseq": {
-    "source": "iana",
-    "extensions": ["mseq"]
-  },
-  "application/vnd.msign": {
-    "source": "iana"
-  },
-  "application/vnd.multiad.creator": {
-    "source": "iana"
-  },
-  "application/vnd.multiad.creator.cif": {
-    "source": "iana"
-  },
-  "application/vnd.music-niff": {
-    "source": "iana"
-  },
-  "application/vnd.musician": {
-    "source": "iana",
-    "extensions": ["mus"]
-  },
-  "application/vnd.muvee.style": {
-    "source": "iana",
-    "extensions": ["msty"]
-  },
-  "application/vnd.mynfc": {
-    "source": "iana",
-    "extensions": ["taglet"]
-  },
-  "application/vnd.ncd.control": {
-    "source": "iana"
-  },
-  "application/vnd.ncd.reference": {
-    "source": "iana"
-  },
-  "application/vnd.nervana": {
-    "source": "iana"
-  },
-  "application/vnd.netfpx": {
-    "source": "iana"
-  },
-  "application/vnd.neurolanguage.nlu": {
-    "source": "iana",
-    "extensions": ["nlu"]
-  },
-  "application/vnd.nintendo.nitro.rom": {
-    "source": "iana"
-  },
-  "application/vnd.nintendo.snes.rom": {
-    "source": "iana"
-  },
-  "application/vnd.nitf": {
-    "source": "iana",
-    "extensions": ["ntf","nitf"]
-  },
-  "application/vnd.noblenet-directory": {
-    "source": "iana",
-    "extensions": ["nnd"]
-  },
-  "application/vnd.noblenet-sealer": {
-    "source": "iana",
-    "extensions": ["nns"]
-  },
-  "application/vnd.noblenet-web": {
-    "source": "iana",
-    "extensions": ["nnw"]
-  },
-  "application/vnd.nokia.catalogs": {
-    "source": "iana"
-  },
-  "application/vnd.nokia.conml+wbxml": {
-    "source": "iana"
-  },
-  "application/vnd.nokia.conml+xml": {
-    "source": "iana"
-  },
-  "application/vnd.nokia.iptv.config+xml": {
-    "source": "iana"
-  },
-  "application/vnd.nokia.isds-radio-presets": {
-    "source": "iana"
-  },
-  "application/vnd.nokia.landmark+wbxml": {
-    "source": "iana"
-  },
-  "application/vnd.nokia.landmark+xml": {
-    "source": "iana"
-  },
-  "application/vnd.nokia.landmarkcollection+xml": {
-    "source": "iana"
-  },
-  "application/vnd.nokia.n-gage.ac+xml": {
-    "source": "iana"
-  },
-  "application/vnd.nokia.n-gage.data": {
-    "source": "iana",
-    "extensions": ["ngdat"]
-  },
-  "application/vnd.nokia.n-gage.symbian.install": {
-    "source": "iana"
-  },
-  "application/vnd.nokia.ncd": {
-    "source": "iana"
-  },
-  "application/vnd.nokia.pcd+wbxml": {
-    "source": "iana"
-  },
-  "application/vnd.nokia.pcd+xml": {
-    "source": "iana"
-  },
-  "application/vnd.nokia.radio-preset": {
-    "source": "iana",
-    "extensions": ["rpst"]
-  },
-  "application/vnd.nokia.radio-presets": {
-    "source": "iana",
-    "extensions": ["rpss"]
-  },
-  "application/vnd.novadigm.edm": {
-    "source": "iana",
-    "extensions": ["edm"]
-  },
-  "application/vnd.novadigm.edx": {
-    "source": "iana",
-    "extensions": ["edx"]
-  },
-  "application/vnd.novadigm.ext": {
-    "source": "iana",
-    "extensions": ["ext"]
-  },
-  "application/vnd.ntt-local.content-share": {
-    "source": "iana"
-  },
-  "application/vnd.ntt-local.file-transfer": {
-    "source": "iana"
-  },
-  "application/vnd.ntt-local.ogw_remote-access": {
-    "source": "iana"
-  },
-  "application/vnd.ntt-local.sip-ta_remote": {
-    "source": "iana"
-  },
-  "application/vnd.ntt-local.sip-ta_tcp_stream": {
-    "source": "iana"
-  },
-  "application/vnd.oasis.opendocument.chart": {
-    "source": "iana",
-    "extensions": ["odc"]
-  },
-  "application/vnd.oasis.opendocument.chart-template": {
-    "source": "iana",
-    "extensions": ["otc"]
-  },
-  "application/vnd.oasis.opendocument.database": {
-    "source": "iana",
-    "extensions": ["odb"]
-  },
-  "application/vnd.oasis.opendocument.formula": {
-    "source": "iana",
-    "extensions": ["odf"]
-  },
-  "application/vnd.oasis.opendocument.formula-template": {
-    "source": "iana",
-    "extensions": ["odft"]
-  },
-  "application/vnd.oasis.opendocument.graphics": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["odg"]
-  },
-  "application/vnd.oasis.opendocument.graphics-template": {
-    "source": "iana",
-    "extensions": ["otg"]
-  },
-  "application/vnd.oasis.opendocument.image": {
-    "source": "iana",
-    "extensions": ["odi"]
-  },
-  "application/vnd.oasis.opendocument.image-template": {
-    "source": "iana",
-    "extensions": ["oti"]
-  },
-  "application/vnd.oasis.opendocument.presentation": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["odp"]
-  },
-  "application/vnd.oasis.opendocument.presentation-template": {
-    "source": "iana",
-    "extensions": ["otp"]
-  },
-  "application/vnd.oasis.opendocument.spreadsheet": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["ods"]
-  },
-  "application/vnd.oasis.opendocument.spreadsheet-template": {
-    "source": "iana",
-    "extensions": ["ots"]
-  },
-  "application/vnd.oasis.opendocument.text": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["odt"]
-  },
-  "application/vnd.oasis.opendocument.text-master": {
-    "source": "iana",
-    "extensions": ["odm"]
-  },
-  "application/vnd.oasis.opendocument.text-template": {
-    "source": "iana",
-    "extensions": ["ott"]
-  },
-  "application/vnd.oasis.opendocument.text-web": {
-    "source": "iana",
-    "extensions": ["oth"]
-  },
-  "application/vnd.obn": {
-    "source": "iana"
-  },
-  "application/vnd.oftn.l10n+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.oipf.contentaccessdownload+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oipf.contentaccessstreaming+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oipf.cspg-hexbinary": {
-    "source": "iana"
-  },
-  "application/vnd.oipf.dae.svg+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oipf.dae.xhtml+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oipf.mippvcontrolmessage+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oipf.pae.gem": {
-    "source": "iana"
-  },
-  "application/vnd.oipf.spdiscovery+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oipf.spdlist+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oipf.ueprofile+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oipf.userprofile+xml": {
-    "source": "iana"
-  },
-  "application/vnd.olpc-sugar": {
-    "source": "iana",
-    "extensions": ["xo"]
-  },
-  "application/vnd.oma-scws-config": {
-    "source": "iana"
-  },
-  "application/vnd.oma-scws-http-request": {
-    "source": "iana"
-  },
-  "application/vnd.oma-scws-http-response": {
-    "source": "iana"
-  },
-  "application/vnd.oma.bcast.associated-procedure-parameter+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.bcast.drm-trigger+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.bcast.imd+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.bcast.ltkm": {
-    "source": "iana"
-  },
-  "application/vnd.oma.bcast.notification+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.bcast.provisioningtrigger": {
-    "source": "iana"
-  },
-  "application/vnd.oma.bcast.sgboot": {
-    "source": "iana"
-  },
-  "application/vnd.oma.bcast.sgdd+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.bcast.sgdu": {
-    "source": "iana"
-  },
-  "application/vnd.oma.bcast.simple-symbol-container": {
-    "source": "iana"
-  },
-  "application/vnd.oma.bcast.smartcard-trigger+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.bcast.sprov+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.bcast.stkm": {
-    "source": "iana"
-  },
-  "application/vnd.oma.cab-address-book+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.cab-feature-handler+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.cab-pcc+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.cab-subs-invite+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.cab-user-prefs+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.dcd": {
-    "source": "iana"
-  },
-  "application/vnd.oma.dcdc": {
-    "source": "iana"
-  },
-  "application/vnd.oma.dd2+xml": {
-    "source": "iana",
-    "extensions": ["dd2"]
-  },
-  "application/vnd.oma.drm.risd+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.group-usage-list+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.pal+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.poc.detailed-progress-report+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.poc.final-report+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.poc.groups+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.poc.invocation-descriptor+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.poc.optimized-progress-report+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.push": {
-    "source": "iana"
-  },
-  "application/vnd.oma.scidm.messages+xml": {
-    "source": "iana"
-  },
-  "application/vnd.oma.xcap-directory+xml": {
-    "source": "iana"
-  },
-  "application/vnd.omads-email+xml": {
-    "source": "iana"
-  },
-  "application/vnd.omads-file+xml": {
-    "source": "iana"
-  },
-  "application/vnd.omads-folder+xml": {
-    "source": "iana"
-  },
-  "application/vnd.omaloc-supl-init": {
-    "source": "iana"
-  },
-  "application/vnd.openeye.oeb": {
-    "source": "iana"
-  },
-  "application/vnd.openofficeorg.extension": {
-    "source": "apache",
-    "extensions": ["oxt"]
-  },
-  "application/vnd.openxmlformats-officedocument.custom-properties+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.customxmlproperties+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.drawing+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.drawingml.chart+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.drawingml.chartshapes+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.drawingml.diagramcolors+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.drawingml.diagramdata+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.drawingml.diagramlayout+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.drawingml.diagramstyle+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.extended-properties+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml-template": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.commentauthors+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.comments+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.handoutmaster+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.notesmaster+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.notesslide+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["pptx"]
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.presprops+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.slide": {
-    "source": "iana",
-    "extensions": ["sldx"]
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.slide+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.slidelayout+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.slidemaster+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.slideshow": {
-    "source": "iana",
-    "extensions": ["ppsx"]
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.slideshow.main+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.slideupdateinfo+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.tablestyles+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.tags+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.template": {
-    "source": "apache",
-    "extensions": ["potx"]
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.template.main+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.viewprops+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml-template": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.calcchain+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.chartsheet+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.connections+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.dialogsheet+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.externallink+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.pivotcachedefinition+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.pivotcacherecords+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.pivottable+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.querytable+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.revisionheaders+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.revisionlog+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedstrings+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["xlsx"]
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheetmetadata+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.tablesinglecells+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.template": {
-    "source": "apache",
-    "extensions": ["xltx"]
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.template.main+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.usernames+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.volatiledependencies+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.theme+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.themeoverride+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.vmldrawing": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml-template": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.comments+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["docx"]
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document.glossary+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.endnotes+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.fonttable+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.template": {
-    "source": "apache",
-    "extensions": ["dotx"]
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.template.main+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.websettings+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-package.core-properties+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-package.digital-signature-xmlsignature+xml": {
-    "source": "iana"
-  },
-  "application/vnd.openxmlformats-package.relationships+xml": {
-    "source": "iana"
-  },
-  "application/vnd.orange.indata": {
-    "source": "iana"
-  },
-  "application/vnd.osa.netdeploy": {
-    "source": "iana"
-  },
-  "application/vnd.osgeo.mapguide.package": {
-    "source": "iana",
-    "extensions": ["mgp"]
-  },
-  "application/vnd.osgi.bundle": {
-    "source": "iana"
-  },
-  "application/vnd.osgi.dp": {
-    "source": "iana",
-    "extensions": ["dp"]
-  },
-  "application/vnd.osgi.subsystem": {
-    "source": "iana",
-    "extensions": ["esa"]
-  },
-  "application/vnd.otps.ct-kip+xml": {
-    "source": "iana"
-  },
-  "application/vnd.palm": {
-    "source": "iana",
-    "extensions": ["pdb","pqa","oprc"]
-  },
-  "application/vnd.panoply": {
-    "source": "iana"
-  },
-  "application/vnd.paos+xml": {
-    "source": "iana"
-  },
-  "application/vnd.paos.xml": {
-    "source": "apache"
-  },
-  "application/vnd.pawaafile": {
-    "source": "iana",
-    "extensions": ["paw"]
-  },
-  "application/vnd.pcos": {
-    "source": "iana"
-  },
-  "application/vnd.pg.format": {
-    "source": "iana",
-    "extensions": ["str"]
-  },
-  "application/vnd.pg.osasli": {
-    "source": "iana",
-    "extensions": ["ei6"]
-  },
-  "application/vnd.piaccess.application-licence": {
-    "source": "iana"
-  },
-  "application/vnd.picsel": {
-    "source": "iana",
-    "extensions": ["efif"]
-  },
-  "application/vnd.pmi.widget": {
-    "source": "iana",
-    "extensions": ["wg"]
-  },
-  "application/vnd.poc.group-advertisement+xml": {
-    "source": "iana"
-  },
-  "application/vnd.pocketlearn": {
-    "source": "iana",
-    "extensions": ["plf"]
-  },
-  "application/vnd.powerbuilder6": {
-    "source": "iana",
-    "extensions": ["pbd"]
-  },
-  "application/vnd.powerbuilder6-s": {
-    "source": "iana"
-  },
-  "application/vnd.powerbuilder7": {
-    "source": "iana"
-  },
-  "application/vnd.powerbuilder7-s": {
-    "source": "iana"
-  },
-  "application/vnd.powerbuilder75": {
-    "source": "iana"
-  },
-  "application/vnd.powerbuilder75-s": {
-    "source": "iana"
-  },
-  "application/vnd.preminet": {
-    "source": "iana"
-  },
-  "application/vnd.previewsystems.box": {
-    "source": "iana",
-    "extensions": ["box"]
-  },
-  "application/vnd.proteus.magazine": {
-    "source": "iana",
-    "extensions": ["mgz"]
-  },
-  "application/vnd.publishare-delta-tree": {
-    "source": "iana",
-    "extensions": ["qps"]
-  },
-  "application/vnd.pvi.ptid1": {
-    "source": "iana",
-    "extensions": ["ptid"]
-  },
-  "application/vnd.pwg-multiplexed": {
-    "source": "apache"
-  },
-  "application/vnd.pwg-xhtml-print+xml": {
-    "source": "iana"
-  },
-  "application/vnd.qualcomm.brew-app-res": {
-    "source": "iana"
-  },
-  "application/vnd.quark.quarkxpress": {
-    "source": "iana",
-    "extensions": ["qxd","qxt","qwd","qwt","qxl","qxb"]
-  },
-  "application/vnd.quobject-quoxdocument": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.moml+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml-audit+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml-audit-conf+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml-audit-conn+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml-audit-dialog+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml-audit-stream+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml-conf+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml-dialog+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml-dialog-base+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml-dialog-fax-detect+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml-dialog-fax-sendrecv+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml-dialog-group+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml-dialog-speech+xml": {
-    "source": "iana"
-  },
-  "application/vnd.radisys.msml-dialog-transform+xml": {
-    "source": "iana"
-  },
-  "application/vnd.rainstor.data": {
-    "source": "iana"
-  },
-  "application/vnd.rapid": {
-    "source": "iana"
-  },
-  "application/vnd.realvnc.bed": {
-    "source": "iana",
-    "extensions": ["bed"]
-  },
-  "application/vnd.recordare.musicxml": {
-    "source": "iana",
-    "extensions": ["mxl"]
-  },
-  "application/vnd.recordare.musicxml+xml": {
-    "source": "iana",
-    "extensions": ["musicxml"]
-  },
-  "application/vnd.renlearn.rlprint": {
-    "source": "iana"
-  },
-  "application/vnd.rig.cryptonote": {
-    "source": "iana",
-    "extensions": ["cryptonote"]
-  },
-  "application/vnd.rim.cod": {
-    "source": "apache",
-    "extensions": ["cod"]
-  },
-  "application/vnd.rn-realmedia": {
-    "source": "apache",
-    "extensions": ["rm"]
-  },
-  "application/vnd.rn-realmedia-vbr": {
-    "source": "apache",
-    "extensions": ["rmvb"]
-  },
-  "application/vnd.route66.link66+xml": {
-    "source": "iana",
-    "extensions": ["link66"]
-  },
-  "application/vnd.rs-274x": {
-    "source": "iana"
-  },
-  "application/vnd.ruckus.download": {
-    "source": "iana"
-  },
-  "application/vnd.s3sms": {
-    "source": "iana"
-  },
-  "application/vnd.sailingtracker.track": {
-    "source": "iana",
-    "extensions": ["st"]
-  },
-  "application/vnd.sbm.cid": {
-    "source": "iana"
-  },
-  "application/vnd.sbm.mid2": {
-    "source": "iana"
-  },
-  "application/vnd.scribus": {
-    "source": "iana"
-  },
-  "application/vnd.sealed-doc": {
-    "source": "iana"
-  },
-  "application/vnd.sealed-eml": {
-    "source": "iana"
-  },
-  "application/vnd.sealed-mht": {
-    "source": "iana"
-  },
-  "application/vnd.sealed-ppt": {
-    "source": "iana"
-  },
-  "application/vnd.sealed-tiff": {
-    "source": "iana"
-  },
-  "application/vnd.sealed-xls": {
-    "source": "iana"
-  },
-  "application/vnd.sealed.3df": {
-    "source": "iana"
-  },
-  "application/vnd.sealed.csf": {
-    "source": "iana"
-  },
-  "application/vnd.sealed.doc": {
-    "source": "apache"
-  },
-  "application/vnd.sealed.eml": {
-    "source": "apache"
-  },
-  "application/vnd.sealed.mht": {
-    "source": "apache"
-  },
-  "application/vnd.sealed.net": {
-    "source": "iana"
-  },
-  "application/vnd.sealed.ppt": {
-    "source": "apache"
-  },
-  "application/vnd.sealed.tiff": {
-    "source": "apache"
-  },
-  "application/vnd.sealed.xls": {
-    "source": "apache"
-  },
-  "application/vnd.sealedmedia.softseal-html": {
-    "source": "iana"
-  },
-  "application/vnd.sealedmedia.softseal-pdf": {
-    "source": "iana"
-  },
-  "application/vnd.sealedmedia.softseal.html": {
-    "source": "apache"
-  },
-  "application/vnd.sealedmedia.softseal.pdf": {
-    "source": "apache"
-  },
-  "application/vnd.seemail": {
-    "source": "iana",
-    "extensions": ["see"]
-  },
-  "application/vnd.sema": {
-    "source": "apache",
-    "extensions": ["sema"]
-  },
-  "application/vnd.semd": {
-    "source": "iana",
-    "extensions": ["semd"]
-  },
-  "application/vnd.semf": {
-    "source": "iana",
-    "extensions": ["semf"]
-  },
-  "application/vnd.shana.informed.formdata": {
-    "source": "iana",
-    "extensions": ["ifm"]
-  },
-  "application/vnd.shana.informed.formtemplate": {
-    "source": "iana",
-    "extensions": ["itp"]
-  },
-  "application/vnd.shana.informed.interchange": {
-    "source": "iana",
-    "extensions": ["iif"]
-  },
-  "application/vnd.shana.informed.package": {
-    "source": "iana",
-    "extensions": ["ipk"]
-  },
-  "application/vnd.simtech-mindmapper": {
-    "source": "iana",
-    "extensions": ["twd","twds"]
-  },
-  "application/vnd.siren+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.smaf": {
-    "source": "iana",
-    "extensions": ["mmf"]
-  },
-  "application/vnd.smart.notebook": {
-    "source": "iana"
-  },
-  "application/vnd.smart.teacher": {
-    "source": "iana",
-    "extensions": ["teacher"]
-  },
-  "application/vnd.software602.filler.form+xml": {
-    "source": "iana"
-  },
-  "application/vnd.software602.filler.form-xml-zip": {
-    "source": "iana"
-  },
-  "application/vnd.solent.sdkm+xml": {
-    "source": "iana",
-    "extensions": ["sdkm","sdkd"]
-  },
-  "application/vnd.spotfire.dxp": {
-    "source": "iana",
-    "extensions": ["dxp"]
-  },
-  "application/vnd.spotfire.sfs": {
-    "source": "iana",
-    "extensions": ["sfs"]
-  },
-  "application/vnd.sss-cod": {
-    "source": "iana"
-  },
-  "application/vnd.sss-dtf": {
-    "source": "iana"
-  },
-  "application/vnd.sss-ntf": {
-    "source": "iana"
-  },
-  "application/vnd.stardivision.calc": {
-    "source": "apache",
-    "extensions": ["sdc"]
-  },
-  "application/vnd.stardivision.draw": {
-    "source": "apache",
-    "extensions": ["sda"]
-  },
-  "application/vnd.stardivision.impress": {
-    "source": "apache",
-    "extensions": ["sdd"]
-  },
-  "application/vnd.stardivision.math": {
-    "source": "apache",
-    "extensions": ["smf"]
-  },
-  "application/vnd.stardivision.writer": {
-    "source": "apache",
-    "extensions": ["sdw","vor"]
-  },
-  "application/vnd.stardivision.writer-global": {
-    "source": "apache",
-    "extensions": ["sgl"]
-  },
-  "application/vnd.stepmania.package": {
-    "source": "iana",
-    "extensions": ["smzip"]
-  },
-  "application/vnd.stepmania.stepchart": {
-    "source": "iana",
-    "extensions": ["sm"]
-  },
-  "application/vnd.street-stream": {
-    "source": "iana"
-  },
-  "application/vnd.sun.wadl+xml": {
-    "source": "iana"
-  },
-  "application/vnd.sun.xml.calc": {
-    "source": "apache",
-    "extensions": ["sxc"]
-  },
-  "application/vnd.sun.xml.calc.template": {
-    "source": "apache",
-    "extensions": ["stc"]
-  },
-  "application/vnd.sun.xml.draw": {
-    "source": "apache",
-    "extensions": ["sxd"]
-  },
-  "application/vnd.sun.xml.draw.template": {
-    "source": "apache",
-    "extensions": ["std"]
-  },
-  "application/vnd.sun.xml.impress": {
-    "source": "apache",
-    "extensions": ["sxi"]
-  },
-  "application/vnd.sun.xml.impress.template": {
-    "source": "apache",
-    "extensions": ["sti"]
-  },
-  "application/vnd.sun.xml.math": {
-    "source": "apache",
-    "extensions": ["sxm"]
-  },
-  "application/vnd.sun.xml.writer": {
-    "source": "apache",
-    "extensions": ["sxw"]
-  },
-  "application/vnd.sun.xml.writer.global": {
-    "source": "apache",
-    "extensions": ["sxg"]
-  },
-  "application/vnd.sun.xml.writer.template": {
-    "source": "apache",
-    "extensions": ["stw"]
-  },
-  "application/vnd.sus-calendar": {
-    "source": "iana",
-    "extensions": ["sus","susp"]
-  },
-  "application/vnd.svd": {
-    "source": "iana",
-    "extensions": ["svd"]
-  },
-  "application/vnd.swiftview-ics": {
-    "source": "iana"
-  },
-  "application/vnd.symbian.install": {
-    "source": "apache",
-    "extensions": ["sis","sisx"]
-  },
-  "application/vnd.syncml+xml": {
-    "source": "iana",
-    "extensions": ["xsm"]
-  },
-  "application/vnd.syncml.dm+wbxml": {
-    "source": "iana",
-    "extensions": ["bdm"]
-  },
-  "application/vnd.syncml.dm+xml": {
-    "source": "iana",
-    "extensions": ["xdm"]
-  },
-  "application/vnd.syncml.dm.notification": {
-    "source": "iana"
-  },
-  "application/vnd.syncml.dmddf+wbxml": {
-    "source": "iana"
-  },
-  "application/vnd.syncml.dmddf+xml": {
-    "source": "iana"
-  },
-  "application/vnd.syncml.dmtnds+wbxml": {
-    "source": "iana"
-  },
-  "application/vnd.syncml.dmtnds+xml": {
-    "source": "iana"
-  },
-  "application/vnd.syncml.ds.notification": {
-    "source": "iana"
-  },
-  "application/vnd.tao.intent-module-archive": {
-    "source": "iana",
-    "extensions": ["tao"]
-  },
-  "application/vnd.tcpdump.pcap": {
-    "source": "iana",
-    "extensions": ["pcap","cap","dmp"]
-  },
-  "application/vnd.tmd.mediaflex.api+xml": {
-    "source": "iana"
-  },
-  "application/vnd.tmobile-livetv": {
-    "source": "iana",
-    "extensions": ["tmo"]
-  },
-  "application/vnd.trid.tpt": {
-    "source": "iana",
-    "extensions": ["tpt"]
-  },
-  "application/vnd.triscape.mxs": {
-    "source": "iana",
-    "extensions": ["mxs"]
-  },
-  "application/vnd.trueapp": {
-    "source": "iana",
-    "extensions": ["tra"]
-  },
-  "application/vnd.truedoc": {
-    "source": "iana"
-  },
-  "application/vnd.ubisoft.webplayer": {
-    "source": "iana"
-  },
-  "application/vnd.ufdl": {
-    "source": "iana",
-    "extensions": ["ufd","ufdl"]
-  },
-  "application/vnd.uiq.theme": {
-    "source": "iana",
-    "extensions": ["utz"]
-  },
-  "application/vnd.umajin": {
-    "source": "iana",
-    "extensions": ["umj"]
-  },
-  "application/vnd.unity": {
-    "source": "iana",
-    "extensions": ["unityweb"]
-  },
-  "application/vnd.uoml+xml": {
-    "source": "iana",
-    "extensions": ["uoml"]
-  },
-  "application/vnd.uplanet.alert": {
-    "source": "iana"
-  },
-  "application/vnd.uplanet.alert-wbxml": {
-    "source": "iana"
-  },
-  "application/vnd.uplanet.bearer-choice": {
-    "source": "iana"
-  },
-  "application/vnd.uplanet.bearer-choice-wbxml": {
-    "source": "iana"
-  },
-  "application/vnd.uplanet.cacheop": {
-    "source": "iana"
-  },
-  "application/vnd.uplanet.cacheop-wbxml": {
-    "source": "iana"
-  },
-  "application/vnd.uplanet.channel": {
-    "source": "iana"
-  },
-  "application/vnd.uplanet.channel-wbxml": {
-    "source": "iana"
-  },
-  "application/vnd.uplanet.list": {
-    "source": "iana"
-  },
-  "application/vnd.uplanet.list-wbxml": {
-    "source": "iana"
-  },
-  "application/vnd.uplanet.listcmd": {
-    "source": "iana"
-  },
-  "application/vnd.uplanet.listcmd-wbxml": {
-    "source": "iana"
-  },
-  "application/vnd.uplanet.signal": {
-    "source": "iana"
-  },
-  "application/vnd.valve.source.material": {
-    "source": "iana"
-  },
-  "application/vnd.vcx": {
-    "source": "iana",
-    "extensions": ["vcx"]
-  },
-  "application/vnd.vd-study": {
-    "source": "iana"
-  },
-  "application/vnd.vectorworks": {
-    "source": "iana"
-  },
-  "application/vnd.verimatrix.vcas": {
-    "source": "iana"
-  },
-  "application/vnd.vidsoft.vidconference": {
-    "source": "iana"
-  },
-  "application/vnd.visio": {
-    "source": "iana",
-    "extensions": ["vsd","vst","vss","vsw"]
-  },
-  "application/vnd.visionary": {
-    "source": "iana",
-    "extensions": ["vis"]
-  },
-  "application/vnd.vividence.scriptfile": {
-    "source": "iana"
-  },
-  "application/vnd.vsf": {
-    "source": "iana",
-    "extensions": ["vsf"]
-  },
-  "application/vnd.wap-slc": {
-    "source": "iana"
-  },
-  "application/vnd.wap-wbxml": {
-    "source": "iana"
-  },
-  "application/vnd.wap.sic": {
-    "source": "iana"
-  },
-  "application/vnd.wap.slc": {
-    "source": "apache"
-  },
-  "application/vnd.wap.wbxml": {
-    "source": "apache",
-    "extensions": ["wbxml"]
-  },
-  "application/vnd.wap.wmlc": {
-    "source": "apache",
-    "extensions": ["wmlc"]
-  },
-  "application/vnd.wap.wmlscriptc": {
-    "source": "iana",
-    "extensions": ["wmlsc"]
-  },
-  "application/vnd.webturbo": {
-    "source": "iana",
-    "extensions": ["wtb"]
-  },
-  "application/vnd.wfa.p2p": {
-    "source": "iana"
-  },
-  "application/vnd.wfa.wsc": {
-    "source": "iana"
-  },
-  "application/vnd.windows.devicepairing": {
-    "source": "iana"
-  },
-  "application/vnd.wmc": {
-    "source": "iana"
-  },
-  "application/vnd.wmf.bootstrap": {
-    "source": "iana"
-  },
-  "application/vnd.wolfram.mathematica": {
-    "source": "iana"
-  },
-  "application/vnd.wolfram.mathematica.package": {
-    "source": "iana"
-  },
-  "application/vnd.wolfram.player": {
-    "source": "iana",
-    "extensions": ["nbp"]
-  },
-  "application/vnd.wordperfect": {
-    "source": "iana",
-    "extensions": ["wpd"]
-  },
-  "application/vnd.wqd": {
-    "source": "iana",
-    "extensions": ["wqd"]
-  },
-  "application/vnd.wrq-hp3000-labelled": {
-    "source": "iana"
-  },
-  "application/vnd.wt.stf": {
-    "source": "iana",
-    "extensions": ["stf"]
-  },
-  "application/vnd.wv.csp+wbxml": {
-    "source": "iana"
-  },
-  "application/vnd.wv.csp+xml": {
-    "source": "iana"
-  },
-  "application/vnd.wv.ssp+xml": {
-    "source": "iana"
-  },
-  "application/vnd.xacml+json": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/vnd.xara": {
-    "source": "iana",
-    "extensions": ["xar"]
-  },
-  "application/vnd.xfdl": {
-    "source": "iana",
-    "extensions": ["xfdl"]
-  },
-  "application/vnd.xfdl.webform": {
-    "source": "iana"
-  },
-  "application/vnd.xmi+xml": {
-    "source": "iana"
-  },
-  "application/vnd.xmpie.cpkg": {
-    "source": "iana"
-  },
-  "application/vnd.xmpie.dpkg": {
-    "source": "iana"
-  },
-  "application/vnd.xmpie.plan": {
-    "source": "iana"
-  },
-  "application/vnd.xmpie.ppkg": {
-    "source": "iana"
-  },
-  "application/vnd.xmpie.xlim": {
-    "source": "iana"
-  },
-  "application/vnd.yamaha.hv-dic": {
-    "source": "iana",
-    "extensions": ["hvd"]
-  },
-  "application/vnd.yamaha.hv-script": {
-    "source": "iana",
-    "extensions": ["hvs"]
-  },
-  "application/vnd.yamaha.hv-voice": {
-    "source": "iana",
-    "extensions": ["hvp"]
-  },
-  "application/vnd.yamaha.openscoreformat": {
-    "source": "iana",
-    "extensions": ["osf"]
-  },
-  "application/vnd.yamaha.openscoreformat.osfpvg+xml": {
-    "source": "iana",
-    "extensions": ["osfpvg"]
-  },
-  "application/vnd.yamaha.remote-setup": {
-    "source": "iana"
-  },
-  "application/vnd.yamaha.smaf-audio": {
-    "source": "iana",
-    "extensions": ["saf"]
-  },
-  "application/vnd.yamaha.smaf-phrase": {
-    "source": "iana",
-    "extensions": ["spf"]
-  },
-  "application/vnd.yamaha.through-ngn": {
-    "source": "iana"
-  },
-  "application/vnd.yamaha.tunnel-udpencap": {
-    "source": "iana"
-  },
-  "application/vnd.yaoweme": {
-    "source": "iana"
-  },
-  "application/vnd.yellowriver-custom-menu": {
-    "source": "iana",
-    "extensions": ["cmp"]
-  },
-  "application/vnd.zul": {
-    "source": "iana",
-    "extensions": ["zir","zirz"]
-  },
-  "application/vnd.zzazz.deck+xml": {
-    "source": "iana",
-    "extensions": ["zaz"]
-  },
-  "application/voicexml+xml": {
-    "source": "iana",
-    "extensions": ["vxml"]
-  },
-  "application/vq-rtcpxr": {
-    "source": "iana"
-  },
-  "application/vwg-multiplexed": {
-    "source": "iana"
-  },
-  "application/watcherinfo+xml": {
-    "source": "iana"
-  },
-  "application/whoispp-query": {
-    "source": "iana"
-  },
-  "application/whoispp-response": {
-    "source": "iana"
-  },
-  "application/widget": {
-    "source": "iana",
-    "extensions": ["wgt"]
-  },
-  "application/winhlp": {
-    "source": "apache",
-    "extensions": ["hlp"]
-  },
-  "application/wita": {
-    "source": "iana"
-  },
-  "application/wordperfect5.1": {
-    "source": "iana"
-  },
-  "application/wsdl+xml": {
-    "source": "iana",
-    "extensions": ["wsdl"]
-  },
-  "application/wspolicy+xml": {
-    "source": "iana",
-    "extensions": ["wspolicy"]
-  },
-  "application/x-7z-compressed": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["7z"]
-  },
-  "application/x-abiword": {
-    "source": "apache",
-    "extensions": ["abw"]
-  },
-  "application/x-ace-compressed": {
-    "source": "apache",
-    "extensions": ["ace"]
-  },
-  "application/x-amf": {
-    "source": "apache"
-  },
-  "application/x-apple-diskimage": {
-    "source": "apache",
-    "extensions": ["dmg"]
-  },
-  "application/x-authorware-bin": {
-    "source": "apache",
-    "extensions": ["aab","x32","u32","vox"]
-  },
-  "application/x-authorware-map": {
-    "source": "apache",
-    "extensions": ["aam"]
-  },
-  "application/x-authorware-seg": {
-    "source": "apache",
-    "extensions": ["aas"]
-  },
-  "application/x-bcpio": {
-    "source": "apache",
-    "extensions": ["bcpio"]
-  },
-  "application/x-bittorrent": {
-    "source": "apache",
-    "extensions": ["torrent"]
-  },
-  "application/x-blorb": {
-    "source": "apache",
-    "extensions": ["blb","blorb"]
-  },
-  "application/x-bzip": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["bz"]
-  },
-  "application/x-bzip2": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["bz2","boz"]
-  },
-  "application/x-cbr": {
-    "source": "apache",
-    "extensions": ["cbr","cba","cbt","cbz","cb7"]
-  },
-  "application/x-cdlink": {
-    "source": "apache",
-    "extensions": ["vcd"]
-  },
-  "application/x-cfs-compressed": {
-    "source": "apache",
-    "extensions": ["cfs"]
-  },
-  "application/x-chat": {
-    "source": "apache",
-    "extensions": ["chat"]
-  },
-  "application/x-chess-pgn": {
-    "source": "apache",
-    "extensions": ["pgn"]
-  },
-  "application/x-chrome-extension": {
-    "extensions": ["crx"]
-  },
-  "application/x-compress": {
-    "source": "apache"
-  },
-  "application/x-conference": {
-    "source": "apache",
-    "extensions": ["nsc"]
-  },
-  "application/x-cpio": {
-    "source": "apache",
-    "extensions": ["cpio"]
-  },
-  "application/x-csh": {
-    "source": "apache",
-    "extensions": ["csh"]
-  },
-  "application/x-deb": {
-    "compressible": false
-  },
-  "application/x-debian-package": {
-    "source": "apache",
-    "extensions": ["deb","udeb"]
-  },
-  "application/x-dgc-compressed": {
-    "source": "apache",
-    "extensions": ["dgc"]
-  },
-  "application/x-director": {
-    "source": "apache",
-    "extensions": ["dir","dcr","dxr","cst","cct","cxt","w3d","fgd","swa"]
-  },
-  "application/x-doom": {
-    "source": "apache",
-    "extensions": ["wad"]
-  },
-  "application/x-dtbncx+xml": {
-    "source": "apache",
-    "extensions": ["ncx"]
-  },
-  "application/x-dtbook+xml": {
-    "source": "apache",
-    "extensions": ["dtb"]
-  },
-  "application/x-dtbresource+xml": {
-    "source": "apache",
-    "extensions": ["res"]
-  },
-  "application/x-dvi": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["dvi"]
-  },
-  "application/x-envoy": {
-    "source": "apache",
-    "extensions": ["evy"]
-  },
-  "application/x-eva": {
-    "source": "apache",
-    "extensions": ["eva"]
-  },
-  "application/x-font-bdf": {
-    "source": "apache",
-    "extensions": ["bdf"]
-  },
-  "application/x-font-dos": {
-    "source": "apache"
-  },
-  "application/x-font-framemaker": {
-    "source": "apache"
-  },
-  "application/x-font-ghostscript": {
-    "source": "apache",
-    "extensions": ["gsf"]
-  },
-  "application/x-font-libgrx": {
-    "source": "apache"
-  },
-  "application/x-font-linux-psf": {
-    "source": "apache",
-    "extensions": ["psf"]
-  },
-  "application/x-font-otf": {
-    "source": "apache",
-    "compressible": true,
-    "extensions": ["otf"]
-  },
-  "application/x-font-pcf": {
-    "source": "apache",
-    "extensions": ["pcf"]
-  },
-  "application/x-font-snf": {
-    "source": "apache",
-    "extensions": ["snf"]
-  },
-  "application/x-font-speedo": {
-    "source": "apache"
-  },
-  "application/x-font-sunos-news": {
-    "source": "apache"
-  },
-  "application/x-font-ttf": {
-    "source": "apache",
-    "compressible": true,
-    "extensions": ["ttf","ttc"]
-  },
-  "application/x-font-type1": {
-    "source": "apache",
-    "extensions": ["pfa","pfb","pfm","afm"]
-  },
-  "application/x-font-vfont": {
-    "source": "apache"
-  },
-  "application/x-freearc": {
-    "source": "apache",
-    "extensions": ["arc"]
-  },
-  "application/x-futuresplash": {
-    "source": "apache",
-    "extensions": ["spl"]
-  },
-  "application/x-gca-compressed": {
-    "source": "apache",
-    "extensions": ["gca"]
-  },
-  "application/x-glulx": {
-    "source": "apache",
-    "extensions": ["ulx"]
-  },
-  "application/x-gnumeric": {
-    "source": "apache",
-    "extensions": ["gnumeric"]
-  },
-  "application/x-gramps-xml": {
-    "source": "apache",
-    "extensions": ["gramps"]
-  },
-  "application/x-gtar": {
-    "source": "apache",
-    "extensions": ["gtar"]
-  },
-  "application/x-gzip": {
-    "source": "apache"
-  },
-  "application/x-hdf": {
-    "source": "apache",
-    "extensions": ["hdf"]
-  },
-  "application/x-install-instructions": {
-    "source": "apache",
-    "extensions": ["install"]
-  },
-  "application/x-iso9660-image": {
-    "source": "apache",
-    "extensions": ["iso"]
-  },
-  "application/x-java-jnlp-file": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["jnlp"]
-  },
-  "application/x-javascript": {
-    "compressible": true
-  },
-  "application/x-latex": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["latex"]
-  },
-  "application/x-lua-bytecode": {
-    "extensions": ["luac"]
-  },
-  "application/x-lzh-compressed": {
-    "source": "apache",
-    "extensions": ["lzh","lha"]
-  },
-  "application/x-mie": {
-    "source": "apache",
-    "extensions": ["mie"]
-  },
-  "application/x-mobipocket-ebook": {
-    "source": "apache",
-    "extensions": ["prc","mobi"]
-  },
-  "application/x-mpegurl": {
-    "compressible": false
-  },
-  "application/x-ms-application": {
-    "source": "apache",
-    "extensions": ["application"]
-  },
-  "application/x-ms-shortcut": {
-    "source": "apache",
-    "extensions": ["lnk"]
-  },
-  "application/x-ms-wmd": {
-    "source": "apache",
-    "extensions": ["wmd"]
-  },
-  "application/x-ms-wmz": {
-    "source": "apache",
-    "extensions": ["wmz"]
-  },
-  "application/x-ms-xbap": {
-    "source": "apache",
-    "extensions": ["xbap"]
-  },
-  "application/x-msaccess": {
-    "source": "apache",
-    "extensions": ["mdb"]
-  },
-  "application/x-msbinder": {
-    "source": "apache",
-    "extensions": ["obd"]
-  },
-  "application/x-mscardfile": {
-    "source": "apache",
-    "extensions": ["crd"]
-  },
-  "application/x-msclip": {
-    "source": "apache",
-    "extensions": ["clp"]
-  },
-  "application/x-msdownload": {
-    "source": "apache",
-    "extensions": ["exe","dll","com","bat","msi"]
-  },
-  "application/x-msmediaview": {
-    "source": "apache",
-    "extensions": ["mvb","m13","m14"]
-  },
-  "application/x-msmetafile": {
-    "source": "apache",
-    "extensions": ["wmf","wmz","emf","emz"]
-  },
-  "application/x-msmoney": {
-    "source": "apache",
-    "extensions": ["mny"]
-  },
-  "application/x-mspublisher": {
-    "source": "apache",
-    "extensions": ["pub"]
-  },
-  "application/x-msschedule": {
-    "source": "apache",
-    "extensions": ["scd"]
-  },
-  "application/x-msterminal": {
-    "source": "apache",
-    "extensions": ["trm"]
-  },
-  "application/x-mswrite": {
-    "source": "apache",
-    "extensions": ["wri"]
-  },
-  "application/x-netcdf": {
-    "source": "apache",
-    "extensions": ["nc","cdf"]
-  },
-  "application/x-nzb": {
-    "source": "apache",
-    "extensions": ["nzb"]
-  },
-  "application/x-pkcs12": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["p12","pfx"]
-  },
-  "application/x-pkcs7-certificates": {
-    "source": "apache",
-    "extensions": ["p7b","spc"]
-  },
-  "application/x-pkcs7-certreqresp": {
-    "source": "apache",
-    "extensions": ["p7r"]
-  },
-  "application/x-rar-compressed": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["rar"]
-  },
-  "application/x-research-info-systems": {
-    "source": "apache",
-    "extensions": ["ris"]
-  },
-  "application/x-sh": {
-    "source": "apache",
-    "compressible": true,
-    "extensions": ["sh"]
-  },
-  "application/x-shar": {
-    "source": "apache",
-    "extensions": ["shar"]
-  },
-  "application/x-shockwave-flash": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["swf"]
-  },
-  "application/x-silverlight-app": {
-    "source": "apache",
-    "extensions": ["xap"]
-  },
-  "application/x-sql": {
-    "source": "apache",
-    "extensions": ["sql"]
-  },
-  "application/x-stuffit": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["sit"]
-  },
-  "application/x-stuffitx": {
-    "source": "apache",
-    "extensions": ["sitx"]
-  },
-  "application/x-subrip": {
-    "source": "apache",
-    "extensions": ["srt"]
-  },
-  "application/x-sv4cpio": {
-    "source": "apache",
-    "extensions": ["sv4cpio"]
-  },
-  "application/x-sv4crc": {
-    "source": "apache",
-    "extensions": ["sv4crc"]
-  },
-  "application/x-t3vm-image": {
-    "source": "apache",
-    "extensions": ["t3"]
-  },
-  "application/x-tads": {
-    "source": "apache",
-    "extensions": ["gam"]
-  },
-  "application/x-tar": {
-    "source": "apache",
-    "compressible": true,
-    "extensions": ["tar"]
-  },
-  "application/x-tcl": {
-    "source": "apache",
-    "extensions": ["tcl"]
-  },
-  "application/x-tex": {
-    "source": "apache",
-    "extensions": ["tex"]
-  },
-  "application/x-tex-tfm": {
-    "source": "apache",
-    "extensions": ["tfm"]
-  },
-  "application/x-texinfo": {
-    "source": "apache",
-    "extensions": ["texinfo","texi"]
-  },
-  "application/x-tgif": {
-    "source": "apache",
-    "extensions": ["obj"]
-  },
-  "application/x-ustar": {
-    "source": "apache",
-    "extensions": ["ustar"]
-  },
-  "application/x-wais-source": {
-    "source": "apache",
-    "extensions": ["src"]
-  },
-  "application/x-web-app-manifest+json": {
-    "compressible": true,
-    "extensions": ["webapp"]
-  },
-  "application/x-www-form-urlencoded": {
-    "source": "iana",
-    "compressible": true
-  },
-  "application/x-x509-ca-cert": {
-    "source": "apache",
-    "extensions": ["der","crt"]
-  },
-  "application/x-xfig": {
-    "source": "apache",
-    "extensions": ["fig"]
-  },
-  "application/x-xliff+xml": {
-    "source": "apache",
-    "extensions": ["xlf"]
-  },
-  "application/x-xpinstall": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["xpi"]
-  },
-  "application/x-xz": {
-    "source": "apache",
-    "extensions": ["xz"]
-  },
-  "application/x-zmachine": {
-    "source": "apache",
-    "extensions": ["z1","z2","z3","z4","z5","z6","z7","z8"]
-  },
-  "application/x400-bp": {
-    "source": "iana"
-  },
-  "application/xacml+xml": {
-    "source": "iana"
-  },
-  "application/xaml+xml": {
-    "source": "apache",
-    "extensions": ["xaml"]
-  },
-  "application/xcap-att+xml": {
-    "source": "iana"
-  },
-  "application/xcap-caps+xml": {
-    "source": "iana"
-  },
-  "application/xcap-diff+xml": {
-    "source": "iana",
-    "extensions": ["xdf"]
-  },
-  "application/xcap-el+xml": {
-    "source": "iana"
-  },
-  "application/xcap-error+xml": {
-    "source": "iana"
-  },
-  "application/xcap-ns+xml": {
-    "source": "iana"
-  },
-  "application/xcon-conference-info+xml": {
-    "source": "iana"
-  },
-  "application/xcon-conference-info-diff+xml": {
-    "source": "iana"
-  },
-  "application/xenc+xml": {
-    "source": "iana",
-    "extensions": ["xenc"]
-  },
-  "application/xhtml+xml": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["xhtml","xht"]
-  },
-  "application/xhtml-voice+xml": {
-    "source": "iana"
-  },
-  "application/xml": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["xml","xsl","xsd"]
-  },
-  "application/xml-dtd": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["dtd"]
-  },
-  "application/xml-external-parsed-entity": {
-    "source": "iana"
-  },
-  "application/xml-patch+xml": {
-    "source": "iana"
-  },
-  "application/xmpp+xml": {
-    "source": "iana"
-  },
-  "application/xop+xml": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["xop"]
-  },
-  "application/xproc+xml": {
-    "source": "apache",
-    "extensions": ["xpl"]
-  },
-  "application/xslt+xml": {
-    "source": "iana",
-    "extensions": ["xslt"]
-  },
-  "application/xspf+xml": {
-    "source": "apache",
-    "extensions": ["xspf"]
-  },
-  "application/xv+xml": {
-    "source": "iana",
-    "extensions": ["mxml","xhvml","xvml","xvm"]
-  },
-  "application/yang": {
-    "source": "iana",
-    "extensions": ["yang"]
-  },
-  "application/yin+xml": {
-    "source": "iana",
-    "extensions": ["yin"]
-  },
-  "application/zip": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["zip"]
-  },
-  "application/zlib": {
-    "source": "iana"
-  },
-  "audio/1d-interleaved-parityfec": {
-    "source": "iana"
-  },
-  "audio/32kadpcm": {
-    "source": "iana"
-  },
-  "audio/3gpp": {
-    "source": "iana"
-  },
-  "audio/3gpp2": {
-    "source": "iana"
-  },
-  "audio/ac3": {
-    "source": "iana"
-  },
-  "audio/adpcm": {
-    "source": "apache",
-    "extensions": ["adp"]
-  },
-  "audio/amr": {
-    "source": "iana"
-  },
-  "audio/amr-wb": {
-    "source": "iana"
-  },
-  "audio/amr-wb+": {
-    "source": "iana"
-  },
-  "audio/aptx": {
-    "source": "iana"
-  },
-  "audio/asc": {
-    "source": "iana"
-  },
-  "audio/atrac-advanced-lossless": {
-    "source": "iana"
-  },
-  "audio/atrac-x": {
-    "source": "iana"
-  },
-  "audio/atrac3": {
-    "source": "iana"
-  },
-  "audio/basic": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["au","snd"]
-  },
-  "audio/bv16": {
-    "source": "iana"
-  },
-  "audio/bv32": {
-    "source": "iana"
-  },
-  "audio/clearmode": {
-    "source": "iana"
-  },
-  "audio/cn": {
-    "source": "iana"
-  },
-  "audio/dat12": {
-    "source": "iana"
-  },
-  "audio/dls": {
-    "source": "iana"
-  },
-  "audio/dsr-es201108": {
-    "source": "iana"
-  },
-  "audio/dsr-es202050": {
-    "source": "iana"
-  },
-  "audio/dsr-es202211": {
-    "source": "iana"
-  },
-  "audio/dsr-es202212": {
-    "source": "iana"
-  },
-  "audio/dv": {
-    "source": "iana"
-  },
-  "audio/dvi4": {
-    "source": "iana"
-  },
-  "audio/eac3": {
-    "source": "iana"
-  },
-  "audio/encaprtp": {
-    "source": "iana"
-  },
-  "audio/evrc": {
-    "source": "iana"
-  },
-  "audio/evrc-qcp": {
-    "source": "iana"
-  },
-  "audio/evrc0": {
-    "source": "iana"
-  },
-  "audio/evrc1": {
-    "source": "iana"
-  },
-  "audio/evrcb": {
-    "source": "iana"
-  },
-  "audio/evrcb0": {
-    "source": "iana"
-  },
-  "audio/evrcb1": {
-    "source": "iana"
-  },
-  "audio/evrcnw": {
-    "source": "iana"
-  },
-  "audio/evrcnw0": {
-    "source": "iana"
-  },
-  "audio/evrcnw1": {
-    "source": "iana"
-  },
-  "audio/evrcwb": {
-    "source": "iana"
-  },
-  "audio/evrcwb0": {
-    "source": "iana"
-  },
-  "audio/evrcwb1": {
-    "source": "iana"
-  },
-  "audio/example": {
-    "source": "iana"
-  },
-  "audio/fwdred": {
-    "source": "iana"
-  },
-  "audio/g719": {
-    "source": "iana"
-  },
-  "audio/g721": {
-    "source": "iana"
-  },
-  "audio/g722": {
-    "source": "iana"
-  },
-  "audio/g7221": {
-    "source": "apache"
-  },
-  "audio/g723": {
-    "source": "iana"
-  },
-  "audio/g726-16": {
-    "source": "iana"
-  },
-  "audio/g726-24": {
-    "source": "iana"
-  },
-  "audio/g726-32": {
-    "source": "iana"
-  },
-  "audio/g726-40": {
-    "source": "iana"
-  },
-  "audio/g728": {
-    "source": "iana"
-  },
-  "audio/g729": {
-    "source": "iana"
-  },
-  "audio/g7291": {
-    "source": "iana"
-  },
-  "audio/g729d": {
-    "source": "iana"
-  },
-  "audio/g729e": {
-    "source": "iana"
-  },
-  "audio/gsm": {
-    "source": "iana"
-  },
-  "audio/gsm-efr": {
-    "source": "iana"
-  },
-  "audio/gsm-hr-08": {
-    "source": "iana"
-  },
-  "audio/ilbc": {
-    "source": "iana"
-  },
-  "audio/ip-mr_v2.5": {
-    "source": "iana"
-  },
-  "audio/isac": {
-    "source": "apache"
-  },
-  "audio/l16": {
-    "source": "iana"
-  },
-  "audio/l20": {
-    "source": "iana"
-  },
-  "audio/l24": {
-    "source": "iana",
-    "compressible": false
-  },
-  "audio/l8": {
-    "source": "iana"
-  },
-  "audio/lpc": {
-    "source": "iana"
-  },
-  "audio/midi": {
-    "source": "apache",
-    "extensions": ["mid","midi","kar","rmi"]
-  },
-  "audio/mobile-xmf": {
-    "source": "iana"
-  },
-  "audio/mp4": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["mp4a","m4a"]
-  },
-  "audio/mp4a-latm": {
-    "source": "iana"
-  },
-  "audio/mpa": {
-    "source": "iana"
-  },
-  "audio/mpa-robust": {
-    "source": "iana"
-  },
-  "audio/mpeg": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["mpga","mp2","mp2a","mp3","m2a","m3a"]
-  },
-  "audio/mpeg4-generic": {
-    "source": "iana"
-  },
-  "audio/musepack": {
-    "source": "apache"
-  },
-  "audio/ogg": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["oga","ogg","spx"]
-  },
-  "audio/opus": {
-    "source": "apache"
-  },
-  "audio/parityfec": {
-    "source": "iana"
-  },
-  "audio/pcma": {
-    "source": "iana"
-  },
-  "audio/pcma-wb": {
-    "source": "iana"
-  },
-  "audio/pcmu": {
-    "source": "iana"
-  },
-  "audio/pcmu-wb": {
-    "source": "iana"
-  },
-  "audio/prs.sid": {
-    "source": "iana"
-  },
-  "audio/qcelp": {
-    "source": "iana"
-  },
-  "audio/raptorfec": {
-    "source": "iana"
-  },
-  "audio/red": {
-    "source": "iana"
-  },
-  "audio/rtp-enc-aescm128": {
-    "source": "iana"
-  },
-  "audio/rtp-midi": {
-    "source": "iana"
-  },
-  "audio/rtploopback": {
-    "source": "iana"
-  },
-  "audio/rtx": {
-    "source": "iana"
-  },
-  "audio/s3m": {
-    "source": "apache",
-    "extensions": ["s3m"]
-  },
-  "audio/silk": {
-    "source": "apache",
-    "extensions": ["sil"]
-  },
-  "audio/smv": {
-    "source": "iana"
-  },
-  "audio/smv-qcp": {
-    "source": "iana"
-  },
-  "audio/smv0": {
-    "source": "iana"
-  },
-  "audio/sp-midi": {
-    "source": "iana"
-  },
-  "audio/speex": {
-    "source": "iana"
-  },
-  "audio/t140c": {
-    "source": "iana"
-  },
-  "audio/t38": {
-    "source": "iana"
-  },
-  "audio/telephone-event": {
-    "source": "iana"
-  },
-  "audio/tone": {
-    "source": "iana"
-  },
-  "audio/uemclip": {
-    "source": "iana"
-  },
-  "audio/ulpfec": {
-    "source": "iana"
-  },
-  "audio/vdvi": {
-    "source": "iana"
-  },
-  "audio/vmr-wb": {
-    "source": "iana"
-  },
-  "audio/vnd.3gpp.iufp": {
-    "source": "iana"
-  },
-  "audio/vnd.4sb": {
-    "source": "iana"
-  },
-  "audio/vnd.audiokoz": {
-    "source": "iana"
-  },
-  "audio/vnd.celp": {
-    "source": "iana"
-  },
-  "audio/vnd.cisco.nse": {
-    "source": "iana"
-  },
-  "audio/vnd.cmles.radio-events": {
-    "source": "iana"
-  },
-  "audio/vnd.cns.anp1": {
-    "source": "iana"
-  },
-  "audio/vnd.cns.inf1": {
-    "source": "iana"
-  },
-  "audio/vnd.dece.audio": {
-    "source": "iana",
-    "extensions": ["uva","uvva"]
-  },
-  "audio/vnd.digital-winds": {
-    "source": "iana",
-    "extensions": ["eol"]
-  },
-  "audio/vnd.dlna.adts": {
-    "source": "iana"
-  },
-  "audio/vnd.dolby.heaac.1": {
-    "source": "iana"
-  },
-  "audio/vnd.dolby.heaac.2": {
-    "source": "iana"
-  },
-  "audio/vnd.dolby.mlp": {
-    "source": "iana"
-  },
-  "audio/vnd.dolby.mps": {
-    "source": "iana"
-  },
-  "audio/vnd.dolby.pl2": {
-    "source": "iana"
-  },
-  "audio/vnd.dolby.pl2x": {
-    "source": "iana"
-  },
-  "audio/vnd.dolby.pl2z": {
-    "source": "iana"
-  },
-  "audio/vnd.dolby.pulse.1": {
-    "source": "iana"
-  },
-  "audio/vnd.dra": {
-    "source": "iana",
-    "extensions": ["dra"]
-  },
-  "audio/vnd.dts": {
-    "source": "iana",
-    "extensions": ["dts"]
-  },
-  "audio/vnd.dts.hd": {
-    "source": "iana",
-    "extensions": ["dtshd"]
-  },
-  "audio/vnd.dvb.file": {
-    "source": "iana"
-  },
-  "audio/vnd.everad.plj": {
-    "source": "iana"
-  },
-  "audio/vnd.hns.audio": {
-    "source": "iana"
-  },
-  "audio/vnd.lucent.voice": {
-    "source": "iana",
-    "extensions": ["lvp"]
-  },
-  "audio/vnd.ms-playready.media.pya": {
-    "source": "iana",
-    "extensions": ["pya"]
-  },
-  "audio/vnd.nokia.mobile-xmf": {
-    "source": "iana"
-  },
-  "audio/vnd.nortel.vbk": {
-    "source": "iana"
-  },
-  "audio/vnd.nuera.ecelp4800": {
-    "source": "iana",
-    "extensions": ["ecelp4800"]
-  },
-  "audio/vnd.nuera.ecelp7470": {
-    "source": "iana",
-    "extensions": ["ecelp7470"]
-  },
-  "audio/vnd.nuera.ecelp9600": {
-    "source": "iana",
-    "extensions": ["ecelp9600"]
-  },
-  "audio/vnd.octel.sbc": {
-    "source": "iana"
-  },
-  "audio/vnd.qcelp": {
-    "source": "iana"
-  },
-  "audio/vnd.rhetorex.32kadpcm": {
-    "source": "iana"
-  },
-  "audio/vnd.rip": {
-    "source": "iana",
-    "extensions": ["rip"]
-  },
-  "audio/vnd.rn-realaudio": {
-    "compressible": false
-  },
-  "audio/vnd.sealedmedia.softseal-mpeg": {
-    "source": "iana"
-  },
-  "audio/vnd.sealedmedia.softseal.mpeg": {
-    "source": "apache"
-  },
-  "audio/vnd.vmx.cvsd": {
-    "source": "iana"
-  },
-  "audio/vnd.wave": {
-    "compressible": false
-  },
-  "audio/vorbis": {
-    "source": "iana",
-    "compressible": false
-  },
-  "audio/vorbis-config": {
-    "source": "iana"
-  },
-  "audio/webm": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["weba"]
-  },
-  "audio/x-aac": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["aac"]
-  },
-  "audio/x-aiff": {
-    "source": "apache",
-    "extensions": ["aif","aiff","aifc"]
-  },
-  "audio/x-caf": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["caf"]
-  },
-  "audio/x-flac": {
-    "source": "apache",
-    "extensions": ["flac"]
-  },
-  "audio/x-matroska": {
-    "source": "apache",
-    "extensions": ["mka"]
-  },
-  "audio/x-mpegurl": {
-    "source": "apache",
-    "extensions": ["m3u"]
-  },
-  "audio/x-ms-wax": {
-    "source": "apache",
-    "extensions": ["wax"]
-  },
-  "audio/x-ms-wma": {
-    "source": "apache",
-    "extensions": ["wma"]
-  },
-  "audio/x-pn-realaudio": {
-    "source": "apache",
-    "extensions": ["ram","ra"]
-  },
-  "audio/x-pn-realaudio-plugin": {
-    "source": "apache",
-    "extensions": ["rmp"]
-  },
-  "audio/x-tta": {
-    "source": "apache"
-  },
-  "audio/x-wav": {
-    "source": "apache",
-    "extensions": ["wav"]
-  },
-  "audio/xm": {
-    "source": "apache",
-    "extensions": ["xm"]
-  },
-  "chemical/x-cdx": {
-    "source": "apache",
-    "extensions": ["cdx"]
-  },
-  "chemical/x-cif": {
-    "source": "apache",
-    "extensions": ["cif"]
-  },
-  "chemical/x-cmdf": {
-    "source": "apache",
-    "extensions": ["cmdf"]
-  },
-  "chemical/x-cml": {
-    "source": "apache",
-    "extensions": ["cml"]
-  },
-  "chemical/x-csml": {
-    "source": "apache",
-    "extensions": ["csml"]
-  },
-  "chemical/x-pdb": {
-    "source": "apache"
-  },
-  "chemical/x-xyz": {
-    "source": "apache",
-    "extensions": ["xyz"]
-  },
-  "font/opentype": {
-    "compressible": true,
-    "extensions": ["otf"]
-  },
-  "image/bmp": {
-    "source": "apache",
-    "compressible": true,
-    "extensions": ["bmp"]
-  },
-  "image/cgm": {
-    "source": "iana",
-    "extensions": ["cgm"]
-  },
-  "image/example": {
-    "source": "iana"
-  },
-  "image/fits": {
-    "source": "iana"
-  },
-  "image/g3fax": {
-    "source": "iana",
-    "extensions": ["g3"]
-  },
-  "image/gif": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["gif"]
-  },
-  "image/ief": {
-    "source": "iana",
-    "extensions": ["ief"]
-  },
-  "image/jp2": {
-    "source": "iana"
-  },
-  "image/jpeg": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["jpeg","jpg","jpe"]
-  },
-  "image/jpm": {
-    "source": "iana"
-  },
-  "image/jpx": {
-    "source": "iana"
-  },
-  "image/ktx": {
-    "source": "iana",
-    "extensions": ["ktx"]
-  },
-  "image/naplps": {
-    "source": "iana"
-  },
-  "image/pjpeg": {
-    "compressible": false
-  },
-  "image/png": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["png"]
-  },
-  "image/prs.btif": {
-    "source": "iana",
-    "extensions": ["btif"]
-  },
-  "image/prs.pti": {
-    "source": "iana"
-  },
-  "image/pwg-raster": {
-    "source": "iana"
-  },
-  "image/sgi": {
-    "source": "apache",
-    "extensions": ["sgi"]
-  },
-  "image/svg+xml": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["svg","svgz"]
-  },
-  "image/t38": {
-    "source": "iana"
-  },
-  "image/tiff": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["tiff","tif"]
-  },
-  "image/tiff-fx": {
-    "source": "iana"
-  },
-  "image/vnd-djvu": {
-    "source": "iana"
-  },
-  "image/vnd-svf": {
-    "source": "iana"
-  },
-  "image/vnd-wap-wbmp": {
-    "source": "iana"
-  },
-  "image/vnd.adobe.photoshop": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["psd"]
-  },
-  "image/vnd.airzip.accelerator.azv": {
-    "source": "iana"
-  },
-  "image/vnd.cns.inf2": {
-    "source": "iana"
-  },
-  "image/vnd.dece.graphic": {
-    "source": "iana",
-    "extensions": ["uvi","uvvi","uvg","uvvg"]
-  },
-  "image/vnd.djvu": {
-    "source": "apache",
-    "extensions": ["djvu","djv"]
-  },
-  "image/vnd.dvb.subtitle": {
-    "source": "iana",
-    "extensions": ["sub"]
-  },
-  "image/vnd.dwg": {
-    "source": "iana",
-    "extensions": ["dwg"]
-  },
-  "image/vnd.dxf": {
-    "source": "iana",
-    "extensions": ["dxf"]
-  },
-  "image/vnd.fastbidsheet": {
-    "source": "iana",
-    "extensions": ["fbs"]
-  },
-  "image/vnd.fpx": {
-    "source": "iana",
-    "extensions": ["fpx"]
-  },
-  "image/vnd.fst": {
-    "source": "iana",
-    "extensions": ["fst"]
-  },
-  "image/vnd.fujixerox.edmics-mmr": {
-    "source": "iana",
-    "extensions": ["mmr"]
-  },
-  "image/vnd.fujixerox.edmics-rlc": {
-    "source": "iana",
-    "extensions": ["rlc"]
-  },
-  "image/vnd.globalgraphics.pgb": {
-    "source": "iana"
-  },
-  "image/vnd.microsoft.icon": {
-    "source": "iana"
-  },
-  "image/vnd.mix": {
-    "source": "iana"
-  },
-  "image/vnd.ms-modi": {
-    "source": "iana",
-    "extensions": ["mdi"]
-  },
-  "image/vnd.ms-photo": {
-    "source": "apache",
-    "extensions": ["wdp"]
-  },
-  "image/vnd.net-fpx": {
-    "source": "iana",
-    "extensions": ["npx"]
-  },
-  "image/vnd.radiance": {
-    "source": "iana"
-  },
-  "image/vnd.sealed-png": {
-    "source": "iana"
-  },
-  "image/vnd.sealed.png": {
-    "source": "apache"
-  },
-  "image/vnd.sealedmedia.softseal-gif": {
-    "source": "iana"
-  },
-  "image/vnd.sealedmedia.softseal-jpg": {
-    "source": "iana"
-  },
-  "image/vnd.sealedmedia.softseal.gif": {
-    "source": "apache"
-  },
-  "image/vnd.sealedmedia.softseal.jpg": {
-    "source": "apache"
-  },
-  "image/vnd.svf": {
-    "source": "apache"
-  },
-  "image/vnd.tencent.tap": {
-    "source": "iana"
-  },
-  "image/vnd.valve.source.texture": {
-    "source": "iana"
-  },
-  "image/vnd.wap.wbmp": {
-    "source": "apache",
-    "extensions": ["wbmp"]
-  },
-  "image/vnd.xiff": {
-    "source": "iana",
-    "extensions": ["xif"]
-  },
-  "image/webp": {
-    "source": "apache",
-    "extensions": ["webp"]
-  },
-  "image/x-3ds": {
-    "source": "apache",
-    "extensions": ["3ds"]
-  },
-  "image/x-cmu-raster": {
-    "source": "apache",
-    "extensions": ["ras"]
-  },
-  "image/x-cmx": {
-    "source": "apache",
-    "extensions": ["cmx"]
-  },
-  "image/x-freehand": {
-    "source": "apache",
-    "extensions": ["fh","fhc","fh4","fh5","fh7"]
-  },
-  "image/x-icon": {
-    "source": "apache",
-    "compressible": true,
-    "extensions": ["ico"]
-  },
-  "image/x-mrsid-image": {
-    "source": "apache",
-    "extensions": ["sid"]
-  },
-  "image/x-pcx": {
-    "source": "apache",
-    "extensions": ["pcx"]
-  },
-  "image/x-pict": {
-    "source": "apache",
-    "extensions": ["pic","pct"]
-  },
-  "image/x-portable-anymap": {
-    "source": "apache",
-    "extensions": ["pnm"]
-  },
-  "image/x-portable-bitmap": {
-    "source": "apache",
-    "extensions": ["pbm"]
-  },
-  "image/x-portable-graymap": {
-    "source": "apache",
-    "extensions": ["pgm"]
-  },
-  "image/x-portable-pixmap": {
-    "source": "apache",
-    "extensions": ["ppm"]
-  },
-  "image/x-rgb": {
-    "source": "apache",
-    "extensions": ["rgb"]
-  },
-  "image/x-tga": {
-    "source": "apache",
-    "extensions": ["tga"]
-  },
-  "image/x-xbitmap": {
-    "source": "apache",
-    "extensions": ["xbm"]
-  },
-  "image/x-xcf": {
-    "compressible": false
-  },
-  "image/x-xpixmap": {
-    "source": "apache",
-    "extensions": ["xpm"]
-  },
-  "image/x-xwindowdump": {
-    "source": "apache",
-    "extensions": ["xwd"]
-  },
-  "message/cpim": {
-    "source": "iana"
-  },
-  "message/delivery-status": {
-    "source": "iana"
-  },
-  "message/disposition-notification": {
-    "source": "iana"
-  },
-  "message/example": {
-    "source": "iana"
-  },
-  "message/external-body": {
-    "source": "iana"
-  },
-  "message/feedback-report": {
-    "source": "iana"
-  },
-  "message/global": {
-    "source": "iana"
-  },
-  "message/global-delivery-status": {
-    "source": "iana"
-  },
-  "message/global-disposition-notification": {
-    "source": "iana"
-  },
-  "message/global-headers": {
-    "source": "iana"
-  },
-  "message/http": {
-    "source": "iana",
-    "compressible": false
-  },
-  "message/imdn+xml": {
-    "source": "iana",
-    "compressible": true
-  },
-  "message/news": {
-    "source": "iana"
-  },
-  "message/partial": {
-    "source": "iana",
-    "compressible": false
-  },
-  "message/rfc822": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["eml","mime"]
-  },
-  "message/s-http": {
-    "source": "iana"
-  },
-  "message/sip": {
-    "source": "iana"
-  },
-  "message/sipfrag": {
-    "source": "iana"
-  },
-  "message/tracking-status": {
-    "source": "iana"
-  },
-  "message/vnd.si.simp": {
-    "source": "iana"
-  },
-  "message/vnd.wfa.wsc": {
-    "source": "iana"
-  },
-  "model/example": {
-    "source": "iana",
-    "compressible": false
-  },
-  "model/iges": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["igs","iges"]
-  },
-  "model/mesh": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["msh","mesh","silo"]
-  },
-  "model/vnd-dwf": {
-    "source": "iana"
-  },
-  "model/vnd.collada+xml": {
-    "source": "iana",
-    "extensions": ["dae"]
-  },
-  "model/vnd.dwf": {
-    "source": "apache",
-    "extensions": ["dwf"]
-  },
-  "model/vnd.flatland.3dml": {
-    "source": "iana"
-  },
-  "model/vnd.gdl": {
-    "source": "iana",
-    "extensions": ["gdl"]
-  },
-  "model/vnd.gs-gdl": {
-    "source": "iana"
-  },
-  "model/vnd.gs.gdl": {
-    "source": "apache"
-  },
-  "model/vnd.gtw": {
-    "source": "iana",
-    "extensions": ["gtw"]
-  },
-  "model/vnd.moml+xml": {
-    "source": "iana"
-  },
-  "model/vnd.mts": {
-    "source": "iana",
-    "extensions": ["mts"]
-  },
-  "model/vnd.opengex": {
-    "source": "iana"
-  },
-  "model/vnd.parasolid.transmit-binary": {
-    "source": "iana"
-  },
-  "model/vnd.parasolid.transmit-text": {
-    "source": "iana"
-  },
-  "model/vnd.parasolid.transmit.binary": {
-    "source": "apache"
-  },
-  "model/vnd.parasolid.transmit.text": {
-    "source": "apache"
-  },
-  "model/vnd.valve.source.compiled-map": {
-    "source": "iana"
-  },
-  "model/vnd.vtu": {
-    "source": "iana",
-    "extensions": ["vtu"]
-  },
-  "model/vrml": {
-    "source": "iana",
-    "compressible": false,
-    "extensions": ["wrl","vrml"]
-  },
-  "model/x3d+binary": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["x3db","x3dbz"]
-  },
-  "model/x3d+fastinfoset": {
-    "source": "iana"
-  },
-  "model/x3d+vrml": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["x3dv","x3dvz"]
-  },
-  "model/x3d+xml": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["x3d","x3dz"]
-  },
-  "model/x3d-vrml": {
-    "source": "iana"
-  },
-  "multipart/alternative": {
-    "source": "iana",
-    "compressible": false
-  },
-  "multipart/appledouble": {
-    "source": "iana"
-  },
-  "multipart/byteranges": {
-    "source": "iana"
-  },
-  "multipart/digest": {
-    "source": "iana"
-  },
-  "multipart/encrypted": {
-    "source": "iana",
-    "compressible": false
-  },
-  "multipart/example": {
-    "source": "iana"
-  },
-  "multipart/form-data": {
-    "source": "iana",
-    "compressible": false
-  },
-  "multipart/header-set": {
-    "source": "iana"
-  },
-  "multipart/mixed": {
-    "source": "iana",
-    "compressible": false
-  },
-  "multipart/parallel": {
-    "source": "iana"
-  },
-  "multipart/related": {
-    "source": "iana",
-    "compressible": false
-  },
-  "multipart/report": {
-    "source": "iana"
-  },
-  "multipart/signed": {
-    "source": "iana",
-    "compressible": false
-  },
-  "multipart/voice-message": {
-    "source": "iana"
-  },
-  "multipart/x-mixed-replace": {
-    "source": "iana"
-  },
-  "text/1d-interleaved-parityfec": {
-    "source": "iana"
-  },
-  "text/cache-manifest": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["appcache","manifest"]
-  },
-  "text/calendar": {
-    "source": "iana",
-    "extensions": ["ics","ifb"]
-  },
-  "text/calender": {
-    "compressible": true
-  },
-  "text/cmd": {
-    "compressible": true
-  },
-  "text/coffeescript": {
-    "extensions": ["coffee"]
-  },
-  "text/css": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["css"]
-  },
-  "text/csv": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["csv"]
-  },
-  "text/csv-schema": {
-    "source": "iana"
-  },
-  "text/directory": {
-    "source": "iana"
-  },
-  "text/dns": {
-    "source": "iana"
-  },
-  "text/ecmascript": {
-    "source": "iana"
-  },
-  "text/encaprtp": {
-    "source": "iana"
-  },
-  "text/enriched": {
-    "source": "iana"
-  },
-  "text/example": {
-    "source": "iana"
-  },
-  "text/fwdred": {
-    "source": "iana"
-  },
-  "text/grammar-ref-list": {
-    "source": "iana"
-  },
-  "text/html": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["html","htm"]
-  },
-  "text/jade": {
-    "extensions": ["jade"]
-  },
-  "text/javascript": {
-    "source": "iana",
-    "compressible": true
-  },
-  "text/jcr-cnd": {
-    "source": "iana"
-  },
-  "text/jsx": {
-    "compressible": true,
-    "extensions": ["jsx"]
-  },
-  "text/less": {
-    "extensions": ["less"]
-  },
-  "text/markdown": {
-    "source": "iana"
-  },
-  "text/mizar": {
-    "source": "iana"
-  },
-  "text/n3": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["n3"]
-  },
-  "text/parameters": {
-    "source": "iana"
-  },
-  "text/parityfec": {
-    "source": "iana"
-  },
-  "text/plain": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["txt","text","conf","def","list","log","in","ini"]
-  },
-  "text/provenance-notation": {
-    "source": "iana"
-  },
-  "text/prs.fallenstein.rst": {
-    "source": "iana"
-  },
-  "text/prs.lines.tag": {
-    "source": "iana",
-    "extensions": ["dsc"]
-  },
-  "text/raptorfec": {
-    "source": "iana"
-  },
-  "text/red": {
-    "source": "iana"
-  },
-  "text/rfc822-headers": {
-    "source": "iana"
-  },
-  "text/richtext": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["rtx"]
-  },
-  "text/rtf": {
-    "source": "iana"
-  },
-  "text/rtp-enc-aescm128": {
-    "source": "iana"
-  },
-  "text/rtploopback": {
-    "source": "iana"
-  },
-  "text/rtx": {
-    "source": "iana"
-  },
-  "text/sgml": {
-    "source": "iana",
-    "extensions": ["sgml","sgm"]
-  },
-  "text/stylus": {
-    "extensions": ["stylus","styl"]
-  },
-  "text/t140": {
-    "source": "iana"
-  },
-  "text/tab-separated-values": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["tsv"]
-  },
-  "text/troff": {
-    "source": "iana",
-    "extensions": ["t","tr","roff","man","me","ms"]
-  },
-  "text/turtle": {
-    "source": "iana",
-    "extensions": ["ttl"]
-  },
-  "text/ulpfec": {
-    "source": "iana"
-  },
-  "text/uri-list": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["uri","uris","urls"]
-  },
-  "text/vcard": {
-    "source": "iana",
-    "compressible": true,
-    "extensions": ["vcard"]
-  },
-  "text/vnd-a": {
-    "source": "iana"
-  },
-  "text/vnd-curl": {
-    "source": "iana"
-  },
-  "text/vnd.abc": {
-    "source": "iana"
-  },
-  "text/vnd.curl": {
-    "source": "apache",
-    "extensions": ["curl"]
-  },
-  "text/vnd.curl.dcurl": {
-    "source": "apache",
-    "extensions": ["dcurl"]
-  },
-  "text/vnd.curl.mcurl": {
-    "source": "apache",
-    "extensions": ["mcurl"]
-  },
-  "text/vnd.curl.scurl": {
-    "source": "apache",
-    "extensions": ["scurl"]
-  },
-  "text/vnd.debian.copyright": {
-    "source": "iana"
-  },
-  "text/vnd.dmclientscript": {
-    "source": "iana"
-  },
-  "text/vnd.dvb.subtitle": {
-    "source": "iana",
-    "extensions": ["sub"]
-  },
-  "text/vnd.esmertec.theme-descriptor": {
-    "source": "iana"
-  },
-  "text/vnd.fly": {
-    "source": "iana",
-    "extensions": ["fly"]
-  },
-  "text/vnd.fmi.flexstor": {
-    "source": "iana",
-    "extensions": ["flx"]
-  },
-  "text/vnd.graphviz": {
-    "source": "iana",
-    "extensions": ["gv"]
-  },
-  "text/vnd.in3d.3dml": {
-    "source": "iana",
-    "extensions": ["3dml"]
-  },
-  "text/vnd.in3d.spot": {
-    "source": "iana",
-    "extensions": ["spot"]
-  },
-  "text/vnd.iptc.newsml": {
-    "source": "iana"
-  },
-  "text/vnd.iptc.nitf": {
-    "source": "iana"
-  },
-  "text/vnd.latex-z": {
-    "source": "iana"
-  },
-  "text/vnd.motorola.reflex": {
-    "source": "iana"
-  },
-  "text/vnd.ms-mediapackage": {
-    "source": "iana"
-  },
-  "text/vnd.net2phone.commcenter.command": {
-    "source": "iana"
-  },
-  "text/vnd.radisys.msml-basic-layout": {
-    "source": "iana"
-  },
-  "text/vnd.si.uricatalogue": {
-    "source": "iana"
-  },
-  "text/vnd.sun.j2me.app-descriptor": {
-    "source": "iana",
-    "extensions": ["jad"]
-  },
-  "text/vnd.trolltech.linguist": {
-    "source": "iana"
-  },
-  "text/vnd.wap-wml": {
-    "source": "iana"
-  },
-  "text/vnd.wap.si": {
-    "source": "iana"
-  },
-  "text/vnd.wap.sl": {
-    "source": "iana"
-  },
-  "text/vnd.wap.wml": {
-    "source": "apache",
-    "extensions": ["wml"]
-  },
-  "text/vnd.wap.wmlscript": {
-    "source": "iana",
-    "extensions": ["wmls"]
-  },
-  "text/vtt": {
-    "charset": "UTF-8",
-    "compressible": true,
-    "extensions": ["vtt"]
-  },
-  "text/x-asm": {
-    "source": "apache",
-    "extensions": ["s","asm"]
-  },
-  "text/x-c": {
-    "source": "apache",
-    "extensions": ["c","cc","cxx","cpp","h","hh","dic"]
-  },
-  "text/x-component": {
-    "extensions": ["htc"]
-  },
-  "text/x-fortran": {
-    "source": "apache",
-    "extensions": ["f","for","f77","f90"]
-  },
-  "text/x-gwt-rpc": {
-    "compressible": true
-  },
-  "text/x-handlebars-template": {
-    "extensions": ["hbs"]
-  },
-  "text/x-java-source": {
-    "source": "apache",
-    "extensions": ["java"]
-  },
-  "text/x-jquery-tmpl": {
-    "compressible": true
-  },
-  "text/x-lua": {
-    "extensions": ["lua"]
-  },
-  "text/x-markdown": {
-    "compressible": true,
-    "extensions": ["markdown","md","mkd"]
-  },
-  "text/x-nfo": {
-    "source": "apache",
-    "extensions": ["nfo"]
-  },
-  "text/x-opml": {
-    "source": "apache",
-    "extensions": ["opml"]
-  },
-  "text/x-pascal": {
-    "source": "apache",
-    "extensions": ["p","pas"]
-  },
-  "text/x-sass": {
-    "extensions": ["sass"]
-  },
-  "text/x-scss": {
-    "extensions": ["scss"]
-  },
-  "text/x-setext": {
-    "source": "apache",
-    "extensions": ["etx"]
-  },
-  "text/x-sfv": {
-    "source": "apache",
-    "extensions": ["sfv"]
-  },
-  "text/x-uuencode": {
-    "source": "apache",
-    "extensions": ["uu"]
-  },
-  "text/x-vcalendar": {
-    "source": "apache",
-    "extensions": ["vcs"]
-  },
-  "text/x-vcard": {
-    "source": "apache",
-    "extensions": ["vcf"]
-  },
-  "text/xml": {
-    "source": "iana",
-    "compressible": true
-  },
-  "text/xml-external-parsed-entity": {
-    "source": "iana"
-  },
-  "text/yaml": {
-    "extensions": ["yaml","yml"]
-  },
-  "video/1d-interleaved-parityfec": {
-    "source": "apache"
-  },
-  "video/3gpp": {
-    "source": "apache",
-    "extensions": ["3gp"]
-  },
-  "video/3gpp-tt": {
-    "source": "apache"
-  },
-  "video/3gpp2": {
-    "source": "apache",
-    "extensions": ["3g2"]
-  },
-  "video/bmpeg": {
-    "source": "apache"
-  },
-  "video/bt656": {
-    "source": "apache"
-  },
-  "video/celb": {
-    "source": "apache"
-  },
-  "video/dv": {
-    "source": "apache"
-  },
-  "video/example": {
-    "source": "apache"
-  },
-  "video/h261": {
-    "source": "apache",
-    "extensions": ["h261"]
-  },
-  "video/h263": {
-    "source": "apache",
-    "extensions": ["h263"]
-  },
-  "video/h263-1998": {
-    "source": "apache"
-  },
-  "video/h263-2000": {
-    "source": "apache"
-  },
-  "video/h264": {
-    "source": "apache",
-    "extensions": ["h264"]
-  },
-  "video/h264-rcdo": {
-    "source": "apache"
-  },
-  "video/h264-svc": {
-    "source": "apache"
-  },
-  "video/jpeg": {
-    "source": "apache",
-    "extensions": ["jpgv"]
-  },
-  "video/jpeg2000": {
-    "source": "apache"
-  },
-  "video/jpm": {
-    "source": "apache",
-    "extensions": ["jpm","jpgm"]
-  },
-  "video/mj2": {
-    "source": "apache",
-    "extensions": ["mj2","mjp2"]
-  },
-  "video/mp1s": {
-    "source": "apache"
-  },
-  "video/mp2p": {
-    "source": "apache"
-  },
-  "video/mp2t": {
-    "source": "apache",
-    "extensions": ["ts"]
-  },
-  "video/mp4": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["mp4","mp4v","mpg4"]
-  },
-  "video/mp4v-es": {
-    "source": "apache"
-  },
-  "video/mpeg": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["mpeg","mpg","mpe","m1v","m2v"]
-  },
-  "video/mpeg4-generic": {
-    "source": "apache"
-  },
-  "video/mpv": {
-    "source": "apache"
-  },
-  "video/nv": {
-    "source": "apache"
-  },
-  "video/ogg": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["ogv"]
-  },
-  "video/parityfec": {
-    "source": "apache"
-  },
-  "video/pointer": {
-    "source": "apache"
-  },
-  "video/quicktime": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["qt","mov"]
-  },
-  "video/raw": {
-    "source": "apache"
-  },
-  "video/rtp-enc-aescm128": {
-    "source": "apache"
-  },
-  "video/rtx": {
-    "source": "apache"
-  },
-  "video/smpte292m": {
-    "source": "apache"
-  },
-  "video/ulpfec": {
-    "source": "apache"
-  },
-  "video/vc1": {
-    "source": "apache"
-  },
-  "video/vnd.cctv": {
-    "source": "apache"
-  },
-  "video/vnd.dece.hd": {
-    "source": "apache",
-    "extensions": ["uvh","uvvh"]
-  },
-  "video/vnd.dece.mobile": {
-    "source": "apache",
-    "extensions": ["uvm","uvvm"]
-  },
-  "video/vnd.dece.mp4": {
-    "source": "apache"
-  },
-  "video/vnd.dece.pd": {
-    "source": "apache",
-    "extensions": ["uvp","uvvp"]
-  },
-  "video/vnd.dece.sd": {
-    "source": "apache",
-    "extensions": ["uvs","uvvs"]
-  },
-  "video/vnd.dece.video": {
-    "source": "apache",
-    "extensions": ["uvv","uvvv"]
-  },
-  "video/vnd.directv.mpeg": {
-    "source": "apache"
-  },
-  "video/vnd.directv.mpeg-tts": {
-    "source": "apache"
-  },
-  "video/vnd.dlna.mpeg-tts": {
-    "source": "apache"
-  },
-  "video/vnd.dvb.file": {
-    "source": "apache",
-    "extensions": ["dvb"]
-  },
-  "video/vnd.fvt": {
-    "source": "apache",
-    "extensions": ["fvt"]
-  },
-  "video/vnd.hns.video": {
-    "source": "apache"
-  },
-  "video/vnd.iptvforum.1dparityfec-1010": {
-    "source": "apache"
-  },
-  "video/vnd.iptvforum.1dparityfec-2005": {
-    "source": "apache"
-  },
-  "video/vnd.iptvforum.2dparityfec-1010": {
-    "source": "apache"
-  },
-  "video/vnd.iptvforum.2dparityfec-2005": {
-    "source": "apache"
-  },
-  "video/vnd.iptvforum.ttsavc": {
-    "source": "apache"
-  },
-  "video/vnd.iptvforum.ttsmpeg2": {
-    "source": "apache"
-  },
-  "video/vnd.motorola.video": {
-    "source": "apache"
-  },
-  "video/vnd.motorola.videop": {
-    "source": "apache"
-  },
-  "video/vnd.mpegurl": {
-    "source": "apache",
-    "extensions": ["mxu","m4u"]
-  },
-  "video/vnd.ms-playready.media.pyv": {
-    "source": "apache",
-    "extensions": ["pyv"]
-  },
-  "video/vnd.nokia.interleaved-multimedia": {
-    "source": "apache"
-  },
-  "video/vnd.nokia.videovoip": {
-    "source": "apache"
-  },
-  "video/vnd.objectvideo": {
-    "source": "apache"
-  },
-  "video/vnd.sealed.mpeg1": {
-    "source": "apache"
-  },
-  "video/vnd.sealed.mpeg4": {
-    "source": "apache"
-  },
-  "video/vnd.sealed.swf": {
-    "source": "apache"
-  },
-  "video/vnd.sealedmedia.softseal.mov": {
-    "source": "apache"
-  },
-  "video/vnd.uvvu.mp4": {
-    "source": "apache",
-    "extensions": ["uvu","uvvu"]
-  },
-  "video/vnd.vivo": {
-    "source": "apache",
-    "extensions": ["viv"]
-  },
-  "video/webm": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["webm"]
-  },
-  "video/x-f4v": {
-    "source": "apache",
-    "extensions": ["f4v"]
-  },
-  "video/x-fli": {
-    "source": "apache",
-    "extensions": ["fli"]
-  },
-  "video/x-flv": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["flv"]
-  },
-  "video/x-m4v": {
-    "source": "apache",
-    "extensions": ["m4v"]
-  },
-  "video/x-matroska": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["mkv","mk3d","mks"]
-  },
-  "video/x-mng": {
-    "source": "apache",
-    "extensions": ["mng"]
-  },
-  "video/x-ms-asf": {
-    "source": "apache",
-    "extensions": ["asf","asx"]
-  },
-  "video/x-ms-vob": {
-    "source": "apache",
-    "extensions": ["vob"]
-  },
-  "video/x-ms-wm": {
-    "source": "apache",
-    "extensions": ["wm"]
-  },
-  "video/x-ms-wmv": {
-    "source": "apache",
-    "compressible": false,
-    "extensions": ["wmv"]
-  },
-  "video/x-ms-wmx": {
-    "source": "apache",
-    "extensions": ["wmx"]
-  },
-  "video/x-ms-wvx": {
-    "source": "apache",
-    "extensions": ["wvx"]
-  },
-  "video/x-msvideo": {
-    "source": "apache",
-    "extensions": ["avi"]
-  },
-  "video/x-sgi-movie": {
-    "source": "apache",
-    "extensions": ["movie"]
-  },
-  "video/x-smv": {
-    "source": "apache",
-    "extensions": ["smv"]
-  },
-  "x-conference/x-cooltalk": {
-    "source": "apache",
-    "extensions": ["ice"]
-  },
-  "x-shader/x-fragment": {
-    "compressible": true
-  },
-  "x-shader/x-vertex": {
-    "compressible": true
-  }
-}
-
-},{}],185:[function(require,module,exports){
-/*!
- * mime-db
- * Copyright(c) 2014 Jonathan Ong
- * MIT Licensed
- */
-
-/**
- * Module exports.
- */
-
-module.exports = require('./db.json')
-
-},{"./db.json":184}],186:[function(require,module,exports){
-module.exports = require('./lib');
-},{"./lib":189}],187:[function(require,module,exports){
-// Load modules
-
-var Url = require('url');
-var Hoek = require('hoek');
-var Cryptiles = require('cryptiles');
-var Crypto = require('./crypto');
-var Utils = require('./utils');
-
-
-// Declare internals
-
-var internals = {};
-
-
-// Generate an Authorization header for a given request
-
+},{"_process":166}],212:[function(require,module,exports){
 /*
-    uri: 'http://example.com/resource?a=b' or object from Url.parse()
-    method: HTTP verb (e.g. 'GET', 'POST')
-    options: {
-
-        // Required
-
-        credentials: {
-            id: 'dh37fgj492je',
-            key: 'aoijedoaijsdlaksjdl',
-            algorithm: 'sha256'                                 // 'sha1', 'sha256'
-        },
-
-        // Optional
-
-        ext: 'application-specific',                        // Application specific data sent via the ext attribute
-        timestamp: Date.now(),                              // A pre-calculated timestamp
-        nonce: '2334f34f',                                  // A pre-generated nonce
-        localtimeOffsetMsec: 400,                           // Time offset to sync with server time (ignored if timestamp provided)
-        payload: '{"some":"payload"}',                      // UTF-8 encoded string for body hash generation (ignored if hash provided)
-        contentType: 'application/json',                    // Payload content-type (ignored if hash provided)
-        hash: 'U4MKKSmiVxk37JCCrAVIjV=',                    // Pre-calculated payload hash
-        app: '24s23423f34dx',                               // Oz application id
-        dlg: '234sz34tww3sd'                                // Oz delegated-by application id
-    }
+    HTTP Hawk Authentication Scheme
+    Copyright (c) 2012-2014, Eran Hammer <eran@hammer.io>
+    BSD Licensed
 */
 
-exports.header = function (uri, method, options) {
 
-    var result = {
-        field: '',
-        artifacts: {}
-    };
+// Declare namespace
 
-    // Validate inputs
-
-    if (!uri || (typeof uri !== 'string' && typeof uri !== 'object') ||
-        !method || typeof method !== 'string' ||
-        !options || typeof options !== 'object') {
-
-        result.err = 'Invalid argument type';
-        return result;
-    }
-
-    // Application time
-
-    var timestamp = options.timestamp || Math.floor((Utils.now() + (options.localtimeOffsetMsec || 0)) / 1000)
-
-    // Validate credentials
-
-    var credentials = options.credentials;
-    if (!credentials ||
-        !credentials.id ||
-        !credentials.key ||
-        !credentials.algorithm) {
-
-        result.err = 'Invalid credential object';
-        return result;
-    }
-
-    if (Crypto.algorithms.indexOf(credentials.algorithm) === -1) {
-        result.err = 'Unknown algorithm';
-        return result;
-    }
-
-    // Parse URI
-
-    if (typeof uri === 'string') {
-        uri = Url.parse(uri);
-    }
-
-    // Calculate signature
-
-    var artifacts = {
-        ts: timestamp,
-        nonce: options.nonce || Cryptiles.randomString(6),
-        method: method,
-        resource: uri.pathname + (uri.search || ''),                            // Maintain trailing '?'
-        host: uri.hostname,
-        port: uri.port || (uri.protocol === 'http:' ? 80 : 443),
-        hash: options.hash,
-        ext: options.ext,
-        app: options.app,
-        dlg: options.dlg
-    };
-
-    result.artifacts = artifacts;
-
-    // Calculate payload hash
-
-    if (!artifacts.hash &&
-        options.hasOwnProperty('payload')) {
-
-        artifacts.hash = Crypto.calculatePayloadHash(options.payload, credentials.algorithm, options.contentType);
-    }
-
-    var mac = Crypto.calculateMac('header', credentials, artifacts);
-
-    // Construct header
-
-    var hasExt = artifacts.ext !== null && artifacts.ext !== undefined && artifacts.ext !== '';       // Other falsey values allowed
-    var header = 'Hawk id="' + credentials.id +
-                 '", ts="' + artifacts.ts +
-                 '", nonce="' + artifacts.nonce +
-                 (artifacts.hash ? '", hash="' + artifacts.hash : '') +
-                 (hasExt ? '", ext="' + Utils.escapeHeaderAttribute(artifacts.ext) : '') +
-                 '", mac="' + mac + '"';
-
-    if (artifacts.app) {
-        header += ', app="' + artifacts.app +
-                  (artifacts.dlg ? '", dlg="' + artifacts.dlg : '') + '"';
-    }
-
-    result.field = header;
-
-    return result;
+var hawk = {
+    internals: {}
 };
 
 
-// Validate server response
+hawk.client = {
 
-/*
-    res:        node's response object
-    artifacts:  object recieved from header().artifacts
-    options: {
-        payload:    optional payload received
-        required:   specifies if a Server-Authorization header is required. Defaults to 'false'
-    }
-*/
+    // Generate an Authorization header for a given request
 
-exports.authenticate = function (res, credentials, artifacts, options) {
+    /*
+        uri: 'http://example.com/resource?a=b' or object generated by hawk.utils.parseUri()
+        method: HTTP verb (e.g. 'GET', 'POST')
+        options: {
 
-    artifacts = Hoek.clone(artifacts);
-    options = options || {};
+            // Required
 
-    if (res.headers['www-authenticate']) {
+            credentials: {
+                id: 'dh37fgj492je',
+                key: 'aoijedoaijsdlaksjdl',
+                algorithm: 'sha256'                                 // 'sha1', 'sha256'
+            },
 
-        // Parse HTTP WWW-Authenticate header
+            // Optional
 
-        var attributes = Utils.parseAuthorizationHeader(res.headers['www-authenticate'], ['ts', 'tsm', 'error']);
-        if (attributes instanceof Error) {
+            ext: 'application-specific',                        // Application specific data sent via the ext attribute
+            timestamp: Date.now() / 1000,                       // A pre-calculated timestamp in seconds
+            nonce: '2334f34f',                                  // A pre-generated nonce
+            localtimeOffsetMsec: 400,                           // Time offset to sync with server time (ignored if timestamp provided)
+            payload: '{"some":"payload"}',                      // UTF-8 encoded string for body hash generation (ignored if hash provided)
+            contentType: 'application/json',                    // Payload content-type (ignored if hash provided)
+            hash: 'U4MKKSmiVxk37JCCrAVIjV=',                    // Pre-calculated payload hash
+            app: '24s23423f34dx',                               // Oz application id
+            dlg: '234sz34tww3sd'                                // Oz delegated-by application id
+        }
+    */
+
+    header: function (uri, method, options) {
+
+        var result = {
+            field: '',
+            artifacts: {}
+        };
+
+        // Validate inputs
+
+        if (!uri || (typeof uri !== 'string' && typeof uri !== 'object') ||
+            !method || typeof method !== 'string' ||
+            !options || typeof options !== 'object') {
+
+            result.err = 'Invalid argument type';
+            return result;
+        }
+
+        // Application time
+
+        var timestamp = options.timestamp || hawk.utils.now(options.localtimeOffsetMsec);
+
+        // Validate credentials
+
+        var credentials = options.credentials;
+        if (!credentials ||
+            !credentials.id ||
+            !credentials.key ||
+            !credentials.algorithm) {
+
+            result.err = 'Invalid credentials object';
+            return result;
+        }
+
+        if (hawk.crypto.algorithms.indexOf(credentials.algorithm) === -1) {
+            result.err = 'Unknown algorithm';
+            return result;
+        }
+
+        // Parse URI
+
+        if (typeof uri === 'string') {
+            uri = hawk.utils.parseUri(uri);
+        }
+
+        // Calculate signature
+
+        var artifacts = {
+            ts: timestamp,
+            nonce: options.nonce || hawk.utils.randomString(6),
+            method: method,
+            resource: uri.relative,
+            host: uri.hostname,
+            port: uri.port,
+            hash: options.hash,
+            ext: options.ext,
+            app: options.app,
+            dlg: options.dlg
+        };
+
+        result.artifacts = artifacts;
+
+        // Calculate payload hash
+
+        if (!artifacts.hash &&
+            (options.payload || options.payload === '')) {
+
+            artifacts.hash = hawk.crypto.calculatePayloadHash(options.payload, credentials.algorithm, options.contentType);
+        }
+
+        var mac = hawk.crypto.calculateMac('header', credentials, artifacts);
+
+        // Construct header
+
+        var hasExt = artifacts.ext !== null && artifacts.ext !== undefined && artifacts.ext !== '';       // Other falsey values allowed
+        var header = 'Hawk id="' + credentials.id +
+                     '", ts="' + artifacts.ts +
+                     '", nonce="' + artifacts.nonce +
+                     (artifacts.hash ? '", hash="' + artifacts.hash : '') +
+                     (hasExt ? '", ext="' + hawk.utils.escapeHeaderAttribute(artifacts.ext) : '') +
+                     '", mac="' + mac + '"';
+
+        if (artifacts.app) {
+            header += ', app="' + artifacts.app +
+                      (artifacts.dlg ? '", dlg="' + artifacts.dlg : '') + '"';
+        }
+
+        result.field = header;
+
+        return result;
+    },
+
+    // Generate a bewit value for a given URI
+
+    /*
+        uri: 'http://example.com/resource?a=b'
+        options: {
+
+            // Required
+
+            credentials: {
+            id: 'dh37fgj492je',
+            key: 'aoijedoaijsdlaksjdl',
+            algorithm: 'sha256'                             // 'sha1', 'sha256'
+            },
+            ttlSec: 60 * 60,                                    // TTL in seconds
+
+            // Optional
+
+            ext: 'application-specific',                        // Application specific data sent via the ext attribute
+            localtimeOffsetMsec: 400                            // Time offset to sync with server time
+         };
+    */
+
+    bewit: function (uri, options) {
+
+        // Validate inputs
+
+        if (!uri ||
+            (typeof uri !== 'string') ||
+            !options ||
+            typeof options !== 'object' ||
+            !options.ttlSec) {
+
+            return '';
+        }
+
+        options.ext = (options.ext === null || options.ext === undefined ? '' : options.ext);       // Zero is valid value
+
+        // Application time
+
+        var now = hawk.utils.now(options.localtimeOffsetMsec);
+
+        // Validate credentials
+
+        var credentials = options.credentials;
+        if (!credentials ||
+            !credentials.id ||
+            !credentials.key ||
+            !credentials.algorithm) {
+
+            return '';
+        }
+
+        if (hawk.crypto.algorithms.indexOf(credentials.algorithm) === -1) {
+            return '';
+        }
+
+        // Parse URI
+
+        uri = hawk.utils.parseUri(uri);
+
+        // Calculate signature
+
+        var exp = now + options.ttlSec;
+        var mac = hawk.crypto.calculateMac('bewit', credentials, {
+            ts: exp,
+            nonce: '',
+            method: 'GET',
+            resource: uri.relative,                            // Maintain trailing '?' and query params
+            host: uri.hostname,
+            port: uri.port,
+            ext: options.ext
+        });
+
+        // Construct bewit: id\exp\mac\ext
+
+        var bewit = credentials.id + '\\' + exp + '\\' + mac + '\\' + options.ext;
+        return hawk.utils.base64urlEncode(bewit);
+    },
+
+    // Validate server response
+
+    /*
+        request:    object created via 'new XMLHttpRequest()' after response received
+        artifacts:  object received from header().artifacts
+        options: {
+            payload:    optional payload received
+            required:   specifies if a Server-Authorization header is required. Defaults to 'false'
+        }
+    */
+
+    authenticate: function (request, credentials, artifacts, options) {
+
+        options = options || {};
+
+        var getHeader = function (name) {
+
+            return request.getResponseHeader ? request.getResponseHeader(name) : request.getHeader(name);
+        };
+
+        var wwwAuthenticate = getHeader('www-authenticate');
+        if (wwwAuthenticate) {
+
+            // Parse HTTP WWW-Authenticate header
+
+            var attributes = hawk.utils.parseAuthorizationHeader(wwwAuthenticate, ['ts', 'tsm', 'error']);
+            if (!attributes) {
+                return false;
+            }
+
+            if (attributes.ts) {
+                var tsm = hawk.crypto.calculateTsMac(attributes.ts, credentials);
+                if (tsm !== attributes.tsm) {
+                    return false;
+                }
+
+                hawk.utils.setNtpOffset(attributes.ts - Math.floor((new Date()).getTime() / 1000));     // Keep offset at 1 second precision
+            }
+        }
+
+        // Parse HTTP Server-Authorization header
+
+        var serverAuthorization = getHeader('server-authorization');
+        if (!serverAuthorization &&
+            !options.required) {
+
+            return true;
+        }
+
+        var attributes = hawk.utils.parseAuthorizationHeader(serverAuthorization, ['mac', 'ext', 'hash']);
+        if (!attributes) {
             return false;
         }
 
-        // Validate server timestamp (not used to update clock since it is done via the SNPT client)
+        var modArtifacts = {
+            ts: artifacts.ts,
+            nonce: artifacts.nonce,
+            method: artifacts.method,
+            resource: artifacts.resource,
+            host: artifacts.host,
+            port: artifacts.port,
+            hash: attributes.hash,
+            ext: attributes.ext,
+            app: artifacts.app,
+            dlg: artifacts.dlg
+        };
 
-        if (attributes.ts) {
-            var tsm = Crypto.calculateTsMac(attributes.ts, credentials);
-            if (tsm !== attributes.tsm) {
-                return false;
-            }
+        var mac = hawk.crypto.calculateMac('response', credentials, modArtifacts);
+        if (mac !== attributes.mac) {
+            return false;
         }
-    }
 
-    // Parse HTTP Server-Authorization header
+        if (!options.payload &&
+            options.payload !== '') {
 
-    if (!res.headers['server-authorization'] &&
-        !options.required) {
+            return true;
+        }
 
-        return true;
-    }
+        if (!attributes.hash) {
+            return false;
+        }
 
-    var attributes = Utils.parseAuthorizationHeader(res.headers['server-authorization'], ['mac', 'ext', 'hash']);
-    if (attributes instanceof Error) {
-        return false;
-    }
-
-    artifacts.ext = attributes.ext;
-    artifacts.hash = attributes.hash;
-
-    var mac = Crypto.calculateMac('response', credentials, artifacts);
-    if (mac !== attributes.mac) {
-        return false;
-    }
-
-    if (!options.hasOwnProperty('payload')) {
-        return true;
-    }
-
-    if (!attributes.hash) {
-        return false;
-    }
-
-    var calculatedHash = Crypto.calculatePayloadHash(options.payload, credentials.algorithm, res.headers['content-type']);
-    return (calculatedHash === attributes.hash);
-};
-
-
-// Generate a bewit value for a given URI
-
-/*
- * credentials is an object with the following keys: 'id, 'key', 'algorithm'.
- * options is an object with the following optional keys: 'ext', 'localtimeOffsetMsec'
- */
-/*
-    uri: 'http://example.com/resource?a=b' or object from Url.parse()
-    options: {
-
-        // Required
-
-        credentials: {
-            id: 'dh37fgj492je',
-            key: 'aoijedoaijsdlaksjdl',
-            algorithm: 'sha256'                             // 'sha1', 'sha256'
-        },
-        ttlSec: 60 * 60,                                    // TTL in seconds
-
-        // Optional
-
-        ext: 'application-specific',                        // Application specific data sent via the ext attribute
-        localtimeOffsetMsec: 400                            // Time offset to sync with server time
-    };
-*/
-
-exports.getBewit = function (uri, options) {
-
-    // Validate inputs
-
-    if (!uri ||
-        (typeof uri !== 'string' && typeof uri !== 'object') ||
-        !options ||
-        typeof options !== 'object' ||
-        !options.ttlSec) {
-
-        return '';
-    }
-
-    options.ext = (options.ext === null || options.ext === undefined ? '' : options.ext);       // Zero is valid value
-
-    // Application time
-
-    var now = Utils.now() + (options.localtimeOffsetMsec || 0);
-
-    // Validate credentials
-
-    var credentials = options.credentials;
-    if (!credentials ||
-        !credentials.id ||
-        !credentials.key ||
-        !credentials.algorithm) {
-
-        return '';
-    }
-
-    if (Crypto.algorithms.indexOf(credentials.algorithm) === -1) {
-        return '';
-    }
-
-    // Parse URI
-
-    if (typeof uri === 'string') {
-        uri = Url.parse(uri);
-    }
-
-    // Calculate signature
-
-    var exp = Math.floor(now / 1000) + options.ttlSec;
-    var mac = Crypto.calculateMac('bewit', credentials, {
-        ts: exp,
-        nonce: '',
-        method: 'GET',
-        resource: uri.pathname + (uri.search || ''),                            // Maintain trailing '?'
-        host: uri.hostname,
-        port: uri.port || (uri.protocol === 'http:' ? 80 : 443),
-        ext: options.ext
-    });
-
-    // Construct bewit: id\exp\mac\ext
-
-    var bewit = credentials.id + '\\' + exp + '\\' + mac + '\\' + options.ext;
-    return Utils.base64urlEncode(bewit);
-};
-
-
-// Generate an authorization string for a message
-
-/*
-    host: 'example.com',
-    port: 8000,
-    message: '{"some":"payload"}',                          // UTF-8 encoded string for body hash generation
-    options: {
-
-        // Required
-
-        credentials: {
-            id: 'dh37fgj492je',
-            key: 'aoijedoaijsdlaksjdl',
-            algorithm: 'sha256'                             // 'sha1', 'sha256'
-        },
-
-        // Optional
-
-        timestamp: Date.now(),                              // A pre-calculated timestamp
-        nonce: '2334f34f',                                  // A pre-generated nonce
-        localtimeOffsetMsec: 400,                           // Time offset to sync with server time (ignored if timestamp provided)
-    }
-*/
-
-exports.message = function (host, port, message, options) {
-
-    // Validate inputs
-
-    if (!host || typeof host !== 'string' ||
-        !port || typeof port !== 'number' ||
-        message === null || message === undefined || typeof message !== 'string' ||
-        !options || typeof options !== 'object') {
-
-        return null;
-    }
-
-    // Application time
-
-    var timestamp = options.timestamp || Math.floor((Utils.now() + (options.localtimeOffsetMsec || 0)) / 1000)
-
-    // Validate credentials
-
-    var credentials = options.credentials;
-    if (!credentials ||
-        !credentials.id ||
-        !credentials.key ||
-        !credentials.algorithm) {
-
-        // Invalid credential object
-        return null;
-    }
-
-    if (Crypto.algorithms.indexOf(credentials.algorithm) === -1) {
-        return null;
-    }
-
-    // Calculate signature
-
-    var artifacts = {
-        ts: timestamp,
-        nonce: options.nonce || Cryptiles.randomString(6),
-        host: host,
-        port: port,
-        hash: Crypto.calculatePayloadHash(message, credentials.algorithm)
-    };
-
-    // Construct authorization
-
-    var result = {
-        id: credentials.id,
-        ts: artifacts.ts,
-        nonce: artifacts.nonce,
-        hash: artifacts.hash,
-        mac: Crypto.calculateMac('message', credentials, artifacts)
-    };
-
-    return result;
-};
-
-
-
-
-},{"./crypto":188,"./utils":191,"cryptiles":194,"hoek":196,"url":155}],188:[function(require,module,exports){
-// Load modules
-
-var Crypto = require('crypto');
-var Url = require('url');
-var Utils = require('./utils');
-
-
-// Declare internals
-
-var internals = {};
-
-
-// MAC normalization format version
-
-exports.headerVersion = '1';                        // Prevent comparison of mac values generated with different normalized string formats
-
-
-// Supported HMAC algorithms
-
-exports.algorithms = ['sha1', 'sha256'];
-
-
-// Calculate the request MAC
-
-/*
-    type: 'header',                                 // 'header', 'bewit', 'response'
-    credentials: {
-        key: 'aoijedoaijsdlaksjdl',
-        algorithm: 'sha256'                         // 'sha1', 'sha256'
+        var calculatedHash = hawk.crypto.calculatePayloadHash(options.payload, credentials.algorithm, getHeader('content-type'));
+        return (calculatedHash === attributes.hash);
     },
-    options: {
-        method: 'GET',
-        resource: '/resource?a=1&b=2',
-        host: 'example.com',
-        port: 8080,
-        ts: 1357718381034,
-        nonce: 'd3d345f',
-        hash: 'U4MKKSmiVxk37JCCrAVIjV/OhB3y+NdwoCr6RShbVkE=',
-        ext: 'app-specific-data',
-        app: 'hf48hd83qwkj',                        // Application id (Oz)
-        dlg: 'd8djwekds9cj'                         // Delegated by application id (Oz), requires options.app
-    }
-*/
 
-exports.calculateMac = function (type, credentials, options) {
+    message: function (host, port, message, options) {
 
-    var normalized = exports.generateNormalizedString(type, options);
+        // Validate inputs
 
-    var hmac = Crypto.createHmac(credentials.algorithm, credentials.key).update(normalized);
-    var digest = hmac.digest('base64');
-    return digest;
-};
+        if (!host || typeof host !== 'string' ||
+            !port || typeof port !== 'number' ||
+            message === null || message === undefined || typeof message !== 'string' ||
+            !options || typeof options !== 'object') {
 
-
-exports.generateNormalizedString = function (type, options) {
-
-    var normalized = 'hawk.' + exports.headerVersion + '.' + type + '\n' +
-                     options.ts + '\n' +
-                     options.nonce + '\n' +
-                     (options.method || '').toUpperCase() + '\n' +
-                     (options.resource || '') + '\n' +
-                     options.host.toLowerCase() + '\n' +
-                     options.port + '\n' +
-                     (options.hash || '') + '\n';
-
-    if (options.ext) {
-        normalized += options.ext.replace('\\', '\\\\').replace('\n', '\\n');
-    }
-
-    normalized += '\n';
-
-    if (options.app) {
-        normalized += options.app + '\n' +
-                      (options.dlg || '') + '\n';
-    }
-
-    return normalized;
-};
-
-
-exports.calculatePayloadHash = function (payload, algorithm, contentType) {
-
-    var hash = exports.initializePayloadHash(algorithm, contentType);
-    hash.update(payload || '');
-    return exports.finalizePayloadHash(hash);
-};
-
-
-exports.initializePayloadHash = function (algorithm, contentType) {
-
-    var hash = Crypto.createHash(algorithm);
-    hash.update('hawk.' + exports.headerVersion + '.payload\n');
-    hash.update(Utils.parseContentType(contentType) + '\n');
-    return hash;
-};
-
-
-exports.finalizePayloadHash = function (hash) {
-
-    hash.update('\n');
-    return hash.digest('base64');
-};
-
-
-exports.calculateTsMac = function (ts, credentials) {
-
-    var hmac = Crypto.createHmac(credentials.algorithm, credentials.key);
-    hmac.update('hawk.' + exports.headerVersion + '.ts\n' + ts + '\n');
-    return hmac.digest('base64');
-};
-
-
-exports.timestampMessage = function (credentials, localtimeOffsetMsec) {
-
-    var now = Math.floor((Utils.now() + (localtimeOffsetMsec || 0)) / 1000);
-    var tsm = exports.calculateTsMac(now, credentials);
-    return { ts: now, tsm: tsm };
-};
-
-},{"./utils":191,"crypto":24,"url":155}],189:[function(require,module,exports){
-// Export sub-modules
-
-exports.error = exports.Error = require('boom');
-exports.sntp = require('sntp');
-
-exports.server = require('./server');
-exports.client = require('./client');
-exports.crypto = require('./crypto');
-exports.utils = require('./utils');
-
-exports.uri = {
-    authenticate: exports.server.authenticateBewit,
-    getBewit: exports.client.getBewit
-};
-
-
-},{"./client":187,"./crypto":188,"./server":190,"./utils":191,"boom":192,"sntp":199}],190:[function(require,module,exports){
-// Load modules
-
-var Boom = require('boom');
-var Hoek = require('hoek');
-var Cryptiles = require('cryptiles');
-var Crypto = require('./crypto');
-var Utils = require('./utils');
-
-
-// Declare internals
-
-var internals = {};
-
-
-// Hawk authentication
-
-/*
-   req:                 node's HTTP request object or an object as follows:
-  
-                        var request = {
-                            method: 'GET',
-                            url: '/resource/4?a=1&b=2',
-                            host: 'example.com',
-                            port: 8080,
-                            authorization: 'Hawk id="dh37fgj492je", ts="1353832234", nonce="j4h3g2", ext="some-app-ext-data", mac="6R4rV5iE+NPoym+WwjeHzjAGXUtLNIxmo1vpMofpLAE="'
-                        };
-  
-   credentialsFunc:     required function to lookup the set of Hawk credentials based on the provided credentials id.
-                        The credentials include the MAC key, MAC algorithm, and other attributes (such as username)
-                        needed by the application. This function is the equivalent of verifying the username and
-                        password in Basic authentication.
-  
-                        var credentialsFunc = function (id, callback) {
-    
-                            // Lookup credentials in database
-                            db.lookup(id, function (err, item) {
-    
-                                if (err || !item) {
-                                    return callback(err);
-                                }
-    
-                                var credentials = {
-                                    // Required
-                                    key: item.key,
-                                    algorithm: item.algorithm,
-                                    // Application specific
-                                    user: item.user
-                                };
-    
-                                return callback(null, credentials);
-                            });
-                        };
-  
-   options: {
-
-        hostHeaderName:        optional header field name, used to override the default 'Host' header when used
-                               behind a cache of a proxy. Apache2 changes the value of the 'Host' header while preserving
-                               the original (which is what the module must verify) in the 'x-forwarded-host' header field.
-                               Only used when passed a node Http.ServerRequest object.
-  
-        nonceFunc:             optional nonce validation function. The function signature is function(nonce, ts, callback)
-                               where 'callback' must be called using the signature function(err).
-  
-        timestampSkewSec:      optional number of seconds of permitted clock skew for incoming timestamps. Defaults to 60 seconds.
-                               Provides a +/- skew which means actual allowed window is double the number of seconds.
-  
-        localtimeOffsetMsec:   optional local clock time offset express in a number of milliseconds (positive or negative).
-                               Defaults to 0.
-  
-        payload:               optional payload for validation. The client calculates the hash value and includes it via the 'hash'
-                               header attribute. The server always ensures the value provided has been included in the request
-                               MAC. When this option is provided, it validates the hash value itself. Validation is done by calculating
-                               a hash value over the entire payload (assuming it has already be normalized to the same format and
-                               encoding used by the client to calculate the hash on request). If the payload is not available at the time
-                               of authentication, the authenticatePayload() method can be used by passing it the credentials and
-                               attributes.hash returned in the authenticate callback.
-
-        host:                  optional host name override. Only used when passed a node request object.
-        port:                  optional port override. Only used when passed a node request object.
-    }
-
-    callback: function (err, credentials, artifacts) { }
- */
-
-exports.authenticate = function (req, credentialsFunc, options, callback) {
-
-    callback = Utils.nextTick(callback);
-    
-    // Default options
-
-    options.nonceFunc = options.nonceFunc || function (nonce, ts, nonceCallback) { return nonceCallback(); };   // No validation
-    options.timestampSkewSec = options.timestampSkewSec || 60;                                                  // 60 seconds
-
-    // Application time
-
-    var now = Utils.now() + (options.localtimeOffsetMsec || 0);                 // Measure now before any other processing
-
-    // Convert node Http request object to a request configuration object
-
-    var request = Utils.parseRequest(req, options);
-    if (request instanceof Error) {
-        return callback(Boom.badRequest(request.message));
-    }
-
-    // Parse HTTP Authorization header
-
-    var attributes = Utils.parseAuthorizationHeader(request.authorization);
-    if (attributes instanceof Error) {
-        return callback(attributes);
-    }
-
-    // Construct artifacts container
-
-    var artifacts = {
-        method: request.method,
-        host: request.host,
-        port: request.port,
-        resource: request.url,
-        ts: attributes.ts,
-        nonce: attributes.nonce,
-        hash: attributes.hash,
-        ext: attributes.ext,
-        app: attributes.app,
-        dlg: attributes.dlg,
-        mac: attributes.mac,
-        id: attributes.id
-    };
-
-    // Verify required header attributes
-
-    if (!attributes.id ||
-        !attributes.ts ||
-        !attributes.nonce ||
-        !attributes.mac) {
-
-        return callback(Boom.badRequest('Missing attributes'), null, artifacts);
-    }
-
-    // Fetch Hawk credentials
-
-    credentialsFunc(attributes.id, function (err, credentials) {
-
-        if (err) {
-            return callback(err, credentials || null, artifacts);
+            return null;
         }
 
-        if (!credentials) {
-            return callback(Boom.unauthorized('Unknown credentials', 'Hawk'), null, artifacts);
-        }
+        // Application time
 
-        if (!credentials.key ||
+        var timestamp = options.timestamp || hawk.utils.now(options.localtimeOffsetMsec);
+
+        // Validate credentials
+
+        var credentials = options.credentials;
+        if (!credentials ||
+            !credentials.id ||
+            !credentials.key ||
             !credentials.algorithm) {
 
-            return callback(Boom.internal('Invalid credentials'), credentials, artifacts);
+            // Invalid credential object
+            return null;
         }
 
-        if (Crypto.algorithms.indexOf(credentials.algorithm) === -1) {
-            return callback(Boom.internal('Unknown algorithm'), credentials, artifacts);
+        if (hawk.crypto.algorithms.indexOf(credentials.algorithm) === -1) {
+            return null;
         }
 
-        // Calculate MAC
-
-        var mac = Crypto.calculateMac('header', credentials, artifacts);
-        if (!Cryptiles.fixedTimeComparison(mac, attributes.mac)) {
-            return callback(Boom.unauthorized('Bad mac', 'Hawk'), credentials, artifacts);
-        }
-
-        // Check payload hash
-
-        if (options.payload !== null &&
-            options.payload !== undefined) {       // '' is valid
-
-            if (!attributes.hash) {
-                return callback(Boom.unauthorized('Missing required payload hash', 'Hawk'), credentials, artifacts);
-            }
-
-            var hash = Crypto.calculatePayloadHash(options.payload, credentials.algorithm, request.contentType);
-            if (!Cryptiles.fixedTimeComparison(hash, attributes.hash)) {
-                return callback(Boom.unauthorized('Bad payload hash', 'Hawk'), credentials, artifacts);
-            }
-        }
-
-        // Check nonce
-
-        options.nonceFunc(attributes.nonce, attributes.ts, function (err) {
-
-            if (err) {
-                return callback(Boom.unauthorized('Invalid nonce', 'Hawk'), credentials, artifacts);
-            }
-
-            // Check timestamp staleness
-
-            if (Math.abs((attributes.ts * 1000) - now) > (options.timestampSkewSec * 1000)) {
-                var tsm = Crypto.timestampMessage(credentials, options.localtimeOffsetMsec);
-                return callback(Boom.unauthorized('Stale timestamp', 'Hawk', tsm), credentials, artifacts);
-            }
-
-            // Successful authentication
-
-            return callback(null, credentials, artifacts);
-        });
-    });
-};
-
-
-// Authenticate payload hash - used when payload cannot be provided during authenticate()
-
-/*
-    payload:        raw request payload
-    credentials:    from authenticate callback
-    artifacts:      from authenticate callback
-    contentType:    req.headers['content-type']
-*/
-
-exports.authenticatePayload = function (payload, credentials, artifacts, contentType) {
-
-    var calculatedHash = Crypto.calculatePayloadHash(payload, credentials.algorithm, contentType);
-    return Cryptiles.fixedTimeComparison(calculatedHash, artifacts.hash);
-};
-
-
-// Generate a Server-Authorization header for a given response
-
-/*
-    credentials: {},                                        // Object received from authenticate()
-    artifacts: {}                                           // Object received from authenticate(); 'mac', 'hash', and 'ext' - ignored
-    options: {
-        ext: 'application-specific',                        // Application specific data sent via the ext attribute
-        payload: '{"some":"payload"}',                      // UTF-8 encoded string for body hash generation (ignored if hash provided)
-        contentType: 'application/json',                    // Payload content-type (ignored if hash provided)
-        hash: 'U4MKKSmiVxk37JCCrAVIjV='                     // Pre-calculated payload hash
-    }
-*/
-
-exports.header = function (credentials, artifacts, options) {
-
-    // Prepare inputs
-
-    options = options || {};
-
-    if (!artifacts ||
-        typeof artifacts !== 'object' ||
-        typeof options !== 'object') {
-
-        return '';
-    }
-
-    artifacts = Hoek.clone(artifacts);
-    delete artifacts.mac;
-    artifacts.hash = options.hash;
-    artifacts.ext = options.ext;
-
-    // Validate credentials
-
-    if (!credentials ||
-        !credentials.key ||
-        !credentials.algorithm) {
-
-        // Invalid credential object
-        return '';
-    }
-
-    if (Crypto.algorithms.indexOf(credentials.algorithm) === -1) {
-        return '';
-    }
-
-    // Calculate payload hash
-
-    if (!artifacts.hash &&
-        options.hasOwnProperty('payload')) {
-
-        artifacts.hash = Crypto.calculatePayloadHash(options.payload, credentials.algorithm, options.contentType);
-    }
-
-    var mac = Crypto.calculateMac('response', credentials, artifacts);
-
-    // Construct header
-
-    var header = 'Hawk mac="' + mac + '"' +
-                 (artifacts.hash ? ', hash="' + artifacts.hash + '"' : '');
-
-    if (artifacts.ext !== null &&
-        artifacts.ext !== undefined &&
-        artifacts.ext !== '') {                       // Other falsey values allowed
-
-        header += ', ext="' + Utils.escapeHeaderAttribute(artifacts.ext) + '"';
-    }
-
-    return header;
-};
-
-
-/*
- * Arguments and options are the same as authenticate() with the exception that the only supported options are:
- * 'hostHeaderName', 'localtimeOffsetMsec', 'host', 'port'
- */
-
-exports.authenticateBewit = function (req, credentialsFunc, options, callback) {
-
-    callback = Utils.nextTick(callback);
-
-    // Application time
-
-    var now = Utils.now() + (options.localtimeOffsetMsec || 0);
-
-    // Convert node Http request object to a request configuration object
-
-    var request = Utils.parseRequest(req, options);
-    if (request instanceof Error) {
-        return callback(Boom.badRequest(request.message));
-    }
-
-    // Extract bewit
-
-    //                                 1     2             3           4     
-    var resource = request.url.match(/^(\/.*)([\?&])bewit\=([^&$]*)(?:&(.+))?$/);
-    if (!resource) {
-        return callback(Boom.unauthorized(null, 'Hawk'));
-    }
-
-    // Bewit not empty
-
-    if (!resource[3]) {
-        return callback(Boom.unauthorized('Empty bewit', 'Hawk'));
-    }
-
-    // Verify method is GET
-
-    if (request.method !== 'GET' &&
-        request.method !== 'HEAD') {
-
-        return callback(Boom.unauthorized('Invalid method', 'Hawk'));
-    }
-
-    // No other authentication
-
-    if (request.authorization) {
-        return callback(Boom.badRequest('Multiple authentications', 'Hawk'));
-    }
-
-    // Parse bewit
-
-    var bewitString = Utils.base64urlDecode(resource[3]);
-    if (bewitString instanceof Error) {
-        return callback(Boom.badRequest('Invalid bewit encoding'));
-    }
-
-    // Bewit format: id\exp\mac\ext ('\' is used because it is a reserved header attribute character)
-
-    var bewitParts = bewitString.split('\\');
-    if (!bewitParts ||
-        bewitParts.length !== 4) {
-
-        return callback(Boom.badRequest('Invalid bewit structure'));
-    }
-
-    var bewit = {
-        id: bewitParts[0],
-        exp: parseInt(bewitParts[1], 10),
-        mac: bewitParts[2],
-        ext: bewitParts[3] || ''
-    };
-
-    if (!bewit.id ||
-        !bewit.exp ||
-        !bewit.mac) {
-
-        return callback(Boom.badRequest('Missing bewit attributes'));
-    }
-
-    // Construct URL without bewit
-
-    var url = resource[1];
-    if (resource[4]) {
-        url += resource[2] + resource[4];
-    }
-
-    // Check expiration
-
-    if (bewit.exp * 1000 <= now) {
-        return callback(Boom.unauthorized('Access expired', 'Hawk'), null, bewit);
-    }
-
-    // Fetch Hawk credentials
-
-    credentialsFunc(bewit.id, function (err, credentials) {
-
-        if (err) {
-            return callback(err, credentials || null, bewit.ext);
-        }
-
-        if (!credentials) {
-            return callback(Boom.unauthorized('Unknown credentials', 'Hawk'), null, bewit);
-        }
-
-        if (!credentials.key ||
-            !credentials.algorithm) {
-
-            return callback(Boom.internal('Invalid credentials'), credentials, bewit);
-        }
-
-        if (Crypto.algorithms.indexOf(credentials.algorithm) === -1) {
-            return callback(Boom.internal('Unknown algorithm'), credentials, bewit);
-        }
-
-        // Calculate MAC
-
-        var mac = Crypto.calculateMac('bewit', credentials, {
-            ts: bewit.exp,
-            nonce: '',
-            method: 'GET',
-            resource: url,
-            host: request.host,
-            port: request.port,
-            ext: bewit.ext
-        });
-
-        if (!Cryptiles.fixedTimeComparison(mac, bewit.mac)) {
-            return callback(Boom.unauthorized('Bad mac', 'Hawk'), credentials, bewit);
-        }
-
-        // Successful authentication
-
-        return callback(null, credentials, bewit);
-    });
-};
-
-
-/*
- *  options are the same as authenticate() with the exception that the only supported options are:
- * 'nonceFunc', 'timestampSkewSec', 'localtimeOffsetMsec'
- */
-
-exports.authenticateMessage = function (host, port, message, authorization, credentialsFunc, options, callback) {
-
-    callback = Utils.nextTick(callback);
-    
-    // Default options
-
-    options.nonceFunc = options.nonceFunc || function (nonce, ts, nonceCallback) { return nonceCallback(); };   // No validation
-    options.timestampSkewSec = options.timestampSkewSec || 60;                                                  // 60 seconds
-
-    // Application time
-
-    var now = Utils.now() + (options.localtimeOffsetMsec || 0);                 // Measure now before any other processing
-
-    // Validate authorization
-    
-    if (!authorization.id ||
-        !authorization.ts ||
-        !authorization.nonce ||
-        !authorization.hash ||
-        !authorization.mac) {
-        
-            return callback(Boom.badRequest('Invalid authorization'))
-    }
-
-    // Fetch Hawk credentials
-
-    credentialsFunc(authorization.id, function (err, credentials) {
-
-        if (err) {
-            return callback(err, credentials || null);
-        }
-
-        if (!credentials) {
-            return callback(Boom.unauthorized('Unknown credentials', 'Hawk'));
-        }
-
-        if (!credentials.key ||
-            !credentials.algorithm) {
-
-            return callback(Boom.internal('Invalid credentials'), credentials);
-        }
-
-        if (Crypto.algorithms.indexOf(credentials.algorithm) === -1) {
-            return callback(Boom.internal('Unknown algorithm'), credentials);
-        }
-
-        // Construct artifacts container
+        // Calculate signature
 
         var artifacts = {
-            ts: authorization.ts,
-            nonce: authorization.nonce,
+            ts: timestamp,
+            nonce: options.nonce || hawk.utils.randomString(6),
             host: host,
             port: port,
-            hash: authorization.hash
+            hash: hawk.crypto.calculatePayloadHash(message, credentials.algorithm)
         };
 
-        // Calculate MAC
-
-        var mac = Crypto.calculateMac('message', credentials, artifacts);
-        if (!Cryptiles.fixedTimeComparison(mac, authorization.mac)) {
-            return callback(Boom.unauthorized('Bad mac', 'Hawk'), credentials);
-        }
-
-        // Check payload hash
-
-        var hash = Crypto.calculatePayloadHash(message, credentials.algorithm);
-        if (!Cryptiles.fixedTimeComparison(hash, authorization.hash)) {
-            return callback(Boom.unauthorized('Bad message hash', 'Hawk'), credentials);
-        }
-
-        // Check nonce
-
-        options.nonceFunc(authorization.nonce, authorization.ts, function (err) {
-
-            if (err) {
-                return callback(Boom.unauthorized('Invalid nonce', 'Hawk'), credentials);
-            }
-
-            // Check timestamp staleness
-
-            if (Math.abs((authorization.ts * 1000) - now) > (options.timestampSkewSec * 1000)) {
-                return callback(Boom.unauthorized('Stale timestamp'), credentials);
-            }
-
-            // Successful authentication
-
-            return callback(null, credentials);
-        });
-    });
-};
-
-},{"./crypto":188,"./utils":191,"boom":192,"cryptiles":194,"hoek":196}],191:[function(require,module,exports){
-(function (__dirname){
-// Load modules
-
-var Hoek = require('hoek');
-var Sntp = require('sntp');
-var Boom = require('boom');
-
-
-// Declare internals
-
-var internals = {};
-
-
-// Import Hoek Utilities
-
-internals.import = function () {
-
-    for (var i in Hoek) {
-        if (Hoek.hasOwnProperty(i)) {
-            exports[i] = Hoek[i];
-        }
-    }
-};
-
-internals.import();
-
-
-// Hawk version
-
-exports.version = function () {
-
-    return exports.loadPackage(__dirname + '/..').version;
-};
-
-
-// Extract host and port from request
-
-exports.parseHost = function (req, hostHeaderName) {
-
-    hostHeaderName = (hostHeaderName ? hostHeaderName.toLowerCase() : 'host');
-    var hostHeader = req.headers[hostHeaderName];
-    if (!hostHeader) {
-        return null;
-    }
-
-    var hostHeaderRegex;
-    if (hostHeader[0] === '[') {
-        hostHeaderRegex = /^(?:(?:\r\n)?\s)*(\[[^\]]+\])(?::(\d+))?(?:(?:\r\n)?\s)*$/;      // IPv6
-    }
-    else {
-        hostHeaderRegex = /^(?:(?:\r\n)?\s)*([^:]+)(?::(\d+))?(?:(?:\r\n)?\s)*$/;           // IPv4, hostname
-    }
-    
-    var hostParts = hostHeader.match(hostHeaderRegex);
-
-    if (!hostParts ||
-        hostParts.length !== 3 ||
-        !hostParts[1]) {
-
-        return null;
-    }
-
-    return {
-        name: hostParts[1],
-        port: (hostParts[2] ? hostParts[2] : (req.connection && req.connection.encrypted ? 443 : 80))
-    };
-};
-
-
-// Parse Content-Type header content
-
-exports.parseContentType = function (header) {
-
-    if (!header) {
-        return '';
-    }
-
-    return header.split(';')[0].trim().toLowerCase();
-};
-
-
-// Convert node's  to request configuration object
-
-exports.parseRequest = function (req, options) {
-
-    if (!req.headers) {
-        return req;
-    }
-    
-    // Obtain host and port information
-
-    if (!options.host || !options.port) {
-        var host = exports.parseHost(req, options.hostHeaderName);
-        if (!host) {
-            return new Error('Invalid Host header');
-        }
-    }
-
-    var request = {
-        method: req.method,
-        url: req.url,
-        host: options.host || host.name,
-        port: options.port || host.port,
-        authorization: req.headers.authorization,
-        contentType: req.headers['content-type'] || ''
-    };
-
-    return request;
-};
-
-
-exports.now = function () {
-
-    return Sntp.now();
-};
-
-
-// Parse Hawk HTTP Authorization header
-
-exports.parseAuthorizationHeader = function (header, keys) {
-
-    keys = keys || ['id', 'ts', 'nonce', 'hash', 'ext', 'mac', 'app', 'dlg'];
-
-    if (!header) {
-        return Boom.unauthorized(null, 'Hawk');
-    }
-
-    var headerParts = header.match(/^(\w+)(?:\s+(.*))?$/);       // Header: scheme[ something]
-    if (!headerParts) {
-        return Boom.badRequest('Invalid header syntax');
-    }
-
-    var scheme = headerParts[1];
-    if (scheme.toLowerCase() !== 'hawk') {
-        return Boom.unauthorized(null, 'Hawk');
-    }
-
-    var attributesString = headerParts[2];
-    if (!attributesString) {
-        return Boom.badRequest('Invalid header syntax');
-    }
-
-    var attributes = {};
-    var errorMessage = '';
-    var verify = attributesString.replace(/(\w+)="([^"\\]*)"\s*(?:,\s*|$)/g, function ($0, $1, $2) {
-
-        // Check valid attribute names
-
-        if (keys.indexOf($1) === -1) {
-            errorMessage = 'Unknown attribute: ' + $1;
-            return;
-        }
-
-        // Allowed attribute value characters: !#$%&'()*+,-./:;<=>?@[]^_`{|}~ and space, a-z, A-Z, 0-9
-
-        if ($2.match(/^[ \w\!#\$%&'\(\)\*\+,\-\.\/\:;<\=>\?@\[\]\^`\{\|\}~]+$/) === null) {
-            errorMessage = 'Bad attribute value: ' + $1;
-            return;
-        }
-
-        // Check for duplicates
-
-        if (attributes.hasOwnProperty($1)) {
-            errorMessage = 'Duplicate attribute: ' + $1;
-            return;
-        }
-
-        attributes[$1] = $2;
-        return '';
-    });
-
-    if (verify !== '') {
-        return Boom.badRequest(errorMessage || 'Bad header format');
-    }
-
-    return attributes;
-};
-
-
-exports.unauthorized = function (message) {
-
-    return Boom.unauthorized(message, 'Hawk');
-};
-
-
-}).call(this,"/node_modules\\request\\node_modules\\hawk\\lib")
-},{"boom":192,"hoek":196,"sntp":199}],192:[function(require,module,exports){
-arguments[4][186][0].apply(exports,arguments)
-},{"./lib":193,"C:\\DEV\\github\\z-schema\\node_modules\\request\\node_modules\\hawk\\index.js":186}],193:[function(require,module,exports){
-// Load modules
-
-var Http = require('http');
-var NodeUtil = require('util');
-var Hoek = require('hoek');
-
-
-// Declare internals
-
-var internals = {};
-
-
-exports = module.exports = internals.Boom = function (/* (new Error) or (code, message) */) {
-
-    var self = this;
-
-    Hoek.assert(this.constructor === internals.Boom, 'Error must be instantiated using new');
-
-    Error.call(this);
-    this.isBoom = true;
-
-    this.response = {
-        code: 0,
-        payload: {},
-        headers: {}
-        // type: 'content-type'
-    };
-
-    if (arguments[0] instanceof Error) {
-
-        // Error
-
-        var error = arguments[0];
-
-        this.data = error;
-        this.response.code = error.code || 500;
-        if (error.message) {
-            this.message = error.message;
-        }
-    }
-    else {
-
-        // code, message
-
-        var code = arguments[0];
-        var message = arguments[1];
-
-        Hoek.assert(!isNaN(parseFloat(code)) && isFinite(code) && code >= 400, 'First argument must be a number (400+)');
-
-        this.response.code = code;
-        if (message) {
-            this.message = message;
-        }
-    }
-
-    // Response format
-
-    this.reformat();
-
-    return this;
-};
-
-NodeUtil.inherits(internals.Boom, Error);
-
-
-internals.Boom.prototype.reformat = function () {
-
-    this.response.payload.code = this.response.code;
-    this.response.payload.error = Http.STATUS_CODES[this.response.code] || 'Unknown';
-    if (this.message) {
-        this.response.payload.message = Hoek.escapeHtml(this.message);         // Prevent XSS from error message
-    }
-};
-
-
-// Utilities
-
-internals.Boom.badRequest = function (message) {
-
-    return new internals.Boom(400, message);
-};
-
-
-internals.Boom.unauthorized = function (message, scheme, attributes) {          // Or function (message, wwwAuthenticate[])
-
-    var err = new internals.Boom(401, message);
-
-    if (!scheme) {
-        return err;
-    }
-
-    var wwwAuthenticate = '';
-
-    if (typeof scheme === 'string') {
-
-        // function (message, scheme, attributes)
-
-        wwwAuthenticate = scheme;
-        if (attributes) {
-            var names = Object.keys(attributes);
-            for (var i = 0, il = names.length; i < il; ++i) {
-                if (i) {
-                    wwwAuthenticate += ',';
-                }
-
-                var value = attributes[names[i]];
-                if (value === null ||
-                    value === undefined) {              // Value can be zero
-
-                    value = '';
-                }
-                wwwAuthenticate += ' ' + names[i] + '="' + Hoek.escapeHeaderAttribute(value.toString()) + '"';
-            }
-        }
-
-        if (message) {
-            if (attributes) {
-                wwwAuthenticate += ',';
-            }
-            wwwAuthenticate += ' error="' + Hoek.escapeHeaderAttribute(message) + '"';
-        }
-        else {
-            err.isMissing = true;
-        }
-    }
-    else {
-
-        // function (message, wwwAuthenticate[])
-
-        var wwwArray = scheme;
-        for (var i = 0, il = wwwArray.length; i < il; ++i) {
-            if (i) {
-                wwwAuthenticate += ', ';
-            }
-
-            wwwAuthenticate += wwwArray[i];
-        }
-    }
-
-    err.response.headers['WWW-Authenticate'] = wwwAuthenticate;
-
-    return err;
-};
-
-
-internals.Boom.clientTimeout = function (message) {
-
-    return new internals.Boom(408, message);
-};
-
-
-internals.Boom.serverTimeout = function (message) {
-
-    return new internals.Boom(503, message);
-};
-
-
-internals.Boom.forbidden = function (message) {
-
-    return new internals.Boom(403, message);
-};
-
-
-internals.Boom.notFound = function (message) {
-
-    return new internals.Boom(404, message);
-};
-
-
-internals.Boom.internal = function (message, data) {
-
-    var err = new internals.Boom(500, message);
-
-    if (data && data.stack) {
-        err.trace = data.stack.split('\n');
-        err.outterTrace = Hoek.displayStack(1);
-    }
-    else {
-        err.trace = Hoek.displayStack(1);
-    }
-
-    err.data = data;
-    err.response.payload.message = 'An internal server error occurred';                     // Hide actual error from user
-
-    return err;
-};
-
-
-internals.Boom.passThrough = function (code, payload, contentType, headers) {
-
-    var err = new internals.Boom(500, 'Pass-through');                                      // 500 code is only used to initialize
-
-    err.data = {
-        code: code,
-        payload: payload,
-        type: contentType
-    };
-
-    err.response.code = code;
-    err.response.type = contentType;
-    err.response.headers = headers;
-    err.response.payload = payload;
-
-    return err;
-};
-
-
-
-},{"hoek":196,"http":129,"util":157}],194:[function(require,module,exports){
-arguments[4][186][0].apply(exports,arguments)
-},{"./lib":195,"C:\\DEV\\github\\z-schema\\node_modules\\request\\node_modules\\hawk\\index.js":186}],195:[function(require,module,exports){
-// Load modules
-
-var Crypto = require('crypto');
-var Boom = require('boom');
-
-
-// Declare internals
-
-var internals = {};
-
-
-// Generate a cryptographically strong pseudo-random data
-
-exports.randomString = function (size) {
-
-    var buffer = exports.randomBits((size + 1) * 6);
-    if (buffer instanceof Error) {
-        return buffer;
-    }
-
-    var string = buffer.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/\=/g, '');
-    return string.slice(0, size);
-};
-
-
-exports.randomBits = function (bits) {
-
-    if (!bits ||
-        bits < 0) {
-
-        return Boom.internal('Invalid random bits count');
-    }
-
-    var bytes = Math.ceil(bits / 8);
-    try {
-        return Crypto.randomBytes(bytes);
-    }
-    catch (err) {
-        return Boom.internal('Failed generating random bits: ' + err.message);
-    }
-};
-
-
-// Compare two strings using fixed time algorithm (to prevent time-based analysis of MAC digest match)
-
-exports.fixedTimeComparison = function (a, b) {
-
-    if (typeof a !== 'string' ||
-        typeof b !== 'string') {
-
-        return false;
-    }
-
-    var mismatch = (a.length === b.length ? 0 : 1);
-    if (mismatch) {
-        b = a;
-    }
-
-    for (var i = 0, il = a.length; i < il; ++i) {
-        var ac = a.charCodeAt(i);
-        var bc = b.charCodeAt(i);
-        mismatch += (ac === bc ? 0 : 1);
-    }
-
-    return (mismatch === 0);
-};
-
-
-
-},{"boom":192,"crypto":24}],196:[function(require,module,exports){
-arguments[4][186][0].apply(exports,arguments)
-},{"./lib":198,"C:\\DEV\\github\\z-schema\\node_modules\\request\\node_modules\\hawk\\index.js":186}],197:[function(require,module,exports){
-(function (Buffer){
-// Declare internals
-
-var internals = {};
-
-
-exports.escapeJavaScript = function (input) {
-
-    if (!input) {
-        return '';
-    }
-
-    var escaped = '';
-
-    for (var i = 0, il = input.length; i < il; ++i) {
-
-        var charCode = input.charCodeAt(i);
-
-        if (internals.isSafe(charCode)) {
-            escaped += input[i];
-        }
-        else {
-            escaped += internals.escapeJavaScriptChar(charCode);
-        }
-    }
-
-    return escaped;
-};
-
-
-exports.escapeHtml = function (input) {
-
-    if (!input) {
-        return '';
-    }
-
-    var escaped = '';
-
-    for (var i = 0, il = input.length; i < il; ++i) {
-
-        var charCode = input.charCodeAt(i);
-
-        if (internals.isSafe(charCode)) {
-            escaped += input[i];
-        }
-        else {
-            escaped += internals.escapeHtmlChar(charCode);
-        }
-    }
-
-    return escaped;
-};
-
-
-internals.escapeJavaScriptChar = function (charCode) {
-
-    if (charCode >= 256) {
-        return '\\u' + internals.padLeft('' + charCode, 4);
-    }
-
-    var hexValue = new Buffer(String.fromCharCode(charCode), 'ascii').toString('hex');
-    return '\\x' + internals.padLeft(hexValue, 2);
-};
-
-
-internals.escapeHtmlChar = function (charCode) {
-
-    var namedEscape = internals.namedHtml[charCode];
-    if (typeof namedEscape !== 'undefined') {
-        return namedEscape;
-    }
-
-    if (charCode >= 256) {
-        return '&#' + charCode + ';';
-    }
-
-    var hexValue = new Buffer(String.fromCharCode(charCode), 'ascii').toString('hex');
-    return '&#x' + internals.padLeft(hexValue, 2) + ';';
-};
-
-
-internals.padLeft = function (str, len) {
-
-    while (str.length < len) {
-        str = '0' + str;
-    }
-
-    return str;
-};
-
-
-internals.isSafe = function (charCode) {
-
-    return (typeof internals.safeCharCodes[charCode] !== 'undefined');
-};
-
-
-internals.namedHtml = {
-    '38': '&amp;',
-    '60': '&lt;',
-    '62': '&gt;',
-    '34': '&quot;',
-    '160': '&nbsp;',
-    '162': '&cent;',
-    '163': '&pound;',
-    '164': '&curren;',
-    '169': '&copy;',
-    '174': '&reg;'
-};
-
-
-internals.safeCharCodes = (function () {
-
-    var safe = {};
-
-    for (var i = 32; i < 123; ++i) {
-
-        if ((i >= 97 && i <= 122) ||         // a-z
-            (i >= 65 && i <= 90) ||          // A-Z
-            (i >= 48 && i <= 57) ||          // 0-9
-            i === 32 ||                      // space
-            i === 46 ||                      // .
-            i === 44 ||                      // ,
-            i === 45 ||                      // -
-            i === 58 ||                      // :
-            i === 95) {                      // _
-
-            safe[i] = null;
-        }
-    }
-
-    return safe;
-}());
-}).call(this,require("buffer").Buffer)
-},{"buffer":17}],198:[function(require,module,exports){
-(function (process,Buffer){
-// Load modules
-
-var Fs = require('fs');
-var Escape = require('./escape');
-
-
-// Declare internals
-
-var internals = {};
-
-
-// Clone object or array
-
-exports.clone = function (obj, seen) {
-
-    if (typeof obj !== 'object' ||
-        obj === null) {
-
-        return obj;
-    }
-
-    seen = seen || { orig: [], copy: [] };
-
-    var lookup = seen.orig.indexOf(obj);
-    if (lookup !== -1) {
-        return seen.copy[lookup];
-    }
-
-    var newObj = (obj instanceof Array) ? [] : {};
-
-    seen.orig.push(obj);
-    seen.copy.push(newObj);
-
-    for (var i in obj) {
-        if (obj.hasOwnProperty(i)) {
-            if (obj[i] instanceof Buffer) {
-                newObj[i] = new Buffer(obj[i]);
-            }
-            else if (obj[i] instanceof Date) {
-                newObj[i] = new Date(obj[i].getTime());
-            }
-            else if (obj[i] instanceof RegExp) {
-                var flags = '' + (obj[i].global ? 'g' : '') + (obj[i].ignoreCase ? 'i' : '') + (obj[i].multiline ? 'm' : '');
-                newObj[i] = new RegExp(obj[i].source, flags);
-            }
-            else {
-                newObj[i] = exports.clone(obj[i], seen);
-            }
-        }
-    }
-
-    return newObj;
-};
-
-
-// Merge all the properties of source into target, source wins in conflic, and by default null and undefined from source are applied
-
-exports.merge = function (target, source, isNullOverride /* = true */, isMergeArrays /* = true */) {
-
-    exports.assert(target && typeof target == 'object', 'Invalid target value: must be an object');
-    exports.assert(source === null || source === undefined || typeof source === 'object', 'Invalid source value: must be null, undefined, or an object');
-
-    if (!source) {
-        return target;
-    }
-
-    if (source instanceof Array) {
-        exports.assert(target instanceof Array, 'Cannot merge array onto an object');
-        if (isMergeArrays === false) {                                                  // isMergeArrays defaults to true
-            target.length = 0;                                                          // Must not change target assignment
-        }
-
-        for (var i = 0, il = source.length; i < il; ++i) {
-            target.push(source[i]);
-        }
-
-        return target;
-    }
-
-    var keys = Object.keys(source);
-    for (var k = 0, kl = keys.length; k < kl; ++k) {
-        var key = keys[k];
-        var value = source[key];
-        if (value &&
-            typeof value === 'object') {
-
-            if (!target[key] ||
-                typeof target[key] !== 'object') {
-
-                target[key] = exports.clone(value);
-            }
-            else {
-                exports.merge(target[key], source[key], isNullOverride, isMergeArrays);
-            }
-        }
-        else {
-            if (value !== null && value !== undefined) {            // Explicit to preserve empty strings
-                target[key] = value;
-            }
-            else if (isNullOverride !== false) {                    // Defaults to true
-                target[key] = value;
-            }
-        }
-    }
-
-    return target;
-};
-
-
-// Apply options to a copy of the defaults
-
-exports.applyToDefaults = function (defaults, options) {
-
-    exports.assert(defaults && typeof defaults == 'object', 'Invalid defaults value: must be an object');
-    exports.assert(!options || options === true || typeof options === 'object', 'Invalid options value: must be true, falsy or an object');
-
-    if (!options) {                                                 // If no options, return null
-        return null;
-    }
-
-    var copy = exports.clone(defaults);
-
-    if (options === true) {                                         // If options is set to true, use defaults
-        return copy;
-    }
-
-    return exports.merge(copy, options, false, false);
-};
-
-
-// Remove duplicate items from array
-
-exports.unique = function (array, key) {
-
-    var index = {};
-    var result = [];
-
-    for (var i = 0, il = array.length; i < il; ++i) {
-        var id = (key ? array[i][key] : array[i]);
-        if (index[id] !== true) {
-
-            result.push(array[i]);
-            index[id] = true;
-        }
-    }
-
-    return result;
-};
-
-
-// Convert array into object
-
-exports.mapToObject = function (array, key) {
-
-    if (!array) {
-        return null;
-    }
-
-    var obj = {};
-    for (var i = 0, il = array.length; i < il; ++i) {
-        if (key) {
-            if (array[i][key]) {
-                obj[array[i][key]] = true;
-            }
-        }
-        else {
-            obj[array[i]] = true;
-        }
-    }
-
-    return obj;
-};
-
-
-// Find the common unique items in two arrays
-
-exports.intersect = function (array1, array2, justFirst) {
-
-    if (!array1 || !array2) {
-        return [];
-    }
-
-    var common = [];
-    var hash = (array1 instanceof Array ? exports.mapToObject(array1) : array1);
-    var found = {};
-    for (var i = 0, il = array2.length; i < il; ++i) {
-        if (hash[array2[i]] && !found[array2[i]]) {
-            if (justFirst) {
-                return array2[i];
-            }
-
-            common.push(array2[i]);
-            found[array2[i]] = true;
-        }
-    }
-
-    return (justFirst ? null : common);
-};
-
-
-// Find which keys are present
-
-exports.matchKeys = function (obj, keys) {
-
-    var matched = [];
-    for (var i = 0, il = keys.length; i < il; ++i) {
-        if (obj.hasOwnProperty(keys[i])) {
-            matched.push(keys[i]);
-        }
-    }
-    return matched;
-};
-
-
-// Flatten array
-
-exports.flatten = function (array, target) {
-
-    var result = target || [];
-
-    for (var i = 0, il = array.length; i < il; ++i) {
-        if (Array.isArray(array[i])) {
-            exports.flatten(array[i], result);
-        }
-        else {
-            result.push(array[i]);
-        }
-    }
-
-    return result;
-};
-
-
-// Remove keys
-
-exports.removeKeys = function (object, keys) {
-
-    for (var i = 0, il = keys.length; i < il; i++) {
-        delete object[keys[i]];
-    }
-};
-
-
-// Convert an object key chain string ('a.b.c') to reference (object[a][b][c])
-
-exports.reach = function (obj, chain) {
-
-    var path = chain.split('.');
-    var ref = obj;
-    for (var i = 0, il = path.length; i < il; ++i) {
-        if (ref) {
-            ref = ref[path[i]];
-        }
-    }
-
-    return ref;
-};
-
-
-// Inherits a selected set of methods from an object, wrapping functions in asynchronous syntax and catching errors
-
-exports.inheritAsync = function (self, obj, keys) {
-
-    keys = keys || null;
-
-    for (var i in obj) {
-        if (obj.hasOwnProperty(i)) {
-            if (keys instanceof Array &&
-                keys.indexOf(i) < 0) {
-
-                continue;
-            }
-
-            self.prototype[i] = (function (fn) {
-
-                return function (next) {
-
-                    var result = null;
-                    try {
-                        result = fn();
-                    }
-                    catch (err) {
-                        return next(err);
-                    }
-
-                    return next(null, result);
-                };
-            })(obj[i]);
-        }
-    }
-};
-
-
-exports.formatStack = function (stack) {
-
-    var trace = [];
-    for (var i = 0, il = stack.length; i < il; ++i) {
-        var item = stack[i];
-        trace.push([item.getFileName(), item.getLineNumber(), item.getColumnNumber(), item.getFunctionName(), item.isConstructor()]);
-    }
-
-    return trace;
-};
-
-
-exports.formatTrace = function (trace) {
-
-    var display = [];
-
-    for (var i = 0, il = trace.length; i < il; ++i) {
-        var row = trace[i];
-        display.push((row[4] ? 'new ' : '') + row[3] + ' (' + row[0] + ':' + row[1] + ':' + row[2] + ')');
-    }
-
-    return display;
-};
-
-
-exports.callStack = function (slice) {
-
-    // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
-
-    var v8 = Error.prepareStackTrace;
-    Error.prepareStackTrace = function (err, stack) {
-
-        return stack;
-    };
-
-    var capture = {};
-    Error.captureStackTrace(capture, arguments.callee);
-    var stack = capture.stack;
-
-    Error.prepareStackTrace = v8;
-
-    var trace = exports.formatStack(stack);
-
-    if (slice) {
-        return trace.slice(slice);
-    }
-
-    return trace;
-};
-
-
-exports.displayStack = function (slice) {
-
-    var trace = exports.callStack(slice === undefined ? 1 : slice + 1);
-
-    return exports.formatTrace(trace);
-};
-
-
-exports.abortThrow = false;
-
-
-exports.abort = function (message, hideStack) {
-
-    if (process.env.NODE_ENV === 'test' || exports.abortThrow === true) {
-        throw new Error(message || 'Unknown error');
-    }
-
-    var stack = '';
-    if (!hideStack) {
-        stack = exports.displayStack(1).join('\n\t');
-    }
-    console.log('ABORT: ' + message + '\n\t' + stack);
-    process.exit(1);
-};
-
-
-exports.assert = function (condition /*, msg1, msg2, msg3 */) {
-
-    if (condition) {
-        return;
-    }
-
-    var msgs = Array.prototype.slice.call(arguments, 1);
-    msgs = msgs.map(function (msg) {
-
-        return typeof msg === 'string' ? msg : msg instanceof Error ? msg.message : JSON.stringify(msg);
-    });
-    throw new Error(msgs.join(' ') || 'Unknown error');
-};
-
-
-exports.loadDirModules = function (path, excludeFiles, target) {      // target(filename, name, capName)
-
-    var exclude = {};
-    for (var i = 0, il = excludeFiles.length; i < il; ++i) {
-        exclude[excludeFiles[i] + '.js'] = true;
-    }
-
-    var files = Fs.readdirSync(path);
-    for (i = 0, il = files.length; i < il; ++i) {
-        var filename = files[i];
-        if (/\.js$/.test(filename) &&
-            !exclude[filename]) {
-
-            var name = filename.substr(0, filename.lastIndexOf('.'));
-            var capName = name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
-
-            if (typeof target !== 'function') {
-                target[capName] = require(path + '/' + name);
-            }
-            else {
-                target(path + '/' + name, name, capName);
-            }
-        }
-    }
-};
-
-
-exports.rename = function (obj, from, to) {
-
-    obj[to] = obj[from];
-    delete obj[from];
-};
-
-
-exports.Timer = function () {
-
-    this.reset();
-};
-
-
-exports.Timer.prototype.reset = function () {
-
-    this.ts = Date.now();
-};
-
-
-exports.Timer.prototype.elapsed = function () {
-
-    return Date.now() - this.ts;
-};
-
-
-// Load and parse package.json process root or given directory
-
-exports.loadPackage = function (dir) {
-
-    var result = {};
-    var filepath = (dir || process.env.PWD) + '/package.json';
-    if (Fs.existsSync(filepath)) {
-        try {
-            result = JSON.parse(Fs.readFileSync(filepath));
-        }
-        catch (e) { }
-    }
-
-    return result;
-};
-
-
-// Escape string for Regex construction
-
-exports.escapeRegex = function (string) {
-
-    // Escape ^$.*+-?=!:|\/()[]{},
-    return string.replace(/[\^\$\.\*\+\-\?\=\!\:\|\\\/\(\)\[\]\{\}\,]/g, '\\$&');
-};
-
-
-// Return an error as first argument of a callback
-
-exports.toss = function (condition /*, [message], next */) {
-
-    var message = (arguments.length === 3 ? arguments[1] : '');
-    var next = (arguments.length === 3 ? arguments[2] : arguments[1]);
-
-    var err = (message instanceof Error ? message : (message ? new Error(message) : (condition instanceof Error ? condition : new Error())));
-
-    if (condition instanceof Error ||
-        !condition) {
-
-        return next(err);
-    }
-};
-
-
-// Base64url (RFC 4648) encode
-
-exports.base64urlEncode = function (value) {
-
-    return (new Buffer(value, 'binary')).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/\=/g, '');
-};
-
-
-// Base64url (RFC 4648) decode
-
-exports.base64urlDecode = function (encoded) {
-
-    if (encoded &&
-        !encoded.match(/^[\w\-]*$/)) {
-
-        return new Error('Invalid character');
-    }
-
-    try {
-        return (new Buffer(encoded.replace(/-/g, '+').replace(/:/g, '/'), 'base64')).toString('binary');
-    }
-    catch (err) {
-        return err;
-    }
-};
-
-
-// Escape attribute value for use in HTTP header
-
-exports.escapeHeaderAttribute = function (attribute) {
-
-    // Allowed value characters: !#$%&'()*+,-./:;<=>?@[]^_`{|}~ and space, a-z, A-Z, 0-9, \, "
-
-    exports.assert(attribute.match(/^[ \w\!#\$%&'\(\)\*\+,\-\.\/\:;<\=>\?@\[\]\^`\{\|\}~\"\\]*$/), 'Bad attribute value (' + attribute + ')');
-
-    return attribute.replace(/\\/g, '\\\\').replace(/\"/g, '\\"');                             // Escape quotes and slash
-};
-
-
-exports.escapeHtml = function (string) {
-
-    return Escape.escapeHtml(string);
-};
-
-
-exports.escapeJavaScript = function (string) {
-
-    return Escape.escapeJavaScript(string);
-};
-
-
-/*
-var event = {
-    timestamp: now.getTime(),
-    tags: ['tag'],
-    data: { some: 'data' }
-};
-*/
-
-exports.consoleFunc = console.log;
-
-exports.printEvent = function (event) {
-
-    var pad = function (value) {
-
-        return (value < 10 ? '0' : '') + value;
-    };
-
-    var now = new Date(event.timestamp);
-    var timestring = (now.getYear() - 100).toString() +
-        pad(now.getMonth() + 1) +
-        pad(now.getDate()) +
-        '/' +
-        pad(now.getHours()) +
-        pad(now.getMinutes()) +
-        pad(now.getSeconds()) +
-        '.' +
-        now.getMilliseconds();
-
-    var data = event.data;
-    if (typeof event.data !== 'string') {
-        try {
-            data = JSON.stringify(event.data);
-        }
-        catch (e) {
-            data = 'JSON Error: ' + e.message;
-        }
-    }
-
-    var output = timestring + ', ' + event.tags[0] + ', ' + data;
-    exports.consoleFunc(output);
-};
-
-
-exports.nextTick = function (callback) {
-
-    return function () {
-
-        var args = arguments;
-        process.nextTick(function () {
-
-            callback.apply(null, args);
-        });
-    };
-};
-
-}).call(this,require('_process'),require("buffer").Buffer)
-},{"./escape":197,"_process":137,"buffer":17,"fs":1}],199:[function(require,module,exports){
-arguments[4][186][0].apply(exports,arguments)
-},{"./lib":200,"C:\\DEV\\github\\z-schema\\node_modules\\request\\node_modules\\hawk\\index.js":186}],200:[function(require,module,exports){
-(function (process,Buffer){
-// Load modules
-
-var Dgram = require('dgram');
-var Dns = require('dns');
-var Hoek = require('hoek');
-
-
-// Declare internals
-
-var internals = {};
-
-
-exports.time = function (options, callback) {
-
-    if (arguments.length !== 2) {
-        callback = arguments[0];
-        options = {};
-    }
-
-    var settings = Hoek.clone(options);
-    settings.host = settings.host || 'pool.ntp.org';
-    settings.port = settings.port || 123;
-    settings.resolveReference = settings.resolveReference || false;
-
-    // Declare variables used by callback
-
-    var timeoutId = 0;
-    var sent = 0;
-
-    // Ensure callback is only called once
-
-    var isFinished = false;
-    var finish = function (err, result) {
-
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-            timeoutId = 0;
-        }
-
-        if (!isFinished) {
-            isFinished = true;
-            socket.removeAllListeners();
-            socket.close();
-            return callback(err, result);
-        }
-    };
-
-    // Create UDP socket
-
-    var socket = Dgram.createSocket('udp4');
-
-    socket.once('error', function (err) {
-
-        return finish(err);
-    });
-
-    // Listen to incoming messages
-
-    socket.on('message', function (buffer, rinfo) {
-
-        var received = Date.now();
-
-        var message = new internals.NtpMessage(buffer);
-        if (!message.isValid) {
-            return finish(new Error('Invalid server response'), message);
-        }
-
-        if (message.originateTimestamp !== sent) {
-            return finish(new Error('Wrong originate timestamp'), message);
-        }
-
-        // Timestamp Name          ID   When Generated
-        // ------------------------------------------------------------
-        // Originate Timestamp     T1   time request sent by client
-        // Receive Timestamp       T2   time request received by server
-        // Transmit Timestamp      T3   time reply sent by server
-        // Destination Timestamp   T4   time reply received by client
-        //
-        // The roundtrip delay d and system clock offset t are defined as:
-        //
-        // d = (T4 - T1) - (T3 - T2)     t = ((T2 - T1) + (T3 - T4)) / 2
-
-        var T1 = message.originateTimestamp;
-        var T2 = message.receiveTimestamp;
-        var T3 = message.transmitTimestamp;
-        var T4 = received;
-
-        message.d = (T4 - T1) - (T3 - T2);
-        message.t = ((T2 - T1) + (T3 - T4)) / 2;
-        message.receivedLocally = received;
-
-        if (!settings.resolveReference ||
-            message.stratum !== 'secondary') {
-
-            return finish(null, message);
-        }
-
-        // Resolve reference IP address
-
-        Dns.reverse(message.referenceId, function (err, domains) {
-
-            if (!err) {
-                message.referenceHost = domains[0];
-            }
-
-            return finish(null, message);
-        });
-    });
-
-    // Set timeout
-
-    if (settings.timeout) {
-        timeoutId = setTimeout(function () {
-
-            timeoutId = 0;
-            return finish(new Error('Timeout'));
-        }, settings.timeout);
-    }
-
-    // Construct NTP message
-
-    var message = new Buffer(48);
-    for (var i = 0; i < 48; i++) {                      // Zero message
-        message[i] = 0;
-    }
-
-    message[0] = (0 << 6) + (4 << 3) + (3 << 0)         // Set version number to 4 and Mode to 3 (client)
-    sent = Date.now();
-    internals.fromMsecs(sent, message, 40);               // Set transmit timestamp (returns as originate)
-
-    // Send NTP request
-
-    socket.send(message, 0, message.length, settings.port, settings.host, function (err, bytes) {
-
-        if (err ||
-            bytes !== 48) {
-
-            return finish(err || new Error('Could not send entire message'));
-        }
-    });
-};
-
-
-internals.NtpMessage = function (buffer) {
-
-    this.isValid = false;
-
-    // Validate
-
-    if (buffer.length !== 48) {
-        return;
-    }
-
-    // Leap indicator
-
-    var li = (buffer[0] >> 6);
-    switch (li) {
-        case 0: this.leapIndicator = 'no-warning'; break;
-        case 1: this.leapIndicator = 'last-minute-61'; break;
-        case 2: this.leapIndicator = 'last-minute-59'; break;
-        case 3: this.leapIndicator = 'alarm'; break;
-    }
-
-    // Version
-
-    var vn = ((buffer[0] & 0x38) >> 3);
-    this.version = vn;
-
-    // Mode
-
-    var mode = (buffer[0] & 0x7);
-    switch (mode) {
-        case 1: this.mode = 'symmetric-active'; break;
-        case 2: this.mode = 'symmetric-passive'; break;
-        case 3: this.mode = 'client'; break;
-        case 4: this.mode = 'server'; break;
-        case 5: this.mode = 'broadcast'; break;
-        case 0:
-        case 6:
-        case 7: this.mode = 'reserved'; break;
-    }
-
-    // Stratum
-
-    var stratum = buffer[1];
-    if (stratum === 0) {
-        this.stratum = 'death';
-    }
-    else if (stratum === 1) {
-        this.stratum = 'primary';
-    }
-    else if (stratum <= 15) {
-        this.stratum = 'secondary';
-    }
-    else {
-        this.stratum = 'reserved';
-    }
-
-    // Poll interval (msec)
-
-    this.pollInterval = Math.round(Math.pow(2, buffer[2])) * 1000;
-
-    // Precision (msecs)
-
-    this.precision = Math.pow(2, buffer[3]) * 1000;
-
-    // Root delay (msecs)
-
-    var rootDelay = 256 * (256 * (256 * buffer[4] + buffer[5]) + buffer[6]) + buffer[7];
-    this.rootDelay = 1000 * (rootDelay / 0x10000);
-
-    // Root dispersion (msecs)
-
-    this.rootDispersion = ((buffer[8] << 8) + buffer[9] + ((buffer[10] << 8) + buffer[11]) / Math.pow(2, 16)) * 1000;
-
-    // Reference identifier
-
-    this.referenceId = '';
-    switch (this.stratum) {
-        case 'death':
-        case 'primary':
-            this.referenceId = String.fromCharCode(buffer[12]) + String.fromCharCode(buffer[13]) + String.fromCharCode(buffer[14]) + String.fromCharCode(buffer[15]);
-            break;
-        case 'secondary':
-            this.referenceId = '' + buffer[12] + '.' + buffer[13] + '.' + buffer[14] + '.' + buffer[15];
-            break;
-    }
-
-    // Reference timestamp
-
-    this.referenceTimestamp = internals.toMsecs(buffer, 16);
-
-    // Originate timestamp
-
-    this.originateTimestamp = internals.toMsecs(buffer, 24);
-
-    // Receive timestamp
-
-    this.receiveTimestamp = internals.toMsecs(buffer, 32);
-
-    // Transmit timestamp
-
-    this.transmitTimestamp = internals.toMsecs(buffer, 40);
-
-    // Validate
-
-    if (this.version === 4 &&
-        this.stratum !== 'reserved' &&
-        this.mode === 'server' &&
-        this.originateTimestamp &&
-        this.receiveTimestamp &&
-        this.transmitTimestamp) {
-
-        this.isValid = true;
-    }
-
-    return this;
-};
-
-
-internals.toMsecs = function (buffer, offset) {
-
-    var seconds = 0;
-    var fraction = 0;
-
-    for (var i = 0; i < 4; ++i) {
-        seconds = (seconds * 256) + buffer[offset + i];
-    }
-
-    for (i = 4; i < 8; ++i) {
-        fraction = (fraction * 256) + buffer[offset + i];
-    }
-
-    return ((seconds - 2208988800 + (fraction / Math.pow(2, 32))) * 1000);
-};
-
-
-internals.fromMsecs = function (ts, buffer, offset) {
-
-    var seconds = Math.floor(ts / 1000) + 2208988800;
-    var fraction = Math.round((ts % 1000) / 1000 * Math.pow(2, 32));
-
-    buffer[offset + 0] = (seconds & 0xFF000000) >> 24;
-    buffer[offset + 1] = (seconds & 0x00FF0000) >> 16;
-    buffer[offset + 2] = (seconds & 0x0000FF00) >> 8;
-    buffer[offset + 3] = (seconds & 0x000000FF);
-
-    buffer[offset + 4] = (fraction & 0xFF000000) >> 24;
-    buffer[offset + 5] = (fraction & 0x00FF0000) >> 16;
-    buffer[offset + 6] = (fraction & 0x0000FF00) >> 8;
-    buffer[offset + 7] = (fraction & 0x000000FF);
-};
-
-
-// Offset singleton
-
-internals.last = {
-    offset: 0,
-    expires: 0,
-    host: '',
-    port: 0
-};
-
-
-exports.offset = function (options, callback) {
-
-    if (arguments.length !== 2) {
-        callback = arguments[0];
-        options = {};
-    }
-
-    var now = Date.now();
-    var clockSyncRefresh = options.clockSyncRefresh || 24 * 60 * 60 * 1000;                    // Daily
-
-    if (internals.last.offset &&
-        internals.last.host === options.host &&
-        internals.last.port === options.port &&
-        now < internals.last.expires) {
-
-        process.nextTick(function () {
-                
-            callback(null, internals.last.offset);
-        });
-
-        return;
-    }
-
-    exports.time(options, function (err, time) {
-
-        if (err) {
-            return callback(err, 0);
-        }
-
-        internals.last = {
-            offset: Math.round(time.t),
-            expires: now + clockSyncRefresh,
-            host: options.host,
-            port: options.port
+        // Construct authorization
+
+        var result = {
+            id: credentials.id,
+            ts: artifacts.ts,
+            nonce: artifacts.nonce,
+            hash: artifacts.hash,
+            mac: hawk.crypto.calculateMac('message', credentials, artifacts)
         };
 
-        return callback(null, internals.last.offset);
-    });
-};
+        return result;
+    },
 
+    authenticateTimestamp: function (message, credentials, updateClock) {           // updateClock defaults to true
 
-// Now singleton
+        var tsm = hawk.crypto.calculateTsMac(message.ts, credentials);
+        if (tsm !== message.tsm) {
+            return false;
+        }
 
-internals.now = {
-    intervalId: 0
-};
+        if (updateClock !== false) {
+            hawk.utils.setNtpOffset(message.ts - Math.floor((new Date()).getTime() / 1000));    // Keep offset at 1 second precision
+        }
 
-
-exports.start = function (options, callback) {
-
-    if (arguments.length !== 2) {
-        callback = arguments[0];
-        options = {};
+        return true;
     }
+};
 
-    if (internals.now.intervalId) {
-        process.nextTick(function () {
-            
-            callback();
+
+hawk.crypto = {
+
+    headerVersion: '1',
+
+    algorithms: ['sha1', 'sha256'],
+
+    calculateMac: function (type, credentials, options) {
+
+        var normalized = hawk.crypto.generateNormalizedString(type, options);
+
+        var hmac = CryptoJS['Hmac' + credentials.algorithm.toUpperCase()](normalized, credentials.key);
+        return hmac.toString(CryptoJS.enc.Base64);
+    },
+
+    generateNormalizedString: function (type, options) {
+
+        var normalized = 'hawk.' + hawk.crypto.headerVersion + '.' + type + '\n' +
+                         options.ts + '\n' +
+                         options.nonce + '\n' +
+                         (options.method || '').toUpperCase() + '\n' +
+                         (options.resource || '') + '\n' +
+                         options.host.toLowerCase() + '\n' +
+                         options.port + '\n' +
+                         (options.hash || '') + '\n';
+
+        if (options.ext) {
+            normalized += options.ext.replace('\\', '\\\\').replace('\n', '\\n');
+        }
+
+        normalized += '\n';
+
+        if (options.app) {
+            normalized += options.app + '\n' +
+                          (options.dlg || '') + '\n';
+        }
+
+        return normalized;
+    },
+
+    calculatePayloadHash: function (payload, algorithm, contentType) {
+
+        var hash = CryptoJS.algo[algorithm.toUpperCase()].create();
+        hash.update('hawk.' + hawk.crypto.headerVersion + '.payload\n');
+        hash.update(hawk.utils.parseContentType(contentType) + '\n');
+        hash.update(payload);
+        hash.update('\n');
+        return hash.finalize().toString(CryptoJS.enc.Base64);
+    },
+
+    calculateTsMac: function (ts, credentials) {
+
+        var hash = CryptoJS['Hmac' + credentials.algorithm.toUpperCase()]('hawk.' + hawk.crypto.headerVersion + '.ts\n' + ts + '\n', credentials.key);
+        return hash.toString(CryptoJS.enc.Base64);
+    }
+};
+
+
+// localStorage compatible interface
+
+hawk.internals.LocalStorage = function () {
+
+    this._cache = {};
+    this.length = 0;
+
+    this.getItem = function (key) {
+
+        return this._cache.hasOwnProperty(key) ? String(this._cache[key]) : null;
+    };
+
+    this.setItem = function (key, value) {
+
+        this._cache[key] = String(value);
+        this.length = Object.keys(this._cache).length;
+    };
+
+    this.removeItem = function (key) {
+
+        delete this._cache[key];
+        this.length = Object.keys(this._cache).length;
+    };
+
+    this.clear = function () {
+
+        this._cache = {};
+        this.length = 0;
+    };
+
+    this.key = function (i) {
+
+        return Object.keys(this._cache)[i || 0];
+    };
+};
+
+
+hawk.utils = {
+
+    storage: new hawk.internals.LocalStorage(),
+
+    setStorage: function (storage) {
+
+        var ntpOffset = hawk.utils.storage.getItem('hawk_ntp_offset');
+        hawk.utils.storage = storage;
+        if (ntpOffset) {
+            hawk.utils.setNtpOffset(ntpOffset);
+        }
+    },
+
+    setNtpOffset: function (offset) {
+
+        try {
+            hawk.utils.storage.setItem('hawk_ntp_offset', offset);
+        }
+        catch (err) {
+            console.error('[hawk] could not write to storage.');
+            console.error(err);
+        }
+    },
+
+    getNtpOffset: function () {
+
+        var offset = hawk.utils.storage.getItem('hawk_ntp_offset');
+        if (!offset) {
+            return 0;
+        }
+
+        return parseInt(offset, 10);
+    },
+
+    now: function (localtimeOffsetMsec) {
+
+        return Math.floor(((new Date()).getTime() + (localtimeOffsetMsec || 0)) / 1000) + hawk.utils.getNtpOffset();
+    },
+
+    escapeHeaderAttribute: function (attribute) {
+
+        return attribute.replace(/\\/g, '\\\\').replace(/\"/g, '\\"');
+    },
+
+    parseContentType: function (header) {
+
+        if (!header) {
+            return '';
+        }
+
+        return header.split(';')[0].replace(/^\s+|\s+$/g, '').toLowerCase();
+    },
+
+    parseAuthorizationHeader: function (header, keys) {
+
+        if (!header) {
+            return null;
+        }
+
+        var headerParts = header.match(/^(\w+)(?:\s+(.*))?$/);       // Header: scheme[ something]
+        if (!headerParts) {
+            return null;
+        }
+
+        var scheme = headerParts[1];
+        if (scheme.toLowerCase() !== 'hawk') {
+            return null;
+        }
+
+        var attributesString = headerParts[2];
+        if (!attributesString) {
+            return null;
+        }
+
+        var attributes = {};
+        var verify = attributesString.replace(/(\w+)="([^"\\]*)"\s*(?:,\s*|$)/g, function ($0, $1, $2) {
+
+            // Check valid attribute names
+
+            if (keys.indexOf($1) === -1) {
+                return;
+            }
+
+            // Allowed attribute value characters: !#$%&'()*+,-./:;<=>?@[]^_`{|}~ and space, a-z, A-Z, 0-9
+
+            if ($2.match(/^[ \w\!#\$%&'\(\)\*\+,\-\.\/\:;<\=>\?@\[\]\^`\{\|\}~]+$/) === null) {
+                return;
+            }
+
+            // Check for duplicates
+
+            if (attributes.hasOwnProperty($1)) {
+                return;
+            }
+
+            attributes[$1] = $2;
+            return '';
         });
-        
-        return;
+
+        if (verify !== '') {
+            return null;
+        }
+
+        return attributes;
+    },
+
+    randomString: function (size) {
+
+        var randomSource = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        var len = randomSource.length;
+
+        var result = [];
+        for (var i = 0; i < size; ++i) {
+            result[i] = randomSource[Math.floor(Math.random() * len)];
+        }
+
+        return result.join('');
+    },
+
+    parseUri: function (input) {
+
+        // Based on: parseURI 1.2.2
+        // http://blog.stevenlevithan.com/archives/parseuri
+        // (c) Steven Levithan <stevenlevithan.com>
+        // MIT License
+
+        var keys = ['source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'hostname', 'port', 'resource', 'relative', 'pathname', 'directory', 'file', 'query', 'fragment'];
+
+        var uriRegex = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?(((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?)(?:#(.*))?)/;
+        var uriByNumber = input.match(uriRegex);
+        var uri = {};
+
+        for (var i = 0, il = keys.length; i < il; ++i) {
+            uri[keys[i]] = uriByNumber[i] || '';
+        }
+
+        if (uri.port === '') {
+            uri.port = (uri.protocol.toLowerCase() === 'http' ? '80' : (uri.protocol.toLowerCase() === 'https' ? '443' : ''));
+        }
+
+        return uri;
+    },
+
+    base64urlEncode: function (value) {
+
+        var wordArray = CryptoJS.enc.Utf8.parse(value);
+        var encoded = CryptoJS.enc.Base64.stringify(wordArray);
+        return encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/\=/g, '');
     }
-
-    exports.offset(options, function (err, offset) {
-
-        internals.now.intervalId = setInterval(function () {
-
-            exports.offset(options, function () { });
-        }, options.clockSyncRefresh || 24 * 60 * 60 * 1000);                                // Daily
-
-        return callback();
-    });
 };
 
 
-exports.stop = function () {
+// $lab:coverage:off$
 
-    if (!internals.now.intervalId) {
-        return;
-    }
+// Based on: Crypto-JS v3.1.2
+// Copyright (c) 2009-2013, Jeff Mott. All rights reserved.
+// http://code.google.com/p/crypto-js/
+// http://code.google.com/p/crypto-js/wiki/License
 
-    clearInterval(internals.now.intervalId);
-    internals.now.intervalId = 0;
-};
+var CryptoJS = CryptoJS || function (h, r) { var k = {}, l = k.lib = {}, n = function () { }, f = l.Base = { extend: function (a) { n.prototype = this; var b = new n; a && b.mixIn(a); b.hasOwnProperty("init") || (b.init = function () { b.$super.init.apply(this, arguments) }); b.init.prototype = b; b.$super = this; return b }, create: function () { var a = this.extend(); a.init.apply(a, arguments); return a }, init: function () { }, mixIn: function (a) { for (var b in a) a.hasOwnProperty(b) && (this[b] = a[b]); a.hasOwnProperty("toString") && (this.toString = a.toString) }, clone: function () { return this.init.prototype.extend(this) } }, j = l.WordArray = f.extend({ init: function (a, b) { a = this.words = a || []; this.sigBytes = b != r ? b : 4 * a.length }, toString: function (a) { return (a || s).stringify(this) }, concat: function (a) { var b = this.words, d = a.words, c = this.sigBytes; a = a.sigBytes; this.clamp(); if (c % 4) for (var e = 0; e < a; e++) b[c + e >>> 2] |= (d[e >>> 2] >>> 24 - 8 * (e % 4) & 255) << 24 - 8 * ((c + e) % 4); else if (65535 < d.length) for (e = 0; e < a; e += 4) b[c + e >>> 2] = d[e >>> 2]; else b.push.apply(b, d); this.sigBytes += a; return this }, clamp: function () { var a = this.words, b = this.sigBytes; a[b >>> 2] &= 4294967295 << 32 - 8 * (b % 4); a.length = h.ceil(b / 4) }, clone: function () { var a = f.clone.call(this); a.words = this.words.slice(0); return a }, random: function (a) { for (var b = [], d = 0; d < a; d += 4) b.push(4294967296 * h.random() | 0); return new j.init(b, a) } }), m = k.enc = {}, s = m.Hex = { stringify: function (a) { var b = a.words; a = a.sigBytes; for (var d = [], c = 0; c < a; c++) { var e = b[c >>> 2] >>> 24 - 8 * (c % 4) & 255; d.push((e >>> 4).toString(16)); d.push((e & 15).toString(16)) } return d.join("") }, parse: function (a) { for (var b = a.length, d = [], c = 0; c < b; c += 2) d[c >>> 3] |= parseInt(a.substr(c, 2), 16) << 24 - 4 * (c % 8); return new j.init(d, b / 2) } }, p = m.Latin1 = { stringify: function (a) { var b = a.words; a = a.sigBytes; for (var d = [], c = 0; c < a; c++) d.push(String.fromCharCode(b[c >>> 2] >>> 24 - 8 * (c % 4) & 255)); return d.join("") }, parse: function (a) { for (var b = a.length, d = [], c = 0; c < b; c++) d[c >>> 2] |= (a.charCodeAt(c) & 255) << 24 - 8 * (c % 4); return new j.init(d, b) } }, t = m.Utf8 = { stringify: function (a) { try { return decodeURIComponent(escape(p.stringify(a))) } catch (b) { throw Error("Malformed UTF-8 data"); } }, parse: function (a) { return p.parse(unescape(encodeURIComponent(a))) } }, q = l.BufferedBlockAlgorithm = f.extend({ reset: function () { this._data = new j.init; this._nDataBytes = 0 }, _append: function (a) { "string" == typeof a && (a = t.parse(a)); this._data.concat(a); this._nDataBytes += a.sigBytes }, _process: function (a) { var b = this._data, d = b.words, c = b.sigBytes, e = this.blockSize, f = c / (4 * e), f = a ? h.ceil(f) : h.max((f | 0) - this._minBufferSize, 0); a = f * e; c = h.min(4 * a, c); if (a) { for (var g = 0; g < a; g += e) this._doProcessBlock(d, g); g = d.splice(0, a); b.sigBytes -= c } return new j.init(g, c) }, clone: function () { var a = f.clone.call(this); a._data = this._data.clone(); return a }, _minBufferSize: 0 }); l.Hasher = q.extend({ cfg: f.extend(), init: function (a) { this.cfg = this.cfg.extend(a); this.reset() }, reset: function () { q.reset.call(this); this._doReset() }, update: function (a) { this._append(a); this._process(); return this }, finalize: function (a) { a && this._append(a); return this._doFinalize() }, blockSize: 16, _createHelper: function (a) { return function (b, d) { return (new a.init(d)).finalize(b) } }, _createHmacHelper: function (a) { return function (b, d) { return (new u.HMAC.init(a, d)).finalize(b) } } }); var u = k.algo = {}; return k }(Math);
+(function () { var k = CryptoJS, b = k.lib, m = b.WordArray, l = b.Hasher, d = [], b = k.algo.SHA1 = l.extend({ _doReset: function () { this._hash = new m.init([1732584193, 4023233417, 2562383102, 271733878, 3285377520]) }, _doProcessBlock: function (n, p) { for (var a = this._hash.words, e = a[0], f = a[1], h = a[2], j = a[3], b = a[4], c = 0; 80 > c; c++) { if (16 > c) d[c] = n[p + c] | 0; else { var g = d[c - 3] ^ d[c - 8] ^ d[c - 14] ^ d[c - 16]; d[c] = g << 1 | g >>> 31 } g = (e << 5 | e >>> 27) + b + d[c]; g = 20 > c ? g + ((f & h | ~f & j) + 1518500249) : 40 > c ? g + ((f ^ h ^ j) + 1859775393) : 60 > c ? g + ((f & h | f & j | h & j) - 1894007588) : g + ((f ^ h ^ j) - 899497514); b = j; j = h; h = f << 30 | f >>> 2; f = e; e = g } a[0] = a[0] + e | 0; a[1] = a[1] + f | 0; a[2] = a[2] + h | 0; a[3] = a[3] + j | 0; a[4] = a[4] + b | 0 }, _doFinalize: function () { var b = this._data, d = b.words, a = 8 * this._nDataBytes, e = 8 * b.sigBytes; d[e >>> 5] |= 128 << 24 - e % 32; d[(e + 64 >>> 9 << 4) + 14] = Math.floor(a / 4294967296); d[(e + 64 >>> 9 << 4) + 15] = a; b.sigBytes = 4 * d.length; this._process(); return this._hash }, clone: function () { var b = l.clone.call(this); b._hash = this._hash.clone(); return b } }); k.SHA1 = l._createHelper(b); k.HmacSHA1 = l._createHmacHelper(b) })();
+(function (k) { for (var g = CryptoJS, h = g.lib, v = h.WordArray, j = h.Hasher, h = g.algo, s = [], t = [], u = function (q) { return 4294967296 * (q - (q | 0)) | 0 }, l = 2, b = 0; 64 > b;) { var d; a: { d = l; for (var w = k.sqrt(d), r = 2; r <= w; r++) if (!(d % r)) { d = !1; break a } d = !0 } d && (8 > b && (s[b] = u(k.pow(l, 0.5))), t[b] = u(k.pow(l, 1 / 3)), b++); l++ } var n = [], h = h.SHA256 = j.extend({ _doReset: function () { this._hash = new v.init(s.slice(0)) }, _doProcessBlock: function (q, h) { for (var a = this._hash.words, c = a[0], d = a[1], b = a[2], k = a[3], f = a[4], g = a[5], j = a[6], l = a[7], e = 0; 64 > e; e++) { if (16 > e) n[e] = q[h + e] | 0; else { var m = n[e - 15], p = n[e - 2]; n[e] = ((m << 25 | m >>> 7) ^ (m << 14 | m >>> 18) ^ m >>> 3) + n[e - 7] + ((p << 15 | p >>> 17) ^ (p << 13 | p >>> 19) ^ p >>> 10) + n[e - 16] } m = l + ((f << 26 | f >>> 6) ^ (f << 21 | f >>> 11) ^ (f << 7 | f >>> 25)) + (f & g ^ ~f & j) + t[e] + n[e]; p = ((c << 30 | c >>> 2) ^ (c << 19 | c >>> 13) ^ (c << 10 | c >>> 22)) + (c & d ^ c & b ^ d & b); l = j; j = g; g = f; f = k + m | 0; k = b; b = d; d = c; c = m + p | 0 } a[0] = a[0] + c | 0; a[1] = a[1] + d | 0; a[2] = a[2] + b | 0; a[3] = a[3] + k | 0; a[4] = a[4] + f | 0; a[5] = a[5] + g | 0; a[6] = a[6] + j | 0; a[7] = a[7] + l | 0 }, _doFinalize: function () { var d = this._data, b = d.words, a = 8 * this._nDataBytes, c = 8 * d.sigBytes; b[c >>> 5] |= 128 << 24 - c % 32; b[(c + 64 >>> 9 << 4) + 14] = k.floor(a / 4294967296); b[(c + 64 >>> 9 << 4) + 15] = a; d.sigBytes = 4 * b.length; this._process(); return this._hash }, clone: function () { var b = j.clone.call(this); b._hash = this._hash.clone(); return b } }); g.SHA256 = j._createHelper(h); g.HmacSHA256 = j._createHmacHelper(h) })(Math);
+(function () { var c = CryptoJS, k = c.enc.Utf8; c.algo.HMAC = c.lib.Base.extend({ init: function (a, b) { a = this._hasher = new a.init; "string" == typeof b && (b = k.parse(b)); var c = a.blockSize, e = 4 * c; b.sigBytes > e && (b = a.finalize(b)); b.clamp(); for (var f = this._oKey = b.clone(), g = this._iKey = b.clone(), h = f.words, j = g.words, d = 0; d < c; d++) h[d] ^= 1549556828, j[d] ^= 909522486; f.sigBytes = g.sigBytes = e; this.reset() }, reset: function () { var a = this._hasher; a.reset(); a.update(this._iKey) }, update: function (a) { this._hasher.update(a); return this }, finalize: function (a) { var b = this._hasher; a = b.finalize(a); b.reset(); return b.finalize(this._oKey.clone().concat(a)) } }) })();
+(function () { var h = CryptoJS, j = h.lib.WordArray; h.enc.Base64 = { stringify: function (b) { var e = b.words, f = b.sigBytes, c = this._map; b.clamp(); b = []; for (var a = 0; a < f; a += 3) for (var d = (e[a >>> 2] >>> 24 - 8 * (a % 4) & 255) << 16 | (e[a + 1 >>> 2] >>> 24 - 8 * ((a + 1) % 4) & 255) << 8 | e[a + 2 >>> 2] >>> 24 - 8 * ((a + 2) % 4) & 255, g = 0; 4 > g && a + 0.75 * g < f; g++) b.push(c.charAt(d >>> 6 * (3 - g) & 63)); if (e = c.charAt(64)) for (; b.length % 4;) b.push(e); return b.join("") }, parse: function (b) { var e = b.length, f = this._map, c = f.charAt(64); c && (c = b.indexOf(c), -1 != c && (e = c)); for (var c = [], a = 0, d = 0; d < e; d++) if (d % 4) { var g = f.indexOf(b.charAt(d - 1)) << 2 * (d % 4), h = f.indexOf(b.charAt(d)) >>> 6 - 2 * (d % 4); c[a >>> 2] |= (g | h) << 24 - 8 * (a % 4); a++ } return j.create(c, a) }, _map: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=" } })();
 
-
-exports.isLive = function () {
-
-    return !!internals.now.intervalId;
-};
-
-
-exports.now = function () {
-
-    var now = Date.now();
-    if (!exports.isLive() ||
-        now >= internals.last.expires) {
-
-        return now;
-    }
-
-    return now + internals.last.offset;
-};
+hawk.crypto.internals = CryptoJS;
 
 
-}).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":137,"buffer":17,"dgram":1,"dns":1,"hoek":196}],201:[function(require,module,exports){
+// Export if used as a module
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = hawk;
+}
+
+// $lab:coverage:on$
+
+},{}],213:[function(require,module,exports){
 // Copyright 2011 Joyent, Inc.  All rights reserved.
 
 var parser = require('./parser');
@@ -36653,12 +29795,13 @@ module.exports = {
 
   sshKeyToPEM: util.sshKeyToPEM,
   sshKeyFingerprint: util.fingerprint,
+  pemToRsaSSHKey: util.pemToRsaSSHKey,
 
   verify: verify.verifySignature,
   verifySignature: verify.verifySignature
 };
 
-},{"./parser":202,"./signer":203,"./util":204,"./verify":205}],202:[function(require,module,exports){
+},{"./parser":214,"./signer":215,"./util":216,"./verify":217}],214:[function(require,module,exports){
 // Copyright 2012 Joyent, Inc.  All rights reserved.
 
 var assert = require('assert-plus');
@@ -36964,7 +30107,7 @@ module.exports = {
 
 };
 
-},{"assert-plus":212,"util":157}],203:[function(require,module,exports){
+},{"assert-plus":224,"util":186}],215:[function(require,module,exports){
 // Copyright 2012 Joyent, Inc.  All rights reserved.
 
 var assert = require('assert-plus');
@@ -37113,7 +30256,6 @@ module.exports = {
         }
         stringToSign += h + ': ' + value;
       } else {
-        value =
         stringToSign +=
           request.method + ' ' + request.path + ' HTTP/' + options.httpVersion;
       }
@@ -37145,7 +30287,7 @@ module.exports = {
 
 };
 
-},{"assert-plus":212,"crypto":24,"http":129,"util":157}],204:[function(require,module,exports){
+},{"assert-plus":224,"crypto":20,"http":158,"util":186}],216:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2012 Joyent, Inc.  All rights reserved.
 
@@ -37392,13 +30534,68 @@ module.exports = {
     }
 
     return fp;
+  },
+
+  /**
+  * Converts a PKGCS#8 PEM file to an OpenSSH public key (rsa)
+  *
+  * The reverse of the above function.
+  */
+  pemToRsaSSHKey: function pemToRsaSSHKey(pem, comment) {
+    assert.equal('string', typeof pem, 'typeof pem');
+
+    // chop off the BEGIN PUBLIC KEY and END PUBLIC KEY portion
+    var cleaned = pem.split('\n').slice(1, -2).join('');
+
+    var buf = new Buffer(cleaned, 'base64');
+
+    var der = new asn1.BerReader(buf);
+
+    der.readSequence();
+    der.readSequence();
+
+    var oid = der.readOID();
+    assert.equal(oid, '1.2.840.113549.1.1.1', 'pem not in RSA format');
+
+    // Null -- XXX this probably isn't good practice
+    der.readByte();
+    der.readByte();
+
+    // bit string sequence
+    der.readSequence(0x03);
+    der.readByte();
+    der.readSequence();
+
+    // modulus
+    assert.equal(der.peek(), asn1.Ber.Integer, 'modulus not an integer');
+    der._offset = der.readLength(der.offset + 1);
+    var modulus = der._buf.slice(der.offset, der.offset + der.length);
+    der._offset += der.length;
+
+    // exponent
+    assert.equal(der.peek(), asn1.Ber.Integer, 'exponent not an integer');
+    der._offset = der.readLength(der.offset + 1);
+    var exponent = der._buf.slice(der.offset, der.offset + der.length);
+    der._offset += der.length;
+
+    // now, make the key
+    var type = new Buffer('ssh-rsa');
+    var buffer = new Buffer(4 + type.length + 4 + modulus.length + 4 + exponent.length);
+    var i = 0;
+    buffer.writeUInt32BE(type.length, i);     i += 4;
+    type.copy(buffer, i);                     i += type.length;
+    buffer.writeUInt32BE(exponent.length, i); i += 4;
+    exponent.copy(buffer, i);                 i += exponent.length;
+    buffer.writeUInt32BE(modulus.length, i);  i += 4;
+    modulus.copy(buffer, i);                  i += modulus.length;
+
+    var s = type.toString() + ' ' + buffer.toString('base64') + ' ' + (comment || '');
+    return s;
   }
-
-
 };
 
 }).call(this,require("buffer").Buffer)
-},{"asn1":211,"assert-plus":212,"buffer":17,"crypto":24,"ctype":215}],205:[function(require,module,exports){
+},{"asn1":223,"assert-plus":224,"buffer":16,"crypto":20,"ctype":227}],217:[function(require,module,exports){
 // Copyright 2011 Joyent, Inc.  All rights reserved.
 
 var assert = require('assert-plus');
@@ -37442,7 +30639,7 @@ module.exports = {
 
 };
 
-},{"assert-plus":212,"crypto":24}],206:[function(require,module,exports){
+},{"assert-plus":224,"crypto":20}],218:[function(require,module,exports){
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
 
 
@@ -37457,7 +30654,7 @@ module.exports = {
 
 };
 
-},{}],207:[function(require,module,exports){
+},{}],219:[function(require,module,exports){
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
 
 var errors = require('./errors');
@@ -37486,7 +30683,7 @@ for (var e in errors) {
     module.exports[e] = errors[e];
 }
 
-},{"./errors":206,"./reader":208,"./types":209,"./writer":210}],208:[function(require,module,exports){
+},{"./errors":218,"./reader":220,"./types":221,"./writer":222}],220:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
 
@@ -37757,7 +30954,7 @@ Reader.prototype._readTag = function(tag) {
 module.exports = Reader;
 
 }).call(this,require("buffer").Buffer)
-},{"./errors":206,"./types":209,"assert":2,"buffer":17}],209:[function(require,module,exports){
+},{"./errors":218,"./types":221,"assert":2,"buffer":16}],221:[function(require,module,exports){
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
 
 
@@ -37795,7 +30992,7 @@ module.exports = {
   Context: 128
 };
 
-},{}],210:[function(require,module,exports){
+},{}],222:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
 
@@ -38116,7 +31313,7 @@ Writer.prototype._ensure = function(len) {
 module.exports = Writer;
 
 }).call(this,require("buffer").Buffer)
-},{"./errors":206,"./types":209,"assert":2,"buffer":17}],211:[function(require,module,exports){
+},{"./errors":218,"./types":221,"assert":2,"buffer":16}],223:[function(require,module,exports){
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
 
 // If you have no idea what ASN.1 or BER is, see this:
@@ -38138,7 +31335,7 @@ module.exports = {
 
 };
 
-},{"./ber/index":207}],212:[function(require,module,exports){
+},{"./ber/index":219}],224:[function(require,module,exports){
 (function (process,Buffer){
 // Copyright (c) 2012, Mark Cavage. All rights reserved.
 
@@ -38151,6 +31348,7 @@ var util = require('util');
 ///--- Globals
 
 var NDEBUG = process.env.NODE_NDEBUG || false;
+var UUID_REGEXP = /^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/;
 
 
 
@@ -38195,6 +31393,28 @@ function _assert(arg, type, name, stackFunc) {
 }
 
 
+function _instanceof(arg, type, name, stackFunc) {
+        if (!NDEBUG) {
+                name = name || type;
+                stackFunc = stackFunc || _instanceof.caller;
+
+                if (!(arg instanceof type)) {
+                        throw new assert.AssertionError({
+                                message: _(TYPE_REQUIRED, name, type.name),
+                                actual: _getClass(arg),
+                                expected: type.name,
+                                operator: 'instanceof',
+                                stackStartFunction: stackFunc
+                        });
+                }
+        }
+}
+
+function _getClass(object) {
+        return (Object.prototype.toString.call(object).slice(8, -1));
+};
+
+
 
 ///--- API
 
@@ -38227,7 +31447,7 @@ function bool(arg, name) {
 function buffer(arg, name) {
         if (!Buffer.isBuffer(arg)) {
                 throw new assert.AssertionError({
-                        message: _(TYPE_REQUIRED, name, type),
+                        message: _(TYPE_REQUIRED, name || '', 'Buffer'),
                         actual: typeof (arg),
                         expected: 'buffer',
                         operator: 'Buffer.isBuffer',
@@ -38244,6 +31464,15 @@ function func(arg, name) {
 
 function number(arg, name) {
         _assert(arg, 'number', name);
+        if (!NDEBUG && (isNaN(arg) || !isFinite(arg))) {
+                throw new assert.AssertionError({
+                        message: _(TYPE_REQUIRED, name, 'number'),
+                        actual: arg,
+                        expected: 'number',
+                        operator: 'isNaN',
+                        stackStartFunction: number
+                });
+        }
 }
 
 
@@ -38253,15 +31482,16 @@ function object(arg, name) {
 
 
 function stream(arg, name) {
-        if (!(arg instanceof Stream)) {
-                throw new assert.AssertionError({
-                        message: _(TYPE_REQUIRED, name, type),
-                        actual: typeof (arg),
-                        expected: 'Stream',
-                        operator: 'instanceof',
-                        stackStartFunction: buffer
-                });
-        }
+        _instanceof(arg, Stream, name);
+}
+
+
+function date(arg, name) {
+        _instanceof(arg, Date, name);
+}
+
+function regexp(arg, name) {
+        _instanceof(arg, RegExp, name);
 }
 
 
@@ -38270,17 +31500,33 @@ function string(arg, name) {
 }
 
 
+function uuid(arg, name) {
+        string(arg, name);
+        if (!NDEBUG && !UUID_REGEXP.test(arg)) {
+                throw new assert.AssertionError({
+                        message: _(TYPE_REQUIRED, name, 'uuid'),
+                        actual: 'string',
+                        expected: 'uuid',
+                        operator: 'test',
+                        stackStartFunction: uuid
+                });
+        }
+}
+
 
 ///--- Exports
 
 module.exports = {
         bool: bool,
         buffer: buffer,
+        date: date,
         func: func,
         number: number,
         object: object,
+        regexp: regexp,
         stream: stream,
-        string: string
+        string: string,
+        uuid: uuid
 };
 
 
@@ -38338,7 +31584,7 @@ Object.keys(assert).forEach(function (k) {
 });
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":137,"assert":2,"buffer":17,"stream":153,"util":157}],213:[function(require,module,exports){
+},{"_process":166,"assert":2,"buffer":16,"stream":182,"util":186}],225:[function(require,module,exports){
 /*
  * ctf.js
  *
@@ -38585,7 +31831,7 @@ function ctfParseJson(json, ctype)
 
 exports.ctfParseJson = ctfParseJson;
 
-},{"assert":2}],214:[function(require,module,exports){
+},{"assert":2}],226:[function(require,module,exports){
 /*
  * rm - Feb 2011
  * ctio.js:
@@ -40072,7 +33318,7 @@ exports.rdouble = rdouble;
 exports.wfloat = wfloat;
 exports.wdouble = wdouble;
 
-},{"assert":2}],215:[function(require,module,exports){
+},{"assert":2}],227:[function(require,module,exports){
 (function (Buffer){
 /*
  * rm - Feb 2011
@@ -41020,7 +34266,36 @@ exports.wfloat = mod_ctio.wfloat;
 exports.wdouble = mod_ctio.wdouble;
 
 }).call(this,require("buffer").Buffer)
-},{"./ctf.js":213,"./ctio.js":214,"assert":2,"buffer":17}],216:[function(require,module,exports){
+},{"./ctf.js":225,"./ctio.js":226,"assert":2,"buffer":16}],228:[function(require,module,exports){
+var stream = require('stream')
+
+
+function isStream (obj) {
+  return obj instanceof stream.Stream
+}
+
+
+function isReadable (obj) {
+  return isStream(obj) && typeof obj._read == 'function' && typeof obj._readableState == 'object'
+}
+
+
+function isWritable (obj) {
+  return isStream(obj) && typeof obj._write == 'function' && typeof obj._writableState == 'object'
+}
+
+
+function isDuplex (obj) {
+  return isReadable(obj) && isWritable(obj)
+}
+
+
+module.exports            = isStream
+module.exports.isReadable = isReadable
+module.exports.isWritable = isWritable
+module.exports.isDuplex   = isDuplex
+
+},{"stream":182}],229:[function(require,module,exports){
 module.exports = stringify;
 
 function getSerialize (fn, decycle) {
@@ -41061,53 +34336,28 @@ function stringify(obj, fn, spaces, decycle) {
 
 stringify.getSerialize = getSerialize;
 
-},{}],217:[function(require,module,exports){
-module.exports={
-  "text/jade": [
-    "jade"
-  ],
-  "text/stylus": [
-    "stylus",
-    "styl"
-  ],
-  "text/less": [
-    "less"
-  ],
-  "text/x-sass": [
-    "sass"
-  ],
-  "text/x-scss": [
-    "scss"
-  ],
-  "text/coffeescript": [
-    "coffee"
-  ],
-  "text/x-handlebars-template": [
-    "hbs"
-  ],
-  "text/jsx": [
-    "jsx"
-  ]
-}
+},{}],230:[function(require,module,exports){
 
-},{}],218:[function(require,module,exports){
+var db = require('mime-db')
 
 // types[extension] = type
 exports.types = Object.create(null)
 // extensions[type] = [extensions]
 exports.extensions = Object.create(null)
-// define more mime types
-exports.define = define
 
-// store the json files
-exports.json = {
-  mime: require('./mime.json'),
-  node: require('./node.json'),
-  custom: require('./custom.json'),
-}
+Object.keys(db).forEach(function (name) {
+  var mime = db[name]
+  var exts = mime.extensions
+  if (!exts || !exts.length) return
+  exports.extensions[name] = exts
+  exts.forEach(function (ext) {
+    exports.types[ext] = name
+  })
+})
 
 exports.lookup = function (string) {
   if (!string || typeof string !== "string") return false
+  // remove any leading paths, though we should just use path.basename
   string = string.replace(/.*[\.\/\\]/, '').toLowerCase()
   if (!string) return false
   return exports.types[string] || false
@@ -41115,6 +34365,7 @@ exports.lookup = function (string) {
 
 exports.extension = function (type) {
   if (!type || typeof type !== "string") return false
+  // to do: use media-typer
   type = type.match(/^\s*([^;\s]*)(?:;|\s|$)/)
   if (!type) return false
   var exts = exports.extensions[type[1].toLowerCase()]
@@ -41124,11 +34375,8 @@ exports.extension = function (type) {
 
 // type has to be an exact mime type
 exports.charset = function (type) {
-  // special cases
-  switch (type) {
-    case 'application/json': return 'UTF-8'
-    case 'application/javascript': return 'UTF-8'
-  }
+  var mime = db[type]
+  if (mime && mime.charset) return mime.charset
 
   // default text/* to utf-8
   if (/^text\//.test(type)) return 'UTF-8'
@@ -41141,6 +34389,7 @@ exports.charsets = {
   lookup: exports.charset
 }
 
+// to do: maybe use set-type module or something
 exports.contentType = function (type) {
   if (!type || typeof type !== "string") return false
   if (!~type.indexOf('/')) type = exports.lookup(type)
@@ -41152,3398 +34401,6315 @@ exports.contentType = function (type) {
   return type
 }
 
-define(exports.json.mime)
-define(exports.json.node)
-define(exports.json.custom)
-
-function define(json) {
-  Object.keys(json).forEach(function (type) {
-    var exts = json[type] || []
-    exports.extensions[type] = exports.extensions[type] || []
-    exts.forEach(function (ext) {
-      if (!~exports.extensions[type].indexOf(ext)) exports.extensions[type].push(ext)
-      exports.types[ext] = type
-    })
-  })
-}
-
-},{"./custom.json":217,"./mime.json":219,"./node.json":220}],219:[function(require,module,exports){
+},{"mime-db":232}],231:[function(require,module,exports){
 module.exports={
-  "application/1d-interleaved-parityfec": [],
-  "application/3gpp-ims+xml": [],
-  "application/activemessage": [],
-  "application/andrew-inset": [
-    "ez"
-  ],
-  "application/applefile": [],
-  "application/applixware": [
-    "aw"
-  ],
-  "application/atom+xml": [
-    "atom"
-  ],
-  "application/atomcat+xml": [
-    "atomcat"
-  ],
-  "application/atomicmail": [],
-  "application/atomsvc+xml": [
-    "atomsvc"
-  ],
-  "application/auth-policy+xml": [],
-  "application/batch-smtp": [],
-  "application/beep+xml": [],
-  "application/calendar+xml": [],
-  "application/cals-1840": [],
-  "application/ccmp+xml": [],
-  "application/ccxml+xml": [
-    "ccxml"
-  ],
-  "application/cdmi-capability": [
-    "cdmia"
-  ],
-  "application/cdmi-container": [
-    "cdmic"
-  ],
-  "application/cdmi-domain": [
-    "cdmid"
-  ],
-  "application/cdmi-object": [
-    "cdmio"
-  ],
-  "application/cdmi-queue": [
-    "cdmiq"
-  ],
-  "application/cea-2018+xml": [],
-  "application/cellml+xml": [],
-  "application/cfw": [],
-  "application/cnrp+xml": [],
-  "application/commonground": [],
-  "application/conference-info+xml": [],
-  "application/cpl+xml": [],
-  "application/csta+xml": [],
-  "application/cstadata+xml": [],
-  "application/cu-seeme": [
-    "cu"
-  ],
-  "application/cybercash": [],
-  "application/davmount+xml": [
-    "davmount"
-  ],
-  "application/dca-rft": [],
-  "application/dec-dx": [],
-  "application/dialog-info+xml": [],
-  "application/dicom": [],
-  "application/dns": [],
-  "application/docbook+xml": [
-    "dbk"
-  ],
-  "application/dskpp+xml": [],
-  "application/dssc+der": [
-    "dssc"
-  ],
-  "application/dssc+xml": [
-    "xdssc"
-  ],
-  "application/dvcs": [],
-  "application/ecmascript": [
-    "ecma"
-  ],
-  "application/edi-consent": [],
-  "application/edi-x12": [],
-  "application/edifact": [],
-  "application/emma+xml": [
-    "emma"
-  ],
-  "application/epp+xml": [],
-  "application/epub+zip": [
-    "epub"
-  ],
-  "application/eshop": [],
-  "application/example": [],
-  "application/exi": [
-    "exi"
-  ],
-  "application/fastinfoset": [],
-  "application/fastsoap": [],
-  "application/fits": [],
-  "application/font-tdpfr": [
-    "pfr"
-  ],
-  "application/framework-attributes+xml": [],
-  "application/gml+xml": [
-    "gml"
-  ],
-  "application/gpx+xml": [
-    "gpx"
-  ],
-  "application/gxf": [
-    "gxf"
-  ],
-  "application/h224": [],
-  "application/held+xml": [],
-  "application/http": [],
-  "application/hyperstudio": [
-    "stk"
-  ],
-  "application/ibe-key-request+xml": [],
-  "application/ibe-pkg-reply+xml": [],
-  "application/ibe-pp-data": [],
-  "application/iges": [],
-  "application/im-iscomposing+xml": [],
-  "application/index": [],
-  "application/index.cmd": [],
-  "application/index.obj": [],
-  "application/index.response": [],
-  "application/index.vnd": [],
-  "application/inkml+xml": [
-    "ink",
-    "inkml"
-  ],
-  "application/iotp": [],
-  "application/ipfix": [
-    "ipfix"
-  ],
-  "application/ipp": [],
-  "application/isup": [],
-  "application/java-archive": [
-    "jar"
-  ],
-  "application/java-serialized-object": [
-    "ser"
-  ],
-  "application/java-vm": [
-    "class"
-  ],
-  "application/javascript": [
-    "js"
-  ],
-  "application/json": [
-    "json"
-  ],
-  "application/jsonml+json": [
-    "jsonml"
-  ],
-  "application/kpml-request+xml": [],
-  "application/kpml-response+xml": [],
-  "application/lost+xml": [
-    "lostxml"
-  ],
-  "application/mac-binhex40": [
-    "hqx"
-  ],
-  "application/mac-compactpro": [
-    "cpt"
-  ],
-  "application/macwriteii": [],
-  "application/mads+xml": [
-    "mads"
-  ],
-  "application/marc": [
-    "mrc"
-  ],
-  "application/marcxml+xml": [
-    "mrcx"
-  ],
-  "application/mathematica": [
-    "ma",
-    "nb",
-    "mb"
-  ],
-  "application/mathml-content+xml": [],
-  "application/mathml-presentation+xml": [],
-  "application/mathml+xml": [
-    "mathml"
-  ],
-  "application/mbms-associated-procedure-description+xml": [],
-  "application/mbms-deregister+xml": [],
-  "application/mbms-envelope+xml": [],
-  "application/mbms-msk+xml": [],
-  "application/mbms-msk-response+xml": [],
-  "application/mbms-protection-description+xml": [],
-  "application/mbms-reception-report+xml": [],
-  "application/mbms-register+xml": [],
-  "application/mbms-register-response+xml": [],
-  "application/mbms-user-service-description+xml": [],
-  "application/mbox": [
-    "mbox"
-  ],
-  "application/media_control+xml": [],
-  "application/mediaservercontrol+xml": [
-    "mscml"
-  ],
-  "application/metalink+xml": [
-    "metalink"
-  ],
-  "application/metalink4+xml": [
-    "meta4"
-  ],
-  "application/mets+xml": [
-    "mets"
-  ],
-  "application/mikey": [],
-  "application/mods+xml": [
-    "mods"
-  ],
-  "application/moss-keys": [],
-  "application/moss-signature": [],
-  "application/mosskey-data": [],
-  "application/mosskey-request": [],
-  "application/mp21": [
-    "m21",
-    "mp21"
-  ],
-  "application/mp4": [
-    "mp4s"
-  ],
-  "application/mpeg4-generic": [],
-  "application/mpeg4-iod": [],
-  "application/mpeg4-iod-xmt": [],
-  "application/msc-ivr+xml": [],
-  "application/msc-mixer+xml": [],
-  "application/msword": [
-    "doc",
-    "dot"
-  ],
-  "application/mxf": [
-    "mxf"
-  ],
-  "application/nasdata": [],
-  "application/news-checkgroups": [],
-  "application/news-groupinfo": [],
-  "application/news-transmission": [],
-  "application/nss": [],
-  "application/ocsp-request": [],
-  "application/ocsp-response": [],
-  "application/octet-stream": [
-    "bin",
-    "dms",
-    "lrf",
-    "mar",
-    "so",
-    "dist",
-    "distz",
-    "pkg",
-    "bpk",
-    "dump",
-    "elc",
-    "deploy"
-  ],
-  "application/oda": [
-    "oda"
-  ],
-  "application/oebps-package+xml": [
-    "opf"
-  ],
-  "application/ogg": [
-    "ogx"
-  ],
-  "application/omdoc+xml": [
-    "omdoc"
-  ],
-  "application/onenote": [
-    "onetoc",
-    "onetoc2",
-    "onetmp",
-    "onepkg"
-  ],
-  "application/oxps": [
-    "oxps"
-  ],
-  "application/parityfec": [],
-  "application/patch-ops-error+xml": [
-    "xer"
-  ],
-  "application/pdf": [
-    "pdf"
-  ],
-  "application/pgp-encrypted": [
-    "pgp"
-  ],
-  "application/pgp-keys": [],
-  "application/pgp-signature": [
-    "asc",
-    "sig"
-  ],
-  "application/pics-rules": [
-    "prf"
-  ],
-  "application/pidf+xml": [],
-  "application/pidf-diff+xml": [],
-  "application/pkcs10": [
-    "p10"
-  ],
-  "application/pkcs7-mime": [
-    "p7m",
-    "p7c"
-  ],
-  "application/pkcs7-signature": [
-    "p7s"
-  ],
-  "application/pkcs8": [
-    "p8"
-  ],
-  "application/pkix-attr-cert": [
-    "ac"
-  ],
-  "application/pkix-cert": [
-    "cer"
-  ],
-  "application/pkix-crl": [
-    "crl"
-  ],
-  "application/pkix-pkipath": [
-    "pkipath"
-  ],
-  "application/pkixcmp": [
-    "pki"
-  ],
-  "application/pls+xml": [
-    "pls"
-  ],
-  "application/poc-settings+xml": [],
-  "application/postscript": [
-    "ai",
-    "eps",
-    "ps"
-  ],
-  "application/prs.alvestrand.titrax-sheet": [],
-  "application/prs.cww": [
-    "cww"
-  ],
-  "application/prs.nprend": [],
-  "application/prs.plucker": [],
-  "application/prs.rdf-xml-crypt": [],
-  "application/prs.xsf+xml": [],
-  "application/pskc+xml": [
-    "pskcxml"
-  ],
-  "application/qsig": [],
-  "application/rdf+xml": [
-    "rdf"
-  ],
-  "application/reginfo+xml": [
-    "rif"
-  ],
-  "application/relax-ng-compact-syntax": [
-    "rnc"
-  ],
-  "application/remote-printing": [],
-  "application/resource-lists+xml": [
-    "rl"
-  ],
-  "application/resource-lists-diff+xml": [
-    "rld"
-  ],
-  "application/riscos": [],
-  "application/rlmi+xml": [],
-  "application/rls-services+xml": [
-    "rs"
-  ],
-  "application/rpki-ghostbusters": [
-    "gbr"
-  ],
-  "application/rpki-manifest": [
-    "mft"
-  ],
-  "application/rpki-roa": [
-    "roa"
-  ],
-  "application/rpki-updown": [],
-  "application/rsd+xml": [
-    "rsd"
-  ],
-  "application/rss+xml": [
-    "rss"
-  ],
-  "application/rtf": [
-    "rtf"
-  ],
-  "application/rtx": [],
-  "application/samlassertion+xml": [],
-  "application/samlmetadata+xml": [],
-  "application/sbml+xml": [
-    "sbml"
-  ],
-  "application/scvp-cv-request": [
-    "scq"
-  ],
-  "application/scvp-cv-response": [
-    "scs"
-  ],
-  "application/scvp-vp-request": [
-    "spq"
-  ],
-  "application/scvp-vp-response": [
-    "spp"
-  ],
-  "application/sdp": [
-    "sdp"
-  ],
-  "application/set-payment": [],
-  "application/set-payment-initiation": [
-    "setpay"
-  ],
-  "application/set-registration": [],
-  "application/set-registration-initiation": [
-    "setreg"
-  ],
-  "application/sgml": [],
-  "application/sgml-open-catalog": [],
-  "application/shf+xml": [
-    "shf"
-  ],
-  "application/sieve": [],
-  "application/simple-filter+xml": [],
-  "application/simple-message-summary": [],
-  "application/simplesymbolcontainer": [],
-  "application/slate": [],
-  "application/smil": [],
-  "application/smil+xml": [
-    "smi",
-    "smil"
-  ],
-  "application/soap+fastinfoset": [],
-  "application/soap+xml": [],
-  "application/sparql-query": [
-    "rq"
-  ],
-  "application/sparql-results+xml": [
-    "srx"
-  ],
-  "application/spirits-event+xml": [],
-  "application/srgs": [
-    "gram"
-  ],
-  "application/srgs+xml": [
-    "grxml"
-  ],
-  "application/sru+xml": [
-    "sru"
-  ],
-  "application/ssdl+xml": [
-    "ssdl"
-  ],
-  "application/ssml+xml": [
-    "ssml"
-  ],
-  "application/tamp-apex-update": [],
-  "application/tamp-apex-update-confirm": [],
-  "application/tamp-community-update": [],
-  "application/tamp-community-update-confirm": [],
-  "application/tamp-error": [],
-  "application/tamp-sequence-adjust": [],
-  "application/tamp-sequence-adjust-confirm": [],
-  "application/tamp-status-query": [],
-  "application/tamp-status-response": [],
-  "application/tamp-update": [],
-  "application/tamp-update-confirm": [],
-  "application/tei+xml": [
-    "tei",
-    "teicorpus"
-  ],
-  "application/thraud+xml": [
-    "tfi"
-  ],
-  "application/timestamp-query": [],
-  "application/timestamp-reply": [],
-  "application/timestamped-data": [
-    "tsd"
-  ],
-  "application/tve-trigger": [],
-  "application/ulpfec": [],
-  "application/vcard+xml": [],
-  "application/vemmi": [],
-  "application/vividence.scriptfile": [],
-  "application/vnd.3gpp.bsf+xml": [],
-  "application/vnd.3gpp.pic-bw-large": [
-    "plb"
-  ],
-  "application/vnd.3gpp.pic-bw-small": [
-    "psb"
-  ],
-  "application/vnd.3gpp.pic-bw-var": [
-    "pvb"
-  ],
-  "application/vnd.3gpp.sms": [],
-  "application/vnd.3gpp2.bcmcsinfo+xml": [],
-  "application/vnd.3gpp2.sms": [],
-  "application/vnd.3gpp2.tcap": [
-    "tcap"
-  ],
-  "application/vnd.3m.post-it-notes": [
-    "pwn"
-  ],
-  "application/vnd.accpac.simply.aso": [
-    "aso"
-  ],
-  "application/vnd.accpac.simply.imp": [
-    "imp"
-  ],
-  "application/vnd.acucobol": [
-    "acu"
-  ],
-  "application/vnd.acucorp": [
-    "atc",
-    "acutc"
-  ],
-  "application/vnd.adobe.air-application-installer-package+zip": [
-    "air"
-  ],
-  "application/vnd.adobe.formscentral.fcdt": [
-    "fcdt"
-  ],
-  "application/vnd.adobe.fxp": [
-    "fxp",
-    "fxpl"
-  ],
-  "application/vnd.adobe.partial-upload": [],
-  "application/vnd.adobe.xdp+xml": [
-    "xdp"
-  ],
-  "application/vnd.adobe.xfdf": [
-    "xfdf"
-  ],
-  "application/vnd.aether.imp": [],
-  "application/vnd.ah-barcode": [],
-  "application/vnd.ahead.space": [
-    "ahead"
-  ],
-  "application/vnd.airzip.filesecure.azf": [
-    "azf"
-  ],
-  "application/vnd.airzip.filesecure.azs": [
-    "azs"
-  ],
-  "application/vnd.amazon.ebook": [
-    "azw"
-  ],
-  "application/vnd.americandynamics.acc": [
-    "acc"
-  ],
-  "application/vnd.amiga.ami": [
-    "ami"
-  ],
-  "application/vnd.amundsen.maze+xml": [],
-  "application/vnd.android.package-archive": [
-    "apk"
-  ],
-  "application/vnd.anser-web-certificate-issue-initiation": [
-    "cii"
-  ],
-  "application/vnd.anser-web-funds-transfer-initiation": [
-    "fti"
-  ],
-  "application/vnd.antix.game-component": [
-    "atx"
-  ],
-  "application/vnd.apple.installer+xml": [
-    "mpkg"
-  ],
-  "application/vnd.apple.mpegurl": [
-    "m3u8"
-  ],
-  "application/vnd.arastra.swi": [],
-  "application/vnd.aristanetworks.swi": [
-    "swi"
-  ],
-  "application/vnd.astraea-software.iota": [
-    "iota"
-  ],
-  "application/vnd.audiograph": [
-    "aep"
-  ],
-  "application/vnd.autopackage": [],
-  "application/vnd.avistar+xml": [],
-  "application/vnd.blueice.multipass": [
-    "mpm"
-  ],
-  "application/vnd.bluetooth.ep.oob": [],
-  "application/vnd.bmi": [
-    "bmi"
-  ],
-  "application/vnd.businessobjects": [
-    "rep"
-  ],
-  "application/vnd.cab-jscript": [],
-  "application/vnd.canon-cpdl": [],
-  "application/vnd.canon-lips": [],
-  "application/vnd.cendio.thinlinc.clientconf": [],
-  "application/vnd.chemdraw+xml": [
-    "cdxml"
-  ],
-  "application/vnd.chipnuts.karaoke-mmd": [
-    "mmd"
-  ],
-  "application/vnd.cinderella": [
-    "cdy"
-  ],
-  "application/vnd.cirpack.isdn-ext": [],
-  "application/vnd.claymore": [
-    "cla"
-  ],
-  "application/vnd.cloanto.rp9": [
-    "rp9"
-  ],
-  "application/vnd.clonk.c4group": [
-    "c4g",
-    "c4d",
-    "c4f",
-    "c4p",
-    "c4u"
-  ],
-  "application/vnd.cluetrust.cartomobile-config": [
-    "c11amc"
-  ],
-  "application/vnd.cluetrust.cartomobile-config-pkg": [
-    "c11amz"
-  ],
-  "application/vnd.collection+json": [],
-  "application/vnd.commerce-battelle": [],
-  "application/vnd.commonspace": [
-    "csp"
-  ],
-  "application/vnd.contact.cmsg": [
-    "cdbcmsg"
-  ],
-  "application/vnd.cosmocaller": [
-    "cmc"
-  ],
-  "application/vnd.crick.clicker": [
-    "clkx"
-  ],
-  "application/vnd.crick.clicker.keyboard": [
-    "clkk"
-  ],
-  "application/vnd.crick.clicker.palette": [
-    "clkp"
-  ],
-  "application/vnd.crick.clicker.template": [
-    "clkt"
-  ],
-  "application/vnd.crick.clicker.wordbank": [
-    "clkw"
-  ],
-  "application/vnd.criticaltools.wbs+xml": [
-    "wbs"
-  ],
-  "application/vnd.ctc-posml": [
-    "pml"
-  ],
-  "application/vnd.ctct.ws+xml": [],
-  "application/vnd.cups-pdf": [],
-  "application/vnd.cups-postscript": [],
-  "application/vnd.cups-ppd": [
-    "ppd"
-  ],
-  "application/vnd.cups-raster": [],
-  "application/vnd.cups-raw": [],
-  "application/vnd.curl": [],
-  "application/vnd.curl.car": [
-    "car"
-  ],
-  "application/vnd.curl.pcurl": [
-    "pcurl"
-  ],
-  "application/vnd.cybank": [],
-  "application/vnd.dart": [
-    "dart"
-  ],
-  "application/vnd.data-vision.rdz": [
-    "rdz"
-  ],
-  "application/vnd.dece.data": [
-    "uvf",
-    "uvvf",
-    "uvd",
-    "uvvd"
-  ],
-  "application/vnd.dece.ttml+xml": [
-    "uvt",
-    "uvvt"
-  ],
-  "application/vnd.dece.unspecified": [
-    "uvx",
-    "uvvx"
-  ],
-  "application/vnd.dece.zip": [
-    "uvz",
-    "uvvz"
-  ],
-  "application/vnd.denovo.fcselayout-link": [
-    "fe_launch"
-  ],
-  "application/vnd.dir-bi.plate-dl-nosuffix": [],
-  "application/vnd.dna": [
-    "dna"
-  ],
-  "application/vnd.dolby.mlp": [
-    "mlp"
-  ],
-  "application/vnd.dolby.mobile.1": [],
-  "application/vnd.dolby.mobile.2": [],
-  "application/vnd.dpgraph": [
-    "dpg"
-  ],
-  "application/vnd.dreamfactory": [
-    "dfac"
-  ],
-  "application/vnd.ds-keypoint": [
-    "kpxx"
-  ],
-  "application/vnd.dvb.ait": [
-    "ait"
-  ],
-  "application/vnd.dvb.dvbj": [],
-  "application/vnd.dvb.esgcontainer": [],
-  "application/vnd.dvb.ipdcdftnotifaccess": [],
-  "application/vnd.dvb.ipdcesgaccess": [],
-  "application/vnd.dvb.ipdcesgaccess2": [],
-  "application/vnd.dvb.ipdcesgpdd": [],
-  "application/vnd.dvb.ipdcroaming": [],
-  "application/vnd.dvb.iptv.alfec-base": [],
-  "application/vnd.dvb.iptv.alfec-enhancement": [],
-  "application/vnd.dvb.notif-aggregate-root+xml": [],
-  "application/vnd.dvb.notif-container+xml": [],
-  "application/vnd.dvb.notif-generic+xml": [],
-  "application/vnd.dvb.notif-ia-msglist+xml": [],
-  "application/vnd.dvb.notif-ia-registration-request+xml": [],
-  "application/vnd.dvb.notif-ia-registration-response+xml": [],
-  "application/vnd.dvb.notif-init+xml": [],
-  "application/vnd.dvb.pfr": [],
-  "application/vnd.dvb.service": [
-    "svc"
-  ],
-  "application/vnd.dxr": [],
-  "application/vnd.dynageo": [
-    "geo"
-  ],
-  "application/vnd.easykaraoke.cdgdownload": [],
-  "application/vnd.ecdis-update": [],
-  "application/vnd.ecowin.chart": [
-    "mag"
-  ],
-  "application/vnd.ecowin.filerequest": [],
-  "application/vnd.ecowin.fileupdate": [],
-  "application/vnd.ecowin.series": [],
-  "application/vnd.ecowin.seriesrequest": [],
-  "application/vnd.ecowin.seriesupdate": [],
-  "application/vnd.emclient.accessrequest+xml": [],
-  "application/vnd.enliven": [
-    "nml"
-  ],
-  "application/vnd.eprints.data+xml": [],
-  "application/vnd.epson.esf": [
-    "esf"
-  ],
-  "application/vnd.epson.msf": [
-    "msf"
-  ],
-  "application/vnd.epson.quickanime": [
-    "qam"
-  ],
-  "application/vnd.epson.salt": [
-    "slt"
-  ],
-  "application/vnd.epson.ssf": [
-    "ssf"
-  ],
-  "application/vnd.ericsson.quickcall": [],
-  "application/vnd.eszigno3+xml": [
-    "es3",
-    "et3"
-  ],
-  "application/vnd.etsi.aoc+xml": [],
-  "application/vnd.etsi.cug+xml": [],
-  "application/vnd.etsi.iptvcommand+xml": [],
-  "application/vnd.etsi.iptvdiscovery+xml": [],
-  "application/vnd.etsi.iptvprofile+xml": [],
-  "application/vnd.etsi.iptvsad-bc+xml": [],
-  "application/vnd.etsi.iptvsad-cod+xml": [],
-  "application/vnd.etsi.iptvsad-npvr+xml": [],
-  "application/vnd.etsi.iptvservice+xml": [],
-  "application/vnd.etsi.iptvsync+xml": [],
-  "application/vnd.etsi.iptvueprofile+xml": [],
-  "application/vnd.etsi.mcid+xml": [],
-  "application/vnd.etsi.overload-control-policy-dataset+xml": [],
-  "application/vnd.etsi.sci+xml": [],
-  "application/vnd.etsi.simservs+xml": [],
-  "application/vnd.etsi.tsl+xml": [],
-  "application/vnd.etsi.tsl.der": [],
-  "application/vnd.eudora.data": [],
-  "application/vnd.ezpix-album": [
-    "ez2"
-  ],
-  "application/vnd.ezpix-package": [
-    "ez3"
-  ],
-  "application/vnd.f-secure.mobile": [],
-  "application/vnd.fdf": [
-    "fdf"
-  ],
-  "application/vnd.fdsn.mseed": [
-    "mseed"
-  ],
-  "application/vnd.fdsn.seed": [
-    "seed",
-    "dataless"
-  ],
-  "application/vnd.ffsns": [],
-  "application/vnd.fints": [],
-  "application/vnd.flographit": [
-    "gph"
-  ],
-  "application/vnd.fluxtime.clip": [
-    "ftc"
-  ],
-  "application/vnd.font-fontforge-sfd": [],
-  "application/vnd.framemaker": [
-    "fm",
-    "frame",
-    "maker",
-    "book"
-  ],
-  "application/vnd.frogans.fnc": [
-    "fnc"
-  ],
-  "application/vnd.frogans.ltf": [
-    "ltf"
-  ],
-  "application/vnd.fsc.weblaunch": [
-    "fsc"
-  ],
-  "application/vnd.fujitsu.oasys": [
-    "oas"
-  ],
-  "application/vnd.fujitsu.oasys2": [
-    "oa2"
-  ],
-  "application/vnd.fujitsu.oasys3": [
-    "oa3"
-  ],
-  "application/vnd.fujitsu.oasysgp": [
-    "fg5"
-  ],
-  "application/vnd.fujitsu.oasysprs": [
-    "bh2"
-  ],
-  "application/vnd.fujixerox.art-ex": [],
-  "application/vnd.fujixerox.art4": [],
-  "application/vnd.fujixerox.hbpl": [],
-  "application/vnd.fujixerox.ddd": [
-    "ddd"
-  ],
-  "application/vnd.fujixerox.docuworks": [
-    "xdw"
-  ],
-  "application/vnd.fujixerox.docuworks.binder": [
-    "xbd"
-  ],
-  "application/vnd.fut-misnet": [],
-  "application/vnd.fuzzysheet": [
-    "fzs"
-  ],
-  "application/vnd.genomatix.tuxedo": [
-    "txd"
-  ],
-  "application/vnd.geocube+xml": [],
-  "application/vnd.geogebra.file": [
-    "ggb"
-  ],
-  "application/vnd.geogebra.tool": [
-    "ggt"
-  ],
-  "application/vnd.geometry-explorer": [
-    "gex",
-    "gre"
-  ],
-  "application/vnd.geonext": [
-    "gxt"
-  ],
-  "application/vnd.geoplan": [
-    "g2w"
-  ],
-  "application/vnd.geospace": [
-    "g3w"
-  ],
-  "application/vnd.globalplatform.card-content-mgt": [],
-  "application/vnd.globalplatform.card-content-mgt-response": [],
-  "application/vnd.gmx": [
-    "gmx"
-  ],
-  "application/vnd.google-earth.kml+xml": [
-    "kml"
-  ],
-  "application/vnd.google-earth.kmz": [
-    "kmz"
-  ],
-  "application/vnd.grafeq": [
-    "gqf",
-    "gqs"
-  ],
-  "application/vnd.gridmp": [],
-  "application/vnd.groove-account": [
-    "gac"
-  ],
-  "application/vnd.groove-help": [
-    "ghf"
-  ],
-  "application/vnd.groove-identity-message": [
-    "gim"
-  ],
-  "application/vnd.groove-injector": [
-    "grv"
-  ],
-  "application/vnd.groove-tool-message": [
-    "gtm"
-  ],
-  "application/vnd.groove-tool-template": [
-    "tpl"
-  ],
-  "application/vnd.groove-vcard": [
-    "vcg"
-  ],
-  "application/vnd.hal+json": [],
-  "application/vnd.hal+xml": [
-    "hal"
-  ],
-  "application/vnd.handheld-entertainment+xml": [
-    "zmm"
-  ],
-  "application/vnd.hbci": [
-    "hbci"
-  ],
-  "application/vnd.hcl-bireports": [],
-  "application/vnd.hhe.lesson-player": [
-    "les"
-  ],
-  "application/vnd.hp-hpgl": [
-    "hpgl"
-  ],
-  "application/vnd.hp-hpid": [
-    "hpid"
-  ],
-  "application/vnd.hp-hps": [
-    "hps"
-  ],
-  "application/vnd.hp-jlyt": [
-    "jlt"
-  ],
-  "application/vnd.hp-pcl": [
-    "pcl"
-  ],
-  "application/vnd.hp-pclxl": [
-    "pclxl"
-  ],
-  "application/vnd.httphone": [],
-  "application/vnd.hzn-3d-crossword": [],
-  "application/vnd.ibm.afplinedata": [],
-  "application/vnd.ibm.electronic-media": [],
-  "application/vnd.ibm.minipay": [
-    "mpy"
-  ],
-  "application/vnd.ibm.modcap": [
-    "afp",
-    "listafp",
-    "list3820"
-  ],
-  "application/vnd.ibm.rights-management": [
-    "irm"
-  ],
-  "application/vnd.ibm.secure-container": [
-    "sc"
-  ],
-  "application/vnd.iccprofile": [
-    "icc",
-    "icm"
-  ],
-  "application/vnd.igloader": [
-    "igl"
-  ],
-  "application/vnd.immervision-ivp": [
-    "ivp"
-  ],
-  "application/vnd.immervision-ivu": [
-    "ivu"
-  ],
-  "application/vnd.informedcontrol.rms+xml": [],
-  "application/vnd.informix-visionary": [],
-  "application/vnd.infotech.project": [],
-  "application/vnd.infotech.project+xml": [],
-  "application/vnd.innopath.wamp.notification": [],
-  "application/vnd.insors.igm": [
-    "igm"
-  ],
-  "application/vnd.intercon.formnet": [
-    "xpw",
-    "xpx"
-  ],
-  "application/vnd.intergeo": [
-    "i2g"
-  ],
-  "application/vnd.intertrust.digibox": [],
-  "application/vnd.intertrust.nncp": [],
-  "application/vnd.intu.qbo": [
-    "qbo"
-  ],
-  "application/vnd.intu.qfx": [
-    "qfx"
-  ],
-  "application/vnd.iptc.g2.conceptitem+xml": [],
-  "application/vnd.iptc.g2.knowledgeitem+xml": [],
-  "application/vnd.iptc.g2.newsitem+xml": [],
-  "application/vnd.iptc.g2.newsmessage+xml": [],
-  "application/vnd.iptc.g2.packageitem+xml": [],
-  "application/vnd.iptc.g2.planningitem+xml": [],
-  "application/vnd.ipunplugged.rcprofile": [
-    "rcprofile"
-  ],
-  "application/vnd.irepository.package+xml": [
-    "irp"
-  ],
-  "application/vnd.is-xpr": [
-    "xpr"
-  ],
-  "application/vnd.isac.fcs": [
-    "fcs"
-  ],
-  "application/vnd.jam": [
-    "jam"
-  ],
-  "application/vnd.japannet-directory-service": [],
-  "application/vnd.japannet-jpnstore-wakeup": [],
-  "application/vnd.japannet-payment-wakeup": [],
-  "application/vnd.japannet-registration": [],
-  "application/vnd.japannet-registration-wakeup": [],
-  "application/vnd.japannet-setstore-wakeup": [],
-  "application/vnd.japannet-verification": [],
-  "application/vnd.japannet-verification-wakeup": [],
-  "application/vnd.jcp.javame.midlet-rms": [
-    "rms"
-  ],
-  "application/vnd.jisp": [
-    "jisp"
-  ],
-  "application/vnd.joost.joda-archive": [
-    "joda"
-  ],
-  "application/vnd.kahootz": [
-    "ktz",
-    "ktr"
-  ],
-  "application/vnd.kde.karbon": [
-    "karbon"
-  ],
-  "application/vnd.kde.kchart": [
-    "chrt"
-  ],
-  "application/vnd.kde.kformula": [
-    "kfo"
-  ],
-  "application/vnd.kde.kivio": [
-    "flw"
-  ],
-  "application/vnd.kde.kontour": [
-    "kon"
-  ],
-  "application/vnd.kde.kpresenter": [
-    "kpr",
-    "kpt"
-  ],
-  "application/vnd.kde.kspread": [
-    "ksp"
-  ],
-  "application/vnd.kde.kword": [
-    "kwd",
-    "kwt"
-  ],
-  "application/vnd.kenameaapp": [
-    "htke"
-  ],
-  "application/vnd.kidspiration": [
-    "kia"
-  ],
-  "application/vnd.kinar": [
-    "kne",
-    "knp"
-  ],
-  "application/vnd.koan": [
-    "skp",
-    "skd",
-    "skt",
-    "skm"
-  ],
-  "application/vnd.kodak-descriptor": [
-    "sse"
-  ],
-  "application/vnd.las.las+xml": [
-    "lasxml"
-  ],
-  "application/vnd.liberty-request+xml": [],
-  "application/vnd.llamagraphics.life-balance.desktop": [
-    "lbd"
-  ],
-  "application/vnd.llamagraphics.life-balance.exchange+xml": [
-    "lbe"
-  ],
-  "application/vnd.lotus-1-2-3": [
-    "123"
-  ],
-  "application/vnd.lotus-approach": [
-    "apr"
-  ],
-  "application/vnd.lotus-freelance": [
-    "pre"
-  ],
-  "application/vnd.lotus-notes": [
-    "nsf"
-  ],
-  "application/vnd.lotus-organizer": [
-    "org"
-  ],
-  "application/vnd.lotus-screencam": [
-    "scm"
-  ],
-  "application/vnd.lotus-wordpro": [
-    "lwp"
-  ],
-  "application/vnd.macports.portpkg": [
-    "portpkg"
-  ],
-  "application/vnd.marlin.drm.actiontoken+xml": [],
-  "application/vnd.marlin.drm.conftoken+xml": [],
-  "application/vnd.marlin.drm.license+xml": [],
-  "application/vnd.marlin.drm.mdcf": [],
-  "application/vnd.mcd": [
-    "mcd"
-  ],
-  "application/vnd.medcalcdata": [
-    "mc1"
-  ],
-  "application/vnd.mediastation.cdkey": [
-    "cdkey"
-  ],
-  "application/vnd.meridian-slingshot": [],
-  "application/vnd.mfer": [
-    "mwf"
-  ],
-  "application/vnd.mfmp": [
-    "mfm"
-  ],
-  "application/vnd.micrografx.flo": [
-    "flo"
-  ],
-  "application/vnd.micrografx.igx": [
-    "igx"
-  ],
-  "application/vnd.mif": [
-    "mif"
-  ],
-  "application/vnd.minisoft-hp3000-save": [],
-  "application/vnd.mitsubishi.misty-guard.trustweb": [],
-  "application/vnd.mobius.daf": [
-    "daf"
-  ],
-  "application/vnd.mobius.dis": [
-    "dis"
-  ],
-  "application/vnd.mobius.mbk": [
-    "mbk"
-  ],
-  "application/vnd.mobius.mqy": [
-    "mqy"
-  ],
-  "application/vnd.mobius.msl": [
-    "msl"
-  ],
-  "application/vnd.mobius.plc": [
-    "plc"
-  ],
-  "application/vnd.mobius.txf": [
-    "txf"
-  ],
-  "application/vnd.mophun.application": [
-    "mpn"
-  ],
-  "application/vnd.mophun.certificate": [
-    "mpc"
-  ],
-  "application/vnd.motorola.flexsuite": [],
-  "application/vnd.motorola.flexsuite.adsi": [],
-  "application/vnd.motorola.flexsuite.fis": [],
-  "application/vnd.motorola.flexsuite.gotap": [],
-  "application/vnd.motorola.flexsuite.kmr": [],
-  "application/vnd.motorola.flexsuite.ttc": [],
-  "application/vnd.motorola.flexsuite.wem": [],
-  "application/vnd.motorola.iprm": [],
-  "application/vnd.mozilla.xul+xml": [
-    "xul"
-  ],
-  "application/vnd.ms-artgalry": [
-    "cil"
-  ],
-  "application/vnd.ms-asf": [],
-  "application/vnd.ms-cab-compressed": [
-    "cab"
-  ],
-  "application/vnd.ms-color.iccprofile": [],
-  "application/vnd.ms-excel": [
-    "xls",
-    "xlm",
-    "xla",
-    "xlc",
-    "xlt",
-    "xlw"
-  ],
-  "application/vnd.ms-excel.addin.macroenabled.12": [
-    "xlam"
-  ],
-  "application/vnd.ms-excel.sheet.binary.macroenabled.12": [
-    "xlsb"
-  ],
-  "application/vnd.ms-excel.sheet.macroenabled.12": [
-    "xlsm"
-  ],
-  "application/vnd.ms-excel.template.macroenabled.12": [
-    "xltm"
-  ],
-  "application/vnd.ms-fontobject": [
-    "eot"
-  ],
-  "application/vnd.ms-htmlhelp": [
-    "chm"
-  ],
-  "application/vnd.ms-ims": [
-    "ims"
-  ],
-  "application/vnd.ms-lrm": [
-    "lrm"
-  ],
-  "application/vnd.ms-office.activex+xml": [],
-  "application/vnd.ms-officetheme": [
-    "thmx"
-  ],
-  "application/vnd.ms-opentype": [],
-  "application/vnd.ms-package.obfuscated-opentype": [],
-  "application/vnd.ms-pki.seccat": [
-    "cat"
-  ],
-  "application/vnd.ms-pki.stl": [
-    "stl"
-  ],
-  "application/vnd.ms-playready.initiator+xml": [],
-  "application/vnd.ms-powerpoint": [
-    "ppt",
-    "pps",
-    "pot"
-  ],
-  "application/vnd.ms-powerpoint.addin.macroenabled.12": [
-    "ppam"
-  ],
-  "application/vnd.ms-powerpoint.presentation.macroenabled.12": [
-    "pptm"
-  ],
-  "application/vnd.ms-powerpoint.slide.macroenabled.12": [
-    "sldm"
-  ],
-  "application/vnd.ms-powerpoint.slideshow.macroenabled.12": [
-    "ppsm"
-  ],
-  "application/vnd.ms-powerpoint.template.macroenabled.12": [
-    "potm"
-  ],
-  "application/vnd.ms-printing.printticket+xml": [],
-  "application/vnd.ms-project": [
-    "mpp",
-    "mpt"
-  ],
-  "application/vnd.ms-tnef": [],
-  "application/vnd.ms-wmdrm.lic-chlg-req": [],
-  "application/vnd.ms-wmdrm.lic-resp": [],
-  "application/vnd.ms-wmdrm.meter-chlg-req": [],
-  "application/vnd.ms-wmdrm.meter-resp": [],
-  "application/vnd.ms-word.document.macroenabled.12": [
-    "docm"
-  ],
-  "application/vnd.ms-word.template.macroenabled.12": [
-    "dotm"
-  ],
-  "application/vnd.ms-works": [
-    "wps",
-    "wks",
-    "wcm",
-    "wdb"
-  ],
-  "application/vnd.ms-wpl": [
-    "wpl"
-  ],
-  "application/vnd.ms-xpsdocument": [
-    "xps"
-  ],
-  "application/vnd.mseq": [
-    "mseq"
-  ],
-  "application/vnd.msign": [],
-  "application/vnd.multiad.creator": [],
-  "application/vnd.multiad.creator.cif": [],
-  "application/vnd.music-niff": [],
-  "application/vnd.musician": [
-    "mus"
-  ],
-  "application/vnd.muvee.style": [
-    "msty"
-  ],
-  "application/vnd.mynfc": [
-    "taglet"
-  ],
-  "application/vnd.ncd.control": [],
-  "application/vnd.ncd.reference": [],
-  "application/vnd.nervana": [],
-  "application/vnd.netfpx": [],
-  "application/vnd.neurolanguage.nlu": [
-    "nlu"
-  ],
-  "application/vnd.nitf": [
-    "ntf",
-    "nitf"
-  ],
-  "application/vnd.noblenet-directory": [
-    "nnd"
-  ],
-  "application/vnd.noblenet-sealer": [
-    "nns"
-  ],
-  "application/vnd.noblenet-web": [
-    "nnw"
-  ],
-  "application/vnd.nokia.catalogs": [],
-  "application/vnd.nokia.conml+wbxml": [],
-  "application/vnd.nokia.conml+xml": [],
-  "application/vnd.nokia.isds-radio-presets": [],
-  "application/vnd.nokia.iptv.config+xml": [],
-  "application/vnd.nokia.landmark+wbxml": [],
-  "application/vnd.nokia.landmark+xml": [],
-  "application/vnd.nokia.landmarkcollection+xml": [],
-  "application/vnd.nokia.n-gage.ac+xml": [],
-  "application/vnd.nokia.n-gage.data": [
-    "ngdat"
-  ],
-  "application/vnd.nokia.ncd": [],
-  "application/vnd.nokia.pcd+wbxml": [],
-  "application/vnd.nokia.pcd+xml": [],
-  "application/vnd.nokia.radio-preset": [
-    "rpst"
-  ],
-  "application/vnd.nokia.radio-presets": [
-    "rpss"
-  ],
-  "application/vnd.novadigm.edm": [
-    "edm"
-  ],
-  "application/vnd.novadigm.edx": [
-    "edx"
-  ],
-  "application/vnd.novadigm.ext": [
-    "ext"
-  ],
-  "application/vnd.ntt-local.file-transfer": [],
-  "application/vnd.ntt-local.sip-ta_remote": [],
-  "application/vnd.ntt-local.sip-ta_tcp_stream": [],
-  "application/vnd.oasis.opendocument.chart": [
-    "odc"
-  ],
-  "application/vnd.oasis.opendocument.chart-template": [
-    "otc"
-  ],
-  "application/vnd.oasis.opendocument.database": [
-    "odb"
-  ],
-  "application/vnd.oasis.opendocument.formula": [
-    "odf"
-  ],
-  "application/vnd.oasis.opendocument.formula-template": [
-    "odft"
-  ],
-  "application/vnd.oasis.opendocument.graphics": [
-    "odg"
-  ],
-  "application/vnd.oasis.opendocument.graphics-template": [
-    "otg"
-  ],
-  "application/vnd.oasis.opendocument.image": [
-    "odi"
-  ],
-  "application/vnd.oasis.opendocument.image-template": [
-    "oti"
-  ],
-  "application/vnd.oasis.opendocument.presentation": [
-    "odp"
-  ],
-  "application/vnd.oasis.opendocument.presentation-template": [
-    "otp"
-  ],
-  "application/vnd.oasis.opendocument.spreadsheet": [
-    "ods"
-  ],
-  "application/vnd.oasis.opendocument.spreadsheet-template": [
-    "ots"
-  ],
-  "application/vnd.oasis.opendocument.text": [
-    "odt"
-  ],
-  "application/vnd.oasis.opendocument.text-master": [
-    "odm"
-  ],
-  "application/vnd.oasis.opendocument.text-template": [
-    "ott"
-  ],
-  "application/vnd.oasis.opendocument.text-web": [
-    "oth"
-  ],
-  "application/vnd.obn": [],
-  "application/vnd.oftn.l10n+json": [],
-  "application/vnd.oipf.contentaccessdownload+xml": [],
-  "application/vnd.oipf.contentaccessstreaming+xml": [],
-  "application/vnd.oipf.cspg-hexbinary": [],
-  "application/vnd.oipf.dae.svg+xml": [],
-  "application/vnd.oipf.dae.xhtml+xml": [],
-  "application/vnd.oipf.mippvcontrolmessage+xml": [],
-  "application/vnd.oipf.pae.gem": [],
-  "application/vnd.oipf.spdiscovery+xml": [],
-  "application/vnd.oipf.spdlist+xml": [],
-  "application/vnd.oipf.ueprofile+xml": [],
-  "application/vnd.oipf.userprofile+xml": [],
-  "application/vnd.olpc-sugar": [
-    "xo"
-  ],
-  "application/vnd.oma-scws-config": [],
-  "application/vnd.oma-scws-http-request": [],
-  "application/vnd.oma-scws-http-response": [],
-  "application/vnd.oma.bcast.associated-procedure-parameter+xml": [],
-  "application/vnd.oma.bcast.drm-trigger+xml": [],
-  "application/vnd.oma.bcast.imd+xml": [],
-  "application/vnd.oma.bcast.ltkm": [],
-  "application/vnd.oma.bcast.notification+xml": [],
-  "application/vnd.oma.bcast.provisioningtrigger": [],
-  "application/vnd.oma.bcast.sgboot": [],
-  "application/vnd.oma.bcast.sgdd+xml": [],
-  "application/vnd.oma.bcast.sgdu": [],
-  "application/vnd.oma.bcast.simple-symbol-container": [],
-  "application/vnd.oma.bcast.smartcard-trigger+xml": [],
-  "application/vnd.oma.bcast.sprov+xml": [],
-  "application/vnd.oma.bcast.stkm": [],
-  "application/vnd.oma.cab-address-book+xml": [],
-  "application/vnd.oma.cab-feature-handler+xml": [],
-  "application/vnd.oma.cab-pcc+xml": [],
-  "application/vnd.oma.cab-user-prefs+xml": [],
-  "application/vnd.oma.dcd": [],
-  "application/vnd.oma.dcdc": [],
-  "application/vnd.oma.dd2+xml": [
-    "dd2"
-  ],
-  "application/vnd.oma.drm.risd+xml": [],
-  "application/vnd.oma.group-usage-list+xml": [],
-  "application/vnd.oma.pal+xml": [],
-  "application/vnd.oma.poc.detailed-progress-report+xml": [],
-  "application/vnd.oma.poc.final-report+xml": [],
-  "application/vnd.oma.poc.groups+xml": [],
-  "application/vnd.oma.poc.invocation-descriptor+xml": [],
-  "application/vnd.oma.poc.optimized-progress-report+xml": [],
-  "application/vnd.oma.push": [],
-  "application/vnd.oma.scidm.messages+xml": [],
-  "application/vnd.oma.xcap-directory+xml": [],
-  "application/vnd.omads-email+xml": [],
-  "application/vnd.omads-file+xml": [],
-  "application/vnd.omads-folder+xml": [],
-  "application/vnd.omaloc-supl-init": [],
-  "application/vnd.openofficeorg.extension": [
-    "oxt"
-  ],
-  "application/vnd.openxmlformats-officedocument.custom-properties+xml": [],
-  "application/vnd.openxmlformats-officedocument.customxmlproperties+xml": [],
-  "application/vnd.openxmlformats-officedocument.drawing+xml": [],
-  "application/vnd.openxmlformats-officedocument.drawingml.chart+xml": [],
-  "application/vnd.openxmlformats-officedocument.drawingml.chartshapes+xml": [],
-  "application/vnd.openxmlformats-officedocument.drawingml.diagramcolors+xml": [],
-  "application/vnd.openxmlformats-officedocument.drawingml.diagramdata+xml": [],
-  "application/vnd.openxmlformats-officedocument.drawingml.diagramlayout+xml": [],
-  "application/vnd.openxmlformats-officedocument.drawingml.diagramstyle+xml": [],
-  "application/vnd.openxmlformats-officedocument.extended-properties+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.commentauthors+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.comments+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.handoutmaster+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.notesmaster+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.notesslide+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation": [
-    "pptx"
-  ],
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.presprops+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.slide": [
-    "sldx"
-  ],
-  "application/vnd.openxmlformats-officedocument.presentationml.slide+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.slidelayout+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.slidemaster+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.slideshow": [
-    "ppsx"
-  ],
-  "application/vnd.openxmlformats-officedocument.presentationml.slideshow.main+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.slideupdateinfo+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.tablestyles+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.tags+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.template": [
-    "potx"
-  ],
-  "application/vnd.openxmlformats-officedocument.presentationml.template.main+xml": [],
-  "application/vnd.openxmlformats-officedocument.presentationml.viewprops+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.calcchain+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.chartsheet+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.connections+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.dialogsheet+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.externallink+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.pivotcachedefinition+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.pivotcacherecords+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.pivottable+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.querytable+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.revisionheaders+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.revisionlog+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedstrings+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
-    "xlsx"
-  ],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheetmetadata+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.tablesinglecells+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.template": [
-    "xltx"
-  ],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.template.main+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.usernames+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.volatiledependencies+xml": [],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml": [],
-  "application/vnd.openxmlformats-officedocument.theme+xml": [],
-  "application/vnd.openxmlformats-officedocument.themeoverride+xml": [],
-  "application/vnd.openxmlformats-officedocument.vmldrawing": [],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.comments+xml": [],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
-    "docx"
-  ],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document.glossary+xml": [],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml": [],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.endnotes+xml": [],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.fonttable+xml": [],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml": [],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml": [],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml": [],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml": [],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml": [],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.template": [
-    "dotx"
-  ],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.template.main+xml": [],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.websettings+xml": [],
-  "application/vnd.openxmlformats-package.core-properties+xml": [],
-  "application/vnd.openxmlformats-package.digital-signature-xmlsignature+xml": [],
-  "application/vnd.openxmlformats-package.relationships+xml": [],
-  "application/vnd.quobject-quoxdocument": [],
-  "application/vnd.osa.netdeploy": [],
-  "application/vnd.osgeo.mapguide.package": [
-    "mgp"
-  ],
-  "application/vnd.osgi.bundle": [],
-  "application/vnd.osgi.dp": [
-    "dp"
-  ],
-  "application/vnd.osgi.subsystem": [
-    "esa"
-  ],
-  "application/vnd.otps.ct-kip+xml": [],
-  "application/vnd.palm": [
-    "pdb",
-    "pqa",
-    "oprc"
-  ],
-  "application/vnd.paos.xml": [],
-  "application/vnd.pawaafile": [
-    "paw"
-  ],
-  "application/vnd.pg.format": [
-    "str"
-  ],
-  "application/vnd.pg.osasli": [
-    "ei6"
-  ],
-  "application/vnd.piaccess.application-licence": [],
-  "application/vnd.picsel": [
-    "efif"
-  ],
-  "application/vnd.pmi.widget": [
-    "wg"
-  ],
-  "application/vnd.poc.group-advertisement+xml": [],
-  "application/vnd.pocketlearn": [
-    "plf"
-  ],
-  "application/vnd.powerbuilder6": [
-    "pbd"
-  ],
-  "application/vnd.powerbuilder6-s": [],
-  "application/vnd.powerbuilder7": [],
-  "application/vnd.powerbuilder7-s": [],
-  "application/vnd.powerbuilder75": [],
-  "application/vnd.powerbuilder75-s": [],
-  "application/vnd.preminet": [],
-  "application/vnd.previewsystems.box": [
-    "box"
-  ],
-  "application/vnd.proteus.magazine": [
-    "mgz"
-  ],
-  "application/vnd.publishare-delta-tree": [
-    "qps"
-  ],
-  "application/vnd.pvi.ptid1": [
-    "ptid"
-  ],
-  "application/vnd.pwg-multiplexed": [],
-  "application/vnd.pwg-xhtml-print+xml": [],
-  "application/vnd.qualcomm.brew-app-res": [],
-  "application/vnd.quark.quarkxpress": [
-    "qxd",
-    "qxt",
-    "qwd",
-    "qwt",
-    "qxl",
-    "qxb"
-  ],
-  "application/vnd.radisys.moml+xml": [],
-  "application/vnd.radisys.msml+xml": [],
-  "application/vnd.radisys.msml-audit+xml": [],
-  "application/vnd.radisys.msml-audit-conf+xml": [],
-  "application/vnd.radisys.msml-audit-conn+xml": [],
-  "application/vnd.radisys.msml-audit-dialog+xml": [],
-  "application/vnd.radisys.msml-audit-stream+xml": [],
-  "application/vnd.radisys.msml-conf+xml": [],
-  "application/vnd.radisys.msml-dialog+xml": [],
-  "application/vnd.radisys.msml-dialog-base+xml": [],
-  "application/vnd.radisys.msml-dialog-fax-detect+xml": [],
-  "application/vnd.radisys.msml-dialog-fax-sendrecv+xml": [],
-  "application/vnd.radisys.msml-dialog-group+xml": [],
-  "application/vnd.radisys.msml-dialog-speech+xml": [],
-  "application/vnd.radisys.msml-dialog-transform+xml": [],
-  "application/vnd.rainstor.data": [],
-  "application/vnd.rapid": [],
-  "application/vnd.realvnc.bed": [
-    "bed"
-  ],
-  "application/vnd.recordare.musicxml": [
-    "mxl"
-  ],
-  "application/vnd.recordare.musicxml+xml": [
-    "musicxml"
-  ],
-  "application/vnd.renlearn.rlprint": [],
-  "application/vnd.rig.cryptonote": [
-    "cryptonote"
-  ],
-  "application/vnd.rim.cod": [
-    "cod"
-  ],
-  "application/vnd.rn-realmedia": [
-    "rm"
-  ],
-  "application/vnd.rn-realmedia-vbr": [
-    "rmvb"
-  ],
-  "application/vnd.route66.link66+xml": [
-    "link66"
-  ],
-  "application/vnd.rs-274x": [],
-  "application/vnd.ruckus.download": [],
-  "application/vnd.s3sms": [],
-  "application/vnd.sailingtracker.track": [
-    "st"
-  ],
-  "application/vnd.sbm.cid": [],
-  "application/vnd.sbm.mid2": [],
-  "application/vnd.scribus": [],
-  "application/vnd.sealed.3df": [],
-  "application/vnd.sealed.csf": [],
-  "application/vnd.sealed.doc": [],
-  "application/vnd.sealed.eml": [],
-  "application/vnd.sealed.mht": [],
-  "application/vnd.sealed.net": [],
-  "application/vnd.sealed.ppt": [],
-  "application/vnd.sealed.tiff": [],
-  "application/vnd.sealed.xls": [],
-  "application/vnd.sealedmedia.softseal.html": [],
-  "application/vnd.sealedmedia.softseal.pdf": [],
-  "application/vnd.seemail": [
-    "see"
-  ],
-  "application/vnd.sema": [
-    "sema"
-  ],
-  "application/vnd.semd": [
-    "semd"
-  ],
-  "application/vnd.semf": [
-    "semf"
-  ],
-  "application/vnd.shana.informed.formdata": [
-    "ifm"
-  ],
-  "application/vnd.shana.informed.formtemplate": [
-    "itp"
-  ],
-  "application/vnd.shana.informed.interchange": [
-    "iif"
-  ],
-  "application/vnd.shana.informed.package": [
-    "ipk"
-  ],
-  "application/vnd.simtech-mindmapper": [
-    "twd",
-    "twds"
-  ],
-  "application/vnd.smaf": [
-    "mmf"
-  ],
-  "application/vnd.smart.notebook": [],
-  "application/vnd.smart.teacher": [
-    "teacher"
-  ],
-  "application/vnd.software602.filler.form+xml": [],
-  "application/vnd.software602.filler.form-xml-zip": [],
-  "application/vnd.solent.sdkm+xml": [
-    "sdkm",
-    "sdkd"
-  ],
-  "application/vnd.spotfire.dxp": [
-    "dxp"
-  ],
-  "application/vnd.spotfire.sfs": [
-    "sfs"
-  ],
-  "application/vnd.sss-cod": [],
-  "application/vnd.sss-dtf": [],
-  "application/vnd.sss-ntf": [],
-  "application/vnd.stardivision.calc": [
-    "sdc"
-  ],
-  "application/vnd.stardivision.draw": [
-    "sda"
-  ],
-  "application/vnd.stardivision.impress": [
-    "sdd"
-  ],
-  "application/vnd.stardivision.math": [
-    "smf"
-  ],
-  "application/vnd.stardivision.writer": [
-    "sdw",
-    "vor"
-  ],
-  "application/vnd.stardivision.writer-global": [
-    "sgl"
-  ],
-  "application/vnd.stepmania.package": [
-    "smzip"
-  ],
-  "application/vnd.stepmania.stepchart": [
-    "sm"
-  ],
-  "application/vnd.street-stream": [],
-  "application/vnd.sun.xml.calc": [
-    "sxc"
-  ],
-  "application/vnd.sun.xml.calc.template": [
-    "stc"
-  ],
-  "application/vnd.sun.xml.draw": [
-    "sxd"
-  ],
-  "application/vnd.sun.xml.draw.template": [
-    "std"
-  ],
-  "application/vnd.sun.xml.impress": [
-    "sxi"
-  ],
-  "application/vnd.sun.xml.impress.template": [
-    "sti"
-  ],
-  "application/vnd.sun.xml.math": [
-    "sxm"
-  ],
-  "application/vnd.sun.xml.writer": [
-    "sxw"
-  ],
-  "application/vnd.sun.xml.writer.global": [
-    "sxg"
-  ],
-  "application/vnd.sun.xml.writer.template": [
-    "stw"
-  ],
-  "application/vnd.sun.wadl+xml": [],
-  "application/vnd.sus-calendar": [
-    "sus",
-    "susp"
-  ],
-  "application/vnd.svd": [
-    "svd"
-  ],
-  "application/vnd.swiftview-ics": [],
-  "application/vnd.symbian.install": [
-    "sis",
-    "sisx"
-  ],
-  "application/vnd.syncml+xml": [
-    "xsm"
-  ],
-  "application/vnd.syncml.dm+wbxml": [
-    "bdm"
-  ],
-  "application/vnd.syncml.dm+xml": [
-    "xdm"
-  ],
-  "application/vnd.syncml.dm.notification": [],
-  "application/vnd.syncml.ds.notification": [],
-  "application/vnd.tao.intent-module-archive": [
-    "tao"
-  ],
-  "application/vnd.tcpdump.pcap": [
-    "pcap",
-    "cap",
-    "dmp"
-  ],
-  "application/vnd.tmobile-livetv": [
-    "tmo"
-  ],
-  "application/vnd.trid.tpt": [
-    "tpt"
-  ],
-  "application/vnd.triscape.mxs": [
-    "mxs"
-  ],
-  "application/vnd.trueapp": [
-    "tra"
-  ],
-  "application/vnd.truedoc": [],
-  "application/vnd.ubisoft.webplayer": [],
-  "application/vnd.ufdl": [
-    "ufd",
-    "ufdl"
-  ],
-  "application/vnd.uiq.theme": [
-    "utz"
-  ],
-  "application/vnd.umajin": [
-    "umj"
-  ],
-  "application/vnd.unity": [
-    "unityweb"
-  ],
-  "application/vnd.uoml+xml": [
-    "uoml"
-  ],
-  "application/vnd.uplanet.alert": [],
-  "application/vnd.uplanet.alert-wbxml": [],
-  "application/vnd.uplanet.bearer-choice": [],
-  "application/vnd.uplanet.bearer-choice-wbxml": [],
-  "application/vnd.uplanet.cacheop": [],
-  "application/vnd.uplanet.cacheop-wbxml": [],
-  "application/vnd.uplanet.channel": [],
-  "application/vnd.uplanet.channel-wbxml": [],
-  "application/vnd.uplanet.list": [],
-  "application/vnd.uplanet.list-wbxml": [],
-  "application/vnd.uplanet.listcmd": [],
-  "application/vnd.uplanet.listcmd-wbxml": [],
-  "application/vnd.uplanet.signal": [],
-  "application/vnd.vcx": [
-    "vcx"
-  ],
-  "application/vnd.vd-study": [],
-  "application/vnd.vectorworks": [],
-  "application/vnd.verimatrix.vcas": [],
-  "application/vnd.vidsoft.vidconference": [],
-  "application/vnd.visio": [
-    "vsd",
-    "vst",
-    "vss",
-    "vsw"
-  ],
-  "application/vnd.visionary": [
-    "vis"
-  ],
-  "application/vnd.vividence.scriptfile": [],
-  "application/vnd.vsf": [
-    "vsf"
-  ],
-  "application/vnd.wap.sic": [],
-  "application/vnd.wap.slc": [],
-  "application/vnd.wap.wbxml": [
-    "wbxml"
-  ],
-  "application/vnd.wap.wmlc": [
-    "wmlc"
-  ],
-  "application/vnd.wap.wmlscriptc": [
-    "wmlsc"
-  ],
-  "application/vnd.webturbo": [
-    "wtb"
-  ],
-  "application/vnd.wfa.wsc": [],
-  "application/vnd.wmc": [],
-  "application/vnd.wmf.bootstrap": [],
-  "application/vnd.wolfram.mathematica": [],
-  "application/vnd.wolfram.mathematica.package": [],
-  "application/vnd.wolfram.player": [
-    "nbp"
-  ],
-  "application/vnd.wordperfect": [
-    "wpd"
-  ],
-  "application/vnd.wqd": [
-    "wqd"
-  ],
-  "application/vnd.wrq-hp3000-labelled": [],
-  "application/vnd.wt.stf": [
-    "stf"
-  ],
-  "application/vnd.wv.csp+wbxml": [],
-  "application/vnd.wv.csp+xml": [],
-  "application/vnd.wv.ssp+xml": [],
-  "application/vnd.xara": [
-    "xar"
-  ],
-  "application/vnd.xfdl": [
-    "xfdl"
-  ],
-  "application/vnd.xfdl.webform": [],
-  "application/vnd.xmi+xml": [],
-  "application/vnd.xmpie.cpkg": [],
-  "application/vnd.xmpie.dpkg": [],
-  "application/vnd.xmpie.plan": [],
-  "application/vnd.xmpie.ppkg": [],
-  "application/vnd.xmpie.xlim": [],
-  "application/vnd.yamaha.hv-dic": [
-    "hvd"
-  ],
-  "application/vnd.yamaha.hv-script": [
-    "hvs"
-  ],
-  "application/vnd.yamaha.hv-voice": [
-    "hvp"
-  ],
-  "application/vnd.yamaha.openscoreformat": [
-    "osf"
-  ],
-  "application/vnd.yamaha.openscoreformat.osfpvg+xml": [
-    "osfpvg"
-  ],
-  "application/vnd.yamaha.remote-setup": [],
-  "application/vnd.yamaha.smaf-audio": [
-    "saf"
-  ],
-  "application/vnd.yamaha.smaf-phrase": [
-    "spf"
-  ],
-  "application/vnd.yamaha.through-ngn": [],
-  "application/vnd.yamaha.tunnel-udpencap": [],
-  "application/vnd.yellowriver-custom-menu": [
-    "cmp"
-  ],
-  "application/vnd.zul": [
-    "zir",
-    "zirz"
-  ],
-  "application/vnd.zzazz.deck+xml": [
-    "zaz"
-  ],
-  "application/voicexml+xml": [
-    "vxml"
-  ],
-  "application/vq-rtcpxr": [],
-  "application/watcherinfo+xml": [],
-  "application/whoispp-query": [],
-  "application/whoispp-response": [],
-  "application/widget": [
-    "wgt"
-  ],
-  "application/winhlp": [
-    "hlp"
-  ],
-  "application/wita": [],
-  "application/wordperfect5.1": [],
-  "application/wsdl+xml": [
-    "wsdl"
-  ],
-  "application/wspolicy+xml": [
-    "wspolicy"
-  ],
-  "application/x-7z-compressed": [
-    "7z"
-  ],
-  "application/x-abiword": [
-    "abw"
-  ],
-  "application/x-ace-compressed": [
-    "ace"
-  ],
-  "application/x-amf": [],
-  "application/x-apple-diskimage": [
-    "dmg"
-  ],
-  "application/x-authorware-bin": [
-    "aab",
-    "x32",
-    "u32",
-    "vox"
-  ],
-  "application/x-authorware-map": [
-    "aam"
-  ],
-  "application/x-authorware-seg": [
-    "aas"
-  ],
-  "application/x-bcpio": [
-    "bcpio"
-  ],
-  "application/x-bittorrent": [
-    "torrent"
-  ],
-  "application/x-blorb": [
-    "blb",
-    "blorb"
-  ],
-  "application/x-bzip": [
-    "bz"
-  ],
-  "application/x-bzip2": [
-    "bz2",
-    "boz"
-  ],
-  "application/x-cbr": [
-    "cbr",
-    "cba",
-    "cbt",
-    "cbz",
-    "cb7"
-  ],
-  "application/x-cdlink": [
-    "vcd"
-  ],
-  "application/x-cfs-compressed": [
-    "cfs"
-  ],
-  "application/x-chat": [
-    "chat"
-  ],
-  "application/x-chess-pgn": [
-    "pgn"
-  ],
-  "application/x-conference": [
-    "nsc"
-  ],
-  "application/x-compress": [],
-  "application/x-cpio": [
-    "cpio"
-  ],
-  "application/x-csh": [
-    "csh"
-  ],
-  "application/x-debian-package": [
-    "deb",
-    "udeb"
-  ],
-  "application/x-dgc-compressed": [
-    "dgc"
-  ],
-  "application/x-director": [
-    "dir",
-    "dcr",
-    "dxr",
-    "cst",
-    "cct",
-    "cxt",
-    "w3d",
-    "fgd",
-    "swa"
-  ],
-  "application/x-doom": [
-    "wad"
-  ],
-  "application/x-dtbncx+xml": [
-    "ncx"
-  ],
-  "application/x-dtbook+xml": [
-    "dtb"
-  ],
-  "application/x-dtbresource+xml": [
-    "res"
-  ],
-  "application/x-dvi": [
-    "dvi"
-  ],
-  "application/x-envoy": [
-    "evy"
-  ],
-  "application/x-eva": [
-    "eva"
-  ],
-  "application/x-font-bdf": [
-    "bdf"
-  ],
-  "application/x-font-dos": [],
-  "application/x-font-framemaker": [],
-  "application/x-font-ghostscript": [
-    "gsf"
-  ],
-  "application/x-font-libgrx": [],
-  "application/x-font-linux-psf": [
-    "psf"
-  ],
-  "application/x-font-otf": [
-    "otf"
-  ],
-  "application/x-font-pcf": [
-    "pcf"
-  ],
-  "application/x-font-snf": [
-    "snf"
-  ],
-  "application/x-font-speedo": [],
-  "application/x-font-sunos-news": [],
-  "application/x-font-ttf": [
-    "ttf",
-    "ttc"
-  ],
-  "application/x-font-type1": [
-    "pfa",
-    "pfb",
-    "pfm",
-    "afm"
-  ],
-  "application/font-woff": [
-    "woff"
-  ],
-  "application/x-font-vfont": [],
-  "application/x-freearc": [
-    "arc"
-  ],
-  "application/x-futuresplash": [
-    "spl"
-  ],
-  "application/x-gca-compressed": [
-    "gca"
-  ],
-  "application/x-glulx": [
-    "ulx"
-  ],
-  "application/x-gnumeric": [
-    "gnumeric"
-  ],
-  "application/x-gramps-xml": [
-    "gramps"
-  ],
-  "application/x-gtar": [
-    "gtar"
-  ],
-  "application/x-gzip": [],
-  "application/x-hdf": [
-    "hdf"
-  ],
-  "application/x-install-instructions": [
-    "install"
-  ],
-  "application/x-iso9660-image": [
-    "iso"
-  ],
-  "application/x-java-jnlp-file": [
-    "jnlp"
-  ],
-  "application/x-latex": [
-    "latex"
-  ],
-  "application/x-lzh-compressed": [
-    "lzh",
-    "lha"
-  ],
-  "application/x-mie": [
-    "mie"
-  ],
-  "application/x-mobipocket-ebook": [
-    "prc",
-    "mobi"
-  ],
-  "application/x-ms-application": [
-    "application"
-  ],
-  "application/x-ms-shortcut": [
-    "lnk"
-  ],
-  "application/x-ms-wmd": [
-    "wmd"
-  ],
-  "application/x-ms-wmz": [
-    "wmz"
-  ],
-  "application/x-ms-xbap": [
-    "xbap"
-  ],
-  "application/x-msaccess": [
-    "mdb"
-  ],
-  "application/x-msbinder": [
-    "obd"
-  ],
-  "application/x-mscardfile": [
-    "crd"
-  ],
-  "application/x-msclip": [
-    "clp"
-  ],
-  "application/x-msdownload": [
-    "exe",
-    "dll",
-    "com",
-    "bat",
-    "msi"
-  ],
-  "application/x-msmediaview": [
-    "mvb",
-    "m13",
-    "m14"
-  ],
-  "application/x-msmetafile": [
-    "wmf",
-    "wmz",
-    "emf",
-    "emz"
-  ],
-  "application/x-msmoney": [
-    "mny"
-  ],
-  "application/x-mspublisher": [
-    "pub"
-  ],
-  "application/x-msschedule": [
-    "scd"
-  ],
-  "application/x-msterminal": [
-    "trm"
-  ],
-  "application/x-mswrite": [
-    "wri"
-  ],
-  "application/x-netcdf": [
-    "nc",
-    "cdf"
-  ],
-  "application/x-nzb": [
-    "nzb"
-  ],
-  "application/x-pkcs12": [
-    "p12",
-    "pfx"
-  ],
-  "application/x-pkcs7-certificates": [
-    "p7b",
-    "spc"
-  ],
-  "application/x-pkcs7-certreqresp": [
-    "p7r"
-  ],
-  "application/x-rar-compressed": [
-    "rar"
-  ],
-  "application/x-research-info-systems": [
-    "ris"
-  ],
-  "application/x-sh": [
-    "sh"
-  ],
-  "application/x-shar": [
-    "shar"
-  ],
-  "application/x-shockwave-flash": [
-    "swf"
-  ],
-  "application/x-silverlight-app": [
-    "xap"
-  ],
-  "application/x-sql": [
-    "sql"
-  ],
-  "application/x-stuffit": [
-    "sit"
-  ],
-  "application/x-stuffitx": [
-    "sitx"
-  ],
-  "application/x-subrip": [
-    "srt"
-  ],
-  "application/x-sv4cpio": [
-    "sv4cpio"
-  ],
-  "application/x-sv4crc": [
-    "sv4crc"
-  ],
-  "application/x-t3vm-image": [
-    "t3"
-  ],
-  "application/x-tads": [
-    "gam"
-  ],
-  "application/x-tar": [
-    "tar"
-  ],
-  "application/x-tcl": [
-    "tcl"
-  ],
-  "application/x-tex": [
-    "tex"
-  ],
-  "application/x-tex-tfm": [
-    "tfm"
-  ],
-  "application/x-texinfo": [
-    "texinfo",
-    "texi"
-  ],
-  "application/x-tgif": [
-    "obj"
-  ],
-  "application/x-ustar": [
-    "ustar"
-  ],
-  "application/x-wais-source": [
-    "src"
-  ],
-  "application/x-x509-ca-cert": [
-    "der",
-    "crt"
-  ],
-  "application/x-xfig": [
-    "fig"
-  ],
-  "application/x-xliff+xml": [
-    "xlf"
-  ],
-  "application/x-xpinstall": [
-    "xpi"
-  ],
-  "application/x-xz": [
-    "xz"
-  ],
-  "application/x-zmachine": [
-    "z1",
-    "z2",
-    "z3",
-    "z4",
-    "z5",
-    "z6",
-    "z7",
-    "z8"
-  ],
-  "application/x400-bp": [],
-  "application/xaml+xml": [
-    "xaml"
-  ],
-  "application/xcap-att+xml": [],
-  "application/xcap-caps+xml": [],
-  "application/xcap-diff+xml": [
-    "xdf"
-  ],
-  "application/xcap-el+xml": [],
-  "application/xcap-error+xml": [],
-  "application/xcap-ns+xml": [],
-  "application/xcon-conference-info-diff+xml": [],
-  "application/xcon-conference-info+xml": [],
-  "application/xenc+xml": [
-    "xenc"
-  ],
-  "application/xhtml+xml": [
-    "xhtml",
-    "xht"
-  ],
-  "application/xhtml-voice+xml": [],
-  "application/xml": [
-    "xml",
-    "xsl"
-  ],
-  "application/xml-dtd": [
-    "dtd"
-  ],
-  "application/xml-external-parsed-entity": [],
-  "application/xmpp+xml": [],
-  "application/xop+xml": [
-    "xop"
-  ],
-  "application/xproc+xml": [
-    "xpl"
-  ],
-  "application/xslt+xml": [
-    "xslt"
-  ],
-  "application/xspf+xml": [
-    "xspf"
-  ],
-  "application/xv+xml": [
-    "mxml",
-    "xhvml",
-    "xvml",
-    "xvm"
-  ],
-  "application/yang": [
-    "yang"
-  ],
-  "application/yin+xml": [
-    "yin"
-  ],
-  "application/zip": [
-    "zip"
-  ],
-  "audio/1d-interleaved-parityfec": [],
-  "audio/32kadpcm": [],
-  "audio/3gpp": [],
-  "audio/3gpp2": [],
-  "audio/ac3": [],
-  "audio/adpcm": [
-    "adp"
-  ],
-  "audio/amr": [],
-  "audio/amr-wb": [],
-  "audio/amr-wb+": [],
-  "audio/asc": [],
-  "audio/atrac-advanced-lossless": [],
-  "audio/atrac-x": [],
-  "audio/atrac3": [],
-  "audio/basic": [
-    "au",
-    "snd"
-  ],
-  "audio/bv16": [],
-  "audio/bv32": [],
-  "audio/clearmode": [],
-  "audio/cn": [],
-  "audio/dat12": [],
-  "audio/dls": [],
-  "audio/dsr-es201108": [],
-  "audio/dsr-es202050": [],
-  "audio/dsr-es202211": [],
-  "audio/dsr-es202212": [],
-  "audio/dv": [],
-  "audio/dvi4": [],
-  "audio/eac3": [],
-  "audio/evrc": [],
-  "audio/evrc-qcp": [],
-  "audio/evrc0": [],
-  "audio/evrc1": [],
-  "audio/evrcb": [],
-  "audio/evrcb0": [],
-  "audio/evrcb1": [],
-  "audio/evrcwb": [],
-  "audio/evrcwb0": [],
-  "audio/evrcwb1": [],
-  "audio/example": [],
-  "audio/fwdred": [],
-  "audio/g719": [],
-  "audio/g722": [],
-  "audio/g7221": [],
-  "audio/g723": [],
-  "audio/g726-16": [],
-  "audio/g726-24": [],
-  "audio/g726-32": [],
-  "audio/g726-40": [],
-  "audio/g728": [],
-  "audio/g729": [],
-  "audio/g7291": [],
-  "audio/g729d": [],
-  "audio/g729e": [],
-  "audio/gsm": [],
-  "audio/gsm-efr": [],
-  "audio/gsm-hr-08": [],
-  "audio/ilbc": [],
-  "audio/ip-mr_v2.5": [],
-  "audio/isac": [],
-  "audio/l16": [],
-  "audio/l20": [],
-  "audio/l24": [],
-  "audio/l8": [],
-  "audio/lpc": [],
-  "audio/midi": [
-    "mid",
-    "midi",
-    "kar",
-    "rmi"
-  ],
-  "audio/mobile-xmf": [],
-  "audio/mp4": [
-    "mp4a"
-  ],
-  "audio/mp4a-latm": [],
-  "audio/mpa": [],
-  "audio/mpa-robust": [],
-  "audio/mpeg": [
-    "mpga",
-    "mp2",
-    "mp2a",
-    "mp3",
-    "m2a",
-    "m3a"
-  ],
-  "audio/mpeg4-generic": [],
-  "audio/musepack": [],
-  "audio/ogg": [
-    "oga",
-    "ogg",
-    "spx"
-  ],
-  "audio/opus": [],
-  "audio/parityfec": [],
-  "audio/pcma": [],
-  "audio/pcma-wb": [],
-  "audio/pcmu-wb": [],
-  "audio/pcmu": [],
-  "audio/prs.sid": [],
-  "audio/qcelp": [],
-  "audio/red": [],
-  "audio/rtp-enc-aescm128": [],
-  "audio/rtp-midi": [],
-  "audio/rtx": [],
-  "audio/s3m": [
-    "s3m"
-  ],
-  "audio/silk": [
-    "sil"
-  ],
-  "audio/smv": [],
-  "audio/smv0": [],
-  "audio/smv-qcp": [],
-  "audio/sp-midi": [],
-  "audio/speex": [],
-  "audio/t140c": [],
-  "audio/t38": [],
-  "audio/telephone-event": [],
-  "audio/tone": [],
-  "audio/uemclip": [],
-  "audio/ulpfec": [],
-  "audio/vdvi": [],
-  "audio/vmr-wb": [],
-  "audio/vnd.3gpp.iufp": [],
-  "audio/vnd.4sb": [],
-  "audio/vnd.audiokoz": [],
-  "audio/vnd.celp": [],
-  "audio/vnd.cisco.nse": [],
-  "audio/vnd.cmles.radio-events": [],
-  "audio/vnd.cns.anp1": [],
-  "audio/vnd.cns.inf1": [],
-  "audio/vnd.dece.audio": [
-    "uva",
-    "uvva"
-  ],
-  "audio/vnd.digital-winds": [
-    "eol"
-  ],
-  "audio/vnd.dlna.adts": [],
-  "audio/vnd.dolby.heaac.1": [],
-  "audio/vnd.dolby.heaac.2": [],
-  "audio/vnd.dolby.mlp": [],
-  "audio/vnd.dolby.mps": [],
-  "audio/vnd.dolby.pl2": [],
-  "audio/vnd.dolby.pl2x": [],
-  "audio/vnd.dolby.pl2z": [],
-  "audio/vnd.dolby.pulse.1": [],
-  "audio/vnd.dra": [
-    "dra"
-  ],
-  "audio/vnd.dts": [
-    "dts"
-  ],
-  "audio/vnd.dts.hd": [
-    "dtshd"
-  ],
-  "audio/vnd.dvb.file": [],
-  "audio/vnd.everad.plj": [],
-  "audio/vnd.hns.audio": [],
-  "audio/vnd.lucent.voice": [
-    "lvp"
-  ],
-  "audio/vnd.ms-playready.media.pya": [
-    "pya"
-  ],
-  "audio/vnd.nokia.mobile-xmf": [],
-  "audio/vnd.nortel.vbk": [],
-  "audio/vnd.nuera.ecelp4800": [
-    "ecelp4800"
-  ],
-  "audio/vnd.nuera.ecelp7470": [
-    "ecelp7470"
-  ],
-  "audio/vnd.nuera.ecelp9600": [
-    "ecelp9600"
-  ],
-  "audio/vnd.octel.sbc": [],
-  "audio/vnd.qcelp": [],
-  "audio/vnd.rhetorex.32kadpcm": [],
-  "audio/vnd.rip": [
-    "rip"
-  ],
-  "audio/vnd.sealedmedia.softseal.mpeg": [],
-  "audio/vnd.vmx.cvsd": [],
-  "audio/vorbis": [],
-  "audio/vorbis-config": [],
-  "audio/webm": [
-    "weba"
-  ],
-  "audio/x-aac": [
-    "aac"
-  ],
-  "audio/x-aiff": [
-    "aif",
-    "aiff",
-    "aifc"
-  ],
-  "audio/x-caf": [
-    "caf"
-  ],
-  "audio/x-flac": [
-    "flac"
-  ],
-  "audio/x-matroska": [
-    "mka"
-  ],
-  "audio/x-mpegurl": [
-    "m3u"
-  ],
-  "audio/x-ms-wax": [
-    "wax"
-  ],
-  "audio/x-ms-wma": [
-    "wma"
-  ],
-  "audio/x-pn-realaudio": [
-    "ram",
-    "ra"
-  ],
-  "audio/x-pn-realaudio-plugin": [
-    "rmp"
-  ],
-  "audio/x-tta": [],
-  "audio/x-wav": [
-    "wav"
-  ],
-  "audio/xm": [
-    "xm"
-  ],
-  "chemical/x-cdx": [
-    "cdx"
-  ],
-  "chemical/x-cif": [
-    "cif"
-  ],
-  "chemical/x-cmdf": [
-    "cmdf"
-  ],
-  "chemical/x-cml": [
-    "cml"
-  ],
-  "chemical/x-csml": [
-    "csml"
-  ],
-  "chemical/x-pdb": [],
-  "chemical/x-xyz": [
-    "xyz"
-  ],
-  "image/bmp": [
-    "bmp"
-  ],
-  "image/cgm": [
-    "cgm"
-  ],
-  "image/example": [],
-  "image/fits": [],
-  "image/g3fax": [
-    "g3"
-  ],
-  "image/gif": [
-    "gif"
-  ],
-  "image/ief": [
-    "ief"
-  ],
-  "image/jp2": [],
-  "image/jpeg": [
-    "jpeg",
-    "jpg",
-    "jpe"
-  ],
-  "image/jpm": [],
-  "image/jpx": [],
-  "image/ktx": [
-    "ktx"
-  ],
-  "image/naplps": [],
-  "image/png": [
-    "png"
-  ],
-  "image/prs.btif": [
-    "btif"
-  ],
-  "image/prs.pti": [],
-  "image/sgi": [
-    "sgi"
-  ],
-  "image/svg+xml": [
-    "svg",
-    "svgz"
-  ],
-  "image/t38": [],
-  "image/tiff": [
-    "tiff",
-    "tif"
-  ],
-  "image/tiff-fx": [],
-  "image/vnd.adobe.photoshop": [
-    "psd"
-  ],
-  "image/vnd.cns.inf2": [],
-  "image/vnd.dece.graphic": [
-    "uvi",
-    "uvvi",
-    "uvg",
-    "uvvg"
-  ],
-  "image/vnd.dvb.subtitle": [
-    "sub"
-  ],
-  "image/vnd.djvu": [
-    "djvu",
-    "djv"
-  ],
-  "image/vnd.dwg": [
-    "dwg"
-  ],
-  "image/vnd.dxf": [
-    "dxf"
-  ],
-  "image/vnd.fastbidsheet": [
-    "fbs"
-  ],
-  "image/vnd.fpx": [
-    "fpx"
-  ],
-  "image/vnd.fst": [
-    "fst"
-  ],
-  "image/vnd.fujixerox.edmics-mmr": [
-    "mmr"
-  ],
-  "image/vnd.fujixerox.edmics-rlc": [
-    "rlc"
-  ],
-  "image/vnd.globalgraphics.pgb": [],
-  "image/vnd.microsoft.icon": [],
-  "image/vnd.mix": [],
-  "image/vnd.ms-modi": [
-    "mdi"
-  ],
-  "image/vnd.ms-photo": [
-    "wdp"
-  ],
-  "image/vnd.net-fpx": [
-    "npx"
-  ],
-  "image/vnd.radiance": [],
-  "image/vnd.sealed.png": [],
-  "image/vnd.sealedmedia.softseal.gif": [],
-  "image/vnd.sealedmedia.softseal.jpg": [],
-  "image/vnd.svf": [],
-  "image/vnd.wap.wbmp": [
-    "wbmp"
-  ],
-  "image/vnd.xiff": [
-    "xif"
-  ],
-  "image/webp": [
-    "webp"
-  ],
-  "image/x-3ds": [
-    "3ds"
-  ],
-  "image/x-cmu-raster": [
-    "ras"
-  ],
-  "image/x-cmx": [
-    "cmx"
-  ],
-  "image/x-freehand": [
-    "fh",
-    "fhc",
-    "fh4",
-    "fh5",
-    "fh7"
-  ],
-  "image/x-icon": [
-    "ico"
-  ],
-  "image/x-mrsid-image": [
-    "sid"
-  ],
-  "image/x-pcx": [
-    "pcx"
-  ],
-  "image/x-pict": [
-    "pic",
-    "pct"
-  ],
-  "image/x-portable-anymap": [
-    "pnm"
-  ],
-  "image/x-portable-bitmap": [
-    "pbm"
-  ],
-  "image/x-portable-graymap": [
-    "pgm"
-  ],
-  "image/x-portable-pixmap": [
-    "ppm"
-  ],
-  "image/x-rgb": [
-    "rgb"
-  ],
-  "image/x-tga": [
-    "tga"
-  ],
-  "image/x-xbitmap": [
-    "xbm"
-  ],
-  "image/x-xpixmap": [
-    "xpm"
-  ],
-  "image/x-xwindowdump": [
-    "xwd"
-  ],
-  "message/cpim": [],
-  "message/delivery-status": [],
-  "message/disposition-notification": [],
-  "message/example": [],
-  "message/external-body": [],
-  "message/feedback-report": [],
-  "message/global": [],
-  "message/global-delivery-status": [],
-  "message/global-disposition-notification": [],
-  "message/global-headers": [],
-  "message/http": [],
-  "message/imdn+xml": [],
-  "message/news": [],
-  "message/partial": [],
-  "message/rfc822": [
-    "eml",
-    "mime"
-  ],
-  "message/s-http": [],
-  "message/sip": [],
-  "message/sipfrag": [],
-  "message/tracking-status": [],
-  "message/vnd.si.simp": [],
-  "model/example": [],
-  "model/iges": [
-    "igs",
-    "iges"
-  ],
-  "model/mesh": [
-    "msh",
-    "mesh",
-    "silo"
-  ],
-  "model/vnd.collada+xml": [
-    "dae"
-  ],
-  "model/vnd.dwf": [
-    "dwf"
-  ],
-  "model/vnd.flatland.3dml": [],
-  "model/vnd.gdl": [
-    "gdl"
-  ],
-  "model/vnd.gs-gdl": [],
-  "model/vnd.gs.gdl": [],
-  "model/vnd.gtw": [
-    "gtw"
-  ],
-  "model/vnd.moml+xml": [],
-  "model/vnd.mts": [
-    "mts"
-  ],
-  "model/vnd.parasolid.transmit.binary": [],
-  "model/vnd.parasolid.transmit.text": [],
-  "model/vnd.vtu": [
-    "vtu"
-  ],
-  "model/vrml": [
-    "wrl",
-    "vrml"
-  ],
-  "model/x3d+binary": [
-    "x3db",
-    "x3dbz"
-  ],
-  "model/x3d+vrml": [
-    "x3dv",
-    "x3dvz"
-  ],
-  "model/x3d+xml": [
-    "x3d",
-    "x3dz"
-  ],
-  "multipart/alternative": [],
-  "multipart/appledouble": [],
-  "multipart/byteranges": [],
-  "multipart/digest": [],
-  "multipart/encrypted": [],
-  "multipart/example": [],
-  "multipart/form-data": [],
-  "multipart/header-set": [],
-  "multipart/mixed": [],
-  "multipart/parallel": [],
-  "multipart/related": [],
-  "multipart/report": [],
-  "multipart/signed": [],
-  "multipart/voice-message": [],
-  "text/1d-interleaved-parityfec": [],
-  "text/cache-manifest": [
-    "appcache"
-  ],
-  "text/calendar": [
-    "ics",
-    "ifb"
-  ],
-  "text/css": [
-    "css"
-  ],
-  "text/csv": [
-    "csv"
-  ],
-  "text/directory": [],
-  "text/dns": [],
-  "text/ecmascript": [],
-  "text/enriched": [],
-  "text/example": [],
-  "text/fwdred": [],
-  "text/html": [
-    "html",
-    "htm"
-  ],
-  "text/javascript": [],
-  "text/n3": [
-    "n3"
-  ],
-  "text/parityfec": [],
-  "text/plain": [
-    "txt",
-    "text",
-    "conf",
-    "def",
-    "list",
-    "log",
-    "in"
-  ],
-  "text/prs.fallenstein.rst": [],
-  "text/prs.lines.tag": [
-    "dsc"
-  ],
-  "text/vnd.radisys.msml-basic-layout": [],
-  "text/red": [],
-  "text/rfc822-headers": [],
-  "text/richtext": [
-    "rtx"
-  ],
-  "text/rtf": [],
-  "text/rtp-enc-aescm128": [],
-  "text/rtx": [],
-  "text/sgml": [
-    "sgml",
-    "sgm"
-  ],
-  "text/t140": [],
-  "text/tab-separated-values": [
-    "tsv"
-  ],
-  "text/troff": [
-    "t",
-    "tr",
-    "roff",
-    "man",
-    "me",
-    "ms"
-  ],
-  "text/turtle": [
-    "ttl"
-  ],
-  "text/ulpfec": [],
-  "text/uri-list": [
-    "uri",
-    "uris",
-    "urls"
-  ],
-  "text/vcard": [
-    "vcard"
-  ],
-  "text/vnd.abc": [],
-  "text/vnd.curl": [
-    "curl"
-  ],
-  "text/vnd.curl.dcurl": [
-    "dcurl"
-  ],
-  "text/vnd.curl.scurl": [
-    "scurl"
-  ],
-  "text/vnd.curl.mcurl": [
-    "mcurl"
-  ],
-  "text/vnd.dmclientscript": [],
-  "text/vnd.dvb.subtitle": [
-    "sub"
-  ],
-  "text/vnd.esmertec.theme-descriptor": [],
-  "text/vnd.fly": [
-    "fly"
-  ],
-  "text/vnd.fmi.flexstor": [
-    "flx"
-  ],
-  "text/vnd.graphviz": [
-    "gv"
-  ],
-  "text/vnd.in3d.3dml": [
-    "3dml"
-  ],
-  "text/vnd.in3d.spot": [
-    "spot"
-  ],
-  "text/vnd.iptc.newsml": [],
-  "text/vnd.iptc.nitf": [],
-  "text/vnd.latex-z": [],
-  "text/vnd.motorola.reflex": [],
-  "text/vnd.ms-mediapackage": [],
-  "text/vnd.net2phone.commcenter.command": [],
-  "text/vnd.si.uricatalogue": [],
-  "text/vnd.sun.j2me.app-descriptor": [
-    "jad"
-  ],
-  "text/vnd.trolltech.linguist": [],
-  "text/vnd.wap.si": [],
-  "text/vnd.wap.sl": [],
-  "text/vnd.wap.wml": [
-    "wml"
-  ],
-  "text/vnd.wap.wmlscript": [
-    "wmls"
-  ],
-  "text/x-asm": [
-    "s",
-    "asm"
-  ],
-  "text/x-c": [
-    "c",
-    "cc",
-    "cxx",
-    "cpp",
-    "h",
-    "hh",
-    "dic"
-  ],
-  "text/x-fortran": [
-    "f",
-    "for",
-    "f77",
-    "f90"
-  ],
-  "text/x-java-source": [
-    "java"
-  ],
-  "text/x-opml": [
-    "opml"
-  ],
-  "text/x-pascal": [
-    "p",
-    "pas"
-  ],
-  "text/x-nfo": [
-    "nfo"
-  ],
-  "text/x-setext": [
-    "etx"
-  ],
-  "text/x-sfv": [
-    "sfv"
-  ],
-  "text/x-uuencode": [
-    "uu"
-  ],
-  "text/x-vcalendar": [
-    "vcs"
-  ],
-  "text/x-vcard": [
-    "vcf"
-  ],
-  "text/xml": [],
-  "text/xml-external-parsed-entity": [],
-  "video/1d-interleaved-parityfec": [],
-  "video/3gpp": [
-    "3gp"
-  ],
-  "video/3gpp-tt": [],
-  "video/3gpp2": [
-    "3g2"
-  ],
-  "video/bmpeg": [],
-  "video/bt656": [],
-  "video/celb": [],
-  "video/dv": [],
-  "video/example": [],
-  "video/h261": [
-    "h261"
-  ],
-  "video/h263": [
-    "h263"
-  ],
-  "video/h263-1998": [],
-  "video/h263-2000": [],
-  "video/h264": [
-    "h264"
-  ],
-  "video/h264-rcdo": [],
-  "video/h264-svc": [],
-  "video/jpeg": [
-    "jpgv"
-  ],
-  "video/jpeg2000": [],
-  "video/jpm": [
-    "jpm",
-    "jpgm"
-  ],
-  "video/mj2": [
-    "mj2",
-    "mjp2"
-  ],
-  "video/mp1s": [],
-  "video/mp2p": [],
-  "video/mp2t": [],
-  "video/mp4": [
-    "mp4",
-    "mp4v",
-    "mpg4"
-  ],
-  "video/mp4v-es": [],
-  "video/mpeg": [
-    "mpeg",
-    "mpg",
-    "mpe",
-    "m1v",
-    "m2v"
-  ],
-  "video/mpeg4-generic": [],
-  "video/mpv": [],
-  "video/nv": [],
-  "video/ogg": [
-    "ogv"
-  ],
-  "video/parityfec": [],
-  "video/pointer": [],
-  "video/quicktime": [
-    "qt",
-    "mov"
-  ],
-  "video/raw": [],
-  "video/rtp-enc-aescm128": [],
-  "video/rtx": [],
-  "video/smpte292m": [],
-  "video/ulpfec": [],
-  "video/vc1": [],
-  "video/vnd.cctv": [],
-  "video/vnd.dece.hd": [
-    "uvh",
-    "uvvh"
-  ],
-  "video/vnd.dece.mobile": [
-    "uvm",
-    "uvvm"
-  ],
-  "video/vnd.dece.mp4": [],
-  "video/vnd.dece.pd": [
-    "uvp",
-    "uvvp"
-  ],
-  "video/vnd.dece.sd": [
-    "uvs",
-    "uvvs"
-  ],
-  "video/vnd.dece.video": [
-    "uvv",
-    "uvvv"
-  ],
-  "video/vnd.directv.mpeg": [],
-  "video/vnd.directv.mpeg-tts": [],
-  "video/vnd.dlna.mpeg-tts": [],
-  "video/vnd.dvb.file": [
-    "dvb"
-  ],
-  "video/vnd.fvt": [
-    "fvt"
-  ],
-  "video/vnd.hns.video": [],
-  "video/vnd.iptvforum.1dparityfec-1010": [],
-  "video/vnd.iptvforum.1dparityfec-2005": [],
-  "video/vnd.iptvforum.2dparityfec-1010": [],
-  "video/vnd.iptvforum.2dparityfec-2005": [],
-  "video/vnd.iptvforum.ttsavc": [],
-  "video/vnd.iptvforum.ttsmpeg2": [],
-  "video/vnd.motorola.video": [],
-  "video/vnd.motorola.videop": [],
-  "video/vnd.mpegurl": [
-    "mxu",
-    "m4u"
-  ],
-  "video/vnd.ms-playready.media.pyv": [
-    "pyv"
-  ],
-  "video/vnd.nokia.interleaved-multimedia": [],
-  "video/vnd.nokia.videovoip": [],
-  "video/vnd.objectvideo": [],
-  "video/vnd.sealed.mpeg1": [],
-  "video/vnd.sealed.mpeg4": [],
-  "video/vnd.sealed.swf": [],
-  "video/vnd.sealedmedia.softseal.mov": [],
-  "video/vnd.uvvu.mp4": [
-    "uvu",
-    "uvvu"
-  ],
-  "video/vnd.vivo": [
-    "viv"
-  ],
-  "video/webm": [
-    "webm"
-  ],
-  "video/x-f4v": [
-    "f4v"
-  ],
-  "video/x-fli": [
-    "fli"
-  ],
-  "video/x-flv": [
-    "flv"
-  ],
-  "video/x-m4v": [
-    "m4v"
-  ],
-  "video/x-matroska": [
-    "mkv",
-    "mk3d",
-    "mks"
-  ],
-  "video/x-mng": [
-    "mng"
-  ],
-  "video/x-ms-asf": [
-    "asf",
-    "asx"
-  ],
-  "video/x-ms-vob": [
-    "vob"
-  ],
-  "video/x-ms-wm": [
-    "wm"
-  ],
-  "video/x-ms-wmv": [
-    "wmv"
-  ],
-  "video/x-ms-wmx": [
-    "wmx"
-  ],
-  "video/x-ms-wvx": [
-    "wvx"
-  ],
-  "video/x-msvideo": [
-    "avi"
-  ],
-  "video/x-sgi-movie": [
-    "movie"
-  ],
-  "video/x-smv": [
-    "smv"
-  ],
-  "x-conference/x-cooltalk": [
-    "ice"
-  ]
+  "application/1d-interleaved-parityfec": {
+    "source": "iana"
+  },
+  "application/3gpdash-qoe-report+xml": {
+    "source": "iana"
+  },
+  "application/3gpp-ims+xml": {
+    "source": "iana"
+  },
+  "application/a2l": {
+    "source": "iana"
+  },
+  "application/activemessage": {
+    "source": "iana"
+  },
+  "application/alto-costmap+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/alto-costmapfilter+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/alto-directory+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/alto-endpointcost+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/alto-endpointcostparams+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/alto-endpointprop+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/alto-endpointpropparams+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/alto-error+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/alto-networkmap+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/alto-networkmapfilter+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/aml": {
+    "source": "iana"
+  },
+  "application/andrew-inset": {
+    "source": "iana",
+    "extensions": ["ez"]
+  },
+  "application/applefile": {
+    "source": "iana"
+  },
+  "application/applixware": {
+    "source": "apache",
+    "extensions": ["aw"]
+  },
+  "application/atf": {
+    "source": "iana"
+  },
+  "application/atfx": {
+    "source": "iana"
+  },
+  "application/atom+xml": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["atom"]
+  },
+  "application/atomcat+xml": {
+    "source": "iana",
+    "extensions": ["atomcat"]
+  },
+  "application/atomdeleted+xml": {
+    "source": "iana"
+  },
+  "application/atomicmail": {
+    "source": "iana"
+  },
+  "application/atomsvc+xml": {
+    "source": "iana",
+    "extensions": ["atomsvc"]
+  },
+  "application/atxml": {
+    "source": "iana"
+  },
+  "application/auth-policy+xml": {
+    "source": "iana"
+  },
+  "application/bacnet-xdd+zip": {
+    "source": "iana"
+  },
+  "application/batch-smtp": {
+    "source": "iana"
+  },
+  "application/beep+xml": {
+    "source": "iana"
+  },
+  "application/calendar+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/calendar+xml": {
+    "source": "iana"
+  },
+  "application/call-completion": {
+    "source": "iana"
+  },
+  "application/cals-1840": {
+    "source": "iana"
+  },
+  "application/cbor": {
+    "source": "iana"
+  },
+  "application/ccmp+xml": {
+    "source": "iana"
+  },
+  "application/ccxml+xml": {
+    "source": "iana",
+    "extensions": ["ccxml"]
+  },
+  "application/cdfx+xml": {
+    "source": "iana"
+  },
+  "application/cdmi-capability": {
+    "source": "iana",
+    "extensions": ["cdmia"]
+  },
+  "application/cdmi-container": {
+    "source": "iana",
+    "extensions": ["cdmic"]
+  },
+  "application/cdmi-domain": {
+    "source": "iana",
+    "extensions": ["cdmid"]
+  },
+  "application/cdmi-object": {
+    "source": "iana",
+    "extensions": ["cdmio"]
+  },
+  "application/cdmi-queue": {
+    "source": "iana",
+    "extensions": ["cdmiq"]
+  },
+  "application/cea": {
+    "source": "iana"
+  },
+  "application/cea-2018+xml": {
+    "source": "iana"
+  },
+  "application/cellml+xml": {
+    "source": "iana"
+  },
+  "application/cfw": {
+    "source": "iana"
+  },
+  "application/cms": {
+    "source": "iana"
+  },
+  "application/cnrp+xml": {
+    "source": "iana"
+  },
+  "application/coap-group+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/commonground": {
+    "source": "iana"
+  },
+  "application/conference-info+xml": {
+    "source": "iana"
+  },
+  "application/cpl+xml": {
+    "source": "iana"
+  },
+  "application/csrattrs": {
+    "source": "iana"
+  },
+  "application/csta+xml": {
+    "source": "iana"
+  },
+  "application/cstadata+xml": {
+    "source": "iana"
+  },
+  "application/cu-seeme": {
+    "source": "apache",
+    "extensions": ["cu"]
+  },
+  "application/cybercash": {
+    "source": "iana"
+  },
+  "application/dart": {
+    "compressible": true
+  },
+  "application/dash+xml": {
+    "source": "iana",
+    "extensions": ["mdp"]
+  },
+  "application/dashdelta": {
+    "source": "iana"
+  },
+  "application/davmount+xml": {
+    "source": "iana",
+    "extensions": ["davmount"]
+  },
+  "application/dca-rft": {
+    "source": "iana"
+  },
+  "application/dcd": {
+    "source": "iana"
+  },
+  "application/dec-dx": {
+    "source": "iana"
+  },
+  "application/dialog-info+xml": {
+    "source": "iana"
+  },
+  "application/dicom": {
+    "source": "iana"
+  },
+  "application/dii": {
+    "source": "iana"
+  },
+  "application/dit": {
+    "source": "iana"
+  },
+  "application/dns": {
+    "source": "iana"
+  },
+  "application/docbook+xml": {
+    "source": "apache",
+    "extensions": ["dbk"]
+  },
+  "application/dskpp+xml": {
+    "source": "iana"
+  },
+  "application/dssc+der": {
+    "source": "iana",
+    "extensions": ["dssc"]
+  },
+  "application/dssc+xml": {
+    "source": "iana",
+    "extensions": ["xdssc"]
+  },
+  "application/dvcs": {
+    "source": "iana"
+  },
+  "application/ecmascript": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["ecma"]
+  },
+  "application/edi-consent": {
+    "source": "iana"
+  },
+  "application/edi-x12": {
+    "source": "iana",
+    "compressible": false
+  },
+  "application/edifact": {
+    "source": "iana",
+    "compressible": false
+  },
+  "application/emma+xml": {
+    "source": "iana",
+    "extensions": ["emma"]
+  },
+  "application/emotionml+xml": {
+    "source": "iana"
+  },
+  "application/encaprtp": {
+    "source": "iana"
+  },
+  "application/epp+xml": {
+    "source": "iana"
+  },
+  "application/epub+zip": {
+    "source": "iana",
+    "extensions": ["epub"]
+  },
+  "application/eshop": {
+    "source": "iana"
+  },
+  "application/exi": {
+    "source": "iana",
+    "extensions": ["exi"]
+  },
+  "application/fastinfoset": {
+    "source": "iana"
+  },
+  "application/fastsoap": {
+    "source": "iana"
+  },
+  "application/fdt+xml": {
+    "source": "iana"
+  },
+  "application/fits": {
+    "source": "iana"
+  },
+  "application/font-sfnt": {
+    "source": "iana"
+  },
+  "application/font-tdpfr": {
+    "source": "iana",
+    "extensions": ["pfr"]
+  },
+  "application/font-woff": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["woff"]
+  },
+  "application/font-woff2": {
+    "compressible": false,
+    "extensions": ["woff2"]
+  },
+  "application/framework-attributes+xml": {
+    "source": "iana"
+  },
+  "application/gml+xml": {
+    "source": "apache",
+    "extensions": ["gml"]
+  },
+  "application/gpx+xml": {
+    "source": "apache",
+    "extensions": ["gpx"]
+  },
+  "application/gxf": {
+    "source": "apache",
+    "extensions": ["gxf"]
+  },
+  "application/gzip": {
+    "source": "iana",
+    "compressible": false
+  },
+  "application/h224": {
+    "source": "iana"
+  },
+  "application/held+xml": {
+    "source": "iana"
+  },
+  "application/http": {
+    "source": "iana"
+  },
+  "application/hyperstudio": {
+    "source": "iana",
+    "extensions": ["stk"]
+  },
+  "application/ibe-key-request+xml": {
+    "source": "iana"
+  },
+  "application/ibe-pkg-reply+xml": {
+    "source": "iana"
+  },
+  "application/ibe-pp-data": {
+    "source": "iana"
+  },
+  "application/iges": {
+    "source": "iana"
+  },
+  "application/im-iscomposing+xml": {
+    "source": "iana"
+  },
+  "application/index": {
+    "source": "iana"
+  },
+  "application/index.cmd": {
+    "source": "iana"
+  },
+  "application/index.obj": {
+    "source": "iana"
+  },
+  "application/index.response": {
+    "source": "iana"
+  },
+  "application/index.vnd": {
+    "source": "iana"
+  },
+  "application/inkml+xml": {
+    "source": "iana",
+    "extensions": ["ink","inkml"]
+  },
+  "application/iotp": {
+    "source": "iana"
+  },
+  "application/ipfix": {
+    "source": "iana",
+    "extensions": ["ipfix"]
+  },
+  "application/ipp": {
+    "source": "iana"
+  },
+  "application/isup": {
+    "source": "iana"
+  },
+  "application/its+xml": {
+    "source": "iana"
+  },
+  "application/java-archive": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["jar"]
+  },
+  "application/java-serialized-object": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["ser"]
+  },
+  "application/java-vm": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["class"]
+  },
+  "application/javascript": {
+    "source": "iana",
+    "charset": "UTF-8",
+    "compressible": true,
+    "extensions": ["js"]
+  },
+  "application/jose": {
+    "source": "iana"
+  },
+  "application/jose+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/jrd+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/json": {
+    "source": "iana",
+    "charset": "UTF-8",
+    "compressible": true,
+    "extensions": ["json","map"]
+  },
+  "application/json-patch+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/json-seq": {
+    "source": "iana"
+  },
+  "application/json5": {
+    "extensions": ["json5"]
+  },
+  "application/jsonml+json": {
+    "source": "apache",
+    "compressible": true,
+    "extensions": ["jsonml"]
+  },
+  "application/jwk+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/jwk-set+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/jwt": {
+    "source": "iana"
+  },
+  "application/kpml-request+xml": {
+    "source": "iana"
+  },
+  "application/kpml-response+xml": {
+    "source": "iana"
+  },
+  "application/ld+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/link-format": {
+    "source": "iana"
+  },
+  "application/load-control+xml": {
+    "source": "iana"
+  },
+  "application/lost+xml": {
+    "source": "iana",
+    "extensions": ["lostxml"]
+  },
+  "application/lostsync+xml": {
+    "source": "iana"
+  },
+  "application/lxf": {
+    "source": "iana"
+  },
+  "application/mac-binhex40": {
+    "source": "iana",
+    "extensions": ["hqx"]
+  },
+  "application/mac-compactpro": {
+    "source": "apache",
+    "extensions": ["cpt"]
+  },
+  "application/macwriteii": {
+    "source": "iana"
+  },
+  "application/mads+xml": {
+    "source": "iana",
+    "extensions": ["mads"]
+  },
+  "application/marc": {
+    "source": "iana",
+    "extensions": ["mrc"]
+  },
+  "application/marcxml+xml": {
+    "source": "iana",
+    "extensions": ["mrcx"]
+  },
+  "application/mathematica": {
+    "source": "iana",
+    "extensions": ["ma","nb","mb"]
+  },
+  "application/mathml+xml": {
+    "source": "iana",
+    "extensions": ["mathml"]
+  },
+  "application/mathml-content+xml": {
+    "source": "iana"
+  },
+  "application/mathml-presentation+xml": {
+    "source": "iana"
+  },
+  "application/mbms-associated-procedure-description+xml": {
+    "source": "iana"
+  },
+  "application/mbms-deregister+xml": {
+    "source": "iana"
+  },
+  "application/mbms-envelope+xml": {
+    "source": "iana"
+  },
+  "application/mbms-msk+xml": {
+    "source": "iana"
+  },
+  "application/mbms-msk-response+xml": {
+    "source": "iana"
+  },
+  "application/mbms-protection-description+xml": {
+    "source": "iana"
+  },
+  "application/mbms-reception-report+xml": {
+    "source": "iana"
+  },
+  "application/mbms-register+xml": {
+    "source": "iana"
+  },
+  "application/mbms-register-response+xml": {
+    "source": "iana"
+  },
+  "application/mbms-schedule+xml": {
+    "source": "iana"
+  },
+  "application/mbms-user-service-description+xml": {
+    "source": "iana"
+  },
+  "application/mbox": {
+    "source": "iana",
+    "extensions": ["mbox"]
+  },
+  "application/media-policy-dataset+xml": {
+    "source": "iana"
+  },
+  "application/media_control+xml": {
+    "source": "iana"
+  },
+  "application/mediaservercontrol+xml": {
+    "source": "iana",
+    "extensions": ["mscml"]
+  },
+  "application/merge-patch+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/metalink+xml": {
+    "source": "apache",
+    "extensions": ["metalink"]
+  },
+  "application/metalink4+xml": {
+    "source": "iana",
+    "extensions": ["meta4"]
+  },
+  "application/mets+xml": {
+    "source": "iana",
+    "extensions": ["mets"]
+  },
+  "application/mf4": {
+    "source": "iana"
+  },
+  "application/mikey": {
+    "source": "iana"
+  },
+  "application/mods+xml": {
+    "source": "iana",
+    "extensions": ["mods"]
+  },
+  "application/moss-keys": {
+    "source": "iana"
+  },
+  "application/moss-signature": {
+    "source": "iana"
+  },
+  "application/mosskey-data": {
+    "source": "iana"
+  },
+  "application/mosskey-request": {
+    "source": "iana"
+  },
+  "application/mp21": {
+    "source": "iana",
+    "extensions": ["m21","mp21"]
+  },
+  "application/mp4": {
+    "source": "iana",
+    "extensions": ["mp4s","m4p"]
+  },
+  "application/mpeg4-generic": {
+    "source": "iana"
+  },
+  "application/mpeg4-iod": {
+    "source": "iana"
+  },
+  "application/mpeg4-iod-xmt": {
+    "source": "iana"
+  },
+  "application/mrb-consumer+xml": {
+    "source": "iana"
+  },
+  "application/mrb-publish+xml": {
+    "source": "iana"
+  },
+  "application/msc-ivr+xml": {
+    "source": "iana"
+  },
+  "application/msc-mixer+xml": {
+    "source": "iana"
+  },
+  "application/msword": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["doc","dot"]
+  },
+  "application/mxf": {
+    "source": "iana",
+    "extensions": ["mxf"]
+  },
+  "application/nasdata": {
+    "source": "iana"
+  },
+  "application/news-checkgroups": {
+    "source": "iana"
+  },
+  "application/news-groupinfo": {
+    "source": "iana"
+  },
+  "application/news-transmission": {
+    "source": "iana"
+  },
+  "application/nlsml+xml": {
+    "source": "iana"
+  },
+  "application/nss": {
+    "source": "iana"
+  },
+  "application/ocsp-request": {
+    "source": "iana"
+  },
+  "application/ocsp-response": {
+    "source": "iana"
+  },
+  "application/octet-stream": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["bin","dms","lrf","mar","so","dist","distz","pkg","bpk","dump","elc","deploy","buffer"]
+  },
+  "application/oda": {
+    "source": "iana",
+    "extensions": ["oda"]
+  },
+  "application/odx": {
+    "source": "iana"
+  },
+  "application/oebps-package+xml": {
+    "source": "iana",
+    "extensions": ["opf"]
+  },
+  "application/ogg": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["ogx"]
+  },
+  "application/omdoc+xml": {
+    "source": "apache",
+    "extensions": ["omdoc"]
+  },
+  "application/onenote": {
+    "source": "apache",
+    "extensions": ["onetoc","onetoc2","onetmp","onepkg"]
+  },
+  "application/oxps": {
+    "source": "iana",
+    "extensions": ["oxps"]
+  },
+  "application/p2p-overlay+xml": {
+    "source": "iana"
+  },
+  "application/parityfec": {
+    "source": "iana"
+  },
+  "application/patch-ops-error+xml": {
+    "source": "iana",
+    "extensions": ["xer"]
+  },
+  "application/pdf": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["pdf"]
+  },
+  "application/pdx": {
+    "source": "iana"
+  },
+  "application/pgp-encrypted": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["pgp"]
+  },
+  "application/pgp-keys": {
+    "source": "iana"
+  },
+  "application/pgp-signature": {
+    "source": "iana",
+    "extensions": ["asc","sig"]
+  },
+  "application/pics-rules": {
+    "source": "apache",
+    "extensions": ["prf"]
+  },
+  "application/pidf+xml": {
+    "source": "iana"
+  },
+  "application/pidf-diff+xml": {
+    "source": "iana"
+  },
+  "application/pkcs10": {
+    "source": "iana",
+    "extensions": ["p10"]
+  },
+  "application/pkcs7-mime": {
+    "source": "iana",
+    "extensions": ["p7m","p7c"]
+  },
+  "application/pkcs7-signature": {
+    "source": "iana",
+    "extensions": ["p7s"]
+  },
+  "application/pkcs8": {
+    "source": "iana",
+    "extensions": ["p8"]
+  },
+  "application/pkix-attr-cert": {
+    "source": "iana",
+    "extensions": ["ac"]
+  },
+  "application/pkix-cert": {
+    "source": "iana",
+    "extensions": ["cer"]
+  },
+  "application/pkix-crl": {
+    "source": "iana",
+    "extensions": ["crl"]
+  },
+  "application/pkix-pkipath": {
+    "source": "iana",
+    "extensions": ["pkipath"]
+  },
+  "application/pkixcmp": {
+    "source": "iana",
+    "extensions": ["pki"]
+  },
+  "application/pls+xml": {
+    "source": "iana",
+    "extensions": ["pls"]
+  },
+  "application/poc-settings+xml": {
+    "source": "iana"
+  },
+  "application/postscript": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["ai","eps","ps"]
+  },
+  "application/provenance+xml": {
+    "source": "iana"
+  },
+  "application/prs.alvestrand.titrax-sheet": {
+    "source": "iana"
+  },
+  "application/prs.cww": {
+    "source": "iana",
+    "extensions": ["cww"]
+  },
+  "application/prs.hpub+zip": {
+    "source": "iana"
+  },
+  "application/prs.nprend": {
+    "source": "iana"
+  },
+  "application/prs.plucker": {
+    "source": "iana"
+  },
+  "application/prs.rdf-xml-crypt": {
+    "source": "iana"
+  },
+  "application/prs.xsf+xml": {
+    "source": "iana"
+  },
+  "application/pskc+xml": {
+    "source": "iana",
+    "extensions": ["pskcxml"]
+  },
+  "application/qsig": {
+    "source": "iana"
+  },
+  "application/raptorfec": {
+    "source": "iana"
+  },
+  "application/rdap+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/rdf+xml": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["rdf"]
+  },
+  "application/reginfo+xml": {
+    "source": "iana",
+    "extensions": ["rif"]
+  },
+  "application/relax-ng-compact-syntax": {
+    "source": "iana",
+    "extensions": ["rnc"]
+  },
+  "application/remote-printing": {
+    "source": "iana"
+  },
+  "application/reputon+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/resource-lists+xml": {
+    "source": "iana",
+    "extensions": ["rl"]
+  },
+  "application/resource-lists-diff+xml": {
+    "source": "iana",
+    "extensions": ["rld"]
+  },
+  "application/riscos": {
+    "source": "iana"
+  },
+  "application/rlmi+xml": {
+    "source": "iana"
+  },
+  "application/rls-services+xml": {
+    "source": "iana",
+    "extensions": ["rs"]
+  },
+  "application/rpki-ghostbusters": {
+    "source": "iana",
+    "extensions": ["gbr"]
+  },
+  "application/rpki-manifest": {
+    "source": "iana",
+    "extensions": ["mft"]
+  },
+  "application/rpki-roa": {
+    "source": "iana",
+    "extensions": ["roa"]
+  },
+  "application/rpki-updown": {
+    "source": "iana"
+  },
+  "application/rsd+xml": {
+    "source": "apache",
+    "extensions": ["rsd"]
+  },
+  "application/rss+xml": {
+    "source": "apache",
+    "compressible": true,
+    "extensions": ["rss"]
+  },
+  "application/rtf": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["rtf"]
+  },
+  "application/rtploopback": {
+    "source": "iana"
+  },
+  "application/rtx": {
+    "source": "iana"
+  },
+  "application/samlassertion+xml": {
+    "source": "iana"
+  },
+  "application/samlmetadata+xml": {
+    "source": "iana"
+  },
+  "application/sbml+xml": {
+    "source": "iana",
+    "extensions": ["sbml"]
+  },
+  "application/scaip+xml": {
+    "source": "iana"
+  },
+  "application/scvp-cv-request": {
+    "source": "iana",
+    "extensions": ["scq"]
+  },
+  "application/scvp-cv-response": {
+    "source": "iana",
+    "extensions": ["scs"]
+  },
+  "application/scvp-vp-request": {
+    "source": "iana",
+    "extensions": ["spq"]
+  },
+  "application/scvp-vp-response": {
+    "source": "iana",
+    "extensions": ["spp"]
+  },
+  "application/sdp": {
+    "source": "iana",
+    "extensions": ["sdp"]
+  },
+  "application/sep+xml": {
+    "source": "iana"
+  },
+  "application/sep-exi": {
+    "source": "iana"
+  },
+  "application/session-info": {
+    "source": "iana"
+  },
+  "application/set-payment": {
+    "source": "iana"
+  },
+  "application/set-payment-initiation": {
+    "source": "iana",
+    "extensions": ["setpay"]
+  },
+  "application/set-registration": {
+    "source": "iana"
+  },
+  "application/set-registration-initiation": {
+    "source": "iana",
+    "extensions": ["setreg"]
+  },
+  "application/sgml": {
+    "source": "iana"
+  },
+  "application/sgml-open-catalog": {
+    "source": "iana"
+  },
+  "application/shf+xml": {
+    "source": "iana",
+    "extensions": ["shf"]
+  },
+  "application/sieve": {
+    "source": "iana"
+  },
+  "application/simple-filter+xml": {
+    "source": "iana"
+  },
+  "application/simple-message-summary": {
+    "source": "iana"
+  },
+  "application/simplesymbolcontainer": {
+    "source": "iana"
+  },
+  "application/slate": {
+    "source": "iana"
+  },
+  "application/smil": {
+    "source": "iana"
+  },
+  "application/smil+xml": {
+    "source": "iana",
+    "extensions": ["smi","smil"]
+  },
+  "application/smpte336m": {
+    "source": "iana"
+  },
+  "application/soap+fastinfoset": {
+    "source": "iana"
+  },
+  "application/soap+xml": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/sparql-query": {
+    "source": "iana",
+    "extensions": ["rq"]
+  },
+  "application/sparql-results+xml": {
+    "source": "iana",
+    "extensions": ["srx"]
+  },
+  "application/spirits-event+xml": {
+    "source": "iana"
+  },
+  "application/sql": {
+    "source": "iana"
+  },
+  "application/srgs": {
+    "source": "iana",
+    "extensions": ["gram"]
+  },
+  "application/srgs+xml": {
+    "source": "iana",
+    "extensions": ["grxml"]
+  },
+  "application/sru+xml": {
+    "source": "iana",
+    "extensions": ["sru"]
+  },
+  "application/ssdl+xml": {
+    "source": "apache",
+    "extensions": ["ssdl"]
+  },
+  "application/ssml+xml": {
+    "source": "iana",
+    "extensions": ["ssml"]
+  },
+  "application/tamp-apex-update": {
+    "source": "iana"
+  },
+  "application/tamp-apex-update-confirm": {
+    "source": "iana"
+  },
+  "application/tamp-community-update": {
+    "source": "iana"
+  },
+  "application/tamp-community-update-confirm": {
+    "source": "iana"
+  },
+  "application/tamp-error": {
+    "source": "iana"
+  },
+  "application/tamp-sequence-adjust": {
+    "source": "iana"
+  },
+  "application/tamp-sequence-adjust-confirm": {
+    "source": "iana"
+  },
+  "application/tamp-status-query": {
+    "source": "iana"
+  },
+  "application/tamp-status-response": {
+    "source": "iana"
+  },
+  "application/tamp-update": {
+    "source": "iana"
+  },
+  "application/tamp-update-confirm": {
+    "source": "iana"
+  },
+  "application/tar": {
+    "compressible": true
+  },
+  "application/tei+xml": {
+    "source": "iana",
+    "extensions": ["tei","teicorpus"]
+  },
+  "application/thraud+xml": {
+    "source": "iana",
+    "extensions": ["tfi"]
+  },
+  "application/timestamp-query": {
+    "source": "iana"
+  },
+  "application/timestamp-reply": {
+    "source": "iana"
+  },
+  "application/timestamped-data": {
+    "source": "iana",
+    "extensions": ["tsd"]
+  },
+  "application/ttml+xml": {
+    "source": "iana"
+  },
+  "application/tve-trigger": {
+    "source": "iana"
+  },
+  "application/ulpfec": {
+    "source": "iana"
+  },
+  "application/urc-grpsheet+xml": {
+    "source": "iana"
+  },
+  "application/urc-ressheet+xml": {
+    "source": "iana"
+  },
+  "application/urc-targetdesc+xml": {
+    "source": "iana"
+  },
+  "application/urc-uisocketdesc+xml": {
+    "source": "iana"
+  },
+  "application/vcard+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vcard+xml": {
+    "source": "iana"
+  },
+  "application/vemmi": {
+    "source": "iana"
+  },
+  "application/vividence.scriptfile": {
+    "source": "apache"
+  },
+  "application/vnd.3gpp.bsf+xml": {
+    "source": "iana"
+  },
+  "application/vnd.3gpp.pic-bw-large": {
+    "source": "iana",
+    "extensions": ["plb"]
+  },
+  "application/vnd.3gpp.pic-bw-small": {
+    "source": "iana",
+    "extensions": ["psb"]
+  },
+  "application/vnd.3gpp.pic-bw-var": {
+    "source": "iana",
+    "extensions": ["pvb"]
+  },
+  "application/vnd.3gpp.sms": {
+    "source": "iana"
+  },
+  "application/vnd.3gpp2.bcmcsinfo+xml": {
+    "source": "iana"
+  },
+  "application/vnd.3gpp2.sms": {
+    "source": "iana"
+  },
+  "application/vnd.3gpp2.tcap": {
+    "source": "iana",
+    "extensions": ["tcap"]
+  },
+  "application/vnd.3m.post-it-notes": {
+    "source": "iana",
+    "extensions": ["pwn"]
+  },
+  "application/vnd.accpac.simply.aso": {
+    "source": "iana",
+    "extensions": ["aso"]
+  },
+  "application/vnd.accpac.simply.imp": {
+    "source": "iana",
+    "extensions": ["imp"]
+  },
+  "application/vnd.acucobol": {
+    "source": "iana",
+    "extensions": ["acu"]
+  },
+  "application/vnd.acucorp": {
+    "source": "iana",
+    "extensions": ["atc","acutc"]
+  },
+  "application/vnd.adobe.air-application-installer-package+zip": {
+    "source": "apache",
+    "extensions": ["air"]
+  },
+  "application/vnd.adobe.flash.movie": {
+    "source": "iana"
+  },
+  "application/vnd.adobe.formscentral.fcdt": {
+    "source": "iana",
+    "extensions": ["fcdt"]
+  },
+  "application/vnd.adobe.fxp": {
+    "source": "iana",
+    "extensions": ["fxp","fxpl"]
+  },
+  "application/vnd.adobe.partial-upload": {
+    "source": "iana"
+  },
+  "application/vnd.adobe.xdp+xml": {
+    "source": "iana",
+    "extensions": ["xdp"]
+  },
+  "application/vnd.adobe.xfdf": {
+    "source": "iana",
+    "extensions": ["xfdf"]
+  },
+  "application/vnd.aether.imp": {
+    "source": "iana"
+  },
+  "application/vnd.ah-barcode": {
+    "source": "iana"
+  },
+  "application/vnd.ahead.space": {
+    "source": "iana",
+    "extensions": ["ahead"]
+  },
+  "application/vnd.airzip.filesecure.azf": {
+    "source": "iana",
+    "extensions": ["azf"]
+  },
+  "application/vnd.airzip.filesecure.azs": {
+    "source": "iana",
+    "extensions": ["azs"]
+  },
+  "application/vnd.amazon.ebook": {
+    "source": "apache",
+    "extensions": ["azw"]
+  },
+  "application/vnd.americandynamics.acc": {
+    "source": "iana",
+    "extensions": ["acc"]
+  },
+  "application/vnd.amiga.ami": {
+    "source": "iana",
+    "extensions": ["ami"]
+  },
+  "application/vnd.amundsen.maze+xml": {
+    "source": "iana"
+  },
+  "application/vnd.android.package-archive": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["apk"]
+  },
+  "application/vnd.anser-web-certificate-issue-initiation": {
+    "source": "iana",
+    "extensions": ["cii"]
+  },
+  "application/vnd.anser-web-funds-transfer-initiation": {
+    "source": "apache",
+    "extensions": ["fti"]
+  },
+  "application/vnd.antix.game-component": {
+    "source": "iana",
+    "extensions": ["atx"]
+  },
+  "application/vnd.apache.thrift.binary": {
+    "source": "iana"
+  },
+  "application/vnd.apache.thrift.compact": {
+    "source": "iana"
+  },
+  "application/vnd.apache.thrift.json": {
+    "source": "iana"
+  },
+  "application/vnd.api+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.apple.installer+xml": {
+    "source": "iana",
+    "extensions": ["mpkg"]
+  },
+  "application/vnd.apple.mpegurl": {
+    "source": "iana",
+    "extensions": ["m3u8"]
+  },
+  "application/vnd.arastra.swi": {
+    "source": "iana"
+  },
+  "application/vnd.aristanetworks.swi": {
+    "source": "iana",
+    "extensions": ["swi"]
+  },
+  "application/vnd.artsquare": {
+    "source": "iana"
+  },
+  "application/vnd.astraea-software.iota": {
+    "source": "iana",
+    "extensions": ["iota"]
+  },
+  "application/vnd.audiograph": {
+    "source": "iana",
+    "extensions": ["aep"]
+  },
+  "application/vnd.autopackage": {
+    "source": "iana"
+  },
+  "application/vnd.avistar+xml": {
+    "source": "iana"
+  },
+  "application/vnd.balsamiq.bmml+xml": {
+    "source": "iana"
+  },
+  "application/vnd.bekitzur-stech+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.blueice.multipass": {
+    "source": "iana",
+    "extensions": ["mpm"]
+  },
+  "application/vnd.bluetooth.ep.oob": {
+    "source": "iana"
+  },
+  "application/vnd.bluetooth.le.oob": {
+    "source": "iana"
+  },
+  "application/vnd.bmi": {
+    "source": "iana",
+    "extensions": ["bmi"]
+  },
+  "application/vnd.businessobjects": {
+    "source": "iana",
+    "extensions": ["rep"]
+  },
+  "application/vnd.cab-jscript": {
+    "source": "iana"
+  },
+  "application/vnd.canon-cpdl": {
+    "source": "iana"
+  },
+  "application/vnd.canon-lips": {
+    "source": "iana"
+  },
+  "application/vnd.cendio.thinlinc.clientconf": {
+    "source": "iana"
+  },
+  "application/vnd.century-systems.tcp_stream": {
+    "source": "iana"
+  },
+  "application/vnd.chemdraw+xml": {
+    "source": "iana",
+    "extensions": ["cdxml"]
+  },
+  "application/vnd.chipnuts.karaoke-mmd": {
+    "source": "iana",
+    "extensions": ["mmd"]
+  },
+  "application/vnd.cinderella": {
+    "source": "iana",
+    "extensions": ["cdy"]
+  },
+  "application/vnd.cirpack.isdn-ext": {
+    "source": "iana"
+  },
+  "application/vnd.claymore": {
+    "source": "iana",
+    "extensions": ["cla"]
+  },
+  "application/vnd.cloanto.rp9": {
+    "source": "iana",
+    "extensions": ["rp9"]
+  },
+  "application/vnd.clonk.c4group": {
+    "source": "iana",
+    "extensions": ["c4g","c4d","c4f","c4p","c4u"]
+  },
+  "application/vnd.cluetrust.cartomobile-config": {
+    "source": "iana",
+    "extensions": ["c11amc"]
+  },
+  "application/vnd.cluetrust.cartomobile-config-pkg": {
+    "source": "iana",
+    "extensions": ["c11amz"]
+  },
+  "application/vnd.coffeescript": {
+    "source": "iana"
+  },
+  "application/vnd.collection+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.collection.doc+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.collection.next+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.commerce-battelle": {
+    "source": "iana"
+  },
+  "application/vnd.commonspace": {
+    "source": "iana",
+    "extensions": ["csp"]
+  },
+  "application/vnd.contact.cmsg": {
+    "source": "iana",
+    "extensions": ["cdbcmsg"]
+  },
+  "application/vnd.cosmocaller": {
+    "source": "iana",
+    "extensions": ["cmc"]
+  },
+  "application/vnd.crick.clicker": {
+    "source": "iana",
+    "extensions": ["clkx"]
+  },
+  "application/vnd.crick.clicker.keyboard": {
+    "source": "iana",
+    "extensions": ["clkk"]
+  },
+  "application/vnd.crick.clicker.palette": {
+    "source": "iana",
+    "extensions": ["clkp"]
+  },
+  "application/vnd.crick.clicker.template": {
+    "source": "iana",
+    "extensions": ["clkt"]
+  },
+  "application/vnd.crick.clicker.wordbank": {
+    "source": "iana",
+    "extensions": ["clkw"]
+  },
+  "application/vnd.criticaltools.wbs+xml": {
+    "source": "iana",
+    "extensions": ["wbs"]
+  },
+  "application/vnd.ctc-posml": {
+    "source": "iana",
+    "extensions": ["pml"]
+  },
+  "application/vnd.ctct.ws+xml": {
+    "source": "iana"
+  },
+  "application/vnd.cups-pdf": {
+    "source": "iana"
+  },
+  "application/vnd.cups-postscript": {
+    "source": "iana"
+  },
+  "application/vnd.cups-ppd": {
+    "source": "iana",
+    "extensions": ["ppd"]
+  },
+  "application/vnd.cups-raster": {
+    "source": "iana"
+  },
+  "application/vnd.cups-raw": {
+    "source": "iana"
+  },
+  "application/vnd.curl": {
+    "source": "iana"
+  },
+  "application/vnd.curl.car": {
+    "source": "apache",
+    "extensions": ["car"]
+  },
+  "application/vnd.curl.pcurl": {
+    "source": "apache",
+    "extensions": ["pcurl"]
+  },
+  "application/vnd.cyan.dean.root+xml": {
+    "source": "iana"
+  },
+  "application/vnd.cybank": {
+    "source": "iana"
+  },
+  "application/vnd.dart": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["dart"]
+  },
+  "application/vnd.data-vision.rdz": {
+    "source": "iana",
+    "extensions": ["rdz"]
+  },
+  "application/vnd.debian.binary-package": {
+    "source": "iana"
+  },
+  "application/vnd.dece.data": {
+    "source": "iana",
+    "extensions": ["uvf","uvvf","uvd","uvvd"]
+  },
+  "application/vnd.dece.ttml+xml": {
+    "source": "iana",
+    "extensions": ["uvt","uvvt"]
+  },
+  "application/vnd.dece.unspecified": {
+    "source": "iana",
+    "extensions": ["uvx","uvvx"]
+  },
+  "application/vnd.dece.zip": {
+    "source": "iana",
+    "extensions": ["uvz","uvvz"]
+  },
+  "application/vnd.denovo.fcselayout-link": {
+    "source": "iana",
+    "extensions": ["fe_launch"]
+  },
+  "application/vnd.desmume-movie": {
+    "source": "iana"
+  },
+  "application/vnd.dir-bi.plate-dl-nosuffix": {
+    "source": "iana"
+  },
+  "application/vnd.dm.delegation+xml": {
+    "source": "iana"
+  },
+  "application/vnd.dna": {
+    "source": "iana",
+    "extensions": ["dna"]
+  },
+  "application/vnd.document+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.dolby.mlp": {
+    "source": "apache",
+    "extensions": ["mlp"]
+  },
+  "application/vnd.dolby.mobile.1": {
+    "source": "iana"
+  },
+  "application/vnd.dolby.mobile.2": {
+    "source": "iana"
+  },
+  "application/vnd.doremir.scorecloud-binary-document": {
+    "source": "iana"
+  },
+  "application/vnd.dpgraph": {
+    "source": "iana",
+    "extensions": ["dpg"]
+  },
+  "application/vnd.dreamfactory": {
+    "source": "iana",
+    "extensions": ["dfac"]
+  },
+  "application/vnd.ds-keypoint": {
+    "source": "apache",
+    "extensions": ["kpxx"]
+  },
+  "application/vnd.dtg.local": {
+    "source": "iana"
+  },
+  "application/vnd.dtg.local.flash": {
+    "source": "iana"
+  },
+  "application/vnd.dtg.local.html": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.ait": {
+    "source": "iana",
+    "extensions": ["ait"]
+  },
+  "application/vnd.dvb.dvbj": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.esgcontainer": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.ipdcdftnotifaccess": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.ipdcesgaccess": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.ipdcesgaccess2": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.ipdcesgpdd": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.ipdcroaming": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.iptv.alfec-base": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.iptv.alfec-enhancement": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.notif-aggregate-root+xml": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.notif-container+xml": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.notif-generic+xml": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.notif-ia-msglist+xml": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.notif-ia-registration-request+xml": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.notif-ia-registration-response+xml": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.notif-init+xml": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.pfr": {
+    "source": "iana"
+  },
+  "application/vnd.dvb.service": {
+    "source": "iana",
+    "extensions": ["svc"]
+  },
+  "application/vnd.dxr": {
+    "source": "iana"
+  },
+  "application/vnd.dynageo": {
+    "source": "iana",
+    "extensions": ["geo"]
+  },
+  "application/vnd.dzr": {
+    "source": "iana"
+  },
+  "application/vnd.easykaraoke.cdgdownload": {
+    "source": "iana"
+  },
+  "application/vnd.ecdis-update": {
+    "source": "iana"
+  },
+  "application/vnd.ecowin.chart": {
+    "source": "iana",
+    "extensions": ["mag"]
+  },
+  "application/vnd.ecowin.filerequest": {
+    "source": "iana"
+  },
+  "application/vnd.ecowin.fileupdate": {
+    "source": "iana"
+  },
+  "application/vnd.ecowin.series": {
+    "source": "iana"
+  },
+  "application/vnd.ecowin.seriesrequest": {
+    "source": "iana"
+  },
+  "application/vnd.ecowin.seriesupdate": {
+    "source": "iana"
+  },
+  "application/vnd.emclient.accessrequest+xml": {
+    "source": "iana"
+  },
+  "application/vnd.enliven": {
+    "source": "iana",
+    "extensions": ["nml"]
+  },
+  "application/vnd.enphase.envoy": {
+    "source": "iana"
+  },
+  "application/vnd.eprints.data+xml": {
+    "source": "iana"
+  },
+  "application/vnd.epson.esf": {
+    "source": "iana",
+    "extensions": ["esf"]
+  },
+  "application/vnd.epson.msf": {
+    "source": "iana",
+    "extensions": ["msf"]
+  },
+  "application/vnd.epson.quickanime": {
+    "source": "iana",
+    "extensions": ["qam"]
+  },
+  "application/vnd.epson.salt": {
+    "source": "iana",
+    "extensions": ["slt"]
+  },
+  "application/vnd.epson.ssf": {
+    "source": "iana",
+    "extensions": ["ssf"]
+  },
+  "application/vnd.ericsson.quickcall": {
+    "source": "iana"
+  },
+  "application/vnd.eszigno3+xml": {
+    "source": "iana",
+    "extensions": ["es3","et3"]
+  },
+  "application/vnd.etsi.aoc+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.asic-e+zip": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.asic-s+zip": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.cug+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.iptvcommand+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.iptvdiscovery+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.iptvprofile+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.iptvsad-bc+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.iptvsad-cod+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.iptvsad-npvr+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.iptvservice+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.iptvsync+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.iptvueprofile+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.mcid+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.mheg5": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.overload-control-policy-dataset+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.pstn+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.sci+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.simservs+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.timestamp-token": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.tsl+xml": {
+    "source": "iana"
+  },
+  "application/vnd.etsi.tsl.der": {
+    "source": "iana"
+  },
+  "application/vnd.eudora.data": {
+    "source": "iana"
+  },
+  "application/vnd.ezpix-album": {
+    "source": "iana",
+    "extensions": ["ez2"]
+  },
+  "application/vnd.ezpix-package": {
+    "source": "iana",
+    "extensions": ["ez3"]
+  },
+  "application/vnd.f-secure.mobile": {
+    "source": "iana"
+  },
+  "application/vnd.fdf": {
+    "source": "iana",
+    "extensions": ["fdf"]
+  },
+  "application/vnd.fdsn.mseed": {
+    "source": "iana",
+    "extensions": ["mseed"]
+  },
+  "application/vnd.fdsn.seed": {
+    "source": "iana",
+    "extensions": ["seed","dataless"]
+  },
+  "application/vnd.ffsns": {
+    "source": "iana"
+  },
+  "application/vnd.fints": {
+    "source": "iana"
+  },
+  "application/vnd.flographit": {
+    "source": "iana",
+    "extensions": ["gph"]
+  },
+  "application/vnd.fluxtime.clip": {
+    "source": "iana",
+    "extensions": ["ftc"]
+  },
+  "application/vnd.font-fontforge-sfd": {
+    "source": "iana"
+  },
+  "application/vnd.framemaker": {
+    "source": "iana",
+    "extensions": ["fm","frame","maker","book"]
+  },
+  "application/vnd.frogans.fnc": {
+    "source": "iana",
+    "extensions": ["fnc"]
+  },
+  "application/vnd.frogans.ltf": {
+    "source": "iana",
+    "extensions": ["ltf"]
+  },
+  "application/vnd.fsc.weblaunch": {
+    "source": "iana",
+    "extensions": ["fsc"]
+  },
+  "application/vnd.fujitsu.oasys": {
+    "source": "iana",
+    "extensions": ["oas"]
+  },
+  "application/vnd.fujitsu.oasys2": {
+    "source": "iana",
+    "extensions": ["oa2"]
+  },
+  "application/vnd.fujitsu.oasys3": {
+    "source": "iana",
+    "extensions": ["oa3"]
+  },
+  "application/vnd.fujitsu.oasysgp": {
+    "source": "iana",
+    "extensions": ["fg5"]
+  },
+  "application/vnd.fujitsu.oasysprs": {
+    "source": "iana",
+    "extensions": ["bh2"]
+  },
+  "application/vnd.fujixerox.art-ex": {
+    "source": "iana"
+  },
+  "application/vnd.fujixerox.art4": {
+    "source": "iana"
+  },
+  "application/vnd.fujixerox.ddd": {
+    "source": "iana",
+    "extensions": ["ddd"]
+  },
+  "application/vnd.fujixerox.docuworks": {
+    "source": "iana",
+    "extensions": ["xdw"]
+  },
+  "application/vnd.fujixerox.docuworks.binder": {
+    "source": "iana",
+    "extensions": ["xbd"]
+  },
+  "application/vnd.fujixerox.docuworks.container": {
+    "source": "iana"
+  },
+  "application/vnd.fujixerox.hbpl": {
+    "source": "iana"
+  },
+  "application/vnd.fut-misnet": {
+    "source": "iana"
+  },
+  "application/vnd.fuzzysheet": {
+    "source": "iana",
+    "extensions": ["fzs"]
+  },
+  "application/vnd.genomatix.tuxedo": {
+    "source": "iana",
+    "extensions": ["txd"]
+  },
+  "application/vnd.geo+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.geocube+xml": {
+    "source": "iana"
+  },
+  "application/vnd.geogebra.file": {
+    "source": "iana",
+    "extensions": ["ggb"]
+  },
+  "application/vnd.geogebra.tool": {
+    "source": "iana",
+    "extensions": ["ggt"]
+  },
+  "application/vnd.geometry-explorer": {
+    "source": "iana",
+    "extensions": ["gex","gre"]
+  },
+  "application/vnd.geonext": {
+    "source": "iana",
+    "extensions": ["gxt"]
+  },
+  "application/vnd.geoplan": {
+    "source": "iana",
+    "extensions": ["g2w"]
+  },
+  "application/vnd.geospace": {
+    "source": "iana",
+    "extensions": ["g3w"]
+  },
+  "application/vnd.globalplatform.card-content-mgt": {
+    "source": "iana"
+  },
+  "application/vnd.globalplatform.card-content-mgt-response": {
+    "source": "iana"
+  },
+  "application/vnd.gmx": {
+    "source": "iana",
+    "extensions": ["gmx"]
+  },
+  "application/vnd.google-earth.kml+xml": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["kml"]
+  },
+  "application/vnd.google-earth.kmz": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["kmz"]
+  },
+  "application/vnd.gov.sk.e-form+xml": {
+    "source": "iana"
+  },
+  "application/vnd.gov.sk.e-form+zip": {
+    "source": "iana"
+  },
+  "application/vnd.grafeq": {
+    "source": "iana",
+    "extensions": ["gqf","gqs"]
+  },
+  "application/vnd.gridmp": {
+    "source": "iana"
+  },
+  "application/vnd.groove-account": {
+    "source": "iana",
+    "extensions": ["gac"]
+  },
+  "application/vnd.groove-help": {
+    "source": "iana",
+    "extensions": ["ghf"]
+  },
+  "application/vnd.groove-identity-message": {
+    "source": "iana",
+    "extensions": ["gim"]
+  },
+  "application/vnd.groove-injector": {
+    "source": "iana",
+    "extensions": ["grv"]
+  },
+  "application/vnd.groove-tool-message": {
+    "source": "iana",
+    "extensions": ["gtm"]
+  },
+  "application/vnd.groove-tool-template": {
+    "source": "iana",
+    "extensions": ["tpl"]
+  },
+  "application/vnd.groove-vcard": {
+    "source": "iana",
+    "extensions": ["vcg"]
+  },
+  "application/vnd.hal+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.hal+xml": {
+    "source": "iana",
+    "extensions": ["hal"]
+  },
+  "application/vnd.handheld-entertainment+xml": {
+    "source": "iana",
+    "extensions": ["zmm"]
+  },
+  "application/vnd.hbci": {
+    "source": "iana",
+    "extensions": ["hbci"]
+  },
+  "application/vnd.hcl-bireports": {
+    "source": "iana"
+  },
+  "application/vnd.heroku+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.hhe.lesson-player": {
+    "source": "iana",
+    "extensions": ["les"]
+  },
+  "application/vnd.hp-hpgl": {
+    "source": "iana",
+    "extensions": ["hpgl"]
+  },
+  "application/vnd.hp-hpid": {
+    "source": "iana",
+    "extensions": ["hpid"]
+  },
+  "application/vnd.hp-hps": {
+    "source": "iana",
+    "extensions": ["hps"]
+  },
+  "application/vnd.hp-jlyt": {
+    "source": "iana",
+    "extensions": ["jlt"]
+  },
+  "application/vnd.hp-pcl": {
+    "source": "iana",
+    "extensions": ["pcl"]
+  },
+  "application/vnd.hp-pclxl": {
+    "source": "iana",
+    "extensions": ["pclxl"]
+  },
+  "application/vnd.httphone": {
+    "source": "iana"
+  },
+  "application/vnd.hydrostatix.sof-data": {
+    "source": "iana"
+  },
+  "application/vnd.hzn-3d-crossword": {
+    "source": "iana"
+  },
+  "application/vnd.ibm.afplinedata": {
+    "source": "iana"
+  },
+  "application/vnd.ibm.electronic-media": {
+    "source": "iana"
+  },
+  "application/vnd.ibm.minipay": {
+    "source": "iana",
+    "extensions": ["mpy"]
+  },
+  "application/vnd.ibm.modcap": {
+    "source": "iana",
+    "extensions": ["afp","listafp","list3820"]
+  },
+  "application/vnd.ibm.rights-management": {
+    "source": "iana",
+    "extensions": ["irm"]
+  },
+  "application/vnd.ibm.secure-container": {
+    "source": "iana",
+    "extensions": ["sc"]
+  },
+  "application/vnd.iccprofile": {
+    "source": "iana",
+    "extensions": ["icc","icm"]
+  },
+  "application/vnd.ieee.1905": {
+    "source": "iana"
+  },
+  "application/vnd.igloader": {
+    "source": "iana",
+    "extensions": ["igl"]
+  },
+  "application/vnd.immervision-ivp": {
+    "source": "iana",
+    "extensions": ["ivp"]
+  },
+  "application/vnd.immervision-ivu": {
+    "source": "iana",
+    "extensions": ["ivu"]
+  },
+  "application/vnd.ims.imsccv1p1": {
+    "source": "iana"
+  },
+  "application/vnd.ims.imsccv1p2": {
+    "source": "iana"
+  },
+  "application/vnd.ims.imsccv1p3": {
+    "source": "iana"
+  },
+  "application/vnd.ims.lis.v2.result+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.ims.lti.v2.toolconsumerprofile+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.ims.lti.v2.toolproxy+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.ims.lti.v2.toolproxy.id+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.ims.lti.v2.toolsettings+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.ims.lti.v2.toolsettings.simple+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.informedcontrol.rms+xml": {
+    "source": "iana"
+  },
+  "application/vnd.informix-visionary": {
+    "source": "iana"
+  },
+  "application/vnd.infotech.project": {
+    "source": "iana"
+  },
+  "application/vnd.infotech.project+xml": {
+    "source": "iana"
+  },
+  "application/vnd.innopath.wamp.notification": {
+    "source": "iana"
+  },
+  "application/vnd.insors.igm": {
+    "source": "iana",
+    "extensions": ["igm"]
+  },
+  "application/vnd.intercon.formnet": {
+    "source": "iana",
+    "extensions": ["xpw","xpx"]
+  },
+  "application/vnd.intergeo": {
+    "source": "iana",
+    "extensions": ["i2g"]
+  },
+  "application/vnd.intertrust.digibox": {
+    "source": "iana"
+  },
+  "application/vnd.intertrust.nncp": {
+    "source": "iana"
+  },
+  "application/vnd.intu.qbo": {
+    "source": "iana",
+    "extensions": ["qbo"]
+  },
+  "application/vnd.intu.qfx": {
+    "source": "iana",
+    "extensions": ["qfx"]
+  },
+  "application/vnd.iptc.g2.catalogitem+xml": {
+    "source": "iana"
+  },
+  "application/vnd.iptc.g2.conceptitem+xml": {
+    "source": "iana"
+  },
+  "application/vnd.iptc.g2.knowledgeitem+xml": {
+    "source": "iana"
+  },
+  "application/vnd.iptc.g2.newsitem+xml": {
+    "source": "iana"
+  },
+  "application/vnd.iptc.g2.newsmessage+xml": {
+    "source": "iana"
+  },
+  "application/vnd.iptc.g2.packageitem+xml": {
+    "source": "iana"
+  },
+  "application/vnd.iptc.g2.planningitem+xml": {
+    "source": "iana"
+  },
+  "application/vnd.ipunplugged.rcprofile": {
+    "source": "iana",
+    "extensions": ["rcprofile"]
+  },
+  "application/vnd.irepository.package+xml": {
+    "source": "iana",
+    "extensions": ["irp"]
+  },
+  "application/vnd.is-xpr": {
+    "source": "iana",
+    "extensions": ["xpr"]
+  },
+  "application/vnd.isac.fcs": {
+    "source": "iana",
+    "extensions": ["fcs"]
+  },
+  "application/vnd.jam": {
+    "source": "iana",
+    "extensions": ["jam"]
+  },
+  "application/vnd.japannet-directory-service": {
+    "source": "iana"
+  },
+  "application/vnd.japannet-jpnstore-wakeup": {
+    "source": "iana"
+  },
+  "application/vnd.japannet-payment-wakeup": {
+    "source": "iana"
+  },
+  "application/vnd.japannet-registration": {
+    "source": "iana"
+  },
+  "application/vnd.japannet-registration-wakeup": {
+    "source": "iana"
+  },
+  "application/vnd.japannet-setstore-wakeup": {
+    "source": "iana"
+  },
+  "application/vnd.japannet-verification": {
+    "source": "iana"
+  },
+  "application/vnd.japannet-verification-wakeup": {
+    "source": "iana"
+  },
+  "application/vnd.jcp.javame.midlet-rms": {
+    "source": "iana",
+    "extensions": ["rms"]
+  },
+  "application/vnd.jisp": {
+    "source": "iana",
+    "extensions": ["jisp"]
+  },
+  "application/vnd.joost.joda-archive": {
+    "source": "iana",
+    "extensions": ["joda"]
+  },
+  "application/vnd.jsk.isdn-ngn": {
+    "source": "iana"
+  },
+  "application/vnd.kahootz": {
+    "source": "iana",
+    "extensions": ["ktz","ktr"]
+  },
+  "application/vnd.kde.karbon": {
+    "source": "iana",
+    "extensions": ["karbon"]
+  },
+  "application/vnd.kde.kchart": {
+    "source": "iana",
+    "extensions": ["chrt"]
+  },
+  "application/vnd.kde.kformula": {
+    "source": "iana",
+    "extensions": ["kfo"]
+  },
+  "application/vnd.kde.kivio": {
+    "source": "iana",
+    "extensions": ["flw"]
+  },
+  "application/vnd.kde.kontour": {
+    "source": "iana",
+    "extensions": ["kon"]
+  },
+  "application/vnd.kde.kpresenter": {
+    "source": "iana",
+    "extensions": ["kpr","kpt"]
+  },
+  "application/vnd.kde.kspread": {
+    "source": "iana",
+    "extensions": ["ksp"]
+  },
+  "application/vnd.kde.kword": {
+    "source": "iana",
+    "extensions": ["kwd","kwt"]
+  },
+  "application/vnd.kenameaapp": {
+    "source": "iana",
+    "extensions": ["htke"]
+  },
+  "application/vnd.kidspiration": {
+    "source": "iana",
+    "extensions": ["kia"]
+  },
+  "application/vnd.kinar": {
+    "source": "iana",
+    "extensions": ["kne","knp"]
+  },
+  "application/vnd.koan": {
+    "source": "iana",
+    "extensions": ["skp","skd","skt","skm"]
+  },
+  "application/vnd.kodak-descriptor": {
+    "source": "iana",
+    "extensions": ["sse"]
+  },
+  "application/vnd.las.las+xml": {
+    "source": "iana",
+    "extensions": ["lasxml"]
+  },
+  "application/vnd.liberty-request+xml": {
+    "source": "iana"
+  },
+  "application/vnd.llamagraphics.life-balance.desktop": {
+    "source": "iana",
+    "extensions": ["lbd"]
+  },
+  "application/vnd.llamagraphics.life-balance.exchange+xml": {
+    "source": "iana",
+    "extensions": ["lbe"]
+  },
+  "application/vnd.lotus-1-2-3": {
+    "source": "iana",
+    "extensions": ["123"]
+  },
+  "application/vnd.lotus-approach": {
+    "source": "iana",
+    "extensions": ["apr"]
+  },
+  "application/vnd.lotus-freelance": {
+    "source": "iana",
+    "extensions": ["pre"]
+  },
+  "application/vnd.lotus-notes": {
+    "source": "iana",
+    "extensions": ["nsf"]
+  },
+  "application/vnd.lotus-organizer": {
+    "source": "iana",
+    "extensions": ["org"]
+  },
+  "application/vnd.lotus-screencam": {
+    "source": "iana",
+    "extensions": ["scm"]
+  },
+  "application/vnd.lotus-wordpro": {
+    "source": "iana",
+    "extensions": ["lwp"]
+  },
+  "application/vnd.macports.portpkg": {
+    "source": "iana",
+    "extensions": ["portpkg"]
+  },
+  "application/vnd.marlin.drm.actiontoken+xml": {
+    "source": "iana"
+  },
+  "application/vnd.marlin.drm.conftoken+xml": {
+    "source": "iana"
+  },
+  "application/vnd.marlin.drm.license+xml": {
+    "source": "iana"
+  },
+  "application/vnd.marlin.drm.mdcf": {
+    "source": "iana"
+  },
+  "application/vnd.mason+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.maxmind.maxmind-db": {
+    "source": "iana"
+  },
+  "application/vnd.mcd": {
+    "source": "iana",
+    "extensions": ["mcd"]
+  },
+  "application/vnd.medcalcdata": {
+    "source": "iana",
+    "extensions": ["mc1"]
+  },
+  "application/vnd.mediastation.cdkey": {
+    "source": "iana",
+    "extensions": ["cdkey"]
+  },
+  "application/vnd.meridian-slingshot": {
+    "source": "iana"
+  },
+  "application/vnd.mfer": {
+    "source": "iana",
+    "extensions": ["mwf"]
+  },
+  "application/vnd.mfmp": {
+    "source": "iana",
+    "extensions": ["mfm"]
+  },
+  "application/vnd.micrografx.flo": {
+    "source": "iana",
+    "extensions": ["flo"]
+  },
+  "application/vnd.micrografx.igx": {
+    "source": "iana",
+    "extensions": ["igx"]
+  },
+  "application/vnd.miele+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.mif": {
+    "source": "iana",
+    "extensions": ["mif"]
+  },
+  "application/vnd.minisoft-hp3000-save": {
+    "source": "iana"
+  },
+  "application/vnd.mitsubishi.misty-guard.trustweb": {
+    "source": "iana"
+  },
+  "application/vnd.mobius.daf": {
+    "source": "iana",
+    "extensions": ["daf"]
+  },
+  "application/vnd.mobius.dis": {
+    "source": "iana",
+    "extensions": ["dis"]
+  },
+  "application/vnd.mobius.mbk": {
+    "source": "iana",
+    "extensions": ["mbk"]
+  },
+  "application/vnd.mobius.mqy": {
+    "source": "iana",
+    "extensions": ["mqy"]
+  },
+  "application/vnd.mobius.msl": {
+    "source": "iana",
+    "extensions": ["msl"]
+  },
+  "application/vnd.mobius.plc": {
+    "source": "iana",
+    "extensions": ["plc"]
+  },
+  "application/vnd.mobius.txf": {
+    "source": "iana",
+    "extensions": ["txf"]
+  },
+  "application/vnd.mophun.application": {
+    "source": "iana",
+    "extensions": ["mpn"]
+  },
+  "application/vnd.mophun.certificate": {
+    "source": "iana",
+    "extensions": ["mpc"]
+  },
+  "application/vnd.motorola.flexsuite": {
+    "source": "iana"
+  },
+  "application/vnd.motorola.flexsuite.adsi": {
+    "source": "iana"
+  },
+  "application/vnd.motorola.flexsuite.fis": {
+    "source": "iana"
+  },
+  "application/vnd.motorola.flexsuite.gotap": {
+    "source": "iana"
+  },
+  "application/vnd.motorola.flexsuite.kmr": {
+    "source": "iana"
+  },
+  "application/vnd.motorola.flexsuite.ttc": {
+    "source": "iana"
+  },
+  "application/vnd.motorola.flexsuite.wem": {
+    "source": "iana"
+  },
+  "application/vnd.motorola.iprm": {
+    "source": "iana"
+  },
+  "application/vnd.mozilla.xul+xml": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["xul"]
+  },
+  "application/vnd.ms-3mfdocument": {
+    "source": "iana"
+  },
+  "application/vnd.ms-artgalry": {
+    "source": "iana",
+    "extensions": ["cil"]
+  },
+  "application/vnd.ms-asf": {
+    "source": "iana"
+  },
+  "application/vnd.ms-cab-compressed": {
+    "source": "iana",
+    "extensions": ["cab"]
+  },
+  "application/vnd.ms-color.iccprofile": {
+    "source": "apache"
+  },
+  "application/vnd.ms-excel": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["xls","xlm","xla","xlc","xlt","xlw"]
+  },
+  "application/vnd.ms-excel.addin.macroenabled.12": {
+    "source": "iana",
+    "extensions": ["xlam"]
+  },
+  "application/vnd.ms-excel.sheet.binary.macroenabled.12": {
+    "source": "iana",
+    "extensions": ["xlsb"]
+  },
+  "application/vnd.ms-excel.sheet.macroenabled.12": {
+    "source": "iana",
+    "extensions": ["xlsm"]
+  },
+  "application/vnd.ms-excel.template.macroenabled.12": {
+    "source": "iana",
+    "extensions": ["xltm"]
+  },
+  "application/vnd.ms-fontobject": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["eot"]
+  },
+  "application/vnd.ms-htmlhelp": {
+    "source": "iana",
+    "extensions": ["chm"]
+  },
+  "application/vnd.ms-ims": {
+    "source": "iana",
+    "extensions": ["ims"]
+  },
+  "application/vnd.ms-lrm": {
+    "source": "iana",
+    "extensions": ["lrm"]
+  },
+  "application/vnd.ms-office.activex+xml": {
+    "source": "iana"
+  },
+  "application/vnd.ms-officetheme": {
+    "source": "iana",
+    "extensions": ["thmx"]
+  },
+  "application/vnd.ms-opentype": {
+    "source": "apache",
+    "compressible": true
+  },
+  "application/vnd.ms-package.obfuscated-opentype": {
+    "source": "apache"
+  },
+  "application/vnd.ms-pki.seccat": {
+    "source": "apache",
+    "extensions": ["cat"]
+  },
+  "application/vnd.ms-pki.stl": {
+    "source": "apache",
+    "extensions": ["stl"]
+  },
+  "application/vnd.ms-playready.initiator+xml": {
+    "source": "iana"
+  },
+  "application/vnd.ms-powerpoint": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["ppt","pps","pot"]
+  },
+  "application/vnd.ms-powerpoint.addin.macroenabled.12": {
+    "source": "iana",
+    "extensions": ["ppam"]
+  },
+  "application/vnd.ms-powerpoint.presentation.macroenabled.12": {
+    "source": "iana",
+    "extensions": ["pptm"]
+  },
+  "application/vnd.ms-powerpoint.slide.macroenabled.12": {
+    "source": "iana",
+    "extensions": ["sldm"]
+  },
+  "application/vnd.ms-powerpoint.slideshow.macroenabled.12": {
+    "source": "iana",
+    "extensions": ["ppsm"]
+  },
+  "application/vnd.ms-powerpoint.template.macroenabled.12": {
+    "source": "iana",
+    "extensions": ["potm"]
+  },
+  "application/vnd.ms-printing.printticket+xml": {
+    "source": "apache"
+  },
+  "application/vnd.ms-project": {
+    "source": "iana",
+    "extensions": ["mpp","mpt"]
+  },
+  "application/vnd.ms-tnef": {
+    "source": "iana"
+  },
+  "application/vnd.ms-windows.printerpairing": {
+    "source": "iana"
+  },
+  "application/vnd.ms-wmdrm.lic-chlg-req": {
+    "source": "iana"
+  },
+  "application/vnd.ms-wmdrm.lic-resp": {
+    "source": "iana"
+  },
+  "application/vnd.ms-wmdrm.meter-chlg-req": {
+    "source": "iana"
+  },
+  "application/vnd.ms-wmdrm.meter-resp": {
+    "source": "iana"
+  },
+  "application/vnd.ms-word.document.macroenabled.12": {
+    "source": "iana",
+    "extensions": ["docm"]
+  },
+  "application/vnd.ms-word.template.macroenabled.12": {
+    "source": "iana",
+    "extensions": ["dotm"]
+  },
+  "application/vnd.ms-works": {
+    "source": "iana",
+    "extensions": ["wps","wks","wcm","wdb"]
+  },
+  "application/vnd.ms-wpl": {
+    "source": "iana",
+    "extensions": ["wpl"]
+  },
+  "application/vnd.ms-xpsdocument": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["xps"]
+  },
+  "application/vnd.mseq": {
+    "source": "iana",
+    "extensions": ["mseq"]
+  },
+  "application/vnd.msign": {
+    "source": "iana"
+  },
+  "application/vnd.multiad.creator": {
+    "source": "iana"
+  },
+  "application/vnd.multiad.creator.cif": {
+    "source": "iana"
+  },
+  "application/vnd.music-niff": {
+    "source": "iana"
+  },
+  "application/vnd.musician": {
+    "source": "iana",
+    "extensions": ["mus"]
+  },
+  "application/vnd.muvee.style": {
+    "source": "iana",
+    "extensions": ["msty"]
+  },
+  "application/vnd.mynfc": {
+    "source": "iana",
+    "extensions": ["taglet"]
+  },
+  "application/vnd.ncd.control": {
+    "source": "iana"
+  },
+  "application/vnd.ncd.reference": {
+    "source": "iana"
+  },
+  "application/vnd.nervana": {
+    "source": "iana"
+  },
+  "application/vnd.netfpx": {
+    "source": "iana"
+  },
+  "application/vnd.neurolanguage.nlu": {
+    "source": "iana",
+    "extensions": ["nlu"]
+  },
+  "application/vnd.nintendo.nitro.rom": {
+    "source": "iana"
+  },
+  "application/vnd.nintendo.snes.rom": {
+    "source": "iana"
+  },
+  "application/vnd.nitf": {
+    "source": "iana",
+    "extensions": ["ntf","nitf"]
+  },
+  "application/vnd.noblenet-directory": {
+    "source": "iana",
+    "extensions": ["nnd"]
+  },
+  "application/vnd.noblenet-sealer": {
+    "source": "iana",
+    "extensions": ["nns"]
+  },
+  "application/vnd.noblenet-web": {
+    "source": "iana",
+    "extensions": ["nnw"]
+  },
+  "application/vnd.nokia.catalogs": {
+    "source": "iana"
+  },
+  "application/vnd.nokia.conml+wbxml": {
+    "source": "iana"
+  },
+  "application/vnd.nokia.conml+xml": {
+    "source": "iana"
+  },
+  "application/vnd.nokia.iptv.config+xml": {
+    "source": "iana"
+  },
+  "application/vnd.nokia.isds-radio-presets": {
+    "source": "iana"
+  },
+  "application/vnd.nokia.landmark+wbxml": {
+    "source": "iana"
+  },
+  "application/vnd.nokia.landmark+xml": {
+    "source": "iana"
+  },
+  "application/vnd.nokia.landmarkcollection+xml": {
+    "source": "iana"
+  },
+  "application/vnd.nokia.n-gage.ac+xml": {
+    "source": "iana"
+  },
+  "application/vnd.nokia.n-gage.data": {
+    "source": "iana",
+    "extensions": ["ngdat"]
+  },
+  "application/vnd.nokia.n-gage.symbian.install": {
+    "source": "iana"
+  },
+  "application/vnd.nokia.ncd": {
+    "source": "iana"
+  },
+  "application/vnd.nokia.pcd+wbxml": {
+    "source": "iana"
+  },
+  "application/vnd.nokia.pcd+xml": {
+    "source": "iana"
+  },
+  "application/vnd.nokia.radio-preset": {
+    "source": "iana",
+    "extensions": ["rpst"]
+  },
+  "application/vnd.nokia.radio-presets": {
+    "source": "iana",
+    "extensions": ["rpss"]
+  },
+  "application/vnd.novadigm.edm": {
+    "source": "iana",
+    "extensions": ["edm"]
+  },
+  "application/vnd.novadigm.edx": {
+    "source": "iana",
+    "extensions": ["edx"]
+  },
+  "application/vnd.novadigm.ext": {
+    "source": "iana",
+    "extensions": ["ext"]
+  },
+  "application/vnd.ntt-local.content-share": {
+    "source": "iana"
+  },
+  "application/vnd.ntt-local.file-transfer": {
+    "source": "iana"
+  },
+  "application/vnd.ntt-local.ogw_remote-access": {
+    "source": "iana"
+  },
+  "application/vnd.ntt-local.sip-ta_remote": {
+    "source": "iana"
+  },
+  "application/vnd.ntt-local.sip-ta_tcp_stream": {
+    "source": "iana"
+  },
+  "application/vnd.oasis.opendocument.chart": {
+    "source": "iana",
+    "extensions": ["odc"]
+  },
+  "application/vnd.oasis.opendocument.chart-template": {
+    "source": "iana",
+    "extensions": ["otc"]
+  },
+  "application/vnd.oasis.opendocument.database": {
+    "source": "iana",
+    "extensions": ["odb"]
+  },
+  "application/vnd.oasis.opendocument.formula": {
+    "source": "iana",
+    "extensions": ["odf"]
+  },
+  "application/vnd.oasis.opendocument.formula-template": {
+    "source": "iana",
+    "extensions": ["odft"]
+  },
+  "application/vnd.oasis.opendocument.graphics": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["odg"]
+  },
+  "application/vnd.oasis.opendocument.graphics-template": {
+    "source": "iana",
+    "extensions": ["otg"]
+  },
+  "application/vnd.oasis.opendocument.image": {
+    "source": "iana",
+    "extensions": ["odi"]
+  },
+  "application/vnd.oasis.opendocument.image-template": {
+    "source": "iana",
+    "extensions": ["oti"]
+  },
+  "application/vnd.oasis.opendocument.presentation": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["odp"]
+  },
+  "application/vnd.oasis.opendocument.presentation-template": {
+    "source": "iana",
+    "extensions": ["otp"]
+  },
+  "application/vnd.oasis.opendocument.spreadsheet": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["ods"]
+  },
+  "application/vnd.oasis.opendocument.spreadsheet-template": {
+    "source": "iana",
+    "extensions": ["ots"]
+  },
+  "application/vnd.oasis.opendocument.text": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["odt"]
+  },
+  "application/vnd.oasis.opendocument.text-master": {
+    "source": "iana",
+    "extensions": ["odm"]
+  },
+  "application/vnd.oasis.opendocument.text-template": {
+    "source": "iana",
+    "extensions": ["ott"]
+  },
+  "application/vnd.oasis.opendocument.text-web": {
+    "source": "iana",
+    "extensions": ["oth"]
+  },
+  "application/vnd.obn": {
+    "source": "iana"
+  },
+  "application/vnd.oftn.l10n+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.oipf.contentaccessdownload+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oipf.contentaccessstreaming+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oipf.cspg-hexbinary": {
+    "source": "iana"
+  },
+  "application/vnd.oipf.dae.svg+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oipf.dae.xhtml+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oipf.mippvcontrolmessage+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oipf.pae.gem": {
+    "source": "iana"
+  },
+  "application/vnd.oipf.spdiscovery+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oipf.spdlist+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oipf.ueprofile+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oipf.userprofile+xml": {
+    "source": "iana"
+  },
+  "application/vnd.olpc-sugar": {
+    "source": "iana",
+    "extensions": ["xo"]
+  },
+  "application/vnd.oma-scws-config": {
+    "source": "iana"
+  },
+  "application/vnd.oma-scws-http-request": {
+    "source": "iana"
+  },
+  "application/vnd.oma-scws-http-response": {
+    "source": "iana"
+  },
+  "application/vnd.oma.bcast.associated-procedure-parameter+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.bcast.drm-trigger+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.bcast.imd+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.bcast.ltkm": {
+    "source": "iana"
+  },
+  "application/vnd.oma.bcast.notification+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.bcast.provisioningtrigger": {
+    "source": "iana"
+  },
+  "application/vnd.oma.bcast.sgboot": {
+    "source": "iana"
+  },
+  "application/vnd.oma.bcast.sgdd+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.bcast.sgdu": {
+    "source": "iana"
+  },
+  "application/vnd.oma.bcast.simple-symbol-container": {
+    "source": "iana"
+  },
+  "application/vnd.oma.bcast.smartcard-trigger+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.bcast.sprov+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.bcast.stkm": {
+    "source": "iana"
+  },
+  "application/vnd.oma.cab-address-book+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.cab-feature-handler+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.cab-pcc+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.cab-subs-invite+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.cab-user-prefs+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.dcd": {
+    "source": "iana"
+  },
+  "application/vnd.oma.dcdc": {
+    "source": "iana"
+  },
+  "application/vnd.oma.dd2+xml": {
+    "source": "iana",
+    "extensions": ["dd2"]
+  },
+  "application/vnd.oma.drm.risd+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.group-usage-list+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.pal+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.poc.detailed-progress-report+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.poc.final-report+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.poc.groups+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.poc.invocation-descriptor+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.poc.optimized-progress-report+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.push": {
+    "source": "iana"
+  },
+  "application/vnd.oma.scidm.messages+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oma.xcap-directory+xml": {
+    "source": "iana"
+  },
+  "application/vnd.omads-email+xml": {
+    "source": "iana"
+  },
+  "application/vnd.omads-file+xml": {
+    "source": "iana"
+  },
+  "application/vnd.omads-folder+xml": {
+    "source": "iana"
+  },
+  "application/vnd.omaloc-supl-init": {
+    "source": "iana"
+  },
+  "application/vnd.openeye.oeb": {
+    "source": "iana"
+  },
+  "application/vnd.openofficeorg.extension": {
+    "source": "apache",
+    "extensions": ["oxt"]
+  },
+  "application/vnd.openxmlformats-officedocument.custom-properties+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.customxmlproperties+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.drawing+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.drawingml.chart+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.drawingml.chartshapes+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.drawingml.diagramcolors+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.drawingml.diagramdata+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.drawingml.diagramlayout+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.drawingml.diagramstyle+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.extended-properties+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml-template": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.commentauthors+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.comments+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.handoutmaster+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.notesmaster+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.notesslide+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["pptx"]
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.presprops+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slide": {
+    "source": "iana",
+    "extensions": ["sldx"]
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slide+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slidelayout+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slidemaster+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slideshow": {
+    "source": "iana",
+    "extensions": ["ppsx"]
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slideshow.main+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slideupdateinfo+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.tablestyles+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.tags+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.template": {
+    "source": "apache",
+    "extensions": ["potx"]
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.template.main+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.viewprops+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml-template": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.calcchain+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.chartsheet+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.connections+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.dialogsheet+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.externallink+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.pivotcachedefinition+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.pivotcacherecords+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.pivottable+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.querytable+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.revisionheaders+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.revisionlog+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedstrings+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["xlsx"]
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheetmetadata+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.tablesinglecells+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.template": {
+    "source": "apache",
+    "extensions": ["xltx"]
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.template.main+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.usernames+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.volatiledependencies+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.theme+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.themeoverride+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.vmldrawing": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml-template": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.comments+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["docx"]
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document.glossary+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.endnotes+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.fonttable+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.template": {
+    "source": "apache",
+    "extensions": ["dotx"]
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.template.main+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.websettings+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-package.core-properties+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-package.digital-signature-xmlsignature+xml": {
+    "source": "iana"
+  },
+  "application/vnd.openxmlformats-package.relationships+xml": {
+    "source": "iana"
+  },
+  "application/vnd.oracle.resource+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.orange.indata": {
+    "source": "iana"
+  },
+  "application/vnd.osa.netdeploy": {
+    "source": "iana"
+  },
+  "application/vnd.osgeo.mapguide.package": {
+    "source": "iana",
+    "extensions": ["mgp"]
+  },
+  "application/vnd.osgi.bundle": {
+    "source": "iana"
+  },
+  "application/vnd.osgi.dp": {
+    "source": "iana",
+    "extensions": ["dp"]
+  },
+  "application/vnd.osgi.subsystem": {
+    "source": "iana",
+    "extensions": ["esa"]
+  },
+  "application/vnd.otps.ct-kip+xml": {
+    "source": "iana"
+  },
+  "application/vnd.palm": {
+    "source": "iana",
+    "extensions": ["pdb","pqa","oprc"]
+  },
+  "application/vnd.panoply": {
+    "source": "iana"
+  },
+  "application/vnd.paos+xml": {
+    "source": "iana"
+  },
+  "application/vnd.paos.xml": {
+    "source": "apache"
+  },
+  "application/vnd.pawaafile": {
+    "source": "iana",
+    "extensions": ["paw"]
+  },
+  "application/vnd.pcos": {
+    "source": "iana"
+  },
+  "application/vnd.pg.format": {
+    "source": "iana",
+    "extensions": ["str"]
+  },
+  "application/vnd.pg.osasli": {
+    "source": "iana",
+    "extensions": ["ei6"]
+  },
+  "application/vnd.piaccess.application-licence": {
+    "source": "iana"
+  },
+  "application/vnd.picsel": {
+    "source": "iana",
+    "extensions": ["efif"]
+  },
+  "application/vnd.pmi.widget": {
+    "source": "iana",
+    "extensions": ["wg"]
+  },
+  "application/vnd.poc.group-advertisement+xml": {
+    "source": "iana"
+  },
+  "application/vnd.pocketlearn": {
+    "source": "iana",
+    "extensions": ["plf"]
+  },
+  "application/vnd.powerbuilder6": {
+    "source": "iana",
+    "extensions": ["pbd"]
+  },
+  "application/vnd.powerbuilder6-s": {
+    "source": "iana"
+  },
+  "application/vnd.powerbuilder7": {
+    "source": "iana"
+  },
+  "application/vnd.powerbuilder7-s": {
+    "source": "iana"
+  },
+  "application/vnd.powerbuilder75": {
+    "source": "iana"
+  },
+  "application/vnd.powerbuilder75-s": {
+    "source": "iana"
+  },
+  "application/vnd.preminet": {
+    "source": "iana"
+  },
+  "application/vnd.previewsystems.box": {
+    "source": "iana",
+    "extensions": ["box"]
+  },
+  "application/vnd.proteus.magazine": {
+    "source": "iana",
+    "extensions": ["mgz"]
+  },
+  "application/vnd.publishare-delta-tree": {
+    "source": "iana",
+    "extensions": ["qps"]
+  },
+  "application/vnd.pvi.ptid1": {
+    "source": "iana",
+    "extensions": ["ptid"]
+  },
+  "application/vnd.pwg-multiplexed": {
+    "source": "iana"
+  },
+  "application/vnd.pwg-xhtml-print+xml": {
+    "source": "iana"
+  },
+  "application/vnd.qualcomm.brew-app-res": {
+    "source": "iana"
+  },
+  "application/vnd.quark.quarkxpress": {
+    "source": "iana",
+    "extensions": ["qxd","qxt","qwd","qwt","qxl","qxb"]
+  },
+  "application/vnd.quobject-quoxdocument": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.moml+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml-audit+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml-audit-conf+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml-audit-conn+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml-audit-dialog+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml-audit-stream+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml-conf+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml-dialog+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml-dialog-base+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml-dialog-fax-detect+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml-dialog-fax-sendrecv+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml-dialog-group+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml-dialog-speech+xml": {
+    "source": "iana"
+  },
+  "application/vnd.radisys.msml-dialog-transform+xml": {
+    "source": "iana"
+  },
+  "application/vnd.rainstor.data": {
+    "source": "iana"
+  },
+  "application/vnd.rapid": {
+    "source": "iana"
+  },
+  "application/vnd.realvnc.bed": {
+    "source": "iana",
+    "extensions": ["bed"]
+  },
+  "application/vnd.recordare.musicxml": {
+    "source": "iana",
+    "extensions": ["mxl"]
+  },
+  "application/vnd.recordare.musicxml+xml": {
+    "source": "iana",
+    "extensions": ["musicxml"]
+  },
+  "application/vnd.renlearn.rlprint": {
+    "source": "iana"
+  },
+  "application/vnd.rig.cryptonote": {
+    "source": "iana",
+    "extensions": ["cryptonote"]
+  },
+  "application/vnd.rim.cod": {
+    "source": "apache",
+    "extensions": ["cod"]
+  },
+  "application/vnd.rn-realmedia": {
+    "source": "apache",
+    "extensions": ["rm"]
+  },
+  "application/vnd.rn-realmedia-vbr": {
+    "source": "apache",
+    "extensions": ["rmvb"]
+  },
+  "application/vnd.route66.link66+xml": {
+    "source": "iana",
+    "extensions": ["link66"]
+  },
+  "application/vnd.rs-274x": {
+    "source": "iana"
+  },
+  "application/vnd.ruckus.download": {
+    "source": "iana"
+  },
+  "application/vnd.s3sms": {
+    "source": "iana"
+  },
+  "application/vnd.sailingtracker.track": {
+    "source": "iana",
+    "extensions": ["st"]
+  },
+  "application/vnd.sbm.cid": {
+    "source": "iana"
+  },
+  "application/vnd.sbm.mid2": {
+    "source": "iana"
+  },
+  "application/vnd.scribus": {
+    "source": "iana"
+  },
+  "application/vnd.sealed.3df": {
+    "source": "iana"
+  },
+  "application/vnd.sealed.csf": {
+    "source": "iana"
+  },
+  "application/vnd.sealed.doc": {
+    "source": "iana"
+  },
+  "application/vnd.sealed.eml": {
+    "source": "iana"
+  },
+  "application/vnd.sealed.mht": {
+    "source": "iana"
+  },
+  "application/vnd.sealed.net": {
+    "source": "iana"
+  },
+  "application/vnd.sealed.ppt": {
+    "source": "iana"
+  },
+  "application/vnd.sealed.tiff": {
+    "source": "iana"
+  },
+  "application/vnd.sealed.xls": {
+    "source": "iana"
+  },
+  "application/vnd.sealedmedia.softseal.html": {
+    "source": "iana"
+  },
+  "application/vnd.sealedmedia.softseal.pdf": {
+    "source": "iana"
+  },
+  "application/vnd.seemail": {
+    "source": "iana",
+    "extensions": ["see"]
+  },
+  "application/vnd.sema": {
+    "source": "iana",
+    "extensions": ["sema"]
+  },
+  "application/vnd.semd": {
+    "source": "iana",
+    "extensions": ["semd"]
+  },
+  "application/vnd.semf": {
+    "source": "iana",
+    "extensions": ["semf"]
+  },
+  "application/vnd.shana.informed.formdata": {
+    "source": "iana",
+    "extensions": ["ifm"]
+  },
+  "application/vnd.shana.informed.formtemplate": {
+    "source": "iana",
+    "extensions": ["itp"]
+  },
+  "application/vnd.shana.informed.interchange": {
+    "source": "iana",
+    "extensions": ["iif"]
+  },
+  "application/vnd.shana.informed.package": {
+    "source": "iana",
+    "extensions": ["ipk"]
+  },
+  "application/vnd.simtech-mindmapper": {
+    "source": "iana",
+    "extensions": ["twd","twds"]
+  },
+  "application/vnd.siren+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.smaf": {
+    "source": "iana",
+    "extensions": ["mmf"]
+  },
+  "application/vnd.smart.notebook": {
+    "source": "iana"
+  },
+  "application/vnd.smart.teacher": {
+    "source": "iana",
+    "extensions": ["teacher"]
+  },
+  "application/vnd.software602.filler.form+xml": {
+    "source": "iana"
+  },
+  "application/vnd.software602.filler.form-xml-zip": {
+    "source": "iana"
+  },
+  "application/vnd.solent.sdkm+xml": {
+    "source": "iana",
+    "extensions": ["sdkm","sdkd"]
+  },
+  "application/vnd.spotfire.dxp": {
+    "source": "iana",
+    "extensions": ["dxp"]
+  },
+  "application/vnd.spotfire.sfs": {
+    "source": "iana",
+    "extensions": ["sfs"]
+  },
+  "application/vnd.sss-cod": {
+    "source": "iana"
+  },
+  "application/vnd.sss-dtf": {
+    "source": "iana"
+  },
+  "application/vnd.sss-ntf": {
+    "source": "iana"
+  },
+  "application/vnd.stardivision.calc": {
+    "source": "apache",
+    "extensions": ["sdc"]
+  },
+  "application/vnd.stardivision.draw": {
+    "source": "apache",
+    "extensions": ["sda"]
+  },
+  "application/vnd.stardivision.impress": {
+    "source": "apache",
+    "extensions": ["sdd"]
+  },
+  "application/vnd.stardivision.math": {
+    "source": "apache",
+    "extensions": ["smf"]
+  },
+  "application/vnd.stardivision.writer": {
+    "source": "apache",
+    "extensions": ["sdw","vor"]
+  },
+  "application/vnd.stardivision.writer-global": {
+    "source": "apache",
+    "extensions": ["sgl"]
+  },
+  "application/vnd.stepmania.package": {
+    "source": "iana",
+    "extensions": ["smzip"]
+  },
+  "application/vnd.stepmania.stepchart": {
+    "source": "iana",
+    "extensions": ["sm"]
+  },
+  "application/vnd.street-stream": {
+    "source": "iana"
+  },
+  "application/vnd.sun.wadl+xml": {
+    "source": "iana"
+  },
+  "application/vnd.sun.xml.calc": {
+    "source": "apache",
+    "extensions": ["sxc"]
+  },
+  "application/vnd.sun.xml.calc.template": {
+    "source": "apache",
+    "extensions": ["stc"]
+  },
+  "application/vnd.sun.xml.draw": {
+    "source": "apache",
+    "extensions": ["sxd"]
+  },
+  "application/vnd.sun.xml.draw.template": {
+    "source": "apache",
+    "extensions": ["std"]
+  },
+  "application/vnd.sun.xml.impress": {
+    "source": "apache",
+    "extensions": ["sxi"]
+  },
+  "application/vnd.sun.xml.impress.template": {
+    "source": "apache",
+    "extensions": ["sti"]
+  },
+  "application/vnd.sun.xml.math": {
+    "source": "apache",
+    "extensions": ["sxm"]
+  },
+  "application/vnd.sun.xml.writer": {
+    "source": "apache",
+    "extensions": ["sxw"]
+  },
+  "application/vnd.sun.xml.writer.global": {
+    "source": "apache",
+    "extensions": ["sxg"]
+  },
+  "application/vnd.sun.xml.writer.template": {
+    "source": "apache",
+    "extensions": ["stw"]
+  },
+  "application/vnd.sus-calendar": {
+    "source": "iana",
+    "extensions": ["sus","susp"]
+  },
+  "application/vnd.svd": {
+    "source": "iana",
+    "extensions": ["svd"]
+  },
+  "application/vnd.swiftview-ics": {
+    "source": "iana"
+  },
+  "application/vnd.symbian.install": {
+    "source": "apache",
+    "extensions": ["sis","sisx"]
+  },
+  "application/vnd.syncml+xml": {
+    "source": "iana",
+    "extensions": ["xsm"]
+  },
+  "application/vnd.syncml.dm+wbxml": {
+    "source": "iana",
+    "extensions": ["bdm"]
+  },
+  "application/vnd.syncml.dm+xml": {
+    "source": "iana",
+    "extensions": ["xdm"]
+  },
+  "application/vnd.syncml.dm.notification": {
+    "source": "iana"
+  },
+  "application/vnd.syncml.dmddf+wbxml": {
+    "source": "iana"
+  },
+  "application/vnd.syncml.dmddf+xml": {
+    "source": "iana"
+  },
+  "application/vnd.syncml.dmtnds+wbxml": {
+    "source": "iana"
+  },
+  "application/vnd.syncml.dmtnds+xml": {
+    "source": "iana"
+  },
+  "application/vnd.syncml.ds.notification": {
+    "source": "iana"
+  },
+  "application/vnd.tao.intent-module-archive": {
+    "source": "iana",
+    "extensions": ["tao"]
+  },
+  "application/vnd.tcpdump.pcap": {
+    "source": "iana",
+    "extensions": ["pcap","cap","dmp"]
+  },
+  "application/vnd.tmd.mediaflex.api+xml": {
+    "source": "iana"
+  },
+  "application/vnd.tmobile-livetv": {
+    "source": "iana",
+    "extensions": ["tmo"]
+  },
+  "application/vnd.trid.tpt": {
+    "source": "iana",
+    "extensions": ["tpt"]
+  },
+  "application/vnd.triscape.mxs": {
+    "source": "iana",
+    "extensions": ["mxs"]
+  },
+  "application/vnd.trueapp": {
+    "source": "iana",
+    "extensions": ["tra"]
+  },
+  "application/vnd.truedoc": {
+    "source": "iana"
+  },
+  "application/vnd.ubisoft.webplayer": {
+    "source": "iana"
+  },
+  "application/vnd.ufdl": {
+    "source": "iana",
+    "extensions": ["ufd","ufdl"]
+  },
+  "application/vnd.uiq.theme": {
+    "source": "iana",
+    "extensions": ["utz"]
+  },
+  "application/vnd.umajin": {
+    "source": "iana",
+    "extensions": ["umj"]
+  },
+  "application/vnd.unity": {
+    "source": "iana",
+    "extensions": ["unityweb"]
+  },
+  "application/vnd.uoml+xml": {
+    "source": "iana",
+    "extensions": ["uoml"]
+  },
+  "application/vnd.uplanet.alert": {
+    "source": "iana"
+  },
+  "application/vnd.uplanet.alert-wbxml": {
+    "source": "iana"
+  },
+  "application/vnd.uplanet.bearer-choice": {
+    "source": "iana"
+  },
+  "application/vnd.uplanet.bearer-choice-wbxml": {
+    "source": "iana"
+  },
+  "application/vnd.uplanet.cacheop": {
+    "source": "iana"
+  },
+  "application/vnd.uplanet.cacheop-wbxml": {
+    "source": "iana"
+  },
+  "application/vnd.uplanet.channel": {
+    "source": "iana"
+  },
+  "application/vnd.uplanet.channel-wbxml": {
+    "source": "iana"
+  },
+  "application/vnd.uplanet.list": {
+    "source": "iana"
+  },
+  "application/vnd.uplanet.list-wbxml": {
+    "source": "iana"
+  },
+  "application/vnd.uplanet.listcmd": {
+    "source": "iana"
+  },
+  "application/vnd.uplanet.listcmd-wbxml": {
+    "source": "iana"
+  },
+  "application/vnd.uplanet.signal": {
+    "source": "iana"
+  },
+  "application/vnd.valve.source.material": {
+    "source": "iana"
+  },
+  "application/vnd.vcx": {
+    "source": "iana",
+    "extensions": ["vcx"]
+  },
+  "application/vnd.vd-study": {
+    "source": "iana"
+  },
+  "application/vnd.vectorworks": {
+    "source": "iana"
+  },
+  "application/vnd.verimatrix.vcas": {
+    "source": "iana"
+  },
+  "application/vnd.vidsoft.vidconference": {
+    "source": "iana"
+  },
+  "application/vnd.visio": {
+    "source": "iana",
+    "extensions": ["vsd","vst","vss","vsw"]
+  },
+  "application/vnd.visionary": {
+    "source": "iana",
+    "extensions": ["vis"]
+  },
+  "application/vnd.vividence.scriptfile": {
+    "source": "iana"
+  },
+  "application/vnd.vsf": {
+    "source": "iana",
+    "extensions": ["vsf"]
+  },
+  "application/vnd.wap.sic": {
+    "source": "iana"
+  },
+  "application/vnd.wap.slc": {
+    "source": "iana"
+  },
+  "application/vnd.wap.wbxml": {
+    "source": "iana",
+    "extensions": ["wbxml"]
+  },
+  "application/vnd.wap.wmlc": {
+    "source": "iana",
+    "extensions": ["wmlc"]
+  },
+  "application/vnd.wap.wmlscriptc": {
+    "source": "iana",
+    "extensions": ["wmlsc"]
+  },
+  "application/vnd.webturbo": {
+    "source": "iana",
+    "extensions": ["wtb"]
+  },
+  "application/vnd.wfa.p2p": {
+    "source": "iana"
+  },
+  "application/vnd.wfa.wsc": {
+    "source": "iana"
+  },
+  "application/vnd.windows.devicepairing": {
+    "source": "iana"
+  },
+  "application/vnd.wmc": {
+    "source": "iana"
+  },
+  "application/vnd.wmf.bootstrap": {
+    "source": "iana"
+  },
+  "application/vnd.wolfram.mathematica": {
+    "source": "iana"
+  },
+  "application/vnd.wolfram.mathematica.package": {
+    "source": "iana"
+  },
+  "application/vnd.wolfram.player": {
+    "source": "iana",
+    "extensions": ["nbp"]
+  },
+  "application/vnd.wordperfect": {
+    "source": "iana",
+    "extensions": ["wpd"]
+  },
+  "application/vnd.wqd": {
+    "source": "iana",
+    "extensions": ["wqd"]
+  },
+  "application/vnd.wrq-hp3000-labelled": {
+    "source": "iana"
+  },
+  "application/vnd.wt.stf": {
+    "source": "iana",
+    "extensions": ["stf"]
+  },
+  "application/vnd.wv.csp+wbxml": {
+    "source": "iana"
+  },
+  "application/vnd.wv.csp+xml": {
+    "source": "iana"
+  },
+  "application/vnd.wv.ssp+xml": {
+    "source": "iana"
+  },
+  "application/vnd.xacml+json": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/vnd.xara": {
+    "source": "iana",
+    "extensions": ["xar"]
+  },
+  "application/vnd.xfdl": {
+    "source": "iana",
+    "extensions": ["xfdl"]
+  },
+  "application/vnd.xfdl.webform": {
+    "source": "iana"
+  },
+  "application/vnd.xmi+xml": {
+    "source": "iana"
+  },
+  "application/vnd.xmpie.cpkg": {
+    "source": "iana"
+  },
+  "application/vnd.xmpie.dpkg": {
+    "source": "iana"
+  },
+  "application/vnd.xmpie.plan": {
+    "source": "iana"
+  },
+  "application/vnd.xmpie.ppkg": {
+    "source": "iana"
+  },
+  "application/vnd.xmpie.xlim": {
+    "source": "iana"
+  },
+  "application/vnd.yamaha.hv-dic": {
+    "source": "iana",
+    "extensions": ["hvd"]
+  },
+  "application/vnd.yamaha.hv-script": {
+    "source": "iana",
+    "extensions": ["hvs"]
+  },
+  "application/vnd.yamaha.hv-voice": {
+    "source": "iana",
+    "extensions": ["hvp"]
+  },
+  "application/vnd.yamaha.openscoreformat": {
+    "source": "iana",
+    "extensions": ["osf"]
+  },
+  "application/vnd.yamaha.openscoreformat.osfpvg+xml": {
+    "source": "iana",
+    "extensions": ["osfpvg"]
+  },
+  "application/vnd.yamaha.remote-setup": {
+    "source": "iana"
+  },
+  "application/vnd.yamaha.smaf-audio": {
+    "source": "iana",
+    "extensions": ["saf"]
+  },
+  "application/vnd.yamaha.smaf-phrase": {
+    "source": "iana",
+    "extensions": ["spf"]
+  },
+  "application/vnd.yamaha.through-ngn": {
+    "source": "iana"
+  },
+  "application/vnd.yamaha.tunnel-udpencap": {
+    "source": "iana"
+  },
+  "application/vnd.yaoweme": {
+    "source": "iana"
+  },
+  "application/vnd.yellowriver-custom-menu": {
+    "source": "iana",
+    "extensions": ["cmp"]
+  },
+  "application/vnd.zul": {
+    "source": "iana",
+    "extensions": ["zir","zirz"]
+  },
+  "application/vnd.zzazz.deck+xml": {
+    "source": "iana",
+    "extensions": ["zaz"]
+  },
+  "application/voicexml+xml": {
+    "source": "iana",
+    "extensions": ["vxml"]
+  },
+  "application/vq-rtcpxr": {
+    "source": "iana"
+  },
+  "application/watcherinfo+xml": {
+    "source": "iana"
+  },
+  "application/whoispp-query": {
+    "source": "iana"
+  },
+  "application/whoispp-response": {
+    "source": "iana"
+  },
+  "application/widget": {
+    "source": "iana",
+    "extensions": ["wgt"]
+  },
+  "application/winhlp": {
+    "source": "apache",
+    "extensions": ["hlp"]
+  },
+  "application/wita": {
+    "source": "iana"
+  },
+  "application/wordperfect5.1": {
+    "source": "iana"
+  },
+  "application/wsdl+xml": {
+    "source": "iana",
+    "extensions": ["wsdl"]
+  },
+  "application/wspolicy+xml": {
+    "source": "iana",
+    "extensions": ["wspolicy"]
+  },
+  "application/x-7z-compressed": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["7z"]
+  },
+  "application/x-abiword": {
+    "source": "apache",
+    "extensions": ["abw"]
+  },
+  "application/x-ace-compressed": {
+    "source": "apache",
+    "extensions": ["ace"]
+  },
+  "application/x-amf": {
+    "source": "apache"
+  },
+  "application/x-apple-diskimage": {
+    "source": "apache",
+    "extensions": ["dmg"]
+  },
+  "application/x-authorware-bin": {
+    "source": "apache",
+    "extensions": ["aab","x32","u32","vox"]
+  },
+  "application/x-authorware-map": {
+    "source": "apache",
+    "extensions": ["aam"]
+  },
+  "application/x-authorware-seg": {
+    "source": "apache",
+    "extensions": ["aas"]
+  },
+  "application/x-bcpio": {
+    "source": "apache",
+    "extensions": ["bcpio"]
+  },
+  "application/x-bittorrent": {
+    "source": "apache",
+    "extensions": ["torrent"]
+  },
+  "application/x-blorb": {
+    "source": "apache",
+    "extensions": ["blb","blorb"]
+  },
+  "application/x-bzip": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["bz"]
+  },
+  "application/x-bzip2": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["bz2","boz"]
+  },
+  "application/x-cbr": {
+    "source": "apache",
+    "extensions": ["cbr","cba","cbt","cbz","cb7"]
+  },
+  "application/x-cdlink": {
+    "source": "apache",
+    "extensions": ["vcd"]
+  },
+  "application/x-cfs-compressed": {
+    "source": "apache",
+    "extensions": ["cfs"]
+  },
+  "application/x-chat": {
+    "source": "apache",
+    "extensions": ["chat"]
+  },
+  "application/x-chess-pgn": {
+    "source": "apache",
+    "extensions": ["pgn"]
+  },
+  "application/x-chrome-extension": {
+    "extensions": ["crx"]
+  },
+  "application/x-compress": {
+    "source": "apache"
+  },
+  "application/x-conference": {
+    "source": "apache",
+    "extensions": ["nsc"]
+  },
+  "application/x-cpio": {
+    "source": "apache",
+    "extensions": ["cpio"]
+  },
+  "application/x-csh": {
+    "source": "apache",
+    "extensions": ["csh"]
+  },
+  "application/x-deb": {
+    "compressible": false
+  },
+  "application/x-debian-package": {
+    "source": "apache",
+    "extensions": ["deb","udeb"]
+  },
+  "application/x-dgc-compressed": {
+    "source": "apache",
+    "extensions": ["dgc"]
+  },
+  "application/x-director": {
+    "source": "apache",
+    "extensions": ["dir","dcr","dxr","cst","cct","cxt","w3d","fgd","swa"]
+  },
+  "application/x-doom": {
+    "source": "apache",
+    "extensions": ["wad"]
+  },
+  "application/x-dtbncx+xml": {
+    "source": "apache",
+    "extensions": ["ncx"]
+  },
+  "application/x-dtbook+xml": {
+    "source": "apache",
+    "extensions": ["dtb"]
+  },
+  "application/x-dtbresource+xml": {
+    "source": "apache",
+    "extensions": ["res"]
+  },
+  "application/x-dvi": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["dvi"]
+  },
+  "application/x-envoy": {
+    "source": "apache",
+    "extensions": ["evy"]
+  },
+  "application/x-eva": {
+    "source": "apache",
+    "extensions": ["eva"]
+  },
+  "application/x-font-bdf": {
+    "source": "apache",
+    "extensions": ["bdf"]
+  },
+  "application/x-font-dos": {
+    "source": "apache"
+  },
+  "application/x-font-framemaker": {
+    "source": "apache"
+  },
+  "application/x-font-ghostscript": {
+    "source": "apache",
+    "extensions": ["gsf"]
+  },
+  "application/x-font-libgrx": {
+    "source": "apache"
+  },
+  "application/x-font-linux-psf": {
+    "source": "apache",
+    "extensions": ["psf"]
+  },
+  "application/x-font-otf": {
+    "source": "apache",
+    "compressible": true,
+    "extensions": ["otf"]
+  },
+  "application/x-font-pcf": {
+    "source": "apache",
+    "extensions": ["pcf"]
+  },
+  "application/x-font-snf": {
+    "source": "apache",
+    "extensions": ["snf"]
+  },
+  "application/x-font-speedo": {
+    "source": "apache"
+  },
+  "application/x-font-sunos-news": {
+    "source": "apache"
+  },
+  "application/x-font-ttf": {
+    "source": "apache",
+    "compressible": true,
+    "extensions": ["ttf","ttc"]
+  },
+  "application/x-font-type1": {
+    "source": "apache",
+    "extensions": ["pfa","pfb","pfm","afm"]
+  },
+  "application/x-font-vfont": {
+    "source": "apache"
+  },
+  "application/x-freearc": {
+    "source": "apache",
+    "extensions": ["arc"]
+  },
+  "application/x-futuresplash": {
+    "source": "apache",
+    "extensions": ["spl"]
+  },
+  "application/x-gca-compressed": {
+    "source": "apache",
+    "extensions": ["gca"]
+  },
+  "application/x-glulx": {
+    "source": "apache",
+    "extensions": ["ulx"]
+  },
+  "application/x-gnumeric": {
+    "source": "apache",
+    "extensions": ["gnumeric"]
+  },
+  "application/x-gramps-xml": {
+    "source": "apache",
+    "extensions": ["gramps"]
+  },
+  "application/x-gtar": {
+    "source": "apache",
+    "extensions": ["gtar"]
+  },
+  "application/x-gzip": {
+    "source": "apache"
+  },
+  "application/x-hdf": {
+    "source": "apache",
+    "extensions": ["hdf"]
+  },
+  "application/x-install-instructions": {
+    "source": "apache",
+    "extensions": ["install"]
+  },
+  "application/x-iso9660-image": {
+    "source": "apache",
+    "extensions": ["iso"]
+  },
+  "application/x-java-jnlp-file": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["jnlp"]
+  },
+  "application/x-javascript": {
+    "compressible": true
+  },
+  "application/x-latex": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["latex"]
+  },
+  "application/x-lua-bytecode": {
+    "extensions": ["luac"]
+  },
+  "application/x-lzh-compressed": {
+    "source": "apache",
+    "extensions": ["lzh","lha"]
+  },
+  "application/x-mie": {
+    "source": "apache",
+    "extensions": ["mie"]
+  },
+  "application/x-mobipocket-ebook": {
+    "source": "apache",
+    "extensions": ["prc","mobi"]
+  },
+  "application/x-mpegurl": {
+    "compressible": false
+  },
+  "application/x-ms-application": {
+    "source": "apache",
+    "extensions": ["application"]
+  },
+  "application/x-ms-shortcut": {
+    "source": "apache",
+    "extensions": ["lnk"]
+  },
+  "application/x-ms-wmd": {
+    "source": "apache",
+    "extensions": ["wmd"]
+  },
+  "application/x-ms-wmz": {
+    "source": "apache",
+    "extensions": ["wmz"]
+  },
+  "application/x-ms-xbap": {
+    "source": "apache",
+    "extensions": ["xbap"]
+  },
+  "application/x-msaccess": {
+    "source": "apache",
+    "extensions": ["mdb"]
+  },
+  "application/x-msbinder": {
+    "source": "apache",
+    "extensions": ["obd"]
+  },
+  "application/x-mscardfile": {
+    "source": "apache",
+    "extensions": ["crd"]
+  },
+  "application/x-msclip": {
+    "source": "apache",
+    "extensions": ["clp"]
+  },
+  "application/x-msdownload": {
+    "source": "apache",
+    "extensions": ["exe","dll","com","bat","msi"]
+  },
+  "application/x-msmediaview": {
+    "source": "apache",
+    "extensions": ["mvb","m13","m14"]
+  },
+  "application/x-msmetafile": {
+    "source": "apache",
+    "extensions": ["wmf","wmz","emf","emz"]
+  },
+  "application/x-msmoney": {
+    "source": "apache",
+    "extensions": ["mny"]
+  },
+  "application/x-mspublisher": {
+    "source": "apache",
+    "extensions": ["pub"]
+  },
+  "application/x-msschedule": {
+    "source": "apache",
+    "extensions": ["scd"]
+  },
+  "application/x-msterminal": {
+    "source": "apache",
+    "extensions": ["trm"]
+  },
+  "application/x-mswrite": {
+    "source": "apache",
+    "extensions": ["wri"]
+  },
+  "application/x-netcdf": {
+    "source": "apache",
+    "extensions": ["nc","cdf"]
+  },
+  "application/x-nzb": {
+    "source": "apache",
+    "extensions": ["nzb"]
+  },
+  "application/x-pkcs12": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["p12","pfx"]
+  },
+  "application/x-pkcs7-certificates": {
+    "source": "apache",
+    "extensions": ["p7b","spc"]
+  },
+  "application/x-pkcs7-certreqresp": {
+    "source": "apache",
+    "extensions": ["p7r"]
+  },
+  "application/x-rar-compressed": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["rar"]
+  },
+  "application/x-research-info-systems": {
+    "source": "apache",
+    "extensions": ["ris"]
+  },
+  "application/x-sh": {
+    "source": "apache",
+    "compressible": true,
+    "extensions": ["sh"]
+  },
+  "application/x-shar": {
+    "source": "apache",
+    "extensions": ["shar"]
+  },
+  "application/x-shockwave-flash": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["swf"]
+  },
+  "application/x-silverlight-app": {
+    "source": "apache",
+    "extensions": ["xap"]
+  },
+  "application/x-sql": {
+    "source": "apache",
+    "extensions": ["sql"]
+  },
+  "application/x-stuffit": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["sit"]
+  },
+  "application/x-stuffitx": {
+    "source": "apache",
+    "extensions": ["sitx"]
+  },
+  "application/x-subrip": {
+    "source": "apache",
+    "extensions": ["srt"]
+  },
+  "application/x-sv4cpio": {
+    "source": "apache",
+    "extensions": ["sv4cpio"]
+  },
+  "application/x-sv4crc": {
+    "source": "apache",
+    "extensions": ["sv4crc"]
+  },
+  "application/x-t3vm-image": {
+    "source": "apache",
+    "extensions": ["t3"]
+  },
+  "application/x-tads": {
+    "source": "apache",
+    "extensions": ["gam"]
+  },
+  "application/x-tar": {
+    "source": "apache",
+    "compressible": true,
+    "extensions": ["tar"]
+  },
+  "application/x-tcl": {
+    "source": "apache",
+    "extensions": ["tcl"]
+  },
+  "application/x-tex": {
+    "source": "apache",
+    "extensions": ["tex"]
+  },
+  "application/x-tex-tfm": {
+    "source": "apache",
+    "extensions": ["tfm"]
+  },
+  "application/x-texinfo": {
+    "source": "apache",
+    "extensions": ["texinfo","texi"]
+  },
+  "application/x-tgif": {
+    "source": "apache",
+    "extensions": ["obj"]
+  },
+  "application/x-ustar": {
+    "source": "apache",
+    "extensions": ["ustar"]
+  },
+  "application/x-wais-source": {
+    "source": "apache",
+    "extensions": ["src"]
+  },
+  "application/x-web-app-manifest+json": {
+    "compressible": true,
+    "extensions": ["webapp"]
+  },
+  "application/x-www-form-urlencoded": {
+    "source": "iana",
+    "compressible": true
+  },
+  "application/x-x509-ca-cert": {
+    "source": "apache",
+    "extensions": ["der","crt"]
+  },
+  "application/x-xfig": {
+    "source": "apache",
+    "extensions": ["fig"]
+  },
+  "application/x-xliff+xml": {
+    "source": "apache",
+    "extensions": ["xlf"]
+  },
+  "application/x-xpinstall": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["xpi"]
+  },
+  "application/x-xz": {
+    "source": "apache",
+    "extensions": ["xz"]
+  },
+  "application/x-zmachine": {
+    "source": "apache",
+    "extensions": ["z1","z2","z3","z4","z5","z6","z7","z8"]
+  },
+  "application/x400-bp": {
+    "source": "iana"
+  },
+  "application/xacml+xml": {
+    "source": "iana"
+  },
+  "application/xaml+xml": {
+    "source": "apache",
+    "extensions": ["xaml"]
+  },
+  "application/xcap-att+xml": {
+    "source": "iana"
+  },
+  "application/xcap-caps+xml": {
+    "source": "iana"
+  },
+  "application/xcap-diff+xml": {
+    "source": "iana",
+    "extensions": ["xdf"]
+  },
+  "application/xcap-el+xml": {
+    "source": "iana"
+  },
+  "application/xcap-error+xml": {
+    "source": "iana"
+  },
+  "application/xcap-ns+xml": {
+    "source": "iana"
+  },
+  "application/xcon-conference-info+xml": {
+    "source": "iana"
+  },
+  "application/xcon-conference-info-diff+xml": {
+    "source": "iana"
+  },
+  "application/xenc+xml": {
+    "source": "iana",
+    "extensions": ["xenc"]
+  },
+  "application/xhtml+xml": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["xhtml","xht"]
+  },
+  "application/xhtml-voice+xml": {
+    "source": "iana"
+  },
+  "application/xml": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["xml","xsl","xsd"]
+  },
+  "application/xml-dtd": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["dtd"]
+  },
+  "application/xml-external-parsed-entity": {
+    "source": "iana"
+  },
+  "application/xml-patch+xml": {
+    "source": "iana"
+  },
+  "application/xmpp+xml": {
+    "source": "iana"
+  },
+  "application/xop+xml": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["xop"]
+  },
+  "application/xproc+xml": {
+    "source": "apache",
+    "extensions": ["xpl"]
+  },
+  "application/xslt+xml": {
+    "source": "iana",
+    "extensions": ["xslt"]
+  },
+  "application/xspf+xml": {
+    "source": "apache",
+    "extensions": ["xspf"]
+  },
+  "application/xv+xml": {
+    "source": "iana",
+    "extensions": ["mxml","xhvml","xvml","xvm"]
+  },
+  "application/yang": {
+    "source": "iana",
+    "extensions": ["yang"]
+  },
+  "application/yin+xml": {
+    "source": "iana",
+    "extensions": ["yin"]
+  },
+  "application/zip": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["zip"]
+  },
+  "application/zlib": {
+    "source": "iana"
+  },
+  "audio/1d-interleaved-parityfec": {
+    "source": "iana"
+  },
+  "audio/32kadpcm": {
+    "source": "iana"
+  },
+  "audio/3gpp": {
+    "source": "iana"
+  },
+  "audio/3gpp2": {
+    "source": "iana"
+  },
+  "audio/ac3": {
+    "source": "iana"
+  },
+  "audio/adpcm": {
+    "source": "apache",
+    "extensions": ["adp"]
+  },
+  "audio/amr": {
+    "source": "iana"
+  },
+  "audio/amr-wb": {
+    "source": "iana"
+  },
+  "audio/amr-wb+": {
+    "source": "iana"
+  },
+  "audio/aptx": {
+    "source": "iana"
+  },
+  "audio/asc": {
+    "source": "iana"
+  },
+  "audio/atrac-advanced-lossless": {
+    "source": "iana"
+  },
+  "audio/atrac-x": {
+    "source": "iana"
+  },
+  "audio/atrac3": {
+    "source": "iana"
+  },
+  "audio/basic": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["au","snd"]
+  },
+  "audio/bv16": {
+    "source": "iana"
+  },
+  "audio/bv32": {
+    "source": "iana"
+  },
+  "audio/clearmode": {
+    "source": "iana"
+  },
+  "audio/cn": {
+    "source": "iana"
+  },
+  "audio/dat12": {
+    "source": "iana"
+  },
+  "audio/dls": {
+    "source": "iana"
+  },
+  "audio/dsr-es201108": {
+    "source": "iana"
+  },
+  "audio/dsr-es202050": {
+    "source": "iana"
+  },
+  "audio/dsr-es202211": {
+    "source": "iana"
+  },
+  "audio/dsr-es202212": {
+    "source": "iana"
+  },
+  "audio/dv": {
+    "source": "iana"
+  },
+  "audio/dvi4": {
+    "source": "iana"
+  },
+  "audio/eac3": {
+    "source": "iana"
+  },
+  "audio/encaprtp": {
+    "source": "iana"
+  },
+  "audio/evrc": {
+    "source": "iana"
+  },
+  "audio/evrc-qcp": {
+    "source": "iana"
+  },
+  "audio/evrc0": {
+    "source": "iana"
+  },
+  "audio/evrc1": {
+    "source": "iana"
+  },
+  "audio/evrcb": {
+    "source": "iana"
+  },
+  "audio/evrcb0": {
+    "source": "iana"
+  },
+  "audio/evrcb1": {
+    "source": "iana"
+  },
+  "audio/evrcnw": {
+    "source": "iana"
+  },
+  "audio/evrcnw0": {
+    "source": "iana"
+  },
+  "audio/evrcnw1": {
+    "source": "iana"
+  },
+  "audio/evrcwb": {
+    "source": "iana"
+  },
+  "audio/evrcwb0": {
+    "source": "iana"
+  },
+  "audio/evrcwb1": {
+    "source": "iana"
+  },
+  "audio/fwdred": {
+    "source": "iana"
+  },
+  "audio/g719": {
+    "source": "iana"
+  },
+  "audio/g722": {
+    "source": "iana"
+  },
+  "audio/g7221": {
+    "source": "iana"
+  },
+  "audio/g723": {
+    "source": "iana"
+  },
+  "audio/g726-16": {
+    "source": "iana"
+  },
+  "audio/g726-24": {
+    "source": "iana"
+  },
+  "audio/g726-32": {
+    "source": "iana"
+  },
+  "audio/g726-40": {
+    "source": "iana"
+  },
+  "audio/g728": {
+    "source": "iana"
+  },
+  "audio/g729": {
+    "source": "iana"
+  },
+  "audio/g7291": {
+    "source": "iana"
+  },
+  "audio/g729d": {
+    "source": "iana"
+  },
+  "audio/g729e": {
+    "source": "iana"
+  },
+  "audio/gsm": {
+    "source": "iana"
+  },
+  "audio/gsm-efr": {
+    "source": "iana"
+  },
+  "audio/gsm-hr-08": {
+    "source": "iana"
+  },
+  "audio/ilbc": {
+    "source": "iana"
+  },
+  "audio/ip-mr_v2.5": {
+    "source": "iana"
+  },
+  "audio/isac": {
+    "source": "apache"
+  },
+  "audio/l16": {
+    "source": "iana"
+  },
+  "audio/l20": {
+    "source": "iana"
+  },
+  "audio/l24": {
+    "source": "iana",
+    "compressible": false
+  },
+  "audio/l8": {
+    "source": "iana"
+  },
+  "audio/lpc": {
+    "source": "iana"
+  },
+  "audio/midi": {
+    "source": "apache",
+    "extensions": ["mid","midi","kar","rmi"]
+  },
+  "audio/mobile-xmf": {
+    "source": "iana"
+  },
+  "audio/mp4": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["mp4a","m4a"]
+  },
+  "audio/mp4a-latm": {
+    "source": "iana"
+  },
+  "audio/mpa": {
+    "source": "iana"
+  },
+  "audio/mpa-robust": {
+    "source": "iana"
+  },
+  "audio/mpeg": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["mpga","mp2","mp2a","mp3","m2a","m3a"]
+  },
+  "audio/mpeg4-generic": {
+    "source": "iana"
+  },
+  "audio/musepack": {
+    "source": "apache"
+  },
+  "audio/ogg": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["oga","ogg","spx"]
+  },
+  "audio/opus": {
+    "source": "apache"
+  },
+  "audio/parityfec": {
+    "source": "iana"
+  },
+  "audio/pcma": {
+    "source": "iana"
+  },
+  "audio/pcma-wb": {
+    "source": "iana"
+  },
+  "audio/pcmu": {
+    "source": "iana"
+  },
+  "audio/pcmu-wb": {
+    "source": "iana"
+  },
+  "audio/prs.sid": {
+    "source": "iana"
+  },
+  "audio/qcelp": {
+    "source": "iana"
+  },
+  "audio/raptorfec": {
+    "source": "iana"
+  },
+  "audio/red": {
+    "source": "iana"
+  },
+  "audio/rtp-enc-aescm128": {
+    "source": "iana"
+  },
+  "audio/rtp-midi": {
+    "source": "iana"
+  },
+  "audio/rtploopback": {
+    "source": "iana"
+  },
+  "audio/rtx": {
+    "source": "iana"
+  },
+  "audio/s3m": {
+    "source": "apache",
+    "extensions": ["s3m"]
+  },
+  "audio/silk": {
+    "source": "apache",
+    "extensions": ["sil"]
+  },
+  "audio/smv": {
+    "source": "iana"
+  },
+  "audio/smv-qcp": {
+    "source": "iana"
+  },
+  "audio/smv0": {
+    "source": "iana"
+  },
+  "audio/sp-midi": {
+    "source": "iana"
+  },
+  "audio/speex": {
+    "source": "iana"
+  },
+  "audio/t140c": {
+    "source": "iana"
+  },
+  "audio/t38": {
+    "source": "iana"
+  },
+  "audio/telephone-event": {
+    "source": "iana"
+  },
+  "audio/tone": {
+    "source": "iana"
+  },
+  "audio/uemclip": {
+    "source": "iana"
+  },
+  "audio/ulpfec": {
+    "source": "iana"
+  },
+  "audio/vdvi": {
+    "source": "iana"
+  },
+  "audio/vmr-wb": {
+    "source": "iana"
+  },
+  "audio/vnd.3gpp.iufp": {
+    "source": "iana"
+  },
+  "audio/vnd.4sb": {
+    "source": "iana"
+  },
+  "audio/vnd.audiokoz": {
+    "source": "iana"
+  },
+  "audio/vnd.celp": {
+    "source": "iana"
+  },
+  "audio/vnd.cisco.nse": {
+    "source": "iana"
+  },
+  "audio/vnd.cmles.radio-events": {
+    "source": "iana"
+  },
+  "audio/vnd.cns.anp1": {
+    "source": "iana"
+  },
+  "audio/vnd.cns.inf1": {
+    "source": "iana"
+  },
+  "audio/vnd.dece.audio": {
+    "source": "iana",
+    "extensions": ["uva","uvva"]
+  },
+  "audio/vnd.digital-winds": {
+    "source": "iana",
+    "extensions": ["eol"]
+  },
+  "audio/vnd.dlna.adts": {
+    "source": "iana"
+  },
+  "audio/vnd.dolby.heaac.1": {
+    "source": "iana"
+  },
+  "audio/vnd.dolby.heaac.2": {
+    "source": "iana"
+  },
+  "audio/vnd.dolby.mlp": {
+    "source": "iana"
+  },
+  "audio/vnd.dolby.mps": {
+    "source": "iana"
+  },
+  "audio/vnd.dolby.pl2": {
+    "source": "iana"
+  },
+  "audio/vnd.dolby.pl2x": {
+    "source": "iana"
+  },
+  "audio/vnd.dolby.pl2z": {
+    "source": "iana"
+  },
+  "audio/vnd.dolby.pulse.1": {
+    "source": "iana"
+  },
+  "audio/vnd.dra": {
+    "source": "iana",
+    "extensions": ["dra"]
+  },
+  "audio/vnd.dts": {
+    "source": "iana",
+    "extensions": ["dts"]
+  },
+  "audio/vnd.dts.hd": {
+    "source": "iana",
+    "extensions": ["dtshd"]
+  },
+  "audio/vnd.dvb.file": {
+    "source": "iana"
+  },
+  "audio/vnd.everad.plj": {
+    "source": "iana"
+  },
+  "audio/vnd.hns.audio": {
+    "source": "iana"
+  },
+  "audio/vnd.lucent.voice": {
+    "source": "iana",
+    "extensions": ["lvp"]
+  },
+  "audio/vnd.ms-playready.media.pya": {
+    "source": "iana",
+    "extensions": ["pya"]
+  },
+  "audio/vnd.nokia.mobile-xmf": {
+    "source": "iana"
+  },
+  "audio/vnd.nortel.vbk": {
+    "source": "iana"
+  },
+  "audio/vnd.nuera.ecelp4800": {
+    "source": "iana",
+    "extensions": ["ecelp4800"]
+  },
+  "audio/vnd.nuera.ecelp7470": {
+    "source": "iana",
+    "extensions": ["ecelp7470"]
+  },
+  "audio/vnd.nuera.ecelp9600": {
+    "source": "iana",
+    "extensions": ["ecelp9600"]
+  },
+  "audio/vnd.octel.sbc": {
+    "source": "iana"
+  },
+  "audio/vnd.qcelp": {
+    "source": "iana"
+  },
+  "audio/vnd.rhetorex.32kadpcm": {
+    "source": "iana"
+  },
+  "audio/vnd.rip": {
+    "source": "iana",
+    "extensions": ["rip"]
+  },
+  "audio/vnd.rn-realaudio": {
+    "compressible": false
+  },
+  "audio/vnd.sealedmedia.softseal.mpeg": {
+    "source": "iana"
+  },
+  "audio/vnd.vmx.cvsd": {
+    "source": "iana"
+  },
+  "audio/vnd.wave": {
+    "compressible": false
+  },
+  "audio/vorbis": {
+    "source": "iana",
+    "compressible": false
+  },
+  "audio/vorbis-config": {
+    "source": "iana"
+  },
+  "audio/webm": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["weba"]
+  },
+  "audio/x-aac": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["aac"]
+  },
+  "audio/x-aiff": {
+    "source": "apache",
+    "extensions": ["aif","aiff","aifc"]
+  },
+  "audio/x-caf": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["caf"]
+  },
+  "audio/x-flac": {
+    "source": "apache",
+    "extensions": ["flac"]
+  },
+  "audio/x-matroska": {
+    "source": "apache",
+    "extensions": ["mka"]
+  },
+  "audio/x-mpegurl": {
+    "source": "apache",
+    "extensions": ["m3u"]
+  },
+  "audio/x-ms-wax": {
+    "source": "apache",
+    "extensions": ["wax"]
+  },
+  "audio/x-ms-wma": {
+    "source": "apache",
+    "extensions": ["wma"]
+  },
+  "audio/x-pn-realaudio": {
+    "source": "apache",
+    "extensions": ["ram","ra"]
+  },
+  "audio/x-pn-realaudio-plugin": {
+    "source": "apache",
+    "extensions": ["rmp"]
+  },
+  "audio/x-tta": {
+    "source": "apache"
+  },
+  "audio/x-wav": {
+    "source": "apache",
+    "extensions": ["wav"]
+  },
+  "audio/xm": {
+    "source": "apache",
+    "extensions": ["xm"]
+  },
+  "chemical/x-cdx": {
+    "source": "apache",
+    "extensions": ["cdx"]
+  },
+  "chemical/x-cif": {
+    "source": "apache",
+    "extensions": ["cif"]
+  },
+  "chemical/x-cmdf": {
+    "source": "apache",
+    "extensions": ["cmdf"]
+  },
+  "chemical/x-cml": {
+    "source": "apache",
+    "extensions": ["cml"]
+  },
+  "chemical/x-csml": {
+    "source": "apache",
+    "extensions": ["csml"]
+  },
+  "chemical/x-pdb": {
+    "source": "apache"
+  },
+  "chemical/x-xyz": {
+    "source": "apache",
+    "extensions": ["xyz"]
+  },
+  "font/opentype": {
+    "compressible": true,
+    "extensions": ["otf"]
+  },
+  "image/bmp": {
+    "source": "apache",
+    "compressible": true,
+    "extensions": ["bmp"]
+  },
+  "image/cgm": {
+    "source": "iana",
+    "extensions": ["cgm"]
+  },
+  "image/fits": {
+    "source": "iana"
+  },
+  "image/g3fax": {
+    "source": "iana",
+    "extensions": ["g3"]
+  },
+  "image/gif": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["gif"]
+  },
+  "image/ief": {
+    "source": "iana",
+    "extensions": ["ief"]
+  },
+  "image/jp2": {
+    "source": "iana"
+  },
+  "image/jpeg": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["jpeg","jpg","jpe"]
+  },
+  "image/jpm": {
+    "source": "iana"
+  },
+  "image/jpx": {
+    "source": "iana"
+  },
+  "image/ktx": {
+    "source": "iana",
+    "extensions": ["ktx"]
+  },
+  "image/naplps": {
+    "source": "iana"
+  },
+  "image/pjpeg": {
+    "compressible": false
+  },
+  "image/png": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["png"]
+  },
+  "image/prs.btif": {
+    "source": "iana",
+    "extensions": ["btif"]
+  },
+  "image/prs.pti": {
+    "source": "iana"
+  },
+  "image/pwg-raster": {
+    "source": "iana"
+  },
+  "image/sgi": {
+    "source": "apache",
+    "extensions": ["sgi"]
+  },
+  "image/svg+xml": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["svg","svgz"]
+  },
+  "image/t38": {
+    "source": "iana"
+  },
+  "image/tiff": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["tiff","tif"]
+  },
+  "image/tiff-fx": {
+    "source": "iana"
+  },
+  "image/vnd.adobe.photoshop": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["psd"]
+  },
+  "image/vnd.airzip.accelerator.azv": {
+    "source": "iana"
+  },
+  "image/vnd.cns.inf2": {
+    "source": "iana"
+  },
+  "image/vnd.dece.graphic": {
+    "source": "iana",
+    "extensions": ["uvi","uvvi","uvg","uvvg"]
+  },
+  "image/vnd.djvu": {
+    "source": "iana",
+    "extensions": ["djvu","djv"]
+  },
+  "image/vnd.dvb.subtitle": {
+    "source": "iana",
+    "extensions": ["sub"]
+  },
+  "image/vnd.dwg": {
+    "source": "iana",
+    "extensions": ["dwg"]
+  },
+  "image/vnd.dxf": {
+    "source": "iana",
+    "extensions": ["dxf"]
+  },
+  "image/vnd.fastbidsheet": {
+    "source": "iana",
+    "extensions": ["fbs"]
+  },
+  "image/vnd.fpx": {
+    "source": "iana",
+    "extensions": ["fpx"]
+  },
+  "image/vnd.fst": {
+    "source": "iana",
+    "extensions": ["fst"]
+  },
+  "image/vnd.fujixerox.edmics-mmr": {
+    "source": "iana",
+    "extensions": ["mmr"]
+  },
+  "image/vnd.fujixerox.edmics-rlc": {
+    "source": "iana",
+    "extensions": ["rlc"]
+  },
+  "image/vnd.globalgraphics.pgb": {
+    "source": "iana"
+  },
+  "image/vnd.microsoft.icon": {
+    "source": "iana"
+  },
+  "image/vnd.mix": {
+    "source": "iana"
+  },
+  "image/vnd.ms-modi": {
+    "source": "iana",
+    "extensions": ["mdi"]
+  },
+  "image/vnd.ms-photo": {
+    "source": "apache",
+    "extensions": ["wdp"]
+  },
+  "image/vnd.net-fpx": {
+    "source": "iana",
+    "extensions": ["npx"]
+  },
+  "image/vnd.radiance": {
+    "source": "iana"
+  },
+  "image/vnd.sealed.png": {
+    "source": "iana"
+  },
+  "image/vnd.sealedmedia.softseal.gif": {
+    "source": "iana"
+  },
+  "image/vnd.sealedmedia.softseal.jpg": {
+    "source": "iana"
+  },
+  "image/vnd.svf": {
+    "source": "iana"
+  },
+  "image/vnd.tencent.tap": {
+    "source": "iana"
+  },
+  "image/vnd.valve.source.texture": {
+    "source": "iana"
+  },
+  "image/vnd.wap.wbmp": {
+    "source": "iana",
+    "extensions": ["wbmp"]
+  },
+  "image/vnd.xiff": {
+    "source": "iana",
+    "extensions": ["xif"]
+  },
+  "image/webp": {
+    "source": "apache",
+    "extensions": ["webp"]
+  },
+  "image/x-3ds": {
+    "source": "apache",
+    "extensions": ["3ds"]
+  },
+  "image/x-cmu-raster": {
+    "source": "apache",
+    "extensions": ["ras"]
+  },
+  "image/x-cmx": {
+    "source": "apache",
+    "extensions": ["cmx"]
+  },
+  "image/x-freehand": {
+    "source": "apache",
+    "extensions": ["fh","fhc","fh4","fh5","fh7"]
+  },
+  "image/x-icon": {
+    "source": "apache",
+    "compressible": true,
+    "extensions": ["ico"]
+  },
+  "image/x-mrsid-image": {
+    "source": "apache",
+    "extensions": ["sid"]
+  },
+  "image/x-pcx": {
+    "source": "apache",
+    "extensions": ["pcx"]
+  },
+  "image/x-pict": {
+    "source": "apache",
+    "extensions": ["pic","pct"]
+  },
+  "image/x-portable-anymap": {
+    "source": "apache",
+    "extensions": ["pnm"]
+  },
+  "image/x-portable-bitmap": {
+    "source": "apache",
+    "extensions": ["pbm"]
+  },
+  "image/x-portable-graymap": {
+    "source": "apache",
+    "extensions": ["pgm"]
+  },
+  "image/x-portable-pixmap": {
+    "source": "apache",
+    "extensions": ["ppm"]
+  },
+  "image/x-rgb": {
+    "source": "apache",
+    "extensions": ["rgb"]
+  },
+  "image/x-tga": {
+    "source": "apache",
+    "extensions": ["tga"]
+  },
+  "image/x-xbitmap": {
+    "source": "apache",
+    "extensions": ["xbm"]
+  },
+  "image/x-xcf": {
+    "compressible": false
+  },
+  "image/x-xpixmap": {
+    "source": "apache",
+    "extensions": ["xpm"]
+  },
+  "image/x-xwindowdump": {
+    "source": "apache",
+    "extensions": ["xwd"]
+  },
+  "message/cpim": {
+    "source": "iana"
+  },
+  "message/delivery-status": {
+    "source": "iana"
+  },
+  "message/disposition-notification": {
+    "source": "iana"
+  },
+  "message/external-body": {
+    "source": "iana"
+  },
+  "message/feedback-report": {
+    "source": "iana"
+  },
+  "message/global": {
+    "source": "iana"
+  },
+  "message/global-delivery-status": {
+    "source": "iana"
+  },
+  "message/global-disposition-notification": {
+    "source": "iana"
+  },
+  "message/global-headers": {
+    "source": "iana"
+  },
+  "message/http": {
+    "source": "iana",
+    "compressible": false
+  },
+  "message/imdn+xml": {
+    "source": "iana",
+    "compressible": true
+  },
+  "message/news": {
+    "source": "iana"
+  },
+  "message/partial": {
+    "source": "iana",
+    "compressible": false
+  },
+  "message/rfc822": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["eml","mime"]
+  },
+  "message/s-http": {
+    "source": "iana"
+  },
+  "message/sip": {
+    "source": "iana"
+  },
+  "message/sipfrag": {
+    "source": "iana"
+  },
+  "message/tracking-status": {
+    "source": "iana"
+  },
+  "message/vnd.si.simp": {
+    "source": "iana"
+  },
+  "message/vnd.wfa.wsc": {
+    "source": "iana"
+  },
+  "model/iges": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["igs","iges"]
+  },
+  "model/mesh": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["msh","mesh","silo"]
+  },
+  "model/vnd.collada+xml": {
+    "source": "iana",
+    "extensions": ["dae"]
+  },
+  "model/vnd.dwf": {
+    "source": "iana",
+    "extensions": ["dwf"]
+  },
+  "model/vnd.flatland.3dml": {
+    "source": "iana"
+  },
+  "model/vnd.gdl": {
+    "source": "iana",
+    "extensions": ["gdl"]
+  },
+  "model/vnd.gs-gdl": {
+    "source": "apache"
+  },
+  "model/vnd.gs.gdl": {
+    "source": "iana"
+  },
+  "model/vnd.gtw": {
+    "source": "iana",
+    "extensions": ["gtw"]
+  },
+  "model/vnd.moml+xml": {
+    "source": "iana"
+  },
+  "model/vnd.mts": {
+    "source": "iana",
+    "extensions": ["mts"]
+  },
+  "model/vnd.opengex": {
+    "source": "iana"
+  },
+  "model/vnd.parasolid.transmit.binary": {
+    "source": "iana"
+  },
+  "model/vnd.parasolid.transmit.text": {
+    "source": "iana"
+  },
+  "model/vnd.valve.source.compiled-map": {
+    "source": "iana"
+  },
+  "model/vnd.vtu": {
+    "source": "iana",
+    "extensions": ["vtu"]
+  },
+  "model/vrml": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["wrl","vrml"]
+  },
+  "model/x3d+binary": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["x3db","x3dbz"]
+  },
+  "model/x3d+fastinfoset": {
+    "source": "iana"
+  },
+  "model/x3d+vrml": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["x3dv","x3dvz"]
+  },
+  "model/x3d+xml": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["x3d","x3dz"]
+  },
+  "model/x3d-vrml": {
+    "source": "iana"
+  },
+  "multipart/alternative": {
+    "source": "iana",
+    "compressible": false
+  },
+  "multipart/appledouble": {
+    "source": "iana"
+  },
+  "multipart/byteranges": {
+    "source": "iana"
+  },
+  "multipart/digest": {
+    "source": "iana"
+  },
+  "multipart/encrypted": {
+    "source": "iana",
+    "compressible": false
+  },
+  "multipart/form-data": {
+    "source": "iana",
+    "compressible": false
+  },
+  "multipart/header-set": {
+    "source": "iana"
+  },
+  "multipart/mixed": {
+    "source": "iana",
+    "compressible": false
+  },
+  "multipart/parallel": {
+    "source": "iana"
+  },
+  "multipart/related": {
+    "source": "iana",
+    "compressible": false
+  },
+  "multipart/report": {
+    "source": "iana"
+  },
+  "multipart/signed": {
+    "source": "iana",
+    "compressible": false
+  },
+  "multipart/voice-message": {
+    "source": "iana"
+  },
+  "multipart/x-mixed-replace": {
+    "source": "iana"
+  },
+  "text/1d-interleaved-parityfec": {
+    "source": "iana"
+  },
+  "text/cache-manifest": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["appcache","manifest"]
+  },
+  "text/calendar": {
+    "source": "iana",
+    "extensions": ["ics","ifb"]
+  },
+  "text/calender": {
+    "compressible": true
+  },
+  "text/cmd": {
+    "compressible": true
+  },
+  "text/coffeescript": {
+    "extensions": ["coffee"]
+  },
+  "text/css": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["css"]
+  },
+  "text/csv": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["csv"]
+  },
+  "text/csv-schema": {
+    "source": "iana"
+  },
+  "text/directory": {
+    "source": "iana"
+  },
+  "text/dns": {
+    "source": "iana"
+  },
+  "text/ecmascript": {
+    "source": "iana"
+  },
+  "text/encaprtp": {
+    "source": "iana"
+  },
+  "text/enriched": {
+    "source": "iana"
+  },
+  "text/fwdred": {
+    "source": "iana"
+  },
+  "text/grammar-ref-list": {
+    "source": "iana"
+  },
+  "text/hjson": {
+    "extensions": ["hjson"]
+  },
+  "text/html": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["html","htm"]
+  },
+  "text/jade": {
+    "extensions": ["jade"]
+  },
+  "text/javascript": {
+    "source": "iana",
+    "compressible": true
+  },
+  "text/jcr-cnd": {
+    "source": "iana"
+  },
+  "text/jsx": {
+    "compressible": true,
+    "extensions": ["jsx"]
+  },
+  "text/less": {
+    "extensions": ["less"]
+  },
+  "text/markdown": {
+    "source": "iana"
+  },
+  "text/mizar": {
+    "source": "iana"
+  },
+  "text/n3": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["n3"]
+  },
+  "text/parameters": {
+    "source": "iana"
+  },
+  "text/parityfec": {
+    "source": "iana"
+  },
+  "text/plain": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["txt","text","conf","def","list","log","in","ini"]
+  },
+  "text/provenance-notation": {
+    "source": "iana"
+  },
+  "text/prs.fallenstein.rst": {
+    "source": "iana"
+  },
+  "text/prs.lines.tag": {
+    "source": "iana",
+    "extensions": ["dsc"]
+  },
+  "text/raptorfec": {
+    "source": "iana"
+  },
+  "text/red": {
+    "source": "iana"
+  },
+  "text/rfc822-headers": {
+    "source": "iana"
+  },
+  "text/richtext": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["rtx"]
+  },
+  "text/rtf": {
+    "source": "iana"
+  },
+  "text/rtp-enc-aescm128": {
+    "source": "iana"
+  },
+  "text/rtploopback": {
+    "source": "iana"
+  },
+  "text/rtx": {
+    "source": "iana"
+  },
+  "text/sgml": {
+    "source": "iana",
+    "extensions": ["sgml","sgm"]
+  },
+  "text/stylus": {
+    "extensions": ["stylus","styl"]
+  },
+  "text/t140": {
+    "source": "iana"
+  },
+  "text/tab-separated-values": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["tsv"]
+  },
+  "text/troff": {
+    "source": "iana",
+    "extensions": ["t","tr","roff","man","me","ms"]
+  },
+  "text/turtle": {
+    "source": "iana",
+    "extensions": ["ttl"]
+  },
+  "text/ulpfec": {
+    "source": "iana"
+  },
+  "text/uri-list": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["uri","uris","urls"]
+  },
+  "text/vcard": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["vcard"]
+  },
+  "text/vnd.a": {
+    "source": "iana"
+  },
+  "text/vnd.abc": {
+    "source": "iana"
+  },
+  "text/vnd.curl": {
+    "source": "iana",
+    "extensions": ["curl"]
+  },
+  "text/vnd.curl.dcurl": {
+    "source": "apache",
+    "extensions": ["dcurl"]
+  },
+  "text/vnd.curl.mcurl": {
+    "source": "apache",
+    "extensions": ["mcurl"]
+  },
+  "text/vnd.curl.scurl": {
+    "source": "apache",
+    "extensions": ["scurl"]
+  },
+  "text/vnd.debian.copyright": {
+    "source": "iana"
+  },
+  "text/vnd.dmclientscript": {
+    "source": "iana"
+  },
+  "text/vnd.dvb.subtitle": {
+    "source": "iana",
+    "extensions": ["sub"]
+  },
+  "text/vnd.esmertec.theme-descriptor": {
+    "source": "iana"
+  },
+  "text/vnd.fly": {
+    "source": "iana",
+    "extensions": ["fly"]
+  },
+  "text/vnd.fmi.flexstor": {
+    "source": "iana",
+    "extensions": ["flx"]
+  },
+  "text/vnd.graphviz": {
+    "source": "iana",
+    "extensions": ["gv"]
+  },
+  "text/vnd.in3d.3dml": {
+    "source": "iana",
+    "extensions": ["3dml"]
+  },
+  "text/vnd.in3d.spot": {
+    "source": "iana",
+    "extensions": ["spot"]
+  },
+  "text/vnd.iptc.newsml": {
+    "source": "iana"
+  },
+  "text/vnd.iptc.nitf": {
+    "source": "iana"
+  },
+  "text/vnd.latex-z": {
+    "source": "iana"
+  },
+  "text/vnd.motorola.reflex": {
+    "source": "iana"
+  },
+  "text/vnd.ms-mediapackage": {
+    "source": "iana"
+  },
+  "text/vnd.net2phone.commcenter.command": {
+    "source": "iana"
+  },
+  "text/vnd.radisys.msml-basic-layout": {
+    "source": "iana"
+  },
+  "text/vnd.si.uricatalogue": {
+    "source": "iana"
+  },
+  "text/vnd.sun.j2me.app-descriptor": {
+    "source": "iana",
+    "extensions": ["jad"]
+  },
+  "text/vnd.trolltech.linguist": {
+    "source": "iana"
+  },
+  "text/vnd.wap.si": {
+    "source": "iana"
+  },
+  "text/vnd.wap.sl": {
+    "source": "iana"
+  },
+  "text/vnd.wap.wml": {
+    "source": "iana",
+    "extensions": ["wml"]
+  },
+  "text/vnd.wap.wmlscript": {
+    "source": "iana",
+    "extensions": ["wmls"]
+  },
+  "text/vtt": {
+    "charset": "UTF-8",
+    "compressible": true,
+    "extensions": ["vtt"]
+  },
+  "text/x-asm": {
+    "source": "apache",
+    "extensions": ["s","asm"]
+  },
+  "text/x-c": {
+    "source": "apache",
+    "extensions": ["c","cc","cxx","cpp","h","hh","dic"]
+  },
+  "text/x-component": {
+    "extensions": ["htc"]
+  },
+  "text/x-fortran": {
+    "source": "apache",
+    "extensions": ["f","for","f77","f90"]
+  },
+  "text/x-gwt-rpc": {
+    "compressible": true
+  },
+  "text/x-handlebars-template": {
+    "extensions": ["hbs"]
+  },
+  "text/x-java-source": {
+    "source": "apache",
+    "extensions": ["java"]
+  },
+  "text/x-jquery-tmpl": {
+    "compressible": true
+  },
+  "text/x-lua": {
+    "extensions": ["lua"]
+  },
+  "text/x-markdown": {
+    "compressible": true,
+    "extensions": ["markdown","md","mkd"]
+  },
+  "text/x-nfo": {
+    "source": "apache",
+    "extensions": ["nfo"]
+  },
+  "text/x-opml": {
+    "source": "apache",
+    "extensions": ["opml"]
+  },
+  "text/x-pascal": {
+    "source": "apache",
+    "extensions": ["p","pas"]
+  },
+  "text/x-sass": {
+    "extensions": ["sass"]
+  },
+  "text/x-scss": {
+    "extensions": ["scss"]
+  },
+  "text/x-setext": {
+    "source": "apache",
+    "extensions": ["etx"]
+  },
+  "text/x-sfv": {
+    "source": "apache",
+    "extensions": ["sfv"]
+  },
+  "text/x-uuencode": {
+    "source": "apache",
+    "extensions": ["uu"]
+  },
+  "text/x-vcalendar": {
+    "source": "apache",
+    "extensions": ["vcs"]
+  },
+  "text/x-vcard": {
+    "source": "apache",
+    "extensions": ["vcf"]
+  },
+  "text/xml": {
+    "source": "iana",
+    "compressible": true
+  },
+  "text/xml-external-parsed-entity": {
+    "source": "iana"
+  },
+  "text/yaml": {
+    "extensions": ["yaml","yml"]
+  },
+  "video/1d-interleaved-parityfec": {
+    "source": "apache"
+  },
+  "video/3gpp": {
+    "source": "apache",
+    "extensions": ["3gp"]
+  },
+  "video/3gpp-tt": {
+    "source": "apache"
+  },
+  "video/3gpp2": {
+    "source": "apache",
+    "extensions": ["3g2"]
+  },
+  "video/bmpeg": {
+    "source": "apache"
+  },
+  "video/bt656": {
+    "source": "apache"
+  },
+  "video/celb": {
+    "source": "apache"
+  },
+  "video/dv": {
+    "source": "apache"
+  },
+  "video/h261": {
+    "source": "apache",
+    "extensions": ["h261"]
+  },
+  "video/h263": {
+    "source": "apache",
+    "extensions": ["h263"]
+  },
+  "video/h263-1998": {
+    "source": "apache"
+  },
+  "video/h263-2000": {
+    "source": "apache"
+  },
+  "video/h264": {
+    "source": "apache",
+    "extensions": ["h264"]
+  },
+  "video/h264-rcdo": {
+    "source": "apache"
+  },
+  "video/h264-svc": {
+    "source": "apache"
+  },
+  "video/jpeg": {
+    "source": "apache",
+    "extensions": ["jpgv"]
+  },
+  "video/jpeg2000": {
+    "source": "apache"
+  },
+  "video/jpm": {
+    "source": "apache",
+    "extensions": ["jpm","jpgm"]
+  },
+  "video/mj2": {
+    "source": "apache",
+    "extensions": ["mj2","mjp2"]
+  },
+  "video/mp1s": {
+    "source": "apache"
+  },
+  "video/mp2p": {
+    "source": "apache"
+  },
+  "video/mp2t": {
+    "source": "apache",
+    "extensions": ["ts"]
+  },
+  "video/mp4": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["mp4","mp4v","mpg4"]
+  },
+  "video/mp4v-es": {
+    "source": "apache"
+  },
+  "video/mpeg": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["mpeg","mpg","mpe","m1v","m2v"]
+  },
+  "video/mpeg4-generic": {
+    "source": "apache"
+  },
+  "video/mpv": {
+    "source": "apache"
+  },
+  "video/nv": {
+    "source": "apache"
+  },
+  "video/ogg": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["ogv"]
+  },
+  "video/parityfec": {
+    "source": "apache"
+  },
+  "video/pointer": {
+    "source": "apache"
+  },
+  "video/quicktime": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["qt","mov"]
+  },
+  "video/raw": {
+    "source": "apache"
+  },
+  "video/rtp-enc-aescm128": {
+    "source": "apache"
+  },
+  "video/rtx": {
+    "source": "apache"
+  },
+  "video/smpte292m": {
+    "source": "apache"
+  },
+  "video/ulpfec": {
+    "source": "apache"
+  },
+  "video/vc1": {
+    "source": "apache"
+  },
+  "video/vnd.cctv": {
+    "source": "apache"
+  },
+  "video/vnd.dece.hd": {
+    "source": "apache",
+    "extensions": ["uvh","uvvh"]
+  },
+  "video/vnd.dece.mobile": {
+    "source": "apache",
+    "extensions": ["uvm","uvvm"]
+  },
+  "video/vnd.dece.mp4": {
+    "source": "apache"
+  },
+  "video/vnd.dece.pd": {
+    "source": "apache",
+    "extensions": ["uvp","uvvp"]
+  },
+  "video/vnd.dece.sd": {
+    "source": "apache",
+    "extensions": ["uvs","uvvs"]
+  },
+  "video/vnd.dece.video": {
+    "source": "apache",
+    "extensions": ["uvv","uvvv"]
+  },
+  "video/vnd.directv.mpeg": {
+    "source": "apache"
+  },
+  "video/vnd.directv.mpeg-tts": {
+    "source": "apache"
+  },
+  "video/vnd.dlna.mpeg-tts": {
+    "source": "apache"
+  },
+  "video/vnd.dvb.file": {
+    "source": "apache",
+    "extensions": ["dvb"]
+  },
+  "video/vnd.fvt": {
+    "source": "apache",
+    "extensions": ["fvt"]
+  },
+  "video/vnd.hns.video": {
+    "source": "apache"
+  },
+  "video/vnd.iptvforum.1dparityfec-1010": {
+    "source": "apache"
+  },
+  "video/vnd.iptvforum.1dparityfec-2005": {
+    "source": "apache"
+  },
+  "video/vnd.iptvforum.2dparityfec-1010": {
+    "source": "apache"
+  },
+  "video/vnd.iptvforum.2dparityfec-2005": {
+    "source": "apache"
+  },
+  "video/vnd.iptvforum.ttsavc": {
+    "source": "apache"
+  },
+  "video/vnd.iptvforum.ttsmpeg2": {
+    "source": "apache"
+  },
+  "video/vnd.motorola.video": {
+    "source": "apache"
+  },
+  "video/vnd.motorola.videop": {
+    "source": "apache"
+  },
+  "video/vnd.mpegurl": {
+    "source": "apache",
+    "extensions": ["mxu","m4u"]
+  },
+  "video/vnd.ms-playready.media.pyv": {
+    "source": "apache",
+    "extensions": ["pyv"]
+  },
+  "video/vnd.nokia.interleaved-multimedia": {
+    "source": "apache"
+  },
+  "video/vnd.nokia.videovoip": {
+    "source": "apache"
+  },
+  "video/vnd.objectvideo": {
+    "source": "apache"
+  },
+  "video/vnd.sealed.mpeg1": {
+    "source": "apache"
+  },
+  "video/vnd.sealed.mpeg4": {
+    "source": "apache"
+  },
+  "video/vnd.sealed.swf": {
+    "source": "apache"
+  },
+  "video/vnd.sealedmedia.softseal.mov": {
+    "source": "apache"
+  },
+  "video/vnd.uvvu.mp4": {
+    "source": "apache",
+    "extensions": ["uvu","uvvu"]
+  },
+  "video/vnd.vivo": {
+    "source": "apache",
+    "extensions": ["viv"]
+  },
+  "video/webm": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["webm"]
+  },
+  "video/x-f4v": {
+    "source": "apache",
+    "extensions": ["f4v"]
+  },
+  "video/x-fli": {
+    "source": "apache",
+    "extensions": ["fli"]
+  },
+  "video/x-flv": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["flv"]
+  },
+  "video/x-m4v": {
+    "source": "apache",
+    "extensions": ["m4v"]
+  },
+  "video/x-matroska": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["mkv","mk3d","mks"]
+  },
+  "video/x-mng": {
+    "source": "apache",
+    "extensions": ["mng"]
+  },
+  "video/x-ms-asf": {
+    "source": "apache",
+    "extensions": ["asf","asx"]
+  },
+  "video/x-ms-vob": {
+    "source": "apache",
+    "extensions": ["vob"]
+  },
+  "video/x-ms-wm": {
+    "source": "apache",
+    "extensions": ["wm"]
+  },
+  "video/x-ms-wmv": {
+    "source": "apache",
+    "compressible": false,
+    "extensions": ["wmv"]
+  },
+  "video/x-ms-wmx": {
+    "source": "apache",
+    "extensions": ["wmx"]
+  },
+  "video/x-ms-wvx": {
+    "source": "apache",
+    "extensions": ["wvx"]
+  },
+  "video/x-msvideo": {
+    "source": "apache",
+    "extensions": ["avi"]
+  },
+  "video/x-sgi-movie": {
+    "source": "apache",
+    "extensions": ["movie"]
+  },
+  "video/x-smv": {
+    "source": "apache",
+    "extensions": ["smv"]
+  },
+  "x-conference/x-cooltalk": {
+    "source": "apache",
+    "extensions": ["ice"]
+  },
+  "x-shader/x-fragment": {
+    "compressible": true
+  },
+  "x-shader/x-vertex": {
+    "compressible": true
+  }
 }
 
-},{}],220:[function(require,module,exports){
-module.exports={
-  "text/vtt": [
-    "vtt"
-  ],
-  "application/x-chrome-extension": [
-    "crx"
-  ],
-  "text/x-component": [
-    "htc"
-  ],
-  "text/cache-manifest": [
-    "manifest"
-  ],
-  "application/octet-stream": [
-    "buffer"
-  ],
-  "application/mp4": [
-    "m4p"
-  ],
-  "audio/mp4": [
-    "m4a"
-  ],
-  "video/MP2T": [
-    "ts"
-  ],
-  "application/x-web-app-manifest+json": [
-    "webapp"
-  ],
-  "text/x-lua": [
-    "lua"
-  ],
-  "application/x-lua-bytecode": [
-    "luac"
-  ],
-  "text/x-markdown": [
-    "markdown",
-    "md",
-    "mkd"
-  ],
-  "text/plain": [
-    "ini"
-  ],
-  "application/dash+xml": [
-    "mdp"
-  ],
-  "font/opentype": [
-    "otf"
-  ],
-  "application/json": [
-    "map"
-  ],
-  "application/xml": [
-    "xsd"
-  ]
-}
+},{}],232:[function(require,module,exports){
+/*!
+ * mime-db
+ * Copyright(c) 2014 Jonathan Ong
+ * MIT Licensed
+ */
 
-},{}],221:[function(require,module,exports){
+/**
+ * Module exports.
+ */
+
+module.exports = require('./db.json')
+
+},{"./db.json":231}],233:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -44790,7 +40956,7 @@ module.exports={
   }
 }).call(this);
 
-},{}],222:[function(require,module,exports){
+},{}],234:[function(require,module,exports){
 var crypto = require('crypto')
   , qs = require('querystring')
   ;
@@ -44886,8 +41052,18 @@ function rsasign (httpMethod, base_uri, params, private_key, token_secret) {
   return rsa(key, base)
 }
 
+function plaintext (consumer_secret, token_secret) {
+  var key = [
+    consumer_secret || '',
+    token_secret || ''
+  ].map(rfc3986).join('&')
+
+  return key
+}
+
 function sign (signMethod, httpMethod, base_uri, params, consumer_secret, token_secret) {
   var method
+  var skipArgs = 1
 
   switch (signMethod) {
     case 'RSA-SHA1':
@@ -44896,22 +41072,27 @@ function sign (signMethod, httpMethod, base_uri, params, consumer_secret, token_
     case 'HMAC-SHA1':
       method = hmacsign
       break
+    case 'PLAINTEXT':
+      method = plaintext
+      skipArgs = 4
+      break
     default:
      throw new Error("Signature method not supported: " + signMethod)
   }
 
-  return method.apply(null, [].slice.call(arguments, 1))
+  return method.apply(null, [].slice.call(arguments, skipArgs))
 }
 
 exports.hmacsign = hmacsign
 exports.rsasign = rsasign
+exports.plaintext = plaintext
 exports.sign = sign
 exports.rfc3986 = rfc3986
 
-},{"crypto":24,"querystring":141}],223:[function(require,module,exports){
+},{"crypto":20,"querystring":170}],235:[function(require,module,exports){
 module.exports = require('./lib/');
 
-},{"./lib/":224}],224:[function(require,module,exports){
+},{"./lib/":236}],236:[function(require,module,exports){
 // Load modules
 
 var Stringify = require('./stringify');
@@ -44928,7 +41109,7 @@ module.exports = {
     parse: Parse
 };
 
-},{"./parse":225,"./stringify":226}],225:[function(require,module,exports){
+},{"./parse":237,"./stringify":238}],237:[function(require,module,exports){
 // Load modules
 
 var Utils = require('./utils');
@@ -45087,7 +41268,7 @@ module.exports = function (str, options) {
     return Utils.compact(obj);
 };
 
-},{"./utils":227}],226:[function(require,module,exports){
+},{"./utils":239}],238:[function(require,module,exports){
 // Load modules
 
 var Utils = require('./utils');
@@ -45166,7 +41347,7 @@ module.exports = function (obj, options) {
     return keys.join(delimiter);
 };
 
-},{"./utils":227}],227:[function(require,module,exports){
+},{"./utils":239}],239:[function(require,module,exports){
 // Load modules
 
 
@@ -45300,7 +41481,7 @@ exports.isBuffer = function (obj) {
         obj.constructor.isBuffer(obj));
 };
 
-},{}],228:[function(require,module,exports){
+},{}],240:[function(require,module,exports){
 (function (Buffer){
 var util = require('util')
 var Stream = require('stream')
@@ -45406,7 +41587,7 @@ function alignedWrite(buffer) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":17,"stream":153,"string_decoder":154,"util":157}],229:[function(require,module,exports){
+},{"buffer":16,"stream":182,"string_decoder":183,"util":186}],241:[function(require,module,exports){
 /*
  * Copyright GoInstant, Inc. and other contributors. All rights reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -46515,7 +42696,7 @@ module.exports = {
   canonicalDomain: canonicalDomain,
 };
 
-},{"./memstore":230,"./pubsuffix":231,"./store":232,"net":1,"punycode":138,"url":155}],230:[function(require,module,exports){
+},{"./memstore":242,"./pubsuffix":243,"./store":244,"net":1,"punycode":167,"url":184}],242:[function(require,module,exports){
 'use strict';
 var tough = require('./cookie');
 var Store = require('./store').Store;
@@ -46640,7 +42821,7 @@ MemoryCookieStore.prototype.removeCookies = function removeCookies(domain, path,
   return cb(null);
 };
 
-},{"./cookie":229,"./store":232,"util":157}],231:[function(require,module,exports){
+},{"./cookie":241,"./store":244,"util":186}],243:[function(require,module,exports){
 /****************************************************
  * AUTOMATICALLY GENERATED by generate-pubsuffix.js *
  *                  DO NOT EDIT!                    *
@@ -46711,7 +42892,7 @@ var index = module.exports.index = Object.freeze(
 
 // END of automatically generated file
 
-},{}],232:[function(require,module,exports){
+},{}],244:[function(require,module,exports){
 'use strict';
 /*jshint unused:false */
 
@@ -46750,7 +42931,7 @@ Store.prototype.removeCookies = function removeCookies(domain, path, cb) {
   throw new Error('removeCookies is not implemented');
 };
 
-},{}],233:[function(require,module,exports){
+},{}],245:[function(require,module,exports){
 (function (process,Buffer){
 'use strict'
 
@@ -46990,7 +43171,7 @@ if (process.env.NODE_DEBUG && /\btunnel\b/.test(process.env.NODE_DEBUG)) {
 exports.debug = debug // for test
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":137,"assert":2,"buffer":17,"events":128,"http":129,"https":133,"net":1,"tls":1,"util":157}],234:[function(require,module,exports){
+},{"_process":166,"assert":2,"buffer":16,"events":157,"http":158,"https":162,"net":1,"tls":1,"util":186}],246:[function(require,module,exports){
 (function (process,Buffer){
 'use strict'
 
@@ -47004,7 +43185,6 @@ var http = require('http')
   , zlib = require('zlib')
   , helpers = require('./lib/helpers')
   , bl = require('bl')
-  , oauth = require('oauth-sign')
   , hawk = require('hawk')
   , aws = require('aws-sign2')
   , httpSignature = require('http-signature')
@@ -47017,9 +43197,12 @@ var http = require('http')
   , FormData = require('form-data')
   , cookies = require('./lib/cookies')
   , copy = require('./lib/copy')
-  , debug = require('./lib/debug')
   , net = require('net')
   , CombinedStream = require('combined-stream')
+  , isstream = require('isstream')
+  , getProxyFromURI = require('./lib/getProxyFromURI')
+  , Auth = require('./lib/auth').Auth
+  , oauth = require('./lib/oauth')
 
 var safeStringify = helpers.safeStringify
   , md5 = helpers.md5
@@ -47125,21 +43308,52 @@ function constructProxyHeaderWhiteList(headers, proxyHeaderWhiteList) {
     }, {})
 }
 
-function construcTunnelOptions(request) {
+function getTunnelOption(self, options) {
+  // Tunnel HTTPS by default, or if a previous request in the redirect chain
+  // was tunneled.  Allow the user to override this setting.
+
+  // If self.tunnel is already set (because this is a redirect), use the
+  // existing value.
+  if (typeof self.tunnel !== 'undefined') {
+    return self.tunnel
+  }
+
+  // If options.tunnel is set (the user specified a value), use it.
+  if (typeof options.tunnel !== 'undefined') {
+    return options.tunnel
+  }
+
+  // If the destination is HTTPS, tunnel.
+  if (self.uri.protocol === 'https:') {
+    return true
+  }
+
+  // Otherwise, leave tunnel unset, because if a later request in the redirect
+  // chain is HTTPS then that request (and any subsequent ones) should be
+  // tunneled.
+  return undefined
+}
+
+function constructTunnelOptions(request) {
   var proxy = request.proxy
 
   var tunnelOptions = {
-    proxy: {
-      host: proxy.hostname,
-      port: +proxy.port,
-      proxyAuth: proxy.auth,
-      headers: request.proxyHeaders
+    proxy : {
+      host      : proxy.hostname,
+      port      : +proxy.port,
+      proxyAuth : proxy.auth,
+      headers   : request.proxyHeaders
     },
-    rejectUnauthorized: request.rejectUnauthorized,
-    headers: request.headers,
-    ca: request.ca,
-    cert: request.cert,
-    key: request.key
+    headers            : request.headers,
+    ca                 : request.ca,
+    cert               : request.cert,
+    key                : request.key,
+    passphrase         : request.passphrase,
+    pfx                : request.pfx,
+    ciphers            : request.ciphers,
+    rejectUnauthorized : request.rejectUnauthorized,
+    secureOptions      : request.secureOptions,
+    secureProtocol     : request.secureProtocol
   }
 
   return tunnelOptions
@@ -47156,60 +43370,6 @@ function getTunnelFn(request) {
   var proxy = request.proxy
   var tunnelFnName = constructTunnelFnName(uri, proxy)
   return tunnel[tunnelFnName]
-}
-
-// Decide the proper request proxy to use based on the request URI object and the
-// environmental variables (NO_PROXY, HTTP_PROXY, etc.)
-function getProxyFromURI(uri) {
-  // respect NO_PROXY environment variables (see: http://lynx.isc.org/current/breakout/lynx_help/keystrokes/environments.html)
-  var noProxy = process.env.NO_PROXY || process.env.no_proxy || null
-
-  // easy case first - if NO_PROXY is '*'
-  if (noProxy === '*') {
-    return null
-  }
-
-  // otherwise, parse the noProxy value to see if it applies to the URL
-  if (noProxy !== null) {
-    var noProxyItem, hostname, port, noProxyItemParts, noProxyHost, noProxyPort, noProxyList
-
-    // canonicalize the hostname, so that 'oogle.com' won't match 'google.com'
-    hostname = uri.hostname.replace(/^\.*/, '.').toLowerCase()
-    noProxyList = noProxy.split(',')
-
-    for (var i = 0, len = noProxyList.length; i < len; i++) {
-      noProxyItem = noProxyList[i].trim().toLowerCase()
-
-      // no_proxy can be granular at the port level, which complicates things a bit.
-      if (noProxyItem.indexOf(':') > -1) {
-        noProxyItemParts = noProxyItem.split(':', 2)
-        noProxyHost = noProxyItemParts[0].replace(/^\.*/, '.')
-        noProxyPort = noProxyItemParts[1]
-        port = uri.port || (uri.protocol === 'https:' ? '443' : '80')
-
-        // we've found a match - ports are same and host ends with no_proxy entry.
-        if (port === noProxyPort && hostname.indexOf(noProxyHost) === hostname.length - noProxyHost.length) {
-          return null
-        }
-      } else {
-        noProxyItem = noProxyItem.replace(/^\.*/, '.')
-        var isMatchedAt = hostname.indexOf(noProxyItem)
-        if (isMatchedAt > -1 && isMatchedAt === hostname.length - noProxyItem.length) {
-          return null
-        }
-      }
-    }
-  }
-
-  // check for HTTP(S)_PROXY environment variables
-  if (uri.protocol === 'http:') {
-      return process.env.HTTP_PROXY || process.env.http_proxy || null
-  } else if (uri.protocol === 'https:') {
-      return process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy || null
-  }
-
-  // return null if all else fails (What uri protocol are you using then?)
-  return null
 }
 
 // Function for properly handling a connection error
@@ -47247,8 +43407,14 @@ function responseToJSON() {
   }
 }
 
+// encode rfc3986 characters
+function rfc3986 (str) {
+  return str.replace(/[!'()*]/g, function(c) {
+    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
+  })
+}
+
 function Request (options) {
-  // if tunnel property of options was not given default to false
   // if given the method property in options, set property explicitMethod to true
 
   // extend the Request instance with any non-reserved properties
@@ -47267,64 +43433,50 @@ function Request (options) {
 
   self.readable = true
   self.writable = true
-  if (typeof options.tunnel === 'undefined') {
-    options.tunnel = false
-  }
   if (options.method) {
     self.explicitMethod = true
   }
-  self.canTunnel = options.tunnel !== false && tunnel
   self.init(options)
 }
 
 util.inherits(Request, stream.Stream)
 
-Request.prototype.setupTunnel = function () {
-  // Set up the tunneling agent if necessary
-  // Only send the proxy whitelisted header names.
-  // Turn on tunneling for the rest of request.
+// Debugging
+Request.debug = process.env.NODE_DEBUG && /\brequest\b/.test(process.env.NODE_DEBUG)
+function debug() {
+  if (Request.debug) {
+    console.error('REQUEST %s', util.format.apply(util, arguments))
+  }
+}
 
+Request.prototype.setupTunnel = function () {
   var self = this
 
   if (typeof self.proxy === 'string') {
     self.proxy = url.parse(self.proxy)
   }
-
-  if (!self.proxy) {
+  
+  if (!self.proxy || !self.tunnel) {
     return false
   }
 
-  if (!self.tunnel && self.uri.protocol !== 'https:') {
-    return false
-  }
-
-  // Always include `defaultProxyHeaderExclusiveList`
-
-  if (!self.proxyHeaderExclusiveList) {
-    self.proxyHeaderExclusiveList = []
-  }
-
+  // Setup Proxy Header Exclusive List and White List
+  self.proxyHeaderExclusiveList = self.proxyHeaderExclusiveList || []
+  self.proxyHeaderWhiteList = self.proxyHeaderWhiteList || defaultProxyHeaderWhiteList
   var proxyHeaderExclusiveList = self.proxyHeaderExclusiveList.concat(defaultProxyHeaderExclusiveList)
-
-  // Treat `proxyHeaderExclusiveList` as part of `proxyHeaderWhiteList`
-
-  if (!self.proxyHeaderWhiteList) {
-    self.proxyHeaderWhiteList = defaultProxyHeaderWhiteList
-  }
-
   var proxyHeaderWhiteList = self.proxyHeaderWhiteList.concat(proxyHeaderExclusiveList)
 
-  var proxyHost = constructProxyHost(self.uri)
+  // Setup Proxy Headers and Proxy Headers Host
+  // Only send the Proxy White Listed Header names
   self.proxyHeaders = constructProxyHeaderWhiteList(self.headers, proxyHeaderWhiteList)
-  self.proxyHeaders.host = proxyHost
-
+  self.proxyHeaders.host = constructProxyHost(self.uri)
   proxyHeaderExclusiveList.forEach(self.removeHeader, self)
-
+ 
+  // Set Agent from Tunnel Data
   var tunnelFn = getTunnelFn(self)
-  var tunnelOptions = construcTunnelOptions(self)
-
+  var tunnelOptions = constructTunnelOptions(self)
   self.agent = tunnelFn(tunnelOptions)
-  self.tunnel = true
+
   return true
 }
 
@@ -47414,8 +43566,7 @@ Request.prototype.init = function (options) {
     self.proxy = getProxyFromURI(self.uri)
   }
 
-  // Pass in `tunnel:true` to *always* tunnel through proxies
-  self.tunnel = !!options.tunnel
+  self.tunnel = getTunnelOption(self, options)
   if (self.proxy) {
     self.setupTunnel()
   }
@@ -47519,6 +43670,8 @@ Request.prototype.init = function (options) {
   }
 
   // Auth must happen last in case signing is dependent on other headers
+  self._auth = new Auth()
+
   if (options.oauth) {
     self.oauth(options.oauth)
   }
@@ -47804,6 +43957,14 @@ Request.prototype.getNewAgent = function () {
     options.cert = self.cert
   }
 
+  if (self.pfx) {
+    options.pfx = self.pfx
+  }
+
+  if (self.passphrase) {
+    options.passphrase = self.passphrase
+  }
+
   var poolKey = ''
 
   // different types of agents are in different pools
@@ -47834,7 +43995,17 @@ Request.prototype.getNewAgent = function () {
     }
 
     if (options.cert) {
+      if (poolKey) {
+        poolKey += ':'
+      }
       poolKey += options.cert.toString('ascii') + options.key.toString('ascii')
+    }
+
+    if (options.pfx) {
+      if (poolKey) {
+        poolKey += ':'
+      }
+      poolKey += options.pfx.toString('ascii')
     }
 
     if (options.ciphers) {
@@ -48060,80 +44231,11 @@ Request.prototype.onRequestResponse = function (response) {
           break
       }
     }
-  } else if (response.statusCode === 401 && self._hasAuth && !self._sentAuth) {
-    var authHeader = response.caseless.get('www-authenticate')
-    var authVerb = authHeader && authHeader.split(' ')[0].toLowerCase()
-    debug('reauth', authVerb)
-
-    switch (authVerb) {
-      case 'basic':
-        self.auth(self._user, self._pass, true)
-        redirectTo = self.uri
-        break
-
-      case 'bearer':
-        self.auth(null, null, true, self._bearer)
-        redirectTo = self.uri
-        break
-
-      case 'digest':
-        // TODO: More complete implementation of RFC 2617.
-        //   - check challenge.algorithm
-        //   - support algorithm="MD5-sess"
-        //   - handle challenge.domain
-        //   - support qop="auth-int" only
-        //   - handle Authentication-Info (not necessarily?)
-        //   - check challenge.stale (not necessarily?)
-        //   - increase nc (not necessarily?)
-        // For reference:
-        // http://tools.ietf.org/html/rfc2617#section-3
-        // https://github.com/bagder/curl/blob/master/lib/http_digest.c
-
-        var challenge = {}
-        var re = /([a-z0-9_-]+)=(?:"([^"]+)"|([a-z0-9_-]+))/gi
-        for (;;) {
-          var match = re.exec(authHeader)
-          if (!match) {
-            break
-          }
-          challenge[match[1]] = match[2] || match[3]
-        }
-
-        var ha1 = md5(self._user + ':' + challenge.realm + ':' + self._pass)
-        var ha2 = md5(self.method + ':' + self.uri.path)
-        var qop = /(^|,)\s*auth\s*($|,)/.test(challenge.qop) && 'auth'
-        var nc = qop && '00000001'
-        var cnonce = qop && uuid().replace(/-/g, '')
-        var digestResponse = qop ? md5(ha1 + ':' + challenge.nonce + ':' + nc + ':' + cnonce + ':' + qop + ':' + ha2) : md5(ha1 + ':' + challenge.nonce + ':' + ha2)
-        var authValues = {
-          username: self._user,
-          realm: challenge.realm,
-          nonce: challenge.nonce,
-          uri: self.uri.path,
-          qop: qop,
-          response: digestResponse,
-          nc: nc,
-          cnonce: cnonce,
-          algorithm: challenge.algorithm,
-          opaque: challenge.opaque
-        }
-
-        authHeader = []
-        for (var k in authValues) {
-          if (authValues[k]) {
-            if (k === 'qop' || k === 'nc' || k === 'algorithm') {
-              authHeader.push(k + '=' + authValues[k])
-            } else {
-              authHeader.push(k + '="' + authValues[k] + '"')
-            }
-          }
-        }
-        authHeader = 'Digest ' + authHeader.join(', ')
-        self.setHeader('authorization', authHeader)
-        self._sentAuth = true
-
-        redirectTo = self.uri
-        break
+  } else if (response.statusCode === 401) {
+    var authHeader = self._auth.response(self.method, self.uri.path, response.headers)
+    if (authHeader) {
+      self.setHeader('authorization', authHeader)
+      redirectTo = self.uri
     }
   }
 
@@ -48307,7 +44409,7 @@ Request.prototype.onRequestResponse = function (response) {
         }
         debug('emitting complete', self.uri.href)
         if(typeof response.body === 'undefined' && !self._json) {
-          response.body = ''
+          response.body = self.encoding === null ? new Buffer(0) : ''
         }
         self.emit('complete', response, response.body)
       })
@@ -48396,7 +44498,9 @@ Request.prototype.qs = function (q, clobber) {
     return self
   }
 
-  self.uri = url.parse(self.uri.href.split('?')[0] + '?' + self.qsLib.stringify(base))
+  var qs = self.qsLib.stringify(base)
+
+  self.uri = url.parse(self.uri.href.split('?')[0] + '?' + rfc3986(qs))
   self.url = self.uri
   self.path = self.uri.path
 
@@ -48407,24 +44511,46 @@ Request.prototype.form = function (form) {
   if (form) {
     self.setHeader('content-type', 'application/x-www-form-urlencoded')
     self.body = (typeof form === 'string') ? form.toString('utf8') : self.qsLib.stringify(form).toString('utf8')
+    self.body = rfc3986(self.body)
     return self
   }
   // create form-data object
   self._form = new FormData()
+  self._form.on('error',function(err) {
+    err.message = 'form-data: ' + err.message
+    self.emit('error', err)
+    self.abort()
+  })
   return self._form
 }
 Request.prototype.multipart = function (multipart) {
   var self = this
 
-  var chunked = (multipart instanceof Array) || (multipart.chunked === undefined) || multipart.chunked
-  multipart = multipart.data || multipart
+  var chunked = false
+  var _multipart = multipart.data || multipart
 
-  var items = chunked ? new CombinedStream() : []
-  function add (part) {
-    return chunked ? items.append(part) : items.push(new Buffer(part))
+  if (!_multipart.forEach) {
+    throw new Error('Argument error, options.multipart.')
   }
 
-  if (chunked) {
+  if (self.getHeader('transfer-encoding') === 'chunked') {
+    chunked = true
+  }
+  if (multipart.chunked !== undefined) {
+    chunked = multipart.chunked
+  }
+  if (!chunked) {
+    _multipart.forEach(function (part) {
+      if(typeof part.body === 'undefined') {
+        throw new Error('Body attribute missing in multipart.')
+      }
+      if (isstream(part.body)) {
+        chunked = true
+      }
+    })
+  }
+
+  if (chunked && !self.hasHeader('transfer-encoding')) {
     self.setHeader('transfer-encoding', 'chunked')
   }
 
@@ -48435,19 +44561,17 @@ Request.prototype.multipart = function (multipart) {
     self.setHeader(headerName, self.headers[headerName].split(';')[0] + '; boundary=' + self.boundary)
   }
 
-  if (!multipart.forEach) {
-    throw new Error('Argument error, options.multipart.')
+  var parts = chunked ? new CombinedStream() : []
+  function add (part) {
+    return chunked ? parts.append(part) : parts.push(new Buffer(part))
   }
 
   if (self.preambleCRLF) {
     add('\r\n')
   }
 
-  multipart.forEach(function (part) {
+  _multipart.forEach(function (part) {
     var body = part.body
-    if(typeof body === 'undefined') {
-      throw new Error('Body attribute missing in multipart.')
-    }
     var preamble = '--' + self.boundary + '\r\n'
     Object.keys(part).forEach(function (key) {
       if (key === 'body') { return }
@@ -48464,7 +44588,7 @@ Request.prototype.multipart = function (multipart) {
     add('\r\n')
   }
 
-  self[chunked ? '_multipart' : 'body'] = items
+  self[chunked ? '_multipart' : 'body'] = parts
   return self
 }
 Request.prototype.json = function (val) {
@@ -48476,8 +44600,12 @@ Request.prototype.json = function (val) {
 
   self._json = true
   if (typeof val === 'boolean') {
-    if (self.body !== undefined && self.getHeader('content-type') !== 'application/x-www-form-urlencoded') {
-      self.body = safeStringify(self.body)
+    if (self.body !== undefined) {
+      if (!/^application\/x-www-form-urlencoded\b/.test(self.getHeader('content-type'))) {
+        self.body = safeStringify(self.body)
+      } else {
+        self.body = rfc3986(self.body)
+      }
       if (!self.hasHeader('content-type')) {
         self.setHeader('content-type', 'application/json')
       }
@@ -48517,29 +44645,17 @@ var getHeader = Request.prototype.getHeader
 
 Request.prototype.auth = function (user, pass, sendImmediately, bearer) {
   var self = this
+
+  var authHeader
   if (bearer !== undefined) {
-    self._bearer = bearer
-    self._hasAuth = true
-    if (sendImmediately || typeof sendImmediately === 'undefined') {
-      if (typeof bearer === 'function') {
-        bearer = bearer()
-      }
-      self.setHeader('authorization', 'Bearer ' + bearer)
-      self._sentAuth = true
-    }
-    return self
+    authHeader = self._auth.bearer(bearer, sendImmediately)
+  } else {
+    authHeader = self._auth.basic(user, pass, sendImmediately)
   }
-  if (typeof user !== 'string' || (pass !== undefined && typeof pass !== 'string')) {
-    throw new Error('auth() received invalid user or password')
+  if (authHeader) {
+    self.setHeader('authorization', authHeader)
   }
-  self._user = user
-  self._pass = pass
-  self._hasAuth = true
-  var header = typeof pass !== 'undefined' ? user + ':' + pass : user
-  if (sendImmediately || typeof sendImmediately === 'undefined') {
-    self.setHeader('authorization', 'Basic ' + toBase64(header))
-    self._sentAuth = true
-  }
+
   return self
 }
 
@@ -48600,61 +44716,29 @@ Request.prototype.hawk = function (opts) {
 
 Request.prototype.oauth = function (_oauth) {
   var self = this
-  var form, query
-  if (self.hasHeader('content-type') &&
-      self.getHeader('content-type').slice(0, 'application/x-www-form-urlencoded'.length) ===
-        'application/x-www-form-urlencoded'
-     ) {
-    form = self.body
+
+  var result = oauth.oauth({
+    uri: self.uri,
+    method: self.method,
+    headers: self.headers,
+    body: self.body,
+    oauth: _oauth,
+    qsLib: self.qsLib
+  })
+
+  if (result.transport === 'header') {
+    self.setHeader('Authorization', result.oauth)
   }
-  if (self.uri.query) {
-    query = self.uri.query
+  else if (result.transport === 'query') {
+    self.path += result.oauth
+  }
+  else if (result.transport === 'body') {
+    self.body = result.oauth
   }
 
-  var oa = {}
-  for (var i in _oauth) {
-    oa['oauth_' + i] = _oauth[i]
-  }
-  if ('oauth_realm' in oa) {
-    delete oa.oauth_realm
-  }
-  if (!oa.oauth_version) {
-    oa.oauth_version = '1.0'
-  }
-  if (!oa.oauth_timestamp) {
-    oa.oauth_timestamp = Math.floor( Date.now() / 1000 ).toString()
-  }
-  if (!oa.oauth_nonce) {
-    oa.oauth_nonce = uuid().replace(/-/g, '')
-  }
-  if (!oa.oauth_signature_method) {
-    oa.oauth_signature_method = 'HMAC-SHA1'
-  }
-
-  var consumer_secret_or_private_key = oa.oauth_consumer_secret || oa.oauth_private_key
-  delete oa.oauth_consumer_secret
-  delete oa.oauth_private_key
-  var token_secret = oa.oauth_token_secret
-  delete oa.oauth_token_secret
-
-  var baseurl = self.uri.protocol + '//' + self.uri.host + self.uri.pathname
-  var params = self.qsLib.parse([].concat(query, form, self.qsLib.stringify(oa)).join('&'))
-
-  var signature = oauth.sign(
-    oa.oauth_signature_method,
-    self.method,
-    baseurl,
-    params,
-    consumer_secret_or_private_key,
-    token_secret)
-
-  var realm = _oauth.realm ? 'realm="' + _oauth.realm + '",' : ''
-  var authHeader = 'OAuth ' + realm +
-    Object.keys(oa).sort().map(function (i) {return i + '="' + oauth.rfc3986(oa[i]) + '"'}).join(',')
-  authHeader += ',oauth_signature="' + oauth.rfc3986(signature) + '"'
-  self.setHeader('Authorization', authHeader)
   return self
 }
+
 Request.prototype.jar = function (jar) {
   var self = this
   var cookies
@@ -48764,7 +44848,7 @@ Request.prototype.toJSON = requestToJSON
 module.exports = Request
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./lib/cookies":161,"./lib/copy":162,"./lib/debug":163,"./lib/helpers":164,"_process":137,"aws-sign2":165,"bl":166,"buffer":17,"caseless":177,"combined-stream":178,"forever-agent":180,"form-data":181,"hawk":186,"http":129,"http-signature":201,"https":133,"mime-types":218,"net":1,"node-uuid":221,"oauth-sign":222,"qs":223,"querystring":141,"stream":153,"stringstream":228,"tunnel-agent":233,"url":155,"util":157,"zlib":16}],235:[function(require,module,exports){
+},{"./lib/auth":190,"./lib/cookies":191,"./lib/copy":192,"./lib/getProxyFromURI":193,"./lib/helpers":194,"./lib/oauth":195,"_process":166,"aws-sign2":196,"bl":197,"buffer":16,"caseless":206,"combined-stream":207,"forever-agent":209,"form-data":210,"hawk":212,"http":158,"http-signature":213,"https":162,"isstream":228,"mime-types":230,"net":1,"node-uuid":233,"qs":235,"querystring":170,"stream":182,"stringstream":240,"tunnel-agent":245,"url":184,"util":186,"zlib":15}],247:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48825,7 +44909,7 @@ module.exports = {
 
 };
 
-},{}],236:[function(require,module,exports){
+},{}],248:[function(require,module,exports){
 /*jshint maxlen: false*/
 
 var FormatValidators = {
@@ -48994,7 +45078,7 @@ var FormatValidators = {
 
 module.exports = FormatValidators;
 
-},{}],237:[function(require,module,exports){
+},{}],249:[function(require,module,exports){
 "use strict";
 
 var FormatValidators  = require("./FormatValidators"),
@@ -49520,7 +45604,7 @@ exports.validate = function (report, schema, json) {
 
 };
 
-},{"./FormatValidators":236,"./Report":239,"./Utils":243}],238:[function(require,module,exports){
+},{"./FormatValidators":248,"./Report":251,"./Utils":255}],250:[function(require,module,exports){
 // Number.isFinite polyfill
 // http://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.isfinite
 if (typeof Number.isFinite !== "function") {
@@ -49538,7 +45622,7 @@ if (typeof Number.isFinite !== "function") {
     };
 }
 
-},{}],239:[function(require,module,exports){
+},{}],251:[function(require,module,exports){
 (function (process){
 "use strict";
 
@@ -49681,7 +45765,7 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
 module.exports = Report;
 
 }).call(this,require('_process'))
-},{"./Errors":235,"./Utils":243,"_process":137}],240:[function(require,module,exports){
+},{"./Errors":247,"./Utils":255,"_process":166}],252:[function(require,module,exports){
 "use strict";
 
 var Report              = require("./Report");
@@ -49826,7 +45910,7 @@ exports.getSchemaByUri = function (report, uri, root) {
 
 exports.getRemotePath = getRemotePath;
 
-},{"./Report":239,"./SchemaCompilation":241,"./SchemaValidation":242,"./Utils":243}],241:[function(require,module,exports){
+},{"./Report":251,"./SchemaCompilation":253,"./SchemaValidation":254,"./Utils":255}],253:[function(require,module,exports){
 "use strict";
 
 var Report = require("./Report");
@@ -50082,7 +46166,7 @@ exports.compileSchema = function (report, schema) {
 
 };
 
-},{"./Report":239,"./SchemaCache":240}],242:[function(require,module,exports){
+},{"./Report":251,"./SchemaCache":252}],254:[function(require,module,exports){
 "use strict";
 
 var FormatValidators = require("./FormatValidators"),
@@ -50637,7 +46721,7 @@ exports.validateSchema = function (report, schema) {
 
 };
 
-},{"./FormatValidators":236,"./JsonValidation":237,"./Report":239,"./Utils":243}],243:[function(require,module,exports){
+},{"./FormatValidators":248,"./JsonValidation":249,"./Report":251,"./Utils":255}],255:[function(require,module,exports){
 "use strict";
 
 exports.whatIs = function (what) {
@@ -50790,7 +46874,7 @@ exports.cloneDeep = function cloneDeep(src) {
     return res;
 };
 
-},{}],244:[function(require,module,exports){
+},{}],256:[function(require,module,exports){
 "use strict";
 
 require("./Polyfills");
@@ -51000,7 +47084,7 @@ ZSchema.getDefaultOptions = function () {
 
 module.exports = ZSchema;
 
-},{"./FormatValidators":236,"./JsonValidation":237,"./Polyfills":238,"./Report":239,"./SchemaCache":240,"./SchemaCompilation":241,"./SchemaValidation":242,"./Utils":243}],245:[function(require,module,exports){
+},{"./FormatValidators":248,"./JsonValidation":249,"./Polyfills":250,"./Report":251,"./SchemaCache":252,"./SchemaCompilation":253,"./SchemaValidation":254,"./Utils":255}],257:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51078,7 +47162,7 @@ module.exports = {
     ]
 };
 
-},{}],246:[function(require,module,exports){
+},{}],258:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51143,7 +47227,7 @@ module.exports = {
     ]
 };
 
-},{}],247:[function(require,module,exports){
+},{}],259:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51216,7 +47300,7 @@ module.exports = {
     ]
 };
 
-},{}],248:[function(require,module,exports){
+},{}],260:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51244,7 +47328,7 @@ module.exports = {
     ]
 };
 
-},{}],249:[function(require,module,exports){
+},{}],261:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51269,7 +47353,7 @@ module.exports = {
     ]
 };
 
-},{}],250:[function(require,module,exports){
+},{}],262:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51342,7 +47426,7 @@ module.exports = {
     ]
 };
 
-},{}],251:[function(require,module,exports){
+},{}],263:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51370,7 +47454,7 @@ module.exports = {
     ]
 };
 
-},{}],252:[function(require,module,exports){
+},{}],264:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51398,7 +47482,7 @@ module.exports = {
     ]
 };
 
-},{}],253:[function(require,module,exports){
+},{}],265:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51454,7 +47538,7 @@ module.exports = {
     ]
 };
 
-},{}],254:[function(require,module,exports){
+},{}],266:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51498,7 +47582,7 @@ module.exports = {
     ]
 };
 
-},{}],255:[function(require,module,exports){
+},{}],267:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51573,7 +47657,7 @@ module.exports = {
     ]
 };
 
-},{}],256:[function(require,module,exports){
+},{}],268:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51746,7 +47830,7 @@ module.exports = {
     ]
 };
 
-},{}],257:[function(require,module,exports){
+},{}],269:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51773,7 +47857,7 @@ module.exports = {
     ]
 };
 
-},{}],258:[function(require,module,exports){
+},{}],270:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51849,7 +47933,7 @@ module.exports = {
     ]
 };
 
-},{}],259:[function(require,module,exports){
+},{}],271:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51885,7 +47969,7 @@ module.exports = {
     ]
 };
 
-},{}],260:[function(require,module,exports){
+},{}],272:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51975,7 +48059,7 @@ module.exports = {
     ]
 };
 
-},{}],261:[function(require,module,exports){
+},{}],273:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -52000,7 +48084,7 @@ module.exports = {
     ]
 };
 
-},{}],262:[function(require,module,exports){
+},{}],274:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -52076,7 +48160,7 @@ module.exports = {
     ]
 };
 
-},{}],263:[function(require,module,exports){
+},{}],275:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -52189,7 +48273,7 @@ module.exports = {
     ]
 };
 
-},{}],264:[function(require,module,exports){
+},{}],276:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -52369,7 +48453,7 @@ module.exports = {
     ]
 };
 
-},{}],265:[function(require,module,exports){
+},{}],277:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -52416,7 +48500,7 @@ module.exports = {
     ]
 };
 
-},{}],266:[function(require,module,exports){
+},{}],278:[function(require,module,exports){
 "use strict";
 
 var resourceObject = {
@@ -52712,7 +48796,7 @@ module.exports = {
     ]
 };
 
-},{}],267:[function(require,module,exports){
+},{}],279:[function(require,module,exports){
 "use strict";
 
 var draft4 = require("./files/Issue47/draft4.json");
@@ -52741,7 +48825,7 @@ module.exports = {
     ]
 };
 
-},{"./files/Issue47/draft4.json":287,"./files/Issue47/sample.json":288,"./files/Issue47/swagger_draft.json":289,"./files/Issue47/swagger_draft_modified.json":290}],268:[function(require,module,exports){
+},{"./files/Issue47/draft4.json":299,"./files/Issue47/sample.json":300,"./files/Issue47/swagger_draft.json":301,"./files/Issue47/swagger_draft_modified.json":302}],280:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -52774,7 +48858,7 @@ module.exports = {
     ]
 };
 
-},{}],269:[function(require,module,exports){
+},{}],281:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -52792,7 +48876,7 @@ module.exports = {
     ]
 };
 
-},{}],270:[function(require,module,exports){
+},{}],282:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -52814,7 +48898,7 @@ module.exports = {
     ]
 };
 
-},{}],271:[function(require,module,exports){
+},{}],283:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -52885,7 +48969,7 @@ module.exports = {
     ]
 };
 
-},{}],272:[function(require,module,exports){
+},{}],284:[function(require,module,exports){
 "use strict";
 
 var dataTypeBaseJson = {
@@ -53570,7 +49654,7 @@ module.exports = {
     ]
 };
 
-},{}],273:[function(require,module,exports){
+},{}],285:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -53633,7 +49717,7 @@ module.exports = {
     ]
 };
 
-},{}],274:[function(require,module,exports){
+},{}],286:[function(require,module,exports){
 /*jshint -W101*/
 
 "use strict";
@@ -54210,7 +50294,7 @@ module.exports = {
     ]
 };
 
-},{}],275:[function(require,module,exports){
+},{}],287:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54241,7 +50325,7 @@ module.exports = {
     ]
 };
 
-},{}],276:[function(require,module,exports){
+},{}],288:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54292,7 +50376,7 @@ module.exports = {
     ]
 };
 
-},{}],277:[function(require,module,exports){
+},{}],289:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54412,7 +50496,7 @@ module.exports = {
     ]
 };
 
-},{}],278:[function(require,module,exports){
+},{}],290:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54470,7 +50554,7 @@ module.exports = {
     ]
 };
 
-},{}],279:[function(require,module,exports){
+},{}],291:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54543,7 +50627,7 @@ module.exports = {
     ]
 };
 
-},{}],280:[function(require,module,exports){
+},{}],292:[function(require,module,exports){
 "use strict";
 
 var innerSchema = {
@@ -54588,7 +50672,7 @@ module.exports = {
     ]
 };
 
-},{}],281:[function(require,module,exports){
+},{}],293:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54647,7 +50731,7 @@ module.exports = {
     ]
 };
 
-},{}],282:[function(require,module,exports){
+},{}],294:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54672,7 +50756,7 @@ module.exports = {
     ]
 };
 
-},{}],283:[function(require,module,exports){
+},{}],295:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54697,7 +50781,7 @@ module.exports = {
     ]
 };
 
-},{}],284:[function(require,module,exports){
+},{}],296:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54742,7 +50826,7 @@ module.exports = {
     ]
 };
 
-},{}],285:[function(require,module,exports){
+},{}],297:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54767,7 +50851,7 @@ module.exports = {
     ]
 };
 
-},{}],286:[function(require,module,exports){
+},{}],298:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54797,7 +50881,7 @@ module.exports = {
     ]
 };
 
-},{}],287:[function(require,module,exports){
+},{}],299:[function(require,module,exports){
 module.exports={
     "id": "http://json-schema.org/draft-04/schema#",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -54949,7 +51033,7 @@ module.exports={
     "default": {}
 }
 
-},{}],288:[function(require,module,exports){
+},{}],300:[function(require,module,exports){
 module.exports={
   "swagger": 2,
   "info": {
@@ -55040,7 +51124,7 @@ module.exports={
   }
 }
 
-},{}],289:[function(require,module,exports){
+},{}],301:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -55438,7 +51522,7 @@ module.exports={
 	}
 }
 
-},{}],290:[function(require,module,exports){
+},{}],302:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -55836,7 +51920,7 @@ module.exports={
 	}
 }
 
-},{}],291:[function(require,module,exports){
+},{}],303:[function(require,module,exports){
 module.exports={
     "$schema": "http://json-schema.org/draft-04/hyper-schema#",
     "id": "http://json-schema.org/draft-04/hyper-schema#",
@@ -55996,7 +52080,7 @@ module.exports={
 }
 
 
-},{}],292:[function(require,module,exports){
+},{}],304:[function(require,module,exports){
 module.exports={
     "id": "http://json-schema.org/draft-04/schema#",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -56148,13 +52232,13 @@ module.exports={
     "default": {}
 }
 
-},{}],293:[function(require,module,exports){
+},{}],305:[function(require,module,exports){
 module.exports={
     "type": "integer"
 }
-},{}],294:[function(require,module,exports){
-module.exports=require(293)
-},{"C:\\DEV\\github\\z-schema\\test\\jsonSchemaTestSuite\\remotes\\folder\\folderInteger.json":293}],295:[function(require,module,exports){
+},{}],306:[function(require,module,exports){
+module.exports=require(305)
+},{"C:\\DEV\\github\\z-schema\\test\\jsonSchemaTestSuite\\remotes\\folder\\folderInteger.json":305}],307:[function(require,module,exports){
 module.exports={
     "integer": {
         "type": "integer"
@@ -56163,7 +52247,7 @@ module.exports={
         "$ref": "#/integer"
     }
 }
-},{}],296:[function(require,module,exports){
+},{}],308:[function(require,module,exports){
 module.exports=[
     {
         "description": "additionalItems as schema",
@@ -56247,7 +52331,7 @@ module.exports=[
     }
 ]
 
-},{}],297:[function(require,module,exports){
+},{}],309:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -56337,7 +52421,7 @@ module.exports=[
     }
 ]
 
-},{}],298:[function(require,module,exports){
+},{}],310:[function(require,module,exports){
 module.exports=[
     {
         "description": "allOf",
@@ -56451,7 +52535,7 @@ module.exports=[
     }
 ]
 
-},{}],299:[function(require,module,exports){
+},{}],311:[function(require,module,exports){
 module.exports=[
     {
         "description": "anyOf",
@@ -56521,7 +52605,7 @@ module.exports=[
     }
 ]
 
-},{}],300:[function(require,module,exports){
+},{}],312:[function(require,module,exports){
 module.exports=[
     {
         "description": "invalid type for default",
@@ -56572,7 +52656,7 @@ module.exports=[
     }
 ]
 
-},{}],301:[function(require,module,exports){
+},{}],313:[function(require,module,exports){
 module.exports=[
     {
         "description": "valid definition",
@@ -56606,7 +52690,7 @@ module.exports=[
     }
 ]
 
-},{}],302:[function(require,module,exports){
+},{}],314:[function(require,module,exports){
 module.exports=[
     {
         "description": "dependencies",
@@ -56721,7 +52805,7 @@ module.exports=[
     }
 ]
 
-},{}],303:[function(require,module,exports){
+},{}],315:[function(require,module,exports){
 module.exports=[
     {
         "description": "simple enum validation",
@@ -56795,7 +52879,7 @@ module.exports=[
     }
 ]
 
-},{}],304:[function(require,module,exports){
+},{}],316:[function(require,module,exports){
 module.exports=[
     {
         "description": "a schema given for items",
@@ -56843,7 +52927,7 @@ module.exports=[
     }
 ]
 
-},{}],305:[function(require,module,exports){
+},{}],317:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxItems validation",
@@ -56873,7 +52957,7 @@ module.exports=[
     }
 ]
 
-},{}],306:[function(require,module,exports){
+},{}],318:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxLength validation",
@@ -56908,7 +52992,7 @@ module.exports=[
     }
 ]
 
-},{}],307:[function(require,module,exports){
+},{}],319:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxProperties validation",
@@ -56938,7 +53022,7 @@ module.exports=[
     }
 ]
 
-},{}],308:[function(require,module,exports){
+},{}],320:[function(require,module,exports){
 module.exports=[
     {
         "description": "maximum validation",
@@ -56982,7 +53066,7 @@ module.exports=[
     }
 ]
 
-},{}],309:[function(require,module,exports){
+},{}],321:[function(require,module,exports){
 module.exports=[
     {
         "description": "minItems validation",
@@ -57012,7 +53096,7 @@ module.exports=[
     }
 ]
 
-},{}],310:[function(require,module,exports){
+},{}],322:[function(require,module,exports){
 module.exports=[
     {
         "description": "minLength validation",
@@ -57047,7 +53131,7 @@ module.exports=[
     }
 ]
 
-},{}],311:[function(require,module,exports){
+},{}],323:[function(require,module,exports){
 module.exports=[
     {
         "description": "minProperties validation",
@@ -57077,7 +53161,7 @@ module.exports=[
     }
 ]
 
-},{}],312:[function(require,module,exports){
+},{}],324:[function(require,module,exports){
 module.exports=[
     {
         "description": "minimum validation",
@@ -57121,7 +53205,7 @@ module.exports=[
     }
 ]
 
-},{}],313:[function(require,module,exports){
+},{}],325:[function(require,module,exports){
 module.exports=[
     {
         "description": "by int",
@@ -57183,7 +53267,7 @@ module.exports=[
     }
 ]
 
-},{}],314:[function(require,module,exports){
+},{}],326:[function(require,module,exports){
 module.exports=[
     {
         "description": "not",
@@ -57281,7 +53365,7 @@ module.exports=[
 
 ]
 
-},{}],315:[function(require,module,exports){
+},{}],327:[function(require,module,exports){
 module.exports=[
     {
         "description": "oneOf",
@@ -57351,7 +53435,7 @@ module.exports=[
     }
 ]
 
-},{}],316:[function(require,module,exports){
+},{}],328:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer",
@@ -57460,7 +53544,7 @@ module.exports=[
     }
 ]
 
-},{}],317:[function(require,module,exports){
+},{}],329:[function(require,module,exports){
 module.exports=[
     {
         "description": "validation of date-time strings",
@@ -57605,7 +53689,7 @@ module.exports=[
     }
 ]
 
-},{}],318:[function(require,module,exports){
+},{}],330:[function(require,module,exports){
 module.exports=[
     {
         "description": "pattern validation",
@@ -57630,7 +53714,7 @@ module.exports=[
     }
 ]
 
-},{}],319:[function(require,module,exports){
+},{}],331:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -57742,7 +53826,7 @@ module.exports=[
     }
 ]
 
-},{}],320:[function(require,module,exports){
+},{}],332:[function(require,module,exports){
 module.exports=[
     {
         "description": "object properties validation",
@@ -57836,7 +53920,7 @@ module.exports=[
     }
 ]
 
-},{}],321:[function(require,module,exports){
+},{}],333:[function(require,module,exports){
 module.exports=[
     {
         "description": "root pointer ref",
@@ -57982,7 +54066,7 @@ module.exports=[
     }
 ]
 
-},{}],322:[function(require,module,exports){
+},{}],334:[function(require,module,exports){
 module.exports=[
     {
         "description": "remote ref",
@@ -58058,7 +54142,7 @@ module.exports=[
     }
 ]
 
-},{}],323:[function(require,module,exports){
+},{}],335:[function(require,module,exports){
 module.exports=[
     {
         "description": "required validation",
@@ -58099,7 +54183,7 @@ module.exports=[
     }
 ]
 
-},{}],324:[function(require,module,exports){
+},{}],336:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer type matches integers",
@@ -58431,7 +54515,7 @@ module.exports=[
     }
 ]
 
-},{}],325:[function(require,module,exports){
+},{}],337:[function(require,module,exports){
 module.exports=[
     {
         "description": "uniqueItems validation",
@@ -58512,7 +54596,7 @@ module.exports=[
     }
 ]
 
-},{}],326:[function(require,module,exports){
+},{}],338:[function(require,module,exports){
 "use strict";
 
 var isBrowser = typeof window !== "undefined";
@@ -58601,7 +54685,7 @@ describe("Automatic schema loading", function () {
 
 });
 
-},{"../../src/ZSchema":244,"request":160}],327:[function(require,module,exports){
+},{"../../src/ZSchema":256,"request":189}],339:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -58673,7 +54757,7 @@ describe("Basic", function () {
 
 });
 
-},{"../../src/ZSchema":244,"../files/draft-04-schema.json":292,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":293,"../jsonSchemaTestSuite/remotes/integer.json":294,"../jsonSchemaTestSuite/remotes/subSchemas.json":295}],328:[function(require,module,exports){
+},{"../../src/ZSchema":256,"../files/draft-04-schema.json":304,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":305,"../jsonSchemaTestSuite/remotes/integer.json":306,"../jsonSchemaTestSuite/remotes/subSchemas.json":307}],340:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -58771,7 +54855,7 @@ describe("JsonSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":244,"../files/draft-04-schema.json":292,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":293,"../jsonSchemaTestSuite/remotes/integer.json":294,"../jsonSchemaTestSuite/remotes/subSchemas.json":295,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":296,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":297,"../jsonSchemaTestSuite/tests/draft4/allOf.json":298,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":299,"../jsonSchemaTestSuite/tests/draft4/default.json":300,"../jsonSchemaTestSuite/tests/draft4/definitions.json":301,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":302,"../jsonSchemaTestSuite/tests/draft4/enum.json":303,"../jsonSchemaTestSuite/tests/draft4/items.json":304,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":305,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":306,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":307,"../jsonSchemaTestSuite/tests/draft4/maximum.json":308,"../jsonSchemaTestSuite/tests/draft4/minItems.json":309,"../jsonSchemaTestSuite/tests/draft4/minLength.json":310,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":311,"../jsonSchemaTestSuite/tests/draft4/minimum.json":312,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":313,"../jsonSchemaTestSuite/tests/draft4/not.json":314,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":315,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":316,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":317,"../jsonSchemaTestSuite/tests/draft4/pattern.json":318,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":319,"../jsonSchemaTestSuite/tests/draft4/properties.json":320,"../jsonSchemaTestSuite/tests/draft4/ref.json":321,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":322,"../jsonSchemaTestSuite/tests/draft4/required.json":323,"../jsonSchemaTestSuite/tests/draft4/type.json":324,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":325}],329:[function(require,module,exports){
+},{"../../src/ZSchema":256,"../files/draft-04-schema.json":304,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":305,"../jsonSchemaTestSuite/remotes/integer.json":306,"../jsonSchemaTestSuite/remotes/subSchemas.json":307,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":308,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":309,"../jsonSchemaTestSuite/tests/draft4/allOf.json":310,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":311,"../jsonSchemaTestSuite/tests/draft4/default.json":312,"../jsonSchemaTestSuite/tests/draft4/definitions.json":313,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":314,"../jsonSchemaTestSuite/tests/draft4/enum.json":315,"../jsonSchemaTestSuite/tests/draft4/items.json":316,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":317,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":318,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":319,"../jsonSchemaTestSuite/tests/draft4/maximum.json":320,"../jsonSchemaTestSuite/tests/draft4/minItems.json":321,"../jsonSchemaTestSuite/tests/draft4/minLength.json":322,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":323,"../jsonSchemaTestSuite/tests/draft4/minimum.json":324,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":325,"../jsonSchemaTestSuite/tests/draft4/not.json":326,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":327,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":328,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":329,"../jsonSchemaTestSuite/tests/draft4/pattern.json":330,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":331,"../jsonSchemaTestSuite/tests/draft4/properties.json":332,"../jsonSchemaTestSuite/tests/draft4/ref.json":333,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":334,"../jsonSchemaTestSuite/tests/draft4/required.json":335,"../jsonSchemaTestSuite/tests/draft4/type.json":336,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":337}],341:[function(require,module,exports){
 /*jshint -W030 */
 
 "use strict";
@@ -58919,4 +55003,4 @@ describe("ZSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":244,"../ZSchemaTestSuite/AssumeAdditional.js":245,"../ZSchemaTestSuite/CustomFormats.js":246,"../ZSchemaTestSuite/CustomFormatsAsync.js":247,"../ZSchemaTestSuite/ErrorPathAsArray.js":248,"../ZSchemaTestSuite/ErrorPathAsJSONPointer.js":249,"../ZSchemaTestSuite/ForceAdditional.js":250,"../ZSchemaTestSuite/ForceItems.js":251,"../ZSchemaTestSuite/ForceMaxLength.js":252,"../ZSchemaTestSuite/ForceProperties.js":253,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":254,"../ZSchemaTestSuite/Issue12.js":255,"../ZSchemaTestSuite/Issue13.js":256,"../ZSchemaTestSuite/Issue16.js":257,"../ZSchemaTestSuite/Issue22.js":258,"../ZSchemaTestSuite/Issue25.js":259,"../ZSchemaTestSuite/Issue26.js":260,"../ZSchemaTestSuite/Issue37.js":261,"../ZSchemaTestSuite/Issue40.js":262,"../ZSchemaTestSuite/Issue41.js":263,"../ZSchemaTestSuite/Issue43.js":264,"../ZSchemaTestSuite/Issue44.js":265,"../ZSchemaTestSuite/Issue45.js":266,"../ZSchemaTestSuite/Issue47.js":267,"../ZSchemaTestSuite/Issue48.js":268,"../ZSchemaTestSuite/Issue49.js":269,"../ZSchemaTestSuite/Issue53.js":270,"../ZSchemaTestSuite/Issue56.js":271,"../ZSchemaTestSuite/Issue57.js":272,"../ZSchemaTestSuite/Issue58.js":273,"../ZSchemaTestSuite/Issue63.js":274,"../ZSchemaTestSuite/Issue64.js":275,"../ZSchemaTestSuite/Issue67.js":276,"../ZSchemaTestSuite/Issue71.js":277,"../ZSchemaTestSuite/Issue73.js":278,"../ZSchemaTestSuite/Issue76.js":279,"../ZSchemaTestSuite/Issue85.js":280,"../ZSchemaTestSuite/MultipleSchemas.js":281,"../ZSchemaTestSuite/NoEmptyArrays.js":282,"../ZSchemaTestSuite/NoEmptyStrings.js":283,"../ZSchemaTestSuite/NoExtraKeywords.js":284,"../ZSchemaTestSuite/NoTypeless.js":285,"../ZSchemaTestSuite/StrictUris.js":286,"../files/draft-04-hyper-schema.json":291,"../files/draft-04-schema.json":292}]},{},[326,327,328,329]);
+},{"../../src/ZSchema":256,"../ZSchemaTestSuite/AssumeAdditional.js":257,"../ZSchemaTestSuite/CustomFormats.js":258,"../ZSchemaTestSuite/CustomFormatsAsync.js":259,"../ZSchemaTestSuite/ErrorPathAsArray.js":260,"../ZSchemaTestSuite/ErrorPathAsJSONPointer.js":261,"../ZSchemaTestSuite/ForceAdditional.js":262,"../ZSchemaTestSuite/ForceItems.js":263,"../ZSchemaTestSuite/ForceMaxLength.js":264,"../ZSchemaTestSuite/ForceProperties.js":265,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":266,"../ZSchemaTestSuite/Issue12.js":267,"../ZSchemaTestSuite/Issue13.js":268,"../ZSchemaTestSuite/Issue16.js":269,"../ZSchemaTestSuite/Issue22.js":270,"../ZSchemaTestSuite/Issue25.js":271,"../ZSchemaTestSuite/Issue26.js":272,"../ZSchemaTestSuite/Issue37.js":273,"../ZSchemaTestSuite/Issue40.js":274,"../ZSchemaTestSuite/Issue41.js":275,"../ZSchemaTestSuite/Issue43.js":276,"../ZSchemaTestSuite/Issue44.js":277,"../ZSchemaTestSuite/Issue45.js":278,"../ZSchemaTestSuite/Issue47.js":279,"../ZSchemaTestSuite/Issue48.js":280,"../ZSchemaTestSuite/Issue49.js":281,"../ZSchemaTestSuite/Issue53.js":282,"../ZSchemaTestSuite/Issue56.js":283,"../ZSchemaTestSuite/Issue57.js":284,"../ZSchemaTestSuite/Issue58.js":285,"../ZSchemaTestSuite/Issue63.js":286,"../ZSchemaTestSuite/Issue64.js":287,"../ZSchemaTestSuite/Issue67.js":288,"../ZSchemaTestSuite/Issue71.js":289,"../ZSchemaTestSuite/Issue73.js":290,"../ZSchemaTestSuite/Issue76.js":291,"../ZSchemaTestSuite/Issue85.js":292,"../ZSchemaTestSuite/MultipleSchemas.js":293,"../ZSchemaTestSuite/NoEmptyArrays.js":294,"../ZSchemaTestSuite/NoEmptyStrings.js":295,"../ZSchemaTestSuite/NoExtraKeywords.js":296,"../ZSchemaTestSuite/NoTypeless.js":297,"../ZSchemaTestSuite/StrictUris.js":298,"../files/draft-04-hyper-schema.json":303,"../files/draft-04-schema.json":304}]},{},[338,339,340,341]);
