@@ -3,6 +3,7 @@
 [![npm version](https://badge.fury.io/js/z-schema.svg)](http://badge.fury.io/js/z-schema)
 [![bower version](https://badge.fury.io/bo/z-schema.svg)](http://badge.fury.io/bo/z-schema)
 [![build status](https://travis-ci.org/zaggino/z-schema.svg?branch=master)](https://travis-ci.org/zaggino/z-schema)
+[![coverage status](https://coveralls.io/repos/zaggino/z-schema/badge.svg)](https://coveralls.io/r/zaggino/z-schema)
 
 ##Version 3.0 has been rewritten from scratch.
 - it runs in the browser now, run tests yourself [here](https://rawgit.com/zaggino/z-schema/master/test/SpecRunner.html)
