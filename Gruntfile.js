@@ -36,7 +36,12 @@ module.exports = function (grunt) {
             }
         },
         "jasmine_node": {
-            projectRoot: "test/spec/"
+            src: [
+                "src/**/*.js"
+            ],
+            options: {
+                coverage: {}
+            }
         },
         browserify: {
             src: {
@@ -84,6 +89,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-jshint");
     grunt.loadNpmTasks("grunt-jscs");
     grunt.loadNpmTasks("grunt-jasmine-node");
+    grunt.loadNpmTasks("grunt-jasmine-node-coverage");
     grunt.loadNpmTasks("grunt-browserify");
     grunt.loadNpmTasks("grunt-contrib-jasmine");
     grunt.loadNpmTasks("grunt-contrib-uglify");

@@ -64,6 +64,7 @@
     "grunt-contrib-jshint": "latest",
     "grunt-contrib-uglify": "latest",
     "grunt-jasmine-node": "latest",
+    "grunt-jasmine-node-coverage": "latest",
     "grunt-jscs": "latest",
     "grunt-lineending": "latest",
     "jasmine-node": "latest",
