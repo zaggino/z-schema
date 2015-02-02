@@ -22,6 +22,16 @@
 
 Validator will try to perform sync validation when possible for speed, but supports async callbacks when they are necessary.
 
+##CLI:
+
+```
+npm install --global z-schema
+z-schema --help
+z-schema mySchema.json
+z-schema mySchema.json myJson.json
+z-schema --strictMode mySchema.json myJson.json
+```
+
 ##NodeJS:
 
 ```javascript
