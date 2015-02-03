@@ -55,7 +55,7 @@ var JsonValidators = {
         if (typeof json !== "string") {
             return;
         }
-        if (json.length > schema.maxLength) {
+        if (Utils.ucs2decode(json).length > schema.maxLength) {
             report.addError("MAX_LENGTH", [json.length, schema.maxLength], null, schema.description);
         }
     },
@@ -64,7 +64,7 @@ var JsonValidators = {
         if (typeof json !== "string") {
             return;
         }
-        if (json.length < schema.minLength) {
+        if (Utils.ucs2decode(json).length < schema.minLength) {
             report.addError("MIN_LENGTH", [json.length, schema.minLength], null, schema.description);
         }
     },

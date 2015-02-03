@@ -51,9 +51,7 @@ var jsonSchemaTestSuiteFiles = [
 
 var testExcludes = [
     "an invalid URI",
-    "an invalid URI though valid URI reference",
-    "one supplementary Unicode code point is not long enough",
-    "two supplementary Unicode code points is long enough"
+    "an invalid URI though valid URI reference"
 ];
 
 describe("JsonSchemaTestSuite", function () {
