@@ -35,9 +35,8 @@ for (var key in defaultOptions) {
     }
 }
 
-if (program.args.length === 0) {
-    console.error("no schema to validate specified, use z-schema <schema>");
-    process.exit(1);
+if (! program.args.length) {
+  program.help();
 }
 
 function readJson(fileName) {
