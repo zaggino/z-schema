@@ -1,26 +1,18 @@
 "use strict";
 
-var Report = require("./Report");
+var Report      = require("./Report");
 var SchemaCache = require("./SchemaCache");
-
-function isAbsoluteUri(uri) {
-    return /^https?:\/\//.test(uri);
-}
-
-function isRelativeUri(uri) {
-    // relative URIs that end with a hash sign, issue #56
-    return /.+#/.test(uri);
-}
+var Utils       = require("./Utils");
 
 function mergeReference(scope, ref) {
-    if (isAbsoluteUri(ref)) {
+    if (Utils.isAbsoluteUri(ref)) {
         return ref;
     }
 
     var joinedScope = scope.join(""),
-        isScopeAbsolute = isAbsoluteUri(joinedScope),
-        isScopeRelative = isRelativeUri(joinedScope),
-        isRefRelative = isRelativeUri(ref),
+        isScopeAbsolute = Utils.isAbsoluteUri(joinedScope),
+        isScopeRelative = Utils.isRelativeUri(joinedScope),
+        isRefRelative = Utils.isRelativeUri(ref),
         toRemove;
 
     if (isScopeAbsolute && isRefRelative) {
@@ -225,7 +217,7 @@ exports.compileSchema = function (report, schema) {
         var response = SchemaCache.getSchemaByUri.call(this, report, refObj.ref, schema);
         if (!response) {
 
-            var isAbsolute = isAbsoluteUri(refObj.ref);
+            var isAbsolute = Utils.isAbsoluteUri(refObj.ref);
             var isDownloaded = false;
             var ignoreUnresolvableRemotes = this.options.ignoreUnresolvableReferences === true;
 

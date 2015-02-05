@@ -84,6 +84,11 @@ Report.prototype.getPath = function () {
     if (this.options.reportPathAsArray !== true) {
         // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
         path = "#/" + path.map(function (segment) {
+
+            if (Utils.isAbsoluteUri(segment)) {
+                return "uri(" + segment + ")";
+            }
+
             return segment.replace("~", "~0").replace("/", "~1");
         }).join("/");
     }

@@ -1,5 +1,14 @@
 "use strict";
 
+exports.isAbsoluteUri = function (uri) {
+    return /^https?:\/\//.test(uri);
+};
+
+exports.isRelativeUri = function (uri) {
+    // relative URIs that end with a hash sign, issue #56
+    return /.+#/.test(uri);
+};
+
 exports.whatIs = function (what) {
 
     var to = typeof what;
