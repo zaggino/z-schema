@@ -948,6 +948,11 @@ Report.prototype.getPath = function () {
     if (this.options.reportPathAsArray !== true) {
         // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
         path = "#/" + path.map(function (segment) {
+
+            if (Utils.isAbsoluteUri(segment)) {
+                return "uri(" + segment + ")";
+            }
+
             return segment.replace("~", "~0").replace("/", "~1");
         }).join("/");
     }
@@ -1151,27 +1156,19 @@ exports.getRemotePath = getRemotePath;
 },{"./Report":6,"./SchemaCompilation":8,"./SchemaValidation":9,"./Utils":10}],8:[function(require,module,exports){
 "use strict";
 
-var Report = require("./Report");
+var Report      = require("./Report");
 var SchemaCache = require("./SchemaCache");
-
-function isAbsoluteUri(uri) {
-    return /^https?:\/\//.test(uri);
-}
-
-function isRelativeUri(uri) {
-    // relative URIs that end with a hash sign, issue #56
-    return /.+#/.test(uri);
-}
+var Utils       = require("./Utils");
 
 function mergeReference(scope, ref) {
-    if (isAbsoluteUri(ref)) {
+    if (Utils.isAbsoluteUri(ref)) {
         return ref;
     }
 
     var joinedScope = scope.join(""),
-        isScopeAbsolute = isAbsoluteUri(joinedScope),
-        isScopeRelative = isRelativeUri(joinedScope),
-        isRefRelative = isRelativeUri(ref),
+        isScopeAbsolute = Utils.isAbsoluteUri(joinedScope),
+        isScopeRelative = Utils.isRelativeUri(joinedScope),
+        isRefRelative = Utils.isRelativeUri(ref),
         toRemove;
 
     if (isScopeAbsolute && isRefRelative) {
@@ -1375,7 +1372,18 @@ exports.compileSchema = function (report, schema) {
         var refObj = refs[idx];
         var response = SchemaCache.getSchemaByUri.call(this, report, refObj.ref, schema);
         if (!response) {
-            if (!isAbsoluteUri(refObj.ref) || this.options.ignoreUnresolvableReferences !== true) {
+
+            var isAbsolute = Utils.isAbsoluteUri(refObj.ref);
+            var isDownloaded = false;
+            var ignoreUnresolvableRemotes = this.options.ignoreUnresolvableReferences === true;
+
+            if (isAbsolute) {
+                // we shouldn't add UNRESOLVABLE_REFERENCE for schemas we already have downloaded
+                // and set through setRemoteReference method
+                isDownloaded = SchemaCache.checkCacheForUri.call(this, refObj.ref);
+            }
+
+            if (!isAbsolute || !isDownloaded && !ignoreUnresolvableRemotes) {
                 Array.prototype.push.apply(report.path, refObj.path);
                 report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref]);
                 report.path.slice(0, -refObj.path.length);
@@ -1404,7 +1412,7 @@ exports.compileSchema = function (report, schema) {
 
 };
 
-},{"./Report":6,"./SchemaCache":7}],9:[function(require,module,exports){
+},{"./Report":6,"./SchemaCache":7,"./Utils":10}],9:[function(require,module,exports){
 "use strict";
 
 var FormatValidators = require("./FormatValidators"),
@@ -1961,6 +1969,15 @@ exports.validateSchema = function (report, schema) {
 
 },{"./FormatValidators":3,"./JsonValidation":4,"./Report":6,"./Utils":10}],10:[function(require,module,exports){
 "use strict";
+
+exports.isAbsoluteUri = function (uri) {
+    return /^https?:\/\//.test(uri);
+};
+
+exports.isRelativeUri = function (uri) {
+    // relative URIs that end with a hash sign, issue #56
+    return /.+#/.test(uri);
+};
 
 exports.whatIs = function (what) {
 
