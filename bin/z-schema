@@ -8,7 +8,7 @@ var ZSchema = require("./../src/ZSchema");
 
 program
   .version(package.version)
-  .usage("[options] <schema> <?json>")
+  .usage("[options] <schema> <json1?> <json2?> <json3?>")
   .option("--asyncTimeout <n>", "default timeout for all async tasks", parseInt)
   .option("--forceAdditional", "force additionalProperties and additionalItems to be defined on \"object\" and \"array\" types")
   .option("--assumeAdditional", "assume additionalProperties and additionalItems are defined as \"false\" where appropriate")
@@ -35,7 +35,7 @@ for (var key in defaultOptions) {
     }
 }
 
-if (! program.args.length) {
+if (!program.args.length) {
   program.help();
 }
 
