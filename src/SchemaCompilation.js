@@ -224,7 +224,18 @@ exports.compileSchema = function (report, schema) {
         var refObj = refs[idx];
         var response = SchemaCache.getSchemaByUri.call(this, report, refObj.ref, schema);
         if (!response) {
-            if (!isAbsoluteUri(refObj.ref) || this.options.ignoreUnresolvableReferences !== true) {
+
+            var isAbsolute = isAbsoluteUri(refObj.ref);
+            var isDownloaded = false;
+            var ignoreUnresolvableRemotes = this.options.ignoreUnresolvableReferences === true;
+
+            if (isAbsolute) {
+                // we shouldn't add UNRESOLVABLE_REFERENCE for schemas we already have downloaded
+                // and set through setRemoteReference method
+                isDownloaded = SchemaCache.checkCacheForUri.call(this, refObj.ref);
+            }
+
+            if (!isAbsolute || !isDownloaded && !ignoreUnresolvableRemotes) {
                 Array.prototype.push.apply(report.path, refObj.path);
                 report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref]);
                 report.path.slice(0, -refObj.path.length);

@@ -40,7 +40,18 @@ if (!program.args.length) {
 }
 
 function readJson(fileName) {
-    return JSON.parse(fs.readFileSync(fileName, { encoding: "utf8" }));
+    var ret;
+    try {
+        ret = fs.readFileSync(fileName, { encoding: "utf8" });
+    } catch (e) {
+        throw new Error("Couldn't read the file: " + fileName);
+    }
+    try {
+        ret = JSON.parse(ret);
+    } catch (e) {
+        throw new Error("Couldn't parse the file as JSON: " + fileName);
+    }
+    return ret;
 }
 
 var validator = new ZSchema(options);
@@ -61,6 +72,9 @@ function validateWithAutomaticDownloads(data, schema, callback) {
         } else {
             lastResult = validator.validateSchema(schema);
         }
+        
+        // console.log(lastResult);
+        // console.log(JSON.stringify(validator.getLastErrors(), null, 4));
 
         var missingReferences = validator.getMissingRemoteReferences();
         if (missingReferences.length > 0) {
@@ -104,7 +118,7 @@ function validateJsons() {
     var json = readJson(program.args.shift());
     validateWithAutomaticDownloads(json, schema, function (errs, isValid) {    
         if (!isValid) {
-            console.log(validator.getLastErrors());
+            console.log(JSON.stringify(validator.getLastErrors(), null, 4));
             console.log("json #" + i + " validation failed");
         } else {
             console.log("json #" + i + " validation passed");
@@ -116,7 +130,7 @@ function validateJsons() {
 // validate schema
 validateWithAutomaticDownloads(undefined, schema, function (errs, isValid) {
     if (!isValid) {
-        console.log(validator.getLastErrors());
+        console.log(JSON.stringify(validator.getLastErrors(), null, 4));
         console.log("schema validation failed");
     } else {
         console.log("schema validation passed");
