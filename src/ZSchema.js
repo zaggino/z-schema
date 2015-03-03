@@ -188,7 +188,8 @@ ZSchema.prototype.getResolvedSchema = function (schema) {
 
     // clean-up the schema and resolve references
     var cleanup = function (schema) {
-        var typeOf = Utils.whatIs(schema);
+        var key,
+            typeOf = Utils.whatIs(schema);
         if (typeOf !== "object" && typeOf !== "array") {
             return;
         }
@@ -197,16 +198,20 @@ ZSchema.prototype.getResolvedSchema = function (schema) {
             var to = schema;
             delete schema.$ref;
             delete schema.__$refResolved;
-            for (var key in from) {
-                to[key] = from[key];
+            for (key in from) {
+                if (from.hasOwnProperty(key)) {
+                    to[key] = from[key];
+                }
             }
         }
-        for (var key in schema) {
-            if (key.indexOf("__$") === 0) {
-                delete schema[key];
-                continue;
+        for (key in schema) {
+            if (schema.hasOwnProperty(key)) {
+                if (key.indexOf("__$") === 0) {
+                    delete schema[key];
+                    continue;
+                }
+                cleanup(schema[key]);
             }
-            cleanup(schema[key]);
         }
     };
     cleanup(schema);

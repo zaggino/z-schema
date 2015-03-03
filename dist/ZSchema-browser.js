@@ -1093,7 +1093,17 @@ exports.checkCacheForUri = function (uri) {
     return remotePath ? this.cache[remotePath] != null : false;
 };
 
-exports.getSchemaByReference = function (key) {
+exports.getSchema = function (report, schema) {
+    if (typeof schema === "object") {
+        schema = exports.getSchemaByReference.call(this, report, schema);
+    }
+    if (typeof schema === "string") {
+        schema = exports.getSchemaByUri.call(this, report, schema);
+    }
+    return schema;
+};
+
+exports.getSchemaByReference = function (report, key) {
     var i = this.referenceCache.length;
     while (i--) {
         if (this.referenceCache[i][0] === key) {
@@ -2263,12 +2273,7 @@ function ZSchema(options) {
 ZSchema.prototype.compileSchema = function (schema) {
     var report = new Report(this.options);
 
-    if (typeof schema === "object") {
-        schema = SchemaCache.getSchemaByReference.call(this, schema);
-    }
-    if (typeof schema === "string") {
-        schema = SchemaCache.getSchemaByUri.call(this, report, schema);
-    }
+    schema = SchemaCache.getSchema.call(this, report, schema);
 
     SchemaCompilation.compileSchema.call(this, report, schema);
 
@@ -2278,12 +2283,7 @@ ZSchema.prototype.compileSchema = function (schema) {
 ZSchema.prototype.validateSchema = function (schema) {
     var report = new Report(this.options);
 
-    if (typeof schema === "object") {
-        schema = SchemaCache.getSchemaByReference.call(this, schema);
-    }
-    if (typeof schema === "string") {
-        schema = SchemaCache.getSchemaByUri.call(this, report, schema);
-    }
+    schema = SchemaCache.getSchema.call(this, report, schema);
 
     var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
     if (compiled) { SchemaValidation.validateSchema.call(this, report, schema); }
@@ -2294,12 +2294,7 @@ ZSchema.prototype.validateSchema = function (schema) {
 ZSchema.prototype.validate = function (json, schema, callback) {
     var report = new Report(this.options);
 
-    if (typeof schema === "object") {
-        schema = SchemaCache.getSchemaByReference.call(this, schema);
-    }
-    if (typeof schema === "string") {
-        schema = SchemaCache.getSchemaByUri.call(this, report, schema);
-    }
+    schema = SchemaCache.getSchema.call(this, report, schema);
 
     var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
     if (!compiled) {
@@ -2370,6 +2365,50 @@ ZSchema.prototype.setRemoteReference = function (uri, schema) {
         schema = JSON.parse(schema);
     }
     SchemaCache.cacheSchemaByUri.call(this, uri, schema);
+};
+ZSchema.prototype.getResolvedSchema = function (schema) {
+    var report = new Report(this.options);
+    schema = SchemaCache.getSchema.call(this, report, schema);
+
+    // clone before making any modifications
+    schema = Utils.cloneDeep(schema);
+
+    // clean-up the schema and resolve references
+    var cleanup = function (schema) {
+        var key,
+            typeOf = Utils.whatIs(schema);
+        if (typeOf !== "object" && typeOf !== "array") {
+            return;
+        }
+        if (schema.$ref && schema.__$refResolved) {
+            var from = schema.__$refResolved;
+            var to = schema;
+            delete schema.$ref;
+            delete schema.__$refResolved;
+            for (key in from) {
+                if (from.hasOwnProperty(key)) {
+                    to[key] = from[key];
+                }
+            }
+        }
+        for (key in schema) {
+            if (schema.hasOwnProperty(key)) {
+                if (key.indexOf("__$") === 0) {
+                    delete schema[key];
+                    continue;
+                }
+                cleanup(schema[key]);
+            }
+        }
+    };
+    cleanup(schema);
+
+    this.lastReport = report;
+    if (report.isValid()) {
+        return schema;
+    } else {
+        throw this.getLastError();
+    }
 };
 
 /*
