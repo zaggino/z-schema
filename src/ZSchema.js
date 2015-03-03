@@ -183,7 +183,33 @@ ZSchema.prototype.getResolvedSchema = function (schema) {
     var report = new Report(this.options);
     schema = SchemaCache.getSchema.call(this, report, schema);
 
-    // TODO: clean-up the schema and resolve references
+    // clone before making any modifications
+    schema = Utils.cloneDeep(schema);
+
+    // clean-up the schema and resolve references
+    var cleanup = function (schema) {
+        var typeOf = Utils.whatIs(schema);
+        if (typeOf !== "object" && typeOf !== "array") {
+            return;
+        }
+        if (schema.$ref && schema.__$refResolved) {
+            var from = schema.__$refResolved;
+            var to = schema;
+            delete schema.$ref;
+            delete schema.__$refResolved;
+            for (var key in from) {
+                to[key] = from[key];
+            }
+        }
+        for (var key in schema) {
+            if (key.indexOf("__$") === 0) {
+                delete schema[key];
+                continue;
+            }
+            cleanup(schema[key]);
+        }
+    };
+    cleanup(schema);
 
     this.lastReport = report;
     if (report.isValid()) {
