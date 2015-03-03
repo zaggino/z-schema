@@ -82,7 +82,17 @@ exports.checkCacheForUri = function (uri) {
     return remotePath ? this.cache[remotePath] != null : false;
 };
 
-exports.getSchemaByReference = function (key) {
+exports.getSchema = function (report, schema) {
+    if (typeof schema === "object") {
+        schema = exports.getSchemaByReference.call(this, report, schema);
+    }
+    if (typeof schema === "string") {
+        schema = exports.getSchemaByUri.call(this, report, schema);
+    }
+    return schema;
+};
+
+exports.getSchemaByReference = function (report, key) {
     var i = this.referenceCache.length;
     while (i--) {
         if (this.referenceCache[i][0] === key) {

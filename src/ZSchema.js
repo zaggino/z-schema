@@ -86,12 +86,7 @@ function ZSchema(options) {
 ZSchema.prototype.compileSchema = function (schema) {
     var report = new Report(this.options);
 
-    if (typeof schema === "object") {
-        schema = SchemaCache.getSchemaByReference.call(this, schema);
-    }
-    if (typeof schema === "string") {
-        schema = SchemaCache.getSchemaByUri.call(this, report, schema);
-    }
+    schema = SchemaCache.getSchema.call(this, report, schema);
 
     SchemaCompilation.compileSchema.call(this, report, schema);
 
@@ -101,12 +96,7 @@ ZSchema.prototype.compileSchema = function (schema) {
 ZSchema.prototype.validateSchema = function (schema) {
     var report = new Report(this.options);
 
-    if (typeof schema === "object") {
-        schema = SchemaCache.getSchemaByReference.call(this, schema);
-    }
-    if (typeof schema === "string") {
-        schema = SchemaCache.getSchemaByUri.call(this, report, schema);
-    }
+    schema = SchemaCache.getSchema.call(this, report, schema);
 
     var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
     if (compiled) { SchemaValidation.validateSchema.call(this, report, schema); }
@@ -117,12 +107,7 @@ ZSchema.prototype.validateSchema = function (schema) {
 ZSchema.prototype.validate = function (json, schema, callback) {
     var report = new Report(this.options);
 
-    if (typeof schema === "object") {
-        schema = SchemaCache.getSchemaByReference.call(this, schema);
-    }
-    if (typeof schema === "string") {
-        schema = SchemaCache.getSchemaByUri.call(this, report, schema);
-    }
+    schema = SchemaCache.getSchema.call(this, report, schema);
 
     var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
     if (!compiled) {
@@ -193,6 +178,19 @@ ZSchema.prototype.setRemoteReference = function (uri, schema) {
         schema = JSON.parse(schema);
     }
     SchemaCache.cacheSchemaByUri.call(this, uri, schema);
+};
+ZSchema.prototype.getResolvedSchema = function (schema) {
+    var report = new Report(this.options);
+    schema = SchemaCache.getSchema.call(this, report, schema);
+
+    // TODO: clean-up the schema and resolve references
+
+    this.lastReport = report;
+    if (report.isValid()) {
+        return schema;
+    } else {
+        throw this.getLastError();
+    }
 };
 
 /*
