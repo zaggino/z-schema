@@ -1750,7 +1750,10 @@ var SchemaValidators = {
 
         if (this.options.noEmptyStrings === true) {
             if (schema.type === "string" || isArray && schema.type.indexOf("string") !== -1) {
-                if (schema.minLength === undefined && schema.enum === undefined) {
+                if (schema.minLength === undefined &&
+                    schema.enum === undefined &&
+                    schema.format === undefined) {
+
                     schema.minLength = 1;
                 }
             }
