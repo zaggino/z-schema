@@ -112,6 +112,9 @@ request(requiredUrl, function (error, response, body) {
 - [Assume additionalItems/additionalProperties are defined in schemas as false](#assumeadditional)
 - [Force additionalItems/additionalProperties to be defined in schemas](#forceadditional)
 - [Force items to be defined in array type schemas](#forceitems)
+- [Force minItems to be defined in array type schemas](#forceminitems)
+- [Force maxItems to be defined in array type schemas](#forcemaxitems)
+- [Force minLength to be defined in string type schemas](#forceminlength)
 - [Force maxLength to be defined in string type schemas](#forcemaxlength)
 - [Force properties or patternProperties to be defined in object type schemas](#forceproperties)
 - [Ignore remote references to schemas that are not cached or resolvable](#ignoreunresolvablereferences)
@@ -300,6 +303,40 @@ var validator = new ZSchema({
     forceItems: true
 });
 ```
+
+##forceMinItems
+
+When true, validator doesn't validate schemas where ```minItems``` is not defined for ```array``` type schemas.
+This is to avoid passing zero-length arrays which application doesn't expect to handle.
+
+```javascript
+var validator = new ZSchema({
+    forceMinItems: true
+});
+```
+
+##forceMaxItems
+
+When true, validator doesn't validate schemas where ```maxItems``` is not defined for ```array``` type schemas.
+This is to avoid passing arrays with unlimited count of elements which application doesn't expect to handle.
+
+```javascript
+var validator = new ZSchema({
+    forceMaxItems: true
+});
+```
+
+##forceMinLength
+
+When true, validator doesn't validate schemas where ```minLength``` is not defined for ```string``` type schemas.
+This is to avoid passing zero-length strings which application doesn't expect to handle.
+
+```javascript
+var validator = new ZSchema({
+    forceMinLength: true
+});
+```
+
 
 ##forceMaxLength
 

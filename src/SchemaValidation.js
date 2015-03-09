@@ -354,6 +354,30 @@ var SchemaValidators = {
                 }
             }
         }
+        if (this.options.forceMinItems === true) {
+            if (schema.type === "array" || isArray && schema.type.indexOf("array") !== -1) {
+                if (schema.minItems === undefined) {
+                    report.addError("KEYWORD_UNDEFINED_STRICT", ["minItems"]);
+                }
+            }
+        }
+        if (this.options.forceMaxItems === true) {
+            if (schema.type === "array" || isArray && schema.type.indexOf("array") !== -1) {
+                if (schema.maxItems === undefined) {
+                    report.addError("KEYWORD_UNDEFINED_STRICT", ["maxItems"]);
+                }
+            }
+        }
+        if (this.options.forceMinLength === true) {
+            if (schema.type === "string" || isArray && schema.type.indexOf("string") !== -1) {
+                if (schema.minLength === undefined &&
+                    schema.format === undefined &&
+                    schema.enum === undefined &&
+                    schema.pattern === undefined) {
+                    report.addError("KEYWORD_UNDEFINED_STRICT", ["minLength"]);
+                }
+            }
+        }
         if (this.options.forceMaxLength === true) {
             if (schema.type === "string" || isArray && schema.type.indexOf("string") !== -1) {
                 if (schema.maxLength === undefined &&

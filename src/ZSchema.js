@@ -21,6 +21,12 @@ var defaultOptions = {
     assumeAdditional: false,
     // force items to be defined on "array" types
     forceItems: false,
+    // force minItems to be defined on "array" types
+    forceMinItems: false,
+    // force maxItems to be defined on "array" types
+    forceMaxItems: false,
+    // force minLength to be defined on "string" types
+    forceMinLength: false,
     // force maxLength to be defined on "string" types
     forceMaxLength: false,
     // force properties or patternProperties to be defined on "object" types
