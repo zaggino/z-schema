@@ -356,7 +356,10 @@ var SchemaValidators = {
         }
         if (this.options.forceMaxLength === true) {
             if (schema.type === "string" || isArray && schema.type.indexOf("string") !== -1) {
-                if (schema.maxLength === undefined && schema.format === undefined && schema.enum === undefined) {
+                if (schema.maxLength === undefined &&
+                    schema.format === undefined &&
+                    schema.enum === undefined &&
+                    schema.pattern === undefined) {
                     report.addError("KEYWORD_UNDEFINED_STRICT", ["maxLength"]);
                 }
             }
