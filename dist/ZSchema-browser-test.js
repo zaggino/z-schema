@@ -45418,6 +45418,664 @@ module.exports = Request
 
 }).call(this,require('_process'),require("buffer").Buffer)
 },{"./lib/auth":188,"./lib/cookies":189,"./lib/copy":190,"./lib/getProxyFromURI":191,"./lib/helpers":192,"./lib/oauth":193,"_process":164,"aws-sign2":194,"bl":195,"buffer":16,"caseless":204,"combined-stream":205,"forever-agent":207,"form-data":208,"hawk":210,"http":156,"http-signature":211,"https":160,"isstream":226,"mime-types":228,"net":1,"node-uuid":231,"qs":233,"querystring":168,"stream":180,"stringstream":238,"tunnel-agent":243,"url":182,"util":184,"zlib":15}],245:[function(require,module,exports){
+/*!
+ * Copyright (c) 2014 Chris O'Hara <cohara87@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+(function (name, definition) {
+    if (typeof exports !== 'undefined' && typeof module !== 'undefined') {
+        module.exports = definition();
+    } else if (typeof define === 'function' && typeof define.amd === 'object') {
+        define(definition);
+    } else {
+        this[name] = definition();
+    }
+})('validator', function (validator) {
+
+    'use strict';
+
+    validator = { version: '3.33.0' };
+
+    var emailAddress = /((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))/;
+    var displayName = /([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~\.]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~\.]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\s)*/;
+
+    var email = new RegExp('^' + emailAddress.source + '$', 'i');
+    var emailWithDisplayName = new RegExp('^' + displayName.source + '<' + emailAddress.source + '>$', 'i');
+
+    var creditCard = /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/;
+
+    var isbn10Maybe = /^(?:[0-9]{9}X|[0-9]{10})$/
+      , isbn13Maybe = /^(?:[0-9]{13})$/;
+
+    var ipv4Maybe = /^(\d?\d?\d)\.(\d?\d?\d)\.(\d?\d?\d)\.(\d?\d?\d)$/
+      , ipv6 = /^::|^::1|^([a-fA-F0-9]{1,4}::?){1,7}([a-fA-F0-9]{1,4})$/;
+
+    var uuid = {
+        '3': /^[0-9A-F]{8}-[0-9A-F]{4}-3[0-9A-F]{3}-[0-9A-F]{4}-[0-9A-F]{12}$/i
+      , '4': /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
+      , '5': /^[0-9A-F]{8}-[0-9A-F]{4}-5[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
+      , all: /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i
+    };
+
+    var alpha = /^[a-zA-Z]+$/
+      , alphanumeric = /^[a-zA-Z0-9]+$/
+      , numeric = /^[-+]?[0-9]+$/
+      , int = /^(?:[-+]?(?:0|[1-9][0-9]*))$/
+      , float = /^(?:[-+]?(?:[0-9]+))?(?:\.[0-9]*)?(?:[eE][\+\-]?(?:[0-9]+))?$/
+      , hexadecimal = /^[0-9a-fA-F]+$/
+      , hexcolor = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+
+    var ascii = /^[\x00-\x7F]+$/
+      , multibyte = /[^\x00-\x7F]/
+      , fullWidth = /[^\u0020-\u007E\uFF61-\uFF9F\uFFA0-\uFFDC\uFFE8-\uFFEE0-9a-zA-Z]/
+      , halfWidth = /[\u0020-\u007E\uFF61-\uFF9F\uFFA0-\uFFDC\uFFE8-\uFFEE0-9a-zA-Z]/;
+
+    var surrogatePair = /[\uD800-\uDBFF][\uDC00-\uDFFF]/;
+
+    var base64 = /^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{4})$/;
+
+    var phones = {
+      'zh-CN': /^(\+?0?86\-?)?1[345789]\d{9}$/,
+      'en-ZA': /^(\+?27|0)\d{9}$/,
+      'en-AU': /^(\+?61|0)4\d{8}$/,
+      'en-HK': /^(\+?852\-?)?[569]\d{3}\-?\d{4}$/,
+      'fr-FR': /^(\+?33|0)[67]\d{8}$/,
+      'pt-PT': /^(\+351)?9[1236]\d{7}$/,
+      'el-GR' : /^(\+30)?((2\d{9})|(69\d{8}))$/
+    };
+
+    validator.extend = function (name, fn) {
+        validator[name] = function () {
+            var args = Array.prototype.slice.call(arguments);
+            args[0] = validator.toString(args[0]);
+            return fn.apply(validator, args);
+        };
+    };
+
+    //Right before exporting the validator object, pass each of the builtins
+    //through extend() so that their first argument is coerced to a string
+    validator.init = function () {
+        for (var name in validator) {
+            if (typeof validator[name] !== 'function' || name === 'toString' ||
+                    name === 'toDate' || name === 'extend' || name === 'init') {
+                continue;
+            }
+            validator.extend(name, validator[name]);
+        }
+    };
+
+    validator.toString = function (input) {
+        if (typeof input === 'object' && input !== null && input.toString) {
+            input = input.toString();
+        } else if (input === null || typeof input === 'undefined' || (isNaN(input) && !input.length)) {
+            input = '';
+        } else if (typeof input !== 'string') {
+            input += '';
+        }
+        return input;
+    };
+
+    validator.toDate = function (date) {
+        if (Object.prototype.toString.call(date) === '[object Date]') {
+            return date;
+        }
+        date = Date.parse(date);
+        return !isNaN(date) ? new Date(date) : null;
+    };
+
+    validator.toFloat = function (str) {
+        return parseFloat(str);
+    };
+
+    validator.toInt = function (str, radix) {
+        return parseInt(str, radix || 10);
+    };
+
+    validator.toBoolean = function (str, strict) {
+        if (strict) {
+            return str === '1' || str === 'true';
+        }
+        return str !== '0' && str !== 'false' && str !== '';
+    };
+
+    validator.equals = function (str, comparison) {
+        return str === validator.toString(comparison);
+    };
+
+    validator.contains = function (str, elem) {
+        return str.indexOf(validator.toString(elem)) >= 0;
+    };
+
+    validator.matches = function (str, pattern, modifiers) {
+        if (Object.prototype.toString.call(pattern) !== '[object RegExp]') {
+            pattern = new RegExp(pattern, modifiers);
+        }
+        return pattern.test(str);
+    };
+
+    var default_email_options = {
+        allow_display_name: false
+    };
+
+    validator.isEmail = function (str, options) {
+        options = merge(options, default_email_options);
+
+        return email.test(str) || (options.allow_display_name === true && emailWithDisplayName.test(str));
+    };
+
+    var default_url_options = {
+        protocols: [ 'http', 'https', 'ftp' ]
+      , require_tld: true
+      , require_protocol: false
+      , allow_underscores: false
+      , allow_trailing_dot: false
+      , allow_protocol_relative_urls: false
+    };
+
+    validator.isURL = function (url, options) {
+        if (!url || url.length >= 2083) {
+            return false;
+        }
+        if (url.indexOf('mailto:') === 0) {
+            return false;
+        }
+        options = merge(options, default_url_options);
+        var protocol, user, pass, auth, host, hostname, port,
+            port_str, path, query, hash, split;
+        split = url.split('://');
+        if (split.length > 1) {
+            protocol = split.shift();
+            if (options.protocols.indexOf(protocol) === -1) {
+                return false;
+            }
+        } else if (options.require_protocol) {
+            return false;
+        }  else if (options.allow_protocol_relative_urls && url.substr(0, 2) === '//') {
+            split[0] = url.substr(2);
+        }
+        url = split.join('://');
+        split = url.split('#');
+        url = split.shift();
+        hash = split.join('#');
+        if (hash && /\s/.test(hash)) {
+            return false;
+        }
+        split = url.split('?');
+        url = split.shift();
+        query = split.join('?');
+        if (query && /\s/.test(query)) {
+            return false;
+        }
+
+        split = url.split('/');
+        url = split.shift();
+        path = split.join('/');
+        if (path && /\s/.test(path)) {
+            return false;
+        }
+        split = url.split('@');
+        if (split.length > 1) {
+            auth = split.shift();
+            if (auth.indexOf(':') >= 0) {
+                auth = auth.split(':');
+                user = auth.shift();
+                if (!/^\S+$/.test(user)) {
+                    return false;
+                }
+                pass = auth.join(':');
+                if (!/^\S*$/.test(user)) {
+                    return false;
+                }
+            }
+        }
+        hostname = split.join('@');
+        split = hostname.split(':');
+        host = split.shift();
+        if (split.length) {
+            port_str = split.join(':');
+            port = parseInt(port_str, 10);
+            if (!/^[0-9]+$/.test(port_str) || port <= 0 || port > 65535) {
+                return false;
+            }
+        }
+        if (!validator.isIP(host) && !validator.isFQDN(host, options) &&
+                host !== 'localhost') {
+            return false;
+        }
+        if (options.host_whitelist &&
+                options.host_whitelist.indexOf(host) === -1) {
+            return false;
+        }
+        if (options.host_blacklist &&
+                options.host_blacklist.indexOf(host) !== -1) {
+            return false;
+        }
+        return true;
+    };
+
+    validator.isIP = function (str, version) {
+        version = validator.toString(version);
+        if (!version) {
+            return validator.isIP(str, 4) || validator.isIP(str, 6);
+        } else if (version === '4') {
+            if (!ipv4Maybe.test(str)) {
+                return false;
+            }
+            var parts = str.split('.').sort(function (a, b) {
+                return a - b;
+            });
+            return parts[3] <= 255;
+        }
+        return version === '6' && ipv6.test(str);
+    };
+
+    var default_fqdn_options = {
+        require_tld: true
+      , allow_underscores: false
+      , allow_trailing_dot: false
+    };
+
+    validator.isFQDN = function (str, options) {
+        options = merge(options, default_fqdn_options);
+
+        /* Remove the optional trailing dot before checking validity */
+        if (options.allow_trailing_dot && str[str.length - 1] === '.') {
+            str = str.substring(0, str.length - 1);
+        }
+        var parts = str.split('.');
+        if (options.require_tld) {
+            var tld = parts.pop();
+            if (!parts.length || !/^([a-z\u00a1-\uffff]{2,}|xn[a-z0-9-]{2,})$/i.test(tld)) {
+                return false;
+            }
+        }
+        for (var part, i = 0; i < parts.length; i++) {
+            part = parts[i];
+            if (options.allow_underscores) {
+                if (part.indexOf('__') >= 0) {
+                    return false;
+                }
+                part = part.replace(/_/g, '');
+            }
+            if (!/^[a-z\u00a1-\uffff0-9-]+$/i.test(part)) {
+                return false;
+            }
+            if (part[0] === '-' || part[part.length - 1] === '-' ||
+                    part.indexOf('---') >= 0) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    validator.isAlpha = function (str) {
+        return alpha.test(str);
+    };
+
+    validator.isAlphanumeric = function (str) {
+        return alphanumeric.test(str);
+    };
+
+    validator.isNumeric = function (str) {
+        return numeric.test(str);
+    };
+
+    validator.isHexadecimal = function (str) {
+        return hexadecimal.test(str);
+    };
+
+    validator.isHexColor = function (str) {
+        return hexcolor.test(str);
+    };
+
+    validator.isLowercase = function (str) {
+        return str === str.toLowerCase();
+    };
+
+    validator.isUppercase = function (str) {
+        return str === str.toUpperCase();
+    };
+
+    validator.isInt = function (str) {
+        return int.test(str);
+    };
+
+    validator.isFloat = function (str) {
+        return str !== '' && float.test(str);
+    };
+
+    validator.isDivisibleBy = function (str, num) {
+        return validator.toFloat(str) % validator.toInt(num) === 0;
+    };
+
+    validator.isNull = function (str) {
+        return str.length === 0;
+    };
+
+    validator.isLength = function (str, min, max) {
+        var surrogatePairs = str.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g) || [];
+        var len = str.length - surrogatePairs.length;
+        return len >= min && (typeof max === 'undefined' || len <= max);
+    };
+
+    validator.isByteLength = function (str, min, max) {
+        return str.length >= min && (typeof max === 'undefined' || str.length <= max);
+    };
+
+    validator.isUUID = function (str, version) {
+        var pattern = uuid[version ? version : 'all'];
+        return pattern && pattern.test(str);
+    };
+
+    validator.isDate = function (str) {
+        return !isNaN(Date.parse(str));
+    };
+
+    validator.isAfter = function (str, date) {
+        var comparison = validator.toDate(date || new Date())
+          , original = validator.toDate(str);
+        return !!(original && comparison && original > comparison);
+    };
+
+    validator.isBefore = function (str, date) {
+        var comparison = validator.toDate(date || new Date())
+          , original = validator.toDate(str);
+        return original && comparison && original < comparison;
+    };
+
+    validator.isIn = function (str, options) {
+        var i;
+        if (Object.prototype.toString.call(options) === '[object Array]') {
+            var array = [];
+            for (i in options) {
+                array[i] = validator.toString(options[i]);
+            }
+            return array.indexOf(str) >= 0;
+        } else if (typeof options === 'object') {
+            return options.hasOwnProperty(str);
+        } else if (options && typeof options.indexOf === 'function') {
+            return options.indexOf(str) >= 0;
+        }
+        return false;
+    };
+
+    validator.isCreditCard = function (str) {
+        var sanitized = str.replace(/[^0-9]+/g, '');
+        if (!creditCard.test(sanitized)) {
+            return false;
+        }
+        var sum = 0, digit, tmpNum, shouldDouble;
+        for (var i = sanitized.length - 1; i >= 0; i--) {
+            digit = sanitized.substring(i, (i + 1));
+            tmpNum = parseInt(digit, 10);
+            if (shouldDouble) {
+                tmpNum *= 2;
+                if (tmpNum >= 10) {
+                    sum += ((tmpNum % 10) + 1);
+                } else {
+                    sum += tmpNum;
+                }
+            } else {
+                sum += tmpNum;
+            }
+            shouldDouble = !shouldDouble;
+        }
+        return !!((sum % 10) === 0 ? sanitized : false);
+    };
+
+    validator.isISBN = function (str, version) {
+        version = validator.toString(version);
+        if (!version) {
+            return validator.isISBN(str, 10) || validator.isISBN(str, 13);
+        }
+        var sanitized = str.replace(/[\s-]+/g, '')
+          , checksum = 0, i;
+        if (version === '10') {
+            if (!isbn10Maybe.test(sanitized)) {
+                return false;
+            }
+            for (i = 0; i < 9; i++) {
+                checksum += (i + 1) * sanitized.charAt(i);
+            }
+            if (sanitized.charAt(9) === 'X') {
+                checksum += 10 * 10;
+            } else {
+                checksum += 10 * sanitized.charAt(9);
+            }
+            if ((checksum % 11) === 0) {
+                return !!sanitized;
+            }
+        } else  if (version === '13') {
+            if (!isbn13Maybe.test(sanitized)) {
+                return false;
+            }
+            var factor = [ 1, 3 ];
+            for (i = 0; i < 12; i++) {
+                checksum += factor[i % 2] * sanitized.charAt(i);
+            }
+            if (sanitized.charAt(12) - ((10 - (checksum % 10)) % 10) === 0) {
+                return !!sanitized;
+            }
+        }
+        return false;
+    };
+
+    validator.isMobilePhone = function(str, locale) {
+        if (locale in phones) {
+            return phones[locale].test(str);
+        }
+        return false;
+    };
+
+    var default_currency_options = {
+        symbol: '$'
+      , require_symbol: false
+      , allow_space_after_symbol: false
+      , symbol_after_digits: false
+      , allow_negatives: true
+      , parens_for_negatives: false
+      , negative_sign_before_digits: false
+      , negative_sign_after_digits: false
+      , allow_negative_sign_placeholder: false
+      , thousands_separator: ','
+      , decimal_separator: '.'
+      , allow_space_after_digits: false
+    };
+
+    validator.isCurrency = function (str, options) {
+        options = merge(options, default_currency_options);
+
+        return currencyRegex(options).test(str);
+    };
+
+    validator.isJSON = function (str) {
+        try {
+            JSON.parse(str);
+        } catch (e) {
+            return false;
+        }
+        return true;
+    };
+
+    validator.isMultibyte = function (str) {
+        return multibyte.test(str);
+    };
+
+    validator.isAscii = function (str) {
+        return ascii.test(str);
+    };
+
+    validator.isFullWidth = function (str) {
+        return fullWidth.test(str);
+    };
+
+    validator.isHalfWidth = function (str) {
+        return halfWidth.test(str);
+    };
+
+    validator.isVariableWidth = function (str) {
+        return fullWidth.test(str) && halfWidth.test(str);
+    };
+
+    validator.isSurrogatePair = function (str) {
+        return surrogatePair.test(str);
+    };
+
+    validator.isBase64 = function (str) {
+        return base64.test(str);
+    };
+
+    validator.isMongoId = function (str) {
+        return validator.isHexadecimal(str) && str.length === 24;
+    };
+
+    validator.ltrim = function (str, chars) {
+        var pattern = chars ? new RegExp('^[' + chars + ']+', 'g') : /^\s+/g;
+        return str.replace(pattern, '');
+    };
+
+    validator.rtrim = function (str, chars) {
+        var pattern = chars ? new RegExp('[' + chars + ']+$', 'g') : /\s+$/g;
+        return str.replace(pattern, '');
+    };
+
+    validator.trim = function (str, chars) {
+        var pattern = chars ? new RegExp('^[' + chars + ']+|[' + chars + ']+$', 'g') : /^\s+|\s+$/g;
+        return str.replace(pattern, '');
+    };
+
+    validator.escape = function (str) {
+        return (str.replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#x27;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\//g, '&#x2F;'));
+    };
+
+    validator.stripLow = function (str, keep_new_lines) {
+        var chars = keep_new_lines ? '\\x00-\\x09\\x0B\\x0C\\x0E-\\x1F\\x7F' : '\\x00-\\x1F\\x7F';
+        return validator.blacklist(str, chars);
+    };
+
+    validator.whitelist = function (str, chars) {
+        return str.replace(new RegExp('[^' + chars + ']+', 'g'), '');
+    };
+
+    validator.blacklist = function (str, chars) {
+        return str.replace(new RegExp('[' + chars + ']+', 'g'), '');
+    };
+
+    var default_normalize_email_options = {
+        lowercase: true
+    };
+
+    validator.normalizeEmail = function (email, options) {
+        options = merge(options, default_normalize_email_options);
+        if (!validator.isEmail(email)) {
+            return false;
+        }
+        var parts = email.split('@', 2);
+        parts[1] = parts[1].toLowerCase();
+        if (parts[1] === 'gmail.com' || parts[1] === 'googlemail.com') {
+            parts[0] = parts[0].toLowerCase().replace(/\./g, '');
+            if (parts[0][0] === '+') {
+                return false;
+            }
+            parts[0] = parts[0].split('+')[0];
+            parts[1] = 'gmail.com';
+        } else if (options.lowercase) {
+            parts[0] = parts[0].toLowerCase();
+        }
+        return parts.join('@');
+    };
+
+    function merge(obj, defaults) {
+        obj = obj || {};
+        for (var key in defaults) {
+            if (typeof obj[key] === 'undefined') {
+                obj[key] = defaults[key];
+            }
+        }
+        return obj;
+    }
+
+    function currencyRegex(options) {
+        var symbol = '(\\' + options.symbol.replace(/\./g, '\\.') + ')' + (options.require_symbol ? '' : '?')
+            , negative = '-?'
+            , whole_dollar_amount_without_sep = '[1-9]\\d*'
+            , whole_dollar_amount_with_sep = '[1-9]\\d{0,2}(\\' + options.thousands_separator + '\\d{3})*'
+            , valid_whole_dollar_amounts = ['0', whole_dollar_amount_without_sep, whole_dollar_amount_with_sep]
+            , whole_dollar_amount = '(' + valid_whole_dollar_amounts.join('|') + ')?'
+            , decimal_amount = '(\\' + options.decimal_separator + '\\d{2})?';
+        var pattern = whole_dollar_amount + decimal_amount;
+        // default is negative sign before symbol, but there are two other options (besides parens)
+        if (options.allow_negatives && !options.parens_for_negatives) {
+            if (options.negative_sign_after_digits) {
+                pattern += negative;
+            }
+            else if (options.negative_sign_before_digits) {
+                pattern = negative + pattern;
+            }
+        }
+        // South African Rand, for example, uses R 123 (space) and R-123 (no space)
+        if (options.allow_negative_sign_placeholder) {
+            pattern = '( (?!\\-))?' + pattern;
+        }
+        else if (options.allow_space_after_symbol) {
+            pattern = ' ?' + pattern;
+        }
+        else if (options.allow_space_after_digits) {
+            pattern += '( (?!$))?';
+        }
+        if (options.symbol_after_digits) {
+            pattern += symbol;
+        } else {
+            pattern = symbol + pattern;
+        }
+        if (options.allow_negatives) {
+            if (options.parens_for_negatives) {
+                pattern = '(\\(' + pattern + '\\)|' + pattern + ')';
+            }
+            else if (!(options.negative_sign_before_digits || options.negative_sign_after_digits)) {
+                pattern = negative + pattern;
+            }
+        }
+        return new RegExp(
+            '^' +
+            // ensure there's a dollar and/or decimal amount, and that it doesn't start with a space or a negative sign followed by a space
+            '(?!-? )(?=.*\\d)' +
+            pattern +
+            '$'
+        );
+    }
+
+    validator.init();
+
+    return validator;
+
+});
+
+},{}],246:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -45478,8 +46136,10 @@ module.exports = {
 
 };
 
-},{}],246:[function(require,module,exports){
+},{}],247:[function(require,module,exports){
 /*jshint maxlen: false*/
+
+var validator = require("validator");
 
 var FormatValidators = {
     "date": function (date) {
@@ -45526,8 +46186,7 @@ var FormatValidators = {
         if (typeof email !== "string") {
             return true;
         }
-        // use regex from owasp: https://www.owasp.org/index.php/OWASP_Validation_Regex_Repository
-        return /^[a-zA-Z0-9+&*-]+(?:\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,7}$/.test(email);
+        return validator.isEmail(email);
     },
     "hostname": function (hostname) {
         if (typeof hostname !== "string") {
@@ -45579,9 +46238,7 @@ var FormatValidators = {
     },
     "ipv4": function (ipv4) {
         if (typeof ipv4 !== "string") { return true; }
-        if (ipv4.indexOf(".") === -1) { return false; }
-        // https://www.owasp.org/index.php/OWASP_Validation_Regex_Repository
-        return /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipv4);
+        return validator.isIP(ipv4, 4);
     },
     "ipv6": function (ipv6) {
         // Stephen Ryan at Dartware @ http://forums.intermapper.com/viewtopic.php?t=452
@@ -45604,50 +46261,13 @@ var FormatValidators = {
         return typeof uri !== "string" || RegExp("^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?").test(uri);
     },
     "strict-uri": function (uri) {
-        // http://mathiasbynens.be/demo/url-regex
-        // https://gist.github.com/dperini/729294
-        return typeof uri !== "string" || RegExp(
-            "^" +
-                // protocol identifier
-                "(?:(?:https?|ftp)://)" +
-                // user:pass authentication
-                "(?:\\S+(?::\\S*)?@)?" +
-                "(?:" +
-                    // IP address exclusion
-                    // private & local networks
-                    "(?!10(?:\\.\\d{1,3}){3})" +
-                    "(?!127(?:\\.\\d{1,3}){3})" +
-                    "(?!169\\.254(?:\\.\\d{1,3}){2})" +
-                    "(?!192\\.168(?:\\.\\d{1,3}){2})" +
-                    "(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})" +
-                    // IP address dotted notation octets
-                    // excludes loopback network 0.0.0.0
-                    // excludes reserved space >= 224.0.0.0
-                    // excludes network & broacast addresses
-                    // (first & last IP address of each class)
-                    "(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])" +
-                    "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}" +
-                    "(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))" +
-                "|" +
-                    // host name
-                    "(?:(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)" +
-                    // domain name
-                    "(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*" +
-                    // TLD identifier
-                    "(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))" +
-                ")" +
-                // port number
-                "(?::\\d{2,5})?" +
-                // resource path
-                "(?:/[^\\s]*)?" +
-            "$", "i"
-        ).test(uri);
+        return typeof uri !== "string" || validator.isURL(uri);
     }
 };
 
 module.exports = FormatValidators;
 
-},{}],247:[function(require,module,exports){
+},{"validator":245}],248:[function(require,module,exports){
 "use strict";
 
 var FormatValidators  = require("./FormatValidators"),
@@ -46173,7 +46793,7 @@ exports.validate = function (report, schema, json) {
 
 };
 
-},{"./FormatValidators":246,"./Report":249,"./Utils":253}],248:[function(require,module,exports){
+},{"./FormatValidators":247,"./Report":250,"./Utils":254}],249:[function(require,module,exports){
 // Number.isFinite polyfill
 // http://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.isfinite
 if (typeof Number.isFinite !== "function") {
@@ -46191,7 +46811,7 @@ if (typeof Number.isFinite !== "function") {
     };
 }
 
-},{}],249:[function(require,module,exports){
+},{}],250:[function(require,module,exports){
 (function (process){
 "use strict";
 
@@ -46339,7 +46959,7 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
 module.exports = Report;
 
 }).call(this,require('_process'))
-},{"./Errors":245,"./Utils":253,"_process":164}],250:[function(require,module,exports){
+},{"./Errors":246,"./Utils":254,"_process":164}],251:[function(require,module,exports){
 "use strict";
 
 var Report              = require("./Report");
@@ -46494,7 +47114,7 @@ exports.getSchemaByUri = function (report, uri, root) {
 
 exports.getRemotePath = getRemotePath;
 
-},{"./Report":249,"./SchemaCompilation":251,"./SchemaValidation":252,"./Utils":253}],251:[function(require,module,exports){
+},{"./Report":250,"./SchemaCompilation":252,"./SchemaValidation":253,"./Utils":254}],252:[function(require,module,exports){
 "use strict";
 
 var Report      = require("./Report");
@@ -46753,7 +47373,7 @@ exports.compileSchema = function (report, schema) {
 
 };
 
-},{"./Report":249,"./SchemaCache":250,"./Utils":253}],252:[function(require,module,exports){
+},{"./Report":250,"./SchemaCache":251,"./Utils":254}],253:[function(require,module,exports){
 "use strict";
 
 var FormatValidators = require("./FormatValidators"),
@@ -47307,7 +47927,8 @@ exports.validateSchema = function (report, schema) {
             });
         }
         // end issue #36
-        if (schema.type === undefined &&
+        if (schema.enum === undefined &&
+            schema.type === undefined &&
             schema.anyOf === undefined &&
             schema.oneOf === undefined &&
             schema.not === undefined &&
@@ -47338,7 +47959,7 @@ exports.validateSchema = function (report, schema) {
 
 };
 
-},{"./FormatValidators":246,"./JsonValidation":247,"./Report":249,"./Utils":253}],253:[function(require,module,exports){
+},{"./FormatValidators":247,"./JsonValidation":248,"./Report":250,"./Utils":254}],254:[function(require,module,exports){
 "use strict";
 
 exports.isAbsoluteUri = function (uri) {
@@ -47545,7 +48166,7 @@ exports.ucs2decode = function (string) {
 };
 /*jshint +W016*/
 
-},{}],254:[function(require,module,exports){
+},{}],255:[function(require,module,exports){
 "use strict";
 
 require("./Polyfills");
@@ -47790,7 +48411,7 @@ ZSchema.getDefaultOptions = function () {
 
 module.exports = ZSchema;
 
-},{"./FormatValidators":246,"./JsonValidation":247,"./Polyfills":248,"./Report":249,"./SchemaCache":250,"./SchemaCompilation":251,"./SchemaValidation":252,"./Utils":253}],255:[function(require,module,exports){
+},{"./FormatValidators":247,"./JsonValidation":248,"./Polyfills":249,"./Report":250,"./SchemaCache":251,"./SchemaCompilation":252,"./SchemaValidation":253,"./Utils":254}],256:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -47868,7 +48489,7 @@ module.exports = {
     ]
 };
 
-},{}],256:[function(require,module,exports){
+},{}],257:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -47933,7 +48554,7 @@ module.exports = {
     ]
 };
 
-},{}],257:[function(require,module,exports){
+},{}],258:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48006,7 +48627,7 @@ module.exports = {
     ]
 };
 
-},{}],258:[function(require,module,exports){
+},{}],259:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48034,7 +48655,7 @@ module.exports = {
     ]
 };
 
-},{}],259:[function(require,module,exports){
+},{}],260:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48059,7 +48680,7 @@ module.exports = {
     ]
 };
 
-},{}],260:[function(require,module,exports){
+},{}],261:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48132,7 +48753,7 @@ module.exports = {
     ]
 };
 
-},{}],261:[function(require,module,exports){
+},{}],262:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48160,7 +48781,7 @@ module.exports = {
     ]
 };
 
-},{}],262:[function(require,module,exports){
+},{}],263:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48188,7 +48809,7 @@ module.exports = {
     ]
 };
 
-},{}],263:[function(require,module,exports){
+},{}],264:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48216,7 +48837,7 @@ module.exports = {
     ]
 };
 
-},{}],264:[function(require,module,exports){
+},{}],265:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48244,7 +48865,7 @@ module.exports = {
     ]
 };
 
-},{}],265:[function(require,module,exports){
+},{}],266:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48272,7 +48893,7 @@ module.exports = {
     ]
 };
 
-},{}],266:[function(require,module,exports){
+},{}],267:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48328,7 +48949,7 @@ module.exports = {
     ]
 };
 
-},{}],267:[function(require,module,exports){
+},{}],268:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48372,7 +48993,7 @@ module.exports = {
     ]
 };
 
-},{}],268:[function(require,module,exports){
+},{}],269:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48447,7 +49068,7 @@ module.exports = {
     ]
 };
 
-},{}],269:[function(require,module,exports){
+},{}],270:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48620,7 +49241,7 @@ module.exports = {
     ]
 };
 
-},{}],270:[function(require,module,exports){
+},{}],271:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48647,7 +49268,7 @@ module.exports = {
     ]
 };
 
-},{}],271:[function(require,module,exports){
+},{}],272:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48723,7 +49344,7 @@ module.exports = {
     ]
 };
 
-},{}],272:[function(require,module,exports){
+},{}],273:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48759,7 +49380,7 @@ module.exports = {
     ]
 };
 
-},{}],273:[function(require,module,exports){
+},{}],274:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48849,7 +49470,7 @@ module.exports = {
     ]
 };
 
-},{}],274:[function(require,module,exports){
+},{}],275:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48874,7 +49495,7 @@ module.exports = {
     ]
 };
 
-},{}],275:[function(require,module,exports){
+},{}],276:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -48950,7 +49571,7 @@ module.exports = {
     ]
 };
 
-},{}],276:[function(require,module,exports){
+},{}],277:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -49063,7 +49684,7 @@ module.exports = {
     ]
 };
 
-},{}],277:[function(require,module,exports){
+},{}],278:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -49243,7 +49864,7 @@ module.exports = {
     ]
 };
 
-},{}],278:[function(require,module,exports){
+},{}],279:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -49290,7 +49911,7 @@ module.exports = {
     ]
 };
 
-},{}],279:[function(require,module,exports){
+},{}],280:[function(require,module,exports){
 "use strict";
 
 var resourceObject = {
@@ -49586,7 +50207,7 @@ module.exports = {
     ]
 };
 
-},{}],280:[function(require,module,exports){
+},{}],281:[function(require,module,exports){
 "use strict";
 
 var draft4 = require("./files/Issue47/draft4.json");
@@ -49615,7 +50236,7 @@ module.exports = {
     ]
 };
 
-},{"./files/Issue47/draft4.json":301,"./files/Issue47/sample.json":302,"./files/Issue47/swagger_draft.json":303,"./files/Issue47/swagger_draft_modified.json":304}],281:[function(require,module,exports){
+},{"./files/Issue47/draft4.json":303,"./files/Issue47/sample.json":304,"./files/Issue47/swagger_draft.json":305,"./files/Issue47/swagger_draft_modified.json":306}],282:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -49648,7 +50269,7 @@ module.exports = {
     ]
 };
 
-},{}],282:[function(require,module,exports){
+},{}],283:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -49666,7 +50287,7 @@ module.exports = {
     ]
 };
 
-},{}],283:[function(require,module,exports){
+},{}],284:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -49688,7 +50309,7 @@ module.exports = {
     ]
 };
 
-},{}],284:[function(require,module,exports){
+},{}],285:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -49759,7 +50380,7 @@ module.exports = {
     ]
 };
 
-},{}],285:[function(require,module,exports){
+},{}],286:[function(require,module,exports){
 "use strict";
 
 var dataTypeBaseJson = {
@@ -50444,7 +51065,7 @@ module.exports = {
     ]
 };
 
-},{}],286:[function(require,module,exports){
+},{}],287:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -50507,7 +51128,7 @@ module.exports = {
     ]
 };
 
-},{}],287:[function(require,module,exports){
+},{}],288:[function(require,module,exports){
 /*jshint -W101*/
 
 "use strict";
@@ -51084,7 +51705,7 @@ module.exports = {
     ]
 };
 
-},{}],288:[function(require,module,exports){
+},{}],289:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51115,7 +51736,7 @@ module.exports = {
     ]
 };
 
-},{}],289:[function(require,module,exports){
+},{}],290:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51166,7 +51787,7 @@ module.exports = {
     ]
 };
 
-},{}],290:[function(require,module,exports){
+},{}],291:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51286,7 +51907,7 @@ module.exports = {
     ]
 };
 
-},{}],291:[function(require,module,exports){
+},{}],292:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51344,7 +51965,7 @@ module.exports = {
     ]
 };
 
-},{}],292:[function(require,module,exports){
+},{}],293:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51417,7 +52038,7 @@ module.exports = {
     ]
 };
 
-},{}],293:[function(require,module,exports){
+},{}],294:[function(require,module,exports){
 "use strict";
 
 var innerSchema = {
@@ -51462,7 +52083,7 @@ module.exports = {
     ]
 };
 
-},{}],294:[function(require,module,exports){
+},{}],295:[function(require,module,exports){
 "use strict";
 
 var schema1 = {
@@ -51506,7 +52127,25 @@ module.exports = {
     ]
 };
 
-},{}],295:[function(require,module,exports){
+},{}],296:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+    description: "Issue #96 - email format validation false negatives",
+    schema: {
+        type: "string",
+        format: "email"
+    },
+    tests: [
+        {
+            description: "should pass validation #1",
+            data: "my_email@gmail.com",
+            valid: true
+        }
+    ]
+};
+
+},{}],297:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51565,7 +52204,7 @@ module.exports = {
     ]
 };
 
-},{}],296:[function(require,module,exports){
+},{}],298:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51590,7 +52229,7 @@ module.exports = {
     ]
 };
 
-},{}],297:[function(require,module,exports){
+},{}],299:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51615,7 +52254,7 @@ module.exports = {
     ]
 };
 
-},{}],298:[function(require,module,exports){
+},{}],300:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51660,7 +52299,7 @@ module.exports = {
     ]
 };
 
-},{}],299:[function(require,module,exports){
+},{}],301:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51685,7 +52324,7 @@ module.exports = {
     ]
 };
 
-},{}],300:[function(require,module,exports){
+},{}],302:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -51715,7 +52354,7 @@ module.exports = {
     ]
 };
 
-},{}],301:[function(require,module,exports){
+},{}],303:[function(require,module,exports){
 module.exports={
     "id": "http://json-schema.org/draft-04/schema#",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -51867,7 +52506,7 @@ module.exports={
     "default": {}
 }
 
-},{}],302:[function(require,module,exports){
+},{}],304:[function(require,module,exports){
 module.exports={
   "swagger": 2,
   "info": {
@@ -51958,7 +52597,7 @@ module.exports={
   }
 }
 
-},{}],303:[function(require,module,exports){
+},{}],305:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -52356,7 +52995,7 @@ module.exports={
 	}
 }
 
-},{}],304:[function(require,module,exports){
+},{}],306:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -52754,7 +53393,7 @@ module.exports={
 	}
 }
 
-},{}],305:[function(require,module,exports){
+},{}],307:[function(require,module,exports){
 module.exports={
     "$schema": "http://json-schema.org/draft-04/hyper-schema#",
     "id": "http://json-schema.org/draft-04/hyper-schema#",
@@ -52914,15 +53553,15 @@ module.exports={
 }
 
 
-},{}],306:[function(require,module,exports){
-module.exports=require(301)
-},{"/Users/zaggino/github/zaggino/z-schema/test/ZSchemaTestSuite/files/Issue47/draft4.json":301}],307:[function(require,module,exports){
+},{}],308:[function(require,module,exports){
+module.exports=require(303)
+},{"/Users/zaggino/github/zaggino/z-schema/test/ZSchemaTestSuite/files/Issue47/draft4.json":303}],309:[function(require,module,exports){
 module.exports={
     "type": "integer"
 }
-},{}],308:[function(require,module,exports){
-module.exports=require(307)
-},{"/Users/zaggino/github/zaggino/z-schema/test/jsonSchemaTestSuite/remotes/folder/folderInteger.json":307}],309:[function(require,module,exports){
+},{}],310:[function(require,module,exports){
+module.exports=require(309)
+},{"/Users/zaggino/github/zaggino/z-schema/test/jsonSchemaTestSuite/remotes/folder/folderInteger.json":309}],311:[function(require,module,exports){
 module.exports={
     "integer": {
         "type": "integer"
@@ -52931,7 +53570,7 @@ module.exports={
         "$ref": "#/integer"
     }
 }
-},{}],310:[function(require,module,exports){
+},{}],312:[function(require,module,exports){
 module.exports=[
     {
         "description": "additionalItems as schema",
@@ -53015,7 +53654,7 @@ module.exports=[
     }
 ]
 
-},{}],311:[function(require,module,exports){
+},{}],313:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -53105,7 +53744,7 @@ module.exports=[
     }
 ]
 
-},{}],312:[function(require,module,exports){
+},{}],314:[function(require,module,exports){
 module.exports=[
     {
         "description": "allOf",
@@ -53219,7 +53858,7 @@ module.exports=[
     }
 ]
 
-},{}],313:[function(require,module,exports){
+},{}],315:[function(require,module,exports){
 module.exports=[
     {
         "description": "anyOf",
@@ -53289,7 +53928,7 @@ module.exports=[
     }
 ]
 
-},{}],314:[function(require,module,exports){
+},{}],316:[function(require,module,exports){
 module.exports=[
     {
         "description": "invalid type for default",
@@ -53340,7 +53979,7 @@ module.exports=[
     }
 ]
 
-},{}],315:[function(require,module,exports){
+},{}],317:[function(require,module,exports){
 module.exports=[
     {
         "description": "valid definition",
@@ -53374,7 +54013,7 @@ module.exports=[
     }
 ]
 
-},{}],316:[function(require,module,exports){
+},{}],318:[function(require,module,exports){
 module.exports=[
     {
         "description": "dependencies",
@@ -53489,7 +54128,7 @@ module.exports=[
     }
 ]
 
-},{}],317:[function(require,module,exports){
+},{}],319:[function(require,module,exports){
 module.exports=[
     {
         "description": "simple enum validation",
@@ -53563,7 +54202,7 @@ module.exports=[
     }
 ]
 
-},{}],318:[function(require,module,exports){
+},{}],320:[function(require,module,exports){
 module.exports=[
     {
         "description": "a schema given for items",
@@ -53611,7 +54250,7 @@ module.exports=[
     }
 ]
 
-},{}],319:[function(require,module,exports){
+},{}],321:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxItems validation",
@@ -53641,7 +54280,7 @@ module.exports=[
     }
 ]
 
-},{}],320:[function(require,module,exports){
+},{}],322:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxLength validation",
@@ -53676,7 +54315,7 @@ module.exports=[
     }
 ]
 
-},{}],321:[function(require,module,exports){
+},{}],323:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxProperties validation",
@@ -53706,7 +54345,7 @@ module.exports=[
     }
 ]
 
-},{}],322:[function(require,module,exports){
+},{}],324:[function(require,module,exports){
 module.exports=[
     {
         "description": "maximum validation",
@@ -53750,7 +54389,7 @@ module.exports=[
     }
 ]
 
-},{}],323:[function(require,module,exports){
+},{}],325:[function(require,module,exports){
 module.exports=[
     {
         "description": "minItems validation",
@@ -53780,7 +54419,7 @@ module.exports=[
     }
 ]
 
-},{}],324:[function(require,module,exports){
+},{}],326:[function(require,module,exports){
 module.exports=[
     {
         "description": "minLength validation",
@@ -53815,7 +54454,7 @@ module.exports=[
     }
 ]
 
-},{}],325:[function(require,module,exports){
+},{}],327:[function(require,module,exports){
 module.exports=[
     {
         "description": "minProperties validation",
@@ -53845,7 +54484,7 @@ module.exports=[
     }
 ]
 
-},{}],326:[function(require,module,exports){
+},{}],328:[function(require,module,exports){
 module.exports=[
     {
         "description": "minimum validation",
@@ -53889,7 +54528,7 @@ module.exports=[
     }
 ]
 
-},{}],327:[function(require,module,exports){
+},{}],329:[function(require,module,exports){
 module.exports=[
     {
         "description": "by int",
@@ -53951,7 +54590,7 @@ module.exports=[
     }
 ]
 
-},{}],328:[function(require,module,exports){
+},{}],330:[function(require,module,exports){
 module.exports=[
     {
         "description": "not",
@@ -54049,7 +54688,7 @@ module.exports=[
 
 ]
 
-},{}],329:[function(require,module,exports){
+},{}],331:[function(require,module,exports){
 module.exports=[
     {
         "description": "oneOf",
@@ -54119,7 +54758,7 @@ module.exports=[
     }
 ]
 
-},{}],330:[function(require,module,exports){
+},{}],332:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer",
@@ -54228,7 +54867,7 @@ module.exports=[
     }
 ]
 
-},{}],331:[function(require,module,exports){
+},{}],333:[function(require,module,exports){
 module.exports=[
     {
         "description": "validation of date-time strings",
@@ -54373,7 +55012,7 @@ module.exports=[
     }
 ]
 
-},{}],332:[function(require,module,exports){
+},{}],334:[function(require,module,exports){
 module.exports=[
     {
         "description": "pattern validation",
@@ -54398,7 +55037,7 @@ module.exports=[
     }
 ]
 
-},{}],333:[function(require,module,exports){
+},{}],335:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -54510,7 +55149,7 @@ module.exports=[
     }
 ]
 
-},{}],334:[function(require,module,exports){
+},{}],336:[function(require,module,exports){
 module.exports=[
     {
         "description": "object properties validation",
@@ -54604,7 +55243,7 @@ module.exports=[
     }
 ]
 
-},{}],335:[function(require,module,exports){
+},{}],337:[function(require,module,exports){
 module.exports=[
     {
         "description": "root pointer ref",
@@ -54750,7 +55389,7 @@ module.exports=[
     }
 ]
 
-},{}],336:[function(require,module,exports){
+},{}],338:[function(require,module,exports){
 module.exports=[
     {
         "description": "remote ref",
@@ -54826,7 +55465,7 @@ module.exports=[
     }
 ]
 
-},{}],337:[function(require,module,exports){
+},{}],339:[function(require,module,exports){
 module.exports=[
     {
         "description": "required validation",
@@ -54867,7 +55506,7 @@ module.exports=[
     }
 ]
 
-},{}],338:[function(require,module,exports){
+},{}],340:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer type matches integers",
@@ -55199,7 +55838,7 @@ module.exports=[
     }
 ]
 
-},{}],339:[function(require,module,exports){
+},{}],341:[function(require,module,exports){
 module.exports=[
     {
         "description": "uniqueItems validation",
@@ -55280,7 +55919,7 @@ module.exports=[
     }
 ]
 
-},{}],340:[function(require,module,exports){
+},{}],342:[function(require,module,exports){
 "use strict";
 
 var isBrowser = typeof window !== "undefined";
@@ -55369,7 +56008,7 @@ describe("Automatic schema loading", function () {
 
 });
 
-},{"../../src/ZSchema":254,"request":187}],341:[function(require,module,exports){
+},{"../../src/ZSchema":255,"request":187}],343:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -55441,7 +56080,7 @@ describe("Basic", function () {
 
 });
 
-},{"../../src/ZSchema":254,"../files/draft-04-schema.json":306,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":307,"../jsonSchemaTestSuite/remotes/integer.json":308,"../jsonSchemaTestSuite/remotes/subSchemas.json":309}],342:[function(require,module,exports){
+},{"../../src/ZSchema":255,"../files/draft-04-schema.json":308,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":309,"../jsonSchemaTestSuite/remotes/integer.json":310,"../jsonSchemaTestSuite/remotes/subSchemas.json":311}],344:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -55537,7 +56176,7 @@ describe("JsonSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":254,"../files/draft-04-schema.json":306,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":307,"../jsonSchemaTestSuite/remotes/integer.json":308,"../jsonSchemaTestSuite/remotes/subSchemas.json":309,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":310,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":311,"../jsonSchemaTestSuite/tests/draft4/allOf.json":312,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":313,"../jsonSchemaTestSuite/tests/draft4/default.json":314,"../jsonSchemaTestSuite/tests/draft4/definitions.json":315,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":316,"../jsonSchemaTestSuite/tests/draft4/enum.json":317,"../jsonSchemaTestSuite/tests/draft4/items.json":318,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":319,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":320,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":321,"../jsonSchemaTestSuite/tests/draft4/maximum.json":322,"../jsonSchemaTestSuite/tests/draft4/minItems.json":323,"../jsonSchemaTestSuite/tests/draft4/minLength.json":324,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":325,"../jsonSchemaTestSuite/tests/draft4/minimum.json":326,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":327,"../jsonSchemaTestSuite/tests/draft4/not.json":328,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":329,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":330,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":331,"../jsonSchemaTestSuite/tests/draft4/pattern.json":332,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":333,"../jsonSchemaTestSuite/tests/draft4/properties.json":334,"../jsonSchemaTestSuite/tests/draft4/ref.json":335,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":336,"../jsonSchemaTestSuite/tests/draft4/required.json":337,"../jsonSchemaTestSuite/tests/draft4/type.json":338,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":339}],343:[function(require,module,exports){
+},{"../../src/ZSchema":255,"../files/draft-04-schema.json":308,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":309,"../jsonSchemaTestSuite/remotes/integer.json":310,"../jsonSchemaTestSuite/remotes/subSchemas.json":311,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":312,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":313,"../jsonSchemaTestSuite/tests/draft4/allOf.json":314,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":315,"../jsonSchemaTestSuite/tests/draft4/default.json":316,"../jsonSchemaTestSuite/tests/draft4/definitions.json":317,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":318,"../jsonSchemaTestSuite/tests/draft4/enum.json":319,"../jsonSchemaTestSuite/tests/draft4/items.json":320,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":321,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":322,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":323,"../jsonSchemaTestSuite/tests/draft4/maximum.json":324,"../jsonSchemaTestSuite/tests/draft4/minItems.json":325,"../jsonSchemaTestSuite/tests/draft4/minLength.json":326,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":327,"../jsonSchemaTestSuite/tests/draft4/minimum.json":328,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":329,"../jsonSchemaTestSuite/tests/draft4/not.json":330,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":331,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":332,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":333,"../jsonSchemaTestSuite/tests/draft4/pattern.json":334,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":335,"../jsonSchemaTestSuite/tests/draft4/properties.json":336,"../jsonSchemaTestSuite/tests/draft4/ref.json":337,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":338,"../jsonSchemaTestSuite/tests/draft4/required.json":339,"../jsonSchemaTestSuite/tests/draft4/type.json":340,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":341}],345:[function(require,module,exports){
 /*jshint -W030 */
 
 "use strict";
@@ -55592,6 +56231,7 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/Issue76.js"),
     require("../ZSchemaTestSuite/Issue85.js"),
     require("../ZSchemaTestSuite/Issue94.js"),
+    require("../ZSchemaTestSuite/Issue96.js"),
     undefined
 ];
 
@@ -55604,8 +56244,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 46 files", function () {
-        expect(testSuiteFiles.length).toBe(46);
+    it("should contain 47 files", function () {
+        expect(testSuiteFiles.length).toBe(47);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -55689,4 +56329,4 @@ describe("ZSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":254,"../ZSchemaTestSuite/AssumeAdditional.js":255,"../ZSchemaTestSuite/CustomFormats.js":256,"../ZSchemaTestSuite/CustomFormatsAsync.js":257,"../ZSchemaTestSuite/ErrorPathAsArray.js":258,"../ZSchemaTestSuite/ErrorPathAsJSONPointer.js":259,"../ZSchemaTestSuite/ForceAdditional.js":260,"../ZSchemaTestSuite/ForceItems.js":261,"../ZSchemaTestSuite/ForceMaxItems.js":262,"../ZSchemaTestSuite/ForceMaxLength.js":263,"../ZSchemaTestSuite/ForceMinItems.js":264,"../ZSchemaTestSuite/ForceMinLength.js":265,"../ZSchemaTestSuite/ForceProperties.js":266,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":267,"../ZSchemaTestSuite/Issue12.js":268,"../ZSchemaTestSuite/Issue13.js":269,"../ZSchemaTestSuite/Issue16.js":270,"../ZSchemaTestSuite/Issue22.js":271,"../ZSchemaTestSuite/Issue25.js":272,"../ZSchemaTestSuite/Issue26.js":273,"../ZSchemaTestSuite/Issue37.js":274,"../ZSchemaTestSuite/Issue40.js":275,"../ZSchemaTestSuite/Issue41.js":276,"../ZSchemaTestSuite/Issue43.js":277,"../ZSchemaTestSuite/Issue44.js":278,"../ZSchemaTestSuite/Issue45.js":279,"../ZSchemaTestSuite/Issue47.js":280,"../ZSchemaTestSuite/Issue48.js":281,"../ZSchemaTestSuite/Issue49.js":282,"../ZSchemaTestSuite/Issue53.js":283,"../ZSchemaTestSuite/Issue56.js":284,"../ZSchemaTestSuite/Issue57.js":285,"../ZSchemaTestSuite/Issue58.js":286,"../ZSchemaTestSuite/Issue63.js":287,"../ZSchemaTestSuite/Issue64.js":288,"../ZSchemaTestSuite/Issue67.js":289,"../ZSchemaTestSuite/Issue71.js":290,"../ZSchemaTestSuite/Issue73.js":291,"../ZSchemaTestSuite/Issue76.js":292,"../ZSchemaTestSuite/Issue85.js":293,"../ZSchemaTestSuite/Issue94.js":294,"../ZSchemaTestSuite/MultipleSchemas.js":295,"../ZSchemaTestSuite/NoEmptyArrays.js":296,"../ZSchemaTestSuite/NoEmptyStrings.js":297,"../ZSchemaTestSuite/NoExtraKeywords.js":298,"../ZSchemaTestSuite/NoTypeless.js":299,"../ZSchemaTestSuite/StrictUris.js":300,"../files/draft-04-hyper-schema.json":305,"../files/draft-04-schema.json":306}]},{},[340,341,342,343]);
+},{"../../src/ZSchema":255,"../ZSchemaTestSuite/AssumeAdditional.js":256,"../ZSchemaTestSuite/CustomFormats.js":257,"../ZSchemaTestSuite/CustomFormatsAsync.js":258,"../ZSchemaTestSuite/ErrorPathAsArray.js":259,"../ZSchemaTestSuite/ErrorPathAsJSONPointer.js":260,"../ZSchemaTestSuite/ForceAdditional.js":261,"../ZSchemaTestSuite/ForceItems.js":262,"../ZSchemaTestSuite/ForceMaxItems.js":263,"../ZSchemaTestSuite/ForceMaxLength.js":264,"../ZSchemaTestSuite/ForceMinItems.js":265,"../ZSchemaTestSuite/ForceMinLength.js":266,"../ZSchemaTestSuite/ForceProperties.js":267,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":268,"../ZSchemaTestSuite/Issue12.js":269,"../ZSchemaTestSuite/Issue13.js":270,"../ZSchemaTestSuite/Issue16.js":271,"../ZSchemaTestSuite/Issue22.js":272,"../ZSchemaTestSuite/Issue25.js":273,"../ZSchemaTestSuite/Issue26.js":274,"../ZSchemaTestSuite/Issue37.js":275,"../ZSchemaTestSuite/Issue40.js":276,"../ZSchemaTestSuite/Issue41.js":277,"../ZSchemaTestSuite/Issue43.js":278,"../ZSchemaTestSuite/Issue44.js":279,"../ZSchemaTestSuite/Issue45.js":280,"../ZSchemaTestSuite/Issue47.js":281,"../ZSchemaTestSuite/Issue48.js":282,"../ZSchemaTestSuite/Issue49.js":283,"../ZSchemaTestSuite/Issue53.js":284,"../ZSchemaTestSuite/Issue56.js":285,"../ZSchemaTestSuite/Issue57.js":286,"../ZSchemaTestSuite/Issue58.js":287,"../ZSchemaTestSuite/Issue63.js":288,"../ZSchemaTestSuite/Issue64.js":289,"../ZSchemaTestSuite/Issue67.js":290,"../ZSchemaTestSuite/Issue71.js":291,"../ZSchemaTestSuite/Issue73.js":292,"../ZSchemaTestSuite/Issue76.js":293,"../ZSchemaTestSuite/Issue85.js":294,"../ZSchemaTestSuite/Issue94.js":295,"../ZSchemaTestSuite/Issue96.js":296,"../ZSchemaTestSuite/MultipleSchemas.js":297,"../ZSchemaTestSuite/NoEmptyArrays.js":298,"../ZSchemaTestSuite/NoEmptyStrings.js":299,"../ZSchemaTestSuite/NoExtraKeywords.js":300,"../ZSchemaTestSuite/NoTypeless.js":301,"../ZSchemaTestSuite/StrictUris.js":302,"../files/draft-04-hyper-schema.json":307,"../files/draft-04-schema.json":308}]},{},[342,343,344,345]);
