@@ -1,5 +1,7 @@
 /*jshint maxlen: false*/
 
+var validator = require("validator");
+
 var FormatValidators = {
     "date": function (date) {
         if (typeof date !== "string") {
@@ -45,8 +47,7 @@ var FormatValidators = {
         if (typeof email !== "string") {
             return true;
         }
-        // use regex from owasp: https://www.owasp.org/index.php/OWASP_Validation_Regex_Repository
-        return /^[a-zA-Z0-9+&*-]+(?:\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,7}$/.test(email);
+        return validator.isEmail(email);
     },
     "hostname": function (hostname) {
         if (typeof hostname !== "string") {
