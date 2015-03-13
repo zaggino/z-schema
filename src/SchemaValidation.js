@@ -551,7 +551,8 @@ exports.validateSchema = function (report, schema) {
             });
         }
         // end issue #36
-        if (schema.type === undefined &&
+        if (schema.enum === undefined &&
+            schema.type === undefined &&
             schema.anyOf === undefined &&
             schema.oneOf === undefined &&
             schema.not === undefined &&
