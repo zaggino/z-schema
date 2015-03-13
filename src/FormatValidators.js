@@ -99,9 +99,7 @@ var FormatValidators = {
     },
     "ipv4": function (ipv4) {
         if (typeof ipv4 !== "string") { return true; }
-        if (ipv4.indexOf(".") === -1) { return false; }
-        // https://www.owasp.org/index.php/OWASP_Validation_Regex_Repository
-        return /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipv4);
+        return validator.isIP(ipv4, 4);
     },
     "ipv6": function (ipv6) {
         // Stephen Ryan at Dartware @ http://forums.intermapper.com/viewtopic.php?t=452
