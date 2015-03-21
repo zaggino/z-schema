@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var fs      = require("fs");
+var path    = require("path");
 var program = require("commander");
 var request = require("request");
 var package = require("./../package.json");
@@ -58,9 +59,10 @@ function readJson(fileName) {
 }
 
 var validator = new ZSchema(options);
-var schema = readJson(program.args.shift());
+var schemaFilePath = program.args.shift();
+var schema = readJson(schemaFilePath);
 
-function validateWithAutomaticDownloads(data, schema, callback) {
+function validateWithAutomaticDownloads(filePath, data, schema, callback) {
 
     var lastResult;
 
@@ -83,25 +85,37 @@ function validateWithAutomaticDownloads(data, schema, callback) {
         if (missingReferences.length > 0) {
             var finished = 0;
             missingReferences.forEach(function (url) {
-                request(url, function (error, response, body) {
-                    
-                    var urlString = "request: " + url + " - ";
-                    
-                    if (error) {
-                        if (response) { console.error(urlString + response.statusCode); }
-                        console.error(error);
-                        process.exit(1);
-                    } else {
-                        console.log(urlString + response.statusCode);
-                    }
-                    
-                    validator.setRemoteReference(url, JSON.parse(body));
+            
+                if (url.match(/^https?:/)) {
+                    request(url, function (error, response, body) {
+
+                        var urlString = "request: " + url + " - ";
+
+                        if (error) {
+                            if (response) { console.error(urlString + response.statusCode); }
+                            console.error(error);
+                            process.exit(1);
+                        } else {
+                            console.log(urlString + response.statusCode);
+                        }
+
+                        validator.setRemoteReference(url, JSON.parse(body));
+                        finished++;
+                        if (finished === missingReferences.length) {
+                            validate();
+                        }
+
+                    });
+                } else {
+                    // FUTURE: maybe else if (isFile(url)) later
+                    var referencePath = path.resolve(process.cwd(), path.dirname(filePath), url);
+                    var reference = readJson(referencePath);
+                    validator.setRemoteReference(url, reference);
                     finished++;
                     if (finished === missingReferences.length) {
                         validate();
                     }
-                    
-                });
+                }
             });
         } else {
             finish();
@@ -118,8 +132,9 @@ function validateJsons() {
     if (program.args.length === 0) { return; }
     i++;
     
-    var json = readJson(program.args.shift());
-    validateWithAutomaticDownloads(json, schema, function (errs, isValid) {    
+    var filePath = program.args.shift();
+    var json = readJson(filePath);
+    validateWithAutomaticDownloads(filePath, json, schema, function (errs, isValid) {    
         if (!isValid) {
             console.log(JSON.stringify(validator.getLastErrors(), null, 4));
             console.log("json #" + i + " validation failed");
@@ -131,7 +146,7 @@ function validateJsons() {
 }
 
 // validate schema
-validateWithAutomaticDownloads(undefined, schema, function (errs, isValid) {
+validateWithAutomaticDownloads(schemaFilePath, undefined, schema, function (errs, isValid) {
     if (!isValid) {
         console.log(JSON.stringify(validator.getLastErrors(), null, 4));
         console.log("schema validation failed");
