@@ -122,7 +122,7 @@ process.chdir = function (dir) {
 
     'use strict';
 
-    validator = { version: '3.33.0' };
+    validator = { version: '3.34.0' };
 
     var emailAddress = /((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))/;
     var displayName = /([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~\.]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~\.]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\s)*/;
@@ -132,11 +132,13 @@ process.chdir = function (dir) {
 
     var creditCard = /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/;
 
+    var isin = /^[A-Z]{2}[0-9A-Z]{9}[0-9]$/;
+
     var isbn10Maybe = /^(?:[0-9]{9}X|[0-9]{10})$/
       , isbn13Maybe = /^(?:[0-9]{13})$/;
 
     var ipv4Maybe = /^(\d?\d?\d)\.(\d?\d?\d)\.(\d?\d?\d)\.(\d?\d?\d)$/
-      , ipv6 = /^::|^::1|^([a-fA-F0-9]{1,4}::?){1,7}([a-fA-F0-9]{1,4})$/;
+      , ipv6Block = /^[0-9A-F]{1,4}$/i;
 
     var uuid = {
         '3': /^[0-9A-F]{8}-[0-9A-F]{4}-3[0-9A-F]{3}-[0-9A-F]{4}-[0-9A-F]{12}$/i
@@ -353,8 +355,45 @@ process.chdir = function (dir) {
                 return a - b;
             });
             return parts[3] <= 255;
+        } else if (version === '6') {
+            var blocks = str.split(':');
+            var foundOmissionBlock = false; // marker to indicate ::
+
+            if (blocks.length > 8)
+                return false;
+
+            // initial or final ::
+            if (str === '::') {
+                return true;
+            } else if (str.substr(0, 2) === '::') {
+                blocks.shift();
+                blocks.shift();
+                foundOmissionBlock = true;
+            } else if (str.substr(str.length - 2) === '::') {
+                blocks.pop();
+                blocks.pop();
+                foundOmissionBlock = true;
+            }
+
+            for (var i = 0; i < blocks.length; ++i) {
+                // test for a :: which can not be at the string start/end
+                // since those cases have been handled above
+                if (blocks[i] === '' && i > 0 && i < blocks.length -1) {
+                    if (foundOmissionBlock)
+                        return false; // multiple :: in address
+                    foundOmissionBlock = true;
+                } else if (!ipv6Block.test(blocks[i])) {
+                    return false;
+                }
+            }
+
+            if (foundOmissionBlock) {
+                return blocks.length >= 1;
+            } else {
+                return blocks.length === 8;
+            }
         }
-        return version === '6' && ipv6.test(str);
+        return false;
     };
 
     var default_fqdn_options = {
@@ -511,6 +550,36 @@ process.chdir = function (dir) {
         return !!((sum % 10) === 0 ? sanitized : false);
     };
 
+    validator.isISIN = function (str) {
+        if (!isin.test(str)) {
+            return false;
+        }
+        
+        var checksumStr = str.replace(/[A-Z]/g, function(character) {
+            return parseInt(character, 36);
+        });
+        
+        var sum = 0, digit, tmpNum, shouldDouble = true;
+        for (var i = checksumStr.length - 2; i >= 0; i--) {
+            digit = checksumStr.substring(i, (i + 1));
+            tmpNum = parseInt(digit, 10);
+            if (shouldDouble) {
+                tmpNum *= 2;
+                if (tmpNum >= 10) {
+                    sum += tmpNum + 1;
+                } else {
+                    sum += tmpNum;
+                }
+            } else {
+                
+                sum += tmpNum;
+            }
+            shouldDouble = !shouldDouble;
+        }
+        
+        return parseInt(str.substr(str.length - 1), 10) === (10000 - sum) % 10;
+    };
+
     validator.isISBN = function (str, version) {
         version = validator.toString(version);
         if (!version) {
@@ -638,7 +707,8 @@ process.chdir = function (dir) {
             .replace(/'/g, '&#x27;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
-            .replace(/\//g, '&#x2F;'));
+            .replace(/\//g, '&#x2F;')
+            .replace(/\`/g, '&#96;'));
     };
 
     validator.stripLow = function (str, keep_new_lines) {
@@ -910,8 +980,8 @@ var FormatValidators = {
         return validator.isIP(ipv4, 4);
     },
     "ipv6": function (ipv6) {
-        // Stephen Ryan at Dartware @ http://forums.intermapper.com/viewtopic.php?t=452
-        return typeof ipv6 !== "string" || /^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/.test(ipv6);
+        if (typeof ipv6 !== "string") { return true; }
+        return validator.isIP(ipv6, 6);
     },
     "regex": function (str) {
         try {
