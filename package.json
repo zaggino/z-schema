@@ -75,6 +75,6 @@
   "dependencies": {
     "commander": "^2.6.0",
     "request": "^2.53.0",
-    "validator": "^3.33.0"
+    "validator": "^3.34.0"
   }
 }
