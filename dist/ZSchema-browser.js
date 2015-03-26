@@ -1292,7 +1292,7 @@ var JsonValidators = {
             idx = schema.oneOf.length;
 
         while (idx--) {
-            var subReport = new Report(report);
+            var subReport = new Report(report, { maxErrors: 1 });
             subReports.push(subReport);
             if (exports.validate.call(this, subReport, schema.oneOf[idx], json) === true) {
                 passes++;
@@ -1557,7 +1557,7 @@ if (typeof Number.isFinite !== "function") {
 var Errors = require("./Errors");
 var Utils  = require("./Utils");
 
-function Report(parentOrOptions) {
+function Report(parentOrOptions, reportOptions) {
     this.parentReport = parentOrOptions instanceof Report ?
                             parentOrOptions :
                             undefined;
@@ -1565,6 +1565,8 @@ function Report(parentOrOptions) {
     this.options = parentOrOptions instanceof Report ?
                        parentOrOptions.options :
                        parentOrOptions || {};
+
+    this.reportOptions = reportOptions || {};
 
     this.errors = [];
     this.path = [];
@@ -1650,6 +1652,10 @@ Report.prototype.getPath = function () {
 };
 
 Report.prototype.addError = function (errorCode, params, subReports, schemaDescription) {
+    if (this.errors.length >= this.reportOptions.maxErrors) {
+        return;
+    }
+
     if (!errorCode) { throw new Error("No errorCode passed into addError()"); }
     if (!Errors[errorCode]) { throw new Error("No errorMessage known for code " + errorCode); }
 
