@@ -283,7 +283,7 @@ var JsonValidators = {
             idx = schema.oneOf.length;
 
         while (idx--) {
-            var subReport = new Report(report);
+            var subReport = new Report(report, { maxErrors: 1 });
             subReports.push(subReport);
             if (exports.validate.call(this, subReport, schema.oneOf[idx], json) === true) {
                 passes++;
