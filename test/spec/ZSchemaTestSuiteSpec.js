@@ -90,8 +90,7 @@ describe("ZSchemaTestSuite", function () {
             !async && it(testSuite.description + ", " + test.description, function () {
 
                 var validator = new ZSchema(options);
-                validator.setRemoteReference("http://json-schema.org/draft-04/schema", require("../files/draft-04-schema.json"));
-                validator.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", require("../files/draft-04-hyper-schema.json"));
+
                 if (setup) { setup(validator, ZSchema); }
 
                 var valid = validator.validateSchema(schema);

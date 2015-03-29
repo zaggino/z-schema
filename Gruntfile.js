@@ -1,12 +1,27 @@
 /*global require,module*/
 
 var remapify = require("remapify");
+var path = require("path");
 
 module.exports = function (grunt) {
 
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
+        copy: {
+            dist: {
+                files: [{
+                    expand: true,
+                    dot: true,
+                    cwd: ".",
+                    dest: "src/schemas/",
+                    src: ["./json-schema/draft-04/*"],
+                    rename: function(dest, src) {
+                        return dest + path.basename(src) + ".json";
+                    }
+                }]
+            }
+        },
         lineending: {
             dist: {
                 options: {
@@ -87,6 +102,7 @@ module.exports = function (grunt) {
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks("grunt-lineending");
     grunt.loadNpmTasks("grunt-contrib-jshint");
+    grunt.loadNpmTasks("grunt-contrib-copy");
     grunt.loadNpmTasks("grunt-jscs");
     grunt.loadNpmTasks("grunt-jasmine-node");
     grunt.loadNpmTasks("grunt-jasmine-node-coverage");
@@ -95,7 +111,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-uglify");
 
     // Default task(s).
-    grunt.registerTask("default", ["lineending", "jshint", "jscs", "jasmine_node", "browserify", "jasmine", "uglify"]);
+    grunt.registerTask("default", ["copy", "lineending", "jshint", "jscs", "jasmine_node", "browserify", "jasmine", "uglify"]);
     grunt.registerTask("test", ["jasmine_node"]);
 
 };
