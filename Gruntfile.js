@@ -16,7 +16,7 @@ module.exports = function (grunt) {
                     cwd: ".",
                     dest: "src/schemas/",
                     src: ["./json-schema/draft-04/*"],
-                    rename: function(dest, src) {
+                    rename: function (dest, src) {
                         return dest + path.basename(src) + ".json";
                     }
                 }]
