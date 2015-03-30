@@ -122,13 +122,13 @@ process.chdir = function (dir) {
 
     'use strict';
 
-    validator = { version: '3.34.0' };
+    validator = { version: '3.36.0' };
 
-    var emailAddress = /((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))/;
-    var displayName = /([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~\.]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~\.]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\s)*/;
+    var emailUser = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e])|(\\[\x01-\x09\x0b\x0c\x0d-\x7f])))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))$/i;
 
-    var email = new RegExp('^' + emailAddress.source + '$', 'i');
-    var emailWithDisplayName = new RegExp('^' + displayName.source + '<' + emailAddress.source + '>$', 'i');
+    var emailUserUtf8 = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))$/i;
+
+    var displayName = /^(?:[a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~\.]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(?:[a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~\.]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\s)*<(.+)>$/i;
 
     var creditCard = /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/;
 
@@ -137,7 +137,7 @@ process.chdir = function (dir) {
     var isbn10Maybe = /^(?:[0-9]{9}X|[0-9]{10})$/
       , isbn13Maybe = /^(?:[0-9]{13})$/;
 
-    var ipv4Maybe = /^(\d?\d?\d)\.(\d?\d?\d)\.(\d?\d?\d)\.(\d?\d?\d)$/
+    var ipv4Maybe = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/
       , ipv6Block = /^[0-9A-F]{1,4}$/i;
 
     var uuid = {
@@ -147,13 +147,13 @@ process.chdir = function (dir) {
       , all: /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i
     };
 
-    var alpha = /^[a-zA-Z]+$/
-      , alphanumeric = /^[a-zA-Z0-9]+$/
+    var alpha = /^[A-Z]+$/i
+      , alphanumeric = /^[0-9A-Z]+$/i
       , numeric = /^[-+]?[0-9]+$/
       , int = /^(?:[-+]?(?:0|[1-9][0-9]*))$/
       , float = /^(?:[-+]?(?:[0-9]+))?(?:\.[0-9]*)?(?:[eE][\+\-]?(?:[0-9]+))?$/
-      , hexadecimal = /^[0-9a-fA-F]+$/
-      , hexcolor = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+      , hexadecimal = /^[0-9A-F]+$/i
+      , hexcolor = /^#?([0-9A-F]{3}|[0-9A-F]{6})$/i;
 
     var ascii = /^[\x00-\x7F]+$/
       , multibyte = /[^\x00-\x7F]/
@@ -162,7 +162,7 @@ process.chdir = function (dir) {
 
     var surrogatePair = /[\uD800-\uDBFF][\uDC00-\uDFFF]/;
 
-    var base64 = /^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{4})$/;
+    var base64 = /^(?:[A-Z0-9+\/]{4})*(?:[A-Z0-9+\/]{2}==|[A-Z0-9+\/]{3}=|[A-Z0-9+\/]{4})$/i;
 
     var phones = {
       'zh-CN': /^(\+?0?86\-?)?1[345789]\d{9}$/,
@@ -171,7 +171,8 @@ process.chdir = function (dir) {
       'en-HK': /^(\+?852\-?)?[569]\d{3}\-?\d{4}$/,
       'fr-FR': /^(\+?33|0)[67]\d{8}$/,
       'pt-PT': /^(\+351)?9[1236]\d{7}$/,
-      'el-GR' : /^(\+30)?((2\d{9})|(69\d{8}))$/
+      'el-GR': /^(\+30)?((2\d{9})|(69\d{8}))$/,
+      'en-GB': /^(\+?44|0)7\d{9}$/
     };
 
     validator.extend = function (name, fn) {
@@ -244,13 +245,34 @@ process.chdir = function (dir) {
     };
 
     var default_email_options = {
-        allow_display_name: false
+        allow_display_name: false,
+        allow_utf8_local_part: true,
+        require_tld: false
     };
 
     validator.isEmail = function (str, options) {
         options = merge(options, default_email_options);
 
-        return email.test(str) || (options.allow_display_name === true && emailWithDisplayName.test(str));
+        if (options.allow_display_name) {
+            var display_email = str.match(displayName);
+            if (display_email) {
+                str = display_email[1];
+            }
+        } else if (/\s/.test(str)) {
+            return false;
+        }
+
+        var parts = str.split('@')
+          , domain = parts.pop()
+          , user = parts.join('@');
+
+        if (!validator.isFQDN(domain, {require_tld: options.require_tld})) {
+            return false;
+        }
+
+        return options.allow_utf8_local_part ?
+            emailUserUtf8.test(user) :
+            emailUser.test(user);
     };
 
     var default_url_options = {
@@ -263,15 +285,15 @@ process.chdir = function (dir) {
     };
 
     validator.isURL = function (url, options) {
-        if (!url || url.length >= 2083) {
+        if (!url || url.length >= 2083 || /\s/.test(url)) {
             return false;
         }
         if (url.indexOf('mailto:') === 0) {
             return false;
         }
         options = merge(options, default_url_options);
-        var protocol, user, pass, auth, host, hostname, port,
-            port_str, path, query, hash, split;
+        var protocol, auth, host, hostname, port,
+            port_str, split;
         split = url.split('://');
         if (split.length > 1) {
             protocol = split.shift();
@@ -286,36 +308,17 @@ process.chdir = function (dir) {
         url = split.join('://');
         split = url.split('#');
         url = split.shift();
-        hash = split.join('#');
-        if (hash && /\s/.test(hash)) {
-            return false;
-        }
+
         split = url.split('?');
         url = split.shift();
-        query = split.join('?');
-        if (query && /\s/.test(query)) {
-            return false;
-        }
 
         split = url.split('/');
         url = split.shift();
-        path = split.join('/');
-        if (path && /\s/.test(path)) {
-            return false;
-        }
         split = url.split('@');
         if (split.length > 1) {
             auth = split.shift();
-            if (auth.indexOf(':') >= 0) {
-                auth = auth.split(':');
-                user = auth.shift();
-                if (!/^\S+$/.test(user)) {
-                    return false;
-                }
-                pass = auth.join(':');
-                if (!/^\S*$/.test(user)) {
-                    return false;
-                }
+            if (auth.indexOf(':') >= 0 && auth.split(':').length > 2) {
+                return false;
             }
         }
         hostname = split.join('@');
@@ -554,11 +557,11 @@ process.chdir = function (dir) {
         if (!isin.test(str)) {
             return false;
         }
-        
+
         var checksumStr = str.replace(/[A-Z]/g, function(character) {
             return parseInt(character, 36);
         });
-        
+
         var sum = 0, digit, tmpNum, shouldDouble = true;
         for (var i = checksumStr.length - 2; i >= 0; i--) {
             digit = checksumStr.substring(i, (i + 1));
@@ -571,12 +574,11 @@ process.chdir = function (dir) {
                     sum += tmpNum;
                 }
             } else {
-                
                 sum += tmpNum;
             }
             shouldDouble = !shouldDouble;
         }
-        
+
         return parseInt(str.substr(str.length - 1), 10) === (10000 - sum) % 10;
     };
 
@@ -925,7 +927,7 @@ var FormatValidators = {
         if (typeof email !== "string") {
             return true;
         }
-        return validator.isEmail(email);
+        return validator.isEmail(email, { "require_tld": true });
     },
     "hostname": function (hostname) {
         if (typeof hostname !== "string") {

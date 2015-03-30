@@ -111,6 +111,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-uglify");
 
     // Default task(s).
+    grunt.registerTask("lint", ["jshint", "jscs"]);
     grunt.registerTask("default", ["copy", "lineending", "jshint", "jscs", "jasmine_node", "browserify", "jasmine", "uglify"]);
     grunt.registerTask("test", ["jasmine_node"]);
 

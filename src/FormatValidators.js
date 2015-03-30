@@ -47,7 +47,7 @@ var FormatValidators = {
         if (typeof email !== "string") {
             return true;
         }
-        return validator.isEmail(email);
+        return validator.isEmail(email, { "require_tld": true });
     },
     "hostname": function (hostname) {
         if (typeof hostname !== "string") {
