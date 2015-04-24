@@ -116,6 +116,18 @@ ZSchema.prototype.validateSchema = function (schema) {
     return report.isValid();
 };
 ZSchema.prototype.validate = function (json, schema, callback) {
+    var whatIs = Utils.whatIs(schema);
+    if (whatIs !== "string" && whatIs !== "object") {
+        var e = new Error("Invalid .validate call - schema must be an string or object but " + whatIs + " was passed!");
+        if (callback) {
+            process.nextTick(function () {
+                callback(e, false);
+            });
+            return;
+        }
+        throw e;
+    }
+
     var report = new Report(this.options);
 
     schema = SchemaCache.getSchema.call(this, report, schema);
