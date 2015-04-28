@@ -122,7 +122,7 @@ process.chdir = function (dir) {
 
     'use strict';
 
-    validator = { version: '3.39.0' };
+    validator = { version: '3.36.0' };
 
     var emailUser = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e])|(\\[\x01-\x09\x0b\x0c\x0d-\x7f])))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))$/i;
 
@@ -172,9 +172,7 @@ process.chdir = function (dir) {
       'fr-FR': /^(\+?33|0)[67]\d{8}$/,
       'pt-PT': /^(\+351)?9[1236]\d{7}$/,
       'el-GR': /^(\+30)?((2\d{9})|(69\d{8}))$/,
-      'en-GB': /^(\+?44|0)7\d{9}$/,
-      'en-US': /^(\+?1)?[2-9]\d{2}[2-9](?!11)\d{6}$/,
-      'en-ZM': /^(\+26)?09[567]\d{7}$/
+      'en-GB': /^(\+?44|0)7\d{9}$/
     };
 
     validator.extend = function (name, fn) {
@@ -249,7 +247,7 @@ process.chdir = function (dir) {
     var default_email_options = {
         allow_display_name: false,
         allow_utf8_local_part: true,
-        require_tld: true
+        require_tld: false
     };
 
     validator.isEmail = function (str, options) {
@@ -468,14 +466,12 @@ process.chdir = function (dir) {
         return str === str.toUpperCase();
     };
 
-    validator.isInt = function (str, options) {
-        options = options || {};
-        return int.test(str) && (!options.hasOwnProperty('min') || str >= options.min) && (!options.hasOwnProperty('max') || str <= options.max);
+    validator.isInt = function (str) {
+        return int.test(str);
     };
 
-    validator.isFloat = function (str, options) {
-        options = options || {};
-        return str !== '' && float.test(str) && (!options.hasOwnProperty('min') || str >= options.min) && (!options.hasOwnProperty('max') || str <= options.max);
+    validator.isFloat = function (str) {
+        return str !== '' && float.test(str);
     };
 
     validator.isDivisibleBy = function (str, num) {
@@ -2851,25 +2847,36 @@ exports.clone = function (src) {
     return res;
 };
 
-exports.cloneDeep = function cloneDeep(src) {
-    if (typeof src !== "object" || src === null) { return src; }
-    var res, idx;
-    if (Array.isArray(src)) {
-        res = [];
-        idx = src.length;
-        while (idx--) {
-            res[idx] = cloneDeep(src[idx]);
+exports.cloneDeep = function (src) {
+    var visited = [], cloned = [];
+    function cloneDeep(src) {
+        if (typeof src !== "object" || src === null) { return src; }
+        var res, idx, cidx;
+
+        cidx = visited.indexOf(src);
+        if (cidx !== -1) { return cloned[cidx]; }
+
+        visited.push(src);
+        if (Array.isArray(src)) {
+            res = [];
+            cloned.push(res);
+            idx = src.length;
+            while (idx--) {
+                res[idx] = cloneDeep(src[idx]);
+            }
+        } else {
+            res = {};
+            cloned.push(res);
+            var keys = Object.keys(src);
+            idx = keys.length;
+            while (idx--) {
+                var key = keys[idx];
+                res[key] = cloneDeep(src[key]);
+            }
         }
-    } else {
-        res = {};
-        var keys = Object.keys(src);
-        idx = keys.length;
-        while (idx--) {
-            var key = keys[idx];
-            res[key] = cloneDeep(src[key]);
-        }
+        return res;
     }
-    return res;
+    return cloneDeep(src);
 };
 
 /*
@@ -3130,6 +3137,8 @@ ZSchema.prototype.getResolvedSchema = function (schema) {
     // clone before making any modifications
     schema = Utils.cloneDeep(schema);
 
+    var visited = [];
+
     // clean-up the schema and resolve references
     var cleanup = function (schema) {
         var key,
@@ -3137,6 +3146,14 @@ ZSchema.prototype.getResolvedSchema = function (schema) {
         if (typeOf !== "object" && typeOf !== "array") {
             return;
         }
+
+        if (schema.___$visited) {
+            return;
+        }
+
+        schema.___$visited = true;
+        visited.push(schema);
+
         if (schema.$ref && schema.__$refResolved) {
             var from = schema.__$refResolved;
             var to = schema;
@@ -3152,13 +3169,17 @@ ZSchema.prototype.getResolvedSchema = function (schema) {
             if (schema.hasOwnProperty(key)) {
                 if (key.indexOf("__$") === 0) {
                     delete schema[key];
-                    continue;
+                } else {
+                    cleanup(schema[key]);
                 }
-                cleanup(schema[key]);
             }
         }
     };
+
     cleanup(schema);
+    visited.forEach(function (s) {
+        delete s.___$visited;
+    });
 
     this.lastReport = report;
     if (report.isValid()) {
