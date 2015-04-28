@@ -209,6 +209,8 @@ ZSchema.prototype.getResolvedSchema = function (schema) {
     // clone before making any modifications
     schema = Utils.cloneDeep(schema);
 
+    var visited = [];
+
     // clean-up the schema and resolve references
     var cleanup = function (schema) {
         var key,
@@ -216,6 +218,14 @@ ZSchema.prototype.getResolvedSchema = function (schema) {
         if (typeOf !== "object" && typeOf !== "array") {
             return;
         }
+
+        if (schema.___$visited) {
+            return;
+        }
+
+        schema.___$visited = true;
+        visited.push(schema);
+
         if (schema.$ref && schema.__$refResolved) {
             var from = schema.__$refResolved;
             var to = schema;
@@ -231,13 +241,17 @@ ZSchema.prototype.getResolvedSchema = function (schema) {
             if (schema.hasOwnProperty(key)) {
                 if (key.indexOf("__$") === 0) {
                     delete schema[key];
-                    continue;
+                } else {
+                    cleanup(schema[key]);
                 }
-                cleanup(schema[key]);
             }
         }
     };
+
     cleanup(schema);
+    visited.forEach(function (s) {
+        delete s.___$visited;
+    });
 
     this.lastReport = report;
     if (report.isValid()) {

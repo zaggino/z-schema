@@ -138,25 +138,36 @@ exports.clone = function (src) {
     return res;
 };
 
-exports.cloneDeep = function cloneDeep(src) {
-    if (typeof src !== "object" || src === null) { return src; }
-    var res, idx;
-    if (Array.isArray(src)) {
-        res = [];
-        idx = src.length;
-        while (idx--) {
-            res[idx] = cloneDeep(src[idx]);
+exports.cloneDeep = function (src) {
+    var visited = [], cloned = [];
+    function cloneDeep(src) {
+        if (typeof src !== "object" || src === null) { return src; }
+        var res, idx, cidx;
+
+        cidx = visited.indexOf(src);
+        if (cidx !== -1) { return cloned[cidx]; }
+
+        visited.push(src);
+        if (Array.isArray(src)) {
+            res = [];
+            cloned.push(res);
+            idx = src.length;
+            while (idx--) {
+                res[idx] = cloneDeep(src[idx]);
+            }
+        } else {
+            res = {};
+            cloned.push(res);
+            var keys = Object.keys(src);
+            idx = keys.length;
+            while (idx--) {
+                var key = keys[idx];
+                res[key] = cloneDeep(src[key]);
+            }
         }
-    } else {
-        res = {};
-        var keys = Object.keys(src);
-        idx = keys.length;
-        while (idx--) {
-            var key = keys[idx];
-            res[key] = cloneDeep(src[key]);
-        }
+        return res;
     }
-    return res;
+    return cloneDeep(src);
 };
 
 /*
