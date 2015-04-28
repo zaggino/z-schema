@@ -76,7 +76,6 @@
   "dependencies": {
     "commander": "^2.7.1",
     "request": "^2.54.0",
-    "validator": "^3.35.0",
-    "clone": "~1.0.2"
+    "validator": "^3.35.0"
   }
 }
