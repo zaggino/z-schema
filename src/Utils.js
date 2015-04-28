@@ -1,5 +1,7 @@
 "use strict";
 
+var cloneDeep = require('clone');
+
 exports.isAbsoluteUri = function (uri) {
     return /^https?:\/\//.test(uri);
 };
@@ -138,26 +140,7 @@ exports.clone = function (src) {
     return res;
 };
 
-exports.cloneDeep = function cloneDeep(src) {
-    if (typeof src !== "object" || src === null) { return src; }
-    var res, idx;
-    if (Array.isArray(src)) {
-        res = [];
-        idx = src.length;
-        while (idx--) {
-            res[idx] = cloneDeep(src[idx]);
-        }
-    } else {
-        res = {};
-        var keys = Object.keys(src);
-        idx = keys.length;
-        while (idx--) {
-            var key = keys[idx];
-            res[key] = cloneDeep(src[key]);
-        }
-    }
-    return res;
-};
+exports.cloneDeep = cloneDeep;
 
 /*
   following function comes from punycode.js library
