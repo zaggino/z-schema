@@ -122,7 +122,7 @@ process.chdir = function (dir) {
 
     'use strict';
 
-    validator = { version: '3.36.0' };
+    validator = { version: '3.39.0' };
 
     var emailUser = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e])|(\\[\x01-\x09\x0b\x0c\x0d-\x7f])))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))$/i;
 
@@ -172,7 +172,9 @@ process.chdir = function (dir) {
       'fr-FR': /^(\+?33|0)[67]\d{8}$/,
       'pt-PT': /^(\+351)?9[1236]\d{7}$/,
       'el-GR': /^(\+30)?((2\d{9})|(69\d{8}))$/,
-      'en-GB': /^(\+?44|0)7\d{9}$/
+      'en-GB': /^(\+?44|0)7\d{9}$/,
+      'en-US': /^(\+?1)?[2-9]\d{2}[2-9](?!11)\d{6}$/,
+      'en-ZM': /^(\+26)?09[567]\d{7}$/
     };
 
     validator.extend = function (name, fn) {
@@ -247,7 +249,7 @@ process.chdir = function (dir) {
     var default_email_options = {
         allow_display_name: false,
         allow_utf8_local_part: true,
-        require_tld: false
+        require_tld: true
     };
 
     validator.isEmail = function (str, options) {
@@ -466,12 +468,14 @@ process.chdir = function (dir) {
         return str === str.toUpperCase();
     };
 
-    validator.isInt = function (str) {
-        return int.test(str);
+    validator.isInt = function (str, options) {
+        options = options || {};
+        return int.test(str) && (!options.hasOwnProperty('min') || str >= options.min) && (!options.hasOwnProperty('max') || str <= options.max);
     };
 
-    validator.isFloat = function (str) {
-        return str !== '' && float.test(str);
+    validator.isFloat = function (str, options) {
+        options = options || {};
+        return str !== '' && float.test(str) && (!options.hasOwnProperty('min') || str >= options.min) && (!options.hasOwnProperty('max') || str <= options.max);
     };
 
     validator.isDivisibleBy = function (str, num) {
@@ -3044,6 +3048,7 @@ ZSchema.prototype.validateSchema = function (schema) {
     return report.isValid();
 };
 ZSchema.prototype.validate = function (json, schema, callback) {
+    var foundError = false;
     var whatIs = Utils.whatIs(schema);
     if (whatIs !== "string" && whatIs !== "object") {
         var e = new Error("Invalid .validate call - schema must be an string or object but " + whatIs + " was passed!");
@@ -3060,19 +3065,27 @@ ZSchema.prototype.validate = function (json, schema, callback) {
 
     schema = SchemaCache.getSchema.call(this, report, schema);
 
-    var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
+    var compiled = false;
+    if (!foundError) {
+        compiled = SchemaCompilation.compileSchema.call(this, report, schema);
+    }
     if (!compiled) {
         this.lastReport = report;
-        return false;
+        foundError = true;
     }
 
-    var validated = SchemaValidation.validateSchema.call(this, report, schema);
+    var validated = false;
+    if (!foundError) {
+        validated = SchemaValidation.validateSchema.call(this, report, schema);
+    }
     if (!validated) {
         this.lastReport = report;
-        return false;
+        foundError = true;
     }
 
-    JsonValidation.validate.call(this, report, schema, json);
+    if (!foundError) {
+        JsonValidation.validate.call(this, report, schema, json);
+    }
 
     if (callback) {
         report.processAsyncTasks(this.options.asyncTimeout, callback);
