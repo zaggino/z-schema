@@ -116,6 +116,7 @@ ZSchema.prototype.validateSchema = function (schema) {
     return report.isValid();
 };
 ZSchema.prototype.validate = function (json, schema, callback) {
+    var foundError = false;
     var whatIs = Utils.whatIs(schema);
     if (whatIs !== "string" && whatIs !== "object") {
         var e = new Error("Invalid .validate call - schema must be an string or object but " + whatIs + " was passed!");
@@ -132,19 +133,27 @@ ZSchema.prototype.validate = function (json, schema, callback) {
 
     schema = SchemaCache.getSchema.call(this, report, schema);
 
-    var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
+    var compiled = false;
+    if (!foundError) {
+        compiled = SchemaCompilation.compileSchema.call(this, report, schema);
+    }
     if (!compiled) {
         this.lastReport = report;
-        return false;
+        foundError = true;
     }
 
-    var validated = SchemaValidation.validateSchema.call(this, report, schema);
+    var validated = false;
+    if (!foundError) {
+        validated = SchemaValidation.validateSchema.call(this, report, schema);
+    }
     if (!validated) {
         this.lastReport = report;
-        return false;
+        foundError = true;
     }
 
-    JsonValidation.validate.call(this, report, schema, json);
+    if (!foundError) {
+        JsonValidation.validate.call(this, report, schema, json);
+    }
 
     if (callback) {
         report.processAsyncTasks(this.options.asyncTimeout, callback);
