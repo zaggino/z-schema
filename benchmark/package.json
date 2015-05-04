@@ -17,6 +17,7 @@
     "skeemas": "latest",
     "themis": "^1.1.4",
     "tv4": "latest",
-    "z-schema": "2.x"
+    "z-schema": "2.x",
+    "jsen": "latest"
   }
 }

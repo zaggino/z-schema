@@ -18,6 +18,7 @@ var JsonSchema = require("jsonschema");
 var Skeemas = require("skeemas");
 var tv4 = require("tv4");
 var Themis = require('themis');
+var jsen = require("jsen");
 
 Tester.registerValidator({
     name: "z-schema-3",
@@ -45,6 +46,21 @@ Tester.registerValidator({
     name: "is-my-json-valid",
     setup: function () {
         return IsMyJsonValid;
+    },
+    test: function (validator, json, schema) {
+        // If we're repeatedly testing the same schema, use the existing validate
+        if (this.lastSchema !== schema) {
+            this.lastSchema = schema;
+            this.validate = validator(schema);
+        }
+        return this.validate(json);
+    }
+});
+
+Tester.registerValidator({
+    name: "jsen",
+    setup: function () {
+        return jsen;
     },
     test: function (validator, json, schema) {
         // If we're repeatedly testing the same schema, use the existing validate
