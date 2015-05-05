@@ -105,6 +105,10 @@ ZSchema.prototype.compileSchema = function (schema) {
     return report.isValid();
 };
 ZSchema.prototype.validateSchema = function (schema) {
+    if (Array.isArray(schema) && schema.length === 0) {
+        throw new Error(".validateSchema was called with an empty array");
+    }
+
     var report = new Report(this.options);
 
     schema = SchemaCache.getSchema.call(this, report, schema);
@@ -116,7 +120,6 @@ ZSchema.prototype.validateSchema = function (schema) {
     return report.isValid();
 };
 ZSchema.prototype.validate = function (json, schema, callback) {
-    var foundError = false;
     var whatIs = Utils.whatIs(schema);
     if (whatIs !== "string" && whatIs !== "object") {
         var e = new Error("Invalid .validate call - schema must be an string or object but " + whatIs + " was passed!");
@@ -129,6 +132,7 @@ ZSchema.prototype.validate = function (json, schema, callback) {
         throw e;
     }
 
+    var foundError = false;
     var report = new Report(this.options);
 
     schema = SchemaCache.getSchema.call(this, report, schema);

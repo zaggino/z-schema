@@ -57,6 +57,7 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/Issue101.js"),
     require("../ZSchemaTestSuite/Issue102.js"),
     require("../ZSchemaTestSuite/Issue103.js"),
+    require("../ZSchemaTestSuite/Issue106.js"),
     undefined
 ];
 
@@ -69,8 +70,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 51 files", function () {
-        expect(testSuiteFiles.length).toBe(51);
+    it("should contain 52 files", function () {
+        expect(testSuiteFiles.length).toBe(52);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -88,30 +89,53 @@ describe("ZSchemaTestSuite", function () {
                 schema              = test.schema             || testSuite.schema,
                 schemaIndex         = test.schemaIndex        || testSuite.schemaIndex  || 0,
                 after               = test.after              || testSuite.after,
-                validateSchemaOnly  = test.validateSchemaOnly || testSuite.validateSchemaOnly;
+                validateSchemaOnly  = test.validateSchemaOnly || testSuite.validateSchemaOnly,
+                failWithException   = test.failWithException  || testSuite.failWithException;
 
             !async && it(testSuite.description + ", " + test.description, function () {
 
                 var validator = new ZSchema(options);
+                var caughtErr;
 
                 if (setup) { setup(validator, ZSchema); }
 
-                var valid = validator.validateSchema(schema);
+                var valid;
+                try {
+                    valid = validator.validateSchema(schema);
+                } catch (err) {
+                    if (!failWithException) {
+                        throw err;
+                    }
+                    caughtErr = err;
+                }
 
                 if (valid && !validateSchemaOnly) {
                     if (Array.isArray(schema)) {
                         schema = schema[schemaIndex];
                     }
-                    valid = validator.validate(data, schema);
+                    try {
+                        valid = validator.validate(data, schema);
+                    } catch (err) {
+                        if (!failWithException) {
+                            throw err;
+                        }
+                        caughtErr = err;
+                    }
                 }
 
-                var err = validator.getLastErrors();
+                var err = caughtErr || validator.getLastErrors();
 
-                expect(typeof valid).toBe("boolean", "returned response is not a boolean");
-                expect(valid).toBe(test.valid, "test result doesn't match expected test result");
+                if (failWithException) {
+                    expect(caughtErr).toBeTruthy();
+                } else {
+                    expect(typeof valid).toBe("boolean", "returned response is not a boolean");
+                    expect(valid).toBe(test.valid, "test result doesn't match expected test result");
+                }
+
                 if (test.valid === true) {
                     expect(err).toBe(undefined, "errors are not undefined when test is valid");
                 }
+
                 if (after) {
                     after(err, valid, data, validator);
                 }
