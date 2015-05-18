@@ -122,7 +122,7 @@ process.chdir = function (dir) {
 
     'use strict';
 
-    validator = { version: '3.36.0' };
+    validator = { version: '3.39.0' };
 
     var emailUser = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e])|(\\[\x01-\x09\x0b\x0c\x0d-\x7f])))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))$/i;
 
@@ -172,7 +172,9 @@ process.chdir = function (dir) {
       'fr-FR': /^(\+?33|0)[67]\d{8}$/,
       'pt-PT': /^(\+351)?9[1236]\d{7}$/,
       'el-GR': /^(\+30)?((2\d{9})|(69\d{8}))$/,
-      'en-GB': /^(\+?44|0)7\d{9}$/
+      'en-GB': /^(\+?44|0)7\d{9}$/,
+      'en-US': /^(\+?1)?[2-9]\d{2}[2-9](?!11)\d{6}$/,
+      'en-ZM': /^(\+26)?09[567]\d{7}$/
     };
 
     validator.extend = function (name, fn) {
@@ -247,7 +249,7 @@ process.chdir = function (dir) {
     var default_email_options = {
         allow_display_name: false,
         allow_utf8_local_part: true,
-        require_tld: false
+        require_tld: true
     };
 
     validator.isEmail = function (str, options) {
@@ -466,12 +468,14 @@ process.chdir = function (dir) {
         return str === str.toUpperCase();
     };
 
-    validator.isInt = function (str) {
-        return int.test(str);
+    validator.isInt = function (str, options) {
+        options = options || {};
+        return int.test(str) && (!options.hasOwnProperty('min') || str >= options.min) && (!options.hasOwnProperty('max') || str <= options.max);
     };
 
-    validator.isFloat = function (str) {
-        return str !== '' && float.test(str);
+    validator.isFloat = function (str, options) {
+        options = options || {};
+        return str !== '' && float.test(str) && (!options.hasOwnProperty('min') || str >= options.min) && (!options.hasOwnProperty('max') || str <= options.max);
     };
 
     validator.isDivisibleBy = function (str, num) {
@@ -2079,6 +2083,28 @@ exports.compileSchema = function (report, schema) {
         // resolve all the collected references into __xxxResolved pointer
         var refObj = refs[idx];
         var response = SchemaCache.getSchemaByUri.call(this, report, refObj.ref, schema);
+
+        // we can try to use custom schemaReader if available
+        if (!response) {
+            var schemaReader = this.getSchemaReader();
+            if (schemaReader) {
+                // it's supposed to return a valid schema
+                var s = schemaReader(refObj.ref);
+                if (s) {
+                    // it needs to have the id
+                    s.id = refObj.ref;
+                    // try to compile the schema
+                    var subreport = new Report(report);
+                    if (!exports.compileSchema.call(this, subreport, s)) {
+                        // copy errors to report
+                        report.errors = report.errors.concat(subreport.errors);
+                    } else {
+                        response = SchemaCache.getSchemaByUri.call(this, report, refObj.ref, schema);
+                    }
+                }
+            }
+        }
+
         if (!response) {
 
             var isAbsolute = Utils.isAbsoluteUri(refObj.ref);
@@ -3201,10 +3227,19 @@ ZSchema.prototype.getResolvedSchema = function (schema) {
         throw this.getLastError();
     }
 };
+ZSchema.prototype.setSchemaReader = function (schemaReader) {
+    return ZSchema.setSchemaReader(schemaReader);
+};
+ZSchema.prototype.getSchemaReader = function () {
+    return ZSchema.schemaReader;
+};
 
 /*
     static methods
 */
+ZSchema.setSchemaReader = function (schemaReader) {
+    ZSchema.schemaReader = schemaReader;
+};
 ZSchema.registerFormat = function (formatName, validatorFunction) {
     FormatValidators[formatName] = validatorFunction;
 };
