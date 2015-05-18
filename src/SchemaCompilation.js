@@ -215,6 +215,28 @@ exports.compileSchema = function (report, schema) {
         // resolve all the collected references into __xxxResolved pointer
         var refObj = refs[idx];
         var response = SchemaCache.getSchemaByUri.call(this, report, refObj.ref, schema);
+
+        // we can try to use custom schemaReader if available
+        if (!response) {
+            var schemaReader = this.getSchemaReader();
+            if (schemaReader) {
+                // it's supposed to return a valid schema
+                var s = schemaReader(refObj.ref);
+                if (s) {
+                    // it needs to have the id
+                    s.id = refObj.ref;
+                    // try to compile the schema
+                    var subreport = new Report(report);
+                    if (!exports.compileSchema.call(this, subreport, s)) {
+                        // copy errors to report
+                        report.errors = report.errors.concat(subreport.errors);
+                    } else {
+                        response = SchemaCache.getSchemaByUri.call(this, report, refObj.ref, schema);
+                    }
+                }
+            }
+        }
+
         if (!response) {
 
             var isAbsolute = Utils.isAbsoluteUri(refObj.ref);

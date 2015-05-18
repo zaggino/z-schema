@@ -98,6 +98,15 @@ request(requiredUrl, function (error, response, body) {
 }
 ```
 
+If you're able to load schemas synchronously, you can use `ZSchema.setSchemaReader` feature:
+
+```
+ZSchema.setSchemaReader(function (uri) {
+    var someFilename = path.resolve(__dirname, "..", "schemas", uri + ".json");
+    return JSON.parse(fs.readFileSync(someFilename, "utf8"));
+});
+```
+
 #Features
 
 - [Compile arrays of schemas and use references between them](#compile-arrays-of-schemas-and-use-references-between-them)

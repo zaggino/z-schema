@@ -273,10 +273,19 @@ ZSchema.prototype.getResolvedSchema = function (schema) {
         throw this.getLastError();
     }
 };
+ZSchema.prototype.setSchemaReader = function (schemaReader) {
+    return ZSchema.setSchemaReader(schemaReader);
+};
+ZSchema.prototype.getSchemaReader = function () {
+    return ZSchema.schemaReader;
+};
 
 /*
     static methods
 */
+ZSchema.setSchemaReader = function (schemaReader) {
+    ZSchema.schemaReader = schemaReader;
+};
 ZSchema.registerFormat = function (formatName, validatorFunction) {
     FormatValidators[formatName] = validatorFunction;
 };
