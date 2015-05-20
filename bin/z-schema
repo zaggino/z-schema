@@ -138,6 +138,7 @@ function validateJsons() {
         if (!isValid) {
             console.log(JSON.stringify(validator.getLastErrors(), null, 4));
             console.log("json #" + i + " validation failed");
+            process.exitCode = 1;
         } else {
             console.log("json #" + i + " validation passed");
         }
@@ -150,6 +151,7 @@ validateWithAutomaticDownloads(schemaFilePath, undefined, schema, function (errs
     if (!isValid) {
         console.log(JSON.stringify(validator.getLastErrors(), null, 4));
         console.log("schema validation failed");
+        process.exitCode = 1;
     } else {
         console.log("schema validation passed");
         validateJsons();
