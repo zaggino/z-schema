@@ -20802,47 +20802,47 @@ var createECDH = require('crypto').createECDH;
 module.exports = createECDH || require('./browser');
 },{"./browser":88,"crypto":22}],90:[function(require,module,exports){
 module.exports=require(44)
-},{"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\bn.js\\lib\\bn.js":44}],91:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\bn.js\\lib\\bn.js":44}],91:[function(require,module,exports){
 module.exports=require(46)
-},{"../package.json":110,"./elliptic/curve":94,"./elliptic/curves":97,"./elliptic/ec":98,"./elliptic/hmac-drbg":101,"./elliptic/utils":102,"brorand":103,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic.js":46}],92:[function(require,module,exports){
+},{"../package.json":110,"./elliptic/curve":94,"./elliptic/curves":97,"./elliptic/ec":98,"./elliptic/hmac-drbg":101,"./elliptic/utils":102,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic.js":46,"brorand":103}],92:[function(require,module,exports){
 module.exports=require(47)
-},{"../../elliptic":91,"bn.js":90,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\base.js":47}],93:[function(require,module,exports){
+},{"../../elliptic":91,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\base.js":47,"bn.js":90}],93:[function(require,module,exports){
 module.exports=require(48)
-},{"../../elliptic":91,"../curve":94,"bn.js":90,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\edwards.js":48,"inherits":167}],94:[function(require,module,exports){
+},{"../../elliptic":91,"../curve":94,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\edwards.js":48,"bn.js":90,"inherits":167}],94:[function(require,module,exports){
 module.exports=require(49)
-},{"./base":92,"./edwards":93,"./mont":95,"./short":96,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\index.js":49}],95:[function(require,module,exports){
+},{"./base":92,"./edwards":93,"./mont":95,"./short":96,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\index.js":49}],95:[function(require,module,exports){
 module.exports=require(50)
-},{"../../elliptic":91,"../curve":94,"bn.js":90,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\mont.js":50,"inherits":167}],96:[function(require,module,exports){
+},{"../../elliptic":91,"../curve":94,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\mont.js":50,"bn.js":90,"inherits":167}],96:[function(require,module,exports){
 module.exports=require(51)
-},{"../../elliptic":91,"../curve":94,"bn.js":90,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\short.js":51,"inherits":167}],97:[function(require,module,exports){
+},{"../../elliptic":91,"../curve":94,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curve\\short.js":51,"bn.js":90,"inherits":167}],97:[function(require,module,exports){
 module.exports=require(52)
-},{"../elliptic":91,"bn.js":90,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curves.js":52,"hash.js":104}],98:[function(require,module,exports){
+},{"../elliptic":91,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\curves.js":52,"bn.js":90,"hash.js":104}],98:[function(require,module,exports){
 module.exports=require(53)
-},{"../../elliptic":91,"./key":99,"./signature":100,"bn.js":90,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\ec\\index.js":53}],99:[function(require,module,exports){
+},{"../../elliptic":91,"./key":99,"./signature":100,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\ec\\index.js":53,"bn.js":90}],99:[function(require,module,exports){
 module.exports=require(54)
-},{"../../elliptic":91,"bn.js":90,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\ec\\key.js":54}],100:[function(require,module,exports){
+},{"../../elliptic":91,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\ec\\key.js":54,"bn.js":90}],100:[function(require,module,exports){
 module.exports=require(55)
-},{"../../elliptic":91,"bn.js":90,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\ec\\signature.js":55}],101:[function(require,module,exports){
+},{"../../elliptic":91,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\ec\\signature.js":55,"bn.js":90}],101:[function(require,module,exports){
 module.exports=require(56)
-},{"../elliptic":91,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\hmac-drbg.js":56,"hash.js":104}],102:[function(require,module,exports){
+},{"../elliptic":91,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\hmac-drbg.js":56,"hash.js":104}],102:[function(require,module,exports){
 module.exports=require(57)
-},{"bn.js":90,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\utils.js":57}],103:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\lib\\elliptic\\utils.js":57,"bn.js":90}],103:[function(require,module,exports){
 module.exports=require(58)
-},{"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\brorand\\index.js":58}],104:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\brorand\\index.js":58}],104:[function(require,module,exports){
 module.exports=require(59)
-},{"./hash/common":105,"./hash/hmac":106,"./hash/ripemd":107,"./hash/sha":108,"./hash/utils":109,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash.js":59}],105:[function(require,module,exports){
+},{"./hash/common":105,"./hash/hmac":106,"./hash/ripemd":107,"./hash/sha":108,"./hash/utils":109,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash.js":59}],105:[function(require,module,exports){
 module.exports=require(60)
-},{"../hash":104,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\common.js":60}],106:[function(require,module,exports){
+},{"../hash":104,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\common.js":60}],106:[function(require,module,exports){
 module.exports=require(61)
-},{"../hash":104,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\hmac.js":61}],107:[function(require,module,exports){
+},{"../hash":104,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\hmac.js":61}],107:[function(require,module,exports){
 module.exports=require(62)
-},{"../hash":104,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\ripemd.js":62}],108:[function(require,module,exports){
+},{"../hash":104,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\ripemd.js":62}],108:[function(require,module,exports){
 module.exports=require(63)
-},{"../hash":104,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\sha.js":63}],109:[function(require,module,exports){
+},{"../hash":104,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\sha.js":63}],109:[function(require,module,exports){
 module.exports=require(64)
-},{"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\utils.js":64,"inherits":167}],110:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\hash.js\\lib\\hash\\utils.js":64,"inherits":167}],110:[function(require,module,exports){
 module.exports=require(65)
-},{"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\package.json":65}],111:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\package.json":65}],111:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var inherits = require('inherits')
@@ -22608,7 +22608,7 @@ module.exports={
 }
 },{}],128:[function(require,module,exports){
 module.exports=require(44)
-},{"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\bn.js\\lib\\bn.js":44}],129:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\bn.js\\lib\\bn.js":44}],129:[function(require,module,exports){
 var bn = require('bn.js');
 var brorand = require('brorand');
 
@@ -22726,7 +22726,7 @@ MillerRabin.prototype.getDivisor = function getDivisor(n, k) {
 
 },{"bn.js":128,"brorand":130}],130:[function(require,module,exports){
 module.exports=require(58)
-},{"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\brorand\\index.js":58}],131:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\elliptic\\node_modules\\brorand\\index.js":58}],131:[function(require,module,exports){
 (function (Buffer){
 var createHmac = require('create-hmac')
 var MAX_ALLOC = Math.pow(2, 30) - 1 // default in iojs
@@ -22842,49 +22842,49 @@ function i2ops(c) {
 }).call(this,require("buffer").Buffer)
 },{"buffer":16,"create-hash":111}],134:[function(require,module,exports){
 module.exports=require(44)
-},{"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\bn.js\\lib\\bn.js":44}],135:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\bn.js\\lib\\bn.js":44}],135:[function(require,module,exports){
 module.exports=require(45)
-},{"bn.js":134,"buffer":16,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\browserify-rsa\\index.js":45,"randombytes":160}],136:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\browserify-rsa\\index.js":45,"bn.js":134,"buffer":16,"randombytes":160}],136:[function(require,module,exports){
 module.exports=require(66)
-},{"buffer":16,"create-hash":111,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\EVP_BytesToKey.js":66}],137:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\EVP_BytesToKey.js":66,"buffer":16,"create-hash":111}],137:[function(require,module,exports){
 module.exports=require(67)
-},{"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\aesid.json":67}],138:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\aesid.json":67}],138:[function(require,module,exports){
 module.exports=require(68)
-},{"asn1.js":141,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\asn1.js":68}],139:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\asn1.js":68,"asn1.js":141}],139:[function(require,module,exports){
 module.exports=require(69)
-},{"./EVP_BytesToKey":136,"browserify-aes":26,"buffer":16,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\fixProc.js":69}],140:[function(require,module,exports){
+},{"./EVP_BytesToKey":136,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\fixProc.js":69,"browserify-aes":26,"buffer":16}],140:[function(require,module,exports){
 module.exports=require(70)
-},{"./aesid.json":137,"./asn1":138,"./fixProc":139,"browserify-aes":26,"buffer":16,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\index.js":70,"pbkdf2-compat":155}],141:[function(require,module,exports){
+},{"./aesid.json":137,"./asn1":138,"./fixProc":139,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\index.js":70,"browserify-aes":26,"buffer":16,"pbkdf2-compat":155}],141:[function(require,module,exports){
 module.exports=require(71)
-},{"./asn1/api":142,"./asn1/base":144,"./asn1/constants":148,"./asn1/decoders":150,"./asn1/encoders":152,"bn.js":153,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1.js":71}],142:[function(require,module,exports){
+},{"./asn1/api":142,"./asn1/base":144,"./asn1/constants":148,"./asn1/decoders":150,"./asn1/encoders":152,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1.js":71,"bn.js":153}],142:[function(require,module,exports){
 module.exports=require(72)
-},{"../asn1":141,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\api.js":72,"inherits":167,"vm":191}],143:[function(require,module,exports){
+},{"../asn1":141,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\api.js":72,"inherits":167,"vm":191}],143:[function(require,module,exports){
 module.exports=require(73)
-},{"../base":144,"buffer":16,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\base\\buffer.js":73,"inherits":167}],144:[function(require,module,exports){
+},{"../base":144,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\base\\buffer.js":73,"buffer":16,"inherits":167}],144:[function(require,module,exports){
 module.exports=require(74)
-},{"./buffer":143,"./node":145,"./reporter":146,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\base\\index.js":74}],145:[function(require,module,exports){
+},{"./buffer":143,"./node":145,"./reporter":146,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\base\\index.js":74}],145:[function(require,module,exports){
 module.exports=require(75)
-},{"../base":144,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\base\\node.js":75,"minimalistic-assert":154}],146:[function(require,module,exports){
+},{"../base":144,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\base\\node.js":75,"minimalistic-assert":154}],146:[function(require,module,exports){
 module.exports=require(76)
-},{"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\base\\reporter.js":76,"inherits":167}],147:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\base\\reporter.js":76,"inherits":167}],147:[function(require,module,exports){
 module.exports=require(77)
-},{"../constants":148,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\constants\\der.js":77}],148:[function(require,module,exports){
+},{"../constants":148,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\constants\\der.js":77}],148:[function(require,module,exports){
 module.exports=require(78)
-},{"./der":147,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\constants\\index.js":78}],149:[function(require,module,exports){
+},{"./der":147,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\constants\\index.js":78}],149:[function(require,module,exports){
 module.exports=require(79)
-},{"../../asn1":141,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\decoders\\der.js":79,"inherits":167}],150:[function(require,module,exports){
+},{"../../asn1":141,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\decoders\\der.js":79,"inherits":167}],150:[function(require,module,exports){
 module.exports=require(80)
-},{"./der":149,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\decoders\\index.js":80}],151:[function(require,module,exports){
+},{"./der":149,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\decoders\\index.js":80}],151:[function(require,module,exports){
 module.exports=require(81)
-},{"../../asn1":141,"buffer":16,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\encoders\\der.js":81,"inherits":167}],152:[function(require,module,exports){
+},{"../../asn1":141,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\encoders\\der.js":81,"buffer":16,"inherits":167}],152:[function(require,module,exports){
 module.exports=require(82)
-},{"./der":151,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\encoders\\index.js":82}],153:[function(require,module,exports){
+},{"./der":151,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\lib\\asn1\\encoders\\index.js":82}],153:[function(require,module,exports){
 module.exports=require(83)
-},{"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\node_modules\\bn.js\\lib\\bn.js":83}],154:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\node_modules\\bn.js\\lib\\bn.js":83}],154:[function(require,module,exports){
 module.exports=require(84)
-},{"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\node_modules\\minimalistic-assert\\index.js":84}],155:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\asn1.js\\node_modules\\minimalistic-assert\\index.js":84}],155:[function(require,module,exports){
 module.exports=require(85)
-},{"buffer":16,"create-hmac":123,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\pbkdf2-compat\\browser.js":85}],156:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\crypto-browserify\\node_modules\\browserify-sign\\node_modules\\parse-asn1\\node_modules\\pbkdf2-compat\\browser.js":85,"buffer":16,"create-hmac":123}],156:[function(require,module,exports){
 (function (Buffer){
 var parseKeys = require('parse-asn1');
 var mgf = require('./mgf');
@@ -30247,21 +30247,21 @@ module.exports = BufferList
 }).call(this,require("buffer").Buffer)
 },{"buffer":16,"readable-stream/duplex":205,"util":190}],205:[function(require,module,exports){
 module.exports=require(175)
-},{"./lib/_stream_duplex.js":206,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\duplex.js":175}],206:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":206,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\duplex.js":175}],206:[function(require,module,exports){
 module.exports=require(176)
-},{"./_stream_readable":207,"./_stream_writable":208,"_process":170,"core-util-is":209,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_duplex.js":176,"inherits":210}],207:[function(require,module,exports){
+},{"./_stream_readable":207,"./_stream_writable":208,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_duplex.js":176,"_process":170,"core-util-is":209,"inherits":210}],207:[function(require,module,exports){
 module.exports=require(178)
-},{"_process":170,"buffer":16,"core-util-is":209,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_readable.js":178,"events":161,"inherits":210,"isarray":211,"stream":186,"string_decoder/":212}],208:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_readable.js":178,"_process":170,"buffer":16,"core-util-is":209,"events":161,"inherits":210,"isarray":211,"stream":186,"string_decoder/":212}],208:[function(require,module,exports){
 module.exports=require(180)
-},{"./_stream_duplex":206,"_process":170,"buffer":16,"core-util-is":209,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_writable.js":180,"inherits":210,"stream":186}],209:[function(require,module,exports){
+},{"./_stream_duplex":206,"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\lib\\_stream_writable.js":180,"_process":170,"buffer":16,"core-util-is":209,"inherits":210,"stream":186}],209:[function(require,module,exports){
 module.exports=require(181)
-},{"buffer":16,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\node_modules\\core-util-is\\lib\\util.js":181}],210:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\readable-stream\\node_modules\\core-util-is\\lib\\util.js":181,"buffer":16}],210:[function(require,module,exports){
 module.exports=require(167)
-},{"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\inherits\\inherits_browser.js":167}],211:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\inherits\\inherits_browser.js":167}],211:[function(require,module,exports){
 module.exports=require(168)
-},{"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\isarray\\index.js":168}],212:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\isarray\\index.js":168}],212:[function(require,module,exports){
 module.exports=require(187)
-},{"buffer":16,"d:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\string_decoder\\index.js":187}],213:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\string_decoder\\index.js":187,"buffer":16}],213:[function(require,module,exports){
 function Caseless (dict) {
   this.dict = dict || {}
 }
@@ -56995,7 +56995,7 @@ module.exports = {
 
 },{}],345:[function(require,module,exports){
 module.exports=require(291)
-},{"d:\\dev\\z-schema\\src\\schemas\\schema.json":291}],346:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\src\\schemas\\schema.json":291}],346:[function(require,module,exports){
 module.exports={
   "swagger": 2,
   "info": {
@@ -57884,13 +57884,13 @@ module.exports={
 
 },{}],349:[function(require,module,exports){
 module.exports=require(291)
-},{"d:\\dev\\z-schema\\src\\schemas\\schema.json":291}],350:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\src\\schemas\\schema.json":291}],350:[function(require,module,exports){
 module.exports={
     "type": "integer"
 }
 },{}],351:[function(require,module,exports){
 module.exports=require(350)
-},{"d:\\dev\\z-schema\\test\\jsonSchemaTestSuite\\remotes\\folder\\folderInteger.json":350}],352:[function(require,module,exports){
+},{"D:\\dev\\z-schema\\test\\jsonSchemaTestSuite\\remotes\\folder\\folderInteger.json":350}],352:[function(require,module,exports){
 module.exports={
     "integer": {
         "type": "integer"
