@@ -21,6 +21,11 @@
 
 Validator will try to perform sync validation when possible for speed, but supports async callbacks when they are necessary.
 
+##Development:
+
+These repository has several submodules and should be cloned as follows:
+>git clone **--recursive** https://github.com/APIs-guru/z-schema.git
+
 ##CLI:
 
 ```

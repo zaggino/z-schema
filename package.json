@@ -60,6 +60,7 @@
   "devDependencies": {
     "coveralls": "latest",
     "grunt": "latest",
+    "grunt-cli": "latest",
     "grunt-browserify": "~3.2.1",
     "grunt-contrib-copy": "latest",
     "grunt-contrib-jasmine": "latest",
