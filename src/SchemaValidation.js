@@ -575,10 +575,33 @@ exports.validateSchema = function (report, schema) {
         }
     }
 
+    if (this.options.pedanticCheck === true) {
+        if (schema.enum) {
+            // break recursion
+            var tmpSchema = Utils.clone(schema);
+            delete tmpSchema.enum;
+            delete tmpSchema.default;
+
+            report.path.push("enum");
+            idx = schema.enum.length;
+            while (idx--) {
+                report.path.push(idx.toString());
+                JsonValidation.validate.call(this, report, tmpSchema, schema.enum[idx]);
+                report.path.pop();
+            }
+            report.path.pop();
+        }
+
+        if (schema.default) {
+            report.path.push("default");
+            JsonValidation.validate.call(this, report, schema, schema.default);
+            report.path.pop();
+        }
+    }
+
     var isValid = report.isValid();
     if (isValid) {
         schema.__$validated = true;
     }
     return isValid;
-
 };
