@@ -50,7 +50,9 @@ var defaultOptions = {
     // report error paths as an array of path segments to get to the offending node
     reportPathAsArray: false,
     // stops validation as soon as an error is found, true by default but can be turned off
-    breakOnFirstError: true
+    breakOnFirstError: true,
+    //check if schema follow best practices and common sence
+    pedanticCheck: false
 };
 
 /*
