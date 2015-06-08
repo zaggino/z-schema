@@ -88,7 +88,7 @@ process.chdir = function (dir) {
 
 },{}],2:[function(require,module,exports){
 /*!
- * Copyright (c) 2015 Chris O'Hara <cohara87@gmail.com>
+ * Copyright (c) 2014 Chris O'Hara <cohara87@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -122,7 +122,7 @@ process.chdir = function (dir) {
 
     'use strict';
 
-    validator = { version: '3.40.0' };
+    validator = { version: '3.36.0' };
 
     var emailUser = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e])|(\\[\x01-\x09\x0b\x0c\x0d-\x7f])))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))$/i;
 
@@ -172,9 +172,7 @@ process.chdir = function (dir) {
       'fr-FR': /^(\+?33|0)[67]\d{8}$/,
       'pt-PT': /^(\+351)?9[1236]\d{7}$/,
       'el-GR': /^(\+30)?((2\d{9})|(69\d{8}))$/,
-      'en-GB': /^(\+?44|0)7\d{9}$/,
-      'en-US': /^(\+?1)?[2-9]\d{2}[2-9](?!11)\d{6}$/,
-      'en-ZM': /^(\+26)?09[567]\d{7}$/
+      'en-GB': /^(\+?44|0)7\d{9}$/
     };
 
     validator.extend = function (name, fn) {
@@ -249,7 +247,7 @@ process.chdir = function (dir) {
     var default_email_options = {
         allow_display_name: false,
         allow_utf8_local_part: true,
-        require_tld: true
+        require_tld: false
     };
 
     validator.isEmail = function (str, options) {
@@ -440,10 +438,6 @@ process.chdir = function (dir) {
         return true;
     };
 
-    validator.isBoolean = function(str) {
-        return (['true', 'false', '1', '0'].indexOf(str) >= 0);
-    };
-
     validator.isAlpha = function (str) {
         return alpha.test(str);
     };
@@ -472,14 +466,12 @@ process.chdir = function (dir) {
         return str === str.toUpperCase();
     };
 
-    validator.isInt = function (str, options) {
-        options = options || {};
-        return int.test(str) && (!options.hasOwnProperty('min') || str >= options.min) && (!options.hasOwnProperty('max') || str <= options.max);
+    validator.isInt = function (str) {
+        return int.test(str);
     };
 
-    validator.isFloat = function (str, options) {
-        options = options || {};
-        return str !== '' && float.test(str) && (!options.hasOwnProperty('min') || str >= options.min) && (!options.hasOwnProperty('max') || str <= options.max);
+    validator.isFloat = function (str) {
+        return str !== '' && float.test(str);
     };
 
     validator.isDivisibleBy = function (str, num) {
@@ -2728,12 +2720,35 @@ exports.validateSchema = function (report, schema) {
         }
     }
 
+    if (this.options.pedanticCheck === true) {
+        if (schema.enum) {
+            // break recursion
+            var tmpSchema = Utils.clone(schema);
+            delete tmpSchema.enum;
+            delete tmpSchema.default;
+
+            report.path.push("enum");
+            idx = schema.enum.length;
+            while (idx--) {
+                report.path.push(idx.toString());
+                JsonValidation.validate.call(this, report, tmpSchema, schema.enum[idx]);
+                report.path.pop();
+            }
+            report.path.pop();
+        }
+
+        if (schema.default) {
+            report.path.push("default");
+            JsonValidation.validate.call(this, report, schema, schema.default);
+            report.path.pop();
+        }
+    }
+
     var isValid = report.isValid();
     if (isValid) {
         schema.__$validated = true;
     }
     return isValid;
-
 };
 
 },{"./FormatValidators":4,"./JsonValidation":5,"./Report":7,"./Utils":11}],11:[function(require,module,exports){
@@ -3008,7 +3023,9 @@ var defaultOptions = {
     // report error paths as an array of path segments to get to the offending node
     reportPathAsArray: false,
     // stops validation as soon as an error is found, true by default but can be turned off
-    breakOnFirstError: true
+    breakOnFirstError: true,
+    // check if schema follow best practices and common sence
+    pedanticCheck: false
 };
 
 /*
