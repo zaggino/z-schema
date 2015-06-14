@@ -209,7 +209,7 @@ ZSchema.registerFormat("xstring", function (str, callback) {
 ```
 ##Helper method to check the formats that have been registered
 ```javascript
-var registeredFormats = ZSchema.getRegisterFormatKeys();
+var registeredFormats = ZSchema.getRegisteredFormats();
 //registeredFormats will now contain an array of all formats that have been registered with z-schema
 
 ##Automatic downloading of remote schemas
