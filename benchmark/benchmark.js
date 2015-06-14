@@ -19,6 +19,8 @@ var Skeemas = require("skeemas");
 var tv4 = require("tv4");
 var Themis = require('themis');
 var jsen = require("jsen");
+var Ajv = require("ajv");
+var schemasaurus = require("schemasaurus");
 
 Tester.registerValidator({
     name: "z-schema-3",
@@ -73,6 +75,21 @@ Tester.registerValidator({
 });
 
 Tester.registerValidator({
+    name: "ajv",
+    setup: function () {
+        return Ajv();
+    },
+    test: function (validator, json, schema) {
+        // If we're repeatedly testing the same schema, use the existing validate
+        if (this.lastSchema !== schema) {
+            this.lastSchema = schema;
+            this.validate = validator.compile(schema);
+        }
+        return this.validate(json);
+    }
+});
+
+Tester.registerValidator({
     name: "themis",
     setup: function () {
         return Themis;
@@ -83,6 +100,21 @@ Tester.registerValidator({
             this.validator = Themis.validator(schema);
         }
         return this.validator(json, '0').valid === true;
+    }
+});
+
+Tester.registerValidator({
+    name: 'schemasaurus',
+    setup: function () {
+        return schemasaurus;
+    },
+    test: function (validator, json, schema) {
+        // If we're repeatedly testing the same schema, use the existing validate
+        if (this.lastSchema !== schema) {
+            this.lastSchema = schema;
+            this.validate = validator.newValidator(schema);
+        }
+        return this.validate(json).valid;
     }
 });
 
