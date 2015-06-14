@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-    description: "pedanticCheck - check if schema follow best practices and common sence",
+    description: "pedanticCheck - check if schema follow best practices and common sense",
     options: {
         pedanticCheck: true,
         breakOnFirstError: false
