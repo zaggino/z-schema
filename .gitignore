@@ -4,3 +4,4 @@
 /benchmark/npm-debug.log
 /.grunt/
 /coverage/
+.DS_Store
