@@ -211,7 +211,7 @@ ZSchema.registerFormat("xstring", function (str, callback) {
 ```javascript
 var registeredFormats = ZSchema.getRegisteredFormats();
 //registeredFormats will now contain an array of all formats that have been registered with z-schema
-
+```
 ##Automatic downloading of remote schemas
 
 Automatic downloading of remote schemas was removed from version ```3.x``` but is still possible with a bit of extra code,
