@@ -52,11 +52,13 @@ function readJson(fileName) {
     try {
         ret = fs.readFileSync(fileName, { encoding: "utf8" });
     } catch (e) {
+        console.error(e);
         throw new Error("Couldn't read the file: " + fileName);
     }
     try {
         ret = JSON.parse(ret);
     } catch (e) {
+        console.error(e);
         throw new Error("Couldn't parse the file as JSON: " + fileName);
     }
     return ret;
