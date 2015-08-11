@@ -239,6 +239,7 @@ exports.compileSchema = function (report, schema) {
 
         if (!response) {
 
+            var hasNotValid = report.hasError("REMOTE_NOT_VALID", [refObj.ref]);
             var isAbsolute = Utils.isAbsoluteUri(refObj.ref);
             var isDownloaded = false;
             var ignoreUnresolvableRemotes = this.options.ignoreUnresolvableReferences === true;
@@ -249,7 +250,13 @@ exports.compileSchema = function (report, schema) {
                 isDownloaded = SchemaCache.checkCacheForUri.call(this, refObj.ref);
             }
 
-            if (!isAbsolute || !isDownloaded && !ignoreUnresolvableRemotes) {
+            if (hasNotValid) {
+                // already has REMOTE_NOT_VALID error for this one
+            } else if (ignoreUnresolvableRemotes && isAbsolute) {
+                // ignoreUnresolvableRemotes is on and remote isAbsolute
+            } else if (isDownloaded) {
+                // remote is downloaded, so no UNRESOLVABLE_REFERENCE
+            } else {
                 Array.prototype.push.apply(report.path, refObj.path);
                 report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref]);
                 report.path.slice(0, -refObj.path.length);

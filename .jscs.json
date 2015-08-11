@@ -9,7 +9,6 @@
     "requireSpacesInAnonymousFunctionExpression":   { "beforeOpeningRoundBrace": true },
     "disallowSpacesInNamedFunctionExpression":      { "beforeOpeningRoundBrace": true },
     "requireBlocksOnNewline":                       1,
-    "disallowEmptyBlocks":                          true,
     "disallowSpacesInsideArrayBrackets":            "all",
     "disallowSpacesInsideParentheses":              true,
     "requireSpacesInsideObjectBrackets":            "all",

@@ -97,6 +97,28 @@ Report.prototype.getPath = function () {
     return path;
 };
 
+Report.prototype.hasError = function (errorCode, params) {
+    var idx = this.errors.length;
+    while (idx--) {
+        if (this.errors[idx].code === errorCode) {
+            // assume match
+            var match = true;
+
+            // check the params too
+            var idx2 = this.errors[idx].params.length;
+            while (idx2--) {
+                if (this.errors[idx].params[idx2] !== params[idx2]) {
+                    match = false;
+                }
+            }
+
+            // if match, return true
+            if (match) { return match; }
+        }
+    }
+    return false;
+};
+
 Report.prototype.addError = function (errorCode, params, subReports, schemaDescription) {
     if (this.errors.length >= this.reportOptions.maxErrors) {
         return;

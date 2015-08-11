@@ -137,7 +137,7 @@ exports.getSchemaByUri = function (report, uri, root) {
 
     if (result && queryPath) {
         var parts = queryPath.split("/");
-        for (var idx = 0, lim = parts.length; idx < lim; idx++) {
+        for (var idx = 0, lim = parts.length; result && idx < lim; idx++) {
             var key = decodeJSONPointer(parts[idx]);
             if (idx === 0) { // it's an id
                 result = findId(result, key);
