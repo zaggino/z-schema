@@ -73,7 +73,7 @@ exports.cacheSchemaByUri = function (uri, schema) {
 exports.removeFromCacheByUri = function (uri) {
     var remotePath = getRemotePath(uri);
     if (remotePath) {
-        this.cache[remotePath] = undefined;
+        delete this.cache[remotePath];
     }
 };
 
