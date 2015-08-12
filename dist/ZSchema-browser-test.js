@@ -54182,18 +54182,22 @@ ZSchema.prototype.getLastError = function () {
     return e;
 };
 ZSchema.prototype.getLastErrors = function () {
-    return this.lastReport.errors.length > 0 ? this.lastReport.errors : undefined;
+    return this.lastReport && this.lastReport.errors.length > 0 ? this.lastReport.errors : undefined;
 };
-ZSchema.prototype.getMissingReferences = function () {
+ZSchema.prototype.getMissingReferences = function (arr) {
+    arr = arr || this.lastReport.errors;
     var res = [],
-        idx = this.lastReport.errors.length;
+        idx = arr.length;
     while (idx--) {
-        var error = this.lastReport.errors[idx];
+        var error = arr[idx];
         if (error.code === "UNRESOLVABLE_REFERENCE") {
             var reference = error.params[0];
             if (res.indexOf(reference) === -1) {
                 res.push(reference);
             }
+        }
+        if (error.inner) {
+            res = res.concat(this.getMissingReferences(error.inner));
         }
     }
     return res;
@@ -54600,6 +54604,7 @@ module.exports={
                 }
             ]
         },
+        "format": { "type": "string" },
         "allOf": { "$ref": "#/definitions/schemaArray" },
         "anyOf": { "$ref": "#/definitions/schemaArray" },
         "oneOf": { "$ref": "#/definitions/schemaArray" },
@@ -55420,6 +55425,33 @@ module.exports = {
 },{}],320:[function(require,module,exports){
 "use strict";
 
+module.exports = {
+    description: "Issue #125 - Do not process format if type validation fails",
+    setup: function (validator, Class) {
+        Class.registerFormat("int32", function () {
+            return false;
+        });
+    },
+    schema: {
+        "type": "integer",
+        "format": "int32"
+    },
+    tests: [
+        {
+            description: "should only process type validation",
+            data: 1.1,
+            valid: false,
+            after: function (err) {
+                expect(err.length).toBe(1);
+                expect(err[0].code).toBe("INVALID_TYPE");
+            }
+        }
+    ]
+};
+
+},{}],321:[function(require,module,exports){
+"use strict";
+
 var REF_NAME = "int.json";
 
 module.exports = {
@@ -55452,18 +55484,19 @@ module.exports = {
             },
             validateSchemaOnly: true,
             valid: false,
-            after: function (err) {
+            after: function (err, valid, data, validator) {
                 err.forEach(function (e) {
                     if (e.params.indexOf(REF_NAME) !== -1) {
                         expect(e.code).not.toBe("UNRESOLVABLE_REFERENCE");
                     }
                 });
+                expect(validator.getMissingRemoteReferences().length).toBe(1);
             }
         }
     ]
 };
 
-},{}],321:[function(require,module,exports){
+},{}],322:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -55636,7 +55669,7 @@ module.exports = {
     ]
 };
 
-},{}],322:[function(require,module,exports){
+},{}],323:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -55663,7 +55696,7 @@ module.exports = {
     ]
 };
 
-},{}],323:[function(require,module,exports){
+},{}],324:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -55739,7 +55772,7 @@ module.exports = {
     ]
 };
 
-},{}],324:[function(require,module,exports){
+},{}],325:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -55775,7 +55808,7 @@ module.exports = {
     ]
 };
 
-},{}],325:[function(require,module,exports){
+},{}],326:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -55865,7 +55898,7 @@ module.exports = {
     ]
 };
 
-},{}],326:[function(require,module,exports){
+},{}],327:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -55890,7 +55923,7 @@ module.exports = {
     ]
 };
 
-},{}],327:[function(require,module,exports){
+},{}],328:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -55966,7 +55999,7 @@ module.exports = {
     ]
 };
 
-},{}],328:[function(require,module,exports){
+},{}],329:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56079,7 +56112,7 @@ module.exports = {
     ]
 };
 
-},{}],329:[function(require,module,exports){
+},{}],330:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56259,7 +56292,7 @@ module.exports = {
     ]
 };
 
-},{}],330:[function(require,module,exports){
+},{}],331:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56306,7 +56339,7 @@ module.exports = {
     ]
 };
 
-},{}],331:[function(require,module,exports){
+},{}],332:[function(require,module,exports){
 "use strict";
 
 var resourceObject = {
@@ -56602,7 +56635,7 @@ module.exports = {
     ]
 };
 
-},{}],332:[function(require,module,exports){
+},{}],333:[function(require,module,exports){
 "use strict";
 
 var draft4 = require("./files/Issue47/draft4.json");
@@ -56631,7 +56664,7 @@ module.exports = {
     ]
 };
 
-},{"./files/Issue47/draft4.json":356,"./files/Issue47/sample.json":357,"./files/Issue47/swagger_draft.json":358,"./files/Issue47/swagger_draft_modified.json":359}],333:[function(require,module,exports){
+},{"./files/Issue47/draft4.json":357,"./files/Issue47/sample.json":358,"./files/Issue47/swagger_draft.json":359,"./files/Issue47/swagger_draft_modified.json":360}],334:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56664,7 +56697,7 @@ module.exports = {
     ]
 };
 
-},{}],334:[function(require,module,exports){
+},{}],335:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56682,7 +56715,7 @@ module.exports = {
     ]
 };
 
-},{}],335:[function(require,module,exports){
+},{}],336:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56704,7 +56737,7 @@ module.exports = {
     ]
 };
 
-},{}],336:[function(require,module,exports){
+},{}],337:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56775,7 +56808,7 @@ module.exports = {
     ]
 };
 
-},{}],337:[function(require,module,exports){
+},{}],338:[function(require,module,exports){
 "use strict";
 
 var dataTypeBaseJson = {
@@ -57460,7 +57493,7 @@ module.exports = {
     ]
 };
 
-},{}],338:[function(require,module,exports){
+},{}],339:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -57523,7 +57556,7 @@ module.exports = {
     ]
 };
 
-},{}],339:[function(require,module,exports){
+},{}],340:[function(require,module,exports){
 /*jshint -W101*/
 
 "use strict";
@@ -58100,7 +58133,7 @@ module.exports = {
     ]
 };
 
-},{}],340:[function(require,module,exports){
+},{}],341:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58131,7 +58164,7 @@ module.exports = {
     ]
 };
 
-},{}],341:[function(require,module,exports){
+},{}],342:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58182,7 +58215,7 @@ module.exports = {
     ]
 };
 
-},{}],342:[function(require,module,exports){
+},{}],343:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58302,7 +58335,7 @@ module.exports = {
     ]
 };
 
-},{}],343:[function(require,module,exports){
+},{}],344:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58360,7 +58393,7 @@ module.exports = {
     ]
 };
 
-},{}],344:[function(require,module,exports){
+},{}],345:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58433,7 +58466,7 @@ module.exports = {
     ]
 };
 
-},{}],345:[function(require,module,exports){
+},{}],346:[function(require,module,exports){
 "use strict";
 
 var innerSchema = {
@@ -58478,7 +58511,7 @@ module.exports = {
     ]
 };
 
-},{}],346:[function(require,module,exports){
+},{}],347:[function(require,module,exports){
 "use strict";
 
 var schema1 = {
@@ -58522,7 +58555,7 @@ module.exports = {
     ]
 };
 
-},{}],347:[function(require,module,exports){
+},{}],348:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58540,7 +58573,7 @@ module.exports = {
     ]
 };
 
-},{}],348:[function(require,module,exports){
+},{}],349:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58572,7 +58605,7 @@ module.exports = {
     ]
 };
 
-},{}],349:[function(require,module,exports){
+},{}],350:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58631,7 +58664,7 @@ module.exports = {
     ]
 };
 
-},{}],350:[function(require,module,exports){
+},{}],351:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58656,7 +58689,7 @@ module.exports = {
     ]
 };
 
-},{}],351:[function(require,module,exports){
+},{}],352:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58681,7 +58714,7 @@ module.exports = {
     ]
 };
 
-},{}],352:[function(require,module,exports){
+},{}],353:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58726,7 +58759,7 @@ module.exports = {
     ]
 };
 
-},{}],353:[function(require,module,exports){
+},{}],354:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58751,7 +58784,7 @@ module.exports = {
     ]
 };
 
-},{}],354:[function(require,module,exports){
+},{}],355:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58790,7 +58823,7 @@ module.exports = {
     ]
 };
 
-},{}],355:[function(require,module,exports){
+},{}],356:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -58820,9 +58853,159 @@ module.exports = {
     ]
 };
 
-},{}],356:[function(require,module,exports){
-module.exports=require(300)
-},{"c:\\dev\\z-schema\\src\\schemas\\schema.json":300}],357:[function(require,module,exports){
+},{}],357:[function(require,module,exports){
+module.exports={
+    "id": "http://json-schema.org/draft-04/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Core schema meta-schema",
+    "definitions": {
+        "schemaArray": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#" }
+        },
+        "positiveInteger": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "positiveIntegerDefault0": {
+            "allOf": [ { "$ref": "#/definitions/positiveInteger" }, { "default": 0 } ]
+        },
+        "simpleTypes": {
+            "enum": [ "array", "boolean", "integer", "null", "number", "object", "string" ]
+        },
+        "stringArray": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1,
+            "uniqueItems": true
+        }
+    },
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "format": "uri"
+        },
+        "$schema": {
+            "type": "string",
+            "format": "uri"
+        },
+        "title": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string"
+        },
+        "default": {},
+        "multipleOf": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true
+        },
+        "maximum": {
+            "type": "number"
+        },
+        "exclusiveMaximum": {
+            "type": "boolean",
+            "default": false
+        },
+        "minimum": {
+            "type": "number"
+        },
+        "exclusiveMinimum": {
+            "type": "boolean",
+            "default": false
+        },
+        "maxLength": { "$ref": "#/definitions/positiveInteger" },
+        "minLength": { "$ref": "#/definitions/positiveIntegerDefault0" },
+        "pattern": {
+            "type": "string",
+            "format": "regex"
+        },
+        "additionalItems": {
+            "anyOf": [
+                { "type": "boolean" },
+                { "$ref": "#" }
+            ],
+            "default": {}
+        },
+        "items": {
+            "anyOf": [
+                { "$ref": "#" },
+                { "$ref": "#/definitions/schemaArray" }
+            ],
+            "default": {}
+        },
+        "maxItems": { "$ref": "#/definitions/positiveInteger" },
+        "minItems": { "$ref": "#/definitions/positiveIntegerDefault0" },
+        "uniqueItems": {
+            "type": "boolean",
+            "default": false
+        },
+        "maxProperties": { "$ref": "#/definitions/positiveInteger" },
+        "minProperties": { "$ref": "#/definitions/positiveIntegerDefault0" },
+        "required": { "$ref": "#/definitions/stringArray" },
+        "additionalProperties": {
+            "anyOf": [
+                { "type": "boolean" },
+                { "$ref": "#" }
+            ],
+            "default": {}
+        },
+        "definitions": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#" },
+            "default": {}
+        },
+        "properties": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#" },
+            "default": {}
+        },
+        "patternProperties": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#" },
+            "default": {}
+        },
+        "dependencies": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    { "$ref": "#" },
+                    { "$ref": "#/definitions/stringArray" }
+                ]
+            }
+        },
+        "enum": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true
+        },
+        "type": {
+            "anyOf": [
+                { "$ref": "#/definitions/simpleTypes" },
+                {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/simpleTypes" },
+                    "minItems": 1,
+                    "uniqueItems": true
+                }
+            ]
+        },
+        "allOf": { "$ref": "#/definitions/schemaArray" },
+        "anyOf": { "$ref": "#/definitions/schemaArray" },
+        "oneOf": { "$ref": "#/definitions/schemaArray" },
+        "not": { "$ref": "#" }
+    },
+    "dependencies": {
+        "exclusiveMaximum": [ "maximum" ],
+        "exclusiveMinimum": [ "minimum" ]
+    },
+    "default": {}
+}
+
+},{}],358:[function(require,module,exports){
 module.exports={
   "swagger": 2,
   "info": {
@@ -58913,7 +59096,7 @@ module.exports={
   }
 }
 
-},{}],358:[function(require,module,exports){
+},{}],359:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -59311,7 +59494,7 @@ module.exports={
 	}
 }
 
-},{}],359:[function(require,module,exports){
+},{}],360:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -59709,7 +59892,7 @@ module.exports={
 	}
 }
 
-},{}],360:[function(require,module,exports){
+},{}],361:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -59734,15 +59917,15 @@ module.exports = {
     ]
 };
 
-},{}],361:[function(require,module,exports){
-module.exports=require(300)
-},{"c:\\dev\\z-schema\\src\\schemas\\schema.json":300}],362:[function(require,module,exports){
+},{}],362:[function(require,module,exports){
+module.exports=require(357)
+},{"c:\\dev\\z-schema\\test\\ZSchemaTestSuite\\files\\Issue47\\draft4.json":357}],363:[function(require,module,exports){
 module.exports={
     "type": "integer"
 }
-},{}],363:[function(require,module,exports){
-module.exports=require(362)
-},{"c:\\dev\\z-schema\\test\\jsonSchemaTestSuite\\remotes\\folder\\folderInteger.json":362}],364:[function(require,module,exports){
+},{}],364:[function(require,module,exports){
+module.exports=require(363)
+},{"c:\\dev\\z-schema\\test\\jsonSchemaTestSuite\\remotes\\folder\\folderInteger.json":363}],365:[function(require,module,exports){
 module.exports={
     "integer": {
         "type": "integer"
@@ -59751,7 +59934,7 @@ module.exports={
         "$ref": "#/integer"
     }
 }
-},{}],365:[function(require,module,exports){
+},{}],366:[function(require,module,exports){
 module.exports=[
     {
         "description": "additionalItems as schema",
@@ -59835,7 +60018,7 @@ module.exports=[
     }
 ]
 
-},{}],366:[function(require,module,exports){
+},{}],367:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -59925,7 +60108,7 @@ module.exports=[
     }
 ]
 
-},{}],367:[function(require,module,exports){
+},{}],368:[function(require,module,exports){
 module.exports=[
     {
         "description": "allOf",
@@ -60039,7 +60222,7 @@ module.exports=[
     }
 ]
 
-},{}],368:[function(require,module,exports){
+},{}],369:[function(require,module,exports){
 module.exports=[
     {
         "description": "anyOf",
@@ -60109,7 +60292,7 @@ module.exports=[
     }
 ]
 
-},{}],369:[function(require,module,exports){
+},{}],370:[function(require,module,exports){
 module.exports=[
     {
         "description": "invalid type for default",
@@ -60160,7 +60343,7 @@ module.exports=[
     }
 ]
 
-},{}],370:[function(require,module,exports){
+},{}],371:[function(require,module,exports){
 module.exports=[
     {
         "description": "valid definition",
@@ -60194,7 +60377,7 @@ module.exports=[
     }
 ]
 
-},{}],371:[function(require,module,exports){
+},{}],372:[function(require,module,exports){
 module.exports=[
     {
         "description": "dependencies",
@@ -60309,7 +60492,7 @@ module.exports=[
     }
 ]
 
-},{}],372:[function(require,module,exports){
+},{}],373:[function(require,module,exports){
 module.exports=[
     {
         "description": "simple enum validation",
@@ -60383,7 +60566,7 @@ module.exports=[
     }
 ]
 
-},{}],373:[function(require,module,exports){
+},{}],374:[function(require,module,exports){
 module.exports=[
     {
         "description": "a schema given for items",
@@ -60431,7 +60614,7 @@ module.exports=[
     }
 ]
 
-},{}],374:[function(require,module,exports){
+},{}],375:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxItems validation",
@@ -60461,7 +60644,7 @@ module.exports=[
     }
 ]
 
-},{}],375:[function(require,module,exports){
+},{}],376:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxLength validation",
@@ -60496,7 +60679,7 @@ module.exports=[
     }
 ]
 
-},{}],376:[function(require,module,exports){
+},{}],377:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxProperties validation",
@@ -60526,7 +60709,7 @@ module.exports=[
     }
 ]
 
-},{}],377:[function(require,module,exports){
+},{}],378:[function(require,module,exports){
 module.exports=[
     {
         "description": "maximum validation",
@@ -60570,7 +60753,7 @@ module.exports=[
     }
 ]
 
-},{}],378:[function(require,module,exports){
+},{}],379:[function(require,module,exports){
 module.exports=[
     {
         "description": "minItems validation",
@@ -60600,7 +60783,7 @@ module.exports=[
     }
 ]
 
-},{}],379:[function(require,module,exports){
+},{}],380:[function(require,module,exports){
 module.exports=[
     {
         "description": "minLength validation",
@@ -60635,7 +60818,7 @@ module.exports=[
     }
 ]
 
-},{}],380:[function(require,module,exports){
+},{}],381:[function(require,module,exports){
 module.exports=[
     {
         "description": "minProperties validation",
@@ -60665,7 +60848,7 @@ module.exports=[
     }
 ]
 
-},{}],381:[function(require,module,exports){
+},{}],382:[function(require,module,exports){
 module.exports=[
     {
         "description": "minimum validation",
@@ -60709,7 +60892,7 @@ module.exports=[
     }
 ]
 
-},{}],382:[function(require,module,exports){
+},{}],383:[function(require,module,exports){
 module.exports=[
     {
         "description": "by int",
@@ -60771,7 +60954,7 @@ module.exports=[
     }
 ]
 
-},{}],383:[function(require,module,exports){
+},{}],384:[function(require,module,exports){
 module.exports=[
     {
         "description": "not",
@@ -60869,7 +61052,7 @@ module.exports=[
 
 ]
 
-},{}],384:[function(require,module,exports){
+},{}],385:[function(require,module,exports){
 module.exports=[
     {
         "description": "oneOf",
@@ -60939,7 +61122,7 @@ module.exports=[
     }
 ]
 
-},{}],385:[function(require,module,exports){
+},{}],386:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer",
@@ -61048,7 +61231,7 @@ module.exports=[
     }
 ]
 
-},{}],386:[function(require,module,exports){
+},{}],387:[function(require,module,exports){
 module.exports=[
     {
         "description": "validation of date-time strings",
@@ -61193,7 +61376,7 @@ module.exports=[
     }
 ]
 
-},{}],387:[function(require,module,exports){
+},{}],388:[function(require,module,exports){
 module.exports=[
     {
         "description": "pattern validation",
@@ -61218,7 +61401,7 @@ module.exports=[
     }
 ]
 
-},{}],388:[function(require,module,exports){
+},{}],389:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -61330,7 +61513,7 @@ module.exports=[
     }
 ]
 
-},{}],389:[function(require,module,exports){
+},{}],390:[function(require,module,exports){
 module.exports=[
     {
         "description": "object properties validation",
@@ -61424,7 +61607,7 @@ module.exports=[
     }
 ]
 
-},{}],390:[function(require,module,exports){
+},{}],391:[function(require,module,exports){
 module.exports=[
     {
         "description": "root pointer ref",
@@ -61570,7 +61753,7 @@ module.exports=[
     }
 ]
 
-},{}],391:[function(require,module,exports){
+},{}],392:[function(require,module,exports){
 module.exports=[
     {
         "description": "remote ref",
@@ -61646,7 +61829,7 @@ module.exports=[
     }
 ]
 
-},{}],392:[function(require,module,exports){
+},{}],393:[function(require,module,exports){
 module.exports=[
     {
         "description": "required validation",
@@ -61687,7 +61870,7 @@ module.exports=[
     }
 ]
 
-},{}],393:[function(require,module,exports){
+},{}],394:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer type matches integers",
@@ -62019,7 +62202,7 @@ module.exports=[
     }
 ]
 
-},{}],394:[function(require,module,exports){
+},{}],395:[function(require,module,exports){
 module.exports=[
     {
         "description": "uniqueItems validation",
@@ -62100,7 +62283,7 @@ module.exports=[
     }
 ]
 
-},{}],395:[function(require,module,exports){
+},{}],396:[function(require,module,exports){
 "use strict";
 
 var isBrowser = typeof window !== "undefined";
@@ -62189,7 +62372,7 @@ describe("Automatic schema loading", function () {
 
 });
 
-},{"../../src/ZSchema":298,"request":197}],396:[function(require,module,exports){
+},{"../../src/ZSchema":298,"request":197}],397:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -62261,7 +62444,7 @@ describe("Basic", function () {
 
 });
 
-},{"../../src/ZSchema":298,"../files/draft-04-schema.json":361,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":362,"../jsonSchemaTestSuite/remotes/integer.json":363,"../jsonSchemaTestSuite/remotes/subSchemas.json":364}],397:[function(require,module,exports){
+},{"../../src/ZSchema":298,"../files/draft-04-schema.json":362,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":363,"../jsonSchemaTestSuite/remotes/integer.json":364,"../jsonSchemaTestSuite/remotes/subSchemas.json":365}],398:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -62357,7 +62540,7 @@ describe("JsonSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":298,"../files/draft-04-schema.json":361,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":362,"../jsonSchemaTestSuite/remotes/integer.json":363,"../jsonSchemaTestSuite/remotes/subSchemas.json":364,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":365,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":366,"../jsonSchemaTestSuite/tests/draft4/allOf.json":367,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":368,"../jsonSchemaTestSuite/tests/draft4/default.json":369,"../jsonSchemaTestSuite/tests/draft4/definitions.json":370,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":371,"../jsonSchemaTestSuite/tests/draft4/enum.json":372,"../jsonSchemaTestSuite/tests/draft4/items.json":373,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":374,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":375,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":376,"../jsonSchemaTestSuite/tests/draft4/maximum.json":377,"../jsonSchemaTestSuite/tests/draft4/minItems.json":378,"../jsonSchemaTestSuite/tests/draft4/minLength.json":379,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":380,"../jsonSchemaTestSuite/tests/draft4/minimum.json":381,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":382,"../jsonSchemaTestSuite/tests/draft4/not.json":383,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":384,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":385,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":386,"../jsonSchemaTestSuite/tests/draft4/pattern.json":387,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":388,"../jsonSchemaTestSuite/tests/draft4/properties.json":389,"../jsonSchemaTestSuite/tests/draft4/ref.json":390,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":391,"../jsonSchemaTestSuite/tests/draft4/required.json":392,"../jsonSchemaTestSuite/tests/draft4/type.json":393,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":394}],398:[function(require,module,exports){
+},{"../../src/ZSchema":298,"../files/draft-04-schema.json":362,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":363,"../jsonSchemaTestSuite/remotes/integer.json":364,"../jsonSchemaTestSuite/remotes/subSchemas.json":365,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":366,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":367,"../jsonSchemaTestSuite/tests/draft4/allOf.json":368,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":369,"../jsonSchemaTestSuite/tests/draft4/default.json":370,"../jsonSchemaTestSuite/tests/draft4/definitions.json":371,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":372,"../jsonSchemaTestSuite/tests/draft4/enum.json":373,"../jsonSchemaTestSuite/tests/draft4/items.json":374,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":375,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":376,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":377,"../jsonSchemaTestSuite/tests/draft4/maximum.json":378,"../jsonSchemaTestSuite/tests/draft4/minItems.json":379,"../jsonSchemaTestSuite/tests/draft4/minLength.json":380,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":381,"../jsonSchemaTestSuite/tests/draft4/minimum.json":382,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":383,"../jsonSchemaTestSuite/tests/draft4/not.json":384,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":385,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":386,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":387,"../jsonSchemaTestSuite/tests/draft4/pattern.json":388,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":389,"../jsonSchemaTestSuite/tests/draft4/properties.json":390,"../jsonSchemaTestSuite/tests/draft4/ref.json":391,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":392,"../jsonSchemaTestSuite/tests/draft4/required.json":393,"../jsonSchemaTestSuite/tests/draft4/type.json":394,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":395}],399:[function(require,module,exports){
 /*jshint -W030 */
 
 "use strict";
@@ -62421,6 +62604,7 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/Issue103.js"),
     require("../ZSchemaTestSuite/Issue106.js"),
     require("../ZSchemaTestSuite/Issue107.js"),
+    require("../ZSchemaTestSuite/Issue125.js"),
     require("../ZSchemaTestSuite/Issue126.js"),
     undefined
 ];
@@ -62434,8 +62618,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 56 files", function () {
-        expect(testSuiteFiles.length).toBe(56);
+    it("should contain 57 files", function () {
+        expect(testSuiteFiles.length).toBe(57);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -62541,4 +62725,4 @@ describe("ZSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":298,"../ZSchemaTestSuite/AssumeAdditional.js":301,"../ZSchemaTestSuite/CustomFormats.js":302,"../ZSchemaTestSuite/CustomFormatsAsync.js":303,"../ZSchemaTestSuite/ErrorPathAsArray.js":304,"../ZSchemaTestSuite/ErrorPathAsJSONPointer.js":305,"../ZSchemaTestSuite/ForceAdditional.js":306,"../ZSchemaTestSuite/ForceItems.js":307,"../ZSchemaTestSuite/ForceMaxItems.js":308,"../ZSchemaTestSuite/ForceMaxLength.js":309,"../ZSchemaTestSuite/ForceMinItems.js":310,"../ZSchemaTestSuite/ForceMinLength.js":311,"../ZSchemaTestSuite/ForceProperties.js":312,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":313,"../ZSchemaTestSuite/Issue101.js":314,"../ZSchemaTestSuite/Issue102.js":315,"../ZSchemaTestSuite/Issue103.js":316,"../ZSchemaTestSuite/Issue106.js":317,"../ZSchemaTestSuite/Issue107.js":318,"../ZSchemaTestSuite/Issue12.js":319,"../ZSchemaTestSuite/Issue126.js":320,"../ZSchemaTestSuite/Issue13.js":321,"../ZSchemaTestSuite/Issue16.js":322,"../ZSchemaTestSuite/Issue22.js":323,"../ZSchemaTestSuite/Issue25.js":324,"../ZSchemaTestSuite/Issue26.js":325,"../ZSchemaTestSuite/Issue37.js":326,"../ZSchemaTestSuite/Issue40.js":327,"../ZSchemaTestSuite/Issue41.js":328,"../ZSchemaTestSuite/Issue43.js":329,"../ZSchemaTestSuite/Issue44.js":330,"../ZSchemaTestSuite/Issue45.js":331,"../ZSchemaTestSuite/Issue47.js":332,"../ZSchemaTestSuite/Issue48.js":333,"../ZSchemaTestSuite/Issue49.js":334,"../ZSchemaTestSuite/Issue53.js":335,"../ZSchemaTestSuite/Issue56.js":336,"../ZSchemaTestSuite/Issue57.js":337,"../ZSchemaTestSuite/Issue58.js":338,"../ZSchemaTestSuite/Issue63.js":339,"../ZSchemaTestSuite/Issue64.js":340,"../ZSchemaTestSuite/Issue67.js":341,"../ZSchemaTestSuite/Issue71.js":342,"../ZSchemaTestSuite/Issue73.js":343,"../ZSchemaTestSuite/Issue76.js":344,"../ZSchemaTestSuite/Issue85.js":345,"../ZSchemaTestSuite/Issue94.js":346,"../ZSchemaTestSuite/Issue96.js":347,"../ZSchemaTestSuite/Issue98.js":348,"../ZSchemaTestSuite/MultipleSchemas.js":349,"../ZSchemaTestSuite/NoEmptyArrays.js":350,"../ZSchemaTestSuite/NoEmptyStrings.js":351,"../ZSchemaTestSuite/NoExtraKeywords.js":352,"../ZSchemaTestSuite/NoTypeless.js":353,"../ZSchemaTestSuite/PedanticCheck.js":354,"../ZSchemaTestSuite/StrictUris.js":355,"../ZSchemaTestSuite/getRegisteredFormats.js":360}]},{},[395,396,397,398]);
+},{"../../src/ZSchema":298,"../ZSchemaTestSuite/AssumeAdditional.js":301,"../ZSchemaTestSuite/CustomFormats.js":302,"../ZSchemaTestSuite/CustomFormatsAsync.js":303,"../ZSchemaTestSuite/ErrorPathAsArray.js":304,"../ZSchemaTestSuite/ErrorPathAsJSONPointer.js":305,"../ZSchemaTestSuite/ForceAdditional.js":306,"../ZSchemaTestSuite/ForceItems.js":307,"../ZSchemaTestSuite/ForceMaxItems.js":308,"../ZSchemaTestSuite/ForceMaxLength.js":309,"../ZSchemaTestSuite/ForceMinItems.js":310,"../ZSchemaTestSuite/ForceMinLength.js":311,"../ZSchemaTestSuite/ForceProperties.js":312,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":313,"../ZSchemaTestSuite/Issue101.js":314,"../ZSchemaTestSuite/Issue102.js":315,"../ZSchemaTestSuite/Issue103.js":316,"../ZSchemaTestSuite/Issue106.js":317,"../ZSchemaTestSuite/Issue107.js":318,"../ZSchemaTestSuite/Issue12.js":319,"../ZSchemaTestSuite/Issue125.js":320,"../ZSchemaTestSuite/Issue126.js":321,"../ZSchemaTestSuite/Issue13.js":322,"../ZSchemaTestSuite/Issue16.js":323,"../ZSchemaTestSuite/Issue22.js":324,"../ZSchemaTestSuite/Issue25.js":325,"../ZSchemaTestSuite/Issue26.js":326,"../ZSchemaTestSuite/Issue37.js":327,"../ZSchemaTestSuite/Issue40.js":328,"../ZSchemaTestSuite/Issue41.js":329,"../ZSchemaTestSuite/Issue43.js":330,"../ZSchemaTestSuite/Issue44.js":331,"../ZSchemaTestSuite/Issue45.js":332,"../ZSchemaTestSuite/Issue47.js":333,"../ZSchemaTestSuite/Issue48.js":334,"../ZSchemaTestSuite/Issue49.js":335,"../ZSchemaTestSuite/Issue53.js":336,"../ZSchemaTestSuite/Issue56.js":337,"../ZSchemaTestSuite/Issue57.js":338,"../ZSchemaTestSuite/Issue58.js":339,"../ZSchemaTestSuite/Issue63.js":340,"../ZSchemaTestSuite/Issue64.js":341,"../ZSchemaTestSuite/Issue67.js":342,"../ZSchemaTestSuite/Issue71.js":343,"../ZSchemaTestSuite/Issue73.js":344,"../ZSchemaTestSuite/Issue76.js":345,"../ZSchemaTestSuite/Issue85.js":346,"../ZSchemaTestSuite/Issue94.js":347,"../ZSchemaTestSuite/Issue96.js":348,"../ZSchemaTestSuite/Issue98.js":349,"../ZSchemaTestSuite/MultipleSchemas.js":350,"../ZSchemaTestSuite/NoEmptyArrays.js":351,"../ZSchemaTestSuite/NoEmptyStrings.js":352,"../ZSchemaTestSuite/NoExtraKeywords.js":353,"../ZSchemaTestSuite/NoTypeless.js":354,"../ZSchemaTestSuite/PedanticCheck.js":355,"../ZSchemaTestSuite/StrictUris.js":356,"../ZSchemaTestSuite/getRegisteredFormats.js":361}]},{},[396,397,398,399]);
