@@ -185,16 +185,20 @@ ZSchema.prototype.getLastError = function () {
 ZSchema.prototype.getLastErrors = function () {
     return this.lastReport.errors.length > 0 ? this.lastReport.errors : undefined;
 };
-ZSchema.prototype.getMissingReferences = function () {
+ZSchema.prototype.getMissingReferences = function (arr) {
+    arr = arr || this.lastReport.errors;
     var res = [],
-        idx = this.lastReport.errors.length;
+        idx = arr.length;
     while (idx--) {
-        var error = this.lastReport.errors[idx];
+        var error = arr[idx];
         if (error.code === "UNRESOLVABLE_REFERENCE") {
             var reference = error.params[0];
             if (res.indexOf(reference) === -1) {
                 res.push(reference);
             }
+        }
+        if (error.inner) {
+            res = res.concat(this.getMissingReferences(error.inner));
         }
     }
     return res;

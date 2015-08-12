@@ -32,12 +32,13 @@ module.exports = {
             },
             validateSchemaOnly: true,
             valid: false,
-            after: function (err) {
+            after: function (err, valid, data, validator) {
                 err.forEach(function (e) {
                     if (e.params.indexOf(REF_NAME) !== -1) {
                         expect(e.code).not.toBe("UNRESOLVABLE_REFERENCE");
                     }
                 });
+                expect(validator.getMissingRemoteReferences().length).toBe(1);
             }
         }
     ]
