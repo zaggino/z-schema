@@ -118,6 +118,7 @@ exports.difference = function (bigSet, subSet) {
 
 // NOT a deep version of clone
 exports.clone = function (src) {
+    if (typeof src === "undefined") { return void 0; }
     if (typeof src !== "object" || src === null) { return src; }
     var res, idx;
     if (Array.isArray(src)) {

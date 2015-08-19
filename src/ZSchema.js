@@ -68,13 +68,27 @@ function ZSchema(options) {
     // options
     if (typeof options === "object") {
         var keys = Object.keys(options),
-            idx = keys.length;
+            idx = keys.length,
+            key;
+
+        // check that the options are correctly configured
         while (idx--) {
-            var key = keys[idx];
+            key = keys[idx];
             if (defaultOptions[key] === undefined) {
                 throw new Error("Unexpected option passed to constructor: " + key);
             }
         }
+
+        // copy the default options into passed options
+        keys = Object.keys(defaultOptions);
+        idx = keys.length;
+        while (idx--) {
+            key = keys[idx];
+            if (options[key] === undefined) {
+                options[key] = Utils.clone(defaultOptions[key]);
+            }
+        }
+
         this.options = options;
     } else {
         this.options = Utils.clone(defaultOptions);
