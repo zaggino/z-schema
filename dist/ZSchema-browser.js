@@ -2930,6 +2930,7 @@ exports.difference = function (bigSet, subSet) {
 
 // NOT a deep version of clone
 exports.clone = function (src) {
+    if (typeof src === "undefined") { return void 0; }
     if (typeof src !== "object" || src === null) { return src; }
     var res, idx;
     if (Array.isArray(src)) {
@@ -3099,13 +3100,27 @@ function ZSchema(options) {
     // options
     if (typeof options === "object") {
         var keys = Object.keys(options),
-            idx = keys.length;
+            idx = keys.length,
+            key;
+
+        // check that the options are correctly configured
         while (idx--) {
-            var key = keys[idx];
+            key = keys[idx];
             if (defaultOptions[key] === undefined) {
                 throw new Error("Unexpected option passed to constructor: " + key);
             }
         }
+
+        // copy the default options into passed options
+        keys = Object.keys(defaultOptions);
+        idx = keys.length;
+        while (idx--) {
+            key = keys[idx];
+            if (options[key] === undefined) {
+                options[key] = Utils.clone(defaultOptions[key]);
+            }
+        }
+
         this.options = options;
     } else {
         this.options = Utils.clone(defaultOptions);
