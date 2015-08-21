@@ -232,6 +232,8 @@ ZSchema.prototype.getMissingRemoteReferences = function () {
 ZSchema.prototype.setRemoteReference = function (uri, schema) {
     if (typeof schema === "string") {
         schema = JSON.parse(schema);
+    } else {
+        schema = Utils.cloneDeep(schema);
     }
     SchemaCache.cacheSchemaByUri.call(this, uri, schema);
 };
