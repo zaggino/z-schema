@@ -18,13 +18,13 @@ describe("Using multiple instances of Z-Schema", function () {
         };
 
         var v;
-        v = new ZSchema({strictMode: true});
+        v = new ZSchema({ strictMode: true });
         expect(v.validateSchema(schema)).toBe(false, "1st");
 
         v = new ZSchema();
         expect(v.validateSchema(schema)).toBe(true, "2nd");
 
-        v = new ZSchema({strictMode: true});
+        v = new ZSchema({ strictMode: true });
         expect(v.validateSchema(schema)).toBe(false, "3rd");
 
     });

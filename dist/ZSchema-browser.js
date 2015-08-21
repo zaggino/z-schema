@@ -473,7 +473,7 @@ process.chdir = function (dir) {
     validator.isNumeric = function (str) {
         return numeric.test(str);
     };
-
+    
     validator.isDecimal = function (str) {
         return decimal.test(str);
     };
@@ -3264,6 +3264,8 @@ ZSchema.prototype.getMissingRemoteReferences = function () {
 ZSchema.prototype.setRemoteReference = function (uri, schema) {
     if (typeof schema === "string") {
         schema = JSON.parse(schema);
+    } else {
+        schema = Utils.cloneDeep(schema);
     }
     SchemaCache.cacheSchemaByUri.call(this, uri, schema);
 };

@@ -23388,7 +23388,7 @@ module.exports = function privateDecrypt(private_key, enc, reverse) {
   } else {
     padding = 4;
   }
-
+  
   var key = parseKeys(private_key);
   var k = key.modulus.byteLength();
   if (enc.length > k || new bn(enc).cmp(key.modulus) >= 0) {
@@ -23972,7 +23972,7 @@ http.request = function (params, cb) {
         params.host = params.host.split(':')[0];
     }
     if (!params.port) params.port = params.protocol == 'https:' ? 443 : 80;
-
+    
     var req = new Request(new xhrHttp, params);
     if (cb) req.on('response', cb);
     return req;
@@ -24093,23 +24093,23 @@ var Request = module.exports = function (xhr, params) {
     self.writable = true;
     self.xhr = xhr;
     self.body = [];
-
+    
     self.uri = (params.protocol || 'http:') + '//'
         + params.host
         + (params.port ? ':' + params.port : '')
         + (params.path || '/')
     ;
-
+    
     if (typeof params.withCredentials === 'undefined') {
         params.withCredentials = true;
     }
 
     try { xhr.withCredentials = params.withCredentials }
     catch (e) {}
-
+    
     if (params.responseType) try { xhr.responseType = params.responseType }
     catch (e) {}
-
+    
     xhr.open(
         params.method || 'GET',
         self.uri,
@@ -24121,7 +24121,7 @@ var Request = module.exports = function (xhr, params) {
     };
 
     self._headers = {};
-
+    
     if (params.headers) {
         var keys = objectKeys(params.headers);
         for (var i = 0; i < keys.length; i++) {
@@ -24131,7 +24131,7 @@ var Request = module.exports = function (xhr, params) {
             self.setHeader(key, value);
         }
     }
-
+    
     if (params.auth) {
         //basic auth
         this.setHeader('Authorization', 'Basic ' + Base64.btoa(params.auth));
@@ -24141,7 +24141,7 @@ var Request = module.exports = function (xhr, params) {
     res.on('close', function () {
         self.emit('close');
     });
-
+    
     res.on('ready', function () {
         self.emit('response', res);
     });
@@ -24149,7 +24149,7 @@ var Request = module.exports = function (xhr, params) {
     res.on('error', function (err) {
         self.emit('error', err);
     });
-
+    
     xhr.onreadystatechange = function () {
         // Fix for IE9 bug
         // SCRIPT575: Could not complete the operation due to error c00c023f
@@ -24218,7 +24218,7 @@ Request.prototype.end = function (s) {
         }
         var body = new(this.body[0].constructor)(len);
         var k = 0;
-
+        
         for (var i = 0; i < this.body.length; i++) {
             var b = this.body[i];
             for (var j = 0; j < b.length; j++) {
@@ -24315,13 +24315,13 @@ function parseHeaders (res) {
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
         if (line === '') continue;
-
+        
         var m = line.match(/^([^:]+):\s*(.*)/);
         if (m) {
             var key = m[1].toLowerCase(), value = m[2];
-
+            
             if (headers[key] !== undefined) {
-
+            
                 if (isArray(headers[key])) {
                     headers[key].push(value);
                 }
@@ -24360,7 +24360,7 @@ Response.prototype.handle = function (res) {
         catch (err) {
             capable.status2 = false;
         }
-
+        
         if (capable.status2) {
             this.emit('ready');
         }
@@ -24374,7 +24374,7 @@ Response.prototype.handle = function (res) {
             }
         }
         catch (err) {}
-
+        
         try {
             this._emitData(res);
         }
@@ -24388,12 +24388,12 @@ Response.prototype.handle = function (res) {
             this.emit('ready');
         }
         this._emitData(res);
-
+        
         if (res.error) {
             this.emit('error', this.getResponse(res));
         }
         else this.emit('end');
-
+        
         this.emit('close');
     }
 };
@@ -29160,13 +29160,13 @@ Script.prototype.runInContext = function (context) {
     if (!(context instanceof Context)) {
         throw new TypeError("needs a 'context' argument.");
     }
-
+    
     var iframe = document.createElement('iframe');
     if (!iframe.style) iframe.style = {};
     iframe.style.display = 'none';
-
+    
     document.body.appendChild(iframe);
-
+    
     var win = iframe.contentWindow;
     var wEval = win.eval, wExecScript = win.execScript;
 
@@ -29175,7 +29175,7 @@ Script.prototype.runInContext = function (context) {
         wExecScript.call(win, 'null');
         wEval = win.eval;
     }
-
+    
     forEach(Object_keys(context), function (key) {
         win[key] = context[key];
     });
@@ -29184,7 +29184,7 @@ Script.prototype.runInContext = function (context) {
             win[key] = context[key];
         }
     });
-
+    
     var winKeys = Object_keys(win);
 
     var res = wEval.call(win, this.code);
@@ -29203,9 +29203,9 @@ Script.prototype.runInContext = function (context) {
             defineProp(context, key, win[key]);
         }
     });
-
+    
     document.body.removeChild(iframe);
-
+    
     return res;
 };
 
@@ -30652,7 +30652,7 @@ var crypto = require('crypto')
  * Valid keys.
  */
 
-var keys =
+var keys = 
   [ 'acl'
   , 'location'
   , 'logging'
@@ -30691,7 +30691,7 @@ module.exports.authorization = authorization
  * @param {Object} options
  * @return {String}
  * @api private
- */
+ */ 
 
 function hmacSha1 (options) {
   return crypto.createHmac('sha1', options.secret).update(options.message).digest('base64')
@@ -30700,8 +30700,8 @@ function hmacSha1 (options) {
 module.exports.hmacSha1 = hmacSha1
 
 /**
- * Create a base64 sha1 HMAC for `options`.
- *
+ * Create a base64 sha1 HMAC for `options`. 
+ * 
  * @param {Object} options
  * @return {String}
  * @api private
@@ -30714,10 +30714,10 @@ function sign (options) {
 module.exports.sign = sign
 
 /**
- * Create a base64 sha1 HMAC for `options`.
+ * Create a base64 sha1 HMAC for `options`. 
  *
  * Specifically to be used with S3 presigned URLs
- *
+ * 
  * @param {Object} options
  * @return {String}
  * @api private
@@ -30733,7 +30733,7 @@ module.exports.signQuery= signQuery
  * Return a string for sign() with the given `options`.
  *
  * Spec:
- *
+ * 
  *    <verb>\n
  *    <md5>\n
  *    <content-type>\n
@@ -30749,7 +30749,7 @@ module.exports.signQuery= signQuery
 function stringToSign (options) {
   var headers = options.amazonHeaders || ''
   if (headers) headers += '\n'
-  var r =
+  var r = 
     [ options.verb
     , options.md5
     , options.contentType
@@ -30765,7 +30765,7 @@ module.exports.queryStringToSign = stringToSign
  * for S3 presigned URLs
  *
  * Spec:
- *
+ * 
  *    <date>\n
  *    <resource>
  *
@@ -33184,8 +33184,8 @@ var util = require('util')
   , net = require('net')
   , tls = require('tls')
   , AgentSSL = require('https').Agent
-
-function getConnectionName(host, port) {
+  
+function getConnectionName(host, port) {  
   var name = ''
   if (typeof host === 'string') {
     name = host + ':' + port
@@ -33194,7 +33194,7 @@ function getConnectionName(host, port) {
     name = host.host + ':' + host.port + ':' + (host.localAddress ? (host.localAddress + ':') : ':')
   }
   return name
-}
+}    
 
 function ForeverAgent(options) {
   var self = this
@@ -33212,7 +33212,7 @@ function ForeverAgent(options) {
     } else if (self.sockets[name].length < self.minSockets) {
       if (!self.freeSockets[name]) self.freeSockets[name] = []
       self.freeSockets[name].push(socket)
-
+      
       // if an error happens while we don't use the socket anyway, meh, throw the socket away
       var onIdleError = function() {
         socket.destroy()
@@ -33238,7 +33238,7 @@ ForeverAgent.prototype.createConnection = net.createConnection
 ForeverAgent.prototype.addRequestNoreuse = Agent.prototype.addRequest
 ForeverAgent.prototype.addRequest = function(req, host, port) {
   var name = getConnectionName(host, port)
-
+  
   if (typeof host !== 'string') {
     var options = host
     port = options.port
@@ -33267,7 +33267,7 @@ ForeverAgent.prototype.removeSocket = function(s, name, host, port) {
     delete this.sockets[name]
     delete this.requests[name]
   }
-
+  
   if (this.freeSockets[name]) {
     var index = this.freeSockets[name].indexOf(s)
     if (index !== -1) {
@@ -51441,7 +51441,7 @@ module.exports = Request
     validator.isNumeric = function (str) {
         return numeric.test(str);
     };
-
+    
     validator.isDecimal = function (str) {
         return decimal.test(str);
     };
@@ -54232,6 +54232,8 @@ ZSchema.prototype.getMissingRemoteReferences = function () {
 ZSchema.prototype.setRemoteReference = function (uri, schema) {
     if (typeof schema === "string") {
         schema = JSON.parse(schema);
+    } else {
+        schema = Utils.cloneDeep(schema);
     }
     SchemaCache.cacheSchemaByUri.call(this, uri, schema);
 };
@@ -62556,6 +62558,40 @@ describe("JsonSchemaTestSuite", function () {
 });
 
 },{"../../src/ZSchema":298,"../files/draft-04-schema.json":362,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":363,"../jsonSchemaTestSuite/remotes/integer.json":364,"../jsonSchemaTestSuite/remotes/subSchemas.json":365,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":366,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":367,"../jsonSchemaTestSuite/tests/draft4/allOf.json":368,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":369,"../jsonSchemaTestSuite/tests/draft4/default.json":370,"../jsonSchemaTestSuite/tests/draft4/definitions.json":371,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":372,"../jsonSchemaTestSuite/tests/draft4/enum.json":373,"../jsonSchemaTestSuite/tests/draft4/items.json":374,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":375,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":376,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":377,"../jsonSchemaTestSuite/tests/draft4/maximum.json":378,"../jsonSchemaTestSuite/tests/draft4/minItems.json":379,"../jsonSchemaTestSuite/tests/draft4/minLength.json":380,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":381,"../jsonSchemaTestSuite/tests/draft4/minimum.json":382,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":383,"../jsonSchemaTestSuite/tests/draft4/not.json":384,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":385,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":386,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":387,"../jsonSchemaTestSuite/tests/draft4/pattern.json":388,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":389,"../jsonSchemaTestSuite/tests/draft4/properties.json":390,"../jsonSchemaTestSuite/tests/draft4/ref.json":391,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":392,"../jsonSchemaTestSuite/tests/draft4/required.json":393,"../jsonSchemaTestSuite/tests/draft4/type.json":394,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":395}],399:[function(require,module,exports){
+"use strict";
+
+var ZSchema = require("../../src/ZSchema");
+
+describe("Using multiple instances of Z-Schema", function () {
+
+    it("Should pass all tests", function () {
+
+        var schema = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "properties": {
+                "options": {
+                    "enum": ["a", "b", "c"]
+                }
+            },
+            "additionalProperties": false
+        };
+
+        var v;
+        v = new ZSchema({ strictMode: true });
+        expect(v.validateSchema(schema)).toBe(false, "1st");
+
+        v = new ZSchema();
+        expect(v.validateSchema(schema)).toBe(true, "2nd");
+
+        v = new ZSchema({ strictMode: true });
+        expect(v.validateSchema(schema)).toBe(false, "3rd");
+
+    });
+
+});
+
+},{"../../src/ZSchema":298}],400:[function(require,module,exports){
 /*jshint -W030 */
 
 "use strict";
@@ -62740,4 +62776,4 @@ describe("ZSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":298,"../ZSchemaTestSuite/AssumeAdditional.js":301,"../ZSchemaTestSuite/CustomFormats.js":302,"../ZSchemaTestSuite/CustomFormatsAsync.js":303,"../ZSchemaTestSuite/ErrorPathAsArray.js":304,"../ZSchemaTestSuite/ErrorPathAsJSONPointer.js":305,"../ZSchemaTestSuite/ForceAdditional.js":306,"../ZSchemaTestSuite/ForceItems.js":307,"../ZSchemaTestSuite/ForceMaxItems.js":308,"../ZSchemaTestSuite/ForceMaxLength.js":309,"../ZSchemaTestSuite/ForceMinItems.js":310,"../ZSchemaTestSuite/ForceMinLength.js":311,"../ZSchemaTestSuite/ForceProperties.js":312,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":313,"../ZSchemaTestSuite/Issue101.js":314,"../ZSchemaTestSuite/Issue102.js":315,"../ZSchemaTestSuite/Issue103.js":316,"../ZSchemaTestSuite/Issue106.js":317,"../ZSchemaTestSuite/Issue107.js":318,"../ZSchemaTestSuite/Issue12.js":319,"../ZSchemaTestSuite/Issue125.js":320,"../ZSchemaTestSuite/Issue126.js":321,"../ZSchemaTestSuite/Issue13.js":322,"../ZSchemaTestSuite/Issue16.js":323,"../ZSchemaTestSuite/Issue22.js":324,"../ZSchemaTestSuite/Issue25.js":325,"../ZSchemaTestSuite/Issue26.js":326,"../ZSchemaTestSuite/Issue37.js":327,"../ZSchemaTestSuite/Issue40.js":328,"../ZSchemaTestSuite/Issue41.js":329,"../ZSchemaTestSuite/Issue43.js":330,"../ZSchemaTestSuite/Issue44.js":331,"../ZSchemaTestSuite/Issue45.js":332,"../ZSchemaTestSuite/Issue47.js":333,"../ZSchemaTestSuite/Issue48.js":334,"../ZSchemaTestSuite/Issue49.js":335,"../ZSchemaTestSuite/Issue53.js":336,"../ZSchemaTestSuite/Issue56.js":337,"../ZSchemaTestSuite/Issue57.js":338,"../ZSchemaTestSuite/Issue58.js":339,"../ZSchemaTestSuite/Issue63.js":340,"../ZSchemaTestSuite/Issue64.js":341,"../ZSchemaTestSuite/Issue67.js":342,"../ZSchemaTestSuite/Issue71.js":343,"../ZSchemaTestSuite/Issue73.js":344,"../ZSchemaTestSuite/Issue76.js":345,"../ZSchemaTestSuite/Issue85.js":346,"../ZSchemaTestSuite/Issue94.js":347,"../ZSchemaTestSuite/Issue96.js":348,"../ZSchemaTestSuite/Issue98.js":349,"../ZSchemaTestSuite/MultipleSchemas.js":350,"../ZSchemaTestSuite/NoEmptyArrays.js":351,"../ZSchemaTestSuite/NoEmptyStrings.js":352,"../ZSchemaTestSuite/NoExtraKeywords.js":353,"../ZSchemaTestSuite/NoTypeless.js":354,"../ZSchemaTestSuite/PedanticCheck.js":355,"../ZSchemaTestSuite/StrictUris.js":356,"../ZSchemaTestSuite/getRegisteredFormats.js":361}]},{},[396,397,398,399]);
+},{"../../src/ZSchema":298,"../ZSchemaTestSuite/AssumeAdditional.js":301,"../ZSchemaTestSuite/CustomFormats.js":302,"../ZSchemaTestSuite/CustomFormatsAsync.js":303,"../ZSchemaTestSuite/ErrorPathAsArray.js":304,"../ZSchemaTestSuite/ErrorPathAsJSONPointer.js":305,"../ZSchemaTestSuite/ForceAdditional.js":306,"../ZSchemaTestSuite/ForceItems.js":307,"../ZSchemaTestSuite/ForceMaxItems.js":308,"../ZSchemaTestSuite/ForceMaxLength.js":309,"../ZSchemaTestSuite/ForceMinItems.js":310,"../ZSchemaTestSuite/ForceMinLength.js":311,"../ZSchemaTestSuite/ForceProperties.js":312,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":313,"../ZSchemaTestSuite/Issue101.js":314,"../ZSchemaTestSuite/Issue102.js":315,"../ZSchemaTestSuite/Issue103.js":316,"../ZSchemaTestSuite/Issue106.js":317,"../ZSchemaTestSuite/Issue107.js":318,"../ZSchemaTestSuite/Issue12.js":319,"../ZSchemaTestSuite/Issue125.js":320,"../ZSchemaTestSuite/Issue126.js":321,"../ZSchemaTestSuite/Issue13.js":322,"../ZSchemaTestSuite/Issue16.js":323,"../ZSchemaTestSuite/Issue22.js":324,"../ZSchemaTestSuite/Issue25.js":325,"../ZSchemaTestSuite/Issue26.js":326,"../ZSchemaTestSuite/Issue37.js":327,"../ZSchemaTestSuite/Issue40.js":328,"../ZSchemaTestSuite/Issue41.js":329,"../ZSchemaTestSuite/Issue43.js":330,"../ZSchemaTestSuite/Issue44.js":331,"../ZSchemaTestSuite/Issue45.js":332,"../ZSchemaTestSuite/Issue47.js":333,"../ZSchemaTestSuite/Issue48.js":334,"../ZSchemaTestSuite/Issue49.js":335,"../ZSchemaTestSuite/Issue53.js":336,"../ZSchemaTestSuite/Issue56.js":337,"../ZSchemaTestSuite/Issue57.js":338,"../ZSchemaTestSuite/Issue58.js":339,"../ZSchemaTestSuite/Issue63.js":340,"../ZSchemaTestSuite/Issue64.js":341,"../ZSchemaTestSuite/Issue67.js":342,"../ZSchemaTestSuite/Issue71.js":343,"../ZSchemaTestSuite/Issue73.js":344,"../ZSchemaTestSuite/Issue76.js":345,"../ZSchemaTestSuite/Issue85.js":346,"../ZSchemaTestSuite/Issue94.js":347,"../ZSchemaTestSuite/Issue96.js":348,"../ZSchemaTestSuite/Issue98.js":349,"../ZSchemaTestSuite/MultipleSchemas.js":350,"../ZSchemaTestSuite/NoEmptyArrays.js":351,"../ZSchemaTestSuite/NoEmptyStrings.js":352,"../ZSchemaTestSuite/NoExtraKeywords.js":353,"../ZSchemaTestSuite/NoTypeless.js":354,"../ZSchemaTestSuite/PedanticCheck.js":355,"../ZSchemaTestSuite/StrictUris.js":356,"../ZSchemaTestSuite/getRegisteredFormats.js":361}]},{},[396,397,398,399,400]);
