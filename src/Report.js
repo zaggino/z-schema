@@ -91,7 +91,7 @@ Report.prototype.getPath = function () {
                 return "uri(" + segment + ")";
             }
 
-            return segment.replace("~", "~0").replace("/", "~1");
+            return segment.replace(/\~/g, "~0").replace(/\//g, "~1");
         }).join("/");
     }
     return path;
