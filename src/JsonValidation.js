@@ -324,7 +324,7 @@ var JsonValidators = {
                     report.addError("INVALID_FORMAT", [schema.format, json], null, schema.description);
                 }
             }
-        } else {
+        } else if (this.options.ignoreUnknownFormats !== true) {
             report.addError("UNKNOWN_FORMAT", [schema.format], null, schema.description);
         }
     }

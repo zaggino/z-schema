@@ -472,7 +472,7 @@ var SchemaValidators = {
         if (typeof schema.format !== "string") {
             report.addError("KEYWORD_TYPE_EXPECTED", ["format", "string"]);
         } else {
-            if (FormatValidators[schema.format] === undefined) {
+            if (FormatValidators[schema.format] === undefined && this.options.ignoreUnknownFormats !== true) {
                 report.addError("UNKNOWN_FORMAT", [schema.format]);
             }
         }

@@ -52,7 +52,9 @@ var defaultOptions = {
     // stops validation as soon as an error is found, true by default but can be turned off
     breakOnFirstError: true,
     // check if schema follow best practices and common sence
-    pedanticCheck: false
+    pedanticCheck: false,
+    // ignore unknown formats (do not report them as an error)
+    ignoreUnknownFormats: false
 };
 
 /*
