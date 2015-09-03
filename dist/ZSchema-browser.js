@@ -122,7 +122,7 @@ process.chdir = function (dir) {
 
     'use strict';
 
-    validator = { version: '3.40.0' };
+    validator = { version: '3.43.0' };
 
     var emailUser = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e])|(\\[\x01-\x09\x0b\x0c\x0d-\x7f])))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))$/i;
 
@@ -153,6 +153,7 @@ process.chdir = function (dir) {
       , int = /^(?:[-+]?(?:0|[1-9][0-9]*))$/
       , float = /^(?:[-+]?(?:[0-9]+))?(?:\.[0-9]*)?(?:[eE][\+\-]?(?:[0-9]+))?$/
       , hexadecimal = /^[0-9A-F]+$/i
+      , decimal = /^[-+]?[0-9]*(\.[0-9]+)?$/
       , hexcolor = /^#?([0-9A-F]{3}|[0-9A-F]{6})$/i;
 
     var ascii = /^[\x00-\x7F]+$/
@@ -174,7 +175,8 @@ process.chdir = function (dir) {
       'el-GR': /^(\+30)?((2\d{9})|(69\d{8}))$/,
       'en-GB': /^(\+?44|0)7\d{9}$/,
       'en-US': /^(\+?1)?[2-9]\d{2}[2-9](?!11)\d{6}$/,
-      'en-ZM': /^(\+26)?09[567]\d{7}$/
+      'en-ZM': /^(\+26)?09[567]\d{7}$/,
+      'ru-RU': /^(\+?7|8)?9\d{9}$/
     };
 
     validator.extend = function (name, fn) {
@@ -268,6 +270,11 @@ process.chdir = function (dir) {
           , domain = parts.pop()
           , user = parts.join('@');
 
+        var lower_domain = domain.toLowerCase();
+        if (lower_domain === 'gmail.com' || lower_domain === 'googlemail.com') {
+            user = user.replace(/\./g, '').toLowerCase();
+        }
+
         if (!validator.isFQDN(domain, {require_tld: options.require_tld})) {
             return false;
         }
@@ -281,6 +288,7 @@ process.chdir = function (dir) {
         protocols: [ 'http', 'https', 'ftp' ]
       , require_tld: true
       , require_protocol: false
+      , require_valid_protocol: true
       , allow_underscores: false
       , allow_trailing_dot: false
       , allow_protocol_relative_urls: false
@@ -299,7 +307,7 @@ process.chdir = function (dir) {
         split = url.split('://');
         if (split.length > 1) {
             protocol = split.shift();
-            if (options.protocols.indexOf(protocol) === -1) {
+            if (options.require_valid_protocol && options.protocols.indexOf(protocol) === -1) {
                 return false;
             }
         } else if (options.require_protocol) {
@@ -364,7 +372,14 @@ process.chdir = function (dir) {
             var blocks = str.split(':');
             var foundOmissionBlock = false; // marker to indicate ::
 
-            if (blocks.length > 8)
+            // At least some OS accept the last 32 bits of an IPv6 address
+            // (i.e. 2 of the blocks) in IPv4 notation, and RFC 3493 says
+            // that '::ffff:a.b.c.d' is valid for IPv4-mapped IPv6 addresses,
+            // and '::a.b.c.d' is deprecated, but also valid.
+            var foundIPv4TransitionBlock = validator.isIP(blocks[blocks.length - 1], 4);
+            var expectedNumberOfBlocks = foundIPv4TransitionBlock ? 7 : 8;
+
+            if (blocks.length > expectedNumberOfBlocks)
                 return false;
 
             // initial or final ::
@@ -387,6 +402,9 @@ process.chdir = function (dir) {
                     if (foundOmissionBlock)
                         return false; // multiple :: in address
                     foundOmissionBlock = true;
+                } else if (foundIPv4TransitionBlock && i == blocks.length - 1) {
+                    // it has been checked before that the last
+                    // block is a valid IPv4 address
                 } else if (!ipv6Block.test(blocks[i])) {
                     return false;
                 }
@@ -395,7 +413,7 @@ process.chdir = function (dir) {
             if (foundOmissionBlock) {
                 return blocks.length >= 1;
             } else {
-                return blocks.length === 8;
+                return blocks.length === expectedNumberOfBlocks;
             }
         }
         return false;
@@ -454,6 +472,10 @@ process.chdir = function (dir) {
 
     validator.isNumeric = function (str) {
         return numeric.test(str);
+    };
+    
+    validator.isDecimal = function (str) {
+        return decimal.test(str);
     };
 
     validator.isHexadecimal = function (str) {
@@ -657,11 +679,10 @@ process.chdir = function (dir) {
 
     validator.isJSON = function (str) {
         try {
-            JSON.parse(str);
-        } catch (e) {
-            return false;
-        }
-        return true;
+            var obj = JSON.parse(str);
+            return !!obj && typeof obj === 'object';
+        } catch (e) {}
+        return false;
     };
 
     validator.isMultibyte = function (str) {

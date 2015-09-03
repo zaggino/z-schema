@@ -441,6 +441,20 @@ if (this.options.strictMode === true) {
 }
 ```
 
+##ignoreUnknownFormats
+
+By default, z-schema reports all unknown formats, formats not defined by JSON Schema and not registered using
+`ZSchema.registerFormat`, as an error.  But the
+[JSON Schema specification](http://json-schema.org/latest/json-schema-validation.html#anchor106) says that validator
+implementations *"they SHOULD offer an option to disable validation"* for `format`.  That being said, setting this
+option to `true` will disable treating unknown formats as errlrs
+
+```javascript
+var validator = new ZSchema({
+    ignoreUnknownFormats: true
+});
+```
+
 #Benchmarks
 
 So how does it compare to version 2.x and others?
