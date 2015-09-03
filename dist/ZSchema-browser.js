@@ -1364,7 +1364,7 @@ var JsonValidators = {
                     report.addError("INVALID_FORMAT", [schema.format, json], null, schema.description);
                 }
             }
-        } else {
+        } else if (this.options.ignoreUnknownFormats !== true) {
             report.addError("UNKNOWN_FORMAT", [schema.format], null, schema.description);
         }
     }
@@ -2675,7 +2675,7 @@ var SchemaValidators = {
         if (typeof schema.format !== "string") {
             report.addError("KEYWORD_TYPE_EXPECTED", ["format", "string"]);
         } else {
-            if (FormatValidators[schema.format] === undefined) {
+            if (FormatValidators[schema.format] === undefined && this.options.ignoreUnknownFormats !== true) {
                 report.addError("UNKNOWN_FORMAT", [schema.format]);
             }
         }
@@ -3084,7 +3084,9 @@ var defaultOptions = {
     // stops validation as soon as an error is found, true by default but can be turned off
     breakOnFirstError: true,
     // check if schema follow best practices and common sence
-    pedanticCheck: false
+    pedanticCheck: false,
+    // ignore unknown formats (do not report them as an error)
+    ignoreUnknownFormats: false
 };
 
 /*
