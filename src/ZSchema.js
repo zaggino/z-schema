@@ -1,6 +1,7 @@
 "use strict";
 
 require("./Polyfills");
+var get               = require("lodash.get");
 var Report            = require("./Report");
 var FormatValidators  = require("./FormatValidators");
 var JsonValidation    = require("./JsonValidation");
@@ -137,7 +138,11 @@ ZSchema.prototype.validateSchema = function (schema) {
     this.lastReport = report;
     return report.isValid();
 };
-ZSchema.prototype.validate = function (json, schema, callback) {
+ZSchema.prototype.validate = function (json, schema, options, callback) {
+
+    if (Utils.whatIs(options) === "function") { callback = options; options = {}; }
+    if (!options) { options = {}; }
+
     var whatIs = Utils.whatIs(schema);
     if (whatIs !== "string" && whatIs !== "object") {
         var e = new Error("Invalid .validate call - schema must be an string or object but " + whatIs + " was passed!");
@@ -171,6 +176,11 @@ ZSchema.prototype.validate = function (json, schema, callback) {
     if (!validated) {
         this.lastReport = report;
         foundError = true;
+    }
+
+    if (options.schemaPath) {
+        report.rootSchema = schema;
+        schema = get(schema, options.schemaPath);
     }
 
     if (!foundError) {

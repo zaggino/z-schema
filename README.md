@@ -114,6 +114,7 @@ ZSchema.setSchemaReader(function (uri) {
 
 #Features
 
+- [Validate against subschema](#validate-against-subschema)
 - [Compile arrays of schemas and use references between them](#compile-arrays-of-schemas-and-use-references-between-them)
 - [Register a custom format](#register-a-custom-format)
 - [Automatic downloading of remote schemas](#automatic-downloading-of-remote-schemas)
@@ -136,6 +137,16 @@ ZSchema.setSchemaReader(function (uri) {
 - [Turn on z-schema strict mode](#strictmode)
 - [Set validator to collect as many errors as possible](#breakonfirsterror)
 - [Report paths in errors as arrays so they can be processed easier](#reportpathasarray)
+
+##Validate against subschema
+
+In case you don't want to split your schema into multiple schemas using reference for any reason, you can use option schemaPath when validating:
+
+```
+var valid = validator.validate(cars, schema, { schemaPath: "definitions.car.definitions.cars" });
+```
+
+See more details in the [test](/test/spec/schemaPathSpec.js).
 
 ##Compile arrays of schemas and use references between them
 
