@@ -140,7 +140,10 @@ ZSchema.prototype.validateSchema = function (schema) {
 };
 ZSchema.prototype.validate = function (json, schema, options, callback) {
 
-    if (Utils.whatIs(options) === "function") { callback = options; options = {}; }
+    if (Utils.whatIs(options) === "function") {
+        callback = options;
+        options = {};
+    }
     if (!options) { options = {}; }
 
     var whatIs = Utils.whatIs(schema);
