@@ -1380,6 +1380,22 @@ var FormatValidators = {
         // RegExp from http://tools.ietf.org/html/rfc3986#appendix-B
         return typeof uri !== "string" || RegExp("^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?").test(uri);
     },
+    "uuid": function (uuid) {
+        if (typeof uuid !== "string") { return true; }
+        return validator.isUUID(uuid);
+    },
+    "uuid-v3": function (uuid) {
+        if (typeof uuid !== "string") { return true; }
+        return validator.isUUID(uuid, 3);
+    },
+    "uuid-v4": function (uuid) {
+        if (typeof uuid !== "string") { return true; }
+        return validator.isUUID(uuid, 4);
+    },
+    "uuid-v5": function (uuid) {
+        if (typeof uuid !== "string") { return true; }
+        return validator.isUUID(uuid, 5);
+    },
     "strict-uri": function (uri) {
         return typeof uri !== "string" || validator.isURL(uri);
     }
