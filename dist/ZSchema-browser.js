@@ -3543,7 +3543,15 @@ ZSchema.prototype.validate = function (json, schema, options, callback) {
     var foundError = false;
     var report = new Report(this.options);
 
-    schema = SchemaCache.getSchema.call(this, report, schema);
+    if (typeof schema === "string") {
+        var schemaName = schema;
+        schema = SchemaCache.getSchema.call(this, report, schemaName);
+        if (!schema) {
+            throw new Error("Schema with id '" + schemaName + "' wasn't found in the validator cache!");
+        }
+    } else {
+        schema = SchemaCache.getSchema.call(this, report, schema);
+    }
 
     var compiled = false;
     if (!foundError) {
