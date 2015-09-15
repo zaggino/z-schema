@@ -192,6 +192,9 @@ ZSchema.prototype.validate = function (json, schema, options, callback) {
     if (options.schemaPath) {
         report.rootSchema = schema;
         schema = get(schema, options.schemaPath);
+        if (!schema) {
+            throw new Error("Schema path '" + options.schemaPath + "' wasn't found in the schema!");
+        }
     }
 
     if (!foundError) {
