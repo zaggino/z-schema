@@ -337,6 +337,9 @@ ZSchema.setSchemaReader = function (schemaReader) {
 ZSchema.registerFormat = function (formatName, validatorFunction) {
     FormatValidators[formatName] = validatorFunction;
 };
+ZSchema.unregisterFormat = function (formatName) {
+    delete FormatValidators[formatName];
+};
 ZSchema.getRegisteredFormats = function () {
     return Object.keys(FormatValidators);
 };
