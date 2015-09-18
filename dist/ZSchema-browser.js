@@ -472,13 +472,15 @@ module.exports = isArray;
 
     'use strict';
 
-    validator = { version: '3.43.0' };
+    validator = { version: '4.0.5' };
 
-    var emailUser = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e])|(\\[\x01-\x09\x0b\x0c\x0d-\x7f])))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))$/i;
+    var emailUserPart = /^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~]+$/i;
+    var quotedEmailUser = /^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f]))*$/i;
 
-    var emailUserUtf8 = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))$/i;
+    var emailUserUtf8Part = /^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+$/i;
+    var quotedEmailUserUtf8 = /^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*$/i;
 
-    var displayName = /^(?:[a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~\.]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(?:[a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~\.]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\s)*<(.+)>$/i;
+    var displayName = /^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~\.\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~\.\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF\s]*<(.+)>$/i;
 
     var creditCard = /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/;
 
@@ -503,7 +505,7 @@ module.exports = isArray;
       , int = /^(?:[-+]?(?:0|[1-9][0-9]*))$/
       , float = /^(?:[-+]?(?:[0-9]+))?(?:\.[0-9]*)?(?:[eE][\+\-]?(?:[0-9]+))?$/
       , hexadecimal = /^[0-9A-F]+$/i
-      , decimal = /^[-+]?[0-9]*(\.[0-9]+)?$/
+      , decimal = /^[-+]?([0-9]+|\.[0-9]+|[0-9]+\.[0-9]+)$/
       , hexcolor = /^#?([0-9A-F]{3}|[0-9A-F]{6})$/i;
 
     var ascii = /^[\x00-\x7F]+$/
@@ -528,6 +530,9 @@ module.exports = isArray;
       'en-ZM': /^(\+26)?09[567]\d{7}$/,
       'ru-RU': /^(\+?7|8)?9\d{9}$/
     };
+
+    // from http://goo.gl/0ejHHW
+    var iso8601 = /^([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24\:?00)([\.,]\d+(?!:))?)?(\17[0-5]\d([\.,]\d+)?)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$/;
 
     validator.extend = function (name, fn) {
         validator[name] = function () {
@@ -612,8 +617,6 @@ module.exports = isArray;
             if (display_email) {
                 str = display_email[1];
             }
-        } else if (/\s/.test(str)) {
-            return false;
         }
 
         var parts = str.split('@')
@@ -625,13 +628,33 @@ module.exports = isArray;
             user = user.replace(/\./g, '').toLowerCase();
         }
 
+        if (!validator.isByteLength(user, 0, 64) ||
+                !validator.isByteLength(domain, 0, 256)) {
+            return false;
+        }
+
         if (!validator.isFQDN(domain, {require_tld: options.require_tld})) {
             return false;
         }
 
-        return options.allow_utf8_local_part ?
-            emailUserUtf8.test(user) :
-            emailUser.test(user);
+        if (user[0] === '"') {
+            user = user.slice(1, user.length - 1);
+            return options.allow_utf8_local_part ?
+                quotedEmailUserUtf8.test(user) :
+                quotedEmailUser.test(user);
+        }
+
+        var pattern = options.allow_utf8_local_part ?
+            emailUserUtf8Part : emailUserPart;
+
+        var user_parts = user.split('.');
+        for (var i = 0; i < user_parts.length; i++) {
+            if (!pattern.test(user_parts[i])) {
+                return false;
+            }
+        }
+
+        return true;
     };
 
     var default_url_options = {
@@ -800,6 +823,10 @@ module.exports = isArray;
             if (!/^[a-z\u00a1-\uffff0-9-]+$/i.test(part)) {
                 return false;
             }
+            if (/[\uff01-\uff5e]/.test(part)) {
+                // disallow full-width chars
+                return false;
+            }
             if (part[0] === '-' || part[part.length - 1] === '-' ||
                     part.indexOf('---') >= 0) {
                 return false;
@@ -823,9 +850,9 @@ module.exports = isArray;
     validator.isNumeric = function (str) {
         return numeric.test(str);
     };
-    
+
     validator.isDecimal = function (str) {
-        return decimal.test(str);
+        return str !== '' && decimal.test(str);
     };
 
     validator.isHexadecimal = function (str) {
@@ -869,7 +896,8 @@ module.exports = isArray;
     };
 
     validator.isByteLength = function (str, min, max) {
-        return str.length >= min && (typeof max === 'undefined' || str.length <= max);
+        var len = encodeURI(str).split(/%..|./).length - 1;
+        return len >= min && (typeof max === 'undefined' || len <= max);
     };
 
     validator.isUUID = function (str, version) {
@@ -1065,6 +1093,10 @@ module.exports = isArray;
 
     validator.isMongoId = function (str) {
         return validator.isHexadecimal(str) && str.length === 24;
+    };
+
+    validator.isISO8601 = function (str) {
+        return iso8601.test(str);
     };
 
     validator.ltrim = function (str, chars) {

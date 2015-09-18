@@ -1,6 +1,6 @@
 {
   "name": "z-schema",
-  "version": "3.15.1",
+  "version": "3.15.2",
   "description": "JSON schema validator",
   "homepage": "https://github.com/zaggino/z-schema",
   "authors": [
@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "lodash.get": "^3.7.0",
-    "validator": "^3.35.0"
+    "validator": "^4.0.5"
   },
   "optionalDependencies": {
     "commander": "^2.7.1",
