@@ -119,7 +119,7 @@ Report.prototype.hasError = function (errorCode, params) {
     return false;
 };
 
-Report.prototype.addError = function (errorCode, params, subReports, schemaDescription) {
+Report.prototype.addError = function (errorCode, params, subReports, schema) {
     if (this.errors.length >= this.reportOptions.maxErrors) {
         return;
     }
@@ -138,14 +138,16 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
     }
 
     var err = {
+
         code: errorCode,
         params: params,
         message: errorMessage,
         path: this.getPath()
     };
 
-    if (schemaDescription) {
-        err.description = schemaDescription;
+    if (schema) {
+        err.id = schema.id;
+        err.description = schema.description;
     }
 
     if (subReports != null) {

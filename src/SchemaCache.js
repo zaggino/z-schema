@@ -124,7 +124,7 @@ exports.getSchemaByUri = function (report, uri, root) {
             }
             var remoteReportIsValid = remoteReport.isValid();
             if (!remoteReportIsValid) {
-                report.addError("REMOTE_NOT_VALID", [uri], remoteReport);
+                report.addError("REMOTE_NOT_VALID", [uri], remoteReport, result);
             }
 
             report.path.pop();

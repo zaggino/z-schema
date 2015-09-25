@@ -44,7 +44,7 @@ var SchemaValidators = {
     minimum: function (report, schema) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.1
         if (typeof schema.minimum !== "number") {
-            report.addError("KEYWORD_TYPE_EXPECTED", ["minimum", "number"]);
+            report.addError("KEYWORD_TYPE_EXPECTED", ["minimum", "number"], schema);
         }
     },
     exclusiveMinimum: function (report, schema) {
@@ -530,7 +530,7 @@ exports.validateSchema = function (report, schema) {
             var subReport = new Report(report);
             var valid = JsonValidation.validate.call(this, subReport, schema.__$schemaResolved, schema);
             if (valid === false) {
-                report.addError("PARENT_SCHEMA_VALIDATION_FAILED", null, subReport);
+                report.addError("PARENT_SCHEMA_VALIDATION_FAILED", null, subReport, schema);
             }
         } else {
             if (this.options.ignoreUnresolvableReferences !== true) {

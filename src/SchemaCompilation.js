@@ -178,7 +178,7 @@ exports.compileSchema = function (report, schema) {
     if (typeof schema === "string") {
         var loadedSchema = SchemaCache.getSchemaByUri.call(this, report, schema);
         if (!loadedSchema) {
-            report.addError("SCHEMA_NOT_REACHABLE", [schema]);
+            report.addError("SCHEMA_NOT_REACHABLE", [schema], null, schema);
             return false;
         }
         schema = loadedSchema;
@@ -258,7 +258,7 @@ exports.compileSchema = function (report, schema) {
                 // remote is downloaded, so no UNRESOLVABLE_REFERENCE
             } else {
                 Array.prototype.push.apply(report.path, refObj.path);
-                report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref]);
+                report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref], null, schema);
                 report.path.slice(0, -refObj.path.length);
 
                 // pusblish unresolved references out
