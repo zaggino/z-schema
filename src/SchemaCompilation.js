@@ -199,7 +199,7 @@ exports.compileSchema = function (report, schema) {
         return true;
     }
 
-    if (schema.id && typeof schema.id === 'string') {
+    if (schema.id && typeof schema.id === "string") {
         // add this to our schemaCache (before compilation in case we have references including id)
         SchemaCache.cacheSchemaByUri.call(this, schema.id, schema);
     }
@@ -276,7 +276,7 @@ exports.compileSchema = function (report, schema) {
     if (isValid) {
         schema.__$compiled = true;
     } else {
-        if (schema.id && typeof schema.id === 'string') {
+        if (schema.id && typeof schema.id === "string") {
             // remove this schema from schemaCache because it failed to compile
             SchemaCache.removeFromCacheByUri.call(this, schema.id);
         }
