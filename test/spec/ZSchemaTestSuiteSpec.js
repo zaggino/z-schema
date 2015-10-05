@@ -26,6 +26,7 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/ErrorPathAsJSONPointer.js"),
     require("../ZSchemaTestSuite/PedanticCheck.js"),
     require("../ZSchemaTestSuite/getRegisteredFormats.js"),
+    require("../ZSchemaTestSuite/InvalidId.js"),
     // issues
     require("../ZSchemaTestSuite/Issue12.js"),
     require("../ZSchemaTestSuite/Issue13.js"),
@@ -80,8 +81,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 61 files", function () {
-        expect(testSuiteFiles.length).toBe(61);
+    it("should contain 62 files", function () {
+        expect(testSuiteFiles.length).toBe(62);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
