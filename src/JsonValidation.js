@@ -255,7 +255,8 @@ var JsonValidators = {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
         var idx = schema.allOf.length;
         while (idx--) {
-            if (exports.validate.call(this, report, schema.allOf[idx], json) === false) {
+            var validateResult = exports.validate.call(this, report, schema.allOf[idx], json);
+            if (this.options.breakOnFirstError && validateResult === false) {
                 break;
             }
         }
