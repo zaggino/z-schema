@@ -32,7 +32,7 @@
   ],
   "scripts": {
     "prepublish": "grunt",
-    "test": "grunt test"
+    "test": "grunt test && grunt lint"
   },
   "testling": {
     "scripts": [
