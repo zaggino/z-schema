@@ -120,7 +120,7 @@ var SchemaValidators = {
             report.addError("KEYWORD_UNDEFINED_STRICT", ["additionalItems"]);
         }
         // custome - assume defined false mode
-        if (this.options.assumeAdditional === true && schema.additionalItems === undefined && Array.isArray(schema.items)) {
+        if (this.options.assumeAdditional && schema.additionalItems === undefined && Array.isArray(schema.items)) {
             schema.additionalItems = false;
         }
     },
@@ -215,7 +215,7 @@ var SchemaValidators = {
             report.addError("KEYWORD_UNDEFINED_STRICT", ["additionalProperties"]);
         }
         // custome - assume defined false mode
-        if (this.options.assumeAdditional === true && schema.additionalProperties === undefined) {
+        if (this.options.assumeAdditional && schema.additionalProperties === undefined) {
             schema.additionalProperties = false;
         }
         // custom - forceProperties

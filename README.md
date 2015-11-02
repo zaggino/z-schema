@@ -312,6 +312,14 @@ var validator = new ZSchema({
 });
 ```
 
+When an array, validator assumes that additionalItems/additionalProperties are defined as false, but allows some properties to pass.
+
+```javascript
+var validator = new ZSchema({
+    assumeAdditional: ["$ref"]
+});
+```
+
 ##forceAdditional
 
 When true, validator doesn't validate schemas where additionalItems/additionalProperties should be defined to either true or false.

@@ -197,7 +197,19 @@ var JsonValidators = {
             }
             // Validation of the json succeeds if, after these two steps, set "s" is empty.
             if (s.length > 0) {
-                report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s], null, schema.description);
+                // assumeAdditional can be an array of allowed properties
+                var idx3 = this.options.assumeAdditional.length;
+                if (idx3) {
+                    while (idx3--) {
+                        var io = s.indexOf(this.options.assumeAdditional[idx3]);
+                        if (io !== -1) {
+                            s.splice(io, 1);
+                        }
+                    }
+                }
+                if (s.length > 0) {
+                    report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s], null, schema.description);
+                }
             }
         }
     },
