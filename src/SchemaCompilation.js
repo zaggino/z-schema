@@ -204,6 +204,13 @@ exports.compileSchema = function (report, schema) {
         SchemaCache.cacheSchemaByUri.call(this, schema.id, schema);
     }
 
+    // this method can be called recursively, so we need to remember our root
+    var isRoot = false;
+    if (!report.rootSchema) {
+        report.rootSchema = schema;
+        isRoot = true;
+    }
+
     // delete all __$missingReferences from previous compilation attempts
     var isValidExceptReferences = report.isValid();
     delete schema.__$missingReferences;
@@ -259,7 +266,7 @@ exports.compileSchema = function (report, schema) {
             } else {
                 Array.prototype.push.apply(report.path, refObj.path);
                 report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref]);
-                report.path.slice(0, -refObj.path.length);
+                report.path = report.path.slice(0, -refObj.path.length);
 
                 // pusblish unresolved references out
                 if (isValidExceptReferences) {
@@ -281,6 +288,12 @@ exports.compileSchema = function (report, schema) {
             SchemaCache.removeFromCacheByUri.call(this, schema.id);
         }
     }
+
+    // we don't need the root pointer anymore
+    if (isRoot) {
+        report.rootSchema = undefined;
+    }
+
     return isValid;
 
 };

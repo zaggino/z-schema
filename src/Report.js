@@ -1,5 +1,6 @@
 "use strict";
 
+var get    = require("lodash.get");
 var Errors = require("./Errors");
 var Utils  = require("./Utils");
 
@@ -97,6 +98,30 @@ Report.prototype.getPath = function () {
     return path;
 };
 
+Report.prototype.getSchemaId = function () {
+
+    if (!this.rootSchema) {
+        return null;
+    }
+
+    // get the error path as an array
+    var path = [];
+    if (this.parentReport) {
+        path = path.concat(this.parentReport.path);
+    }
+    path = path.concat(this.path);
+
+    // try to find id in the error path
+    while (path.length > 0) {
+        var obj = get(this.rootSchema, path);
+        if (obj && obj.id) { return obj.id; }
+        path.pop();
+    }
+
+    // return id of the root
+    return this.rootSchema.id;
+};
+
 Report.prototype.hasError = function (errorCode, params) {
     var idx = this.errors.length;
     while (idx--) {
@@ -141,7 +166,8 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
         code: errorCode,
         params: params,
         message: errorMessage,
-        path: this.getPath()
+        path: this.getPath(),
+        schemaId: this.getSchemaId()
     };
 
     if (schemaDescription) {
