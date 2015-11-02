@@ -68,6 +68,7 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/Issue130.js"),
     require("../ZSchemaTestSuite/Issue131.js"),
     require("../ZSchemaTestSuite/Issue137.js"),
+    require("../ZSchemaTestSuite/Issue139.js"),
     require("../ZSchemaTestSuite/Issue146.js"),
 
     undefined
@@ -82,8 +83,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 63 files", function () {
-        expect(testSuiteFiles.length).toBe(63);
+    it("should contain 64 files", function () {
+        expect(testSuiteFiles.length).toBe(64);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -105,6 +106,8 @@ describe("ZSchemaTestSuite", function () {
                 failWithException   = test.failWithException  || testSuite.failWithException;
 
             !async && it(testSuite.description + ", " + test.description, function () {
+
+                ZSchema.setSchemaReader(null);
 
                 var validator = new ZSchema(options);
                 var caughtErr;
