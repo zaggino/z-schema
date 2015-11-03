@@ -1619,7 +1619,19 @@ var JsonValidators = {
             }
             // Validation of the json succeeds if, after these two steps, set "s" is empty.
             if (s.length > 0) {
-                report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s], null, schema.description);
+                // assumeAdditional can be an array of allowed properties
+                var idx3 = this.options.assumeAdditional.length;
+                if (idx3) {
+                    while (idx3--) {
+                        var io = s.indexOf(this.options.assumeAdditional[idx3]);
+                        if (io !== -1) {
+                            s.splice(io, 1);
+                        }
+                    }
+                }
+                if (s.length > 0) {
+                    report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s], null, schema.description);
+                }
             }
         }
     },
@@ -1968,6 +1980,7 @@ if (typeof Number.isFinite !== "function") {
 (function (process){
 "use strict";
 
+var get    = require("lodash.get");
 var Errors = require("./Errors");
 var Utils  = require("./Utils");
 
@@ -2065,6 +2078,30 @@ Report.prototype.getPath = function () {
     return path;
 };
 
+Report.prototype.getSchemaId = function () {
+
+    if (!this.rootSchema) {
+        return null;
+    }
+
+    // get the error path as an array
+    var path = [];
+    if (this.parentReport) {
+        path = path.concat(this.parentReport.path);
+    }
+    path = path.concat(this.path);
+
+    // try to find id in the error path
+    while (path.length > 0) {
+        var obj = get(this.rootSchema, path);
+        if (obj && obj.id) { return obj.id; }
+        path.pop();
+    }
+
+    // return id of the root
+    return this.rootSchema.id;
+};
+
 Report.prototype.hasError = function (errorCode, params) {
     var idx = this.errors.length;
     while (idx--) {
@@ -2109,7 +2146,8 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
         code: errorCode,
         params: params,
         message: errorMessage,
-        path: this.getPath()
+        path: this.getPath(),
+        schemaId: this.getSchemaId()
     };
 
     if (schemaDescription) {
@@ -2140,7 +2178,7 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
 module.exports = Report;
 
 }).call(this,require('_process'))
-},{"./Errors":7,"./Utils":15,"_process":1}],12:[function(require,module,exports){
+},{"./Errors":7,"./Utils":15,"_process":1,"lodash.get":2}],12:[function(require,module,exports){
 "use strict";
 
 var Report              = require("./Report");
@@ -2502,6 +2540,13 @@ exports.compileSchema = function (report, schema) {
         SchemaCache.cacheSchemaByUri.call(this, schema.id, schema);
     }
 
+    // this method can be called recursively, so we need to remember our root
+    var isRoot = false;
+    if (!report.rootSchema) {
+        report.rootSchema = schema;
+        isRoot = true;
+    }
+
     // delete all __$missingReferences from previous compilation attempts
     var isValidExceptReferences = report.isValid();
     delete schema.__$missingReferences;
@@ -2557,7 +2602,7 @@ exports.compileSchema = function (report, schema) {
             } else {
                 Array.prototype.push.apply(report.path, refObj.path);
                 report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref]);
-                report.path.slice(0, -refObj.path.length);
+                report.path = report.path.slice(0, -refObj.path.length);
 
                 // pusblish unresolved references out
                 if (isValidExceptReferences) {
@@ -2579,6 +2624,12 @@ exports.compileSchema = function (report, schema) {
             SchemaCache.removeFromCacheByUri.call(this, schema.id);
         }
     }
+
+    // we don't need the root pointer anymore
+    if (isRoot) {
+        report.rootSchema = undefined;
+    }
+
     return isValid;
 
 };
@@ -2706,7 +2757,7 @@ var SchemaValidators = {
             report.addError("KEYWORD_UNDEFINED_STRICT", ["additionalItems"]);
         }
         // custome - assume defined false mode
-        if (this.options.assumeAdditional === true && schema.additionalItems === undefined && Array.isArray(schema.items)) {
+        if (this.options.assumeAdditional && schema.additionalItems === undefined && Array.isArray(schema.items)) {
             schema.additionalItems = false;
         }
     },
@@ -2801,7 +2852,7 @@ var SchemaValidators = {
             report.addError("KEYWORD_UNDEFINED_STRICT", ["additionalProperties"]);
         }
         // custome - assume defined false mode
-        if (this.options.assumeAdditional === true && schema.additionalProperties === undefined) {
+        if (this.options.assumeAdditional && schema.additionalProperties === undefined) {
             schema.additionalProperties = false;
         }
         // custom - forceProperties

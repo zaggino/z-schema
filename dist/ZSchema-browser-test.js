@@ -50201,7 +50201,19 @@ var JsonValidators = {
             }
             // Validation of the json succeeds if, after these two steps, set "s" is empty.
             if (s.length > 0) {
-                report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s], null, schema.description);
+                // assumeAdditional can be an array of allowed properties
+                var idx3 = this.options.assumeAdditional.length;
+                if (idx3) {
+                    while (idx3--) {
+                        var io = s.indexOf(this.options.assumeAdditional[idx3]);
+                        if (io !== -1) {
+                            s.splice(io, 1);
+                        }
+                    }
+                }
+                if (s.length > 0) {
+                    report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s], null, schema.description);
+                }
             }
         }
     },
@@ -50550,6 +50562,7 @@ if (typeof Number.isFinite !== "function") {
 (function (process){
 "use strict";
 
+var get    = require("lodash.get");
 var Errors = require("./Errors");
 var Utils  = require("./Utils");
 
@@ -50647,6 +50660,30 @@ Report.prototype.getPath = function () {
     return path;
 };
 
+Report.prototype.getSchemaId = function () {
+
+    if (!this.rootSchema) {
+        return null;
+    }
+
+    // get the error path as an array
+    var path = [];
+    if (this.parentReport) {
+        path = path.concat(this.parentReport.path);
+    }
+    path = path.concat(this.path);
+
+    // try to find id in the error path
+    while (path.length > 0) {
+        var obj = get(this.rootSchema, path);
+        if (obj && obj.id) { return obj.id; }
+        path.pop();
+    }
+
+    // return id of the root
+    return this.rootSchema.id;
+};
+
 Report.prototype.hasError = function (errorCode, params) {
     var idx = this.errors.length;
     while (idx--) {
@@ -50691,7 +50728,8 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
         code: errorCode,
         params: params,
         message: errorMessage,
-        path: this.getPath()
+        path: this.getPath(),
+        schemaId: this.getSchemaId()
     };
 
     if (schemaDescription) {
@@ -50722,7 +50760,7 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
 module.exports = Report;
 
 }).call(this,require('_process'))
-},{"./Errors":290,"./Utils":298,"_process":171}],295:[function(require,module,exports){
+},{"./Errors":290,"./Utils":298,"_process":171,"lodash.get":194}],295:[function(require,module,exports){
 "use strict";
 
 var Report              = require("./Report");
@@ -51084,6 +51122,13 @@ exports.compileSchema = function (report, schema) {
         SchemaCache.cacheSchemaByUri.call(this, schema.id, schema);
     }
 
+    // this method can be called recursively, so we need to remember our root
+    var isRoot = false;
+    if (!report.rootSchema) {
+        report.rootSchema = schema;
+        isRoot = true;
+    }
+
     // delete all __$missingReferences from previous compilation attempts
     var isValidExceptReferences = report.isValid();
     delete schema.__$missingReferences;
@@ -51139,7 +51184,7 @@ exports.compileSchema = function (report, schema) {
             } else {
                 Array.prototype.push.apply(report.path, refObj.path);
                 report.addError("UNRESOLVABLE_REFERENCE", [refObj.ref]);
-                report.path.slice(0, -refObj.path.length);
+                report.path = report.path.slice(0, -refObj.path.length);
 
                 // pusblish unresolved references out
                 if (isValidExceptReferences) {
@@ -51161,6 +51206,12 @@ exports.compileSchema = function (report, schema) {
             SchemaCache.removeFromCacheByUri.call(this, schema.id);
         }
     }
+
+    // we don't need the root pointer anymore
+    if (isRoot) {
+        report.rootSchema = undefined;
+    }
+
     return isValid;
 
 };
@@ -51288,7 +51339,7 @@ var SchemaValidators = {
             report.addError("KEYWORD_UNDEFINED_STRICT", ["additionalItems"]);
         }
         // custome - assume defined false mode
-        if (this.options.assumeAdditional === true && schema.additionalItems === undefined && Array.isArray(schema.items)) {
+        if (this.options.assumeAdditional && schema.additionalItems === undefined && Array.isArray(schema.items)) {
             schema.additionalItems = false;
         }
     },
@@ -51383,7 +51434,7 @@ var SchemaValidators = {
             report.addError("KEYWORD_UNDEFINED_STRICT", ["additionalProperties"]);
         }
         // custome - assume defined false mode
-        if (this.options.assumeAdditional === true && schema.additionalProperties === undefined) {
+        if (this.options.assumeAdditional && schema.additionalProperties === undefined) {
             schema.additionalProperties = false;
         }
         // custom - forceProperties
@@ -53923,6 +53974,83 @@ module.exports = {
 };
 
 },{}],329:[function(require,module,exports){
+module.exports = {
+    description: "Issue #139 - add schema id if present to erro message via addError method",
+    tests: [
+        {
+            description: "should fail",
+            options: {
+                strictMode: true
+            },
+            schema: {
+                id: "dummy",
+                type: "object",
+                description: "This is a dummy schema",
+                properties: {
+                    recType: {
+                        type: "string"
+                    },
+                    startDate: {
+                        type: ["object", "string"],
+                        format: "date"
+                    },
+                    endDate: {
+                        type: ["object", "string"],
+                        format: "date"
+                    },
+                    noteList: {
+                        type: "array",
+                        items: {
+                            $ref: "note"
+                        }
+                    },
+                    isBlocked: {
+                        type: "boolean"
+                    },
+                    roleA: {
+                        $ref: "dbRef"
+                    },
+                    roleB: {
+                        $ref: "dbRef"
+                    },
+                    recProps: {
+                        type: "object"
+                    }
+                },
+                additionalProperties: false,
+                required: ["recType", "roleA", "roleB"]
+            },
+            valid: false,
+            after: function (err) {
+                expect(err.length).toBe(3);
+                err.forEach(function (e) {
+                    expect(e.code).toBe("UNRESOLVABLE_REFERENCE");
+                    expect(e.schemaId).toBe("dummy");
+                });
+            }
+        }
+    ]
+};
+
+},{}],330:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+    description: "Issue #142 - assumeAdditional complains about $ref",
+    tests: [
+        {
+            description: "should pass",
+            options: {
+                assumeAdditional: ["$ref"]
+            },
+            schema: "http://json-schema.org/draft-04/schema",
+            data: { $ref: "#" },
+            valid: true
+        }
+    ]
+};
+
+},{}],331:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -53952,7 +54080,7 @@ module.exports = {
     ]
 };
 
-},{}],330:[function(require,module,exports){
+},{}],332:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -53979,7 +54107,7 @@ module.exports = {
     ]
 };
 
-},{}],331:[function(require,module,exports){
+},{}],333:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54055,7 +54183,7 @@ module.exports = {
     ]
 };
 
-},{}],332:[function(require,module,exports){
+},{}],334:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54091,7 +54219,7 @@ module.exports = {
     ]
 };
 
-},{}],333:[function(require,module,exports){
+},{}],335:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54181,7 +54309,7 @@ module.exports = {
     ]
 };
 
-},{}],334:[function(require,module,exports){
+},{}],336:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54206,7 +54334,7 @@ module.exports = {
     ]
 };
 
-},{}],335:[function(require,module,exports){
+},{}],337:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54282,7 +54410,7 @@ module.exports = {
     ]
 };
 
-},{}],336:[function(require,module,exports){
+},{}],338:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54395,7 +54523,7 @@ module.exports = {
     ]
 };
 
-},{}],337:[function(require,module,exports){
+},{}],339:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54575,7 +54703,7 @@ module.exports = {
     ]
 };
 
-},{}],338:[function(require,module,exports){
+},{}],340:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54622,7 +54750,7 @@ module.exports = {
     ]
 };
 
-},{}],339:[function(require,module,exports){
+},{}],341:[function(require,module,exports){
 "use strict";
 
 var resourceObject = {
@@ -54918,7 +55046,7 @@ module.exports = {
     ]
 };
 
-},{}],340:[function(require,module,exports){
+},{}],342:[function(require,module,exports){
 "use strict";
 
 var draft4 = require("./files/Issue47/draft4.json");
@@ -54947,7 +55075,7 @@ module.exports = {
     ]
 };
 
-},{"./files/Issue47/draft4.json":364,"./files/Issue47/sample.json":365,"./files/Issue47/swagger_draft.json":366,"./files/Issue47/swagger_draft_modified.json":367}],341:[function(require,module,exports){
+},{"./files/Issue47/draft4.json":366,"./files/Issue47/sample.json":367,"./files/Issue47/swagger_draft.json":368,"./files/Issue47/swagger_draft_modified.json":369}],343:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54980,7 +55108,7 @@ module.exports = {
     ]
 };
 
-},{}],342:[function(require,module,exports){
+},{}],344:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -54998,7 +55126,7 @@ module.exports = {
     ]
 };
 
-},{}],343:[function(require,module,exports){
+},{}],345:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -55020,7 +55148,7 @@ module.exports = {
     ]
 };
 
-},{}],344:[function(require,module,exports){
+},{}],346:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -55091,7 +55219,7 @@ module.exports = {
     ]
 };
 
-},{}],345:[function(require,module,exports){
+},{}],347:[function(require,module,exports){
 "use strict";
 
 var dataTypeBaseJson = {
@@ -55776,7 +55904,7 @@ module.exports = {
     ]
 };
 
-},{}],346:[function(require,module,exports){
+},{}],348:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -55839,7 +55967,7 @@ module.exports = {
     ]
 };
 
-},{}],347:[function(require,module,exports){
+},{}],349:[function(require,module,exports){
 /*jshint -W101*/
 
 "use strict";
@@ -56416,7 +56544,7 @@ module.exports = {
     ]
 };
 
-},{}],348:[function(require,module,exports){
+},{}],350:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56447,7 +56575,7 @@ module.exports = {
     ]
 };
 
-},{}],349:[function(require,module,exports){
+},{}],351:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56498,7 +56626,7 @@ module.exports = {
     ]
 };
 
-},{}],350:[function(require,module,exports){
+},{}],352:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56618,7 +56746,7 @@ module.exports = {
     ]
 };
 
-},{}],351:[function(require,module,exports){
+},{}],353:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56676,7 +56804,7 @@ module.exports = {
     ]
 };
 
-},{}],352:[function(require,module,exports){
+},{}],354:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56749,7 +56877,7 @@ module.exports = {
     ]
 };
 
-},{}],353:[function(require,module,exports){
+},{}],355:[function(require,module,exports){
 "use strict";
 
 var innerSchema = {
@@ -56794,7 +56922,7 @@ module.exports = {
     ]
 };
 
-},{}],354:[function(require,module,exports){
+},{}],356:[function(require,module,exports){
 "use strict";
 
 var schema1 = {
@@ -56838,7 +56966,7 @@ module.exports = {
     ]
 };
 
-},{}],355:[function(require,module,exports){
+},{}],357:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56856,7 +56984,7 @@ module.exports = {
     ]
 };
 
-},{}],356:[function(require,module,exports){
+},{}],358:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56888,7 +57016,7 @@ module.exports = {
     ]
 };
 
-},{}],357:[function(require,module,exports){
+},{}],359:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56947,7 +57075,7 @@ module.exports = {
     ]
 };
 
-},{}],358:[function(require,module,exports){
+},{}],360:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56972,7 +57100,7 @@ module.exports = {
     ]
 };
 
-},{}],359:[function(require,module,exports){
+},{}],361:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -56997,7 +57125,7 @@ module.exports = {
     ]
 };
 
-},{}],360:[function(require,module,exports){
+},{}],362:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -57042,7 +57170,7 @@ module.exports = {
     ]
 };
 
-},{}],361:[function(require,module,exports){
+},{}],363:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -57067,7 +57195,7 @@ module.exports = {
     ]
 };
 
-},{}],362:[function(require,module,exports){
+},{}],364:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -57106,7 +57234,7 @@ module.exports = {
     ]
 };
 
-},{}],363:[function(require,module,exports){
+},{}],365:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -57136,7 +57264,7 @@ module.exports = {
     ]
 };
 
-},{}],364:[function(require,module,exports){
+},{}],366:[function(require,module,exports){
 module.exports={
     "id": "http://json-schema.org/draft-04/schema#",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -57288,7 +57416,7 @@ module.exports={
     "default": {}
 }
 
-},{}],365:[function(require,module,exports){
+},{}],367:[function(require,module,exports){
 module.exports={
   "swagger": 2,
   "info": {
@@ -57379,7 +57507,7 @@ module.exports={
   }
 }
 
-},{}],366:[function(require,module,exports){
+},{}],368:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -57777,7 +57905,7 @@ module.exports={
 	}
 }
 
-},{}],367:[function(require,module,exports){
+},{}],369:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -58175,7 +58303,7 @@ module.exports={
 	}
 }
 
-},{}],368:[function(require,module,exports){
+},{}],370:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -58200,15 +58328,15 @@ module.exports = {
     ]
 };
 
-},{}],369:[function(require,module,exports){
-module.exports=require(364)
-},{"C:\\dev\\z-schema\\test\\ZSchemaTestSuite\\files\\Issue47\\draft4.json":364}],370:[function(require,module,exports){
+},{}],371:[function(require,module,exports){
+module.exports=require(366)
+},{"C:\\dev\\z-schema\\test\\ZSchemaTestSuite\\files\\Issue47\\draft4.json":366}],372:[function(require,module,exports){
 module.exports={
     "type": "integer"
 }
-},{}],371:[function(require,module,exports){
-module.exports=require(370)
-},{"C:\\dev\\z-schema\\test\\jsonSchemaTestSuite\\remotes\\folder\\folderInteger.json":370}],372:[function(require,module,exports){
+},{}],373:[function(require,module,exports){
+module.exports=require(372)
+},{"C:\\dev\\z-schema\\test\\jsonSchemaTestSuite\\remotes\\folder\\folderInteger.json":372}],374:[function(require,module,exports){
 module.exports={
     "integer": {
         "type": "integer"
@@ -58217,7 +58345,7 @@ module.exports={
         "$ref": "#/integer"
     }
 }
-},{}],373:[function(require,module,exports){
+},{}],375:[function(require,module,exports){
 module.exports=[
     {
         "description": "additionalItems as schema",
@@ -58301,7 +58429,7 @@ module.exports=[
     }
 ]
 
-},{}],374:[function(require,module,exports){
+},{}],376:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -58391,7 +58519,7 @@ module.exports=[
     }
 ]
 
-},{}],375:[function(require,module,exports){
+},{}],377:[function(require,module,exports){
 module.exports=[
     {
         "description": "allOf",
@@ -58505,7 +58633,7 @@ module.exports=[
     }
 ]
 
-},{}],376:[function(require,module,exports){
+},{}],378:[function(require,module,exports){
 module.exports=[
     {
         "description": "anyOf",
@@ -58575,7 +58703,7 @@ module.exports=[
     }
 ]
 
-},{}],377:[function(require,module,exports){
+},{}],379:[function(require,module,exports){
 module.exports=[
     {
         "description": "invalid type for default",
@@ -58626,7 +58754,7 @@ module.exports=[
     }
 ]
 
-},{}],378:[function(require,module,exports){
+},{}],380:[function(require,module,exports){
 module.exports=[
     {
         "description": "valid definition",
@@ -58660,7 +58788,7 @@ module.exports=[
     }
 ]
 
-},{}],379:[function(require,module,exports){
+},{}],381:[function(require,module,exports){
 module.exports=[
     {
         "description": "dependencies",
@@ -58775,7 +58903,7 @@ module.exports=[
     }
 ]
 
-},{}],380:[function(require,module,exports){
+},{}],382:[function(require,module,exports){
 module.exports=[
     {
         "description": "simple enum validation",
@@ -58849,7 +58977,7 @@ module.exports=[
     }
 ]
 
-},{}],381:[function(require,module,exports){
+},{}],383:[function(require,module,exports){
 module.exports=[
     {
         "description": "a schema given for items",
@@ -58897,7 +59025,7 @@ module.exports=[
     }
 ]
 
-},{}],382:[function(require,module,exports){
+},{}],384:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxItems validation",
@@ -58927,7 +59055,7 @@ module.exports=[
     }
 ]
 
-},{}],383:[function(require,module,exports){
+},{}],385:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxLength validation",
@@ -58962,7 +59090,7 @@ module.exports=[
     }
 ]
 
-},{}],384:[function(require,module,exports){
+},{}],386:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxProperties validation",
@@ -58992,7 +59120,7 @@ module.exports=[
     }
 ]
 
-},{}],385:[function(require,module,exports){
+},{}],387:[function(require,module,exports){
 module.exports=[
     {
         "description": "maximum validation",
@@ -59036,7 +59164,7 @@ module.exports=[
     }
 ]
 
-},{}],386:[function(require,module,exports){
+},{}],388:[function(require,module,exports){
 module.exports=[
     {
         "description": "minItems validation",
@@ -59066,7 +59194,7 @@ module.exports=[
     }
 ]
 
-},{}],387:[function(require,module,exports){
+},{}],389:[function(require,module,exports){
 module.exports=[
     {
         "description": "minLength validation",
@@ -59101,7 +59229,7 @@ module.exports=[
     }
 ]
 
-},{}],388:[function(require,module,exports){
+},{}],390:[function(require,module,exports){
 module.exports=[
     {
         "description": "minProperties validation",
@@ -59131,7 +59259,7 @@ module.exports=[
     }
 ]
 
-},{}],389:[function(require,module,exports){
+},{}],391:[function(require,module,exports){
 module.exports=[
     {
         "description": "minimum validation",
@@ -59175,7 +59303,7 @@ module.exports=[
     }
 ]
 
-},{}],390:[function(require,module,exports){
+},{}],392:[function(require,module,exports){
 module.exports=[
     {
         "description": "by int",
@@ -59237,7 +59365,7 @@ module.exports=[
     }
 ]
 
-},{}],391:[function(require,module,exports){
+},{}],393:[function(require,module,exports){
 module.exports=[
     {
         "description": "not",
@@ -59335,7 +59463,7 @@ module.exports=[
 
 ]
 
-},{}],392:[function(require,module,exports){
+},{}],394:[function(require,module,exports){
 module.exports=[
     {
         "description": "oneOf",
@@ -59405,7 +59533,7 @@ module.exports=[
     }
 ]
 
-},{}],393:[function(require,module,exports){
+},{}],395:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer",
@@ -59514,7 +59642,7 @@ module.exports=[
     }
 ]
 
-},{}],394:[function(require,module,exports){
+},{}],396:[function(require,module,exports){
 module.exports=[
     {
         "description": "validation of date-time strings",
@@ -59659,7 +59787,7 @@ module.exports=[
     }
 ]
 
-},{}],395:[function(require,module,exports){
+},{}],397:[function(require,module,exports){
 module.exports=[
     {
         "description": "pattern validation",
@@ -59684,7 +59812,7 @@ module.exports=[
     }
 ]
 
-},{}],396:[function(require,module,exports){
+},{}],398:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -59796,7 +59924,7 @@ module.exports=[
     }
 ]
 
-},{}],397:[function(require,module,exports){
+},{}],399:[function(require,module,exports){
 module.exports=[
     {
         "description": "object properties validation",
@@ -59890,7 +60018,7 @@ module.exports=[
     }
 ]
 
-},{}],398:[function(require,module,exports){
+},{}],400:[function(require,module,exports){
 module.exports=[
     {
         "description": "root pointer ref",
@@ -60036,7 +60164,7 @@ module.exports=[
     }
 ]
 
-},{}],399:[function(require,module,exports){
+},{}],401:[function(require,module,exports){
 module.exports=[
     {
         "description": "remote ref",
@@ -60112,7 +60240,7 @@ module.exports=[
     }
 ]
 
-},{}],400:[function(require,module,exports){
+},{}],402:[function(require,module,exports){
 module.exports=[
     {
         "description": "required validation",
@@ -60153,7 +60281,7 @@ module.exports=[
     }
 ]
 
-},{}],401:[function(require,module,exports){
+},{}],403:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer type matches integers",
@@ -60485,7 +60613,7 @@ module.exports=[
     }
 ]
 
-},{}],402:[function(require,module,exports){
+},{}],404:[function(require,module,exports){
 module.exports=[
     {
         "description": "uniqueItems validation",
@@ -60566,7 +60694,7 @@ module.exports=[
     }
 ]
 
-},{}],403:[function(require,module,exports){
+},{}],405:[function(require,module,exports){
 "use strict";
 
 var isBrowser = typeof window !== "undefined";
@@ -60655,7 +60783,7 @@ describe("Automatic schema loading", function () {
 
 });
 
-},{"../../src/ZSchema":299,"request":198}],404:[function(require,module,exports){
+},{"../../src/ZSchema":299,"request":198}],406:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -60727,7 +60855,7 @@ describe("Basic", function () {
 
 });
 
-},{"../../src/ZSchema":299,"../files/draft-04-schema.json":369,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":370,"../jsonSchemaTestSuite/remotes/integer.json":371,"../jsonSchemaTestSuite/remotes/subSchemas.json":372}],405:[function(require,module,exports){
+},{"../../src/ZSchema":299,"../files/draft-04-schema.json":371,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":372,"../jsonSchemaTestSuite/remotes/integer.json":373,"../jsonSchemaTestSuite/remotes/subSchemas.json":374}],407:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -60823,7 +60951,7 @@ describe("JsonSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":299,"../files/draft-04-schema.json":369,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":370,"../jsonSchemaTestSuite/remotes/integer.json":371,"../jsonSchemaTestSuite/remotes/subSchemas.json":372,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":373,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":374,"../jsonSchemaTestSuite/tests/draft4/allOf.json":375,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":376,"../jsonSchemaTestSuite/tests/draft4/default.json":377,"../jsonSchemaTestSuite/tests/draft4/definitions.json":378,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":379,"../jsonSchemaTestSuite/tests/draft4/enum.json":380,"../jsonSchemaTestSuite/tests/draft4/items.json":381,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":382,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":383,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":384,"../jsonSchemaTestSuite/tests/draft4/maximum.json":385,"../jsonSchemaTestSuite/tests/draft4/minItems.json":386,"../jsonSchemaTestSuite/tests/draft4/minLength.json":387,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":388,"../jsonSchemaTestSuite/tests/draft4/minimum.json":389,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":390,"../jsonSchemaTestSuite/tests/draft4/not.json":391,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":392,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":393,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":394,"../jsonSchemaTestSuite/tests/draft4/pattern.json":395,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":396,"../jsonSchemaTestSuite/tests/draft4/properties.json":397,"../jsonSchemaTestSuite/tests/draft4/ref.json":398,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":399,"../jsonSchemaTestSuite/tests/draft4/required.json":400,"../jsonSchemaTestSuite/tests/draft4/type.json":401,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":402}],406:[function(require,module,exports){
+},{"../../src/ZSchema":299,"../files/draft-04-schema.json":371,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":372,"../jsonSchemaTestSuite/remotes/integer.json":373,"../jsonSchemaTestSuite/remotes/subSchemas.json":374,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":375,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":376,"../jsonSchemaTestSuite/tests/draft4/allOf.json":377,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":378,"../jsonSchemaTestSuite/tests/draft4/default.json":379,"../jsonSchemaTestSuite/tests/draft4/definitions.json":380,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":381,"../jsonSchemaTestSuite/tests/draft4/enum.json":382,"../jsonSchemaTestSuite/tests/draft4/items.json":383,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":384,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":385,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":386,"../jsonSchemaTestSuite/tests/draft4/maximum.json":387,"../jsonSchemaTestSuite/tests/draft4/minItems.json":388,"../jsonSchemaTestSuite/tests/draft4/minLength.json":389,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":390,"../jsonSchemaTestSuite/tests/draft4/minimum.json":391,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":392,"../jsonSchemaTestSuite/tests/draft4/not.json":393,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":394,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":395,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":396,"../jsonSchemaTestSuite/tests/draft4/pattern.json":397,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":398,"../jsonSchemaTestSuite/tests/draft4/properties.json":399,"../jsonSchemaTestSuite/tests/draft4/ref.json":400,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":401,"../jsonSchemaTestSuite/tests/draft4/required.json":402,"../jsonSchemaTestSuite/tests/draft4/type.json":403,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":404}],408:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -60857,7 +60985,7 @@ describe("Using multiple instances of Z-Schema", function () {
 
 });
 
-},{"../../src/ZSchema":299}],407:[function(require,module,exports){
+},{"../../src/ZSchema":299}],409:[function(require,module,exports){
 /*jshint -W030 */
 
 "use strict";
@@ -60928,6 +61056,8 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/Issue130.js"),
     require("../ZSchemaTestSuite/Issue131.js"),
     require("../ZSchemaTestSuite/Issue137.js"),
+    require("../ZSchemaTestSuite/Issue139.js"),
+    require("../ZSchemaTestSuite/Issue142.js"),
     require("../ZSchemaTestSuite/Issue146.js"),
 
     undefined
@@ -60942,8 +61072,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 63 files", function () {
-        expect(testSuiteFiles.length).toBe(63);
+    it("should contain 65 files", function () {
+        expect(testSuiteFiles.length).toBe(65);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -60965,6 +61095,8 @@ describe("ZSchemaTestSuite", function () {
                 failWithException   = test.failWithException  || testSuite.failWithException;
 
             !async && it(testSuite.description + ", " + test.description, function () {
+
+                ZSchema.setSchemaReader(null);
 
                 var validator = new ZSchema(options);
                 var caughtErr;
@@ -61049,7 +61181,7 @@ describe("ZSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":299,"../ZSchemaTestSuite/AssumeAdditional.js":302,"../ZSchemaTestSuite/CustomFormats.js":303,"../ZSchemaTestSuite/CustomFormatsAsync.js":304,"../ZSchemaTestSuite/ErrorPathAsArray.js":305,"../ZSchemaTestSuite/ErrorPathAsJSONPointer.js":306,"../ZSchemaTestSuite/ForceAdditional.js":307,"../ZSchemaTestSuite/ForceItems.js":308,"../ZSchemaTestSuite/ForceMaxItems.js":309,"../ZSchemaTestSuite/ForceMaxLength.js":310,"../ZSchemaTestSuite/ForceMinItems.js":311,"../ZSchemaTestSuite/ForceMinLength.js":312,"../ZSchemaTestSuite/ForceProperties.js":313,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":314,"../ZSchemaTestSuite/InvalidId.js":315,"../ZSchemaTestSuite/Issue101.js":316,"../ZSchemaTestSuite/Issue102.js":317,"../ZSchemaTestSuite/Issue103.js":318,"../ZSchemaTestSuite/Issue106.js":319,"../ZSchemaTestSuite/Issue107.js":320,"../ZSchemaTestSuite/Issue12.js":321,"../ZSchemaTestSuite/Issue121.js":322,"../ZSchemaTestSuite/Issue125.js":323,"../ZSchemaTestSuite/Issue126.js":324,"../ZSchemaTestSuite/Issue13.js":325,"../ZSchemaTestSuite/Issue130.js":326,"../ZSchemaTestSuite/Issue131.js":327,"../ZSchemaTestSuite/Issue137.js":328,"../ZSchemaTestSuite/Issue146.js":329,"../ZSchemaTestSuite/Issue16.js":330,"../ZSchemaTestSuite/Issue22.js":331,"../ZSchemaTestSuite/Issue25.js":332,"../ZSchemaTestSuite/Issue26.js":333,"../ZSchemaTestSuite/Issue37.js":334,"../ZSchemaTestSuite/Issue40.js":335,"../ZSchemaTestSuite/Issue41.js":336,"../ZSchemaTestSuite/Issue43.js":337,"../ZSchemaTestSuite/Issue44.js":338,"../ZSchemaTestSuite/Issue45.js":339,"../ZSchemaTestSuite/Issue47.js":340,"../ZSchemaTestSuite/Issue48.js":341,"../ZSchemaTestSuite/Issue49.js":342,"../ZSchemaTestSuite/Issue53.js":343,"../ZSchemaTestSuite/Issue56.js":344,"../ZSchemaTestSuite/Issue57.js":345,"../ZSchemaTestSuite/Issue58.js":346,"../ZSchemaTestSuite/Issue63.js":347,"../ZSchemaTestSuite/Issue64.js":348,"../ZSchemaTestSuite/Issue67.js":349,"../ZSchemaTestSuite/Issue71.js":350,"../ZSchemaTestSuite/Issue73.js":351,"../ZSchemaTestSuite/Issue76.js":352,"../ZSchemaTestSuite/Issue85.js":353,"../ZSchemaTestSuite/Issue94.js":354,"../ZSchemaTestSuite/Issue96.js":355,"../ZSchemaTestSuite/Issue98.js":356,"../ZSchemaTestSuite/MultipleSchemas.js":357,"../ZSchemaTestSuite/NoEmptyArrays.js":358,"../ZSchemaTestSuite/NoEmptyStrings.js":359,"../ZSchemaTestSuite/NoExtraKeywords.js":360,"../ZSchemaTestSuite/NoTypeless.js":361,"../ZSchemaTestSuite/PedanticCheck.js":362,"../ZSchemaTestSuite/StrictUris.js":363,"../ZSchemaTestSuite/getRegisteredFormats.js":368}],408:[function(require,module,exports){
+},{"../../src/ZSchema":299,"../ZSchemaTestSuite/AssumeAdditional.js":302,"../ZSchemaTestSuite/CustomFormats.js":303,"../ZSchemaTestSuite/CustomFormatsAsync.js":304,"../ZSchemaTestSuite/ErrorPathAsArray.js":305,"../ZSchemaTestSuite/ErrorPathAsJSONPointer.js":306,"../ZSchemaTestSuite/ForceAdditional.js":307,"../ZSchemaTestSuite/ForceItems.js":308,"../ZSchemaTestSuite/ForceMaxItems.js":309,"../ZSchemaTestSuite/ForceMaxLength.js":310,"../ZSchemaTestSuite/ForceMinItems.js":311,"../ZSchemaTestSuite/ForceMinLength.js":312,"../ZSchemaTestSuite/ForceProperties.js":313,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":314,"../ZSchemaTestSuite/InvalidId.js":315,"../ZSchemaTestSuite/Issue101.js":316,"../ZSchemaTestSuite/Issue102.js":317,"../ZSchemaTestSuite/Issue103.js":318,"../ZSchemaTestSuite/Issue106.js":319,"../ZSchemaTestSuite/Issue107.js":320,"../ZSchemaTestSuite/Issue12.js":321,"../ZSchemaTestSuite/Issue121.js":322,"../ZSchemaTestSuite/Issue125.js":323,"../ZSchemaTestSuite/Issue126.js":324,"../ZSchemaTestSuite/Issue13.js":325,"../ZSchemaTestSuite/Issue130.js":326,"../ZSchemaTestSuite/Issue131.js":327,"../ZSchemaTestSuite/Issue137.js":328,"../ZSchemaTestSuite/Issue139.js":329,"../ZSchemaTestSuite/Issue142.js":330,"../ZSchemaTestSuite/Issue146.js":331,"../ZSchemaTestSuite/Issue16.js":332,"../ZSchemaTestSuite/Issue22.js":333,"../ZSchemaTestSuite/Issue25.js":334,"../ZSchemaTestSuite/Issue26.js":335,"../ZSchemaTestSuite/Issue37.js":336,"../ZSchemaTestSuite/Issue40.js":337,"../ZSchemaTestSuite/Issue41.js":338,"../ZSchemaTestSuite/Issue43.js":339,"../ZSchemaTestSuite/Issue44.js":340,"../ZSchemaTestSuite/Issue45.js":341,"../ZSchemaTestSuite/Issue47.js":342,"../ZSchemaTestSuite/Issue48.js":343,"../ZSchemaTestSuite/Issue49.js":344,"../ZSchemaTestSuite/Issue53.js":345,"../ZSchemaTestSuite/Issue56.js":346,"../ZSchemaTestSuite/Issue57.js":347,"../ZSchemaTestSuite/Issue58.js":348,"../ZSchemaTestSuite/Issue63.js":349,"../ZSchemaTestSuite/Issue64.js":350,"../ZSchemaTestSuite/Issue67.js":351,"../ZSchemaTestSuite/Issue71.js":352,"../ZSchemaTestSuite/Issue73.js":353,"../ZSchemaTestSuite/Issue76.js":354,"../ZSchemaTestSuite/Issue85.js":355,"../ZSchemaTestSuite/Issue94.js":356,"../ZSchemaTestSuite/Issue96.js":357,"../ZSchemaTestSuite/Issue98.js":358,"../ZSchemaTestSuite/MultipleSchemas.js":359,"../ZSchemaTestSuite/NoEmptyArrays.js":360,"../ZSchemaTestSuite/NoEmptyStrings.js":361,"../ZSchemaTestSuite/NoExtraKeywords.js":362,"../ZSchemaTestSuite/NoTypeless.js":363,"../ZSchemaTestSuite/PedanticCheck.js":364,"../ZSchemaTestSuite/StrictUris.js":365,"../ZSchemaTestSuite/getRegisteredFormats.js":370}],410:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -61148,4 +61280,4 @@ describe("Using path to schema as a third argument", function () {
 
 });
 
-},{"../../src/ZSchema":299}]},{},[403,404,405,406,407,408]);
+},{"../../src/ZSchema":299}]},{},[405,406,407,408,409,410]);
