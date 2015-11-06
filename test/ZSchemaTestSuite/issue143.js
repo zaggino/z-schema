@@ -16,7 +16,8 @@ module.exports = {
                     type: "object",
                     properties: {
                         recType: {
-                            type: "string"
+                            type: "string",
+                            format: "custom"
                         }
                     },
                     required: ["recType"]
@@ -24,7 +25,12 @@ module.exports = {
             },
             valid: false,
             after: function (err) {
-                expect(err).toBeTruthy();
+                expect(err.length).toBe(3);
+                err.forEach(function (e) {
+                    expect(e.code).toBe("UNKNOWN_FORMAT");
+                    expect(e.params).toBe("custom");
+                    expect(e.schemaId).toBe("department");
+                });
 
             }
         }
