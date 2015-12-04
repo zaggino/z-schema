@@ -32,6 +32,7 @@ program
   .option("--reportPathAsArray", "report error paths as an array of path segments to get to the offending node")
   .option("--breakOnFirstError", "stops validation as soon as an error is found, true by default but can be turned off")
   .option("--pedanticCheck", "check if schema follow best practices and common sence")
+  .option("--ignoreUnknownFormats", "ignore unknown formats (do not report them as an error)")
   .parse(process.argv);
   
 var options = {};  
