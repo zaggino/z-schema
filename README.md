@@ -24,7 +24,7 @@ Validator will try to perform sync validation when possible for speed, but suppo
 ##Development:
 
 These repository has several submodules and should be cloned as follows:
->git clone **--recursive** https://github.com/APIs-guru/z-schema.git
+>git clone **--recursive** https://github.com/zaggino/z-schema.git
 
 ##CLI:
 
