@@ -201,7 +201,7 @@ var valid = validator.validate(data, schemas[2]);
 
 ##Register a custom format
 
-You can register any format of your own, sync validator function should always respond with boolean:
+You can register any format of your own. Your sync validator function should always respond with a boolean:
 
 ```javascript
 ZSchema.registerFormat("xstring", function (str) {
