@@ -58,8 +58,8 @@
     ]
   },
   "dependencies": {
-    "lodash.get": "^3.7.0",
-    "validator": "^4.0.5"
+    "lodash.get": "^4.1.2",
+    "validator": "^5.0.0"
   },
   "optionalDependencies": {
     "commander": "^2.7.1",
