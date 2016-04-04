@@ -77,14 +77,14 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
 
 };
 
-Report.prototype.getPath = function () {
+Report.prototype.getPath = function (returnPathAsString) {
     var path = [];
     if (this.parentReport) {
         path = path.concat(this.parentReport.path);
     }
     path = path.concat(this.path);
 
-    if (this.options.reportPathAsArray !== true) {
+    if (returnPathAsString !== true) {
         // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
         path = "#/" + path.map(function (segment) {
 
@@ -166,7 +166,7 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
         code: errorCode,
         params: params,
         message: errorMessage,
-        path: this.getPath(),
+        path: this.getPath(this.options.reportPathAsArray),
         schemaId: this.getSchemaId()
     };
 
