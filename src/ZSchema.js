@@ -55,7 +55,9 @@ var defaultOptions = {
     // check if schema follow best practices and common sence
     pedanticCheck: false,
     // ignore unknown formats (do not report them as an error)
-    ignoreUnknownFormats: false
+    ignoreUnknownFormats: false,
+    // function to be called on every schema
+    customValidator: null
 };
 
 /*

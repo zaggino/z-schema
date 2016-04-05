@@ -77,14 +77,14 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
 
 };
 
-Report.prototype.getPath = function () {
+Report.prototype.getPath = function (returnPathAsString) {
     var path = [];
     if (this.parentReport) {
         path = path.concat(this.parentReport.path);
     }
     path = path.concat(this.path);
 
-    if (this.options.reportPathAsArray !== true) {
+    if (returnPathAsString !== true) {
         // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
         path = "#/" + path.map(function (segment) {
 
@@ -145,17 +145,21 @@ Report.prototype.hasError = function (errorCode, params) {
 };
 
 Report.prototype.addError = function (errorCode, params, subReports, schemaDescription) {
+    if (!errorCode) { throw new Error("No errorCode passed into addError()"); }
+
+    this.addCustomError(errorCode, Errors[errorCode], params, subReports, schemaDescription);
+};
+
+Report.prototype.addCustomError = function (errorCode, errorMessage, params, subReports, schemaDescription) {
     if (this.errors.length >= this.reportOptions.maxErrors) {
         return;
     }
 
-    if (!errorCode) { throw new Error("No errorCode passed into addError()"); }
-    if (!Errors[errorCode]) { throw new Error("No errorMessage known for code " + errorCode); }
+    if (!errorMessage) { throw new Error("No errorMessage known for code " + errorCode); }
 
     params = params || [];
 
-    var idx = params.length,
-        errorMessage = Errors[errorCode];
+    var idx = params.length;
     while (idx--) {
         var whatIs = Utils.whatIs(params[idx]);
         var param = (whatIs === "object" || whatIs === "null") ? JSON.stringify(params[idx]) : params[idx];
@@ -166,7 +170,7 @@ Report.prototype.addError = function (errorCode, params, subReports, schemaDescr
         code: errorCode,
         params: params,
         message: errorMessage,
-        path: this.getPath(),
+        path: this.getPath(this.options.reportPathAsArray),
         schemaId: this.getSchemaId()
     };
 

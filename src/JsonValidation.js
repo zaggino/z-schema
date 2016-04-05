@@ -526,6 +526,10 @@ exports.validate = function (report, schema, json) {
         }
     }
 
+    if (typeof this.options.customValidator === "function") {
+        this.options.customValidator(report, schema, json);
+    }
+
     // we don't need the root pointer anymore
     if (isRoot) {
         report.rootSchema = undefined;

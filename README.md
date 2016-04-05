@@ -474,6 +474,93 @@ var validator = new ZSchema({
 });
 ```
 
+##customValidator
+
+**Warning**: Use only if know what you are doing. Always consider using [custom format](#register-a-custom-format) before using this option.
+
+Register function to be called as part of validation process on every subshema encounter during validation.
+
+Let's make a real-life example with this feature.
+Imagine you have number of transactions:
+```json
+{
+    "fromId": 1034834329,
+    "toId": 1034834543,
+    "amount": 200
+}
+```
+So you write the schema:
+```json
+{
+    "type": "object",
+    "properties": {
+        "fromId": {
+            "type": "integer"
+        },
+        "toId": {
+            "type": "integer"
+        },
+        "amount": {
+            "type": "number"
+        }
+    }
+}
+```
+But how to check that `fromId` and `toId` are never equal.
+In JSON Schema Draft4 there is no possibility to do this.
+Actually, it's easy to just write validation code for such simple payloads.
+But what if you have to do the same check for many objects in different places of JSON payload.
+One solution is to add custom keyword `uniqueProperties` with array of property names as a value. So in our schema we would need to add:
+```json
+"uniqueProperties": [
+    "fromId",
+    "toId"
+]
+```
+To teach `z-schema` about this new keyword we need to write handler for it:
+```js
+function customValidatorFn(report, schema, json) {
+    // check if our custom property is present
+    if (Array.isArray(schema.uniqueProperties)) {
+        var seenValues = [];
+        schema.uniqueProperties.forEach(function (prop) {
+            var value = json[prop];
+            if (typeof value !== 'undefined') {
+                if (seenValues.indexOf(value) !== -1) {
+                    // report error back to z-schema core
+                    report.addCustomError("NON_UNIQUE_PROPERTY_VALUE",
+                        "Property \"{0}\" has non-unique value: {1}",
+                        [prop, value], null, schema.description);
+                }
+                seenValues.push(value)
+            }
+        });
+    }
+}
+
+var validator = new ZSchema({
+    // register our custom validator inside z-schema
+    customValidator: customValidatorFn
+});
+```
+Let's test it:
+```js
+var data = {
+    fromId: 1034834346,
+    toId: 1034834346,
+    amount: 50
+};
+
+validator.validate(data, schema);
+console.log(validator.getLastErrors())
+//[ { code: 'NON_UNIQUE_PROPERTY_VALUE',
+//    params: [ 'toId', 1034834346 ],
+//    message: 'Property "toId" has non-unique value: 1034834346',
+//    path: '#/',
+//    schemaId: undefined } ]
+```
+**Note:** before creating your own keywords you should consider all compatibility issues.
+
 #Benchmarks
 
 So how does it compare to version 2.x and others?
