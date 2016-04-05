@@ -1,6 +1,6 @@
 {
   "name": "z-schema",
-  "version": "3.16.1",
+  "version": "3.17.0",
   "description": "JSON schema validator",
   "homepage": "https://github.com/zaggino/z-schema",
   "authors": [
