@@ -67,7 +67,7 @@
   },
   "devDependencies": {
     "coveralls": "latest",
-    "grunt": "latest",
+    "grunt": "^0.4.5",
     "grunt-cli": "latest",
     "grunt-browserify": "~3.2.1",
     "grunt-contrib-copy": "latest",
