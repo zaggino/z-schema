@@ -105,7 +105,7 @@ request(requiredUrl, function (error, response, body) {
 
 If you're able to load schemas synchronously, you can use `ZSchema.setSchemaReader` feature:
 
-```
+```javascript
 ZSchema.setSchemaReader(function (uri) {
     var someFilename = path.resolve(__dirname, "..", "schemas", uri + ".json");
     return JSON.parse(fs.readFileSync(someFilename, "utf8"));
@@ -142,7 +142,7 @@ ZSchema.setSchemaReader(function (uri) {
 
 In case you don't want to split your schema into multiple schemas using reference for any reason, you can use option schemaPath when validating:
 
-```
+```javascript
 var valid = validator.validate(cars, schema, { schemaPath: "definitions.car.definitions.cars" });
 ```
 
@@ -232,7 +232,7 @@ see [this test](test/spec/AutomaticSchemaLoadingSpec.js) for more information on
 
 Using format, you can pre-fill values of your choosing into the objects like this:
 
-```
+```javascript
 ZSchema.registerFormat("fillHello", function (obj) {
     obj.hello = "world";
     return true;
@@ -518,7 +518,7 @@ One solution is to add custom keyword `uniqueProperties` with array of property 
 ]
 ```
 To teach `z-schema` about this new keyword we need to write handler for it:
-```js
+```javascript
 function customValidatorFn(report, schema, json) {
     // check if our custom property is present
     if (Array.isArray(schema.uniqueProperties)) {
@@ -544,7 +544,7 @@ var validator = new ZSchema({
 });
 ```
 Let's test it:
-```js
+```javascript
 var data = {
     fromId: 1034834346,
     toId: 1034834346,
