@@ -62,12 +62,11 @@
     "validator": "^5.0.0"
   },
   "optionalDependencies": {
-    "commander": "^2.7.1",
-    "request": "^2.54.0"
+    "commander": "^2.7.1"
   },
   "devDependencies": {
     "coveralls": "latest",
-    "grunt": "^0.4.5",
+    "grunt": "^1.0.1",
     "grunt-cli": "latest",
     "grunt-browserify": "~3.2.1",
     "grunt-contrib-copy": "latest",
