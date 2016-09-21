@@ -3,7 +3,7 @@
 var isBrowser = typeof window !== "undefined";
 var ZSchema = require("../../src/ZSchema");
 if (!isBrowser) {
-    var request = require("request");
+    var request = require("https").request;
 }
 
 function validateWithAutomaticDownloads(validator, data, schema, callback) {
@@ -22,12 +22,16 @@ function validateWithAutomaticDownloads(validator, data, schema, callback) {
         if (missingReferences.length > 0) {
             var finished = 0;
             missingReferences.forEach(function (url) {
-                request(url, function (error, response, body) {
-                    validator.setRemoteReference(url, JSON.parse(body));
-                    finished++;
-                    if (finished === missingReferences.length) {
-                        validate();
-                    }
+                request(url, function (response) {
+                    var body = "";
+                    response.on("data", function (chunk) { data += chunk; });
+                    response.on("end", function () {
+                        validator.setRemoteReference(url, JSON.parse(body));
+                        finished++;
+                        if (finished === missingReferences.length) {
+                            validate();
+                        }
+                    });
                 });
             });
         } else {

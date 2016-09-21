@@ -6,7 +6,7 @@ process.exitCode = 0;
 var fs      = require("fs");
 var path    = require("path");
 var program = require("commander");
-var request = require("request");
+var request = require("https").request;
 var package = require("./../package.json");
 var ZSchema = require("./../src/ZSchema");
 
@@ -92,26 +92,26 @@ function validateWithAutomaticDownloads(filePath, data, schema, callback) {
         if (missingReferences.length > 0) {
             var finished = 0;
             missingReferences.forEach(function (url) {
-            
+                var urlString = "request: " + url + " - ";
+
                 if (url.match(/^https?:/)) {
-                    request(url, function (error, response, body) {
+                    request(url, function (response) {
+                        var body = "";
+                        response.on("data", function (chunk) { data += chunk; });
+                        response.on("end", function () {
 
-                        var urlString = "request: " + url + " - ";
-
-                        if (error) {
-                            if (response) { console.error(urlString + response.statusCode); }
-                            console.error(error);
-                            process.exit(1);
-                        } else {
                             console.log(urlString + response.statusCode);
-                        }
 
-                        validator.setRemoteReference(url, JSON.parse(body));
-                        finished++;
-                        if (finished === missingReferences.length) {
-                            validate();
-                        }
-
+                            validator.setRemoteReference(url, JSON.parse(body));
+                            finished++;
+                            if (finished === missingReferences.length) {
+                                validate();
+                            }
+                        });
+                    }).on("error", function (error) {
+                        console.error(urlString);
+                        console.error(error);
+                        process.exit(1);
                     });
                 } else {
                     // FUTURE: maybe else if (isFile(url)) later
