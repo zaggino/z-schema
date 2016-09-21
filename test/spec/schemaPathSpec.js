@@ -83,10 +83,10 @@ describe("Using path to schema as a third argument", function () {
     it("Should pass the test", function () {
 
         var cars = [
-          {
-              "brand": "Lexus",
-              "engine": "big"
-          }
+                {
+                    "brand": "Lexus",
+                    "engine": "big"
+                }
         ];
         var valid = validator.validate(cars, schema, { schemaPath: "definitions.car.definitions.cars" });
         expect(valid).toBe(true);
