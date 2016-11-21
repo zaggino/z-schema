@@ -1,5 +1,6 @@
 "use strict";
 
+var isequal             = require("lodash.isequal");
 var Report              = require("./Report");
 var SchemaCompilation   = require("./SchemaCompilation");
 var SchemaValidation    = require("./SchemaValidation");
@@ -95,7 +96,7 @@ exports.getSchema = function (report, schema) {
 exports.getSchemaByReference = function (report, key) {
     var i = this.referenceCache.length;
     while (i--) {
-        if (this.referenceCache[i][0] === key) {
+        if (isequal(this.referenceCache[i][0], key)) {
             return this.referenceCache[i][1];
         }
     }
