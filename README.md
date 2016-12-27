@@ -426,6 +426,19 @@ var validator = new ZSchema({
 Strict mode of z-schema is currently equal to the following:
 
 ```javascript
+if (this.options.strictMode === true) {
+    this.options.forceAdditional  = true;
+    this.options.forceItems       = true;
+    this.options.forceMaxLength   = true;
+    this.options.forceProperties  = true;
+    this.options.noExtraKeywords  = true;
+    this.options.noTypeless       = true;
+    this.options.noEmptyStrings   = true;
+    this.options.noEmptyArrays    = true;
+}
+```
+
+```javascript
 var validator = new ZSchema({
     strictMode: true
 });
@@ -449,19 +462,6 @@ Report error paths as an array of path segments instead of a string:
 var validator = new ZSchema({
     reportPathAsArray: true
 });
-```
-
-```javascript
-if (this.options.strictMode === true) {
-    this.options.forceAdditional  = true;
-    this.options.forceItems       = true;
-    this.options.forceMaxLength   = true;
-    this.options.forceProperties  = true;
-    this.options.noExtraKeywords  = true;
-    this.options.noTypeless       = true;
-    this.options.noEmptyStrings   = true;
-    this.options.noEmptyArrays    = true;
-}
 ```
 
 ##ignoreUnknownFormats
