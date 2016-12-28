@@ -5,3 +5,4 @@
 /.grunt/
 /coverage/
 .DS_Store
+/.idea/
