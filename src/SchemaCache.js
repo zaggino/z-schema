@@ -1,6 +1,5 @@
 "use strict";
 
-var isequal             = require("lodash.isequal");
 var Report              = require("./Report");
 var SchemaCompilation   = require("./SchemaCompilation");
 var SchemaValidation    = require("./SchemaValidation");
@@ -94,15 +93,11 @@ exports.getSchema = function (report, schema) {
 };
 
 exports.getSchemaByReference = function (report, key) {
-    var i = this.referenceCache.length;
-    while (i--) {
-        if (isequal(this.referenceCache[i][0], key)) {
-            return this.referenceCache[i][1];
-        }
-    }
+    var fromCache = this.referenceCache.get(key);
+    if (fromCache) { return fromCache; }
     // not found
     var schema = Utils.cloneDeep(key);
-    this.referenceCache.push([key, schema]);
+    this.referenceCache.set(key, schema);
     return schema;
 };
 
