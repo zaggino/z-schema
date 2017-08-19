@@ -6,21 +6,21 @@ function ReferenceCache() {
 
 if (typeof Map !== "undefined") {
     ReferenceCache.prototype = {
-        init: function() { this.map = new Map(); },
-        set: function(key, value) {
+        init: function () { this.map = new Map(); },
+        set: function (key, value) {
             this.map.set(key, value);
         },
-        get: function(key) {
+        get: function (key) {
             return this.map.get(key);
         }
     };
 } else {
     ReferenceCache.prototype = {
-        init: function() { this.map = []; },
-        set: function(key, value) {
+        init: function () { this.map = []; },
+        set: function (key, value) {
             this.map.push([key, value]);
         },
-        get: function(key) {
+        get: function (key) {
             var i = this.map.length;
             while (i--) {
                 if (isequal(this.map[i][0], key)) {
