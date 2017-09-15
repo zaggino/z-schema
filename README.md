@@ -1,15 +1,14 @@
+# z-schema validator
+
 [![npm version](https://badge.fury.io/js/z-schema.svg)](http://badge.fury.io/js/z-schema)
 [![bower version](https://badge.fury.io/bo/z-schema.svg)](http://badge.fury.io/bo/z-schema)
 [![build status](https://travis-ci.org/zaggino/z-schema.svg?branch=master)](https://travis-ci.org/zaggino/z-schema)
 [![coverage status](https://coveralls.io/repos/zaggino/z-schema/badge.svg)](https://coveralls.io/r/zaggino/z-schema)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/zaggino/z-schema.svg)](https://greenkeeper.io/)
 [![dependencies Status](https://david-dm.org/zaggino/z-schema/status.svg)](https://david-dm.org/zaggino/z-schema)
 [![devDependencies Status](https://david-dm.org/zaggino/z-schema/dev-status.svg)](https://david-dm.org/zaggino/z-schema?type=dev)
 [![optionalDependencies Status](https://david-dm.org/zaggino/z-schema/optional-status.svg)](https://david-dm.org/zaggino/z-schema?type=optional)
-
-# z-schema validator
-
-[![Greenkeeper badge](https://badges.greenkeeper.io/zaggino/z-schema.svg)](https://greenkeeper.io/)
 
 [![NPM](https://nodei.co/npm/z-schema.png?downloads=true&downloadRank=true)](https://nodei.co/npm/z-schema/)
 
