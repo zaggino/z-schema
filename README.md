@@ -9,6 +9,8 @@
 
 # z-schema validator
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/zaggino/z-schema.svg)](https://greenkeeper.io/)
+
 [![NPM](https://nodei.co/npm/z-schema.png?downloads=true&downloadRank=true)](https://nodei.co/npm/z-schema/)
 
 - version 3.0 runs also in the browsers now, run tests yourself [here](https://rawgit.com/zaggino/z-schema/master/test/SpecRunner.html)
