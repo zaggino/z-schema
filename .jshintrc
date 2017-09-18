@@ -34,7 +34,6 @@
         "describe": true,
         "it": true,
         "expect": true,
-        "beforeEach": true,
-        "Map": true
+        "beforeEach": true
     }
 }

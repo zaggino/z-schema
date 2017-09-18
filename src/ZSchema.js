@@ -11,7 +11,7 @@ var SchemaValidation  = require("./SchemaValidation");
 var Utils             = require("./Utils");
 var Draft4Schema      = require("./schemas/schema.json");
 var Draft4HyperSchema = require("./schemas/hyper-schema.json");
-var ReferenceCache    = require("./ReferenceCache");
+
 /*
     default options
 */
@@ -65,7 +65,7 @@ var defaultOptions = {
 */
 function ZSchema(options) {
     this.cache = {};
-    this.referenceCache = new ReferenceCache();
+    this.referenceCache = [];
 
     this.setRemoteReference("http://json-schema.org/draft-04/schema", Draft4Schema);
     this.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", Draft4HyperSchema);

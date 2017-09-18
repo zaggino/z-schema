@@ -6362,7 +6362,7 @@ exports.validate = function (report, schema, json) {
 
 };
 
-},{"./FormatValidators":73,"./Report":77,"./Utils":81}],75:[function(require,module,exports){
+},{"./FormatValidators":73,"./Report":76,"./Utils":80}],75:[function(require,module,exports){
 // Number.isFinite polyfill
 // http://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.isfinite
 if (typeof Number.isFinite !== "function") {
@@ -6381,42 +6381,6 @@ if (typeof Number.isFinite !== "function") {
 }
 
 },{}],76:[function(require,module,exports){
-var isequal = require("lodash.isequal");
-
-function ReferenceCache() {
-    this.init();
-}
-
-if (typeof Map !== "undefined") {
-    ReferenceCache.prototype = {
-        init: function () { this.map = new Map(); },
-        set: function (key, value) {
-            this.map.set(key, value);
-        },
-        get: function (key) {
-            return this.map.get(key);
-        }
-    };
-} else {
-    ReferenceCache.prototype = {
-        init: function () { this.map = []; },
-        set: function (key, value) {
-            this.map.push([key, value]);
-        },
-        get: function (key) {
-            var i = this.map.length;
-            while (i--) {
-                if (isequal(this.map[i][0], key)) {
-                    return this.map[i][1];
-                }
-            }
-        }
-    };
-}
-
-module.exports = ReferenceCache;
-
-},{"lodash.isequal":2}],77:[function(require,module,exports){
 (function (process){
 "use strict";
 
@@ -6622,9 +6586,10 @@ Report.prototype.addCustomError = function (errorCode, errorMessage, params, sub
 module.exports = Report;
 
 }).call(this,require('_process'))
-},{"./Errors":72,"./Utils":81,"_process":3,"lodash.get":1}],78:[function(require,module,exports){
+},{"./Errors":72,"./Utils":80,"_process":3,"lodash.get":1}],77:[function(require,module,exports){
 "use strict";
 
+var isequal             = require("lodash.isequal");
 var Report              = require("./Report");
 var SchemaCompilation   = require("./SchemaCompilation");
 var SchemaValidation    = require("./SchemaValidation");
@@ -6718,11 +6683,15 @@ exports.getSchema = function (report, schema) {
 };
 
 exports.getSchemaByReference = function (report, key) {
-    var fromCache = this.referenceCache.get(key);
-    if (fromCache) { return fromCache; }
+    var i = this.referenceCache.length;
+    while (i--) {
+        if (isequal(this.referenceCache[i][0], key)) {
+            return this.referenceCache[i][1];
+        }
+    }
     // not found
     var schema = Utils.cloneDeep(key);
-    this.referenceCache.set(key, schema);
+    this.referenceCache.push([key, schema]);
     return schema;
 };
 
@@ -6773,7 +6742,7 @@ exports.getSchemaByUri = function (report, uri, root) {
 
 exports.getRemotePath = getRemotePath;
 
-},{"./Report":77,"./SchemaCompilation":79,"./SchemaValidation":80,"./Utils":81}],79:[function(require,module,exports){
+},{"./Report":76,"./SchemaCompilation":78,"./SchemaValidation":79,"./Utils":80,"lodash.isequal":2}],78:[function(require,module,exports){
 "use strict";
 
 var Report      = require("./Report");
@@ -7074,7 +7043,7 @@ exports.compileSchema = function (report, schema) {
 
 };
 
-},{"./Report":77,"./SchemaCache":78,"./Utils":81}],80:[function(require,module,exports){
+},{"./Report":76,"./SchemaCache":77,"./Utils":80}],79:[function(require,module,exports){
 "use strict";
 
 var FormatValidators = require("./FormatValidators"),
@@ -7683,7 +7652,7 @@ exports.validateSchema = function (report, schema) {
     return isValid;
 };
 
-},{"./FormatValidators":73,"./JsonValidation":74,"./Report":77,"./Utils":81}],81:[function(require,module,exports){
+},{"./FormatValidators":73,"./JsonValidation":74,"./Report":76,"./Utils":80}],80:[function(require,module,exports){
 "use strict";
 
 exports.isAbsoluteUri = function (uri) {
@@ -7902,7 +7871,7 @@ exports.ucs2decode = function (string) {
 };
 /*jshint +W016*/
 
-},{}],82:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 (function (process){
 "use strict";
 
@@ -7917,7 +7886,7 @@ var SchemaValidation  = require("./SchemaValidation");
 var Utils             = require("./Utils");
 var Draft4Schema      = require("./schemas/schema.json");
 var Draft4HyperSchema = require("./schemas/hyper-schema.json");
-var ReferenceCache    = require("./ReferenceCache");
+
 /*
     default options
 */
@@ -7971,7 +7940,7 @@ var defaultOptions = {
 */
 function ZSchema(options) {
     this.cache = {};
-    this.referenceCache = new ReferenceCache();
+    this.referenceCache = [];
 
     this.setRemoteReference("http://json-schema.org/draft-04/schema", Draft4Schema);
     this.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", Draft4HyperSchema);
@@ -8258,7 +8227,7 @@ ZSchema.getDefaultOptions = function () {
 module.exports = ZSchema;
 
 }).call(this,require('_process'))
-},{"./FormatValidators":73,"./JsonValidation":74,"./Polyfills":75,"./ReferenceCache":76,"./Report":77,"./SchemaCache":78,"./SchemaCompilation":79,"./SchemaValidation":80,"./Utils":81,"./schemas/hyper-schema.json":83,"./schemas/schema.json":84,"_process":3,"lodash.get":1}],83:[function(require,module,exports){
+},{"./FormatValidators":73,"./JsonValidation":74,"./Polyfills":75,"./Report":76,"./SchemaCache":77,"./SchemaCompilation":78,"./SchemaValidation":79,"./Utils":80,"./schemas/hyper-schema.json":82,"./schemas/schema.json":83,"_process":3,"lodash.get":1}],82:[function(require,module,exports){
 module.exports={
     "$schema": "http://json-schema.org/draft-04/hyper-schema#",
     "id": "http://json-schema.org/draft-04/hyper-schema#",
@@ -8418,7 +8387,7 @@ module.exports={
 }
 
 
-},{}],84:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 module.exports={
     "id": "http://json-schema.org/draft-04/schema#",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -8571,5 +8540,5 @@ module.exports={
     "default": {}
 }
 
-},{}]},{},[72,73,74,75,76,77,78,79,80,81,82])(82)
+},{}]},{},[72,73,74,75,76,77,78,79,80,81])(81)
 });
