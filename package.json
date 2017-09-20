@@ -75,7 +75,7 @@
     "grunt-contrib-jshint": "latest",
     "grunt-contrib-uglify": "latest",
     "grunt-jasmine-node": "latest",
-    "grunt-jasmine-node-coverage": "^1.2.0",
+    "grunt-jasmine-node-coverage": "^2.0.0",
     "grunt-jscs": "latest",
     "grunt-lineending": "latest",
     "jasmine-node": "latest",
