@@ -121,7 +121,16 @@ exports.getSchemaByUri = function (report, uri, root) {
 
             var remoteReport = new Report(report);
             if (SchemaCompilation.compileSchema.call(this, remoteReport, result)) {
-                SchemaValidation.validateSchema.call(this, remoteReport, result);
+                try {
+                    var savedOptions = this.options;
+
+                    // If custom validationOptions were provided to setRemoteReference(),
+                    // use them instead of the default options
+                    this.options = result.__$validationOptions || this.options;
+                    SchemaValidation.validateSchema.call(this, remoteReport, result);
+                } finally {
+                    this.options = savedOptions;
+                }
             }
             var remoteReportIsValid = remoteReport.isValid();
             if (!remoteReportIsValid) {

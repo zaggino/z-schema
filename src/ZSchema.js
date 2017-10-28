@@ -257,12 +257,17 @@ ZSchema.prototype.getMissingRemoteReferences = function () {
     }
     return missingRemoteReferences;
 };
-ZSchema.prototype.setRemoteReference = function (uri, schema) {
+ZSchema.prototype.setRemoteReference = function (uri, schema, validationOptions) {
     if (typeof schema === "string") {
         schema = JSON.parse(schema);
     } else {
         schema = Utils.cloneDeep(schema);
     }
+
+    if (validationOptions) {
+        schema.__$validationOptions = validationOptions;
+    }
+
     SchemaCache.cacheSchemaByUri.call(this, uri, schema);
 };
 ZSchema.prototype.getResolvedSchema = function (schema) {
