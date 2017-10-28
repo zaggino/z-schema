@@ -60,15 +60,8 @@ var defaultOptions = {
     customValidator: null
 };
 
-/*
-    constructor
-*/
-function ZSchema(options) {
-    this.cache = {};
-    this.referenceCache = [];
-
-    this.setRemoteReference("http://json-schema.org/draft-04/schema", Draft4Schema);
-    this.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", Draft4HyperSchema);
+function normalizeOptions(options) {
+    var normalized;
 
     // options
     if (typeof options === "object") {
@@ -94,22 +87,36 @@ function ZSchema(options) {
             }
         }
 
-        this.options = options;
+        normalized = options;
     } else {
-        this.options = Utils.clone(defaultOptions);
+        normalized = Utils.clone(defaultOptions);
     }
 
-    if (this.options.strictMode === true) {
-        this.options.forceAdditional  = true;
-        this.options.forceItems       = true;
-        this.options.forceMaxLength   = true;
-        this.options.forceProperties  = true;
-        this.options.noExtraKeywords  = true;
-        this.options.noTypeless       = true;
-        this.options.noEmptyStrings   = true;
-        this.options.noEmptyArrays    = true;
+    if (normalized.strictMode === true) {
+        normalized.forceAdditional  = true;
+        normalized.forceItems       = true;
+        normalized.forceMaxLength   = true;
+        normalized.forceProperties  = true;
+        normalized.noExtraKeywords  = true;
+        normalized.noTypeless       = true;
+        normalized.noEmptyStrings   = true;
+        normalized.noEmptyArrays    = true;
     }
 
+    return normalized;
+}
+
+/*
+    constructor
+*/
+function ZSchema(options) {
+    this.cache = {};
+    this.referenceCache = [];
+
+    this.options = normalizeOptions(options);
+
+    this.setRemoteReference("http://json-schema.org/draft-04/schema", Draft4Schema);
+    this.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", Draft4HyperSchema);
 }
 
 /*
@@ -265,7 +272,7 @@ ZSchema.prototype.setRemoteReference = function (uri, schema, validationOptions)
     }
 
     if (validationOptions) {
-        schema.__$validationOptions = validationOptions;
+        schema.__$validationOptions = normalizeOptions(validationOptions);
     }
 
     SchemaCache.cacheSchemaByUri.call(this, uri, schema);
