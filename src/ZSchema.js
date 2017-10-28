@@ -115,8 +115,11 @@ function ZSchema(options) {
 
     this.options = normalizeOptions(options);
 
-    this.setRemoteReference("http://json-schema.org/draft-04/schema", Draft4Schema);
-    this.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", Draft4HyperSchema);
+    // Disable strict validation for the built-in schemas
+    var metaschemaOptions = normalizeOptions({ });
+
+    this.setRemoteReference("http://json-schema.org/draft-04/schema", Draft4Schema, metaschemaOptions);
+    this.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", Draft4HyperSchema, metaschemaOptions);
 }
 
 /*
