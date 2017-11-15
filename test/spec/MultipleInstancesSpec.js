@@ -13,12 +13,12 @@ describe("Using multiple instances of Z-Schema", function () {
                 "options": {
                     "enum": ["a", "b", "c"]
                 }
-            },
-            "additionalProperties": false
+            }
         };
 
         var v;
         v = new ZSchema({ strictMode: true });
+        // Should fail because "additionalProperties" is missing
         expect(v.validateSchema(schema)).toBe(false, "1st");
 
         v = new ZSchema();
