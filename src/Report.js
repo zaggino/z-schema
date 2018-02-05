@@ -57,7 +57,8 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
         };
     }
 
-    if (tasksCount === 0 || this.errors.length > 0) {
+    // finish if tasks are completed or there are any errors and breaking on first error was requested
+    if (tasksCount === 0 || (this.errors.length > 0 && this.options.breakOnFirstError)) {
         finish();
         return;
     }
