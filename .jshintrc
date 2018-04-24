@@ -4,6 +4,7 @@
     "curly": true,
     "eqeqeq": false,
     "es3": false,
+    "esversion": 6,
     "forin": true,
     "freeze": true,
     "immed": true,
