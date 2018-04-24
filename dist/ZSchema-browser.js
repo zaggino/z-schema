@@ -5796,7 +5796,7 @@ module.exports = {
     INVALID_TYPE:                           "Expected type {0} but found type {1}",
     INVALID_FORMAT:                         "Object didn't pass validation for format {0}: {1}",
     ENUM_MISMATCH:                          "No enum match for: {0}",
-    ENUM_CASE_MISMATCH:                     "Enum does not match case for: {0}.",
+    ENUM_CASE_MISMATCH:                     "Enum does not match case for: {0}",
     ANY_OF_MISSING:                         "Data does not match any schemas from 'anyOf'",
     ONE_OF_MISSING:                         "Data does not match any schemas from 'oneOf'",
     ONE_OF_MULTIPLE:                        "Data is valid against more than one schema from 'oneOf'",
@@ -6242,7 +6242,7 @@ var JsonValidators = {
         }
 
         if (match === false) {
-            var error = caseInsensitiveMatch ? "ENUM_CASE_MISMATCH" : "ENUM_MISMATCH";
+            var error = caseInsensitiveMatch && this.options.enumCaseInsensitiveComparison ? "ENUM_CASE_MISMATCH" : "ENUM_MISMATCH";
             report.addError(error, [json], null, schema.description);
         }
     },
@@ -8080,6 +8080,8 @@ var defaultOptions = {
     forceAdditional: false,
     // assume additionalProperties and additionalItems are defined as "false" where appropriate
     assumeAdditional: false,
+    // do case insensitive comparison for enums
+    enumCaseInsensitiveComparison: false,
     // force items to be defined on "array" types
     forceItems: false,
     // force minItems to be defined on "array" types

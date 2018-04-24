@@ -138,6 +138,7 @@ ZSchema.setSchemaReader(function (uri) {
 - [Force maxLength to be defined in string type schemas](#forcemaxlength)
 - [Force properties or patternProperties to be defined in object type schemas](#forceproperties)
 - [Ignore remote references to schemas that are not cached or resolvable](#ignoreunresolvablereferences)
+- [Ignore case mismatch when validating enum values](#enumCaseInsensitiveComparison)
 - [Only allow strictly absolute URIs to be used in schemas](#stricturis)
 - [Turn on z-schema strict mode](#strictmode)
 - [Set validator to collect as many errors as possible](#breakonfirsterror)
@@ -409,6 +410,15 @@ When true, validator doesn't end with error when a remote reference is unreachab
 ```javascript
 var validator = new ZSchema({
     ignoreUnresolvableReferences: true
+});
+```
+## enumCaseInsensitiveComparison
+
+When true, validator will return a ```ENUM_CASE_MISMATCH``` when the enum values mismatch only in case.
+
+```javascript
+var validator = new ZSchema({
+    enumCaseInsensitiveComparison: true
 });
 ```
 

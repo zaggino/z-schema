@@ -258,7 +258,7 @@ var JsonValidators = {
         }
 
         if (match === false) {
-            var error = caseInsensitiveMatch ? "ENUM_CASE_MISMATCH" : "ENUM_MISMATCH";
+            var error = caseInsensitiveMatch && this.options.enumCaseInsensitiveComparison ? "ENUM_CASE_MISMATCH" : "ENUM_MISMATCH";
             report.addError(error, [json], null, schema.description);
         }
     },
