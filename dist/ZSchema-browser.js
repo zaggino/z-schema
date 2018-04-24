@@ -5796,6 +5796,7 @@ module.exports = {
     INVALID_TYPE:                           "Expected type {0} but found type {1}",
     INVALID_FORMAT:                         "Object didn't pass validation for format {0}: {1}",
     ENUM_MISMATCH:                          "No enum match for: {0}",
+    ENUM_CASE_MISMATCH:                     "Enum does not match case for: {0}.",
     ANY_OF_MISSING:                         "Data does not match any schemas from 'anyOf'",
     ONE_OF_MISSING:                         "Data does not match any schemas from 'oneOf'",
     ONE_OF_MULTIPLE:                        "Data is valid against more than one schema from 'oneOf'",
@@ -6229,15 +6230,20 @@ var JsonValidators = {
     enum: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.1.2
         var match = false,
+            caseInsensitiveMatch = false,
             idx = schema.enum.length;
         while (idx--) {
             if (Utils.areEqual(json, schema.enum[idx])) {
                 match = true;
                 break;
+            } else if (Utils.areEqual(json, schema.enum[idx]), { caseInsensitiveComparison: true }) {
+                caseInsensitiveMatch = true;
             }
         }
+
         if (match === false) {
-            report.addError("ENUM_MISMATCH", [json], null, schema.description);
+            var error = caseInsensitiveMatch ? "ENUM_CASE_MISMATCH" : "ENUM_MISMATCH";
+            report.addError(error, [json], null, schema.description);
         }
     },
     /*
@@ -7866,7 +7872,8 @@ exports.whatIs = function (what) {
 
 };
 
-exports.areEqual = function areEqual(json1, json2) {
+exports.areEqual = function areEqual(json1, json2, { caseInsensitiveComparison = false } = {}) {
+
     // http://json-schema.org/latest/json-schema-core.html#rfc.section.3.6
 
     // Two JSON values are said to be equal if and only if:
@@ -7875,6 +7882,12 @@ exports.areEqual = function areEqual(json1, json2) {
     // both are strings, and have the same value; or
     // both are numbers, and have the same mathematical value; or
     if (json1 === json2) {
+        return true;
+    }
+    if (
+      caseInsensitiveComparison === true &&
+      typeof json1 === "string" && typeof json2 === "string" &&
+      json1.toUpperCase() === json2.toUpperCase()) {
         return true;
     }
 
@@ -7889,7 +7902,7 @@ exports.areEqual = function areEqual(json1, json2) {
         // items at the same index are equal according to this definition; or
         len = json1.length;
         for (i = 0; i < len; i++) {
-            if (!areEqual(json1[i], json2[i])) {
+            if (!areEqual(json1[i], json2[i], { caseInsensitiveComparison: caseInsensitiveComparison })) {
                 return false;
             }
         }
@@ -7901,13 +7914,13 @@ exports.areEqual = function areEqual(json1, json2) {
         // have the same set of property names; and
         var keys1 = Object.keys(json1);
         var keys2 = Object.keys(json2);
-        if (!areEqual(keys1, keys2)) {
+        if (!areEqual(keys1, keys2, { caseInsensitiveComparison: caseInsensitiveComparison })) {
             return false;
         }
         // values for a same property name are equal according to this definition.
         len = keys1.length;
         for (i = 0; i < len; i++) {
-            if (!areEqual(json1[keys1[i]], json2[keys1[i]])) {
+            if (!areEqual(json1[keys1[i]], json2[keys1[i]], { caseInsensitiveComparison: caseInsensitiveComparison })) {
                 return false;
             }
         }
