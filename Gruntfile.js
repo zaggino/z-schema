@@ -50,14 +50,6 @@ module.exports = function (grunt) {
                 config: ".jscs.json"
             }
         },
-        "jasmine_node": {
-            src: [
-                "src/**/*.js"
-            ],
-            options: {
-                coverage: {}
-            }
-        },
         browserify: {
             src: {
                 src: ["src/**/*.js"],
@@ -104,15 +96,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-jshint");
     grunt.loadNpmTasks("grunt-contrib-copy");
     grunt.loadNpmTasks("grunt-jscs");
-    grunt.loadNpmTasks("grunt-jasmine-node");
-    grunt.loadNpmTasks("grunt-jasmine-node-coverage");
     grunt.loadNpmTasks("grunt-browserify");
     grunt.loadNpmTasks("grunt-contrib-jasmine");
     grunt.loadNpmTasks("grunt-contrib-uglify");
 
     // Default task(s).
     grunt.registerTask("lint", ["jshint", "jscs"]);
-    grunt.registerTask("default", ["copy", "lineending", "jshint", "jscs", "jasmine_node", "browserify", "jasmine", "uglify"]);
-    grunt.registerTask("test", ["jasmine_node"]);
+    grunt.registerTask("default", ["copy", "lineending", "jshint", "jscs", "browserify", "jasmine", "uglify"]);
 
 };
