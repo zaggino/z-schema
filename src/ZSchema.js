@@ -22,6 +22,8 @@ var defaultOptions = {
     forceAdditional: false,
     // assume additionalProperties and additionalItems are defined as "false" where appropriate
     assumeAdditional: false,
+    // do case insensitive comparison for enums
+    enumCaseInsensitiveComparison: false,
     // force items to be defined on "array" types
     forceItems: false,
     // force minItems to be defined on "array" types

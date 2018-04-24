@@ -246,15 +246,20 @@ var JsonValidators = {
     enum: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.1.2
         var match = false,
+            caseInsensitiveMatch = false,
             idx = schema.enum.length;
         while (idx--) {
             if (Utils.areEqual(json, schema.enum[idx])) {
                 match = true;
                 break;
+            } else if (Utils.areEqual(json, schema.enum[idx]), { caseInsensitiveComparison: true }) {
+                caseInsensitiveMatch = true;
             }
         }
+
         if (match === false) {
-            report.addError("ENUM_MISMATCH", [json], null, schema.description);
+            var error = caseInsensitiveMatch && this.options.enumCaseInsensitiveComparison ? "ENUM_CASE_MISMATCH" : "ENUM_MISMATCH";
+            report.addError(error, [json], null, schema.description);
         }
     },
     /*

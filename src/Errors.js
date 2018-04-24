@@ -5,6 +5,7 @@ module.exports = {
     INVALID_TYPE:                           "Expected type {0} but found type {1}",
     INVALID_FORMAT:                         "Object didn't pass validation for format {0}: {1}",
     ENUM_MISMATCH:                          "No enum match for: {0}",
+    ENUM_CASE_MISMATCH:                     "Enum does not match case for: {0}",
     ANY_OF_MISSING:                         "Data does not match any schemas from 'anyOf'",
     ONE_OF_MISSING:                         "Data does not match any schemas from 'oneOf'",
     ONE_OF_MULTIPLE:                        "Data is valid against more than one schema from 'oneOf'",
