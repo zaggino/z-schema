@@ -41,7 +41,10 @@ exports.whatIs = function (what) {
 
 };
 
-exports.areEqual = function areEqual(json1, json2, { caseInsensitiveComparison = false } = {}) {
+exports.areEqual = function areEqual(json1, json2, options) {
+
+    options = options || {};
+    var caseInsensitiveComparison = options.caseInsensitiveComparison || false;
 
     // http://json-schema.org/latest/json-schema-core.html#rfc.section.3.6
 
