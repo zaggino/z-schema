@@ -60,7 +60,7 @@
   "dependencies": {
     "lodash.get": "^4.0.0",
     "lodash.isequal": "^4.0.0",
-    "validator": "^9.0.0"
+    "validator": "^10.0.0"
   },
   "optionalDependencies": {
     "commander": "^2.7.1"
