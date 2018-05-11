@@ -114,6 +114,7 @@ function normalizeOptions(options) {
 function ZSchema(options) {
     this.cache = {};
     this.referenceCache = [];
+    this.validateOptions = {};
 
     this.options = normalizeOptions(options);
 
@@ -159,6 +160,8 @@ ZSchema.prototype.validate = function (json, schema, options, callback) {
         options = {};
     }
     if (!options) { options = {}; }
+
+    this.validateOptions = options;
 
     var whatIs = Utils.whatIs(schema);
     if (whatIs !== "string" && whatIs !== "object") {
