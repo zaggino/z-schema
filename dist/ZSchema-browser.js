@@ -6384,12 +6384,19 @@ var JsonValidators = {
             report.addError(error, [json], null, schema.description);
         }
     },
-    /*
     type: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.2
-        // type is handled before this is called so ignore
+        var jsonType = Utils.whatIs(json);
+        if (typeof schema.type === "string") {
+            if (jsonType !== schema.type && (jsonType !== "integer" || schema.type !== "number")) {
+                report.addError("INVALID_TYPE", [schema.type, jsonType], null, schema.description);
+            }
+        } else {
+            if (schema.type.indexOf(jsonType) === -1 && (jsonType !== "integer" || schema.type.indexOf("number") === -1)) {
+                report.addError("INVALID_TYPE", [schema.type, jsonType], null, schema.description);
+            }
+        }
     },
-    */
     allOf: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
         var idx = schema.allOf.length;
@@ -6616,23 +6623,12 @@ exports.validate = function (report, schema, json) {
     }
 
     // type checking first
-    // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.2
     var jsonType = Utils.whatIs(json);
     if (schema.type) {
-        if (typeof schema.type === "string") {
-            if (jsonType !== schema.type && (jsonType !== "integer" || schema.type !== "number")) {
-                report.addError("INVALID_TYPE", [schema.type, jsonType], null, schema.description);
-                if (this.options.breakOnFirstError) {
-                    return false;
-                }
-            }
-        } else {
-            if (schema.type.indexOf(jsonType) === -1 && (jsonType !== "integer" || schema.type.indexOf("number") === -1)) {
-                report.addError("INVALID_TYPE", [schema.type, jsonType], null, schema.description);
-                if (this.options.breakOnFirstError) {
-                    return false;
-                }
-            }
+        keys.splice(keys.indexOf("type"), 1);
+        JsonValidators.type.call(this, report, schema, json);
+        if (report.errors.length && this.options.breakOnFirstError) {
+            return false;
         }
     }
 
