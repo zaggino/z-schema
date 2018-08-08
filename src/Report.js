@@ -42,7 +42,7 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
     function finish() {
         process.nextTick(function () {
             var valid = self.errors.length === 0,
-                err   = valid ? undefined : self.errors;
+                err = valid ? undefined : self.errors;
             callback(err, valid);
         });
     }
@@ -145,13 +145,13 @@ Report.prototype.hasError = function (errorCode, params) {
     return false;
 };
 
-Report.prototype.addError = function (errorCode, params, subReports, schemaDescription, schemaTitle) {
+Report.prototype.addError = function (errorCode, params, subReports, schema) {
     if (!errorCode) { throw new Error("No errorCode passed into addError()"); }
 
-    this.addCustomError(errorCode, Errors[errorCode], params, subReports, schemaDescription, schemaTitle);
+    this.addCustomError(errorCode, Errors[errorCode], params, subReports, schema);
 };
 
-Report.prototype.addCustomError = function (errorCode, errorMessage, params, subReports, schemaDescription, schemaTitle) {
+Report.prototype.addCustomError = function (errorCode, errorMessage, params, subReports, schema) {
     if (this.errors.length >= this.reportOptions.maxErrors) {
         return;
     }
@@ -175,12 +175,15 @@ Report.prototype.addCustomError = function (errorCode, errorMessage, params, sub
         schemaId: this.getSchemaId()
     };
 
-    if (schemaDescription) {
-        err.description = schemaDescription;
-    }
-
-    if (schemaTitle) {
-        err.title = schemaTitle;
+    if (schema && typeof schema === "string") {
+        err.description = schema;
+    } else if (schema && typeof schema === "object") {
+        if (schema.title) {
+            err.title = schema.title;
+        }
+        if (schema.description) {
+            err.description = schema.description;
+        }
     }
 
     if (subReports != null) {
