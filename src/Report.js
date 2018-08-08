@@ -145,13 +145,13 @@ Report.prototype.hasError = function (errorCode, params) {
     return false;
 };
 
-Report.prototype.addError = function (errorCode, params, subReports, schemaDescription) {
+Report.prototype.addError = function (errorCode, params, subReports, schemaDescription, schemaTitle) {
     if (!errorCode) { throw new Error("No errorCode passed into addError()"); }
 
-    this.addCustomError(errorCode, Errors[errorCode], params, subReports, schemaDescription);
+    this.addCustomError(errorCode, Errors[errorCode], params, subReports, schemaDescription, schemaTitle);
 };
 
-Report.prototype.addCustomError = function (errorCode, errorMessage, params, subReports, schemaDescription) {
+Report.prototype.addCustomError = function (errorCode, errorMessage, params, subReports, schemaDescription, schemaTitle) {
     if (this.errors.length >= this.reportOptions.maxErrors) {
         return;
     }
@@ -177,6 +177,10 @@ Report.prototype.addCustomError = function (errorCode, errorMessage, params, sub
 
     if (schemaDescription) {
         err.description = schemaDescription;
+    }
+
+    if (schemaTitle) {
+        err.title = schemaTitle;
     }
 
     if (subReports != null) {
