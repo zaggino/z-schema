@@ -367,7 +367,7 @@ var recurseArray = function (report, schema, json) {
     if (Array.isArray(schema.items)) {
 
         while (idx--) {
-            // equal to doesnt make sense here
+            // equal to doesn't make sense here
             if (idx < schema.items.length) {
                 report.path.push(idx.toString());
                 exports.validate.call(this, report, schema.items[idx], json[idx]);
@@ -455,6 +455,12 @@ var recurseObject = function (report, schema, json) {
     }
 };
 
+/**
+ *
+ * @param {Report} report
+ * @param {*} schema
+ * @param {*} json
+ */
 exports.validate = function (report, schema, json) {
 
     report.commonErrorMessage = "JSON_OBJECT_VALIDATION_FAILED";

@@ -4,6 +4,12 @@ var get    = require("lodash.get");
 var Errors = require("./Errors");
 var Utils  = require("./Utils");
 
+/**
+ * @class
+ *
+ * @param {*} parentOrOptions
+ * @param {*} [reportOptions]
+ */
 function Report(parentOrOptions, reportOptions) {
     this.parentReport = parentOrOptions instanceof Report ?
                             parentOrOptions :
@@ -18,6 +24,10 @@ function Report(parentOrOptions, reportOptions) {
     this.errors = [];
     this.path = [];
     this.asyncTasks = [];
+
+    this.rootSchema = undefined;
+    this.commonErrorMessage = undefined;
+    this.json = undefined;
 }
 
 Report.prototype.isValid = function () {
@@ -79,6 +89,9 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
 };
 
 Report.prototype.getPath = function (returnPathAsString) {
+    /**
+     * @type *[] | string
+     */
     var path = [];
     if (this.parentReport) {
         path = path.concat(this.parentReport.path);
@@ -151,6 +164,14 @@ Report.prototype.addError = function (errorCode, params, subReports, schema) {
     this.addCustomError(errorCode, Errors[errorCode], params, subReports, schema);
 };
 
+/**
+ *
+ * @param {*} errorCode
+ * @param {*} errorMessage
+ * @param {*[]} params
+ * @param {*} subReports
+ * @param {*} schema
+ */
 Report.prototype.addCustomError = function (errorCode, errorMessage, params, subReports, schema) {
     if (this.errors.length >= this.reportOptions.maxErrors) {
         return;

@@ -23,7 +23,7 @@
     "disallowKeywords":                             ["with"],
     "disallowMultipleLineStrings":                  true,
     "disallowMultipleLineBreaks":                   true,
-    "validateLineBreaks":                           "LF",
+    "validateLineBreaks":                           false,
     "validateQuoteMarks":                           "\"",
     "validateIndentation":                          4,
     "disallowMixedSpacesAndTabs":                   true,
