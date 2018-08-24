@@ -1,9 +1,21 @@
 "use strict";
 
+/**
+ *
+ * @param {string} uri
+ *
+ * @returns {boolean}
+ */
 exports.isAbsoluteUri = function (uri) {
     return /^https?:\/\//.test(uri);
 };
 
+/**
+ *
+ * @param {string} uri
+ *
+ * @returns {boolean}
+ */
 exports.isRelativeUri = function (uri) {
     // relative URIs that end with a hash sign, issue #56
     return /.+#/.test(uri);
@@ -41,6 +53,14 @@ exports.whatIs = function (what) {
 
 };
 
+/**
+ *
+ * @param {*} json1
+ * @param {*} json2
+ * @param {*} [options]
+ *
+ * @returns {boolean}
+ */
 exports.areEqual = function areEqual(json1, json2, options) {
 
     options = options || {};
@@ -102,6 +122,13 @@ exports.areEqual = function areEqual(json1, json2, options) {
     return false;
 };
 
+/**
+ *
+ * @param {*[]} arr
+ * @param {number[]} [indexes]
+ *
+ * @returns {boolean}
+ */
 exports.isUniqueArray = function (arr, indexes) {
     var i, j, l = arr.length;
     for (i = 0; i < l; i++) {
@@ -115,6 +142,13 @@ exports.isUniqueArray = function (arr, indexes) {
     return true;
 };
 
+/**
+ *
+ * @param {*} bigSet
+ * @param {*} subSet
+ *
+ * @returns {*[]}
+ */
 exports.difference = function (bigSet, subSet) {
     var arr = [],
         idx = bigSet.length;

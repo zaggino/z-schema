@@ -7,8 +7,8 @@ var Utils  = require("./Utils");
 /**
  * @class
  *
- * @param {*} parentOrOptions
- * @param {*} [reportOptions]
+ * @param {Report|object} parentOrOptions
+ * @param {object} [reportOptions]
  */
 function Report(parentOrOptions, reportOptions) {
     this.parentReport = parentOrOptions instanceof Report ?
@@ -22,6 +22,9 @@ function Report(parentOrOptions, reportOptions) {
     this.reportOptions = reportOptions || {};
 
     this.errors = [];
+    /**
+     * @type {string[]}
+     */
     this.path = [];
     this.asyncTasks = [];
 
@@ -30,6 +33,9 @@ function Report(parentOrOptions, reportOptions) {
     this.json = undefined;
 }
 
+/**
+ * @returns {boolean}
+ */
 Report.prototype.isValid = function () {
     if (this.asyncTasks.length > 0) {
         throw new Error("Async tasks pending, can't answer isValid");
@@ -37,10 +43,23 @@ Report.prototype.isValid = function () {
     return this.errors.length === 0;
 };
 
+/**
+ *
+ * @param {*} fn
+ * @param {*} args
+ * @param {*} asyncTaskResultProcessFn
+ */
 Report.prototype.addAsyncTask = function (fn, args, asyncTaskResultProcessFn) {
     this.asyncTasks.push([fn, args, asyncTaskResultProcessFn]);
 };
 
+/**
+ *
+ * @param {*} timeout
+ * @param {function(*, *)} callback
+ *
+ * @returns {void}
+ */
 Report.prototype.processAsyncTasks = function (timeout, callback) {
 
     var validationTimeout = timeout || 2000,
@@ -88,9 +107,15 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
 
 };
 
+/**
+ *
+ * @param {*} returnPathAsString
+ *
+ * @return {string[]|string}
+ */
 Report.prototype.getPath = function (returnPathAsString) {
     /**
-     * @type *[] | string
+     * @type {string[]|string}
      */
     var path = [];
     if (this.parentReport) {
@@ -136,6 +161,13 @@ Report.prototype.getSchemaId = function () {
     return this.rootSchema.id;
 };
 
+/**
+ *
+ * @param {*} errorCode
+ * @param {*} params
+ *
+ * @return {boolean}
+ */
 Report.prototype.hasError = function (errorCode, params) {
     var idx = this.errors.length;
     while (idx--) {
@@ -158,10 +190,30 @@ Report.prototype.hasError = function (errorCode, params) {
     return false;
 };
 
+/**
+ *
+ * @param {*} errorCode
+ * @param {*} params
+ * @param {Report[]|Report} [subReports]
+ * @param {*} [schema]
+ *
+ * @return {void}
+ */
 Report.prototype.addError = function (errorCode, params, subReports, schema) {
     if (!errorCode) { throw new Error("No errorCode passed into addError()"); }
 
     this.addCustomError(errorCode, Errors[errorCode], params, subReports, schema);
+};
+
+Report.prototype.getJson = function () {
+    var self = this;
+    while (self.json === undefined) {
+        self = self.parentReport;
+        if (self === undefined) {
+            return undefined;
+        }
+    }
+    return self.json;
 };
 
 /**
@@ -169,8 +221,10 @@ Report.prototype.addError = function (errorCode, params, subReports, schema) {
  * @param {*} errorCode
  * @param {*} errorMessage
  * @param {*[]} params
- * @param {*} subReports
+ * @param {Report[]|Report} subReports
  * @param {*} schema
+ *
+ * @returns {void}
  */
 Report.prototype.addCustomError = function (errorCode, errorMessage, params, subReports, schema) {
     if (this.errors.length >= this.reportOptions.maxErrors) {
@@ -193,7 +247,8 @@ Report.prototype.addCustomError = function (errorCode, errorMessage, params, sub
         params: params,
         message: errorMessage,
         path: this.getPath(this.options.reportPathAsArray),
-        schemaId: this.getSchemaId()
+        schemaId: this.getSchemaId(),
+        json: this.getJson()
     };
 
     if (schema && typeof schema === "string") {

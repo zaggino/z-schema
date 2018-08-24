@@ -501,6 +501,13 @@ var SchemaValidators = {
     }
 };
 
+/**
+ *
+ * @param {Report} report
+ * @param {*[]} arr
+ *
+ * @returns {boolean}
+ */
 var validateArrayOfSchemas = function (report, arr) {
     var idx = arr.length;
     while (idx--) {
@@ -509,6 +516,11 @@ var validateArrayOfSchemas = function (report, arr) {
     return report.isValid();
 };
 
+/**
+ *
+ * @param {Report} report
+ * @param {*} schema
+ */
 exports.validateSchema = function (report, schema) {
 
     report.commonErrorMessage = "SCHEMA_VALIDATION_FAILED";
