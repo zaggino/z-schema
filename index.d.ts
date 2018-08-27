@@ -1,3 +1,3 @@
-declare const schemaSymbol: Symbol
+declare export const schemaSymbol: Symbol
 
-declare const jsonSymbol: Symbol
+declare export const jsonSymbol: Symbol
