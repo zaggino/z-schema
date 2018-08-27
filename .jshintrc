@@ -5,6 +5,7 @@
     "eqeqeq": false,
     "es3": false,
     "forin": true,
+    "esversion": 6,
     "freeze": true,
     "immed": true,
     "indent": 4,

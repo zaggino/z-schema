@@ -1,5 +1,9 @@
 "use strict";
 
+exports.jsonSymbol = Symbol.for("z-schema/json");
+
+exports.schemaSymbol = Symbol.for("z-schema/schema");
+
 /**
  *
  * @param {string} uri
