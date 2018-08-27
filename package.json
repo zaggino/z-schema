@@ -28,7 +28,8 @@
     "src",
     "dist",
     "LICENSE",
-    "README.md"
+    "README.md",
+    "index.d.ts"
   ],
   "scripts": {
     "prepublish": "npm test && grunt",

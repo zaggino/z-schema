@@ -402,4 +402,8 @@ ZSchema.getDefaultOptions = function () {
     return Utils.cloneDeep(defaultOptions);
 };
 
+ZSchema.schemaSymbol = Utils.schemaSymbol
+
+ZSchema.jsonSymbol = Utils.jsonSymbol
+
 module.exports = ZSchema;
