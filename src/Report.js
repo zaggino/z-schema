@@ -248,7 +248,7 @@ Report.prototype.addCustomError = function (errorCode, errorMessage, params, sub
         message: errorMessage,
         path: this.getPath(this.options.reportPathAsArray),
         schemaId: this.getSchemaId(),
-        json: this.getJson
+        json: () => this.getJson()
     };
 
     if (schema && typeof schema === "string") {
