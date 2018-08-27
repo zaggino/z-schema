@@ -6612,7 +6612,7 @@ var recurseArray = function (report, schema, json) {
     if (Array.isArray(schema.items)) {
 
         while (idx--) {
-            // equal to doesnt make sense here
+            // equal to doesn't make sense here
             if (idx < schema.items.length) {
                 report.path.push(idx.toString());
                 exports.validate.call(this, report, schema.items[idx], json[idx]);
@@ -6700,6 +6700,12 @@ var recurseObject = function (report, schema, json) {
     }
 };
 
+/**
+ *
+ * @param {Report} report
+ * @param {*} schema
+ * @param {*} json
+ */
 exports.validate = function (report, schema, json) {
 
     report.commonErrorMessage = "JSON_OBJECT_VALIDATION_FAILED";
@@ -6812,6 +6818,12 @@ var get    = require("lodash.get");
 var Errors = require("./Errors");
 var Utils  = require("./Utils");
 
+/**
+ * @class
+ *
+ * @param {Report|object} parentOrOptions
+ * @param {object} [reportOptions]
+ */
 function Report(parentOrOptions, reportOptions) {
     this.parentReport = parentOrOptions instanceof Report ?
                             parentOrOptions :
@@ -6824,10 +6836,20 @@ function Report(parentOrOptions, reportOptions) {
     this.reportOptions = reportOptions || {};
 
     this.errors = [];
+    /**
+     * @type {string[]}
+     */
     this.path = [];
     this.asyncTasks = [];
+
+    this.rootSchema = undefined;
+    this.commonErrorMessage = undefined;
+    this.json = undefined;
 }
 
+/**
+ * @returns {boolean}
+ */
 Report.prototype.isValid = function () {
     if (this.asyncTasks.length > 0) {
         throw new Error("Async tasks pending, can't answer isValid");
@@ -6835,10 +6857,23 @@ Report.prototype.isValid = function () {
     return this.errors.length === 0;
 };
 
+/**
+ *
+ * @param {*} fn
+ * @param {*} args
+ * @param {*} asyncTaskResultProcessFn
+ */
 Report.prototype.addAsyncTask = function (fn, args, asyncTaskResultProcessFn) {
     this.asyncTasks.push([fn, args, asyncTaskResultProcessFn]);
 };
 
+/**
+ *
+ * @param {*} timeout
+ * @param {function(*, *)} callback
+ *
+ * @returns {void}
+ */
 Report.prototype.processAsyncTasks = function (timeout, callback) {
 
     var validationTimeout = timeout || 2000,
@@ -6886,7 +6921,16 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
 
 };
 
+/**
+ *
+ * @param {*} returnPathAsString
+ *
+ * @return {string[]|string}
+ */
 Report.prototype.getPath = function (returnPathAsString) {
+    /**
+     * @type {string[]|string}
+     */
     var path = [];
     if (this.parentReport) {
         path = path.concat(this.parentReport.path);
@@ -6931,6 +6975,13 @@ Report.prototype.getSchemaId = function () {
     return this.rootSchema.id;
 };
 
+/**
+ *
+ * @param {*} errorCode
+ * @param {*} params
+ *
+ * @return {boolean}
+ */
 Report.prototype.hasError = function (errorCode, params) {
     var idx = this.errors.length;
     while (idx--) {
@@ -6953,12 +7004,42 @@ Report.prototype.hasError = function (errorCode, params) {
     return false;
 };
 
+/**
+ *
+ * @param {*} errorCode
+ * @param {*} params
+ * @param {Report[]|Report} [subReports]
+ * @param {*} [schema]
+ *
+ * @return {void}
+ */
 Report.prototype.addError = function (errorCode, params, subReports, schema) {
     if (!errorCode) { throw new Error("No errorCode passed into addError()"); }
 
     this.addCustomError(errorCode, Errors[errorCode], params, subReports, schema);
 };
 
+Report.prototype.getJson = function () {
+    var self = this;
+    while (self.json === undefined) {
+        self = self.parentReport;
+        if (self === undefined) {
+            return undefined;
+        }
+    }
+    return self.json;
+};
+
+/**
+ *
+ * @param {*} errorCode
+ * @param {*} errorMessage
+ * @param {*[]} params
+ * @param {Report[]|Report} subReports
+ * @param {*} schema
+ *
+ * @returns {void}
+ */
 Report.prototype.addCustomError = function (errorCode, errorMessage, params, subReports, schema) {
     if (this.errors.length >= this.reportOptions.maxErrors) {
         return;
@@ -6980,7 +7061,8 @@ Report.prototype.addCustomError = function (errorCode, errorMessage, params, sub
         params: params,
         message: errorMessage,
         path: this.getPath(this.options.reportPathAsArray),
-        schemaId: this.getSchemaId()
+        schemaId: this.getSchemaId(),
+        json: this.getJson()
     };
 
     if (schema && typeof schema === "string") {
@@ -7085,6 +7167,13 @@ function findId(schema, id) {
     }
 }
 
+/**
+ *
+ * @param {*} uri
+ * @param {*} schema
+ *
+ * @returns {void}
+ */
 exports.cacheSchemaByUri = function (uri, schema) {
     var remotePath = getRemotePath(uri);
     if (remotePath) {
@@ -7092,6 +7181,12 @@ exports.cacheSchemaByUri = function (uri, schema) {
     }
 };
 
+/**
+ *
+ * @param {*} uri
+ *
+ * @returns {void}
+ */
 exports.removeFromCacheByUri = function (uri) {
     var remotePath = getRemotePath(uri);
     if (remotePath) {
@@ -7099,6 +7194,12 @@ exports.removeFromCacheByUri = function (uri) {
     }
 };
 
+/**
+ *
+ * @param {*} uri
+ *
+ * @returns {boolean}
+ */
 exports.checkCacheForUri = function (uri) {
     var remotePath = getRemotePath(uri);
     return remotePath ? this.cache[remotePath] != null : false;
@@ -7987,6 +8088,13 @@ var SchemaValidators = {
     }
 };
 
+/**
+ *
+ * @param {Report} report
+ * @param {*[]} arr
+ *
+ * @returns {boolean}
+ */
 var validateArrayOfSchemas = function (report, arr) {
     var idx = arr.length;
     while (idx--) {
@@ -7995,6 +8103,11 @@ var validateArrayOfSchemas = function (report, arr) {
     return report.isValid();
 };
 
+/**
+ *
+ * @param {Report} report
+ * @param {*} schema
+ */
 exports.validateSchema = function (report, schema) {
 
     report.commonErrorMessage = "SCHEMA_VALIDATION_FAILED";
@@ -8095,10 +8208,22 @@ exports.validateSchema = function (report, schema) {
 },{"./FormatValidators":80,"./JsonValidation":81,"./Report":83,"./Utils":87}],87:[function(require,module,exports){
 "use strict";
 
+/**
+ *
+ * @param {string} uri
+ *
+ * @returns {boolean}
+ */
 exports.isAbsoluteUri = function (uri) {
     return /^https?:\/\//.test(uri);
 };
 
+/**
+ *
+ * @param {string} uri
+ *
+ * @returns {boolean}
+ */
 exports.isRelativeUri = function (uri) {
     // relative URIs that end with a hash sign, issue #56
     return /.+#/.test(uri);
@@ -8136,6 +8261,14 @@ exports.whatIs = function (what) {
 
 };
 
+/**
+ *
+ * @param {*} json1
+ * @param {*} json2
+ * @param {*} [options]
+ *
+ * @returns {boolean}
+ */
 exports.areEqual = function areEqual(json1, json2, options) {
 
     options = options || {};
@@ -8197,6 +8330,13 @@ exports.areEqual = function areEqual(json1, json2, options) {
     return false;
 };
 
+/**
+ *
+ * @param {*[]} arr
+ * @param {number[]} [indexes]
+ *
+ * @returns {boolean}
+ */
 exports.isUniqueArray = function (arr, indexes) {
     var i, j, l = arr.length;
     for (i = 0; i < l; i++) {
@@ -8210,6 +8350,13 @@ exports.isUniqueArray = function (arr, indexes) {
     return true;
 };
 
+/**
+ *
+ * @param {*} bigSet
+ * @param {*} subSet
+ *
+ * @returns {*[]}
+ */
 exports.difference = function (bigSet, subSet) {
     var arr = [],
         idx = bigSet.length;
@@ -8337,9 +8484,9 @@ var Utils             = require("./Utils");
 var Draft4Schema      = require("./schemas/schema.json");
 var Draft4HyperSchema = require("./schemas/hyper-schema.json");
 
-/*
-    default options
-*/
+/**
+ * default options
+ */
 var defaultOptions = {
     // default timeout for all async tasks
     asyncTimeout: 2000,
@@ -8433,9 +8580,11 @@ function normalizeOptions(options) {
     return normalized;
 }
 
-/*
-    constructor
-*/
+/**
+ * @class
+ *
+ * @param {*} [options]
+ */
 function ZSchema(options) {
     this.cache = {};
     this.referenceCache = [];
@@ -8450,9 +8599,13 @@ function ZSchema(options) {
     this.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", Draft4HyperSchema, metaschemaOptions);
 }
 
-/*
-    instance methods
-*/
+/**
+ * instance methods
+ *
+ * @param {*} schema
+ *
+ * @returns {boolean}
+ */
 ZSchema.prototype.compileSchema = function (schema) {
     var report = new Report(this.options);
 
@@ -8463,6 +8616,13 @@ ZSchema.prototype.compileSchema = function (schema) {
     this.lastReport = report;
     return report.isValid();
 };
+
+/**
+ *
+ * @param {*} schema
+ *
+ * @returns {boolean}
+ */
 ZSchema.prototype.validateSchema = function (schema) {
     if (Array.isArray(schema) && schema.length === 0) {
         throw new Error(".validateSchema was called with an empty array");
@@ -8478,6 +8638,16 @@ ZSchema.prototype.validateSchema = function (schema) {
     this.lastReport = report;
     return report.isValid();
 };
+
+/**
+ *
+ * @param {*} json
+ * @param {*} schema
+ * @param {*} [options]
+ * @param {function(*, *)} [callback]
+ *
+ * @returns {boolean}
+ */
 ZSchema.prototype.validate = function (json, schema, options, callback) {
 
     if (Utils.whatIs(options) === "function") {
@@ -8502,6 +8672,7 @@ ZSchema.prototype.validate = function (json, schema, options, callback) {
 
     var foundError = false;
     var report = new Report(this.options);
+    report.json = json;
 
     if (typeof schema === "string") {
         var schemaName = schema;
@@ -8668,13 +8839,22 @@ ZSchema.prototype.getResolvedSchema = function (schema) {
         throw this.getLastError();
     }
 };
+
+/**
+ *
+ * @param {*} schemaReader
+ *
+ * @returns {void}
+ */
 ZSchema.prototype.setSchemaReader = function (schemaReader) {
     return ZSchema.setSchemaReader(schemaReader);
 };
+
 ZSchema.prototype.getSchemaReader = function () {
     return ZSchema.schemaReader;
 };
 
+ZSchema.schemaReader = undefined;
 /*
     static methods
 */
