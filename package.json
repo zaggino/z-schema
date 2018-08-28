@@ -28,8 +28,10 @@
     "src",
     "dist",
     "LICENSE",
-    "README.md"
+    "README.md",
+    "index.d.ts"
   ],
+  "types": "index.d.ts",
   "scripts": {
     "prepublish": "npm test && grunt",
     "test": "jasmine-node test/ && grunt lint"
