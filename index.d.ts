@@ -80,6 +80,10 @@ declare namespace Validator {
          */
         inner: SchemaErrorDetail[];
     }
+
+    export const schemaSymbol: unique symbol
+
+    export const jsonSymbol: unique symbol
 }
 
 declare class Validator {
