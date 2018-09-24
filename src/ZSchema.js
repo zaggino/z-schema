@@ -12,9 +12,9 @@ var Utils             = require("./Utils");
 var Draft4Schema      = require("./schemas/schema.json");
 var Draft4HyperSchema = require("./schemas/hyper-schema.json");
 
-/*
-    default options
-*/
+/**
+ * default options
+ */
 var defaultOptions = {
     // default timeout for all async tasks
     asyncTimeout: 2000,
@@ -108,9 +108,11 @@ function normalizeOptions(options) {
     return normalized;
 }
 
-/*
-    constructor
-*/
+/**
+ * @class
+ *
+ * @param {*} [options]
+ */
 function ZSchema(options) {
     this.cache = {};
     this.referenceCache = [];
@@ -125,9 +127,13 @@ function ZSchema(options) {
     this.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", Draft4HyperSchema, metaschemaOptions);
 }
 
-/*
-    instance methods
-*/
+/**
+ * instance methods
+ *
+ * @param {*} schema
+ *
+ * @returns {boolean}
+ */
 ZSchema.prototype.compileSchema = function (schema) {
     var report = new Report(this.options);
 
@@ -138,6 +144,13 @@ ZSchema.prototype.compileSchema = function (schema) {
     this.lastReport = report;
     return report.isValid();
 };
+
+/**
+ *
+ * @param {*} schema
+ *
+ * @returns {boolean}
+ */
 ZSchema.prototype.validateSchema = function (schema) {
     if (Array.isArray(schema) && schema.length === 0) {
         throw new Error(".validateSchema was called with an empty array");
@@ -153,6 +166,16 @@ ZSchema.prototype.validateSchema = function (schema) {
     this.lastReport = report;
     return report.isValid();
 };
+
+/**
+ *
+ * @param {*} json
+ * @param {*} schema
+ * @param {*} [options]
+ * @param {function(*, *)} [callback]
+ *
+ * @returns {boolean}
+ */
 ZSchema.prototype.validate = function (json, schema, options, callback) {
 
     if (Utils.whatIs(options) === "function") {
@@ -177,6 +200,7 @@ ZSchema.prototype.validate = function (json, schema, options, callback) {
 
     var foundError = false;
     var report = new Report(this.options);
+    report.json = json;
 
     if (typeof schema === "string") {
         var schemaName = schema;
@@ -343,13 +367,22 @@ ZSchema.prototype.getResolvedSchema = function (schema) {
         throw this.getLastError();
     }
 };
+
+/**
+ *
+ * @param {*} schemaReader
+ *
+ * @returns {void}
+ */
 ZSchema.prototype.setSchemaReader = function (schemaReader) {
     return ZSchema.setSchemaReader(schemaReader);
 };
+
 ZSchema.prototype.getSchemaReader = function () {
     return ZSchema.schemaReader;
 };
 
+ZSchema.schemaReader = undefined;
 /*
     static methods
 */
@@ -368,5 +401,9 @@ ZSchema.getRegisteredFormats = function () {
 ZSchema.getDefaultOptions = function () {
     return Utils.cloneDeep(defaultOptions);
 };
+
+ZSchema.schemaSymbol = Utils.schemaSymbol;
+
+ZSchema.jsonSymbol = Utils.jsonSymbol;
 
 module.exports = ZSchema;

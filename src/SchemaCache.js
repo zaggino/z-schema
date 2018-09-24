@@ -64,6 +64,13 @@ function findId(schema, id) {
     }
 }
 
+/**
+ *
+ * @param {*} uri
+ * @param {*} schema
+ *
+ * @returns {void}
+ */
 exports.cacheSchemaByUri = function (uri, schema) {
     var remotePath = getRemotePath(uri);
     if (remotePath) {
@@ -71,6 +78,12 @@ exports.cacheSchemaByUri = function (uri, schema) {
     }
 };
 
+/**
+ *
+ * @param {*} uri
+ *
+ * @returns {void}
+ */
 exports.removeFromCacheByUri = function (uri) {
     var remotePath = getRemotePath(uri);
     if (remotePath) {
@@ -78,6 +91,12 @@ exports.removeFromCacheByUri = function (uri) {
     }
 };
 
+/**
+ *
+ * @param {*} uri
+ *
+ * @returns {boolean}
+ */
 exports.checkCacheForUri = function (uri) {
     var remotePath = getRemotePath(uri);
     return remotePath ? this.cache[remotePath] != null : false;
