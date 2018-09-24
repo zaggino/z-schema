@@ -9151,6 +9151,15 @@ exports.jsonSymbol = Symbol.for("z-schema/json");
 exports.schemaSymbol = Symbol.for("z-schema/schema");
 
 /**
+ * @param {object} obj
+ *
+ * @returns {string[]}
+ */
+var sortedKeys = exports.sortedKeys = function (obj) {
+    return Object.keys(obj).sort();
+};
+
+/**
  *
  * @param {string} uri
  *
@@ -9254,8 +9263,8 @@ exports.areEqual = function areEqual(json1, json2, options) {
     // both are objects, and:
     if (exports.whatIs(json1) === "object" && exports.whatIs(json2) === "object") {
         // have the same set of property names; and
-        var keys1 = Object.keys(json1);
-        var keys2 = Object.keys(json2);
+        var keys1 = sortedKeys(json1);
+        var keys2 = sortedKeys(json2);
         if (!areEqual(keys1, keys2, { caseInsensitiveComparison: caseInsensitiveComparison })) {
             return false;
         }
