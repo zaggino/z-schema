@@ -15519,6 +15519,8 @@ var recurseObject = function (report, schema, json) {
     }
 };
 
+exports.JsonValidators = JsonValidators;
+
 /**
  *
  * @param {Report} report
