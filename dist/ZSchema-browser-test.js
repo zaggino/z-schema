@@ -15242,17 +15242,6 @@ var JsonValidators = {
                         }
                     }
                 }
-                /*
-                const subReports = []
-                for (const property of s) {
-                    var subReport = new Report(report);
-                    subReport.addError("OBJECT_ADDITIONAL_PROPERTIES", [property], null, schema);
-                    subReports.push(subReport);
-                }
-                if (s.length > 0) {
-                    report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s], subReports, schema);
-                }
-                */
                 if (s.length > 0) {
                     for (const i of s) {
                         report.addError("OBJECT_ADDITIONAL_PROPERTIES", [i], null, schema);
