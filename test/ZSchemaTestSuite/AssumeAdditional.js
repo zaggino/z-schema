@@ -39,6 +39,26 @@ module.exports = {
         },
         {
             schema: {
+                "type": "object",
+                "properties": {
+                    "hello": {
+                        "type": "string"
+                    }
+                }
+            },
+            data: {
+                hello: "world",
+                good: "morning",
+                night: "night"
+            },
+            description: "should fail validation with multiple errors when several other than defined properties are used",
+            valid: false,
+            after: function(errs) {
+                expect(errs.length).toBe(2);
+            }
+        },
+        {
+            schema: {
                 "type": "array",
                 "items": [
                     { "type": "string" },
