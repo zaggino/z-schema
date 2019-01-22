@@ -33,8 +33,10 @@
   ],
   "types": "index.d.ts",
   "scripts": {
-    "prepublish": "npm test && grunt",
-    "test": "jasmine-node test/ && grunt lint"
+    "prepare": "npm test && grunt",
+    "prepublishOnly": "npm test && grunt",
+    "test": "jasmine-node test/ && grunt lint",
+    "grunt": "grunt"
   },
   "testling": {
     "scripts": [

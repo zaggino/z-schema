@@ -7602,7 +7602,10 @@ var recurseObject = function (report, schema, json) {
         while (idx2--) {
             report.path.push(m);
             exports.validate.call(this, report, s[idx2], propertyValue);
-            report.path.pop();
+
+            // commented out to resolve issue #209 - the path gets popped before async tasks complete
+            // all the tests run fine without, there seems to be no reason to have this pop here
+            // report.path.pop();
         }
     }
 };

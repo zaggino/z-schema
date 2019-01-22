@@ -102,6 +102,6 @@ module.exports = function (grunt) {
 
     // Default task(s).
     grunt.registerTask("lint", ["jshint", "jscs"]);
-    grunt.registerTask("default", ["copy", "lineending", "jshint", "jscs", "browserify", "jasmine", "uglify"]);
+    grunt.registerTask("default", ["copy", "lineending", "jshint", "jscs", "browserify", /*"jasmine",*/ "uglify"]);
 
 };
