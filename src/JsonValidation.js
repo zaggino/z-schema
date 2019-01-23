@@ -207,9 +207,10 @@ var JsonValidators = {
                         }
                     }
                 }
-                if (s.length > 0) {
-                    for (const i of s) {
-                        report.addError("OBJECT_ADDITIONAL_PROPERTIES", [i], null, schema);
+                var idx4 = s.length;
+                if (idx4) {
+                    while (idx4--) {
+                        report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s[idx4]], null, schema);
                     }
                 }
             }

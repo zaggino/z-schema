@@ -55,6 +55,8 @@ module.exports = {
             valid: false,
             after: function(errs) {
                 expect(errs.length).toBe(2);
+                expect(errs[0].message).toBe('Additional properties not allowed: good');
+                expect(errs[1].message).toBe('Additional properties not allowed: night');
             }
         },
         {

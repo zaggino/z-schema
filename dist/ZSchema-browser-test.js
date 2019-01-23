@@ -15242,9 +15242,10 @@ var JsonValidators = {
                         }
                     }
                 }
-                if (s.length > 0) {
-                    for (const i of s) {
-                        report.addError("OBJECT_ADDITIONAL_PROPERTIES", [i], null, schema);
+                var idx4 = s.length;
+                if (idx4) {
+                    while (idx4--) {
+                        report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s[idx4]], null, schema);
                     }
                 }
             }
@@ -18050,6 +18051,28 @@ module.exports = {
         },
         {
             schema: {
+                "type": "object",
+                "properties": {
+                    "hello": {
+                        "type": "string"
+                    }
+                }
+            },
+            data: {
+                hello: "world",
+                good: "morning",
+                night: "night"
+            },
+            description: "should fail validation with multiple errors when several other than defined properties are used",
+            valid: false,
+            after: function(errs) {
+                expect(errs.length).toBe(2);
+                expect(errs[0].message).toBe('Additional properties not allowed: good');
+                expect(errs[1].message).toBe('Additional properties not allowed: night');
+            }
+        },
+        {
+            schema: {
                 "type": "array",
                 "items": [
                     { "type": "string" },
@@ -19498,7 +19521,7 @@ module.exports = {
 },{}],215:[function(require,module,exports){
 "use strict";
 
-const testAsync = true;
+var testAsync = true;
 
 module.exports = {
   description: "Issue #209 - async validator returns wrong path",
@@ -19543,6 +19566,7 @@ module.exports = {
     }
   ]
 };
+
 },{}],216:[function(require,module,exports){
 "use strict";
 
