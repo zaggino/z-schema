@@ -207,8 +207,11 @@ var JsonValidators = {
                         }
                     }
                 }
-                if (s.length > 0) {
-                    report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s], null, schema);
+                var idx4 = s.length;
+                if (idx4) {
+                    while (idx4--) {
+                        report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s[idx4]], null, schema);
+                    }
                 }
             }
         }

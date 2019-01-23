@@ -1,6 +1,6 @@
 "use strict";
 
-const testAsync = true;
+var testAsync = true;
 
 module.exports = {
   description: "Issue #209 - async validator returns wrong path",
