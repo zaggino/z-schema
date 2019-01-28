@@ -7490,10 +7490,14 @@ var JsonValidators = {
         var formatValidatorFn = FormatValidators[schema.format];
         if (typeof formatValidatorFn === "function") {
             if (formatValidatorFn.length === 2) {
-                // async
+                // async - need to clone the path here, because it will change by the time async function reports back
+                var pathBeforeAsync = Utils.clone(report.path);
                 report.addAsyncTask(formatValidatorFn, [json], function (result) {
                     if (result !== true) {
+                        var backup = report.path;
+                        report.path = pathBeforeAsync;
                         report.addError("INVALID_FORMAT", [schema.format, json], null, schema);
+                        report.path = backup;
                     }
                 });
             } else {
@@ -7603,10 +7607,7 @@ var recurseObject = function (report, schema, json) {
         while (idx2--) {
             report.path.push(m);
             exports.validate.call(this, report, s[idx2], propertyValue);
-
-            // commented out to resolve issue #209 - the path gets popped before async tasks complete
-            // all the tests run fine without, there seems to be no reason to have this pop here
-            // report.path.pop();
+            report.path.pop();
         }
     }
 };

@@ -1,6 +1,6 @@
 {
   "name": "z-schema",
-  "version": "3.25.0",
+  "version": "3.25.1",
   "description": "JSON schema validator",
   "homepage": "https://github.com/zaggino/z-schema",
   "authors": [
@@ -36,6 +36,7 @@
     "prepare": "grunt",
     "prepublishOnly": "npm test",
     "test": "jasmine-node test/ && grunt lint",
+    "test-z": "jasmine-node test/spec/ZSchemaTestSuiteSpec.js",
     "grunt": "grunt"
   },
   "testling": {
