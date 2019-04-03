@@ -4,18 +4,29 @@ var FormatValidators = require("./FormatValidators"),
     Report           = require("./Report"),
     Utils            = require("./Utils");
 
+var shouldSkipValidate = function (options, errors) {
+    return options && Array.isArray(options.includeErrors) && errors.every(function (err) { return !options.includeErrors.includes(err);});
+};
+
 var JsonValidators = {
     multipleOf: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.1.2
+        if (shouldSkipValidate(this.validateOptions, ["MULTIPLE_OF"])) {
+            return;
+        }
         if (typeof json !== "number") {
             return;
         }
+
         if (Utils.whatIs(json / schema.multipleOf) !== "integer") {
             report.addError("MULTIPLE_OF", [json, schema.multipleOf], null, schema);
         }
     },
     maximum: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.2.2
+        if (shouldSkipValidate(this.validateOptions, ["MAXIMUM", "MAXIMUM_EXCLUSIVE"])) {
+            return;
+        }
         if (typeof json !== "number") {
             return;
         }
@@ -34,6 +45,9 @@ var JsonValidators = {
     },
     minimum: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.2
+        if (shouldSkipValidate(this.validateOptions, ["MINIMUM", "MINIMUM_EXCLUSIVE"])) {
+            return;
+        }
         if (typeof json !== "number") {
             return;
         }
@@ -52,6 +66,9 @@ var JsonValidators = {
     },
     maxLength: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.1.2
+        if (shouldSkipValidate(this.validateOptions, ["MAX_LENGTH"])) {
+            return;
+        }
         if (typeof json !== "string") {
             return;
         }
@@ -61,6 +78,9 @@ var JsonValidators = {
     },
     minLength: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.2.2
+        if (shouldSkipValidate(this.validateOptions, ["MIN_LENGTH"])) {
+            return;
+        }
         if (typeof json !== "string") {
             return;
         }
@@ -70,6 +90,9 @@ var JsonValidators = {
     },
     pattern: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.3.2
+        if (shouldSkipValidate(this.validateOptions, ["PATTERN"])) {
+            return;
+        }
         if (typeof json !== "string") {
             return;
         }
@@ -78,7 +101,10 @@ var JsonValidators = {
         }
     },
     additionalItems: function (report, schema, json) {
-        // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.2
+        // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.2	
+        if (shouldSkipValidate(this.validateOptions, ["ARRAY_ADDITIONAL_ITEMS"])) {
+            return;
+        }
         if (!Array.isArray(json)) {
             return;
         }
@@ -95,6 +121,9 @@ var JsonValidators = {
     },
     maxItems: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.2.2
+        if (shouldSkipValidate(this.validateOptions, ["ARRAY_LENGTH_LONG"])) {
+            return;
+        }
         if (!Array.isArray(json)) {
             return;
         }
@@ -104,6 +133,9 @@ var JsonValidators = {
     },
     minItems: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.3.2
+        if (shouldSkipValidate(this.validateOptions, ["ARRAY_LENGTH_SHORT"])) {
+            return;
+        }
         if (!Array.isArray(json)) {
             return;
         }
@@ -113,6 +145,9 @@ var JsonValidators = {
     },
     uniqueItems: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.4.2
+        if (shouldSkipValidate(this.validateOptions, ["ARRAY_UNIQUE"])) {
+            return;
+        }
         if (!Array.isArray(json)) {
             return;
         }
@@ -125,6 +160,9 @@ var JsonValidators = {
     },
     maxProperties: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.1.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_PROPERTIES_MAXIMUM"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -135,6 +173,9 @@ var JsonValidators = {
     },
     minProperties: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.2.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_PROPERTIES_MINIMUM"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -145,6 +186,9 @@ var JsonValidators = {
     },
     required: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.3.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_MISSING_REQUIRED_PROPERTY"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -170,6 +214,9 @@ var JsonValidators = {
     },
     properties: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_ADDITIONAL_PROPERTIES"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -218,6 +265,9 @@ var JsonValidators = {
     },
     dependencies: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.5.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_DEPENDENCY_KEY"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -248,6 +298,9 @@ var JsonValidators = {
     },
     enum: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.1.2
+        if (shouldSkipValidate(this.validateOptions, ["ENUM_CASE_MISMATCH", "ENUM_MISMATCH"])) {
+            return;
+        }
         var match = false,
             caseInsensitiveMatch = false,
             idx = schema.enum.length;
@@ -267,6 +320,9 @@ var JsonValidators = {
     },
     type: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.2
+        if (shouldSkipValidate(this.validateOptions, ["INVALID_TYPE"])) {
+            return;
+        }
         var jsonType = Utils.whatIs(json);
         if (typeof schema.type === "string") {
             if (jsonType !== schema.type && (jsonType !== "integer" || schema.type !== "number")) {
@@ -339,6 +395,9 @@ var JsonValidators = {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
         var formatValidatorFn = FormatValidators[schema.format];
         if (typeof formatValidatorFn === "function") {
+            if (shouldSkipValidate(this.validateOptions, ["INVALID_FORMAT"])) {
+                return;
+            }
             if (formatValidatorFn.length === 2) {
                 // async - need to clone the path here, because it will change by the time async function reports back
                 var pathBeforeAsync = Utils.clone(report.path);
