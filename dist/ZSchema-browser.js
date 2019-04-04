@@ -7231,7 +7231,8 @@ var FormatValidators = require("./FormatValidators"),
 var shouldSkipValidate = function (options, errors) {
     return options &&
         Array.isArray(options.includeErrors) &&
-        (options.includeErrors.length === 0 || !errors.some(function (err) { return options.includeErrors.includes(err);}));
+        options.includeErrors.length > 0 &&
+        !errors.some(function (err) { return options.includeErrors.includes(err);});
 };
 
 var JsonValidators = {

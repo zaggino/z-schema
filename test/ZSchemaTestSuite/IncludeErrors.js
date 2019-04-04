@@ -79,11 +79,33 @@ module.exports = {
                 hello: "world",
                 extra: "extra"
             },
-            description: "should fail validation for all errors when empty array is provided.",
+            description: "should fail validation for all errors when no `includeErrors` array is provided.",
             valid: false,
             after: function(errs) {
                 expect(errs.length).toBe(2);
             }
         },
+        {
+            schema: {
+                "type": "object",
+                "properties": {
+                    "hello": {
+                        "type": "number"
+                    }
+                }
+            },
+            data: {
+                hello: "world",
+                extra: "extra"
+            },
+            validateOptions: { 
+                includeErrors: []
+            },
+            description: "should fail validation for all errors when empty array is provided.",
+            valid: false,
+            after: function(errs) {
+                expect(errs.length).toBe(2);
+            }
+        }
     ]
 };
