@@ -5,7 +5,9 @@ var FormatValidators = require("./FormatValidators"),
     Utils            = require("./Utils");
 
 var shouldSkipValidate = function (options, errors) {
-    return options && Array.isArray(options.includeErrors) && errors.every(function (err) { return !options.includeErrors.includes(err);});
+    return options &&
+        Array.isArray(options.includeErrors) &&
+        (options.includeErrors.length === 0 || !errors.some(function (err) { return options.includeErrors.includes(err);}));
 };
 
 var JsonValidators = {
@@ -101,7 +103,7 @@ var JsonValidators = {
         }
     },
     additionalItems: function (report, schema, json) {
-        // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.2	
+        // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.2
         if (shouldSkipValidate(this.validateOptions, ["ARRAY_ADDITIONAL_ITEMS"])) {
             return;
         }

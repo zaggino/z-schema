@@ -4000,7 +4000,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var version = '10.9.0';
+var version = '10.11.0';
 var validator = {
   version: version,
   toDate: _toDate.default,
@@ -4085,6 +4085,7 @@ var validator = {
 var _default = validator;
 exports.default = _default;
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./lib/blacklist":57,"./lib/contains":58,"./lib/equals":59,"./lib/escape":60,"./lib/isAfter":61,"./lib/isAlpha":62,"./lib/isAlphanumeric":63,"./lib/isAscii":64,"./lib/isBase64":65,"./lib/isBefore":66,"./lib/isBoolean":67,"./lib/isByteLength":68,"./lib/isCreditCard":69,"./lib/isCurrency":70,"./lib/isDataURI":71,"./lib/isDecimal":72,"./lib/isDivisibleBy":73,"./lib/isEmail":74,"./lib/isEmpty":75,"./lib/isFQDN":76,"./lib/isFloat":77,"./lib/isFullWidth":78,"./lib/isHalfWidth":79,"./lib/isHash":80,"./lib/isHexColor":81,"./lib/isHexadecimal":82,"./lib/isIP":83,"./lib/isIPRange":84,"./lib/isISBN":85,"./lib/isISIN":86,"./lib/isISO31661Alpha2":87,"./lib/isISO31661Alpha3":88,"./lib/isISO8601":89,"./lib/isISRC":90,"./lib/isISSN":91,"./lib/isIdentityCard":92,"./lib/isIn":93,"./lib/isInt":94,"./lib/isJSON":95,"./lib/isJWT":96,"./lib/isLatLong":97,"./lib/isLength":98,"./lib/isLowercase":99,"./lib/isMACAddress":100,"./lib/isMD5":101,"./lib/isMagnetURI":102,"./lib/isMimeType":103,"./lib/isMobilePhone":104,"./lib/isMongoId":105,"./lib/isMultibyte":106,"./lib/isNumeric":107,"./lib/isPort":108,"./lib/isPostalCode":109,"./lib/isRFC3339":110,"./lib/isSurrogatePair":111,"./lib/isURL":112,"./lib/isUUID":113,"./lib/isUppercase":114,"./lib/isVariableWidth":115,"./lib/isWhitelisted":116,"./lib/ltrim":117,"./lib/matches":118,"./lib/normalizeEmail":119,"./lib/rtrim":120,"./lib/stripLow":121,"./lib/toBoolean":122,"./lib/toDate":123,"./lib/toFloat":124,"./lib/toInt":125,"./lib/trim":126,"./lib/unescape":127,"./lib/util/toString":131,"./lib/whitelist":132}],56:[function(require,module,exports){
 "use strict";
 
@@ -4213,6 +4214,7 @@ function blacklist(str, chars) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],58:[function(require,module,exports){
 "use strict";
 
@@ -4233,6 +4235,7 @@ function contains(str, elem) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128,"./util/toString":131}],59:[function(require,module,exports){
 "use strict";
 
@@ -4251,6 +4254,7 @@ function equals(str, comparison) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],60:[function(require,module,exports){
 "use strict";
 
@@ -4269,6 +4273,7 @@ function escape(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],61:[function(require,module,exports){
 "use strict";
 
@@ -4292,6 +4297,7 @@ function isAfter(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./toDate":123,"./util/assertString":128}],62:[function(require,module,exports){
 "use strict";
 
@@ -4370,6 +4376,7 @@ function isAscii(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],65:[function(require,module,exports){
 "use strict";
 
@@ -4397,6 +4404,7 @@ function isBase64(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],66:[function(require,module,exports){
 "use strict";
 
@@ -4420,6 +4428,7 @@ function isBefore(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./toDate":123,"./util/assertString":128}],67:[function(require,module,exports){
 "use strict";
 
@@ -4438,6 +4447,7 @@ function isBoolean(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],68:[function(require,module,exports){
 "use strict";
 
@@ -4472,6 +4482,7 @@ function isByteLength(str, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],69:[function(require,module,exports){
 "use strict";
 
@@ -4524,6 +4535,7 @@ function isCreditCard(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],70:[function(require,module,exports){
 "use strict";
 
@@ -4613,6 +4625,7 @@ function isCurrency(str, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128,"./util/merge":130}],71:[function(require,module,exports){
 "use strict";
 
@@ -4667,6 +4680,7 @@ function isDataURI(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],72:[function(require,module,exports){
 "use strict";
 
@@ -4709,6 +4723,7 @@ function isDecimal(str, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./alpha":56,"./util/assertString":128,"./util/includes":129,"./util/merge":130}],73:[function(require,module,exports){
 "use strict";
 
@@ -4729,6 +4744,7 @@ function isDivisibleBy(str, num) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./toFloat":124,"./util/assertString":128}],74:[function(require,module,exports){
 "use strict";
 
@@ -4862,6 +4878,7 @@ function isEmail(str, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./isByteLength":68,"./isFQDN":76,"./isIP":83,"./util/assertString":128,"./util/merge":130}],75:[function(require,module,exports){
 "use strict";
 
@@ -4887,6 +4904,7 @@ function isEmpty(str, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128,"./util/merge":130}],76:[function(require,module,exports){
 "use strict";
 
@@ -4962,6 +4980,7 @@ function isFQDN(str, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128,"./util/merge":130}],77:[function(require,module,exports){
 "use strict";
 
@@ -5067,6 +5086,7 @@ function isHash(str, algorithm) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],81:[function(require,module,exports){
 "use strict";
 
@@ -5087,6 +5107,7 @@ function isHexColor(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],82:[function(require,module,exports){
 "use strict";
 
@@ -5107,6 +5128,7 @@ function isHexadecimal(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],83:[function(require,module,exports){
 "use strict";
 
@@ -5193,6 +5215,7 @@ function isIP(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],84:[function(require,module,exports){
 "use strict";
 
@@ -5230,6 +5253,7 @@ function isIPRange(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./isIP":83,"./util/assertString":128}],85:[function(require,module,exports){
 "use strict";
 
@@ -5295,6 +5319,7 @@ function isISBN(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],86:[function(require,module,exports){
 "use strict";
 
@@ -5347,6 +5372,7 @@ function isISIN(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],87:[function(require,module,exports){
 "use strict";
 
@@ -5370,6 +5396,7 @@ function isISO31661Alpha2(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128,"./util/includes":129}],88:[function(require,module,exports){
 "use strict";
 
@@ -5393,6 +5420,7 @@ function isISO31661Alpha3(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128,"./util/includes":129}],89:[function(require,module,exports){
 "use strict";
 
@@ -5428,13 +5456,15 @@ var isValidDate = function isValidDate(str) {
   var match = str.match(/(\d{4})-?(\d{0,2})-?(\d*)/).map(Number);
   var year = match[1];
   var month = match[2];
-  var day = match[3]; // create a date object and compare
+  var day = match[3];
+  var monthString = month ? "0".concat(month).slice(-2) : month;
+  var dayString = day ? "0".concat(day).slice(-2) : day; // create a date object and compare
 
-  var d = new Date("".concat(year, "-").concat(month || 1, "-").concat(day || 1));
-  if (isNaN(d.getFullYear())) return false;
+  var d = new Date("".concat(year, "-").concat(monthString || '01', "-").concat(dayString || '01'));
+  if (isNaN(d.getUTCFullYear())) return false;
 
   if (month && day) {
-    return d.getFullYear() === year && d.getMonth() + 1 === month && d.getDate() === day;
+    return d.getUTCFullYear() === year && d.getUTCMonth() + 1 === month && d.getUTCDate() === day;
   }
 
   return true;
@@ -5449,6 +5479,7 @@ function isISO8601(str, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],90:[function(require,module,exports){
 "use strict";
 
@@ -5470,6 +5501,7 @@ function isISRC(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],91:[function(require,module,exports){
 "use strict";
 
@@ -5507,6 +5539,7 @@ function isISSN(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],92:[function(require,module,exports){
 "use strict";
 
@@ -5568,6 +5601,7 @@ function isIdentityCard(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],93:[function(require,module,exports){
 "use strict";
 
@@ -5608,6 +5642,7 @@ function isIn(str, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128,"./util/toString":131}],94:[function(require,module,exports){
 "use strict";
 
@@ -5638,6 +5673,7 @@ function isInt(str, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],95:[function(require,module,exports){
 "use strict";
 
@@ -5666,6 +5702,7 @@ function isJSON(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],96:[function(require,module,exports){
 "use strict";
 
@@ -5686,6 +5723,7 @@ function isJWT(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],97:[function(require,module,exports){
 "use strict";
 
@@ -5709,6 +5747,7 @@ function _default(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],98:[function(require,module,exports){
 "use strict";
 
@@ -5744,6 +5783,7 @@ function isLength(str, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],99:[function(require,module,exports){
 "use strict";
 
@@ -5762,6 +5802,7 @@ function isLowercase(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],100:[function(require,module,exports){
 "use strict";
 
@@ -5788,6 +5829,7 @@ function isMACAddress(str, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],101:[function(require,module,exports){
 "use strict";
 
@@ -5808,6 +5850,7 @@ function isMD5(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],102:[function(require,module,exports){
 "use strict";
 
@@ -5828,6 +5871,7 @@ function isMagnetURI(url) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],103:[function(require,module,exports){
 "use strict";
 
@@ -5879,6 +5923,7 @@ function isMimeType(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],104:[function(require,module,exports){
 "use strict";
 
@@ -5908,12 +5953,13 @@ var phones = {
   'bn-BD': /\+?(88)?0?1[356789][0-9]{8}\b/,
   'cs-CZ': /^(\+?420)? ?[1-9][0-9]{2} ?[0-9]{3} ?[0-9]{3}$/,
   'da-DK': /^(\+?45)?\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}$/,
-  'de-DE': /^(\+?49[ \.\-]?)?([\(]{1}[0-9]{1,6}[\)])?([0-9 \.\-\/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$/,
+  'de-DE': /^(\+49)?0?1(5[0-25-9]\d|6([23]|0\d?)|7([0-57-9]|6\d))\d{7}$/,
   'el-GR': /^(\+?30|0)?(69\d{8})$/,
   'en-AU': /^(\+?61|0)4\d{8}$/,
   'en-GB': /^(\+?44|0)7\d{9}$/,
   'en-GH': /^(\+233|0)(20|50|24|54|27|57|26|56|23|28)\d{7}$/,
   'en-HK': /^(\+?852\-?)?[456789]\d{3}\-?\d{4}$/,
+  'en-IE': /^(\+?353|0)8[356789]\d{7}$/,
   'en-IN': /^(\+?91|0)?[6789]\d{9}$/,
   'en-KE': /^(\+?254|0)?[7]\d{8}$/,
   'en-MU': /^(\+?230|0)?\d{8}$/,
@@ -5924,7 +5970,7 @@ var phones = {
   'en-SG': /^(\+65)?[89]\d{7}$/,
   'en-TZ': /^(\+?255|0)?[67]\d{8}$/,
   'en-UG': /^(\+?256|0)?[7]\d{8}$/,
-  'en-US': /^(\+?1?( |-)?)?(\([2-9][0-9]{2}\)|[2-9][0-9]{2})( |-)?([2-9][0-9]{2}( |-)?[0-9]{4})$/,
+  'en-US': /^((\+1|1)?( |-)?)?(\([2-9][0-9]{2}\)|[2-9][0-9]{2})( |-)?([2-9][0-9]{2}( |-)?[0-9]{4})$/,
   'en-ZA': /^(\+?27|0)\d{9}$/,
   'en-ZM': /^(\+?26)?09[567]\d{7}$/,
   'es-ES': /^(\+?34)?(6\d{1}|7[1234])\d{7}$/,
@@ -5944,7 +5990,7 @@ var phones = {
   'kl-GL': /^(\+?299)?\s?\d{2}\s?\d{2}\s?\d{2}$/,
   'ko-KR': /^((\+?82)[ \-]?)?0?1([0|1|6|7|8|9]{1})[ \-]?\d{3,4}[ \-]?\d{4}$/,
   'lt-LT': /^(\+370|8)\d{8}$/,
-  'ms-MY': /^(\+?6?01){1}(([145]{1}(\-|\s)?\d{7,8})|([236789]{1}(\s|\-)?\d{7}))$/,
+  'ms-MY': /^(\+?6?01){1}(([0145]{1}(\-|\s)?\d{7,8})|([236789]{1}(\s|\-)?\d{7}))$/,
   'nb-NO': /^(\+?47)?[49]\d{7}$/,
   'nl-BE': /^(\+?32|0)4?\d{8}$/,
   'nn-NO': /^(\+?47)?[49]\d{7}$/,
@@ -6031,6 +6077,7 @@ function isMongoId(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./isHexadecimal":82,"./util/assertString":128}],106:[function(require,module,exports){
 "use strict";
 
@@ -6053,6 +6100,7 @@ function isMultibyte(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],107:[function(require,module,exports){
 "use strict";
 
@@ -6079,6 +6127,7 @@ function isNumeric(str, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],108:[function(require,module,exports){
 "use strict";
 
@@ -6099,6 +6148,7 @@ function isPort(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./isInt":94}],109:[function(require,module,exports){
 "use strict";
 
@@ -6160,6 +6210,7 @@ var patterns = {
   SK: /^\d{3}\s?\d{2}$/,
   TN: fourDigit,
   TW: /^\d{3}(\d{2})?$/,
+  UA: fiveDigit,
   US: /^\d{5}(-\d{4})?$/,
   ZA: fourDigit,
   ZM: fiveDigit
@@ -6221,6 +6272,7 @@ function isRFC3339(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],111:[function(require,module,exports){
 "use strict";
 
@@ -6241,6 +6293,7 @@ function isSurrogatePair(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],112:[function(require,module,exports){
 "use strict";
 
@@ -6393,6 +6446,7 @@ function isURL(url, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./isFQDN":76,"./isIP":83,"./util/assertString":128,"./util/merge":130}],113:[function(require,module,exports){
 "use strict";
 
@@ -6420,6 +6474,7 @@ function isUUID(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],114:[function(require,module,exports){
 "use strict";
 
@@ -6438,6 +6493,7 @@ function isUppercase(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],115:[function(require,module,exports){
 "use strict";
 
@@ -6460,6 +6516,7 @@ function isVariableWidth(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./isFullWidth":78,"./isHalfWidth":79,"./util/assertString":128}],116:[function(require,module,exports){
 "use strict";
 
@@ -6485,6 +6542,7 @@ function isWhitelisted(str, chars) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],117:[function(require,module,exports){
 "use strict";
 
@@ -6504,6 +6562,7 @@ function ltrim(str, chars) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],118:[function(require,module,exports){
 "use strict";
 
@@ -6527,6 +6586,7 @@ function matches(str, pattern, modifiers) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],119:[function(require,module,exports){
 "use strict";
 
@@ -6678,6 +6738,7 @@ function normalizeEmail(email, options) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/merge":130}],120:[function(require,module,exports){
 "use strict";
 
@@ -6703,6 +6764,7 @@ function rtrim(str, chars) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],121:[function(require,module,exports){
 "use strict";
 
@@ -6724,6 +6786,7 @@ function stripLow(str, keep_new_lines) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./blacklist":57,"./util/assertString":128}],122:[function(require,module,exports){
 "use strict";
 
@@ -6747,6 +6810,7 @@ function toBoolean(str, strict) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],123:[function(require,module,exports){
 "use strict";
 
@@ -6766,6 +6830,7 @@ function toDate(date) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],124:[function(require,module,exports){
 "use strict";
 
@@ -6784,6 +6849,7 @@ function toFloat(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],125:[function(require,module,exports){
 "use strict";
 
@@ -6802,6 +6868,7 @@ function toInt(str, radix) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],126:[function(require,module,exports){
 "use strict";
 
@@ -6821,6 +6888,7 @@ function trim(str, chars) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./ltrim":117,"./rtrim":120}],127:[function(require,module,exports){
 "use strict";
 
@@ -6839,6 +6907,7 @@ function unescape(str) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],128:[function(require,module,exports){
 "use strict";
 
@@ -6872,6 +6941,7 @@ function assertString(input) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{}],129:[function(require,module,exports){
 "use strict";
 
@@ -6889,6 +6959,7 @@ var includes = function includes(arr, val) {
 var _default = includes;
 exports.default = _default;
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{}],130:[function(require,module,exports){
 "use strict";
 
@@ -6911,6 +6982,7 @@ function merge() {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{}],131:[function(require,module,exports){
 "use strict";
 
@@ -6936,6 +7008,7 @@ function toString(input) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{}],132:[function(require,module,exports){
 "use strict";
 
@@ -6954,6 +7027,7 @@ function whitelist(str, chars) {
 }
 
 module.exports = exports.default;
+module.exports.default = exports.default;
 },{"./util/assertString":128}],133:[function(require,module,exports){
 "use strict";
 
@@ -7154,18 +7228,31 @@ var FormatValidators = require("./FormatValidators"),
     Report           = require("./Report"),
     Utils            = require("./Utils");
 
+var shouldSkipValidate = function (options, errors) {
+    return options &&
+        Array.isArray(options.includeErrors) &&
+        (options.includeErrors.length === 0 || !errors.some(function (err) { return options.includeErrors.includes(err);}));
+};
+
 var JsonValidators = {
     multipleOf: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.1.2
+        if (shouldSkipValidate(this.validateOptions, ["MULTIPLE_OF"])) {
+            return;
+        }
         if (typeof json !== "number") {
             return;
         }
+
         if (Utils.whatIs(json / schema.multipleOf) !== "integer") {
             report.addError("MULTIPLE_OF", [json, schema.multipleOf], null, schema);
         }
     },
     maximum: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.2.2
+        if (shouldSkipValidate(this.validateOptions, ["MAXIMUM", "MAXIMUM_EXCLUSIVE"])) {
+            return;
+        }
         if (typeof json !== "number") {
             return;
         }
@@ -7184,6 +7271,9 @@ var JsonValidators = {
     },
     minimum: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.2
+        if (shouldSkipValidate(this.validateOptions, ["MINIMUM", "MINIMUM_EXCLUSIVE"])) {
+            return;
+        }
         if (typeof json !== "number") {
             return;
         }
@@ -7202,6 +7292,9 @@ var JsonValidators = {
     },
     maxLength: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.1.2
+        if (shouldSkipValidate(this.validateOptions, ["MAX_LENGTH"])) {
+            return;
+        }
         if (typeof json !== "string") {
             return;
         }
@@ -7211,6 +7304,9 @@ var JsonValidators = {
     },
     minLength: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.2.2
+        if (shouldSkipValidate(this.validateOptions, ["MIN_LENGTH"])) {
+            return;
+        }
         if (typeof json !== "string") {
             return;
         }
@@ -7220,6 +7316,9 @@ var JsonValidators = {
     },
     pattern: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.3.2
+        if (shouldSkipValidate(this.validateOptions, ["PATTERN"])) {
+            return;
+        }
         if (typeof json !== "string") {
             return;
         }
@@ -7229,6 +7328,9 @@ var JsonValidators = {
     },
     additionalItems: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.2
+        if (shouldSkipValidate(this.validateOptions, ["ARRAY_ADDITIONAL_ITEMS"])) {
+            return;
+        }
         if (!Array.isArray(json)) {
             return;
         }
@@ -7245,6 +7347,9 @@ var JsonValidators = {
     },
     maxItems: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.2.2
+        if (shouldSkipValidate(this.validateOptions, ["ARRAY_LENGTH_LONG"])) {
+            return;
+        }
         if (!Array.isArray(json)) {
             return;
         }
@@ -7254,6 +7359,9 @@ var JsonValidators = {
     },
     minItems: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.3.2
+        if (shouldSkipValidate(this.validateOptions, ["ARRAY_LENGTH_SHORT"])) {
+            return;
+        }
         if (!Array.isArray(json)) {
             return;
         }
@@ -7263,6 +7371,9 @@ var JsonValidators = {
     },
     uniqueItems: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.4.2
+        if (shouldSkipValidate(this.validateOptions, ["ARRAY_UNIQUE"])) {
+            return;
+        }
         if (!Array.isArray(json)) {
             return;
         }
@@ -7275,6 +7386,9 @@ var JsonValidators = {
     },
     maxProperties: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.1.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_PROPERTIES_MAXIMUM"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -7285,6 +7399,9 @@ var JsonValidators = {
     },
     minProperties: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.2.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_PROPERTIES_MINIMUM"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -7295,6 +7412,9 @@ var JsonValidators = {
     },
     required: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.3.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_MISSING_REQUIRED_PROPERTY"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -7320,6 +7440,9 @@ var JsonValidators = {
     },
     properties: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_ADDITIONAL_PROPERTIES"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -7368,6 +7491,9 @@ var JsonValidators = {
     },
     dependencies: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.5.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_DEPENDENCY_KEY"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -7398,6 +7524,9 @@ var JsonValidators = {
     },
     enum: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.1.2
+        if (shouldSkipValidate(this.validateOptions, ["ENUM_CASE_MISMATCH", "ENUM_MISMATCH"])) {
+            return;
+        }
         var match = false,
             caseInsensitiveMatch = false,
             idx = schema.enum.length;
@@ -7417,6 +7546,9 @@ var JsonValidators = {
     },
     type: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.2
+        if (shouldSkipValidate(this.validateOptions, ["INVALID_TYPE"])) {
+            return;
+        }
         var jsonType = Utils.whatIs(json);
         if (typeof schema.type === "string") {
             if (jsonType !== schema.type && (jsonType !== "integer" || schema.type !== "number")) {
@@ -7489,6 +7621,9 @@ var JsonValidators = {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
         var formatValidatorFn = FormatValidators[schema.format];
         if (typeof formatValidatorFn === "function") {
+            if (shouldSkipValidate(this.validateOptions, ["INVALID_FORMAT"])) {
+                return;
+            }
             if (formatValidatorFn.length === 2) {
                 // async - need to clone the path here, because it will change by the time async function reports back
                 var pathBeforeAsync = Utils.clone(report.path);

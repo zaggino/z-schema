@@ -64,9 +64,9 @@
   },
   "dependencies": {
     "core-js": "^2.5.7",
-    "lodash.get": "^4.0.0",
-    "lodash.isequal": "^4.0.0",
-    "validator": "^10.0.0"
+    "lodash.get": "^4.4.2",
+    "lodash.isequal": "^4.5.0",
+    "validator": "^10.11.0"
   },
   "optionalDependencies": {
     "commander": "^2.7.1"

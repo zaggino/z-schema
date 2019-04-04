@@ -27,6 +27,7 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/PedanticCheck.js"),
     require("../ZSchemaTestSuite/getRegisteredFormats.js"),
     require("../ZSchemaTestSuite/InvalidId.js"),
+    require("../ZSchemaTestSuite/IncludeErrors.js"),
     require("../ZSchemaTestSuite/CustomValidator.js"),
     // issues
     require("../ZSchemaTestSuite/Issue12.js"),
@@ -89,8 +90,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 70 files", function () {
-        expect(testSuiteFiles.length).toBe(70);
+    it("should contain 71 files", function () {
+        expect(testSuiteFiles.length).toBe(71);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -100,6 +101,11 @@ describe("ZSchemaTestSuite", function () {
             var data = test.data;
             if (typeof data === "undefined") {
                 data = testSuite.data;
+            }
+
+            var validateOptions = test.validateOptions;
+            if (typeof validateOptions === "undefined") {
+                validateOptions = testSuite.validateOptions;
             }
 
             var async               = test.async              || testSuite.async        || false,
@@ -135,7 +141,7 @@ describe("ZSchemaTestSuite", function () {
                         schema = schema[schemaIndex];
                     }
                     try {
-                        valid = validator.validate(data, schema);
+                        valid = validator.validate(data, schema, validateOptions);
                     } catch (err) {
                         if (!failWithException) {
                             throw err;
