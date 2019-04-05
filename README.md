@@ -489,6 +489,16 @@ var validator = new ZSchema({
 });
 ```
 
+## includeErrors
+
+By default, z-schema reports all errors. If interested only in a subset of the errors, passing the option `includeErrors` to `validate` will perform validations only for those errors.
+
+```javascript
+var validator = new ZSchema();
+// will only execute validation for "INVALID_TYPE" error.
+validator.validate(json, schema, {includeErrors: ["INVALID_TYPE"]});
+```
+
 ## customValidator
 
 **Warning**: Use only if know what you are doing. Always consider using [custom format](#register-a-custom-format) before using this option.
