@@ -53,6 +53,16 @@ Report.prototype.addAsyncTask = function (fn, args, asyncTaskResultProcessFn) {
     this.asyncTasks.push([fn, args, asyncTaskResultProcessFn]);
 };
 
+Report.prototype.getAncestor = function (id) {
+    if (!this.parentReport) {
+        return undefined;
+    }
+    if (this.parentReport.getSchemaId() === id) {
+        return this.parentReport;
+    }
+    return this.parentReport.getAncestor(id);
+};
+
 /**
  *
  * @param {*} timeout
