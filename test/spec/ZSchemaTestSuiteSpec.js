@@ -91,7 +91,7 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 71 files", function () {
+    it("should contain 72 files", function () {
         expect(testSuiteFiles.length).toBe(72);
     });
 
