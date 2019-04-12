@@ -7920,6 +7920,16 @@ Report.prototype.addAsyncTask = function (fn, args, asyncTaskResultProcessFn) {
     this.asyncTasks.push([fn, args, asyncTaskResultProcessFn]);
 };
 
+Report.prototype.getAncestor = function (id) {
+    if (!this.parentReport) {
+        return undefined;
+    }
+    if (this.parentReport.getSchemaId() === id) {
+        return this.parentReport;
+    }
+    return this.parentReport.getAncestor(id);
+};
+
 /**
  *
  * @param {*} timeout
@@ -8296,16 +8306,23 @@ exports.getSchemaByUri = function (report, uri, root) {
 
             report.path.push(remotePath);
 
-            var remoteReport = new Report(report);
-            if (SchemaCompilation.compileSchema.call(this, remoteReport, result)) {
-                var savedOptions = this.options;
-                try {
-                    // If custom validationOptions were provided to setRemoteReference(),
-                    // use them instead of the default options
-                    this.options = result.__$validationOptions || this.options;
-                    SchemaValidation.validateSchema.call(this, remoteReport, result);
-                } finally {
-                    this.options = savedOptions;
+            var remoteReport;
+
+            var anscestorReport = report.getAncestor(result.id);
+            if (anscestorReport) {
+                remoteReport = anscestorReport;
+            } else {
+                remoteReport = new Report(report);
+                if (SchemaCompilation.compileSchema.call(this, remoteReport, result)) {
+                    var savedOptions = this.options;
+                    try {
+                        // If custom validationOptions were provided to setRemoteReference(),
+                        // use them instead of the default options
+                        this.options = result.__$validationOptions || this.options;
+                        SchemaValidation.validateSchema.call(this, remoteReport, result);
+                    } finally {
+                        this.options = savedOptions;
+                    }
                 }
             }
             var remoteReportIsValid = remoteReport.isValid();
