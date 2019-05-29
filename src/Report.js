@@ -136,6 +136,7 @@ Report.prototype.getPath = function (returnPathAsString) {
     if (returnPathAsString !== true) {
         // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
         path = "#/" + path.map(function (segment) {
+            segment = segment.toString();
 
             if (Utils.isAbsoluteUri(segment)) {
                 return "uri(" + segment + ")";

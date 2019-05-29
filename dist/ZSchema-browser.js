@@ -7665,13 +7665,13 @@ var recurseArray = function (report, schema, json) {
         while (idx--) {
             // equal to doesn't make sense here
             if (idx < schema.items.length) {
-                report.path.push(idx.toString());
+                report.path.push(idx);
                 exports.validate.call(this, report, schema.items[idx], json[idx]);
                 report.path.pop();
             } else {
                 // might be boolean, so check that it's an object
                 if (typeof schema.additionalItems === "object") {
-                    report.path.push(idx.toString());
+                    report.path.push(idx);
                     exports.validate.call(this, report, schema.additionalItems, json[idx]);
                     report.path.pop();
                 }
@@ -7683,7 +7683,7 @@ var recurseArray = function (report, schema, json) {
         // If items is a schema, then the child instance must be valid against this schema,
         // regardless of its index, and regardless of the value of "additionalItems".
         while (idx--) {
-            report.path.push(idx.toString());
+            report.path.push(idx);
             exports.validate.call(this, report, schema.items, json[idx]);
             report.path.pop();
         }
@@ -8003,6 +8003,7 @@ Report.prototype.getPath = function (returnPathAsString) {
     if (returnPathAsString !== true) {
         // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
         path = "#/" + path.map(function (segment) {
+            segment = segment.toString();
 
             if (Utils.isAbsoluteUri(segment)) {
                 return "uri(" + segment + ")";
