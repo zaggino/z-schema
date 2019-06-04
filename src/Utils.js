@@ -199,15 +199,15 @@ exports.clone = function (src) {
 };
 
 exports.cloneDeep = function (src) {
-    var visited = [], cloned = [];
+    var vidx = 0, visited = new Map(), cloned = [];
     function cloneDeep(src) {
         if (typeof src !== "object" || src === null) { return src; }
         var res, idx, cidx;
 
-        cidx = visited.indexOf(src);
-        if (cidx !== -1) { return cloned[cidx]; }
+        cidx = visited.get(src);
+        if (cidx !== undefined) { return cloned[cidx]; }
 
-        visited.push(src);
+        visited.set(src, vidx++);
         if (Array.isArray(src)) {
             res = [];
             cloned.push(res);
