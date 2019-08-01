@@ -64,6 +64,13 @@ function findId(schema, id) {
     }
 }
 
+/**
+ *
+ * @param {*} uri
+ * @param {*} schema
+ *
+ * @returns {void}
+ */
 exports.cacheSchemaByUri = function (uri, schema) {
     var remotePath = getRemotePath(uri);
     if (remotePath) {
@@ -71,6 +78,12 @@ exports.cacheSchemaByUri = function (uri, schema) {
     }
 };
 
+/**
+ *
+ * @param {*} uri
+ *
+ * @returns {void}
+ */
 exports.removeFromCacheByUri = function (uri) {
     var remotePath = getRemotePath(uri);
     if (remotePath) {
@@ -78,6 +91,12 @@ exports.removeFromCacheByUri = function (uri) {
     }
 };
 
+/**
+ *
+ * @param {*} uri
+ *
+ * @returns {boolean}
+ */
 exports.checkCacheForUri = function (uri) {
     var remotePath = getRemotePath(uri);
     return remotePath ? this.cache[remotePath] != null : false;
@@ -119,16 +138,23 @@ exports.getSchemaByUri = function (report, uri, root) {
 
             report.path.push(remotePath);
 
-            var remoteReport = new Report(report);
-            if (SchemaCompilation.compileSchema.call(this, remoteReport, result)) {
-                var savedOptions = this.options;
-                try {
-                    // If custom validationOptions were provided to setRemoteReference(),
-                    // use them instead of the default options
-                    this.options = result.__$validationOptions || this.options;
-                    SchemaValidation.validateSchema.call(this, remoteReport, result);
-                } finally {
-                    this.options = savedOptions;
+            var remoteReport;
+
+            var anscestorReport = report.getAncestor(result.id);
+            if (anscestorReport) {
+                remoteReport = anscestorReport;
+            } else {
+                remoteReport = new Report(report);
+                if (SchemaCompilation.compileSchema.call(this, remoteReport, result)) {
+                    var savedOptions = this.options;
+                    try {
+                        // If custom validationOptions were provided to setRemoteReference(),
+                        // use them instead of the default options
+                        this.options = result.__$validationOptions || this.options;
+                        SchemaValidation.validateSchema.call(this, remoteReport, result);
+                    } finally {
+                        this.options = savedOptions;
+                    }
                 }
             }
             var remoteReportIsValid = remoteReport.isValid();

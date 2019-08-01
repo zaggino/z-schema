@@ -1,6 +1,9 @@
 {
   "name": "z-schema",
-  "version": "3.23.0",
+  "version": "4.1.0",
+  "engines": {
+    "node": ">=6.0.0"
+  },
   "description": "JSON schema validator",
   "homepage": "https://github.com/zaggino/z-schema",
   "authors": [
@@ -28,11 +31,16 @@
     "src",
     "dist",
     "LICENSE",
-    "README.md"
+    "README.md",
+    "index.d.ts"
   ],
+  "types": "index.d.ts",
   "scripts": {
-    "prepublish": "npm test && grunt",
-    "test": "jasmine-node test/ && grunt lint"
+    "prepare": "grunt",
+    "prepublishOnly": "npm test",
+    "test": "jasmine-node test/ && grunt lint",
+    "test-z": "jasmine-node test/spec/ZSchemaTestSuiteSpec.js",
+    "grunt": "grunt"
   },
   "testling": {
     "scripts": [
@@ -58,9 +66,10 @@
     ]
   },
   "dependencies": {
-    "lodash.get": "^4.0.0",
-    "lodash.isequal": "^4.0.0",
-    "validator": "^10.0.0"
+    "core-js": "^2.5.7",
+    "lodash.get": "^4.4.2",
+    "lodash.isequal": "^4.5.0",
+    "validator": "^10.11.0"
   },
   "optionalDependencies": {
     "commander": "^2.7.1"

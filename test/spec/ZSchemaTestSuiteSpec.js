@@ -24,9 +24,11 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/MultipleSchemas.js"),
     require("../ZSchemaTestSuite/ErrorPathAsArray.js"),
     require("../ZSchemaTestSuite/ErrorPathAsJSONPointer.js"),
+    require("../ZSchemaTestSuite/ErrorPathContainsIntegerIndex.js"),
     require("../ZSchemaTestSuite/PedanticCheck.js"),
     require("../ZSchemaTestSuite/getRegisteredFormats.js"),
     require("../ZSchemaTestSuite/InvalidId.js"),
+    require("../ZSchemaTestSuite/IncludeErrors.js"),
     require("../ZSchemaTestSuite/CustomValidator.js"),
     // issues
     require("../ZSchemaTestSuite/Issue12.js"),
@@ -73,6 +75,10 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/Issue142.js"),
     require("../ZSchemaTestSuite/Issue146.js"),
     require("../ZSchemaTestSuite/Issue151.js"),
+    require("../ZSchemaTestSuite/Issue199.js"),
+    require("../ZSchemaTestSuite/Issue209.js"),
+    require("../ZSchemaTestSuite/Issue222.js"),
+    require("../ZSchemaTestSuite/Issue229.js"),
 
     undefined
 ];
@@ -86,8 +92,8 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    it("should contain 67 files", function () {
-        expect(testSuiteFiles.length).toBe(67);
+    it("should contain 73 files", function () {
+        expect(testSuiteFiles.length).toBe(73);
     });
 
     testSuiteFiles.forEach(function (testSuite) {
@@ -97,6 +103,11 @@ describe("ZSchemaTestSuite", function () {
             var data = test.data;
             if (typeof data === "undefined") {
                 data = testSuite.data;
+            }
+
+            var validateOptions = test.validateOptions;
+            if (typeof validateOptions === "undefined") {
+                validateOptions = testSuite.validateOptions;
             }
 
             var async               = test.async              || testSuite.async        || false,
@@ -132,7 +143,7 @@ describe("ZSchemaTestSuite", function () {
                         schema = schema[schemaIndex];
                     }
                     try {
-                        valid = validator.validate(data, schema);
+                        valid = validator.validate(data, schema, validateOptions);
                     } catch (err) {
                         if (!failWithException) {
                             throw err;

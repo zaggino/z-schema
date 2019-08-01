@@ -4,18 +4,32 @@ var FormatValidators = require("./FormatValidators"),
     Report           = require("./Report"),
     Utils            = require("./Utils");
 
+var shouldSkipValidate = function (options, errors) {
+    return options &&
+        Array.isArray(options.includeErrors) &&
+        options.includeErrors.length > 0 &&
+        !errors.some(function (err) { return options.includeErrors.includes(err);});
+};
+
 var JsonValidators = {
     multipleOf: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.1.2
+        if (shouldSkipValidate(this.validateOptions, ["MULTIPLE_OF"])) {
+            return;
+        }
         if (typeof json !== "number") {
             return;
         }
+
         if (Utils.whatIs(json / schema.multipleOf) !== "integer") {
             report.addError("MULTIPLE_OF", [json, schema.multipleOf], null, schema);
         }
     },
     maximum: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.2.2
+        if (shouldSkipValidate(this.validateOptions, ["MAXIMUM", "MAXIMUM_EXCLUSIVE"])) {
+            return;
+        }
         if (typeof json !== "number") {
             return;
         }
@@ -34,6 +48,9 @@ var JsonValidators = {
     },
     minimum: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.2
+        if (shouldSkipValidate(this.validateOptions, ["MINIMUM", "MINIMUM_EXCLUSIVE"])) {
+            return;
+        }
         if (typeof json !== "number") {
             return;
         }
@@ -52,6 +69,9 @@ var JsonValidators = {
     },
     maxLength: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.1.2
+        if (shouldSkipValidate(this.validateOptions, ["MAX_LENGTH"])) {
+            return;
+        }
         if (typeof json !== "string") {
             return;
         }
@@ -61,6 +81,9 @@ var JsonValidators = {
     },
     minLength: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.2.2
+        if (shouldSkipValidate(this.validateOptions, ["MIN_LENGTH"])) {
+            return;
+        }
         if (typeof json !== "string") {
             return;
         }
@@ -70,6 +93,9 @@ var JsonValidators = {
     },
     pattern: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.3.2
+        if (shouldSkipValidate(this.validateOptions, ["PATTERN"])) {
+            return;
+        }
         if (typeof json !== "string") {
             return;
         }
@@ -79,6 +105,9 @@ var JsonValidators = {
     },
     additionalItems: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.2
+        if (shouldSkipValidate(this.validateOptions, ["ARRAY_ADDITIONAL_ITEMS"])) {
+            return;
+        }
         if (!Array.isArray(json)) {
             return;
         }
@@ -95,6 +124,9 @@ var JsonValidators = {
     },
     maxItems: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.2.2
+        if (shouldSkipValidate(this.validateOptions, ["ARRAY_LENGTH_LONG"])) {
+            return;
+        }
         if (!Array.isArray(json)) {
             return;
         }
@@ -104,6 +136,9 @@ var JsonValidators = {
     },
     minItems: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.3.2
+        if (shouldSkipValidate(this.validateOptions, ["ARRAY_LENGTH_SHORT"])) {
+            return;
+        }
         if (!Array.isArray(json)) {
             return;
         }
@@ -113,6 +148,9 @@ var JsonValidators = {
     },
     uniqueItems: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.4.2
+        if (shouldSkipValidate(this.validateOptions, ["ARRAY_UNIQUE"])) {
+            return;
+        }
         if (!Array.isArray(json)) {
             return;
         }
@@ -125,6 +163,9 @@ var JsonValidators = {
     },
     maxProperties: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.1.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_PROPERTIES_MAXIMUM"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -135,6 +176,9 @@ var JsonValidators = {
     },
     minProperties: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.2.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_PROPERTIES_MINIMUM"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -145,6 +189,9 @@ var JsonValidators = {
     },
     required: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.3.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_MISSING_REQUIRED_PROPERTY"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -170,6 +217,9 @@ var JsonValidators = {
     },
     properties: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_ADDITIONAL_PROPERTIES"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -207,14 +257,20 @@ var JsonValidators = {
                         }
                     }
                 }
-                if (s.length > 0) {
-                    report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s], null, schema);
+                var idx4 = s.length;
+                if (idx4) {
+                    while (idx4--) {
+                        report.addError("OBJECT_ADDITIONAL_PROPERTIES", [s[idx4]], null, schema);
+                    }
                 }
             }
         }
     },
     dependencies: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.5.2
+        if (shouldSkipValidate(this.validateOptions, ["OBJECT_DEPENDENCY_KEY"])) {
+            return;
+        }
         if (Utils.whatIs(json) !== "object") {
             return;
         }
@@ -245,6 +301,9 @@ var JsonValidators = {
     },
     enum: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.1.2
+        if (shouldSkipValidate(this.validateOptions, ["ENUM_CASE_MISMATCH", "ENUM_MISMATCH"])) {
+            return;
+        }
         var match = false,
             caseInsensitiveMatch = false,
             idx = schema.enum.length;
@@ -264,6 +323,9 @@ var JsonValidators = {
     },
     type: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.2
+        if (shouldSkipValidate(this.validateOptions, ["INVALID_TYPE"])) {
+            return;
+        }
         var jsonType = Utils.whatIs(json);
         if (typeof schema.type === "string") {
             if (jsonType !== schema.type && (jsonType !== "integer" || schema.type !== "number")) {
@@ -336,11 +398,18 @@ var JsonValidators = {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
         var formatValidatorFn = FormatValidators[schema.format];
         if (typeof formatValidatorFn === "function") {
+            if (shouldSkipValidate(this.validateOptions, ["INVALID_FORMAT"])) {
+                return;
+            }
             if (formatValidatorFn.length === 2) {
-                // async
+                // async - need to clone the path here, because it will change by the time async function reports back
+                var pathBeforeAsync = Utils.clone(report.path);
                 report.addAsyncTask(formatValidatorFn, [json], function (result) {
                     if (result !== true) {
+                        var backup = report.path;
+                        report.path = pathBeforeAsync;
                         report.addError("INVALID_FORMAT", [schema.format, json], null, schema);
+                        report.path = backup;
                     }
                 });
             } else {
@@ -367,15 +436,15 @@ var recurseArray = function (report, schema, json) {
     if (Array.isArray(schema.items)) {
 
         while (idx--) {
-            // equal to doesnt make sense here
+            // equal to doesn't make sense here
             if (idx < schema.items.length) {
-                report.path.push(idx.toString());
+                report.path.push(idx);
                 exports.validate.call(this, report, schema.items[idx], json[idx]);
                 report.path.pop();
             } else {
                 // might be boolean, so check that it's an object
                 if (typeof schema.additionalItems === "object") {
-                    report.path.push(idx.toString());
+                    report.path.push(idx);
                     exports.validate.call(this, report, schema.additionalItems, json[idx]);
                     report.path.pop();
                 }
@@ -387,7 +456,7 @@ var recurseArray = function (report, schema, json) {
         // If items is a schema, then the child instance must be valid against this schema,
         // regardless of its index, and regardless of the value of "additionalItems".
         while (idx--) {
-            report.path.push(idx.toString());
+            report.path.push(idx);
             exports.validate.call(this, report, schema.items, json[idx]);
             report.path.pop();
         }
@@ -455,6 +524,14 @@ var recurseObject = function (report, schema, json) {
     }
 };
 
+exports.JsonValidators = JsonValidators;
+
+/**
+ *
+ * @param {Report} report
+ * @param {*} schema
+ * @param {*} json
+ */
 exports.validate = function (report, schema, json) {
 
     report.commonErrorMessage = "JSON_OBJECT_VALIDATION_FAILED";
