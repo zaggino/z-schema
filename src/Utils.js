@@ -1,6 +1,6 @@
 "use strict";
 
-require("core-js/es6/symbol");
+require("core-js/es/symbol");
 
 exports.jsonSymbol = Symbol.for("z-schema/json");
 
