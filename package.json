@@ -72,7 +72,7 @@
     "validator": "^11.0.0"
   },
   "optionalDependencies": {
-    "commander": "^2.7.1"
+    "commander": "^3.0.2"
   },
   "devDependencies": {
     "coveralls": "^3.0.0",
