@@ -7129,7 +7129,7 @@ exports.validate = function (report, schema, json) {
     }
 
     if (typeof this.options.customValidator === "function") {
-        this.options.customValidator(report, schema, json);
+        this.options.customValidator.call(this, report, schema, json);
     }
 
     // we don't need the root pointer anymore
