@@ -1,7 +1,5 @@
 "use strict";
 
-require("core-js/es/symbol");
-
 exports.jsonSymbol = Symbol.for("z-schema/json");
 
 exports.schemaSymbol = Symbol.for("z-schema/schema");
