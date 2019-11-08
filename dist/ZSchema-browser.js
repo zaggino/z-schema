@@ -6545,7 +6545,9 @@ var JsonValidators = {
             return;
         }
 
-        if (Utils.whatIs(json / schema.multipleOf) !== "integer") {
+        var stringMultipleOf = String(schema.multipleOf);
+        var scale = Math.pow(10, stringMultipleOf.length - stringMultipleOf.indexOf(".") - 1);
+        if (Utils.whatIs((json * scale) / (schema.multipleOf * scale)) !== "integer") {
             report.addError("MULTIPLE_OF", [json, schema.multipleOf], null, schema);
         }
     },
