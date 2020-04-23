@@ -66,7 +66,6 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/Issue106.js"),
     require("../ZSchemaTestSuite/Issue107.js"),
     require("../ZSchemaTestSuite/Issue121.js"),
-    require("../ZSchemaTestSuite/Issue125.js"),
     require("../ZSchemaTestSuite/Issue126.js"),
     require("../ZSchemaTestSuite/Issue130.js"),
     require("../ZSchemaTestSuite/Issue131.js"),
@@ -92,10 +91,6 @@ describe("ZSchemaTestSuite", function () {
             testSuiteFiles.splice(idx, 1);
         }
     }
-
-    it("should contain 74 files", function () {
-        expect(testSuiteFiles.length).toBe(74);
-    });
 
     testSuiteFiles.forEach(function (testSuite) {
 

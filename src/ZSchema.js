@@ -52,8 +52,8 @@ var defaultOptions = {
     strictMode: false,
     // report error paths as an array of path segments to get to the offending node
     reportPathAsArray: false,
-    // stops validation as soon as an error is found, true by default but can be turned off
-    breakOnFirstError: true,
+    // stop validation as soon as an error is found
+    breakOnFirstError: false,
     // check if schema follows best practices and common sense
     pedanticCheck: false,
     // ignore unknown formats (do not report them as an error)
