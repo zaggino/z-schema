@@ -163,7 +163,7 @@ describe("ZSchemaTestSuite", function () {
                 }
 
                 if (test.valid === true) {
-                    expect(err).toBe(undefined, "errors are not undefined when test is valid");
+                    expect(err).toBe(null, "errors are not undefined when test is valid");
                 }
 
                 if (after) {
@@ -186,7 +186,7 @@ describe("ZSchemaTestSuite", function () {
                     expect(typeof valid).toBe("boolean", "returned response is not a boolean");
                     expect(valid).toBe(test.valid, "test result doesn't match expected test result");
                     if (test.valid === true) {
-                        expect(err).toBe(undefined, "errors are not undefined when test is valid");
+                        expect(err).toBe(null, "errors are not undefined when test is valid");
                     }
                     if (after) {
                         after(err, valid, data);

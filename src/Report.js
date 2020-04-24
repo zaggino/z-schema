@@ -81,7 +81,7 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
     function finish() {
         process.nextTick(function () {
             var valid = self.errors.length === 0,
-                err = valid ? undefined : self.errors;
+                err = valid ? null : self.errors;
             callback(err, valid);
         });
     }

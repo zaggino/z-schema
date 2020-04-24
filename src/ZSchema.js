@@ -264,7 +264,7 @@ ZSchema.prototype.getLastError = function () {
     return e;
 };
 ZSchema.prototype.getLastErrors = function () {
-    return this.lastReport && this.lastReport.errors.length > 0 ? this.lastReport.errors : undefined;
+    return this.lastReport && this.lastReport.errors.length > 0 ? this.lastReport.errors : null;
 };
 ZSchema.prototype.getMissingReferences = function (arr) {
     arr = arr || this.lastReport.errors;

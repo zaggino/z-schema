@@ -61,7 +61,7 @@ describe("Automatic schema loading", function () {
 
         validateWithAutomaticDownloads(validator, data, schema, function (err, valid) {
             expect(valid).toBe(true);
-            expect(err).toBe(undefined);
+            expect(err).toBe(null);
             done();
         });
 
