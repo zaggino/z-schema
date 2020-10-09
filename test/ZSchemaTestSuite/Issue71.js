@@ -4,7 +4,7 @@ module.exports = {
     description: "Issue #71 - additionalProperties problem",
     tests: [
         {
-            description: "should have one error #1",
+            description: "should have two errors #1",
 
             schema: {
                 type: "object",
@@ -23,12 +23,12 @@ module.exports = {
             valid: false,
 
             after: function (errors) {
-                expect(errors.length).toBe(1);
+                expect(errors.length).toBe(2);
             }
         },
 
         {
-            description: "should have one error #2",
+            description: "should have two errors #2",
 
             schema: {
                 type: "object",
@@ -51,7 +51,7 @@ module.exports = {
             valid: false,
 
             after: function (errors) {
-                expect(errors.length).toBe(1);
+                expect(errors.length).toBe(2);
             }
         },
 

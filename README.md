@@ -457,11 +457,12 @@ var validator = new ZSchema({
 
 ## breakOnFirstError
 
-By default, z-schema stops validation after the first error is found. With this you can tell it to continue validating anyway:
+default: `false`<br />
+When true, will stop validation after the first error is found:
 
 ```javascript
 var validator = new ZSchema({
-    breakOnFirstError: false
+    breakOnFirstError: true
 });
 ```
 

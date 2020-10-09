@@ -1,5 +1,5 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.ZSchema = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-(function (global){
+(function (global){(function (){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -932,9 +932,9 @@ function get(object, path, defaultValue) {
 
 module.exports = get;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],2:[function(require,module,exports){
-(function (global){
+(function (global){(function (){
 /**
  * Lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -2784,7 +2784,7 @@ function stubFalse() {
 
 module.exports = isEqual;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],3:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
@@ -7320,7 +7320,7 @@ if (typeof Number.isFinite !== "function") {
 }
 
 },{}],90:[function(require,module,exports){
-(function (process){
+(function (process){(function (){
 "use strict";
 
 var get    = require("lodash.get");
@@ -7621,7 +7621,7 @@ Report.prototype.addCustomError = function (errorCode, errorMessage, params, sub
 
 module.exports = Report;
 
-}).call(this,require('_process'))
+}).call(this)}).call(this,require('_process'))
 },{"./Errors":86,"./Utils":94,"_process":3,"lodash.get":1}],91:[function(require,module,exports){
 "use strict";
 
@@ -9011,7 +9011,7 @@ exports.ucs2decode = function (string) {
 /*jshint +W016*/
 
 },{}],95:[function(require,module,exports){
-(function (process){
+(function (process){(function (){
 "use strict";
 
 require("./Polyfills");
@@ -9066,8 +9066,8 @@ var defaultOptions = {
     strictMode: false,
     // report error paths as an array of path segments to get to the offending node
     reportPathAsArray: false,
-    // stops validation as soon as an error is found, true by default but can be turned off
-    breakOnFirstError: true,
+    // stop validation as soon as an error is found
+    breakOnFirstError: false,
     // check if schema follows best practices and common sense
     pedanticCheck: false,
     // ignore unknown formats (do not report them as an error)
@@ -9422,7 +9422,7 @@ ZSchema.jsonSymbol = Utils.jsonSymbol;
 
 module.exports = ZSchema;
 
-}).call(this,require('_process'))
+}).call(this)}).call(this,require('_process'))
 },{"./FormatValidators":87,"./JsonValidation":88,"./Polyfills":89,"./Report":90,"./SchemaCache":91,"./SchemaCompilation":92,"./SchemaValidation":93,"./Utils":94,"./schemas/hyper-schema.json":96,"./schemas/schema.json":97,"_process":3,"lodash.get":1}],96:[function(require,module,exports){
 module.exports={
     "$schema": "http://json-schema.org/draft-04/hyper-schema#",
