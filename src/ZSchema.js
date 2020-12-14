@@ -188,7 +188,7 @@ ZSchema.prototype.validate = function (json, schema, options, callback) {
 
     var whatIs = Utils.whatIs(schema);
     if (whatIs !== "string" && whatIs !== "object") {
-        var e = new Error("Invalid .validate call - schema must be an string or object but " + whatIs + " was passed!");
+        var e = new Error("Invalid .validate call - schema must be a string or object but " + whatIs + " was passed!");
         if (callback) {
             process.nextTick(function () {
                 callback(e, false);
