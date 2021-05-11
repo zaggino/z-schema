@@ -13,7 +13,7 @@ module.exports = {
             data: null,
             valid: false,
             after: function (err) {
-                expect(err.message).toBe("Invalid .validate call - schema must be an string or object but null was passed!");
+                expect(err.message).toBe("Invalid .validate call - schema must be a string or object but null was passed!");
             }
         }
     ]
