@@ -405,7 +405,8 @@ var validator = new ZSchema({
 
 ## ignoreUnresolvableReferences
 
-When true, validator doesn't end with error when a remote reference is unreachable. **This setting is not recommended in production outside of testing.**
+default: `true`<br />
+When true, validator doesn't end with error when a remote reference is unreachable.
 
 ```javascript
 var validator = new ZSchema({
