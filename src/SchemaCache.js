@@ -130,6 +130,10 @@ exports.getSchemaByUri = function (report, uri, root) {
         queryPath = getQueryPath(uri),
         result = remotePath ? this.cache[remotePath] : root;
 
+    if (remotePath in this.cache) {
+        return this.cache[remotePath] // if schema is already compiled and cached, return it
+    }
+
     if (result && remotePath) {
         // we need to avoid compiling schemas in a recursive loop
         var compileRemote = result !== root;
