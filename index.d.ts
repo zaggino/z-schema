@@ -87,6 +87,8 @@ declare namespace Validator {
 }
 
 declare class Validator {
+    public lastReport: Report | undefined;
+
     /**
      * Register a custom format.
      *
@@ -152,6 +154,13 @@ declare class Validator {
  * Basic representation of the Report class -- just enough to support customValidator
  */
 declare class Report {
+    errors: Validator.SchemaErrorDetail[];
+
+    /**
+     * Returns whether the validation did pass
+     */
+    isValid(): boolean;
+
     /**
      * @param errorCode - a string representing the code for the custom error, e.g. INVALID_VALUE_SET
      * @param errorMessage - string with the message to be returned in the error
