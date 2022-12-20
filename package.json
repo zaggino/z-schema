@@ -1,6 +1,6 @@
 {
   "name": "z-schema",
-  "version": "5.0.4",
+  "version": "5.0.5",
   "engines": {
     "node": ">=8.0.0"
   },
@@ -71,7 +71,7 @@
     "validator": "^13.7.0"
   },
   "optionalDependencies": {
-    "commander": "^2.20.3"
+    "commander": "^9.4.1"
   },
   "devDependencies": {
     "coveralls": "^3.1.1",
