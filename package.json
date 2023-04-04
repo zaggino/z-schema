@@ -77,7 +77,7 @@
     "browserify": "^17.0.0",
     "coveralls": "^3.1.1",
     "grunt": "^1.4.1",
-    "grunt-browserify": "^5.3.0",
+    "grunt-browserify": "^6.0.0",
     "grunt-cli": "^1.4.3",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-jasmine": "^4.0.0",
