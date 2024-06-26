@@ -1,13 +1,13 @@
 {
-  "name": "z-schema",
+  "name": "z-schema-esm",
   "version": "6.0.1",
   "engines": {
     "node": ">=16.0.0"
   },
-  "description": "JSON schema validator",
-  "homepage": "https://github.com/zaggino/z-schema",
+  "description": "ESM fork of z-schema. JSON schema validator",
+  "homepage": "https://github.com/jorenbroekema/z-schema",
   "authors": [
-    "Martin Zagora <zaggino@gmail.com>"
+    "Joren Broekema <joren.broekema@gmail.com>"
   ],
   "license": "MIT",
   "keywords": [
@@ -17,12 +17,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/zaggino/z-schema.git"
+    "url": "https://github.com/jorenbroekema/z-schema.git"
   },
   "bugs": {
-    "url": "https://github.com/zaggino/z-schema/issues"
+    "url": "https://github.com/jorenbroekema/z-schema/issues"
   },
   "main": "src/ZSchema.js",
+  "module": "dist/ZSchema.mjs",
   "bin": {
     "z-schema": "./bin/z-schema"
   },
@@ -36,11 +37,12 @@
   ],
   "types": "index.d.ts",
   "scripts": {
-    "prepare": "grunt",
+    "prepare": "grunt && npm run bundle",
     "prepublishOnly": "npm test",
     "test": "jasmine-node test/ && grunt lint",
     "test-z": "jasmine-node test/spec/ZSchemaTestSuiteSpec.js",
-    "grunt": "grunt"
+    "grunt": "grunt",
+    "bundle": "rollup -c rollup.config.js"
   },
   "testling": {
     "scripts": [
@@ -74,6 +76,9 @@
     "commander": "^11.0.0"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
     "browserify": "^17.0.0",
     "coveralls": "^3.1.1",
     "grunt": "^1.4.1",
@@ -87,6 +92,12 @@
     "grunt-lineending": "^1.0.0",
     "jasmine-node": "^3.0.0",
     "jasmine-reporters": "^2.5.0",
-    "remapify": "^2.2.0"
+    "remapify": "^2.2.0",
+    "rollup": "^2.79.1",
+    "rollup-plugin-terser": "^7.0.2"
+  },
+  "prettier": {
+    "tabWidth": 4,
+    "trailingComma": "none"
   }
 }
