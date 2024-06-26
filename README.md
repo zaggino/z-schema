@@ -1,4 +1,6 @@
-# z-schema validator
+# z-schema-esm validator
+
+> ESM fork of z-schema
 
 [![npm version](https://badge.fury.io/js/z-schema.svg)](http://badge.fury.io/js/z-schema)
 [![bower version](https://badge.fury.io/bo/z-schema.svg)](http://badge.fury.io/bo/z-schema)
