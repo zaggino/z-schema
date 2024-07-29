@@ -403,6 +403,9 @@ var JsonValidators = {
             if (shouldSkipValidate(this.validateOptions, ["INVALID_FORMAT"])) {
                 return;
             }
+            if (report.hasError("INVALID_TYPE", [schema.type, Utils.whatIs(json)])) {
+                return;
+            }
             if (formatValidatorFn.length === 2) {
                 // async - need to clone the path here, because it will change by the time async function reports back
                 var pathBeforeAsync = Utils.clone(report.path);

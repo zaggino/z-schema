@@ -1933,7 +1933,7 @@ function numberIsNaN (obj) {
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"base64-js":1,"buffer":3,"ieee754":7}],4:[function(require,module,exports){
+},{"base64-js":1,"buffer":3,"ieee754":27}],4:[function(require,module,exports){
 module.exports = {
   "100": "Continue",
   "101": "Switching Protocols",
@@ -2000,6 +2000,178 @@ module.exports = {
 }
 
 },{}],5:[function(require,module,exports){
+'use strict';
+
+var GetIntrinsic = require('get-intrinsic');
+
+var callBind = require('./');
+
+var $indexOf = callBind(GetIntrinsic('String.prototype.indexOf'));
+
+module.exports = function callBoundIntrinsic(name, allowMissing) {
+	var intrinsic = GetIntrinsic(name, !!allowMissing);
+	if (typeof intrinsic === 'function' && $indexOf(name, '.prototype.') > -1) {
+		return callBind(intrinsic);
+	}
+	return intrinsic;
+};
+
+},{"./":6,"get-intrinsic":19}],6:[function(require,module,exports){
+'use strict';
+
+var bind = require('function-bind');
+var GetIntrinsic = require('get-intrinsic');
+var setFunctionLength = require('set-function-length');
+
+var $TypeError = require('es-errors/type');
+var $apply = GetIntrinsic('%Function.prototype.apply%');
+var $call = GetIntrinsic('%Function.prototype.call%');
+var $reflectApply = GetIntrinsic('%Reflect.apply%', true) || bind.call($call, $apply);
+
+var $defineProperty = require('es-define-property');
+var $max = GetIntrinsic('%Math.max%');
+
+module.exports = function callBind(originalFunction) {
+	if (typeof originalFunction !== 'function') {
+		throw new $TypeError('a function is required');
+	}
+	var func = $reflectApply(bind, $call, arguments);
+	return setFunctionLength(
+		func,
+		1 + $max(0, originalFunction.length - (arguments.length - 1)),
+		true
+	);
+};
+
+var applyBind = function applyBind() {
+	return $reflectApply(bind, $apply, arguments);
+};
+
+if ($defineProperty) {
+	$defineProperty(module.exports, 'apply', { value: applyBind });
+} else {
+	module.exports.apply = applyBind;
+}
+
+},{"es-define-property":8,"es-errors/type":14,"function-bind":18,"get-intrinsic":19,"set-function-length":35}],7:[function(require,module,exports){
+'use strict';
+
+var $defineProperty = require('es-define-property');
+
+var $SyntaxError = require('es-errors/syntax');
+var $TypeError = require('es-errors/type');
+
+var gopd = require('gopd');
+
+/** @type {import('.')} */
+module.exports = function defineDataProperty(
+	obj,
+	property,
+	value
+) {
+	if (!obj || (typeof obj !== 'object' && typeof obj !== 'function')) {
+		throw new $TypeError('`obj` must be an object or a function`');
+	}
+	if (typeof property !== 'string' && typeof property !== 'symbol') {
+		throw new $TypeError('`property` must be a string or a symbol`');
+	}
+	if (arguments.length > 3 && typeof arguments[3] !== 'boolean' && arguments[3] !== null) {
+		throw new $TypeError('`nonEnumerable`, if provided, must be a boolean or null');
+	}
+	if (arguments.length > 4 && typeof arguments[4] !== 'boolean' && arguments[4] !== null) {
+		throw new $TypeError('`nonWritable`, if provided, must be a boolean or null');
+	}
+	if (arguments.length > 5 && typeof arguments[5] !== 'boolean' && arguments[5] !== null) {
+		throw new $TypeError('`nonConfigurable`, if provided, must be a boolean or null');
+	}
+	if (arguments.length > 6 && typeof arguments[6] !== 'boolean') {
+		throw new $TypeError('`loose`, if provided, must be a boolean');
+	}
+
+	var nonEnumerable = arguments.length > 3 ? arguments[3] : null;
+	var nonWritable = arguments.length > 4 ? arguments[4] : null;
+	var nonConfigurable = arguments.length > 5 ? arguments[5] : null;
+	var loose = arguments.length > 6 ? arguments[6] : false;
+
+	/* @type {false | TypedPropertyDescriptor<unknown>} */
+	var desc = !!gopd && gopd(obj, property);
+
+	if ($defineProperty) {
+		$defineProperty(obj, property, {
+			configurable: nonConfigurable === null && desc ? desc.configurable : !nonConfigurable,
+			enumerable: nonEnumerable === null && desc ? desc.enumerable : !nonEnumerable,
+			value: value,
+			writable: nonWritable === null && desc ? desc.writable : !nonWritable
+		});
+	} else if (loose || (!nonEnumerable && !nonWritable && !nonConfigurable)) {
+		// must fall back to [[Set]], and was not explicitly asked to make non-enumerable, non-writable, or non-configurable
+		obj[property] = value; // eslint-disable-line no-param-reassign
+	} else {
+		throw new $SyntaxError('This environment does not support defining a property as non-configurable, non-writable, or non-enumerable.');
+	}
+};
+
+},{"es-define-property":8,"es-errors/syntax":13,"es-errors/type":14,"gopd":20}],8:[function(require,module,exports){
+'use strict';
+
+var GetIntrinsic = require('get-intrinsic');
+
+/** @type {import('.')} */
+var $defineProperty = GetIntrinsic('%Object.defineProperty%', true) || false;
+if ($defineProperty) {
+	try {
+		$defineProperty({}, 'a', { value: 1 });
+	} catch (e) {
+		// IE 8 has a broken defineProperty
+		$defineProperty = false;
+	}
+}
+
+module.exports = $defineProperty;
+
+},{"get-intrinsic":19}],9:[function(require,module,exports){
+'use strict';
+
+/** @type {import('./eval')} */
+module.exports = EvalError;
+
+},{}],10:[function(require,module,exports){
+'use strict';
+
+/** @type {import('.')} */
+module.exports = Error;
+
+},{}],11:[function(require,module,exports){
+'use strict';
+
+/** @type {import('./range')} */
+module.exports = RangeError;
+
+},{}],12:[function(require,module,exports){
+'use strict';
+
+/** @type {import('./ref')} */
+module.exports = ReferenceError;
+
+},{}],13:[function(require,module,exports){
+'use strict';
+
+/** @type {import('./syntax')} */
+module.exports = SyntaxError;
+
+},{}],14:[function(require,module,exports){
+'use strict';
+
+/** @type {import('./type')} */
+module.exports = TypeError;
+
+},{}],15:[function(require,module,exports){
+'use strict';
+
+/** @type {import('./uri')} */
+module.exports = URIError;
+
+},{}],16:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2498,7 +2670,589 @@ function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
   }
 }
 
-},{}],6:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
+'use strict';
+
+/* eslint no-invalid-this: 1 */
+
+var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
+var toStr = Object.prototype.toString;
+var max = Math.max;
+var funcType = '[object Function]';
+
+var concatty = function concatty(a, b) {
+    var arr = [];
+
+    for (var i = 0; i < a.length; i += 1) {
+        arr[i] = a[i];
+    }
+    for (var j = 0; j < b.length; j += 1) {
+        arr[j + a.length] = b[j];
+    }
+
+    return arr;
+};
+
+var slicy = function slicy(arrLike, offset) {
+    var arr = [];
+    for (var i = offset || 0, j = 0; i < arrLike.length; i += 1, j += 1) {
+        arr[j] = arrLike[i];
+    }
+    return arr;
+};
+
+var joiny = function (arr, joiner) {
+    var str = '';
+    for (var i = 0; i < arr.length; i += 1) {
+        str += arr[i];
+        if (i + 1 < arr.length) {
+            str += joiner;
+        }
+    }
+    return str;
+};
+
+module.exports = function bind(that) {
+    var target = this;
+    if (typeof target !== 'function' || toStr.apply(target) !== funcType) {
+        throw new TypeError(ERROR_MESSAGE + target);
+    }
+    var args = slicy(arguments, 1);
+
+    var bound;
+    var binder = function () {
+        if (this instanceof bound) {
+            var result = target.apply(
+                this,
+                concatty(args, arguments)
+            );
+            if (Object(result) === result) {
+                return result;
+            }
+            return this;
+        }
+        return target.apply(
+            that,
+            concatty(args, arguments)
+        );
+
+    };
+
+    var boundLength = max(0, target.length - args.length);
+    var boundArgs = [];
+    for (var i = 0; i < boundLength; i++) {
+        boundArgs[i] = '$' + i;
+    }
+
+    bound = Function('binder', 'return function (' + joiny(boundArgs, ',') + '){ return binder.apply(this,arguments); }')(binder);
+
+    if (target.prototype) {
+        var Empty = function Empty() {};
+        Empty.prototype = target.prototype;
+        bound.prototype = new Empty();
+        Empty.prototype = null;
+    }
+
+    return bound;
+};
+
+},{}],18:[function(require,module,exports){
+'use strict';
+
+var implementation = require('./implementation');
+
+module.exports = Function.prototype.bind || implementation;
+
+},{"./implementation":17}],19:[function(require,module,exports){
+'use strict';
+
+var undefined;
+
+var $Error = require('es-errors');
+var $EvalError = require('es-errors/eval');
+var $RangeError = require('es-errors/range');
+var $ReferenceError = require('es-errors/ref');
+var $SyntaxError = require('es-errors/syntax');
+var $TypeError = require('es-errors/type');
+var $URIError = require('es-errors/uri');
+
+var $Function = Function;
+
+// eslint-disable-next-line consistent-return
+var getEvalledConstructor = function (expressionSyntax) {
+	try {
+		return $Function('"use strict"; return (' + expressionSyntax + ').constructor;')();
+	} catch (e) {}
+};
+
+var $gOPD = Object.getOwnPropertyDescriptor;
+if ($gOPD) {
+	try {
+		$gOPD({}, '');
+	} catch (e) {
+		$gOPD = null; // this is IE 8, which has a broken gOPD
+	}
+}
+
+var throwTypeError = function () {
+	throw new $TypeError();
+};
+var ThrowTypeError = $gOPD
+	? (function () {
+		try {
+			// eslint-disable-next-line no-unused-expressions, no-caller, no-restricted-properties
+			arguments.callee; // IE 8 does not throw here
+			return throwTypeError;
+		} catch (calleeThrows) {
+			try {
+				// IE 8 throws on Object.getOwnPropertyDescriptor(arguments, '')
+				return $gOPD(arguments, 'callee').get;
+			} catch (gOPDthrows) {
+				return throwTypeError;
+			}
+		}
+	}())
+	: throwTypeError;
+
+var hasSymbols = require('has-symbols')();
+var hasProto = require('has-proto')();
+
+var getProto = Object.getPrototypeOf || (
+	hasProto
+		? function (x) { return x.__proto__; } // eslint-disable-line no-proto
+		: null
+);
+
+var needsEval = {};
+
+var TypedArray = typeof Uint8Array === 'undefined' || !getProto ? undefined : getProto(Uint8Array);
+
+var INTRINSICS = {
+	__proto__: null,
+	'%AggregateError%': typeof AggregateError === 'undefined' ? undefined : AggregateError,
+	'%Array%': Array,
+	'%ArrayBuffer%': typeof ArrayBuffer === 'undefined' ? undefined : ArrayBuffer,
+	'%ArrayIteratorPrototype%': hasSymbols && getProto ? getProto([][Symbol.iterator]()) : undefined,
+	'%AsyncFromSyncIteratorPrototype%': undefined,
+	'%AsyncFunction%': needsEval,
+	'%AsyncGenerator%': needsEval,
+	'%AsyncGeneratorFunction%': needsEval,
+	'%AsyncIteratorPrototype%': needsEval,
+	'%Atomics%': typeof Atomics === 'undefined' ? undefined : Atomics,
+	'%BigInt%': typeof BigInt === 'undefined' ? undefined : BigInt,
+	'%BigInt64Array%': typeof BigInt64Array === 'undefined' ? undefined : BigInt64Array,
+	'%BigUint64Array%': typeof BigUint64Array === 'undefined' ? undefined : BigUint64Array,
+	'%Boolean%': Boolean,
+	'%DataView%': typeof DataView === 'undefined' ? undefined : DataView,
+	'%Date%': Date,
+	'%decodeURI%': decodeURI,
+	'%decodeURIComponent%': decodeURIComponent,
+	'%encodeURI%': encodeURI,
+	'%encodeURIComponent%': encodeURIComponent,
+	'%Error%': $Error,
+	'%eval%': eval, // eslint-disable-line no-eval
+	'%EvalError%': $EvalError,
+	'%Float32Array%': typeof Float32Array === 'undefined' ? undefined : Float32Array,
+	'%Float64Array%': typeof Float64Array === 'undefined' ? undefined : Float64Array,
+	'%FinalizationRegistry%': typeof FinalizationRegistry === 'undefined' ? undefined : FinalizationRegistry,
+	'%Function%': $Function,
+	'%GeneratorFunction%': needsEval,
+	'%Int8Array%': typeof Int8Array === 'undefined' ? undefined : Int8Array,
+	'%Int16Array%': typeof Int16Array === 'undefined' ? undefined : Int16Array,
+	'%Int32Array%': typeof Int32Array === 'undefined' ? undefined : Int32Array,
+	'%isFinite%': isFinite,
+	'%isNaN%': isNaN,
+	'%IteratorPrototype%': hasSymbols && getProto ? getProto(getProto([][Symbol.iterator]())) : undefined,
+	'%JSON%': typeof JSON === 'object' ? JSON : undefined,
+	'%Map%': typeof Map === 'undefined' ? undefined : Map,
+	'%MapIteratorPrototype%': typeof Map === 'undefined' || !hasSymbols || !getProto ? undefined : getProto(new Map()[Symbol.iterator]()),
+	'%Math%': Math,
+	'%Number%': Number,
+	'%Object%': Object,
+	'%parseFloat%': parseFloat,
+	'%parseInt%': parseInt,
+	'%Promise%': typeof Promise === 'undefined' ? undefined : Promise,
+	'%Proxy%': typeof Proxy === 'undefined' ? undefined : Proxy,
+	'%RangeError%': $RangeError,
+	'%ReferenceError%': $ReferenceError,
+	'%Reflect%': typeof Reflect === 'undefined' ? undefined : Reflect,
+	'%RegExp%': RegExp,
+	'%Set%': typeof Set === 'undefined' ? undefined : Set,
+	'%SetIteratorPrototype%': typeof Set === 'undefined' || !hasSymbols || !getProto ? undefined : getProto(new Set()[Symbol.iterator]()),
+	'%SharedArrayBuffer%': typeof SharedArrayBuffer === 'undefined' ? undefined : SharedArrayBuffer,
+	'%String%': String,
+	'%StringIteratorPrototype%': hasSymbols && getProto ? getProto(''[Symbol.iterator]()) : undefined,
+	'%Symbol%': hasSymbols ? Symbol : undefined,
+	'%SyntaxError%': $SyntaxError,
+	'%ThrowTypeError%': ThrowTypeError,
+	'%TypedArray%': TypedArray,
+	'%TypeError%': $TypeError,
+	'%Uint8Array%': typeof Uint8Array === 'undefined' ? undefined : Uint8Array,
+	'%Uint8ClampedArray%': typeof Uint8ClampedArray === 'undefined' ? undefined : Uint8ClampedArray,
+	'%Uint16Array%': typeof Uint16Array === 'undefined' ? undefined : Uint16Array,
+	'%Uint32Array%': typeof Uint32Array === 'undefined' ? undefined : Uint32Array,
+	'%URIError%': $URIError,
+	'%WeakMap%': typeof WeakMap === 'undefined' ? undefined : WeakMap,
+	'%WeakRef%': typeof WeakRef === 'undefined' ? undefined : WeakRef,
+	'%WeakSet%': typeof WeakSet === 'undefined' ? undefined : WeakSet
+};
+
+if (getProto) {
+	try {
+		null.error; // eslint-disable-line no-unused-expressions
+	} catch (e) {
+		// https://github.com/tc39/proposal-shadowrealm/pull/384#issuecomment-1364264229
+		var errorProto = getProto(getProto(e));
+		INTRINSICS['%Error.prototype%'] = errorProto;
+	}
+}
+
+var doEval = function doEval(name) {
+	var value;
+	if (name === '%AsyncFunction%') {
+		value = getEvalledConstructor('async function () {}');
+	} else if (name === '%GeneratorFunction%') {
+		value = getEvalledConstructor('function* () {}');
+	} else if (name === '%AsyncGeneratorFunction%') {
+		value = getEvalledConstructor('async function* () {}');
+	} else if (name === '%AsyncGenerator%') {
+		var fn = doEval('%AsyncGeneratorFunction%');
+		if (fn) {
+			value = fn.prototype;
+		}
+	} else if (name === '%AsyncIteratorPrototype%') {
+		var gen = doEval('%AsyncGenerator%');
+		if (gen && getProto) {
+			value = getProto(gen.prototype);
+		}
+	}
+
+	INTRINSICS[name] = value;
+
+	return value;
+};
+
+var LEGACY_ALIASES = {
+	__proto__: null,
+	'%ArrayBufferPrototype%': ['ArrayBuffer', 'prototype'],
+	'%ArrayPrototype%': ['Array', 'prototype'],
+	'%ArrayProto_entries%': ['Array', 'prototype', 'entries'],
+	'%ArrayProto_forEach%': ['Array', 'prototype', 'forEach'],
+	'%ArrayProto_keys%': ['Array', 'prototype', 'keys'],
+	'%ArrayProto_values%': ['Array', 'prototype', 'values'],
+	'%AsyncFunctionPrototype%': ['AsyncFunction', 'prototype'],
+	'%AsyncGenerator%': ['AsyncGeneratorFunction', 'prototype'],
+	'%AsyncGeneratorPrototype%': ['AsyncGeneratorFunction', 'prototype', 'prototype'],
+	'%BooleanPrototype%': ['Boolean', 'prototype'],
+	'%DataViewPrototype%': ['DataView', 'prototype'],
+	'%DatePrototype%': ['Date', 'prototype'],
+	'%ErrorPrototype%': ['Error', 'prototype'],
+	'%EvalErrorPrototype%': ['EvalError', 'prototype'],
+	'%Float32ArrayPrototype%': ['Float32Array', 'prototype'],
+	'%Float64ArrayPrototype%': ['Float64Array', 'prototype'],
+	'%FunctionPrototype%': ['Function', 'prototype'],
+	'%Generator%': ['GeneratorFunction', 'prototype'],
+	'%GeneratorPrototype%': ['GeneratorFunction', 'prototype', 'prototype'],
+	'%Int8ArrayPrototype%': ['Int8Array', 'prototype'],
+	'%Int16ArrayPrototype%': ['Int16Array', 'prototype'],
+	'%Int32ArrayPrototype%': ['Int32Array', 'prototype'],
+	'%JSONParse%': ['JSON', 'parse'],
+	'%JSONStringify%': ['JSON', 'stringify'],
+	'%MapPrototype%': ['Map', 'prototype'],
+	'%NumberPrototype%': ['Number', 'prototype'],
+	'%ObjectPrototype%': ['Object', 'prototype'],
+	'%ObjProto_toString%': ['Object', 'prototype', 'toString'],
+	'%ObjProto_valueOf%': ['Object', 'prototype', 'valueOf'],
+	'%PromisePrototype%': ['Promise', 'prototype'],
+	'%PromiseProto_then%': ['Promise', 'prototype', 'then'],
+	'%Promise_all%': ['Promise', 'all'],
+	'%Promise_reject%': ['Promise', 'reject'],
+	'%Promise_resolve%': ['Promise', 'resolve'],
+	'%RangeErrorPrototype%': ['RangeError', 'prototype'],
+	'%ReferenceErrorPrototype%': ['ReferenceError', 'prototype'],
+	'%RegExpPrototype%': ['RegExp', 'prototype'],
+	'%SetPrototype%': ['Set', 'prototype'],
+	'%SharedArrayBufferPrototype%': ['SharedArrayBuffer', 'prototype'],
+	'%StringPrototype%': ['String', 'prototype'],
+	'%SymbolPrototype%': ['Symbol', 'prototype'],
+	'%SyntaxErrorPrototype%': ['SyntaxError', 'prototype'],
+	'%TypedArrayPrototype%': ['TypedArray', 'prototype'],
+	'%TypeErrorPrototype%': ['TypeError', 'prototype'],
+	'%Uint8ArrayPrototype%': ['Uint8Array', 'prototype'],
+	'%Uint8ClampedArrayPrototype%': ['Uint8ClampedArray', 'prototype'],
+	'%Uint16ArrayPrototype%': ['Uint16Array', 'prototype'],
+	'%Uint32ArrayPrototype%': ['Uint32Array', 'prototype'],
+	'%URIErrorPrototype%': ['URIError', 'prototype'],
+	'%WeakMapPrototype%': ['WeakMap', 'prototype'],
+	'%WeakSetPrototype%': ['WeakSet', 'prototype']
+};
+
+var bind = require('function-bind');
+var hasOwn = require('hasown');
+var $concat = bind.call(Function.call, Array.prototype.concat);
+var $spliceApply = bind.call(Function.apply, Array.prototype.splice);
+var $replace = bind.call(Function.call, String.prototype.replace);
+var $strSlice = bind.call(Function.call, String.prototype.slice);
+var $exec = bind.call(Function.call, RegExp.prototype.exec);
+
+/* adapted from https://github.com/lodash/lodash/blob/4.17.15/dist/lodash.js#L6735-L6744 */
+var rePropName = /[^%.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|%$))/g;
+var reEscapeChar = /\\(\\)?/g; /** Used to match backslashes in property paths. */
+var stringToPath = function stringToPath(string) {
+	var first = $strSlice(string, 0, 1);
+	var last = $strSlice(string, -1);
+	if (first === '%' && last !== '%') {
+		throw new $SyntaxError('invalid intrinsic syntax, expected closing `%`');
+	} else if (last === '%' && first !== '%') {
+		throw new $SyntaxError('invalid intrinsic syntax, expected opening `%`');
+	}
+	var result = [];
+	$replace(string, rePropName, function (match, number, quote, subString) {
+		result[result.length] = quote ? $replace(subString, reEscapeChar, '$1') : number || match;
+	});
+	return result;
+};
+/* end adaptation */
+
+var getBaseIntrinsic = function getBaseIntrinsic(name, allowMissing) {
+	var intrinsicName = name;
+	var alias;
+	if (hasOwn(LEGACY_ALIASES, intrinsicName)) {
+		alias = LEGACY_ALIASES[intrinsicName];
+		intrinsicName = '%' + alias[0] + '%';
+	}
+
+	if (hasOwn(INTRINSICS, intrinsicName)) {
+		var value = INTRINSICS[intrinsicName];
+		if (value === needsEval) {
+			value = doEval(intrinsicName);
+		}
+		if (typeof value === 'undefined' && !allowMissing) {
+			throw new $TypeError('intrinsic ' + name + ' exists, but is not available. Please file an issue!');
+		}
+
+		return {
+			alias: alias,
+			name: intrinsicName,
+			value: value
+		};
+	}
+
+	throw new $SyntaxError('intrinsic ' + name + ' does not exist!');
+};
+
+module.exports = function GetIntrinsic(name, allowMissing) {
+	if (typeof name !== 'string' || name.length === 0) {
+		throw new $TypeError('intrinsic name must be a non-empty string');
+	}
+	if (arguments.length > 1 && typeof allowMissing !== 'boolean') {
+		throw new $TypeError('"allowMissing" argument must be a boolean');
+	}
+
+	if ($exec(/^%?[^%]*%?$/, name) === null) {
+		throw new $SyntaxError('`%` may not be present anywhere but at the beginning and end of the intrinsic name');
+	}
+	var parts = stringToPath(name);
+	var intrinsicBaseName = parts.length > 0 ? parts[0] : '';
+
+	var intrinsic = getBaseIntrinsic('%' + intrinsicBaseName + '%', allowMissing);
+	var intrinsicRealName = intrinsic.name;
+	var value = intrinsic.value;
+	var skipFurtherCaching = false;
+
+	var alias = intrinsic.alias;
+	if (alias) {
+		intrinsicBaseName = alias[0];
+		$spliceApply(parts, $concat([0, 1], alias));
+	}
+
+	for (var i = 1, isOwn = true; i < parts.length; i += 1) {
+		var part = parts[i];
+		var first = $strSlice(part, 0, 1);
+		var last = $strSlice(part, -1);
+		if (
+			(
+				(first === '"' || first === "'" || first === '`')
+				|| (last === '"' || last === "'" || last === '`')
+			)
+			&& first !== last
+		) {
+			throw new $SyntaxError('property names with quotes must have matching quotes');
+		}
+		if (part === 'constructor' || !isOwn) {
+			skipFurtherCaching = true;
+		}
+
+		intrinsicBaseName += '.' + part;
+		intrinsicRealName = '%' + intrinsicBaseName + '%';
+
+		if (hasOwn(INTRINSICS, intrinsicRealName)) {
+			value = INTRINSICS[intrinsicRealName];
+		} else if (value != null) {
+			if (!(part in value)) {
+				if (!allowMissing) {
+					throw new $TypeError('base intrinsic for ' + name + ' exists, but the property is not available.');
+				}
+				return void undefined;
+			}
+			if ($gOPD && (i + 1) >= parts.length) {
+				var desc = $gOPD(value, part);
+				isOwn = !!desc;
+
+				// By convention, when a data property is converted to an accessor
+				// property to emulate a data property that does not suffer from
+				// the override mistake, that accessor's getter is marked with
+				// an `originalValue` property. Here, when we detect this, we
+				// uphold the illusion by pretending to see that original data
+				// property, i.e., returning the value rather than the getter
+				// itself.
+				if (isOwn && 'get' in desc && !('originalValue' in desc.get)) {
+					value = desc.get;
+				} else {
+					value = value[part];
+				}
+			} else {
+				isOwn = hasOwn(value, part);
+				value = value[part];
+			}
+
+			if (isOwn && !skipFurtherCaching) {
+				INTRINSICS[intrinsicRealName] = value;
+			}
+		}
+	}
+	return value;
+};
+
+},{"es-errors":10,"es-errors/eval":9,"es-errors/range":11,"es-errors/ref":12,"es-errors/syntax":13,"es-errors/type":14,"es-errors/uri":15,"function-bind":18,"has-proto":22,"has-symbols":23,"hasown":25}],20:[function(require,module,exports){
+'use strict';
+
+var GetIntrinsic = require('get-intrinsic');
+
+var $gOPD = GetIntrinsic('%Object.getOwnPropertyDescriptor%', true);
+
+if ($gOPD) {
+	try {
+		$gOPD([], 'length');
+	} catch (e) {
+		// IE 8 has a broken gOPD
+		$gOPD = null;
+	}
+}
+
+module.exports = $gOPD;
+
+},{"get-intrinsic":19}],21:[function(require,module,exports){
+'use strict';
+
+var $defineProperty = require('es-define-property');
+
+var hasPropertyDescriptors = function hasPropertyDescriptors() {
+	return !!$defineProperty;
+};
+
+hasPropertyDescriptors.hasArrayLengthDefineBug = function hasArrayLengthDefineBug() {
+	// node v0.6 has a bug where array lengths can be Set but not Defined
+	if (!$defineProperty) {
+		return null;
+	}
+	try {
+		return $defineProperty([], 'length', { value: 1 }).length !== 1;
+	} catch (e) {
+		// In Firefox 4-22, defining length on an array throws an exception.
+		return true;
+	}
+};
+
+module.exports = hasPropertyDescriptors;
+
+},{"es-define-property":8}],22:[function(require,module,exports){
+'use strict';
+
+var test = {
+	__proto__: null,
+	foo: {}
+};
+
+var $Object = Object;
+
+/** @type {import('.')} */
+module.exports = function hasProto() {
+	// @ts-expect-error: TS errors on an inherited property for some reason
+	return { __proto__: test }.foo === test.foo
+		&& !(test instanceof $Object);
+};
+
+},{}],23:[function(require,module,exports){
+'use strict';
+
+var origSymbol = typeof Symbol !== 'undefined' && Symbol;
+var hasSymbolSham = require('./shams');
+
+module.exports = function hasNativeSymbols() {
+	if (typeof origSymbol !== 'function') { return false; }
+	if (typeof Symbol !== 'function') { return false; }
+	if (typeof origSymbol('foo') !== 'symbol') { return false; }
+	if (typeof Symbol('bar') !== 'symbol') { return false; }
+
+	return hasSymbolSham();
+};
+
+},{"./shams":24}],24:[function(require,module,exports){
+'use strict';
+
+/* eslint complexity: [2, 18], max-statements: [2, 33] */
+module.exports = function hasSymbols() {
+	if (typeof Symbol !== 'function' || typeof Object.getOwnPropertySymbols !== 'function') { return false; }
+	if (typeof Symbol.iterator === 'symbol') { return true; }
+
+	var obj = {};
+	var sym = Symbol('test');
+	var symObj = Object(sym);
+	if (typeof sym === 'string') { return false; }
+
+	if (Object.prototype.toString.call(sym) !== '[object Symbol]') { return false; }
+	if (Object.prototype.toString.call(symObj) !== '[object Symbol]') { return false; }
+
+	// temp disabled per https://github.com/ljharb/object.assign/issues/17
+	// if (sym instanceof Symbol) { return false; }
+	// temp disabled per https://github.com/WebReflection/get-own-property-symbols/issues/4
+	// if (!(symObj instanceof Symbol)) { return false; }
+
+	// if (typeof Symbol.prototype.toString !== 'function') { return false; }
+	// if (String(sym) !== Symbol.prototype.toString.call(sym)) { return false; }
+
+	var symVal = 42;
+	obj[sym] = symVal;
+	for (sym in obj) { return false; } // eslint-disable-line no-restricted-syntax, no-unreachable-loop
+	if (typeof Object.keys === 'function' && Object.keys(obj).length !== 0) { return false; }
+
+	if (typeof Object.getOwnPropertyNames === 'function' && Object.getOwnPropertyNames(obj).length !== 0) { return false; }
+
+	var syms = Object.getOwnPropertySymbols(obj);
+	if (syms.length !== 1 || syms[0] !== sym) { return false; }
+
+	if (!Object.prototype.propertyIsEnumerable.call(obj, sym)) { return false; }
+
+	if (typeof Object.getOwnPropertyDescriptor === 'function') {
+		var descriptor = Object.getOwnPropertyDescriptor(obj, sym);
+		if (descriptor.value !== symVal || descriptor.enumerable !== true) { return false; }
+	}
+
+	return true;
+};
+
+},{}],25:[function(require,module,exports){
+'use strict';
+
+var call = Function.prototype.call;
+var $hasOwn = Object.prototype.hasOwnProperty;
+var bind = require('function-bind');
+
+/** @type {import('.')} */
+module.exports = bind.call(call, $hasOwn);
+
+},{"function-bind":18}],26:[function(require,module,exports){
 var http = require('http')
 var url = require('url')
 
@@ -2531,7 +3285,7 @@ function validateParams (params) {
   return params
 }
 
-},{"http":17,"url":37}],7:[function(require,module,exports){
+},{"http":37,"url":62}],27:[function(require,module,exports){
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
@@ -2618,7 +3372,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],8:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -2647,7 +3401,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],9:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 (function (global){(function (){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -3582,7 +4336,7 @@ function get(object, path, defaultValue) {
 module.exports = get;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],10:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 (function (global){(function (){
 /**
  * Lodash (Custom Build) <https://lodash.com/>
@@ -5434,7 +6188,538 @@ function stubFalse() {
 module.exports = isEqual;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],11:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
+(function (global){(function (){
+var hasMap = typeof Map === 'function' && Map.prototype;
+var mapSizeDescriptor = Object.getOwnPropertyDescriptor && hasMap ? Object.getOwnPropertyDescriptor(Map.prototype, 'size') : null;
+var mapSize = hasMap && mapSizeDescriptor && typeof mapSizeDescriptor.get === 'function' ? mapSizeDescriptor.get : null;
+var mapForEach = hasMap && Map.prototype.forEach;
+var hasSet = typeof Set === 'function' && Set.prototype;
+var setSizeDescriptor = Object.getOwnPropertyDescriptor && hasSet ? Object.getOwnPropertyDescriptor(Set.prototype, 'size') : null;
+var setSize = hasSet && setSizeDescriptor && typeof setSizeDescriptor.get === 'function' ? setSizeDescriptor.get : null;
+var setForEach = hasSet && Set.prototype.forEach;
+var hasWeakMap = typeof WeakMap === 'function' && WeakMap.prototype;
+var weakMapHas = hasWeakMap ? WeakMap.prototype.has : null;
+var hasWeakSet = typeof WeakSet === 'function' && WeakSet.prototype;
+var weakSetHas = hasWeakSet ? WeakSet.prototype.has : null;
+var hasWeakRef = typeof WeakRef === 'function' && WeakRef.prototype;
+var weakRefDeref = hasWeakRef ? WeakRef.prototype.deref : null;
+var booleanValueOf = Boolean.prototype.valueOf;
+var objectToString = Object.prototype.toString;
+var functionToString = Function.prototype.toString;
+var $match = String.prototype.match;
+var $slice = String.prototype.slice;
+var $replace = String.prototype.replace;
+var $toUpperCase = String.prototype.toUpperCase;
+var $toLowerCase = String.prototype.toLowerCase;
+var $test = RegExp.prototype.test;
+var $concat = Array.prototype.concat;
+var $join = Array.prototype.join;
+var $arrSlice = Array.prototype.slice;
+var $floor = Math.floor;
+var bigIntValueOf = typeof BigInt === 'function' ? BigInt.prototype.valueOf : null;
+var gOPS = Object.getOwnPropertySymbols;
+var symToString = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol' ? Symbol.prototype.toString : null;
+var hasShammedSymbols = typeof Symbol === 'function' && typeof Symbol.iterator === 'object';
+// ie, `has-tostringtag/shams
+var toStringTag = typeof Symbol === 'function' && Symbol.toStringTag && (typeof Symbol.toStringTag === hasShammedSymbols ? 'object' : 'symbol')
+    ? Symbol.toStringTag
+    : null;
+var isEnumerable = Object.prototype.propertyIsEnumerable;
+
+var gPO = (typeof Reflect === 'function' ? Reflect.getPrototypeOf : Object.getPrototypeOf) || (
+    [].__proto__ === Array.prototype // eslint-disable-line no-proto
+        ? function (O) {
+            return O.__proto__; // eslint-disable-line no-proto
+        }
+        : null
+);
+
+function addNumericSeparator(num, str) {
+    if (
+        num === Infinity
+        || num === -Infinity
+        || num !== num
+        || (num && num > -1000 && num < 1000)
+        || $test.call(/e/, str)
+    ) {
+        return str;
+    }
+    var sepRegex = /[0-9](?=(?:[0-9]{3})+(?![0-9]))/g;
+    if (typeof num === 'number') {
+        var int = num < 0 ? -$floor(-num) : $floor(num); // trunc(num)
+        if (int !== num) {
+            var intStr = String(int);
+            var dec = $slice.call(str, intStr.length + 1);
+            return $replace.call(intStr, sepRegex, '$&_') + '.' + $replace.call($replace.call(dec, /([0-9]{3})/g, '$&_'), /_$/, '');
+        }
+    }
+    return $replace.call(str, sepRegex, '$&_');
+}
+
+var utilInspect = require('./util.inspect');
+var inspectCustom = utilInspect.custom;
+var inspectSymbol = isSymbol(inspectCustom) ? inspectCustom : null;
+
+module.exports = function inspect_(obj, options, depth, seen) {
+    var opts = options || {};
+
+    if (has(opts, 'quoteStyle') && (opts.quoteStyle !== 'single' && opts.quoteStyle !== 'double')) {
+        throw new TypeError('option "quoteStyle" must be "single" or "double"');
+    }
+    if (
+        has(opts, 'maxStringLength') && (typeof opts.maxStringLength === 'number'
+            ? opts.maxStringLength < 0 && opts.maxStringLength !== Infinity
+            : opts.maxStringLength !== null
+        )
+    ) {
+        throw new TypeError('option "maxStringLength", if provided, must be a positive integer, Infinity, or `null`');
+    }
+    var customInspect = has(opts, 'customInspect') ? opts.customInspect : true;
+    if (typeof customInspect !== 'boolean' && customInspect !== 'symbol') {
+        throw new TypeError('option "customInspect", if provided, must be `true`, `false`, or `\'symbol\'`');
+    }
+
+    if (
+        has(opts, 'indent')
+        && opts.indent !== null
+        && opts.indent !== '\t'
+        && !(parseInt(opts.indent, 10) === opts.indent && opts.indent > 0)
+    ) {
+        throw new TypeError('option "indent" must be "\\t", an integer > 0, or `null`');
+    }
+    if (has(opts, 'numericSeparator') && typeof opts.numericSeparator !== 'boolean') {
+        throw new TypeError('option "numericSeparator", if provided, must be `true` or `false`');
+    }
+    var numericSeparator = opts.numericSeparator;
+
+    if (typeof obj === 'undefined') {
+        return 'undefined';
+    }
+    if (obj === null) {
+        return 'null';
+    }
+    if (typeof obj === 'boolean') {
+        return obj ? 'true' : 'false';
+    }
+
+    if (typeof obj === 'string') {
+        return inspectString(obj, opts);
+    }
+    if (typeof obj === 'number') {
+        if (obj === 0) {
+            return Infinity / obj > 0 ? '0' : '-0';
+        }
+        var str = String(obj);
+        return numericSeparator ? addNumericSeparator(obj, str) : str;
+    }
+    if (typeof obj === 'bigint') {
+        var bigIntStr = String(obj) + 'n';
+        return numericSeparator ? addNumericSeparator(obj, bigIntStr) : bigIntStr;
+    }
+
+    var maxDepth = typeof opts.depth === 'undefined' ? 5 : opts.depth;
+    if (typeof depth === 'undefined') { depth = 0; }
+    if (depth >= maxDepth && maxDepth > 0 && typeof obj === 'object') {
+        return isArray(obj) ? '[Array]' : '[Object]';
+    }
+
+    var indent = getIndent(opts, depth);
+
+    if (typeof seen === 'undefined') {
+        seen = [];
+    } else if (indexOf(seen, obj) >= 0) {
+        return '[Circular]';
+    }
+
+    function inspect(value, from, noIndent) {
+        if (from) {
+            seen = $arrSlice.call(seen);
+            seen.push(from);
+        }
+        if (noIndent) {
+            var newOpts = {
+                depth: opts.depth
+            };
+            if (has(opts, 'quoteStyle')) {
+                newOpts.quoteStyle = opts.quoteStyle;
+            }
+            return inspect_(value, newOpts, depth + 1, seen);
+        }
+        return inspect_(value, opts, depth + 1, seen);
+    }
+
+    if (typeof obj === 'function' && !isRegExp(obj)) { // in older engines, regexes are callable
+        var name = nameOf(obj);
+        var keys = arrObjKeys(obj, inspect);
+        return '[Function' + (name ? ': ' + name : ' (anonymous)') + ']' + (keys.length > 0 ? ' { ' + $join.call(keys, ', ') + ' }' : '');
+    }
+    if (isSymbol(obj)) {
+        var symString = hasShammedSymbols ? $replace.call(String(obj), /^(Symbol\(.*\))_[^)]*$/, '$1') : symToString.call(obj);
+        return typeof obj === 'object' && !hasShammedSymbols ? markBoxed(symString) : symString;
+    }
+    if (isElement(obj)) {
+        var s = '<' + $toLowerCase.call(String(obj.nodeName));
+        var attrs = obj.attributes || [];
+        for (var i = 0; i < attrs.length; i++) {
+            s += ' ' + attrs[i].name + '=' + wrapQuotes(quote(attrs[i].value), 'double', opts);
+        }
+        s += '>';
+        if (obj.childNodes && obj.childNodes.length) { s += '...'; }
+        s += '</' + $toLowerCase.call(String(obj.nodeName)) + '>';
+        return s;
+    }
+    if (isArray(obj)) {
+        if (obj.length === 0) { return '[]'; }
+        var xs = arrObjKeys(obj, inspect);
+        if (indent && !singleLineValues(xs)) {
+            return '[' + indentedJoin(xs, indent) + ']';
+        }
+        return '[ ' + $join.call(xs, ', ') + ' ]';
+    }
+    if (isError(obj)) {
+        var parts = arrObjKeys(obj, inspect);
+        if (!('cause' in Error.prototype) && 'cause' in obj && !isEnumerable.call(obj, 'cause')) {
+            return '{ [' + String(obj) + '] ' + $join.call($concat.call('[cause]: ' + inspect(obj.cause), parts), ', ') + ' }';
+        }
+        if (parts.length === 0) { return '[' + String(obj) + ']'; }
+        return '{ [' + String(obj) + '] ' + $join.call(parts, ', ') + ' }';
+    }
+    if (typeof obj === 'object' && customInspect) {
+        if (inspectSymbol && typeof obj[inspectSymbol] === 'function' && utilInspect) {
+            return utilInspect(obj, { depth: maxDepth - depth });
+        } else if (customInspect !== 'symbol' && typeof obj.inspect === 'function') {
+            return obj.inspect();
+        }
+    }
+    if (isMap(obj)) {
+        var mapParts = [];
+        if (mapForEach) {
+            mapForEach.call(obj, function (value, key) {
+                mapParts.push(inspect(key, obj, true) + ' => ' + inspect(value, obj));
+            });
+        }
+        return collectionOf('Map', mapSize.call(obj), mapParts, indent);
+    }
+    if (isSet(obj)) {
+        var setParts = [];
+        if (setForEach) {
+            setForEach.call(obj, function (value) {
+                setParts.push(inspect(value, obj));
+            });
+        }
+        return collectionOf('Set', setSize.call(obj), setParts, indent);
+    }
+    if (isWeakMap(obj)) {
+        return weakCollectionOf('WeakMap');
+    }
+    if (isWeakSet(obj)) {
+        return weakCollectionOf('WeakSet');
+    }
+    if (isWeakRef(obj)) {
+        return weakCollectionOf('WeakRef');
+    }
+    if (isNumber(obj)) {
+        return markBoxed(inspect(Number(obj)));
+    }
+    if (isBigInt(obj)) {
+        return markBoxed(inspect(bigIntValueOf.call(obj)));
+    }
+    if (isBoolean(obj)) {
+        return markBoxed(booleanValueOf.call(obj));
+    }
+    if (isString(obj)) {
+        return markBoxed(inspect(String(obj)));
+    }
+    // note: in IE 8, sometimes `global !== window` but both are the prototypes of each other
+    /* eslint-env browser */
+    if (typeof window !== 'undefined' && obj === window) {
+        return '{ [object Window] }';
+    }
+    if (
+        (typeof globalThis !== 'undefined' && obj === globalThis)
+        || (typeof global !== 'undefined' && obj === global)
+    ) {
+        return '{ [object globalThis] }';
+    }
+    if (!isDate(obj) && !isRegExp(obj)) {
+        var ys = arrObjKeys(obj, inspect);
+        var isPlainObject = gPO ? gPO(obj) === Object.prototype : obj instanceof Object || obj.constructor === Object;
+        var protoTag = obj instanceof Object ? '' : 'null prototype';
+        var stringTag = !isPlainObject && toStringTag && Object(obj) === obj && toStringTag in obj ? $slice.call(toStr(obj), 8, -1) : protoTag ? 'Object' : '';
+        var constructorTag = isPlainObject || typeof obj.constructor !== 'function' ? '' : obj.constructor.name ? obj.constructor.name + ' ' : '';
+        var tag = constructorTag + (stringTag || protoTag ? '[' + $join.call($concat.call([], stringTag || [], protoTag || []), ': ') + '] ' : '');
+        if (ys.length === 0) { return tag + '{}'; }
+        if (indent) {
+            return tag + '{' + indentedJoin(ys, indent) + '}';
+        }
+        return tag + '{ ' + $join.call(ys, ', ') + ' }';
+    }
+    return String(obj);
+};
+
+function wrapQuotes(s, defaultStyle, opts) {
+    var quoteChar = (opts.quoteStyle || defaultStyle) === 'double' ? '"' : "'";
+    return quoteChar + s + quoteChar;
+}
+
+function quote(s) {
+    return $replace.call(String(s), /"/g, '&quot;');
+}
+
+function isArray(obj) { return toStr(obj) === '[object Array]' && (!toStringTag || !(typeof obj === 'object' && toStringTag in obj)); }
+function isDate(obj) { return toStr(obj) === '[object Date]' && (!toStringTag || !(typeof obj === 'object' && toStringTag in obj)); }
+function isRegExp(obj) { return toStr(obj) === '[object RegExp]' && (!toStringTag || !(typeof obj === 'object' && toStringTag in obj)); }
+function isError(obj) { return toStr(obj) === '[object Error]' && (!toStringTag || !(typeof obj === 'object' && toStringTag in obj)); }
+function isString(obj) { return toStr(obj) === '[object String]' && (!toStringTag || !(typeof obj === 'object' && toStringTag in obj)); }
+function isNumber(obj) { return toStr(obj) === '[object Number]' && (!toStringTag || !(typeof obj === 'object' && toStringTag in obj)); }
+function isBoolean(obj) { return toStr(obj) === '[object Boolean]' && (!toStringTag || !(typeof obj === 'object' && toStringTag in obj)); }
+
+// Symbol and BigInt do have Symbol.toStringTag by spec, so that can't be used to eliminate false positives
+function isSymbol(obj) {
+    if (hasShammedSymbols) {
+        return obj && typeof obj === 'object' && obj instanceof Symbol;
+    }
+    if (typeof obj === 'symbol') {
+        return true;
+    }
+    if (!obj || typeof obj !== 'object' || !symToString) {
+        return false;
+    }
+    try {
+        symToString.call(obj);
+        return true;
+    } catch (e) {}
+    return false;
+}
+
+function isBigInt(obj) {
+    if (!obj || typeof obj !== 'object' || !bigIntValueOf) {
+        return false;
+    }
+    try {
+        bigIntValueOf.call(obj);
+        return true;
+    } catch (e) {}
+    return false;
+}
+
+var hasOwn = Object.prototype.hasOwnProperty || function (key) { return key in this; };
+function has(obj, key) {
+    return hasOwn.call(obj, key);
+}
+
+function toStr(obj) {
+    return objectToString.call(obj);
+}
+
+function nameOf(f) {
+    if (f.name) { return f.name; }
+    var m = $match.call(functionToString.call(f), /^function\s*([\w$]+)/);
+    if (m) { return m[1]; }
+    return null;
+}
+
+function indexOf(xs, x) {
+    if (xs.indexOf) { return xs.indexOf(x); }
+    for (var i = 0, l = xs.length; i < l; i++) {
+        if (xs[i] === x) { return i; }
+    }
+    return -1;
+}
+
+function isMap(x) {
+    if (!mapSize || !x || typeof x !== 'object') {
+        return false;
+    }
+    try {
+        mapSize.call(x);
+        try {
+            setSize.call(x);
+        } catch (s) {
+            return true;
+        }
+        return x instanceof Map; // core-js workaround, pre-v2.5.0
+    } catch (e) {}
+    return false;
+}
+
+function isWeakMap(x) {
+    if (!weakMapHas || !x || typeof x !== 'object') {
+        return false;
+    }
+    try {
+        weakMapHas.call(x, weakMapHas);
+        try {
+            weakSetHas.call(x, weakSetHas);
+        } catch (s) {
+            return true;
+        }
+        return x instanceof WeakMap; // core-js workaround, pre-v2.5.0
+    } catch (e) {}
+    return false;
+}
+
+function isWeakRef(x) {
+    if (!weakRefDeref || !x || typeof x !== 'object') {
+        return false;
+    }
+    try {
+        weakRefDeref.call(x);
+        return true;
+    } catch (e) {}
+    return false;
+}
+
+function isSet(x) {
+    if (!setSize || !x || typeof x !== 'object') {
+        return false;
+    }
+    try {
+        setSize.call(x);
+        try {
+            mapSize.call(x);
+        } catch (m) {
+            return true;
+        }
+        return x instanceof Set; // core-js workaround, pre-v2.5.0
+    } catch (e) {}
+    return false;
+}
+
+function isWeakSet(x) {
+    if (!weakSetHas || !x || typeof x !== 'object') {
+        return false;
+    }
+    try {
+        weakSetHas.call(x, weakSetHas);
+        try {
+            weakMapHas.call(x, weakMapHas);
+        } catch (s) {
+            return true;
+        }
+        return x instanceof WeakSet; // core-js workaround, pre-v2.5.0
+    } catch (e) {}
+    return false;
+}
+
+function isElement(x) {
+    if (!x || typeof x !== 'object') { return false; }
+    if (typeof HTMLElement !== 'undefined' && x instanceof HTMLElement) {
+        return true;
+    }
+    return typeof x.nodeName === 'string' && typeof x.getAttribute === 'function';
+}
+
+function inspectString(str, opts) {
+    if (str.length > opts.maxStringLength) {
+        var remaining = str.length - opts.maxStringLength;
+        var trailer = '... ' + remaining + ' more character' + (remaining > 1 ? 's' : '');
+        return inspectString($slice.call(str, 0, opts.maxStringLength), opts) + trailer;
+    }
+    // eslint-disable-next-line no-control-regex
+    var s = $replace.call($replace.call(str, /(['\\])/g, '\\$1'), /[\x00-\x1f]/g, lowbyte);
+    return wrapQuotes(s, 'single', opts);
+}
+
+function lowbyte(c) {
+    var n = c.charCodeAt(0);
+    var x = {
+        8: 'b',
+        9: 't',
+        10: 'n',
+        12: 'f',
+        13: 'r'
+    }[n];
+    if (x) { return '\\' + x; }
+    return '\\x' + (n < 0x10 ? '0' : '') + $toUpperCase.call(n.toString(16));
+}
+
+function markBoxed(str) {
+    return 'Object(' + str + ')';
+}
+
+function weakCollectionOf(type) {
+    return type + ' { ? }';
+}
+
+function collectionOf(type, size, entries, indent) {
+    var joinedEntries = indent ? indentedJoin(entries, indent) : $join.call(entries, ', ');
+    return type + ' (' + size + ') {' + joinedEntries + '}';
+}
+
+function singleLineValues(xs) {
+    for (var i = 0; i < xs.length; i++) {
+        if (indexOf(xs[i], '\n') >= 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function getIndent(opts, depth) {
+    var baseIndent;
+    if (opts.indent === '\t') {
+        baseIndent = '\t';
+    } else if (typeof opts.indent === 'number' && opts.indent > 0) {
+        baseIndent = $join.call(Array(opts.indent + 1), ' ');
+    } else {
+        return null;
+    }
+    return {
+        base: baseIndent,
+        prev: $join.call(Array(depth + 1), baseIndent)
+    };
+}
+
+function indentedJoin(xs, indent) {
+    if (xs.length === 0) { return ''; }
+    var lineJoiner = '\n' + indent.prev + indent.base;
+    return lineJoiner + $join.call(xs, ',' + lineJoiner) + '\n' + indent.prev;
+}
+
+function arrObjKeys(obj, inspect) {
+    var isArr = isArray(obj);
+    var xs = [];
+    if (isArr) {
+        xs.length = obj.length;
+        for (var i = 0; i < obj.length; i++) {
+            xs[i] = has(obj, i) ? inspect(obj[i], obj) : '';
+        }
+    }
+    var syms = typeof gOPS === 'function' ? gOPS(obj) : [];
+    var symMap;
+    if (hasShammedSymbols) {
+        symMap = {};
+        for (var k = 0; k < syms.length; k++) {
+            symMap['$' + syms[k]] = syms[k];
+        }
+    }
+
+    for (var key in obj) { // eslint-disable-line no-restricted-syntax
+        if (!has(obj, key)) { continue; } // eslint-disable-line no-restricted-syntax, no-continue
+        if (isArr && String(Number(key)) === key && key < obj.length) { continue; } // eslint-disable-line no-restricted-syntax, no-continue
+        if (hasShammedSymbols && symMap['$' + key] instanceof Symbol) {
+            // this is to prevent shammed Symbols, which are stored as strings, from being included in the string key section
+            continue; // eslint-disable-line no-restricted-syntax, no-continue
+        } else if ($test.call(/[^\w$]/, key)) {
+            xs.push(inspect(key, obj) + ': ' + inspect(obj[key], obj));
+        } else {
+            xs.push(key + ': ' + inspect(obj[key], obj));
+        }
+    }
+    if (typeof gOPS === 'function') {
+        for (var j = 0; j < syms.length; j++) {
+            if (isEnumerable.call(obj, syms[j])) {
+                xs.push('[' + inspect(syms[j]) + ']: ' + inspect(obj[syms[j]], obj));
+            }
+        }
+    }
+    return xs;
+}
+
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./util.inspect":2}],32:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -5620,7 +6905,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],12:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 (function (global){(function (){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -6157,186 +7442,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],13:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-'use strict';
-
-// If obj.hasOwnProperty has been overridden, then calling
-// obj.hasOwnProperty(prop) will break.
-// See: https://github.com/joyent/node/issues/1707
-function hasOwnProperty(obj, prop) {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
-}
-
-module.exports = function(qs, sep, eq, options) {
-  sep = sep || '&';
-  eq = eq || '=';
-  var obj = {};
-
-  if (typeof qs !== 'string' || qs.length === 0) {
-    return obj;
-  }
-
-  var regexp = /\+/g;
-  qs = qs.split(sep);
-
-  var maxKeys = 1000;
-  if (options && typeof options.maxKeys === 'number') {
-    maxKeys = options.maxKeys;
-  }
-
-  var len = qs.length;
-  // maxKeys <= 0 means that we should not limit keys count
-  if (maxKeys > 0 && len > maxKeys) {
-    len = maxKeys;
-  }
-
-  for (var i = 0; i < len; ++i) {
-    var x = qs[i].replace(regexp, '%20'),
-        idx = x.indexOf(eq),
-        kstr, vstr, k, v;
-
-    if (idx >= 0) {
-      kstr = x.substr(0, idx);
-      vstr = x.substr(idx + 1);
-    } else {
-      kstr = x;
-      vstr = '';
-    }
-
-    k = decodeURIComponent(kstr);
-    v = decodeURIComponent(vstr);
-
-    if (!hasOwnProperty(obj, k)) {
-      obj[k] = v;
-    } else if (isArray(obj[k])) {
-      obj[k].push(v);
-    } else {
-      obj[k] = [obj[k], v];
-    }
-  }
-
-  return obj;
-};
-
-var isArray = Array.isArray || function (xs) {
-  return Object.prototype.toString.call(xs) === '[object Array]';
-};
-
-},{}],14:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-'use strict';
-
-var stringifyPrimitive = function(v) {
-  switch (typeof v) {
-    case 'string':
-      return v;
-
-    case 'boolean':
-      return v ? 'true' : 'false';
-
-    case 'number':
-      return isFinite(v) ? v : '';
-
-    default:
-      return '';
-  }
-};
-
-module.exports = function(obj, sep, eq, name) {
-  sep = sep || '&';
-  eq = eq || '=';
-  if (obj === null) {
-    obj = undefined;
-  }
-
-  if (typeof obj === 'object') {
-    return map(objectKeys(obj), function(k) {
-      var ks = encodeURIComponent(stringifyPrimitive(k)) + eq;
-      if (isArray(obj[k])) {
-        return map(obj[k], function(v) {
-          return ks + encodeURIComponent(stringifyPrimitive(v));
-        }).join(sep);
-      } else {
-        return ks + encodeURIComponent(stringifyPrimitive(obj[k]));
-      }
-    }).join(sep);
-
-  }
-
-  if (!name) return '';
-  return encodeURIComponent(stringifyPrimitive(name)) + eq +
-         encodeURIComponent(stringifyPrimitive(obj));
-};
-
-var isArray = Array.isArray || function (xs) {
-  return Object.prototype.toString.call(xs) === '[object Array]';
-};
-
-function map (xs, f) {
-  if (xs.map) return xs.map(f);
-  var res = [];
-  for (var i = 0; i < xs.length; i++) {
-    res.push(f(xs[i], i));
-  }
-  return res;
-}
-
-var objectKeys = Object.keys || function (obj) {
-  var res = [];
-  for (var key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) res.push(key);
-  }
-  return res;
-};
-
-},{}],15:[function(require,module,exports){
-'use strict';
-
-exports.decode = exports.parse = require('./decode');
-exports.encode = exports.stringify = require('./encode');
-
-},{"./decode":13,"./encode":14}],16:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 /*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
@@ -6403,7 +7509,182 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":3}],17:[function(require,module,exports){
+},{"buffer":3}],35:[function(require,module,exports){
+'use strict';
+
+var GetIntrinsic = require('get-intrinsic');
+var define = require('define-data-property');
+var hasDescriptors = require('has-property-descriptors')();
+var gOPD = require('gopd');
+
+var $TypeError = require('es-errors/type');
+var $floor = GetIntrinsic('%Math.floor%');
+
+/** @type {import('.')} */
+module.exports = function setFunctionLength(fn, length) {
+	if (typeof fn !== 'function') {
+		throw new $TypeError('`fn` is not a function');
+	}
+	if (typeof length !== 'number' || length < 0 || length > 0xFFFFFFFF || $floor(length) !== length) {
+		throw new $TypeError('`length` must be a positive 32-bit integer');
+	}
+
+	var loose = arguments.length > 2 && !!arguments[2];
+
+	var functionLengthIsConfigurable = true;
+	var functionLengthIsWritable = true;
+	if ('length' in fn && gOPD) {
+		var desc = gOPD(fn, 'length');
+		if (desc && !desc.configurable) {
+			functionLengthIsConfigurable = false;
+		}
+		if (desc && !desc.writable) {
+			functionLengthIsWritable = false;
+		}
+	}
+
+	if (functionLengthIsConfigurable || functionLengthIsWritable || !loose) {
+		if (hasDescriptors) {
+			define(/** @type {Parameters<define>[0]} */ (fn), 'length', length, true, true);
+		} else {
+			define(/** @type {Parameters<define>[0]} */ (fn), 'length', length);
+		}
+	}
+	return fn;
+};
+
+},{"define-data-property":7,"es-errors/type":14,"get-intrinsic":19,"gopd":20,"has-property-descriptors":21}],36:[function(require,module,exports){
+'use strict';
+
+var GetIntrinsic = require('get-intrinsic');
+var callBound = require('call-bind/callBound');
+var inspect = require('object-inspect');
+
+var $TypeError = require('es-errors/type');
+var $WeakMap = GetIntrinsic('%WeakMap%', true);
+var $Map = GetIntrinsic('%Map%', true);
+
+var $weakMapGet = callBound('WeakMap.prototype.get', true);
+var $weakMapSet = callBound('WeakMap.prototype.set', true);
+var $weakMapHas = callBound('WeakMap.prototype.has', true);
+var $mapGet = callBound('Map.prototype.get', true);
+var $mapSet = callBound('Map.prototype.set', true);
+var $mapHas = callBound('Map.prototype.has', true);
+
+/*
+* This function traverses the list returning the node corresponding to the given key.
+*
+* That node is also moved to the head of the list, so that if it's accessed again we don't need to traverse the whole list. By doing so, all the recently used nodes can be accessed relatively quickly.
+*/
+/** @type {import('.').listGetNode} */
+var listGetNode = function (list, key) { // eslint-disable-line consistent-return
+	/** @type {typeof list | NonNullable<(typeof list)['next']>} */
+	var prev = list;
+	/** @type {(typeof list)['next']} */
+	var curr;
+	for (; (curr = prev.next) !== null; prev = curr) {
+		if (curr.key === key) {
+			prev.next = curr.next;
+			// eslint-disable-next-line no-extra-parens
+			curr.next = /** @type {NonNullable<typeof list.next>} */ (list.next);
+			list.next = curr; // eslint-disable-line no-param-reassign
+			return curr;
+		}
+	}
+};
+
+/** @type {import('.').listGet} */
+var listGet = function (objects, key) {
+	var node = listGetNode(objects, key);
+	return node && node.value;
+};
+/** @type {import('.').listSet} */
+var listSet = function (objects, key, value) {
+	var node = listGetNode(objects, key);
+	if (node) {
+		node.value = value;
+	} else {
+		// Prepend the new node to the beginning of the list
+		objects.next = /** @type {import('.').ListNode<typeof value>} */ ({ // eslint-disable-line no-param-reassign, no-extra-parens
+			key: key,
+			next: objects.next,
+			value: value
+		});
+	}
+};
+/** @type {import('.').listHas} */
+var listHas = function (objects, key) {
+	return !!listGetNode(objects, key);
+};
+
+/** @type {import('.')} */
+module.exports = function getSideChannel() {
+	/** @type {WeakMap<object, unknown>} */ var $wm;
+	/** @type {Map<object, unknown>} */ var $m;
+	/** @type {import('.').RootNode<unknown>} */ var $o;
+
+	/** @type {import('.').Channel} */
+	var channel = {
+		assert: function (key) {
+			if (!channel.has(key)) {
+				throw new $TypeError('Side channel does not contain ' + inspect(key));
+			}
+		},
+		get: function (key) { // eslint-disable-line consistent-return
+			if ($WeakMap && key && (typeof key === 'object' || typeof key === 'function')) {
+				if ($wm) {
+					return $weakMapGet($wm, key);
+				}
+			} else if ($Map) {
+				if ($m) {
+					return $mapGet($m, key);
+				}
+			} else {
+				if ($o) { // eslint-disable-line no-lonely-if
+					return listGet($o, key);
+				}
+			}
+		},
+		has: function (key) {
+			if ($WeakMap && key && (typeof key === 'object' || typeof key === 'function')) {
+				if ($wm) {
+					return $weakMapHas($wm, key);
+				}
+			} else if ($Map) {
+				if ($m) {
+					return $mapHas($m, key);
+				}
+			} else {
+				if ($o) { // eslint-disable-line no-lonely-if
+					return listHas($o, key);
+				}
+			}
+			return false;
+		},
+		set: function (key, value) {
+			if ($WeakMap && key && (typeof key === 'object' || typeof key === 'function')) {
+				if (!$wm) {
+					$wm = new $WeakMap();
+				}
+				$weakMapSet($wm, key, value);
+			} else if ($Map) {
+				if (!$m) {
+					$m = new $Map();
+				}
+				$mapSet($m, key, value);
+			} else {
+				if (!$o) {
+					// Initialize the linked list as an empty node, so that we don't have to special-case handling of the first node: we can always refer to it as (previous node).next, instead of something like (list).head
+					$o = { key: {}, next: null };
+				}
+				listSet($o, key, value);
+			}
+		}
+	};
+	return channel;
+};
+
+},{"call-bind/callBound":5,"es-errors/type":14,"get-intrinsic":19,"object-inspect":31}],37:[function(require,module,exports){
 (function (global){(function (){
 var ClientRequest = require('./lib/request')
 var response = require('./lib/response')
@@ -6491,7 +7772,7 @@ http.METHODS = [
 	'UNSUBSCRIBE'
 ]
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/request":19,"./lib/response":20,"builtin-status-codes":4,"url":37,"xtend":144}],18:[function(require,module,exports){
+},{"./lib/request":39,"./lib/response":40,"builtin-status-codes":4,"url":62,"xtend":171}],38:[function(require,module,exports){
 (function (global){(function (){
 exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableStream)
 
@@ -6554,7 +7835,7 @@ function isFunction (value) {
 xhr = null // Help gc
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],19:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 (function (process,global,Buffer){(function (){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -6910,7 +8191,7 @@ var unsafeHeaders = [
 ]
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":18,"./response":20,"_process":11,"buffer":3,"inherits":8,"readable-stream":35}],20:[function(require,module,exports){
+},{"./capability":38,"./response":40,"_process":32,"buffer":3,"inherits":28,"readable-stream":55}],40:[function(require,module,exports){
 (function (process,global,Buffer){(function (){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -7125,7 +8406,7 @@ IncomingMessage.prototype._onXHRProgress = function (resetTimers) {
 }
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":18,"_process":11,"buffer":3,"inherits":8,"readable-stream":35}],21:[function(require,module,exports){
+},{"./capability":38,"_process":32,"buffer":3,"inherits":28,"readable-stream":55}],41:[function(require,module,exports){
 'use strict';
 
 function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
@@ -7254,7 +8535,7 @@ createErrorType('ERR_UNKNOWN_ENCODING', function (arg) {
 createErrorType('ERR_STREAM_UNSHIFT_AFTER_END_EVENT', 'stream.unshift() after end event');
 module.exports.codes = codes;
 
-},{}],22:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 (function (process){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -7383,7 +8664,7 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
   }
 });
 }).call(this)}).call(this,require('_process'))
-},{"./_stream_readable":24,"./_stream_writable":26,"_process":11,"inherits":8}],23:[function(require,module,exports){
+},{"./_stream_readable":44,"./_stream_writable":46,"_process":32,"inherits":28}],43:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7421,7 +8702,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":25,"inherits":8}],24:[function(require,module,exports){
+},{"./_stream_transform":45,"inherits":28}],44:[function(require,module,exports){
 (function (process,global){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8451,7 +9732,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../errors":21,"./_stream_duplex":22,"./internal/streams/async_iterator":27,"./internal/streams/buffer_list":28,"./internal/streams/destroy":29,"./internal/streams/from":31,"./internal/streams/state":33,"./internal/streams/stream":34,"_process":11,"buffer":3,"events":5,"inherits":8,"string_decoder/":36,"util":2}],25:[function(require,module,exports){
+},{"../errors":41,"./_stream_duplex":42,"./internal/streams/async_iterator":47,"./internal/streams/buffer_list":48,"./internal/streams/destroy":49,"./internal/streams/from":51,"./internal/streams/state":53,"./internal/streams/stream":54,"_process":32,"buffer":3,"events":16,"inherits":28,"string_decoder/":56,"util":2}],45:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8642,7 +9923,7 @@ function done(stream, er, data) {
   if (stream._transformState.transforming) throw new ERR_TRANSFORM_ALREADY_TRANSFORMING();
   return stream.push(null);
 }
-},{"../errors":21,"./_stream_duplex":22,"inherits":8}],26:[function(require,module,exports){
+},{"../errors":41,"./_stream_duplex":42,"inherits":28}],46:[function(require,module,exports){
 (function (process,global){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -9286,7 +10567,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../errors":21,"./_stream_duplex":22,"./internal/streams/destroy":29,"./internal/streams/state":33,"./internal/streams/stream":34,"_process":11,"buffer":3,"inherits":8,"util-deprecate":39}],27:[function(require,module,exports){
+},{"../errors":41,"./_stream_duplex":42,"./internal/streams/destroy":49,"./internal/streams/state":53,"./internal/streams/stream":54,"_process":32,"buffer":3,"inherits":28,"util-deprecate":63}],47:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -9469,7 +10750,7 @@ var createReadableStreamAsyncIterator = function createReadableStreamAsyncIterat
 };
 module.exports = createReadableStreamAsyncIterator;
 }).call(this)}).call(this,require('_process'))
-},{"./end-of-stream":30,"_process":11}],28:[function(require,module,exports){
+},{"./end-of-stream":50,"_process":32}],48:[function(require,module,exports){
 'use strict';
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
@@ -9653,7 +10934,7 @@ module.exports = /*#__PURE__*/function () {
   }]);
   return BufferList;
 }();
-},{"buffer":3,"util":2}],29:[function(require,module,exports){
+},{"buffer":3,"util":2}],49:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -9752,7 +11033,7 @@ module.exports = {
   errorOrDestroy: errorOrDestroy
 };
 }).call(this)}).call(this,require('_process'))
-},{"_process":11}],30:[function(require,module,exports){
+},{"_process":32}],50:[function(require,module,exports){
 // Ported from https://github.com/mafintosh/end-of-stream with
 // permission from the author, Mathias Buus (@mafintosh).
 
@@ -9839,12 +11120,12 @@ function eos(stream, opts, callback) {
   };
 }
 module.exports = eos;
-},{"../../../errors":21}],31:[function(require,module,exports){
+},{"../../../errors":41}],51:[function(require,module,exports){
 module.exports = function () {
   throw new Error('Readable.from is not available in the browser')
 };
 
-},{}],32:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 // Ported from https://github.com/mafintosh/pump with
 // permission from the author, Mathias Buus (@mafintosh).
 
@@ -9931,7 +11212,7 @@ function pipeline() {
   return streams.reduce(pipe);
 }
 module.exports = pipeline;
-},{"../../../errors":21,"./end-of-stream":30}],33:[function(require,module,exports){
+},{"../../../errors":41,"./end-of-stream":50}],53:[function(require,module,exports){
 'use strict';
 
 var ERR_INVALID_OPT_VALUE = require('../../../errors').codes.ERR_INVALID_OPT_VALUE;
@@ -9954,10 +11235,10 @@ function getHighWaterMark(state, options, duplexKey, isDuplex) {
 module.exports = {
   getHighWaterMark: getHighWaterMark
 };
-},{"../../../errors":21}],34:[function(require,module,exports){
+},{"../../../errors":41}],54:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":5}],35:[function(require,module,exports){
+},{"events":16}],55:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = exports;
 exports.Readable = exports;
@@ -9968,7 +11249,7 @@ exports.PassThrough = require('./lib/_stream_passthrough.js');
 exports.finished = require('./lib/internal/streams/end-of-stream.js');
 exports.pipeline = require('./lib/internal/streams/pipeline.js');
 
-},{"./lib/_stream_duplex.js":22,"./lib/_stream_passthrough.js":23,"./lib/_stream_readable.js":24,"./lib/_stream_transform.js":25,"./lib/_stream_writable.js":26,"./lib/internal/streams/end-of-stream.js":30,"./lib/internal/streams/pipeline.js":32}],36:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":42,"./lib/_stream_passthrough.js":43,"./lib/_stream_readable.js":44,"./lib/_stream_transform.js":45,"./lib/_stream_writable.js":46,"./lib/internal/streams/end-of-stream.js":50,"./lib/internal/streams/pipeline.js":52}],56:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10265,39 +11546,984 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":16}],37:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
+},{"safe-buffer":34}],57:[function(require,module,exports){
+'use strict';
+
+var replace = String.prototype.replace;
+var percentTwenties = /%20/g;
+
+var Format = {
+    RFC1738: 'RFC1738',
+    RFC3986: 'RFC3986'
+};
+
+module.exports = {
+    'default': Format.RFC3986,
+    formatters: {
+        RFC1738: function (value) {
+            return replace.call(value, percentTwenties, '+');
+        },
+        RFC3986: function (value) {
+            return String(value);
+        }
+    },
+    RFC1738: Format.RFC1738,
+    RFC3986: Format.RFC3986
+};
+
+},{}],58:[function(require,module,exports){
+'use strict';
+
+var stringify = require('./stringify');
+var parse = require('./parse');
+var formats = require('./formats');
+
+module.exports = {
+    formats: formats,
+    parse: parse,
+    stringify: stringify
+};
+
+},{"./formats":57,"./parse":59,"./stringify":60}],59:[function(require,module,exports){
+'use strict';
+
+var utils = require('./utils');
+
+var has = Object.prototype.hasOwnProperty;
+var isArray = Array.isArray;
+
+var defaults = {
+    allowDots: false,
+    allowEmptyArrays: false,
+    allowPrototypes: false,
+    allowSparse: false,
+    arrayLimit: 20,
+    charset: 'utf-8',
+    charsetSentinel: false,
+    comma: false,
+    decodeDotInKeys: false,
+    decoder: utils.decode,
+    delimiter: '&',
+    depth: 5,
+    duplicates: 'combine',
+    ignoreQueryPrefix: false,
+    interpretNumericEntities: false,
+    parameterLimit: 1000,
+    parseArrays: true,
+    plainObjects: false,
+    strictNullHandling: false
+};
+
+var interpretNumericEntities = function (str) {
+    return str.replace(/&#(\d+);/g, function ($0, numberStr) {
+        return String.fromCharCode(parseInt(numberStr, 10));
+    });
+};
+
+var parseArrayValue = function (val, options) {
+    if (val && typeof val === 'string' && options.comma && val.indexOf(',') > -1) {
+        return val.split(',');
+    }
+
+    return val;
+};
+
+// This is what browsers will submit when the ✓ character occurs in an
+// application/x-www-form-urlencoded body and the encoding of the page containing
+// the form is iso-8859-1, or when the submitted form has an accept-charset
+// attribute of iso-8859-1. Presumably also with other charsets that do not contain
+// the ✓ character, such as us-ascii.
+var isoSentinel = 'utf8=%26%2310003%3B'; // encodeURIComponent('&#10003;')
+
+// These are the percent-encoded utf-8 octets representing a checkmark, indicating that the request actually is utf-8 encoded.
+var charsetSentinel = 'utf8=%E2%9C%93'; // encodeURIComponent('✓')
+
+var parseValues = function parseQueryStringValues(str, options) {
+    var obj = { __proto__: null };
+
+    var cleanStr = options.ignoreQueryPrefix ? str.replace(/^\?/, '') : str;
+    cleanStr = cleanStr.replace(/%5B/gi, '[').replace(/%5D/gi, ']');
+    var limit = options.parameterLimit === Infinity ? undefined : options.parameterLimit;
+    var parts = cleanStr.split(options.delimiter, limit);
+    var skipIndex = -1; // Keep track of where the utf8 sentinel was found
+    var i;
+
+    var charset = options.charset;
+    if (options.charsetSentinel) {
+        for (i = 0; i < parts.length; ++i) {
+            if (parts[i].indexOf('utf8=') === 0) {
+                if (parts[i] === charsetSentinel) {
+                    charset = 'utf-8';
+                } else if (parts[i] === isoSentinel) {
+                    charset = 'iso-8859-1';
+                }
+                skipIndex = i;
+                i = parts.length; // The eslint settings do not allow break;
+            }
+        }
+    }
+
+    for (i = 0; i < parts.length; ++i) {
+        if (i === skipIndex) {
+            continue;
+        }
+        var part = parts[i];
+
+        var bracketEqualsPos = part.indexOf(']=');
+        var pos = bracketEqualsPos === -1 ? part.indexOf('=') : bracketEqualsPos + 1;
+
+        var key, val;
+        if (pos === -1) {
+            key = options.decoder(part, defaults.decoder, charset, 'key');
+            val = options.strictNullHandling ? null : '';
+        } else {
+            key = options.decoder(part.slice(0, pos), defaults.decoder, charset, 'key');
+            val = utils.maybeMap(
+                parseArrayValue(part.slice(pos + 1), options),
+                function (encodedVal) {
+                    return options.decoder(encodedVal, defaults.decoder, charset, 'value');
+                }
+            );
+        }
+
+        if (val && options.interpretNumericEntities && charset === 'iso-8859-1') {
+            val = interpretNumericEntities(val);
+        }
+
+        if (part.indexOf('[]=') > -1) {
+            val = isArray(val) ? [val] : val;
+        }
+
+        var existing = has.call(obj, key);
+        if (existing && options.duplicates === 'combine') {
+            obj[key] = utils.combine(obj[key], val);
+        } else if (!existing || options.duplicates === 'last') {
+            obj[key] = val;
+        }
+    }
+
+    return obj;
+};
+
+var parseObject = function (chain, val, options, valuesParsed) {
+    var leaf = valuesParsed ? val : parseArrayValue(val, options);
+
+    for (var i = chain.length - 1; i >= 0; --i) {
+        var obj;
+        var root = chain[i];
+
+        if (root === '[]' && options.parseArrays) {
+            obj = options.allowEmptyArrays && (leaf === '' || (options.strictNullHandling && leaf === null))
+                ? []
+                : [].concat(leaf);
+        } else {
+            obj = options.plainObjects ? Object.create(null) : {};
+            var cleanRoot = root.charAt(0) === '[' && root.charAt(root.length - 1) === ']' ? root.slice(1, -1) : root;
+            var decodedRoot = options.decodeDotInKeys ? cleanRoot.replace(/%2E/g, '.') : cleanRoot;
+            var index = parseInt(decodedRoot, 10);
+            if (!options.parseArrays && decodedRoot === '') {
+                obj = { 0: leaf };
+            } else if (
+                !isNaN(index)
+                && root !== decodedRoot
+                && String(index) === decodedRoot
+                && index >= 0
+                && (options.parseArrays && index <= options.arrayLimit)
+            ) {
+                obj = [];
+                obj[index] = leaf;
+            } else if (decodedRoot !== '__proto__') {
+                obj[decodedRoot] = leaf;
+            }
+        }
+
+        leaf = obj;
+    }
+
+    return leaf;
+};
+
+var parseKeys = function parseQueryStringKeys(givenKey, val, options, valuesParsed) {
+    if (!givenKey) {
+        return;
+    }
+
+    // Transform dot notation to bracket notation
+    var key = options.allowDots ? givenKey.replace(/\.([^.[]+)/g, '[$1]') : givenKey;
+
+    // The regex chunks
+
+    var brackets = /(\[[^[\]]*])/;
+    var child = /(\[[^[\]]*])/g;
+
+    // Get the parent
+
+    var segment = options.depth > 0 && brackets.exec(key);
+    var parent = segment ? key.slice(0, segment.index) : key;
+
+    // Stash the parent if it exists
+
+    var keys = [];
+    if (parent) {
+        // If we aren't using plain objects, optionally prefix keys that would overwrite object prototype properties
+        if (!options.plainObjects && has.call(Object.prototype, parent)) {
+            if (!options.allowPrototypes) {
+                return;
+            }
+        }
+
+        keys.push(parent);
+    }
+
+    // Loop through children appending to the array until we hit depth
+
+    var i = 0;
+    while (options.depth > 0 && (segment = child.exec(key)) !== null && i < options.depth) {
+        i += 1;
+        if (!options.plainObjects && has.call(Object.prototype, segment[1].slice(1, -1))) {
+            if (!options.allowPrototypes) {
+                return;
+            }
+        }
+        keys.push(segment[1]);
+    }
+
+    // If there's a remainder, just add whatever is left
+
+    if (segment) {
+        keys.push('[' + key.slice(segment.index) + ']');
+    }
+
+    return parseObject(keys, val, options, valuesParsed);
+};
+
+var normalizeParseOptions = function normalizeParseOptions(opts) {
+    if (!opts) {
+        return defaults;
+    }
+
+    if (typeof opts.allowEmptyArrays !== 'undefined' && typeof opts.allowEmptyArrays !== 'boolean') {
+        throw new TypeError('`allowEmptyArrays` option can only be `true` or `false`, when provided');
+    }
+
+    if (typeof opts.decodeDotInKeys !== 'undefined' && typeof opts.decodeDotInKeys !== 'boolean') {
+        throw new TypeError('`decodeDotInKeys` option can only be `true` or `false`, when provided');
+    }
+
+    if (opts.decoder !== null && typeof opts.decoder !== 'undefined' && typeof opts.decoder !== 'function') {
+        throw new TypeError('Decoder has to be a function.');
+    }
+
+    if (typeof opts.charset !== 'undefined' && opts.charset !== 'utf-8' && opts.charset !== 'iso-8859-1') {
+        throw new TypeError('The charset option must be either utf-8, iso-8859-1, or undefined');
+    }
+    var charset = typeof opts.charset === 'undefined' ? defaults.charset : opts.charset;
+
+    var duplicates = typeof opts.duplicates === 'undefined' ? defaults.duplicates : opts.duplicates;
+
+    if (duplicates !== 'combine' && duplicates !== 'first' && duplicates !== 'last') {
+        throw new TypeError('The duplicates option must be either combine, first, or last');
+    }
+
+    var allowDots = typeof opts.allowDots === 'undefined' ? opts.decodeDotInKeys === true ? true : defaults.allowDots : !!opts.allowDots;
+
+    return {
+        allowDots: allowDots,
+        allowEmptyArrays: typeof opts.allowEmptyArrays === 'boolean' ? !!opts.allowEmptyArrays : defaults.allowEmptyArrays,
+        allowPrototypes: typeof opts.allowPrototypes === 'boolean' ? opts.allowPrototypes : defaults.allowPrototypes,
+        allowSparse: typeof opts.allowSparse === 'boolean' ? opts.allowSparse : defaults.allowSparse,
+        arrayLimit: typeof opts.arrayLimit === 'number' ? opts.arrayLimit : defaults.arrayLimit,
+        charset: charset,
+        charsetSentinel: typeof opts.charsetSentinel === 'boolean' ? opts.charsetSentinel : defaults.charsetSentinel,
+        comma: typeof opts.comma === 'boolean' ? opts.comma : defaults.comma,
+        decodeDotInKeys: typeof opts.decodeDotInKeys === 'boolean' ? opts.decodeDotInKeys : defaults.decodeDotInKeys,
+        decoder: typeof opts.decoder === 'function' ? opts.decoder : defaults.decoder,
+        delimiter: typeof opts.delimiter === 'string' || utils.isRegExp(opts.delimiter) ? opts.delimiter : defaults.delimiter,
+        // eslint-disable-next-line no-implicit-coercion, no-extra-parens
+        depth: (typeof opts.depth === 'number' || opts.depth === false) ? +opts.depth : defaults.depth,
+        duplicates: duplicates,
+        ignoreQueryPrefix: opts.ignoreQueryPrefix === true,
+        interpretNumericEntities: typeof opts.interpretNumericEntities === 'boolean' ? opts.interpretNumericEntities : defaults.interpretNumericEntities,
+        parameterLimit: typeof opts.parameterLimit === 'number' ? opts.parameterLimit : defaults.parameterLimit,
+        parseArrays: opts.parseArrays !== false,
+        plainObjects: typeof opts.plainObjects === 'boolean' ? opts.plainObjects : defaults.plainObjects,
+        strictNullHandling: typeof opts.strictNullHandling === 'boolean' ? opts.strictNullHandling : defaults.strictNullHandling
+    };
+};
+
+module.exports = function (str, opts) {
+    var options = normalizeParseOptions(opts);
+
+    if (str === '' || str === null || typeof str === 'undefined') {
+        return options.plainObjects ? Object.create(null) : {};
+    }
+
+    var tempObj = typeof str === 'string' ? parseValues(str, options) : str;
+    var obj = options.plainObjects ? Object.create(null) : {};
+
+    // Iterate over the keys and setup the new object
+
+    var keys = Object.keys(tempObj);
+    for (var i = 0; i < keys.length; ++i) {
+        var key = keys[i];
+        var newObj = parseKeys(key, tempObj[key], options, typeof str === 'string');
+        obj = utils.merge(obj, newObj, options);
+    }
+
+    if (options.allowSparse === true) {
+        return obj;
+    }
+
+    return utils.compact(obj);
+};
+
+},{"./utils":61}],60:[function(require,module,exports){
+'use strict';
+
+var getSideChannel = require('side-channel');
+var utils = require('./utils');
+var formats = require('./formats');
+var has = Object.prototype.hasOwnProperty;
+
+var arrayPrefixGenerators = {
+    brackets: function brackets(prefix) {
+        return prefix + '[]';
+    },
+    comma: 'comma',
+    indices: function indices(prefix, key) {
+        return prefix + '[' + key + ']';
+    },
+    repeat: function repeat(prefix) {
+        return prefix;
+    }
+};
+
+var isArray = Array.isArray;
+var push = Array.prototype.push;
+var pushToArray = function (arr, valueOrArray) {
+    push.apply(arr, isArray(valueOrArray) ? valueOrArray : [valueOrArray]);
+};
+
+var toISO = Date.prototype.toISOString;
+
+var defaultFormat = formats['default'];
+var defaults = {
+    addQueryPrefix: false,
+    allowDots: false,
+    allowEmptyArrays: false,
+    arrayFormat: 'indices',
+    charset: 'utf-8',
+    charsetSentinel: false,
+    delimiter: '&',
+    encode: true,
+    encodeDotInKeys: false,
+    encoder: utils.encode,
+    encodeValuesOnly: false,
+    format: defaultFormat,
+    formatter: formats.formatters[defaultFormat],
+    // deprecated
+    indices: false,
+    serializeDate: function serializeDate(date) {
+        return toISO.call(date);
+    },
+    skipNulls: false,
+    strictNullHandling: false
+};
+
+var isNonNullishPrimitive = function isNonNullishPrimitive(v) {
+    return typeof v === 'string'
+        || typeof v === 'number'
+        || typeof v === 'boolean'
+        || typeof v === 'symbol'
+        || typeof v === 'bigint';
+};
+
+var sentinel = {};
+
+var stringify = function stringify(
+    object,
+    prefix,
+    generateArrayPrefix,
+    commaRoundTrip,
+    allowEmptyArrays,
+    strictNullHandling,
+    skipNulls,
+    encodeDotInKeys,
+    encoder,
+    filter,
+    sort,
+    allowDots,
+    serializeDate,
+    format,
+    formatter,
+    encodeValuesOnly,
+    charset,
+    sideChannel
+) {
+    var obj = object;
+
+    var tmpSc = sideChannel;
+    var step = 0;
+    var findFlag = false;
+    while ((tmpSc = tmpSc.get(sentinel)) !== void undefined && !findFlag) {
+        // Where object last appeared in the ref tree
+        var pos = tmpSc.get(object);
+        step += 1;
+        if (typeof pos !== 'undefined') {
+            if (pos === step) {
+                throw new RangeError('Cyclic object value');
+            } else {
+                findFlag = true; // Break while
+            }
+        }
+        if (typeof tmpSc.get(sentinel) === 'undefined') {
+            step = 0;
+        }
+    }
+
+    if (typeof filter === 'function') {
+        obj = filter(prefix, obj);
+    } else if (obj instanceof Date) {
+        obj = serializeDate(obj);
+    } else if (generateArrayPrefix === 'comma' && isArray(obj)) {
+        obj = utils.maybeMap(obj, function (value) {
+            if (value instanceof Date) {
+                return serializeDate(value);
+            }
+            return value;
+        });
+    }
+
+    if (obj === null) {
+        if (strictNullHandling) {
+            return encoder && !encodeValuesOnly ? encoder(prefix, defaults.encoder, charset, 'key', format) : prefix;
+        }
+
+        obj = '';
+    }
+
+    if (isNonNullishPrimitive(obj) || utils.isBuffer(obj)) {
+        if (encoder) {
+            var keyValue = encodeValuesOnly ? prefix : encoder(prefix, defaults.encoder, charset, 'key', format);
+            return [formatter(keyValue) + '=' + formatter(encoder(obj, defaults.encoder, charset, 'value', format))];
+        }
+        return [formatter(prefix) + '=' + formatter(String(obj))];
+    }
+
+    var values = [];
+
+    if (typeof obj === 'undefined') {
+        return values;
+    }
+
+    var objKeys;
+    if (generateArrayPrefix === 'comma' && isArray(obj)) {
+        // we need to join elements in
+        if (encodeValuesOnly && encoder) {
+            obj = utils.maybeMap(obj, encoder);
+        }
+        objKeys = [{ value: obj.length > 0 ? obj.join(',') || null : void undefined }];
+    } else if (isArray(filter)) {
+        objKeys = filter;
+    } else {
+        var keys = Object.keys(obj);
+        objKeys = sort ? keys.sort(sort) : keys;
+    }
+
+    var encodedPrefix = encodeDotInKeys ? prefix.replace(/\./g, '%2E') : prefix;
+
+    var adjustedPrefix = commaRoundTrip && isArray(obj) && obj.length === 1 ? encodedPrefix + '[]' : encodedPrefix;
+
+    if (allowEmptyArrays && isArray(obj) && obj.length === 0) {
+        return adjustedPrefix + '[]';
+    }
+
+    for (var j = 0; j < objKeys.length; ++j) {
+        var key = objKeys[j];
+        var value = typeof key === 'object' && typeof key.value !== 'undefined' ? key.value : obj[key];
+
+        if (skipNulls && value === null) {
+            continue;
+        }
+
+        var encodedKey = allowDots && encodeDotInKeys ? key.replace(/\./g, '%2E') : key;
+        var keyPrefix = isArray(obj)
+            ? typeof generateArrayPrefix === 'function' ? generateArrayPrefix(adjustedPrefix, encodedKey) : adjustedPrefix
+            : adjustedPrefix + (allowDots ? '.' + encodedKey : '[' + encodedKey + ']');
+
+        sideChannel.set(object, step);
+        var valueSideChannel = getSideChannel();
+        valueSideChannel.set(sentinel, sideChannel);
+        pushToArray(values, stringify(
+            value,
+            keyPrefix,
+            generateArrayPrefix,
+            commaRoundTrip,
+            allowEmptyArrays,
+            strictNullHandling,
+            skipNulls,
+            encodeDotInKeys,
+            generateArrayPrefix === 'comma' && encodeValuesOnly && isArray(obj) ? null : encoder,
+            filter,
+            sort,
+            allowDots,
+            serializeDate,
+            format,
+            formatter,
+            encodeValuesOnly,
+            charset,
+            valueSideChannel
+        ));
+    }
+
+    return values;
+};
+
+var normalizeStringifyOptions = function normalizeStringifyOptions(opts) {
+    if (!opts) {
+        return defaults;
+    }
+
+    if (typeof opts.allowEmptyArrays !== 'undefined' && typeof opts.allowEmptyArrays !== 'boolean') {
+        throw new TypeError('`allowEmptyArrays` option can only be `true` or `false`, when provided');
+    }
+
+    if (typeof opts.encodeDotInKeys !== 'undefined' && typeof opts.encodeDotInKeys !== 'boolean') {
+        throw new TypeError('`encodeDotInKeys` option can only be `true` or `false`, when provided');
+    }
+
+    if (opts.encoder !== null && typeof opts.encoder !== 'undefined' && typeof opts.encoder !== 'function') {
+        throw new TypeError('Encoder has to be a function.');
+    }
+
+    var charset = opts.charset || defaults.charset;
+    if (typeof opts.charset !== 'undefined' && opts.charset !== 'utf-8' && opts.charset !== 'iso-8859-1') {
+        throw new TypeError('The charset option must be either utf-8, iso-8859-1, or undefined');
+    }
+
+    var format = formats['default'];
+    if (typeof opts.format !== 'undefined') {
+        if (!has.call(formats.formatters, opts.format)) {
+            throw new TypeError('Unknown format option provided.');
+        }
+        format = opts.format;
+    }
+    var formatter = formats.formatters[format];
+
+    var filter = defaults.filter;
+    if (typeof opts.filter === 'function' || isArray(opts.filter)) {
+        filter = opts.filter;
+    }
+
+    var arrayFormat;
+    if (opts.arrayFormat in arrayPrefixGenerators) {
+        arrayFormat = opts.arrayFormat;
+    } else if ('indices' in opts) {
+        arrayFormat = opts.indices ? 'indices' : 'repeat';
+    } else {
+        arrayFormat = defaults.arrayFormat;
+    }
+
+    if ('commaRoundTrip' in opts && typeof opts.commaRoundTrip !== 'boolean') {
+        throw new TypeError('`commaRoundTrip` must be a boolean, or absent');
+    }
+
+    var allowDots = typeof opts.allowDots === 'undefined' ? opts.encodeDotInKeys === true ? true : defaults.allowDots : !!opts.allowDots;
+
+    return {
+        addQueryPrefix: typeof opts.addQueryPrefix === 'boolean' ? opts.addQueryPrefix : defaults.addQueryPrefix,
+        allowDots: allowDots,
+        allowEmptyArrays: typeof opts.allowEmptyArrays === 'boolean' ? !!opts.allowEmptyArrays : defaults.allowEmptyArrays,
+        arrayFormat: arrayFormat,
+        charset: charset,
+        charsetSentinel: typeof opts.charsetSentinel === 'boolean' ? opts.charsetSentinel : defaults.charsetSentinel,
+        commaRoundTrip: opts.commaRoundTrip,
+        delimiter: typeof opts.delimiter === 'undefined' ? defaults.delimiter : opts.delimiter,
+        encode: typeof opts.encode === 'boolean' ? opts.encode : defaults.encode,
+        encodeDotInKeys: typeof opts.encodeDotInKeys === 'boolean' ? opts.encodeDotInKeys : defaults.encodeDotInKeys,
+        encoder: typeof opts.encoder === 'function' ? opts.encoder : defaults.encoder,
+        encodeValuesOnly: typeof opts.encodeValuesOnly === 'boolean' ? opts.encodeValuesOnly : defaults.encodeValuesOnly,
+        filter: filter,
+        format: format,
+        formatter: formatter,
+        serializeDate: typeof opts.serializeDate === 'function' ? opts.serializeDate : defaults.serializeDate,
+        skipNulls: typeof opts.skipNulls === 'boolean' ? opts.skipNulls : defaults.skipNulls,
+        sort: typeof opts.sort === 'function' ? opts.sort : null,
+        strictNullHandling: typeof opts.strictNullHandling === 'boolean' ? opts.strictNullHandling : defaults.strictNullHandling
+    };
+};
+
+module.exports = function (object, opts) {
+    var obj = object;
+    var options = normalizeStringifyOptions(opts);
+
+    var objKeys;
+    var filter;
+
+    if (typeof options.filter === 'function') {
+        filter = options.filter;
+        obj = filter('', obj);
+    } else if (isArray(options.filter)) {
+        filter = options.filter;
+        objKeys = filter;
+    }
+
+    var keys = [];
+
+    if (typeof obj !== 'object' || obj === null) {
+        return '';
+    }
+
+    var generateArrayPrefix = arrayPrefixGenerators[options.arrayFormat];
+    var commaRoundTrip = generateArrayPrefix === 'comma' && options.commaRoundTrip;
+
+    if (!objKeys) {
+        objKeys = Object.keys(obj);
+    }
+
+    if (options.sort) {
+        objKeys.sort(options.sort);
+    }
+
+    var sideChannel = getSideChannel();
+    for (var i = 0; i < objKeys.length; ++i) {
+        var key = objKeys[i];
+
+        if (options.skipNulls && obj[key] === null) {
+            continue;
+        }
+        pushToArray(keys, stringify(
+            obj[key],
+            key,
+            generateArrayPrefix,
+            commaRoundTrip,
+            options.allowEmptyArrays,
+            options.strictNullHandling,
+            options.skipNulls,
+            options.encodeDotInKeys,
+            options.encode ? options.encoder : null,
+            options.filter,
+            options.sort,
+            options.allowDots,
+            options.serializeDate,
+            options.format,
+            options.formatter,
+            options.encodeValuesOnly,
+            options.charset,
+            sideChannel
+        ));
+    }
+
+    var joined = keys.join(options.delimiter);
+    var prefix = options.addQueryPrefix === true ? '?' : '';
+
+    if (options.charsetSentinel) {
+        if (options.charset === 'iso-8859-1') {
+            // encodeURIComponent('&#10003;'), the "numeric entity" representation of a checkmark
+            prefix += 'utf8=%26%2310003%3B&';
+        } else {
+            // encodeURIComponent('✓')
+            prefix += 'utf8=%E2%9C%93&';
+        }
+    }
+
+    return joined.length > 0 ? prefix + joined : '';
+};
+
+},{"./formats":57,"./utils":61,"side-channel":36}],61:[function(require,module,exports){
+'use strict';
+
+var formats = require('./formats');
+
+var has = Object.prototype.hasOwnProperty;
+var isArray = Array.isArray;
+
+var hexTable = (function () {
+    var array = [];
+    for (var i = 0; i < 256; ++i) {
+        array.push('%' + ((i < 16 ? '0' : '') + i.toString(16)).toUpperCase());
+    }
+
+    return array;
+}());
+
+var compactQueue = function compactQueue(queue) {
+    while (queue.length > 1) {
+        var item = queue.pop();
+        var obj = item.obj[item.prop];
+
+        if (isArray(obj)) {
+            var compacted = [];
+
+            for (var j = 0; j < obj.length; ++j) {
+                if (typeof obj[j] !== 'undefined') {
+                    compacted.push(obj[j]);
+                }
+            }
+
+            item.obj[item.prop] = compacted;
+        }
+    }
+};
+
+var arrayToObject = function arrayToObject(source, options) {
+    var obj = options && options.plainObjects ? Object.create(null) : {};
+    for (var i = 0; i < source.length; ++i) {
+        if (typeof source[i] !== 'undefined') {
+            obj[i] = source[i];
+        }
+    }
+
+    return obj;
+};
+
+var merge = function merge(target, source, options) {
+    /* eslint no-param-reassign: 0 */
+    if (!source) {
+        return target;
+    }
+
+    if (typeof source !== 'object') {
+        if (isArray(target)) {
+            target.push(source);
+        } else if (target && typeof target === 'object') {
+            if ((options && (options.plainObjects || options.allowPrototypes)) || !has.call(Object.prototype, source)) {
+                target[source] = true;
+            }
+        } else {
+            return [target, source];
+        }
+
+        return target;
+    }
+
+    if (!target || typeof target !== 'object') {
+        return [target].concat(source);
+    }
+
+    var mergeTarget = target;
+    if (isArray(target) && !isArray(source)) {
+        mergeTarget = arrayToObject(target, options);
+    }
+
+    if (isArray(target) && isArray(source)) {
+        source.forEach(function (item, i) {
+            if (has.call(target, i)) {
+                var targetItem = target[i];
+                if (targetItem && typeof targetItem === 'object' && item && typeof item === 'object') {
+                    target[i] = merge(targetItem, item, options);
+                } else {
+                    target.push(item);
+                }
+            } else {
+                target[i] = item;
+            }
+        });
+        return target;
+    }
+
+    return Object.keys(source).reduce(function (acc, key) {
+        var value = source[key];
+
+        if (has.call(acc, key)) {
+            acc[key] = merge(acc[key], value, options);
+        } else {
+            acc[key] = value;
+        }
+        return acc;
+    }, mergeTarget);
+};
+
+var assign = function assignSingleSource(target, source) {
+    return Object.keys(source).reduce(function (acc, key) {
+        acc[key] = source[key];
+        return acc;
+    }, target);
+};
+
+var decode = function (str, decoder, charset) {
+    var strWithoutPlus = str.replace(/\+/g, ' ');
+    if (charset === 'iso-8859-1') {
+        // unescape never throws, no try...catch needed:
+        return strWithoutPlus.replace(/%[0-9a-f]{2}/gi, unescape);
+    }
+    // utf-8
+    try {
+        return decodeURIComponent(strWithoutPlus);
+    } catch (e) {
+        return strWithoutPlus;
+    }
+};
+
+var limit = 1024;
+
+/* eslint operator-linebreak: [2, "before"] */
+
+var encode = function encode(str, defaultEncoder, charset, kind, format) {
+    // This code was originally written by Brian White (mscdex) for the io.js core querystring library.
+    // It has been adapted here for stricter adherence to RFC 3986
+    if (str.length === 0) {
+        return str;
+    }
+
+    var string = str;
+    if (typeof str === 'symbol') {
+        string = Symbol.prototype.toString.call(str);
+    } else if (typeof str !== 'string') {
+        string = String(str);
+    }
+
+    if (charset === 'iso-8859-1') {
+        return escape(string).replace(/%u[0-9a-f]{4}/gi, function ($0) {
+            return '%26%23' + parseInt($0.slice(2), 16) + '%3B';
+        });
+    }
+
+    var out = '';
+    for (var j = 0; j < string.length; j += limit) {
+        var segment = string.length >= limit ? string.slice(j, j + limit) : string;
+        var arr = [];
+
+        for (var i = 0; i < segment.length; ++i) {
+            var c = segment.charCodeAt(i);
+            if (
+                c === 0x2D // -
+                || c === 0x2E // .
+                || c === 0x5F // _
+                || c === 0x7E // ~
+                || (c >= 0x30 && c <= 0x39) // 0-9
+                || (c >= 0x41 && c <= 0x5A) // a-z
+                || (c >= 0x61 && c <= 0x7A) // A-Z
+                || (format === formats.RFC1738 && (c === 0x28 || c === 0x29)) // ( )
+            ) {
+                arr[arr.length] = segment.charAt(i);
+                continue;
+            }
+
+            if (c < 0x80) {
+                arr[arr.length] = hexTable[c];
+                continue;
+            }
+
+            if (c < 0x800) {
+                arr[arr.length] = hexTable[0xC0 | (c >> 6)]
+                    + hexTable[0x80 | (c & 0x3F)];
+                continue;
+            }
+
+            if (c < 0xD800 || c >= 0xE000) {
+                arr[arr.length] = hexTable[0xE0 | (c >> 12)]
+                    + hexTable[0x80 | ((c >> 6) & 0x3F)]
+                    + hexTable[0x80 | (c & 0x3F)];
+                continue;
+            }
+
+            i += 1;
+            c = 0x10000 + (((c & 0x3FF) << 10) | (segment.charCodeAt(i) & 0x3FF));
+
+            arr[arr.length] = hexTable[0xF0 | (c >> 18)]
+                + hexTable[0x80 | ((c >> 12) & 0x3F)]
+                + hexTable[0x80 | ((c >> 6) & 0x3F)]
+                + hexTable[0x80 | (c & 0x3F)];
+        }
+
+        out += arr.join('');
+    }
+
+    return out;
+};
+
+var compact = function compact(value) {
+    var queue = [{ obj: { o: value }, prop: 'o' }];
+    var refs = [];
+
+    for (var i = 0; i < queue.length; ++i) {
+        var item = queue[i];
+        var obj = item.obj[item.prop];
+
+        var keys = Object.keys(obj);
+        for (var j = 0; j < keys.length; ++j) {
+            var key = keys[j];
+            var val = obj[key];
+            if (typeof val === 'object' && val !== null && refs.indexOf(val) === -1) {
+                queue.push({ obj: obj, prop: key });
+                refs.push(val);
+            }
+        }
+    }
+
+    compactQueue(queue);
+
+    return value;
+};
+
+var isRegExp = function isRegExp(obj) {
+    return Object.prototype.toString.call(obj) === '[object RegExp]';
+};
+
+var isBuffer = function isBuffer(obj) {
+    if (!obj || typeof obj !== 'object') {
+        return false;
+    }
+
+    return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
+};
+
+var combine = function combine(a, b) {
+    return [].concat(a, b);
+};
+
+var maybeMap = function maybeMap(val, fn) {
+    if (isArray(val)) {
+        var mapped = [];
+        for (var i = 0; i < val.length; i += 1) {
+            mapped.push(fn(val[i]));
+        }
+        return mapped;
+    }
+    return fn(val);
+};
+
+module.exports = {
+    arrayToObject: arrayToObject,
+    assign: assign,
+    combine: combine,
+    compact: compact,
+    decode: decode,
+    encode: encode,
+    isBuffer: isBuffer,
+    isRegExp: isRegExp,
+    maybeMap: maybeMap,
+    merge: merge
+};
+
+},{"./formats":57}],62:[function(require,module,exports){
+/*
+ * Copyright Joyent, Inc. and other Node contributors.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the
+ * following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+ * USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 'use strict';
 
-var punycode = require('punycode');
-var util = require('./util');
-
-exports.parse = urlParse;
-exports.resolve = urlResolve;
-exports.resolveObject = urlResolveObject;
-exports.format = urlFormat;
-
-exports.Url = Url;
+var punycode = require('punycode/');
 
 function Url() {
   this.protocol = null;
@@ -10316,85 +12542,102 @@ function Url() {
 
 // Reference: RFC 3986, RFC 1808, RFC 2396
 
-// define these here so at least they only have to be
-// compiled once on the first module load.
+/*
+ * define these here so at least they only have to be
+ * compiled once on the first module load.
+ */
 var protocolPattern = /^([a-z0-9.+-]+:)/i,
-    portPattern = /:[0-9]*$/,
+  portPattern = /:[0-9]*$/,
 
-    // Special case for a simple path URL
-    simplePathPattern = /^(\/\/?(?!\/)[^\?\s]*)(\?[^\s]*)?$/,
+  // Special case for a simple path URL
+  simplePathPattern = /^(\/\/?(?!\/)[^?\s]*)(\?[^\s]*)?$/,
 
-    // RFC 2396: characters reserved for delimiting URLs.
-    // We actually just auto-escape these.
-    delims = ['<', '>', '"', '`', ' ', '\r', '\n', '\t'],
+  /*
+   * RFC 2396: characters reserved for delimiting URLs.
+   * We actually just auto-escape these.
+   */
+  delims = [
+    '<', '>', '"', '`', ' ', '\r', '\n', '\t'
+  ],
 
-    // RFC 2396: characters not allowed for various reasons.
-    unwise = ['{', '}', '|', '\\', '^', '`'].concat(delims),
+  // RFC 2396: characters not allowed for various reasons.
+  unwise = [
+    '{', '}', '|', '\\', '^', '`'
+  ].concat(delims),
 
-    // Allowed by RFCs, but cause of XSS attacks.  Always escape these.
-    autoEscape = ['\''].concat(unwise),
-    // Characters that are never ever allowed in a hostname.
-    // Note that any invalid chars are also handled, but these
-    // are the ones that are *expected* to be seen, so we fast-path
-    // them.
-    nonHostChars = ['%', '/', '?', ';', '#'].concat(autoEscape),
-    hostEndingChars = ['/', '?', '#'],
-    hostnameMaxLen = 255,
-    hostnamePartPattern = /^[+a-z0-9A-Z_-]{0,63}$/,
-    hostnamePartStart = /^([+a-z0-9A-Z_-]{0,63})(.*)$/,
-    // protocols that can allow "unsafe" and "unwise" chars.
-    unsafeProtocol = {
-      'javascript': true,
-      'javascript:': true
-    },
-    // protocols that never have a hostname.
-    hostlessProtocol = {
-      'javascript': true,
-      'javascript:': true
-    },
-    // protocols that always contain a // bit.
-    slashedProtocol = {
-      'http': true,
-      'https': true,
-      'ftp': true,
-      'gopher': true,
-      'file': true,
-      'http:': true,
-      'https:': true,
-      'ftp:': true,
-      'gopher:': true,
-      'file:': true
-    },
-    querystring = require('querystring');
+  // Allowed by RFCs, but cause of XSS attacks.  Always escape these.
+  autoEscape = ['\''].concat(unwise),
+  /*
+   * Characters that are never ever allowed in a hostname.
+   * Note that any invalid chars are also handled, but these
+   * are the ones that are *expected* to be seen, so we fast-path
+   * them.
+   */
+  nonHostChars = [
+    '%', '/', '?', ';', '#'
+  ].concat(autoEscape),
+  hostEndingChars = [
+    '/', '?', '#'
+  ],
+  hostnameMaxLen = 255,
+  hostnamePartPattern = /^[+a-z0-9A-Z_-]{0,63}$/,
+  hostnamePartStart = /^([+a-z0-9A-Z_-]{0,63})(.*)$/,
+  // protocols that can allow "unsafe" and "unwise" chars.
+  unsafeProtocol = {
+    javascript: true,
+    'javascript:': true
+  },
+  // protocols that never have a hostname.
+  hostlessProtocol = {
+    javascript: true,
+    'javascript:': true
+  },
+  // protocols that always contain a // bit.
+  slashedProtocol = {
+    http: true,
+    https: true,
+    ftp: true,
+    gopher: true,
+    file: true,
+    'http:': true,
+    'https:': true,
+    'ftp:': true,
+    'gopher:': true,
+    'file:': true
+  },
+  querystring = require('qs');
 
 function urlParse(url, parseQueryString, slashesDenoteHost) {
-  if (url && util.isObject(url) && url instanceof Url) return url;
+  if (url && typeof url === 'object' && url instanceof Url) { return url; }
 
-  var u = new Url;
+  var u = new Url();
   u.parse(url, parseQueryString, slashesDenoteHost);
   return u;
 }
 
-Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
-  if (!util.isString(url)) {
+Url.prototype.parse = function (url, parseQueryString, slashesDenoteHost) {
+  if (typeof url !== 'string') {
     throw new TypeError("Parameter 'url' must be a string, not " + typeof url);
   }
 
-  // Copy chrome, IE, opera backslash-handling behavior.
-  // Back slashes before the query string get converted to forward slashes
-  // See: https://code.google.com/p/chromium/issues/detail?id=25916
+  /*
+   * Copy chrome, IE, opera backslash-handling behavior.
+   * Back slashes before the query string get converted to forward slashes
+   * See: https://code.google.com/p/chromium/issues/detail?id=25916
+   */
   var queryIndex = url.indexOf('?'),
-      splitter =
-          (queryIndex !== -1 && queryIndex < url.indexOf('#')) ? '?' : '#',
-      uSplit = url.split(splitter),
-      slashRegex = /\\/g;
+    splitter = queryIndex !== -1 && queryIndex < url.indexOf('#') ? '?' : '#',
+    uSplit = url.split(splitter),
+    slashRegex = /\\/g;
   uSplit[0] = uSplit[0].replace(slashRegex, '/');
   url = uSplit.join(splitter);
 
   var rest = url;
 
-  // trim before proceeding.
-  // This is to support parse stuff like "  http://foo.com  \n"
+  /*
+   * trim before proceeding.
+   * This is to support parse stuff like "  http://foo.com  \n"
+   */
   rest = rest.trim();
 
   if (!slashesDenoteHost && url.split('#').length === 1) {
@@ -10427,11 +12670,13 @@ Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
     rest = rest.substr(proto.length);
   }
 
-  // figure out if it's got a host
-  // user@server is *always* interpreted as a hostname, and url
-  // resolution will treat //foo/bar as host=foo,path=bar because that's
-  // how the browser resolves relative URLs.
-  if (slashesDenoteHost || proto || rest.match(/^\/\/[^@\/]+@[^@\/]+/)) {
+  /*
+   * figure out if it's got a host
+   * user@server is *always* interpreted as a hostname, and url
+   * resolution will treat //foo/bar as host=foo,path=bar because that's
+   * how the browser resolves relative URLs.
+   */
+  if (slashesDenoteHost || proto || rest.match(/^\/\/[^@/]+@[^@/]+/)) {
     var slashes = rest.substr(0, 2) === '//';
     if (slashes && !(proto && hostlessProtocol[proto])) {
       rest = rest.substr(2);
@@ -10439,46 +12684,54 @@ Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
     }
   }
 
-  if (!hostlessProtocol[proto] &&
-      (slashes || (proto && !slashedProtocol[proto]))) {
+  if (!hostlessProtocol[proto] && (slashes || (proto && !slashedProtocol[proto]))) {
 
-    // there's a hostname.
-    // the first instance of /, ?, ;, or # ends the host.
-    //
-    // If there is an @ in the hostname, then non-host chars *are* allowed
-    // to the left of the last @ sign, unless some host-ending character
-    // comes *before* the @-sign.
-    // URLs are obnoxious.
-    //
-    // ex:
-    // http://a@b@c/ => user:a@b host:c
-    // http://a@b?@c => user:a host:c path:/?@c
+    /*
+     * there's a hostname.
+     * the first instance of /, ?, ;, or # ends the host.
+     *
+     * If there is an @ in the hostname, then non-host chars *are* allowed
+     * to the left of the last @ sign, unless some host-ending character
+     * comes *before* the @-sign.
+     * URLs are obnoxious.
+     *
+     * ex:
+     * http://a@b@c/ => user:a@b host:c
+     * http://a@b?@c => user:a host:c path:/?@c
+     */
 
-    // v0.12 TODO(isaacs): This is not quite how Chrome does things.
-    // Review our test case against browsers more comprehensively.
+    /*
+     * v0.12 TODO(isaacs): This is not quite how Chrome does things.
+     * Review our test case against browsers more comprehensively.
+     */
 
     // find the first instance of any hostEndingChars
     var hostEnd = -1;
     for (var i = 0; i < hostEndingChars.length; i++) {
       var hec = rest.indexOf(hostEndingChars[i]);
-      if (hec !== -1 && (hostEnd === -1 || hec < hostEnd))
-        hostEnd = hec;
+      if (hec !== -1 && (hostEnd === -1 || hec < hostEnd)) { hostEnd = hec; }
     }
 
-    // at this point, either we have an explicit point where the
-    // auth portion cannot go past, or the last @ char is the decider.
+    /*
+     * at this point, either we have an explicit point where the
+     * auth portion cannot go past, or the last @ char is the decider.
+     */
     var auth, atSign;
     if (hostEnd === -1) {
       // atSign can be anywhere.
       atSign = rest.lastIndexOf('@');
     } else {
-      // atSign must be in auth portion.
-      // http://a@b/c@d => host:b auth:a path:/c@d
+      /*
+       * atSign must be in auth portion.
+       * http://a@b/c@d => host:b auth:a path:/c@d
+       */
       atSign = rest.lastIndexOf('@', hostEnd);
     }
 
-    // Now we have a portion which is definitely the auth.
-    // Pull that off.
+    /*
+     * Now we have a portion which is definitely the auth.
+     * Pull that off.
+     */
     if (atSign !== -1) {
       auth = rest.slice(0, atSign);
       rest = rest.slice(atSign + 1);
@@ -10489,12 +12742,10 @@ Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
     hostEnd = -1;
     for (var i = 0; i < nonHostChars.length; i++) {
       var hec = rest.indexOf(nonHostChars[i]);
-      if (hec !== -1 && (hostEnd === -1 || hec < hostEnd))
-        hostEnd = hec;
+      if (hec !== -1 && (hostEnd === -1 || hec < hostEnd)) { hostEnd = hec; }
     }
     // if we still have not hit it, then the entire thing is a host.
-    if (hostEnd === -1)
-      hostEnd = rest.length;
+    if (hostEnd === -1) { hostEnd = rest.length; }
 
     this.host = rest.slice(0, hostEnd);
     rest = rest.slice(hostEnd);
@@ -10502,28 +12753,33 @@ Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
     // pull out port.
     this.parseHost();
 
-    // we've indicated that there is a hostname,
-    // so even if it's empty, it has to be present.
+    /*
+     * we've indicated that there is a hostname,
+     * so even if it's empty, it has to be present.
+     */
     this.hostname = this.hostname || '';
 
-    // if hostname begins with [ and ends with ]
-    // assume that it's an IPv6 address.
-    var ipv6Hostname = this.hostname[0] === '[' &&
-        this.hostname[this.hostname.length - 1] === ']';
+    /*
+     * if hostname begins with [ and ends with ]
+     * assume that it's an IPv6 address.
+     */
+    var ipv6Hostname = this.hostname[0] === '[' && this.hostname[this.hostname.length - 1] === ']';
 
     // validate a little.
     if (!ipv6Hostname) {
       var hostparts = this.hostname.split(/\./);
       for (var i = 0, l = hostparts.length; i < l; i++) {
         var part = hostparts[i];
-        if (!part) continue;
+        if (!part) { continue; }
         if (!part.match(hostnamePartPattern)) {
           var newpart = '';
           for (var j = 0, k = part.length; j < k; j++) {
             if (part.charCodeAt(j) > 127) {
-              // we replace non-ASCII char with a temporary placeholder
-              // we need this to make sure size of hostname is not
-              // broken by replacing non-ASCII by nothing
+              /*
+               * we replace non-ASCII char with a temporary placeholder
+               * we need this to make sure size of hostname is not
+               * broken by replacing non-ASCII by nothing
+               */
               newpart += 'x';
             } else {
               newpart += part[j];
@@ -10556,10 +12812,12 @@ Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
     }
 
     if (!ipv6Hostname) {
-      // IDNA Support: Returns a punycoded representation of "domain".
-      // It only converts parts of the domain name that
-      // have non-ASCII characters, i.e. it doesn't matter if
-      // you call it with a domain that already is ASCII-only.
+      /*
+       * IDNA Support: Returns a punycoded representation of "domain".
+       * It only converts parts of the domain name that
+       * have non-ASCII characters, i.e. it doesn't matter if
+       * you call it with a domain that already is ASCII-only.
+       */
       this.hostname = punycode.toASCII(this.hostname);
     }
 
@@ -10568,8 +12826,10 @@ Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
     this.host = h + p;
     this.href += this.host;
 
-    // strip [ and ] from the hostname
-    // the host field still retains them, though
+    /*
+     * strip [ and ] from the hostname
+     * the host field still retains them, though
+     */
     if (ipv6Hostname) {
       this.hostname = this.hostname.substr(1, this.hostname.length - 2);
       if (rest[0] !== '/') {
@@ -10578,17 +12838,20 @@ Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
     }
   }
 
-  // now rest is set to the post-host stuff.
-  // chop off any delim chars.
+  /*
+   * now rest is set to the post-host stuff.
+   * chop off any delim chars.
+   */
   if (!unsafeProtocol[lowerProto]) {
 
-    // First, make 100% sure that any "autoEscape" chars get
-    // escaped, even if encodeURIComponent doesn't think they
-    // need to be.
+    /*
+     * First, make 100% sure that any "autoEscape" chars get
+     * escaped, even if encodeURIComponent doesn't think they
+     * need to be.
+     */
     for (var i = 0, l = autoEscape.length; i < l; i++) {
       var ae = autoEscape[i];
-      if (rest.indexOf(ae) === -1)
-        continue;
+      if (rest.indexOf(ae) === -1) { continue; }
       var esc = encodeURIComponent(ae);
       if (esc === ae) {
         esc = escape(ae);
@@ -10596,7 +12859,6 @@ Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
       rest = rest.split(ae).join(esc);
     }
   }
-
 
   // chop off from the tail first.
   var hash = rest.indexOf('#');
@@ -10618,13 +12880,12 @@ Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
     this.search = '';
     this.query = {};
   }
-  if (rest) this.pathname = rest;
-  if (slashedProtocol[lowerProto] &&
-      this.hostname && !this.pathname) {
+  if (rest) { this.pathname = rest; }
+  if (slashedProtocol[lowerProto] && this.hostname && !this.pathname) {
     this.pathname = '/';
   }
 
-  //to support http.request
+  // to support http.request
   if (this.pathname || this.search) {
     var p = this.pathname || '';
     var s = this.search || '';
@@ -10638,16 +12899,18 @@ Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
 
 // format a parsed object into a url string
 function urlFormat(obj) {
-  // ensure it's an object, and not a string url.
-  // If it's an obj, this is a no-op.
-  // this way, you can call url_format() on strings
-  // to clean up potentially wonky urls.
-  if (util.isString(obj)) obj = urlParse(obj);
-  if (!(obj instanceof Url)) return Url.prototype.format.call(obj);
+  /*
+   * ensure it's an object, and not a string url.
+   * If it's an obj, this is a no-op.
+   * this way, you can call url_format() on strings
+   * to clean up potentially wonky urls.
+   */
+  if (typeof obj === 'string') { obj = urlParse(obj); }
+  if (!(obj instanceof Url)) { return Url.prototype.format.call(obj); }
   return obj.format();
 }
 
-Url.prototype.format = function() {
+Url.prototype.format = function () {
   var auth = this.auth || '';
   if (auth) {
     auth = encodeURIComponent(auth);
@@ -10656,46 +12919,46 @@ Url.prototype.format = function() {
   }
 
   var protocol = this.protocol || '',
-      pathname = this.pathname || '',
-      hash = this.hash || '',
-      host = false,
-      query = '';
+    pathname = this.pathname || '',
+    hash = this.hash || '',
+    host = false,
+    query = '';
 
   if (this.host) {
     host = auth + this.host;
   } else if (this.hostname) {
-    host = auth + (this.hostname.indexOf(':') === -1 ?
-        this.hostname :
-        '[' + this.hostname + ']');
+    host = auth + (this.hostname.indexOf(':') === -1 ? this.hostname : '[' + this.hostname + ']');
     if (this.port) {
       host += ':' + this.port;
     }
   }
 
-  if (this.query &&
-      util.isObject(this.query) &&
-      Object.keys(this.query).length) {
-    query = querystring.stringify(this.query);
+  if (this.query && typeof this.query === 'object' && Object.keys(this.query).length) {
+    query = querystring.stringify(this.query, {
+      arrayFormat: 'repeat',
+      addQueryPrefix: false
+    });
   }
 
   var search = this.search || (query && ('?' + query)) || '';
 
-  if (protocol && protocol.substr(-1) !== ':') protocol += ':';
+  if (protocol && protocol.substr(-1) !== ':') { protocol += ':'; }
 
-  // only the slashedProtocols get the //.  Not mailto:, xmpp:, etc.
-  // unless they had them to begin with.
-  if (this.slashes ||
-      (!protocol || slashedProtocol[protocol]) && host !== false) {
+  /*
+   * only the slashedProtocols get the //.  Not mailto:, xmpp:, etc.
+   * unless they had them to begin with.
+   */
+  if (this.slashes || (!protocol || slashedProtocol[protocol]) && host !== false) {
     host = '//' + (host || '');
-    if (pathname && pathname.charAt(0) !== '/') pathname = '/' + pathname;
+    if (pathname && pathname.charAt(0) !== '/') { pathname = '/' + pathname; }
   } else if (!host) {
     host = '';
   }
 
-  if (hash && hash.charAt(0) !== '#') hash = '#' + hash;
-  if (search && search.charAt(0) !== '?') search = '?' + search;
+  if (hash && hash.charAt(0) !== '#') { hash = '#' + hash; }
+  if (search && search.charAt(0) !== '?') { search = '?' + search; }
 
-  pathname = pathname.replace(/[?#]/g, function(match) {
+  pathname = pathname.replace(/[?#]/g, function (match) {
     return encodeURIComponent(match);
   });
   search = search.replace('#', '%23');
@@ -10707,17 +12970,17 @@ function urlResolve(source, relative) {
   return urlParse(source, false, true).resolve(relative);
 }
 
-Url.prototype.resolve = function(relative) {
+Url.prototype.resolve = function (relative) {
   return this.resolveObject(urlParse(relative, false, true)).format();
 };
 
 function urlResolveObject(source, relative) {
-  if (!source) return relative;
+  if (!source) { return relative; }
   return urlParse(source, false, true).resolveObject(relative);
 }
 
-Url.prototype.resolveObject = function(relative) {
-  if (util.isString(relative)) {
+Url.prototype.resolveObject = function (relative) {
+  if (typeof relative === 'string') {
     var rel = new Url();
     rel.parse(relative, false, true);
     relative = rel;
@@ -10730,8 +12993,10 @@ Url.prototype.resolveObject = function(relative) {
     result[tkey] = this[tkey];
   }
 
-  // hash is always overridden, no matter what.
-  // even href="" will remove it.
+  /*
+   * hash is always overridden, no matter what.
+   * even href="" will remove it.
+   */
   result.hash = relative.hash;
 
   // if the relative url is empty, then there's nothing left to do here.
@@ -10746,14 +13011,13 @@ Url.prototype.resolveObject = function(relative) {
     var rkeys = Object.keys(relative);
     for (var rk = 0; rk < rkeys.length; rk++) {
       var rkey = rkeys[rk];
-      if (rkey !== 'protocol')
-        result[rkey] = relative[rkey];
+      if (rkey !== 'protocol') { result[rkey] = relative[rkey]; }
     }
 
-    //urlParse appends trailing / to urls like http://www.example.com
-    if (slashedProtocol[result.protocol] &&
-        result.hostname && !result.pathname) {
-      result.path = result.pathname = '/';
+    // urlParse appends trailing / to urls like http://www.example.com
+    if (slashedProtocol[result.protocol] && result.hostname && !result.pathname) {
+      result.pathname = '/';
+      result.path = result.pathname;
     }
 
     result.href = result.format();
@@ -10761,14 +13025,16 @@ Url.prototype.resolveObject = function(relative) {
   }
 
   if (relative.protocol && relative.protocol !== result.protocol) {
-    // if it's a known url protocol, then changing
-    // the protocol does weird things
-    // first, if it's not file:, then we MUST have a host,
-    // and if there was a path
-    // to begin with, then we MUST have a path.
-    // if it is file:, then the host is dropped,
-    // because that's known to be hostless.
-    // anything else is assumed to be absolute.
+    /*
+     * if it's a known url protocol, then changing
+     * the protocol does weird things
+     * first, if it's not file:, then we MUST have a host,
+     * and if there was a path
+     * to begin with, then we MUST have a path.
+     * if it is file:, then the host is dropped,
+     * because that's known to be hostless.
+     * anything else is assumed to be absolute.
+     */
     if (!slashedProtocol[relative.protocol]) {
       var keys = Object.keys(relative);
       for (var v = 0; v < keys.length; v++) {
@@ -10782,11 +13048,11 @@ Url.prototype.resolveObject = function(relative) {
     result.protocol = relative.protocol;
     if (!relative.host && !hostlessProtocol[relative.protocol]) {
       var relPath = (relative.pathname || '').split('/');
-      while (relPath.length && !(relative.host = relPath.shift()));
-      if (!relative.host) relative.host = '';
-      if (!relative.hostname) relative.hostname = '';
-      if (relPath[0] !== '') relPath.unshift('');
-      if (relPath.length < 2) relPath.unshift('');
+      while (relPath.length && !(relative.host = relPath.shift())) { }
+      if (!relative.host) { relative.host = ''; }
+      if (!relative.hostname) { relative.hostname = ''; }
+      if (relPath[0] !== '') { relPath.unshift(''); }
+      if (relPath.length < 2) { relPath.unshift(''); }
       result.pathname = relPath.join('/');
     } else {
       result.pathname = relative.pathname;
@@ -10808,37 +13074,33 @@ Url.prototype.resolveObject = function(relative) {
     return result;
   }
 
-  var isSourceAbs = (result.pathname && result.pathname.charAt(0) === '/'),
-      isRelAbs = (
-          relative.host ||
-          relative.pathname && relative.pathname.charAt(0) === '/'
-      ),
-      mustEndAbs = (isRelAbs || isSourceAbs ||
-                    (result.host && relative.pathname)),
-      removeAllDots = mustEndAbs,
-      srcPath = result.pathname && result.pathname.split('/') || [],
-      relPath = relative.pathname && relative.pathname.split('/') || [],
-      psychotic = result.protocol && !slashedProtocol[result.protocol];
+  var isSourceAbs = result.pathname && result.pathname.charAt(0) === '/',
+    isRelAbs = relative.host || relative.pathname && relative.pathname.charAt(0) === '/',
+    mustEndAbs = isRelAbs || isSourceAbs || (result.host && relative.pathname),
+    removeAllDots = mustEndAbs,
+    srcPath = result.pathname && result.pathname.split('/') || [],
+    relPath = relative.pathname && relative.pathname.split('/') || [],
+    psychotic = result.protocol && !slashedProtocol[result.protocol];
 
-  // if the url is a non-slashed url, then relative
-  // links like ../.. should be able
-  // to crawl up to the hostname, as well.  This is strange.
-  // result.protocol has already been set by now.
-  // Later on, put the first path part into the host field.
+  /*
+   * if the url is a non-slashed url, then relative
+   * links like ../.. should be able
+   * to crawl up to the hostname, as well.  This is strange.
+   * result.protocol has already been set by now.
+   * Later on, put the first path part into the host field.
+   */
   if (psychotic) {
     result.hostname = '';
     result.port = null;
     if (result.host) {
-      if (srcPath[0] === '') srcPath[0] = result.host;
-      else srcPath.unshift(result.host);
+      if (srcPath[0] === '') { srcPath[0] = result.host; } else { srcPath.unshift(result.host); }
     }
     result.host = '';
     if (relative.protocol) {
       relative.hostname = null;
       relative.port = null;
       if (relative.host) {
-        if (relPath[0] === '') relPath[0] = relative.host;
-        else relPath.unshift(relative.host);
+        if (relPath[0] === '') { relPath[0] = relative.host; } else { relPath.unshift(relative.host); }
       }
       relative.host = null;
     }
@@ -10847,54 +13109,60 @@ Url.prototype.resolveObject = function(relative) {
 
   if (isRelAbs) {
     // it's absolute.
-    result.host = (relative.host || relative.host === '') ?
-                  relative.host : result.host;
-    result.hostname = (relative.hostname || relative.hostname === '') ?
-                      relative.hostname : result.hostname;
+    result.host = relative.host || relative.host === '' ? relative.host : result.host;
+    result.hostname = relative.hostname || relative.hostname === '' ? relative.hostname : result.hostname;
     result.search = relative.search;
     result.query = relative.query;
     srcPath = relPath;
     // fall through to the dot-handling below.
   } else if (relPath.length) {
-    // it's relative
-    // throw away the existing file, and take the new path instead.
-    if (!srcPath) srcPath = [];
+    /*
+     * it's relative
+     * throw away the existing file, and take the new path instead.
+     */
+    if (!srcPath) { srcPath = []; }
     srcPath.pop();
     srcPath = srcPath.concat(relPath);
     result.search = relative.search;
     result.query = relative.query;
-  } else if (!util.isNullOrUndefined(relative.search)) {
-    // just pull out the search.
-    // like href='?foo'.
-    // Put this after the other two cases because it simplifies the booleans
+  } else if (relative.search != null) {
+    /*
+     * just pull out the search.
+     * like href='?foo'.
+     * Put this after the other two cases because it simplifies the booleans
+     */
     if (psychotic) {
-      result.hostname = result.host = srcPath.shift();
-      //occationaly the auth can get stuck only in host
-      //this especially happens in cases like
-      //url.resolveObject('mailto:local1@domain1', 'local2@domain2')
-      var authInHost = result.host && result.host.indexOf('@') > 0 ?
-                       result.host.split('@') : false;
+      result.host = srcPath.shift();
+      result.hostname = result.host;
+      /*
+       * occationaly the auth can get stuck only in host
+       * this especially happens in cases like
+       * url.resolveObject('mailto:local1@domain1', 'local2@domain2')
+       */
+      var authInHost = result.host && result.host.indexOf('@') > 0 ? result.host.split('@') : false;
       if (authInHost) {
         result.auth = authInHost.shift();
-        result.host = result.hostname = authInHost.shift();
+        result.hostname = authInHost.shift();
+        result.host = result.hostname;
       }
     }
     result.search = relative.search;
     result.query = relative.query;
-    //to support http.request
-    if (!util.isNull(result.pathname) || !util.isNull(result.search)) {
-      result.path = (result.pathname ? result.pathname : '') +
-                    (result.search ? result.search : '');
+    // to support http.request
+    if (result.pathname !== null || result.search !== null) {
+      result.path = (result.pathname ? result.pathname : '') + (result.search ? result.search : '');
     }
     result.href = result.format();
     return result;
   }
 
   if (!srcPath.length) {
-    // no path at all.  easy.
-    // we've already handled the other stuff above.
+    /*
+     * no path at all.  easy.
+     * we've already handled the other stuff above.
+     */
     result.pathname = null;
-    //to support http.request
+    // to support http.request
     if (result.search) {
       result.path = '/' + result.search;
     } else {
@@ -10904,16 +13172,18 @@ Url.prototype.resolveObject = function(relative) {
     return result;
   }
 
-  // if a url ENDs in . or .., then it must get a trailing slash.
-  // however, if it ends in anything else non-slashy,
-  // then it must NOT get a trailing slash.
+  /*
+   * if a url ENDs in . or .., then it must get a trailing slash.
+   * however, if it ends in anything else non-slashy,
+   * then it must NOT get a trailing slash.
+   */
   var last = srcPath.slice(-1)[0];
-  var hasTrailingSlash = (
-      (result.host || relative.host || srcPath.length > 1) &&
-      (last === '.' || last === '..') || last === '');
+  var hasTrailingSlash = (result.host || relative.host || srcPath.length > 1) && (last === '.' || last === '..') || last === '';
 
-  // strip single dots, resolve double dots to parent dir
-  // if the path tries to go above the root, `up` ends up > 0
+  /*
+   * strip single dots, resolve double dots to parent dir
+   * if the path tries to go above the root, `up` ends up > 0
+   */
   var up = 0;
   for (var i = srcPath.length; i >= 0; i--) {
     last = srcPath[i];
@@ -10935,8 +13205,7 @@ Url.prototype.resolveObject = function(relative) {
     }
   }
 
-  if (mustEndAbs && srcPath[0] !== '' &&
-      (!srcPath[0] || srcPath[0].charAt(0) !== '/')) {
+  if (mustEndAbs && srcPath[0] !== '' && (!srcPath[0] || srcPath[0].charAt(0) !== '/')) {
     srcPath.unshift('');
   }
 
@@ -10944,21 +13213,22 @@ Url.prototype.resolveObject = function(relative) {
     srcPath.push('');
   }
 
-  var isAbsolute = srcPath[0] === '' ||
-      (srcPath[0] && srcPath[0].charAt(0) === '/');
+  var isAbsolute = srcPath[0] === '' || (srcPath[0] && srcPath[0].charAt(0) === '/');
 
   // put the host back
   if (psychotic) {
-    result.hostname = result.host = isAbsolute ? '' :
-                                    srcPath.length ? srcPath.shift() : '';
-    //occationaly the auth can get stuck only in host
-    //this especially happens in cases like
-    //url.resolveObject('mailto:local1@domain1', 'local2@domain2')
-    var authInHost = result.host && result.host.indexOf('@') > 0 ?
-                     result.host.split('@') : false;
+    result.hostname = isAbsolute ? '' : srcPath.length ? srcPath.shift() : '';
+    result.host = result.hostname;
+    /*
+     * occationaly the auth can get stuck only in host
+     * this especially happens in cases like
+     * url.resolveObject('mailto:local1@domain1', 'local2@domain2')
+     */
+    var authInHost = result.host && result.host.indexOf('@') > 0 ? result.host.split('@') : false;
     if (authInHost) {
       result.auth = authInHost.shift();
-      result.host = result.hostname = authInHost.shift();
+      result.hostname = authInHost.shift();
+      result.host = result.hostname;
     }
   }
 
@@ -10968,17 +13238,16 @@ Url.prototype.resolveObject = function(relative) {
     srcPath.unshift('');
   }
 
-  if (!srcPath.length) {
+  if (srcPath.length > 0) {
+    result.pathname = srcPath.join('/');
+  } else {
     result.pathname = null;
     result.path = null;
-  } else {
-    result.pathname = srcPath.join('/');
   }
 
-  //to support request.http
-  if (!util.isNull(result.pathname) || !util.isNull(result.search)) {
-    result.path = (result.pathname ? result.pathname : '') +
-                  (result.search ? result.search : '');
+  // to support request.http
+  if (result.pathname !== null || result.search !== null) {
+    result.path = (result.pathname ? result.pathname : '') + (result.search ? result.search : '');
   }
   result.auth = relative.auth || result.auth;
   result.slashes = result.slashes || relative.slashes;
@@ -10986,7 +13255,7 @@ Url.prototype.resolveObject = function(relative) {
   return result;
 };
 
-Url.prototype.parseHost = function() {
+Url.prototype.parseHost = function () {
   var host = this.host;
   var port = portPattern.exec(host);
   if (port) {
@@ -10996,28 +13265,17 @@ Url.prototype.parseHost = function() {
     }
     host = host.substr(0, host.length - port.length);
   }
-  if (host) this.hostname = host;
+  if (host) { this.hostname = host; }
 };
 
-},{"./util":38,"punycode":12,"querystring":15}],38:[function(require,module,exports){
-'use strict';
+exports.parse = urlParse;
+exports.resolve = urlResolve;
+exports.resolveObject = urlResolveObject;
+exports.format = urlFormat;
 
-module.exports = {
-  isString: function(arg) {
-    return typeof(arg) === 'string';
-  },
-  isObject: function(arg) {
-    return typeof(arg) === 'object' && arg !== null;
-  },
-  isNull: function(arg) {
-    return arg === null;
-  },
-  isNullOrUndefined: function(arg) {
-    return arg == null;
-  }
-};
+exports.Url = Url;
 
-},{}],39:[function(require,module,exports){
+},{"punycode/":33,"qs":58}],63:[function(require,module,exports){
 (function (global){(function (){
 
 /**
@@ -11088,215 +13346,117 @@ function config (name) {
 }
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],40:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-
 var _toDate = _interopRequireDefault(require("./lib/toDate"));
-
 var _toFloat = _interopRequireDefault(require("./lib/toFloat"));
-
 var _toInt = _interopRequireDefault(require("./lib/toInt"));
-
 var _toBoolean = _interopRequireDefault(require("./lib/toBoolean"));
-
 var _equals = _interopRequireDefault(require("./lib/equals"));
-
 var _contains = _interopRequireDefault(require("./lib/contains"));
-
 var _matches = _interopRequireDefault(require("./lib/matches"));
-
 var _isEmail = _interopRequireDefault(require("./lib/isEmail"));
-
 var _isURL = _interopRequireDefault(require("./lib/isURL"));
-
 var _isMACAddress = _interopRequireDefault(require("./lib/isMACAddress"));
-
 var _isIP = _interopRequireDefault(require("./lib/isIP"));
-
 var _isIPRange = _interopRequireDefault(require("./lib/isIPRange"));
-
 var _isFQDN = _interopRequireDefault(require("./lib/isFQDN"));
-
 var _isDate = _interopRequireDefault(require("./lib/isDate"));
-
 var _isTime = _interopRequireDefault(require("./lib/isTime"));
-
 var _isBoolean = _interopRequireDefault(require("./lib/isBoolean"));
-
 var _isLocale = _interopRequireDefault(require("./lib/isLocale"));
-
+var _isAbaRouting = _interopRequireDefault(require("./lib/isAbaRouting"));
 var _isAlpha = _interopRequireWildcard(require("./lib/isAlpha"));
-
 var _isAlphanumeric = _interopRequireWildcard(require("./lib/isAlphanumeric"));
-
 var _isNumeric = _interopRequireDefault(require("./lib/isNumeric"));
-
 var _isPassportNumber = _interopRequireDefault(require("./lib/isPassportNumber"));
-
 var _isPort = _interopRequireDefault(require("./lib/isPort"));
-
 var _isLowercase = _interopRequireDefault(require("./lib/isLowercase"));
-
 var _isUppercase = _interopRequireDefault(require("./lib/isUppercase"));
-
 var _isIMEI = _interopRequireDefault(require("./lib/isIMEI"));
-
 var _isAscii = _interopRequireDefault(require("./lib/isAscii"));
-
 var _isFullWidth = _interopRequireDefault(require("./lib/isFullWidth"));
-
 var _isHalfWidth = _interopRequireDefault(require("./lib/isHalfWidth"));
-
 var _isVariableWidth = _interopRequireDefault(require("./lib/isVariableWidth"));
-
 var _isMultibyte = _interopRequireDefault(require("./lib/isMultibyte"));
-
 var _isSemVer = _interopRequireDefault(require("./lib/isSemVer"));
-
 var _isSurrogatePair = _interopRequireDefault(require("./lib/isSurrogatePair"));
-
 var _isInt = _interopRequireDefault(require("./lib/isInt"));
-
 var _isFloat = _interopRequireWildcard(require("./lib/isFloat"));
-
 var _isDecimal = _interopRequireDefault(require("./lib/isDecimal"));
-
 var _isHexadecimal = _interopRequireDefault(require("./lib/isHexadecimal"));
-
 var _isOctal = _interopRequireDefault(require("./lib/isOctal"));
-
 var _isDivisibleBy = _interopRequireDefault(require("./lib/isDivisibleBy"));
-
 var _isHexColor = _interopRequireDefault(require("./lib/isHexColor"));
-
 var _isRgbColor = _interopRequireDefault(require("./lib/isRgbColor"));
-
 var _isHSL = _interopRequireDefault(require("./lib/isHSL"));
-
 var _isISRC = _interopRequireDefault(require("./lib/isISRC"));
-
 var _isIBAN = _interopRequireWildcard(require("./lib/isIBAN"));
-
 var _isBIC = _interopRequireDefault(require("./lib/isBIC"));
-
 var _isMD = _interopRequireDefault(require("./lib/isMD5"));
-
 var _isHash = _interopRequireDefault(require("./lib/isHash"));
-
 var _isJWT = _interopRequireDefault(require("./lib/isJWT"));
-
 var _isJSON = _interopRequireDefault(require("./lib/isJSON"));
-
 var _isEmpty = _interopRequireDefault(require("./lib/isEmpty"));
-
 var _isLength = _interopRequireDefault(require("./lib/isLength"));
-
 var _isByteLength = _interopRequireDefault(require("./lib/isByteLength"));
-
 var _isUUID = _interopRequireDefault(require("./lib/isUUID"));
-
 var _isMongoId = _interopRequireDefault(require("./lib/isMongoId"));
-
 var _isAfter = _interopRequireDefault(require("./lib/isAfter"));
-
 var _isBefore = _interopRequireDefault(require("./lib/isBefore"));
-
 var _isIn = _interopRequireDefault(require("./lib/isIn"));
-
 var _isLuhnNumber = _interopRequireDefault(require("./lib/isLuhnNumber"));
-
 var _isCreditCard = _interopRequireDefault(require("./lib/isCreditCard"));
-
 var _isIdentityCard = _interopRequireDefault(require("./lib/isIdentityCard"));
-
 var _isEAN = _interopRequireDefault(require("./lib/isEAN"));
-
 var _isISIN = _interopRequireDefault(require("./lib/isISIN"));
-
 var _isISBN = _interopRequireDefault(require("./lib/isISBN"));
-
 var _isISSN = _interopRequireDefault(require("./lib/isISSN"));
-
 var _isTaxID = _interopRequireDefault(require("./lib/isTaxID"));
-
 var _isMobilePhone = _interopRequireWildcard(require("./lib/isMobilePhone"));
-
 var _isEthereumAddress = _interopRequireDefault(require("./lib/isEthereumAddress"));
-
 var _isCurrency = _interopRequireDefault(require("./lib/isCurrency"));
-
 var _isBtcAddress = _interopRequireDefault(require("./lib/isBtcAddress"));
-
-var _isISO = _interopRequireDefault(require("./lib/isISO6391"));
-
-var _isISO2 = _interopRequireDefault(require("./lib/isISO8601"));
-
+var _isISO = require("./lib/isISO6346");
+var _isISO2 = _interopRequireDefault(require("./lib/isISO6391"));
+var _isISO3 = _interopRequireDefault(require("./lib/isISO8601"));
 var _isRFC = _interopRequireDefault(require("./lib/isRFC3339"));
-
 var _isISO31661Alpha = _interopRequireDefault(require("./lib/isISO31661Alpha2"));
-
 var _isISO31661Alpha2 = _interopRequireDefault(require("./lib/isISO31661Alpha3"));
-
-var _isISO3 = _interopRequireDefault(require("./lib/isISO4217"));
-
+var _isISO4 = _interopRequireDefault(require("./lib/isISO4217"));
 var _isBase = _interopRequireDefault(require("./lib/isBase32"));
-
 var _isBase2 = _interopRequireDefault(require("./lib/isBase58"));
-
 var _isBase3 = _interopRequireDefault(require("./lib/isBase64"));
-
 var _isDataURI = _interopRequireDefault(require("./lib/isDataURI"));
-
 var _isMagnetURI = _interopRequireDefault(require("./lib/isMagnetURI"));
-
+var _isMailtoURI = _interopRequireDefault(require("./lib/isMailtoURI"));
 var _isMimeType = _interopRequireDefault(require("./lib/isMimeType"));
-
 var _isLatLong = _interopRequireDefault(require("./lib/isLatLong"));
-
 var _isPostalCode = _interopRequireWildcard(require("./lib/isPostalCode"));
-
 var _ltrim = _interopRequireDefault(require("./lib/ltrim"));
-
 var _rtrim = _interopRequireDefault(require("./lib/rtrim"));
-
 var _trim = _interopRequireDefault(require("./lib/trim"));
-
 var _escape = _interopRequireDefault(require("./lib/escape"));
-
 var _unescape = _interopRequireDefault(require("./lib/unescape"));
-
 var _stripLow = _interopRequireDefault(require("./lib/stripLow"));
-
 var _whitelist = _interopRequireDefault(require("./lib/whitelist"));
-
 var _blacklist = _interopRequireDefault(require("./lib/blacklist"));
-
 var _isWhitelisted = _interopRequireDefault(require("./lib/isWhitelisted"));
-
 var _normalizeEmail = _interopRequireDefault(require("./lib/normalizeEmail"));
-
 var _isSlug = _interopRequireDefault(require("./lib/isSlug"));
-
 var _isLicensePlate = _interopRequireDefault(require("./lib/isLicensePlate"));
-
 var _isStrongPassword = _interopRequireDefault(require("./lib/isStrongPassword"));
-
 var _isVAT = _interopRequireDefault(require("./lib/isVAT"));
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != _typeof(e) && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var version = '13.9.0';
+var version = '13.12.0';
 var validator = {
   version: version,
   toDate: _toDate.default,
@@ -11315,6 +13475,7 @@ var validator = {
   isBoolean: _isBoolean.default,
   isIBAN: _isIBAN.default,
   isBIC: _isBIC.default,
+  isAbaRouting: _isAbaRouting.default,
   isAlpha: _isAlpha.default,
   isAlphaLocales: _isAlpha.locales,
   isAlphanumeric: _isAlphanumeric.default,
@@ -11370,17 +13531,20 @@ var validator = {
   isEthereumAddress: _isEthereumAddress.default,
   isCurrency: _isCurrency.default,
   isBtcAddress: _isBtcAddress.default,
-  isISO6391: _isISO.default,
-  isISO8601: _isISO2.default,
+  isISO6346: _isISO.isISO6346,
+  isFreightContainerID: _isISO.isFreightContainerID,
+  isISO6391: _isISO2.default,
+  isISO8601: _isISO3.default,
   isRFC3339: _isRFC.default,
   isISO31661Alpha2: _isISO31661Alpha.default,
   isISO31661Alpha3: _isISO31661Alpha2.default,
-  isISO4217: _isISO3.default,
+  isISO4217: _isISO4.default,
   isBase32: _isBase.default,
   isBase58: _isBase2.default,
   isBase64: _isBase3.default,
   isDataURI: _isDataURI.default,
   isMagnetURI: _isMagnetURI.default,
+  isMailtoURI: _isMailtoURI.default,
   isMimeType: _isMimeType.default,
   isLatLong: _isLatLong.default,
   ltrim: _ltrim.default,
@@ -11403,18 +13567,17 @@ var validator = {
   isVAT: _isVAT.default,
   ibanLocales: _isIBAN.locales
 };
-var _default = validator;
-exports.default = _default;
+var _default = exports.default = validator;
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./lib/blacklist":42,"./lib/contains":43,"./lib/equals":44,"./lib/escape":45,"./lib/isAfter":46,"./lib/isAlpha":47,"./lib/isAlphanumeric":48,"./lib/isAscii":49,"./lib/isBIC":50,"./lib/isBase32":51,"./lib/isBase58":52,"./lib/isBase64":53,"./lib/isBefore":54,"./lib/isBoolean":55,"./lib/isBtcAddress":56,"./lib/isByteLength":57,"./lib/isCreditCard":58,"./lib/isCurrency":59,"./lib/isDataURI":60,"./lib/isDate":61,"./lib/isDecimal":62,"./lib/isDivisibleBy":63,"./lib/isEAN":64,"./lib/isEmail":65,"./lib/isEmpty":66,"./lib/isEthereumAddress":67,"./lib/isFQDN":68,"./lib/isFloat":69,"./lib/isFullWidth":70,"./lib/isHSL":71,"./lib/isHalfWidth":72,"./lib/isHash":73,"./lib/isHexColor":74,"./lib/isHexadecimal":75,"./lib/isIBAN":76,"./lib/isIMEI":77,"./lib/isIP":78,"./lib/isIPRange":79,"./lib/isISBN":80,"./lib/isISIN":81,"./lib/isISO31661Alpha2":82,"./lib/isISO31661Alpha3":83,"./lib/isISO4217":84,"./lib/isISO6391":85,"./lib/isISO8601":86,"./lib/isISRC":87,"./lib/isISSN":88,"./lib/isIdentityCard":89,"./lib/isIn":90,"./lib/isInt":91,"./lib/isJSON":92,"./lib/isJWT":93,"./lib/isLatLong":94,"./lib/isLength":95,"./lib/isLicensePlate":96,"./lib/isLocale":97,"./lib/isLowercase":98,"./lib/isLuhnNumber":99,"./lib/isMACAddress":100,"./lib/isMD5":101,"./lib/isMagnetURI":102,"./lib/isMimeType":103,"./lib/isMobilePhone":104,"./lib/isMongoId":105,"./lib/isMultibyte":106,"./lib/isNumeric":107,"./lib/isOctal":108,"./lib/isPassportNumber":109,"./lib/isPort":110,"./lib/isPostalCode":111,"./lib/isRFC3339":112,"./lib/isRgbColor":113,"./lib/isSemVer":114,"./lib/isSlug":115,"./lib/isStrongPassword":116,"./lib/isSurrogatePair":117,"./lib/isTaxID":118,"./lib/isTime":119,"./lib/isURL":120,"./lib/isUUID":121,"./lib/isUppercase":122,"./lib/isVAT":123,"./lib/isVariableWidth":124,"./lib/isWhitelisted":125,"./lib/ltrim":126,"./lib/matches":127,"./lib/normalizeEmail":128,"./lib/rtrim":129,"./lib/stripLow":130,"./lib/toBoolean":131,"./lib/toDate":132,"./lib/toFloat":133,"./lib/toInt":134,"./lib/trim":135,"./lib/unescape":136,"./lib/whitelist":143}],41:[function(require,module,exports){
+},{"./lib/blacklist":66,"./lib/contains":67,"./lib/equals":68,"./lib/escape":69,"./lib/isAbaRouting":70,"./lib/isAfter":71,"./lib/isAlpha":72,"./lib/isAlphanumeric":73,"./lib/isAscii":74,"./lib/isBIC":75,"./lib/isBase32":76,"./lib/isBase58":77,"./lib/isBase64":78,"./lib/isBefore":79,"./lib/isBoolean":80,"./lib/isBtcAddress":81,"./lib/isByteLength":82,"./lib/isCreditCard":83,"./lib/isCurrency":84,"./lib/isDataURI":85,"./lib/isDate":86,"./lib/isDecimal":87,"./lib/isDivisibleBy":88,"./lib/isEAN":89,"./lib/isEmail":90,"./lib/isEmpty":91,"./lib/isEthereumAddress":92,"./lib/isFQDN":93,"./lib/isFloat":94,"./lib/isFullWidth":95,"./lib/isHSL":96,"./lib/isHalfWidth":97,"./lib/isHash":98,"./lib/isHexColor":99,"./lib/isHexadecimal":100,"./lib/isIBAN":101,"./lib/isIMEI":102,"./lib/isIP":103,"./lib/isIPRange":104,"./lib/isISBN":105,"./lib/isISIN":106,"./lib/isISO31661Alpha2":107,"./lib/isISO31661Alpha3":108,"./lib/isISO4217":109,"./lib/isISO6346":110,"./lib/isISO6391":111,"./lib/isISO8601":112,"./lib/isISRC":113,"./lib/isISSN":114,"./lib/isIdentityCard":115,"./lib/isIn":116,"./lib/isInt":117,"./lib/isJSON":118,"./lib/isJWT":119,"./lib/isLatLong":120,"./lib/isLength":121,"./lib/isLicensePlate":122,"./lib/isLocale":123,"./lib/isLowercase":124,"./lib/isLuhnNumber":125,"./lib/isMACAddress":126,"./lib/isMD5":127,"./lib/isMagnetURI":128,"./lib/isMailtoURI":129,"./lib/isMimeType":130,"./lib/isMobilePhone":131,"./lib/isMongoId":132,"./lib/isMultibyte":133,"./lib/isNumeric":134,"./lib/isOctal":135,"./lib/isPassportNumber":136,"./lib/isPort":137,"./lib/isPostalCode":138,"./lib/isRFC3339":139,"./lib/isRgbColor":140,"./lib/isSemVer":141,"./lib/isSlug":142,"./lib/isStrongPassword":143,"./lib/isSurrogatePair":144,"./lib/isTaxID":145,"./lib/isTime":146,"./lib/isURL":147,"./lib/isUUID":148,"./lib/isUppercase":149,"./lib/isVAT":150,"./lib/isVariableWidth":151,"./lib/isWhitelisted":152,"./lib/ltrim":153,"./lib/matches":154,"./lib/normalizeEmail":155,"./lib/rtrim":156,"./lib/stripLow":157,"./lib/toBoolean":158,"./lib/toDate":159,"./lib/toFloat":160,"./lib/toInt":161,"./lib/trim":162,"./lib/unescape":163,"./lib/whitelist":170}],65:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.commaDecimal = exports.dotDecimal = exports.bengaliLocales = exports.farsiLocales = exports.arabicLocales = exports.englishLocales = exports.decimal = exports.alphanumeric = exports.alpha = void 0;
-var alpha = {
+exports.farsiLocales = exports.englishLocales = exports.dotDecimal = exports.decimal = exports.commaDecimal = exports.bengaliLocales = exports.arabicLocales = exports.alphanumeric = exports.alpha = void 0;
+var alpha = exports.alpha = {
   'en-US': /^[A-Z]+$/i,
   'az-AZ': /^[A-VXYZÇƏĞİıÖŞÜ]+$/i,
   'bg-BG': /^[А-Я]+$/i,
@@ -11435,6 +13598,7 @@ var alpha = {
   'pl-PL': /^[A-ZĄĆĘŚŁŃÓŻŹ]+$/i,
   'pt-PT': /^[A-ZÃÁÀÂÄÇÉÊËÍÏÕÓÔÖÚÜ]+$/i,
   'ru-RU': /^[А-ЯЁ]+$/i,
+  'kk-KZ': /^[А-ЯЁ\u04D8\u04B0\u0406\u04A2\u0492\u04AE\u049A\u04E8\u04BA]+$/i,
   'sl-SI': /^[A-ZČĆĐŠŽ]+$/i,
   'sk-SK': /^[A-ZÁČĎÉÍŇÓŠŤÚÝŽĹŔĽÄÔ]+$/i,
   'sr-RS@latin': /^[A-ZČĆŽŠĐ]+$/i,
@@ -11450,11 +13614,11 @@ var alpha = {
   he: /^[א-ת]+$/,
   fa: /^['آاءأؤئبپتثجچحخدذرزژسشصضطظعغفقکگلمنوهةی']+$/i,
   bn: /^['ঀঁংঃঅআইঈউঊঋঌএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহ়ঽািীুূৃৄেৈোৌ্ৎৗড়ঢ়য়ৠৡৢৣৰৱ৲৳৴৵৶৷৸৹৺৻']+$/,
+  eo: /^[ABCĈD-GĜHĤIJĴK-PRSŜTUŬVZ]+$/i,
   'hi-IN': /^[\u0900-\u0961]+[\u0972-\u097F]*$/i,
   'si-LK': /^[\u0D80-\u0DFF]+$/
 };
-exports.alpha = alpha;
-var alphanumeric = {
+var alphanumeric = exports.alphanumeric = {
   'en-US': /^[0-9A-Z]+$/i,
   'az-AZ': /^[0-9A-VXYZÇƏĞİıÖŞÜ]+$/i,
   'bg-BG': /^[0-9А-Я]+$/i,
@@ -11474,6 +13638,7 @@ var alphanumeric = {
   'pl-PL': /^[0-9A-ZĄĆĘŚŁŃÓŻŹ]+$/i,
   'pt-PT': /^[0-9A-ZÃÁÀÂÄÇÉÊËÍÏÕÓÔÖÚÜ]+$/i,
   'ru-RU': /^[0-9А-ЯЁ]+$/i,
+  'kk-KZ': /^[0-9А-ЯЁ\u04D8\u04B0\u0406\u04A2\u0492\u04AE\u049A\u04E8\u04BA]+$/i,
   'sl-SI': /^[0-9A-ZČĆĐŠŽ]+$/i,
   'sk-SK': /^[0-9A-ZÁČĎÉÍŇÓŠŤÚÝŽĹŔĽÄÔ]+$/i,
   'sr-RS@latin': /^[0-9A-ZČĆŽŠĐ]+$/i,
@@ -11489,183 +13654,169 @@ var alphanumeric = {
   he: /^[0-9א-ת]+$/,
   fa: /^['0-9آاءأؤئبپتثجچحخدذرزژسشصضطظعغفقکگلمنوهةی۱۲۳۴۵۶۷۸۹۰']+$/i,
   bn: /^['ঀঁংঃঅআইঈউঊঋঌএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহ়ঽািীুূৃৄেৈোৌ্ৎৗড়ঢ়য়ৠৡৢৣ০১২৩৪৫৬৭৮৯ৰৱ৲৳৴৵৶৷৸৹৺৻']+$/,
+  eo: /^[0-9ABCĈD-GĜHĤIJĴK-PRSŜTUŬVZ]+$/i,
   'hi-IN': /^[\u0900-\u0963]+[\u0966-\u097F]*$/i,
   'si-LK': /^[0-9\u0D80-\u0DFF]+$/
 };
-exports.alphanumeric = alphanumeric;
-var decimal = {
+var decimal = exports.decimal = {
   'en-US': '.',
   ar: '٫'
 };
-exports.decimal = decimal;
-var englishLocales = ['AU', 'GB', 'HK', 'IN', 'NZ', 'ZA', 'ZM'];
-exports.englishLocales = englishLocales;
-
+var englishLocales = exports.englishLocales = ['AU', 'GB', 'HK', 'IN', 'NZ', 'ZA', 'ZM'];
 for (var locale, i = 0; i < englishLocales.length; i++) {
   locale = "en-".concat(englishLocales[i]);
   alpha[locale] = alpha['en-US'];
   alphanumeric[locale] = alphanumeric['en-US'];
   decimal[locale] = decimal['en-US'];
-} // Source: http://www.localeplanet.com/java/
+}
 
-
-var arabicLocales = ['AE', 'BH', 'DZ', 'EG', 'IQ', 'JO', 'KW', 'LB', 'LY', 'MA', 'QM', 'QA', 'SA', 'SD', 'SY', 'TN', 'YE'];
-exports.arabicLocales = arabicLocales;
-
+// Source: http://www.localeplanet.com/java/
+var arabicLocales = exports.arabicLocales = ['AE', 'BH', 'DZ', 'EG', 'IQ', 'JO', 'KW', 'LB', 'LY', 'MA', 'QM', 'QA', 'SA', 'SD', 'SY', 'TN', 'YE'];
 for (var _locale, _i = 0; _i < arabicLocales.length; _i++) {
   _locale = "ar-".concat(arabicLocales[_i]);
   alpha[_locale] = alpha.ar;
   alphanumeric[_locale] = alphanumeric.ar;
   decimal[_locale] = decimal.ar;
 }
-
-var farsiLocales = ['IR', 'AF'];
-exports.farsiLocales = farsiLocales;
-
+var farsiLocales = exports.farsiLocales = ['IR', 'AF'];
 for (var _locale2, _i2 = 0; _i2 < farsiLocales.length; _i2++) {
   _locale2 = "fa-".concat(farsiLocales[_i2]);
   alphanumeric[_locale2] = alphanumeric.fa;
   decimal[_locale2] = decimal.ar;
 }
-
-var bengaliLocales = ['BD', 'IN'];
-exports.bengaliLocales = bengaliLocales;
-
+var bengaliLocales = exports.bengaliLocales = ['BD', 'IN'];
 for (var _locale3, _i3 = 0; _i3 < bengaliLocales.length; _i3++) {
   _locale3 = "bn-".concat(bengaliLocales[_i3]);
   alpha[_locale3] = alpha.bn;
   alphanumeric[_locale3] = alphanumeric.bn;
   decimal[_locale3] = decimal['en-US'];
-} // Source: https://en.wikipedia.org/wiki/Decimal_mark
+}
 
-
-var dotDecimal = ['ar-EG', 'ar-LB', 'ar-LY'];
-exports.dotDecimal = dotDecimal;
-var commaDecimal = ['bg-BG', 'cs-CZ', 'da-DK', 'de-DE', 'el-GR', 'en-ZM', 'es-ES', 'fr-CA', 'fr-FR', 'id-ID', 'it-IT', 'ku-IQ', 'hi-IN', 'hu-HU', 'nb-NO', 'nn-NO', 'nl-NL', 'pl-PL', 'pt-PT', 'ru-RU', 'si-LK', 'sl-SI', 'sr-RS@latin', 'sr-RS', 'sv-SE', 'tr-TR', 'uk-UA', 'vi-VN'];
-exports.commaDecimal = commaDecimal;
-
+// Source: https://en.wikipedia.org/wiki/Decimal_mark
+var dotDecimal = exports.dotDecimal = ['ar-EG', 'ar-LB', 'ar-LY'];
+var commaDecimal = exports.commaDecimal = ['bg-BG', 'cs-CZ', 'da-DK', 'de-DE', 'el-GR', 'en-ZM', 'eo', 'es-ES', 'fr-CA', 'fr-FR', 'id-ID', 'it-IT', 'ku-IQ', 'hi-IN', 'hu-HU', 'nb-NO', 'nn-NO', 'nl-NL', 'pl-PL', 'pt-PT', 'ru-RU', 'kk-KZ', 'si-LK', 'sl-SI', 'sr-RS@latin', 'sr-RS', 'sv-SE', 'tr-TR', 'uk-UA', 'vi-VN'];
 for (var _i4 = 0; _i4 < dotDecimal.length; _i4++) {
   decimal[dotDecimal[_i4]] = decimal['en-US'];
 }
-
 for (var _i5 = 0; _i5 < commaDecimal.length; _i5++) {
   decimal[commaDecimal[_i5]] = ',';
 }
-
 alpha['fr-CA'] = alpha['fr-FR'];
 alphanumeric['fr-CA'] = alphanumeric['fr-FR'];
 alpha['pt-BR'] = alpha['pt-PT'];
 alphanumeric['pt-BR'] = alphanumeric['pt-PT'];
-decimal['pt-BR'] = decimal['pt-PT']; // see #862
+decimal['pt-BR'] = decimal['pt-PT'];
 
+// see #862
 alpha['pl-Pl'] = alpha['pl-PL'];
 alphanumeric['pl-Pl'] = alphanumeric['pl-PL'];
-decimal['pl-Pl'] = decimal['pl-PL']; // see #1455
+decimal['pl-Pl'] = decimal['pl-PL'];
 
+// see #1455
 alpha['fa-AF'] = alpha.fa;
-},{}],42:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = blacklist;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function blacklist(str, chars) {
   (0, _assertString.default)(str);
   return str.replace(new RegExp("[".concat(chars, "]+"), 'g'), '');
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],43:[function(require,module,exports){
+},{"./util/assertString":165}],67:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = contains;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _toString = _interopRequireDefault(require("./util/toString"));
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var defaulContainsOptions = {
   ignoreCase: false,
   minOccurrences: 1
 };
-
 function contains(str, elem, options) {
   (0, _assertString.default)(str);
   options = (0, _merge.default)(options, defaulContainsOptions);
-
   if (options.ignoreCase) {
     return str.toLowerCase().split((0, _toString.default)(elem).toLowerCase()).length > options.minOccurrences;
   }
-
   return str.split((0, _toString.default)(elem)).length > options.minOccurrences;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138,"./util/merge":140,"./util/toString":142}],44:[function(require,module,exports){
+},{"./util/assertString":165,"./util/merge":167,"./util/toString":169}],68:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = equals;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function equals(str, comparison) {
   (0, _assertString.default)(str);
   return str === comparison;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],45:[function(require,module,exports){
+},{"./util/assertString":165}],69:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = escape;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function escape(str) {
   (0, _assertString.default)(str);
   return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\//g, '&#x2F;').replace(/\\/g, '&#x5C;').replace(/`/g, '&#96;');
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],46:[function(require,module,exports){
+},{"./util/assertString":165}],70:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = isAbaRouting;
+var _assertString = _interopRequireDefault(require("./util/assertString"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+// http://www.brainjar.com/js/validation/
+// https://www.aba.com/news-research/research-analysis/routing-number-policy-procedures
+// series reserved for future use are excluded
+var isRoutingReg = /^(?!(1[3-9])|(20)|(3[3-9])|(4[0-9])|(5[0-9])|(60)|(7[3-9])|(8[1-9])|(9[0-2])|(9[3-9]))[0-9]{9}$/;
+function isAbaRouting(str) {
+  (0, _assertString.default)(str);
+  if (!isRoutingReg.test(str)) return false;
+  var checkSumVal = 0;
+  for (var i = 0; i < str.length; i++) {
+    if (i % 3 === 0) checkSumVal += str[i] * 3;else if (i % 3 === 1) checkSumVal += str[i] * 7;else checkSumVal += str[i] * 1;
+  }
+  return checkSumVal % 10 === 0;
+}
+module.exports = exports.default;
+module.exports.default = exports.default;
+},{"./util/assertString":165}],71:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isAfter;
-
 var _toDate = _interopRequireDefault(require("./toDate"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isAfter(date, options) {
   // For backwards compatibility:
   // isAfter(str [, date]), i.e. `options` could be used as argument for the legacy `date`
@@ -11674,10 +13825,9 @@ function isAfter(date, options) {
   var original = (0, _toDate.default)(date);
   return !!(original && comparison && original > comparison);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./toDate":132}],47:[function(require,module,exports){
+},{"./toDate":159}],72:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11685,20 +13835,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = isAlpha;
 exports.locales = void 0;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _alpha = require("./alpha");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isAlpha(_str) {
   var locale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'en-US';
   var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
   (0, _assertString.default)(_str);
   var str = _str;
   var ignore = options.ignore;
-
   if (ignore) {
     if (ignore instanceof RegExp) {
       str = str.replace(ignore, '');
@@ -11708,17 +13853,13 @@ function isAlpha(_str) {
       throw new Error('ignore should be instance of a String or RegExp');
     }
   }
-
   if (locale in _alpha.alpha) {
     return _alpha.alpha[locale].test(str);
   }
-
   throw new Error("Invalid locale '".concat(locale, "'"));
 }
-
-var locales = Object.keys(_alpha.alpha);
-exports.locales = locales;
-},{"./alpha":41,"./util/assertString":138}],48:[function(require,module,exports){
+var locales = exports.locales = Object.keys(_alpha.alpha);
+},{"./alpha":65,"./util/assertString":165}],73:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11726,20 +13867,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = isAlphanumeric;
 exports.locales = void 0;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _alpha = require("./alpha");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isAlphanumeric(_str) {
   var locale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'en-US';
   var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
   (0, _assertString.default)(_str);
   var str = _str;
   var ignore = options.ignore;
-
   if (ignore) {
     if (ignore instanceof RegExp) {
       str = str.replace(ignore, '');
@@ -11749,28 +13885,21 @@ function isAlphanumeric(_str) {
       throw new Error('ignore should be instance of a String or RegExp');
     }
   }
-
   if (locale in _alpha.alphanumeric) {
     return _alpha.alphanumeric[locale].test(str);
   }
-
   throw new Error("Invalid locale '".concat(locale, "'"));
 }
-
-var locales = Object.keys(_alpha.alphanumeric);
-exports.locales = locales;
-},{"./alpha":41,"./util/assertString":138}],49:[function(require,module,exports){
+var locales = exports.locales = Object.keys(_alpha.alphanumeric);
+},{"./alpha":65,"./util/assertString":165}],74:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isAscii;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /* eslint-disable no-control-regex */
 var ascii = /^[\x00-\x7F]+$/;
 /* eslint-enable no-control-regex */
@@ -11779,160 +13908,122 @@ function isAscii(str) {
   (0, _assertString.default)(str);
   return ascii.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],50:[function(require,module,exports){
+},{"./util/assertString":165}],75:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isBIC;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _isISO31661Alpha = require("./isISO31661Alpha2");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 // https://en.wikipedia.org/wiki/ISO_9362
 var isBICReg = /^[A-Za-z]{6}[A-Za-z0-9]{2}([A-Za-z0-9]{3})?$/;
-
 function isBIC(str) {
-  (0, _assertString.default)(str); // toUpperCase() should be removed when a new major version goes out that changes
+  (0, _assertString.default)(str);
+
+  // toUpperCase() should be removed when a new major version goes out that changes
   // the regex to [A-Z] (per the spec).
-
   var countryCode = str.slice(4, 6).toUpperCase();
-
   if (!_isISO31661Alpha.CountryCodes.has(countryCode) && countryCode !== 'XK') {
     return false;
   }
-
   return isBICReg.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./isISO31661Alpha2":82,"./util/assertString":138}],51:[function(require,module,exports){
+},{"./isISO31661Alpha2":107,"./util/assertString":165}],76:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isBase32;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var base32 = /^[A-Z2-7]+=*$/;
 var crockfordBase32 = /^[A-HJKMNP-TV-Z0-9]+$/;
 var defaultBase32Options = {
   crockford: false
 };
-
 function isBase32(str, options) {
   (0, _assertString.default)(str);
   options = (0, _merge.default)(options, defaultBase32Options);
-
   if (options.crockford) {
     return crockfordBase32.test(str);
   }
-
   var len = str.length;
-
   if (len % 8 === 0 && base32.test(str)) {
     return true;
   }
-
   return false;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138,"./util/merge":140}],52:[function(require,module,exports){
+},{"./util/assertString":165,"./util/merge":167}],77:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isBase58;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 // Accepted chars - 123456789ABCDEFGH JKLMN PQRSTUVWXYZabcdefghijk mnopqrstuvwxyz
 var base58Reg = /^[A-HJ-NP-Za-km-z1-9]*$/;
-
 function isBase58(str) {
   (0, _assertString.default)(str);
-
   if (base58Reg.test(str)) {
     return true;
   }
-
   return false;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],53:[function(require,module,exports){
+},{"./util/assertString":165}],78:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isBase64;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var notBase64 = /[^A-Z0-9+\/=]/i;
 var urlSafeBase64 = /^[A-Z0-9_\-]*$/i;
 var defaultBase64Options = {
   urlSafe: false
 };
-
 function isBase64(str, options) {
   (0, _assertString.default)(str);
   options = (0, _merge.default)(options, defaultBase64Options);
   var len = str.length;
-
   if (options.urlSafe) {
     return urlSafeBase64.test(str);
   }
-
   if (len % 4 !== 0 || notBase64.test(str)) {
     return false;
   }
-
   var firstPaddingChar = str.indexOf('=');
   return firstPaddingChar === -1 || firstPaddingChar === len - 1 || firstPaddingChar === len - 2 && str[len - 1] === '=';
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138,"./util/merge":140}],54:[function(require,module,exports){
+},{"./util/assertString":165,"./util/merge":167}],79:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isBefore;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _toDate = _interopRequireDefault(require("./toDate"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isBefore(str) {
   var date = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : String(new Date());
   (0, _assertString.default)(str);
@@ -11940,82 +14031,64 @@ function isBefore(str) {
   var original = (0, _toDate.default)(str);
   return !!(original && comparison && original < comparison);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./toDate":132,"./util/assertString":138}],55:[function(require,module,exports){
+},{"./toDate":159,"./util/assertString":165}],80:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isBoolean;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var defaultOptions = {
   loose: false
 };
 var strictBooleans = ['true', 'false', '1', '0'];
 var looseBooleans = [].concat(strictBooleans, ['yes', 'no']);
-
 function isBoolean(str) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultOptions;
   (0, _assertString.default)(str);
-
   if (options.loose) {
     return looseBooleans.includes(str.toLowerCase());
   }
-
   return strictBooleans.includes(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],56:[function(require,module,exports){
+},{"./util/assertString":165}],81:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isBtcAddress;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var bech32 = /^(bc1)[a-z0-9]{25,39}$/;
 var base58 = /^(1|3)[A-HJ-NP-Za-km-z1-9]{25,39}$/;
-
 function isBtcAddress(str) {
   (0, _assertString.default)(str);
   return bech32.test(str) || base58.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],57:[function(require,module,exports){
+},{"./util/assertString":165}],82:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isByteLength;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 /* eslint-disable prefer-rest-params */
 function isByteLength(str, options) {
   (0, _assertString.default)(str);
   var min;
   var max;
-
   if (_typeof(options) === 'object') {
     min = options.min || 0;
     max = options.max;
@@ -12024,27 +14097,21 @@ function isByteLength(str, options) {
     min = arguments[1];
     max = arguments[2];
   }
-
   var len = encodeURI(str).split(/%..|./).length - 1;
   return len >= min && (typeof max === 'undefined' || len <= max);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],58:[function(require,module,exports){
+},{"./util/assertString":165}],83:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isCreditCard;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _isLuhnNumber = _interopRequireDefault(require("./isLuhnNumber"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var cards = {
   amex: /^3[47][0-9]{13}$/,
   dinersclub: /^3(?:0[0-5]|[68][0-9])[0-9]{11}$/,
@@ -12055,17 +14122,21 @@ var cards = {
   unionpay: /^(6[27][0-9]{14}|^(81[0-9]{14,17}))$/,
   visa: /^(?:4[0-9]{12})(?:[0-9]{3,6})?$/
 };
-/* eslint-disable max-len */
-
-var allCards = /^(?:4[0-9]{12}(?:[0-9]{3,6})?|5[1-5][0-9]{14}|(222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}|6(?:011|5[0-9][0-9])[0-9]{12,15}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11}|6[27][0-9]{14}|^(81[0-9]{14,17}))$/;
-/* eslint-enable max-len */
-
+var allCards = function () {
+  var tmpCardsArray = [];
+  for (var cardProvider in cards) {
+    // istanbul ignore else
+    if (cards.hasOwnProperty(cardProvider)) {
+      tmpCardsArray.push(cards[cardProvider]);
+    }
+  }
+  return tmpCardsArray;
+}();
 function isCreditCard(card) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   (0, _assertString.default)(card);
   var provider = options.provider;
   var sanitized = card.replace(/[- ]+/g, '');
-
   if (provider && provider.toLowerCase() in cards) {
     // specific provider in the list
     if (!cards[provider.toLowerCase()].test(sanitized)) {
@@ -12074,55 +14145,52 @@ function isCreditCard(card) {
   } else if (provider && !(provider.toLowerCase() in cards)) {
     /* specific provider not in the list */
     throw new Error("".concat(provider, " is not a valid credit card provider."));
-  } else if (!allCards.test(sanitized)) {
+  } else if (!allCards.some(function (cardProvider) {
+    return cardProvider.test(sanitized);
+  })) {
     // no specific provider
     return false;
   }
-
   return (0, _isLuhnNumber.default)(card);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./isLuhnNumber":99,"./util/assertString":138}],59:[function(require,module,exports){
+},{"./isLuhnNumber":125,"./util/assertString":165}],84:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isCurrency;
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function currencyRegex(options) {
   var decimal_digits = "\\d{".concat(options.digits_after_decimal[0], "}");
   options.digits_after_decimal.forEach(function (digit, index) {
     if (index !== 0) decimal_digits = "".concat(decimal_digits, "|\\d{").concat(digit, "}");
   });
   var symbol = "(".concat(options.symbol.replace(/\W/, function (m) {
-    return "\\".concat(m);
-  }), ")").concat(options.require_symbol ? '' : '?'),
-      negative = '-?',
-      whole_dollar_amount_without_sep = '[1-9]\\d*',
-      whole_dollar_amount_with_sep = "[1-9]\\d{0,2}(\\".concat(options.thousands_separator, "\\d{3})*"),
-      valid_whole_dollar_amounts = ['0', whole_dollar_amount_without_sep, whole_dollar_amount_with_sep],
-      whole_dollar_amount = "(".concat(valid_whole_dollar_amounts.join('|'), ")?"),
-      decimal_amount = "(\\".concat(options.decimal_separator, "(").concat(decimal_digits, "))").concat(options.require_decimal ? '' : '?');
-  var pattern = whole_dollar_amount + (options.allow_decimal || options.require_decimal ? decimal_amount : ''); // default is negative sign before symbol, but there are two other options (besides parens)
+      return "\\".concat(m);
+    }), ")").concat(options.require_symbol ? '' : '?'),
+    negative = '-?',
+    whole_dollar_amount_without_sep = '[1-9]\\d*',
+    whole_dollar_amount_with_sep = "[1-9]\\d{0,2}(\\".concat(options.thousands_separator, "\\d{3})*"),
+    valid_whole_dollar_amounts = ['0', whole_dollar_amount_without_sep, whole_dollar_amount_with_sep],
+    whole_dollar_amount = "(".concat(valid_whole_dollar_amounts.join('|'), ")?"),
+    decimal_amount = "(\\".concat(options.decimal_separator, "(").concat(decimal_digits, "))").concat(options.require_decimal ? '' : '?');
+  var pattern = whole_dollar_amount + (options.allow_decimal || options.require_decimal ? decimal_amount : '');
 
+  // default is negative sign before symbol, but there are two other options (besides parens)
   if (options.allow_negatives && !options.parens_for_negatives) {
     if (options.negative_sign_after_digits) {
       pattern += negative;
     } else if (options.negative_sign_before_digits) {
       pattern = negative + pattern;
     }
-  } // South African Rand, for example, uses R 123 (space) and R-123 (no space)
+  }
 
-
+  // South African Rand, for example, uses R 123 (space) and R-123 (no space)
   if (options.allow_negative_sign_placeholder) {
     pattern = "( (?!\\-))?".concat(pattern);
   } else if (options.allow_space_after_symbol) {
@@ -12130,26 +14198,23 @@ function currencyRegex(options) {
   } else if (options.allow_space_after_digits) {
     pattern += '( (?!$))?';
   }
-
   if (options.symbol_after_digits) {
     pattern += symbol;
   } else {
     pattern = symbol + pattern;
   }
-
   if (options.allow_negatives) {
     if (options.parens_for_negatives) {
       pattern = "(\\(".concat(pattern, "\\)|").concat(pattern, ")");
     } else if (!(options.negative_sign_before_digits || options.negative_sign_after_digits)) {
       pattern = negative + pattern;
     }
-  } // ensure there's a dollar and/or decimal amount, and that
+  }
+
+  // ensure there's a dollar and/or decimal amount, and that
   // it doesn't start with a space or a negative sign followed by a space
-
-
   return new RegExp("^(?!-? )(?=.*\\d)".concat(pattern, "$"));
 }
-
 var default_currency_options = {
   symbol: '$',
   require_symbol: false,
@@ -12167,126 +14232,95 @@ var default_currency_options = {
   digits_after_decimal: [2],
   allow_space_after_digits: false
 };
-
 function isCurrency(str, options) {
   (0, _assertString.default)(str);
   options = (0, _merge.default)(options, default_currency_options);
   return currencyRegex(options).test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138,"./util/merge":140}],60:[function(require,module,exports){
+},{"./util/assertString":165,"./util/merge":167}],85:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isDataURI;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var validMediaType = /^[a-z]+\/[a-z0-9\-\+\._]+$/i;
 var validAttribute = /^[a-z\-]+=[a-z0-9\-]+$/i;
 var validData = /^[a-z0-9!\$&'\(\)\*\+,;=\-\._~:@\/\?%\s]*$/i;
-
 function isDataURI(str) {
   (0, _assertString.default)(str);
   var data = str.split(',');
-
   if (data.length < 2) {
     return false;
   }
-
   var attributes = data.shift().trim().split(';');
   var schemeAndMediaType = attributes.shift();
-
   if (schemeAndMediaType.slice(0, 5) !== 'data:') {
     return false;
   }
-
   var mediaType = schemeAndMediaType.slice(5);
-
   if (mediaType !== '' && !validMediaType.test(mediaType)) {
     return false;
   }
-
   for (var i = 0; i < attributes.length; i++) {
     if (!(i === attributes.length - 1 && attributes[i].toLowerCase() === 'base64') && !validAttribute.test(attributes[i])) {
       return false;
     }
   }
-
   for (var _i = 0; _i < data.length; _i++) {
     if (!validData.test(data[_i])) {
       return false;
     }
   }
-
   return true;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],61:[function(require,module,exports){
+},{"./util/assertString":165}],86:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isDate;
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
 var default_date_options = {
   format: 'YYYY/MM/DD',
   delimiters: ['/', '-'],
   strictMode: false
 };
-
 function isValidFormat(format) {
   return /(^(y{4}|y{2})[.\/-](m{1,2})[.\/-](d{1,2})$)|(^(m{1,2})[.\/-](d{1,2})[.\/-]((y{4}|y{2})$))|(^(d{1,2})[.\/-](m{1,2})[.\/-]((y{4}|y{2})$))/gi.test(format);
 }
-
 function zip(date, format) {
   var zippedArr = [],
-      len = Math.min(date.length, format.length);
-
+    len = Math.min(date.length, format.length);
   for (var i = 0; i < len; i++) {
     zippedArr.push([date[i], format[i]]);
   }
-
   return zippedArr;
 }
-
 function isDate(input, options) {
   if (typeof options === 'string') {
-    // Allow backward compatbility for old format isDate(input [, format])
+    // Allow backward compatibility for old format isDate(input [, format])
     options = (0, _merge.default)({
       format: options
     }, default_date_options);
   } else {
     options = (0, _merge.default)(options, default_date_options);
   }
-
   if (typeof input === 'string' && isValidFormat(options.format)) {
     var formatDelimiter = options.delimiters.find(function (delimiter) {
       return options.format.indexOf(delimiter) !== -1;
@@ -12296,20 +14330,16 @@ function isDate(input, options) {
     });
     var dateAndFormat = zip(input.split(dateDelimiter), options.format.toLowerCase().split(formatDelimiter));
     var dateObj = {};
-
     var _iterator = _createForOfIteratorHelper(dateAndFormat),
-        _step;
-
+      _step;
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
         var _step$value = _slicedToArray(_step.value, 2),
-            dateWord = _step$value[0],
-            formatWord = _step$value[1];
-
+          dateWord = _step$value[0],
+          formatWord = _step$value[1];
         if (dateWord.length !== formatWord.length) {
           return false;
         }
-
         dateObj[formatWord.charAt(0)] = dateWord;
       }
     } catch (err) {
@@ -12317,95 +14347,98 @@ function isDate(input, options) {
     } finally {
       _iterator.f();
     }
+    var fullYear = dateObj.y;
 
-    return new Date("".concat(dateObj.m, "/").concat(dateObj.d, "/").concat(dateObj.y)).getDate() === +dateObj.d;
+    // Check if the year starts with a hyphen
+    if (fullYear.startsWith('-')) {
+      return false; // Hyphen before year is not allowed
+    }
+    if (dateObj.y.length === 2) {
+      var parsedYear = parseInt(dateObj.y, 10);
+      if (isNaN(parsedYear)) {
+        return false;
+      }
+      var currentYearLastTwoDigits = new Date().getFullYear() % 100;
+      if (parsedYear < currentYearLastTwoDigits) {
+        fullYear = "20".concat(dateObj.y);
+      } else {
+        fullYear = "19".concat(dateObj.y);
+      }
+    }
+    var month = dateObj.m;
+    if (dateObj.m.length === 1) {
+      month = "0".concat(dateObj.m);
+    }
+    var day = dateObj.d;
+    if (dateObj.d.length === 1) {
+      day = "0".concat(dateObj.d);
+    }
+    return new Date("".concat(fullYear, "-").concat(month, "-").concat(day, "T00:00:00.000Z")).getUTCDate() === +dateObj.d;
   }
-
   if (!options.strictMode) {
     return Object.prototype.toString.call(input) === '[object Date]' && isFinite(input);
   }
-
   return false;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/merge":140}],62:[function(require,module,exports){
+},{"./util/merge":167}],87:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isDecimal;
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _includes = _interopRequireDefault(require("./util/includes"));
-
 var _alpha = require("./alpha");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function decimalRegExp(options) {
   var regExp = new RegExp("^[-+]?([0-9]+)?(\\".concat(_alpha.decimal[options.locale], "[0-9]{").concat(options.decimal_digits, "})").concat(options.force_decimal ? '' : '?', "$"));
   return regExp;
 }
-
 var default_decimal_options = {
   force_decimal: false,
   decimal_digits: '1,',
   locale: 'en-US'
 };
 var blacklist = ['', '-', '+'];
-
 function isDecimal(str, options) {
   (0, _assertString.default)(str);
   options = (0, _merge.default)(options, default_decimal_options);
-
   if (options.locale in _alpha.decimal) {
     return !(0, _includes.default)(blacklist, str.replace(/ /g, '')) && decimalRegExp(options).test(str);
   }
-
   throw new Error("Invalid locale '".concat(options.locale, "'"));
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./alpha":41,"./util/assertString":138,"./util/includes":139,"./util/merge":140}],63:[function(require,module,exports){
+},{"./alpha":65,"./util/assertString":165,"./util/includes":166,"./util/merge":167}],88:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isDivisibleBy;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _toFloat = _interopRequireDefault(require("./toFloat"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isDivisibleBy(str, num) {
   (0, _assertString.default)(str);
   return (0, _toFloat.default)(str) % parseInt(num, 10) === 0;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./toFloat":133,"./util/assertString":138}],64:[function(require,module,exports){
+},{"./toFloat":160,"./util/assertString":165}],89:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isEAN;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /**
  * The most commonly used EAN standard is
  * the thirteen-digit EAN-13, while the
@@ -12428,6 +14461,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var LENGTH_EAN_8 = 8;
 var LENGTH_EAN_14 = 14;
 var validEanRegex = /^(\d{8}|\d{13}|\d{14})$/;
+
 /**
  * Get position weight given:
  * EAN length and digit index/position
@@ -12436,14 +14470,13 @@ var validEanRegex = /^(\d{8}|\d{13}|\d{14})$/;
  * @param {number} index
  * @return {number}
  */
-
 function getPositionWeightThroughLengthAndIndex(length, index) {
   if (length === LENGTH_EAN_8 || length === LENGTH_EAN_14) {
     return index % 2 === 0 ? 3 : 1;
   }
-
   return index % 2 === 0 ? 1 : 3;
 }
+
 /**
  * Calculate EAN Check Digit
  * Reference: https://en.wikipedia.org/wiki/International_Article_Number#Calculation_of_checksum_digit
@@ -12451,8 +14484,6 @@ function getPositionWeightThroughLengthAndIndex(length, index) {
  * @param {string} ean
  * @return {number}
  */
-
-
 function calculateCheckDigit(ean) {
   var checksum = ean.slice(0, -1).split('').map(function (char, index) {
     return Number(char) * getPositionWeightThroughLengthAndIndex(ean.length, index);
@@ -12462,6 +14493,7 @@ function calculateCheckDigit(ean) {
   var remainder = 10 - checksum % 10;
   return remainder < 10 ? remainder : 0;
 }
+
 /**
  * Check if string is valid EAN:
  * Matches EAN-8/EAN-13/EAN-14 regex
@@ -12470,38 +14502,29 @@ function calculateCheckDigit(ean) {
  * @param {string} str
  * @return {boolean}
  */
-
-
 function isEAN(str) {
   (0, _assertString.default)(str);
   var actualCheckDigit = Number(str.slice(-1));
   return validEanRegex.test(str) && actualCheckDigit === calculateCheckDigit(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],65:[function(require,module,exports){
+},{"./util/assertString":165}],90:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isEmail;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
-var _merge = _interopRequireDefault(require("./util/merge"));
-
 var _isByteLength = _interopRequireDefault(require("./isByteLength"));
-
 var _isFQDN = _interopRequireDefault(require("./isFQDN"));
-
 var _isIP = _interopRequireDefault(require("./isIP"));
-
+var _merge = _interopRequireDefault(require("./util/merge"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var default_email_options = {
   allow_display_name: false,
+  allow_underscores: false,
   require_display_name: false,
   allow_utf8_local_part: true,
   require_tld: true,
@@ -12510,74 +14533,66 @@ var default_email_options = {
   host_blacklist: [],
   host_whitelist: []
 };
+
 /* eslint-disable max-len */
-
 /* eslint-disable no-control-regex */
-
 var splitNameAddress = /^([^\x00-\x1F\x7F-\x9F\cX]+)</i;
 var emailUserPart = /^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~]+$/i;
 var gmailUserPart = /^[a-z\d]+$/;
 var quotedEmailUser = /^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f]))*$/i;
-var emailUserUtf8Part = /^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+$/i;
+var emailUserUtf8Part = /^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~\u00A1-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+$/i;
 var quotedEmailUserUtf8 = /^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*$/i;
 var defaultMaxEmailLength = 254;
 /* eslint-enable max-len */
-
 /* eslint-enable no-control-regex */
 
 /**
  * Validate display name according to the RFC2822: https://tools.ietf.org/html/rfc2822#appendix-A.1.2
  * @param {String} display_name
  */
-
 function validateDisplayName(display_name) {
-  var display_name_without_quotes = display_name.replace(/^"(.+)"$/, '$1'); // display name with only spaces is not valid
-
+  var display_name_without_quotes = display_name.replace(/^"(.+)"$/, '$1');
+  // display name with only spaces is not valid
   if (!display_name_without_quotes.trim()) {
     return false;
-  } // check whether display name contains illegal character
+  }
 
-
+  // check whether display name contains illegal character
   var contains_illegal = /[\.";<>]/.test(display_name_without_quotes);
-
   if (contains_illegal) {
     // if contains illegal characters,
     // must to be enclosed in double-quotes, otherwise it's not a valid display name
     if (display_name_without_quotes === display_name) {
       return false;
-    } // the quotes in display name must start with character symbol \
+    }
 
-
+    // the quotes in display name must start with character symbol \
     var all_start_with_back_slash = display_name_without_quotes.split('"').length === display_name_without_quotes.split('\\"').length;
-
     if (!all_start_with_back_slash) {
       return false;
     }
   }
-
   return true;
 }
-
 function isEmail(str, options) {
   (0, _assertString.default)(str);
   options = (0, _merge.default)(options, default_email_options);
-
   if (options.require_display_name || options.allow_display_name) {
     var display_email = str.match(splitNameAddress);
-
     if (display_email) {
-      var display_name = display_email[1]; // Remove display name and angle brackets to get email address
-      // Can be done in the regex but will introduce a ReDOS (See  #1597 for more info)
+      var display_name = display_email[1];
 
-      str = str.replace(display_name, '').replace(/(^<|>$)/g, ''); // sometimes need to trim the last space to get the display name
+      // Remove display name and angle brackets to get email address
+      // Can be done in the regex but will introduce a ReDOS (See  #1597 for more info)
+      str = str.replace(display_name, '').replace(/(^<|>$)/g, '');
+
+      // sometimes need to trim the last space to get the display name
       // because there may be a space between display name and email address
       // eg. myname <address@gmail.com>
       // the display name is `myname` instead of `myname `, so need to trim the last space
-
       if (display_name.endsWith(' ')) {
         display_name = display_name.slice(0, -1);
       }
-
       if (!validateDisplayName(display_name)) {
         return false;
       }
@@ -12585,25 +14600,19 @@ function isEmail(str, options) {
       return false;
     }
   }
-
   if (!options.ignore_max_length && str.length > defaultMaxEmailLength) {
     return false;
   }
-
   var parts = str.split('@');
   var domain = parts.pop();
   var lower_domain = domain.toLowerCase();
-
   if (options.host_blacklist.includes(lower_domain)) {
     return false;
   }
-
   if (options.host_whitelist.length > 0 && !options.host_whitelist.includes(lower_domain)) {
     return false;
   }
-
   var user = parts.join('@');
-
   if (options.domain_specific_validation && (lower_domain === 'gmail.com' || lower_domain === 'googlemail.com')) {
     /*
       Previously we removed dots for gmail addresses before validating.
@@ -12612,26 +14621,25 @@ function isEmail(str, options) {
       Gmail only normalizes single dots, removing them from here is pointless,
       should be done in normalizeEmail
     */
-    user = user.toLowerCase(); // Removing sub-address from username before gmail validation
+    user = user.toLowerCase();
 
-    var username = user.split('+')[0]; // Dots are not included in gmail length restriction
+    // Removing sub-address from username before gmail validation
+    var username = user.split('+')[0];
 
+    // Dots are not included in gmail length restriction
     if (!(0, _isByteLength.default)(username.replace(/\./g, ''), {
       min: 6,
       max: 30
     })) {
       return false;
     }
-
     var _user_parts = username.split('.');
-
     for (var i = 0; i < _user_parts.length; i++) {
       if (!gmailUserPart.test(_user_parts[i])) {
         return false;
       }
     }
   }
-
   if (options.ignore_max_length === false && (!(0, _isByteLength.default)(user, {
     max: 64
   }) || !(0, _isByteLength.default)(domain, {
@@ -12639,112 +14647,88 @@ function isEmail(str, options) {
   }))) {
     return false;
   }
-
   if (!(0, _isFQDN.default)(domain, {
     require_tld: options.require_tld,
-    ignore_max_length: options.ignore_max_length
+    ignore_max_length: options.ignore_max_length,
+    allow_underscores: options.allow_underscores
   })) {
     if (!options.allow_ip_domain) {
       return false;
     }
-
     if (!(0, _isIP.default)(domain)) {
       if (!domain.startsWith('[') || !domain.endsWith(']')) {
         return false;
       }
-
       var noBracketdomain = domain.slice(1, -1);
-
       if (noBracketdomain.length === 0 || !(0, _isIP.default)(noBracketdomain)) {
         return false;
       }
     }
   }
-
   if (user[0] === '"') {
     user = user.slice(1, user.length - 1);
     return options.allow_utf8_local_part ? quotedEmailUserUtf8.test(user) : quotedEmailUser.test(user);
   }
-
   var pattern = options.allow_utf8_local_part ? emailUserUtf8Part : emailUserPart;
   var user_parts = user.split('.');
-
   for (var _i = 0; _i < user_parts.length; _i++) {
     if (!pattern.test(user_parts[_i])) {
       return false;
     }
   }
-
   if (options.blacklisted_chars) {
     if (user.search(new RegExp("[".concat(options.blacklisted_chars, "]+"), 'g')) !== -1) return false;
   }
-
   return true;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./isByteLength":57,"./isFQDN":68,"./isIP":78,"./util/assertString":138,"./util/merge":140}],66:[function(require,module,exports){
+},{"./isByteLength":82,"./isFQDN":93,"./isIP":103,"./util/assertString":165,"./util/merge":167}],91:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isEmpty;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var default_is_empty_options = {
   ignore_whitespace: false
 };
-
 function isEmpty(str, options) {
   (0, _assertString.default)(str);
   options = (0, _merge.default)(options, default_is_empty_options);
   return (options.ignore_whitespace ? str.trim().length : str.length) === 0;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138,"./util/merge":140}],67:[function(require,module,exports){
+},{"./util/assertString":165,"./util/merge":167}],92:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isEthereumAddress;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var eth = /^(0x)[0-9a-f]{40}$/i;
-
 function isEthereumAddress(str) {
   (0, _assertString.default)(str);
   return eth.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],68:[function(require,module,exports){
+},{"./util/assertString":165}],93:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isFQDN;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var default_fqdn_options = {
   require_tld: true,
   allow_underscores: false,
@@ -12753,76 +14737,66 @@ var default_fqdn_options = {
   allow_wildcard: false,
   ignore_max_length: false
 };
-
 function isFQDN(str, options) {
   (0, _assertString.default)(str);
   options = (0, _merge.default)(options, default_fqdn_options);
-  /* Remove the optional trailing dot before checking validity */
 
+  /* Remove the optional trailing dot before checking validity */
   if (options.allow_trailing_dot && str[str.length - 1] === '.') {
     str = str.substring(0, str.length - 1);
   }
+
   /* Remove the optional wildcard before checking validity */
-
-
   if (options.allow_wildcard === true && str.indexOf('*.') === 0) {
     str = str.substring(2);
   }
-
   var parts = str.split('.');
   var tld = parts[parts.length - 1];
-
   if (options.require_tld) {
     // disallow fqdns without tld
     if (parts.length < 2) {
       return false;
     }
-
     if (!options.allow_numeric_tld && !/^([a-z\u00A1-\u00A8\u00AA-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]{2,}|xn[a-z0-9-]{2,})$/i.test(tld)) {
       return false;
-    } // disallow spaces
+    }
 
-
+    // disallow spaces
     if (/\s/.test(tld)) {
       return false;
     }
-  } // reject numeric TLDs
+  }
 
-
+  // reject numeric TLDs
   if (!options.allow_numeric_tld && /^\d+$/.test(tld)) {
     return false;
   }
-
   return parts.every(function (part) {
     if (part.length > 63 && !options.ignore_max_length) {
       return false;
     }
-
     if (!/^[a-z_\u00a1-\uffff0-9-]+$/i.test(part)) {
       return false;
-    } // disallow full-width chars
+    }
 
-
+    // disallow full-width chars
     if (/[\uff01-\uff5e]/.test(part)) {
       return false;
-    } // disallow parts starting or ending with hyphen
+    }
 
-
+    // disallow parts starting or ending with hyphen
     if (/^-|-$/.test(part)) {
       return false;
     }
-
     if (!options.allow_underscores && /_/.test(part)) {
       return false;
     }
-
     return true;
   });
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138,"./util/merge":140}],69:[function(require,module,exports){
+},{"./util/assertString":165,"./util/merge":167}],94:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12830,29 +14804,21 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = isFloat;
 exports.locales = void 0;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _alpha = require("./alpha");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isFloat(str, options) {
   (0, _assertString.default)(str);
   options = options || {};
   var float = new RegExp("^(?:[-+])?(?:[0-9]+)?(?:\\".concat(options.locale ? _alpha.decimal[options.locale] : '.', "[0-9]*)?(?:[eE][\\+\\-]?(?:[0-9]+))?$"));
-
   if (str === '' || str === '.' || str === ',' || str === '-' || str === '+') {
     return false;
   }
-
   var value = parseFloat(str.replace(',', '.'));
   return float.test(str) && (!options.hasOwnProperty('min') || value >= options.min) && (!options.hasOwnProperty('max') || value <= options.max) && (!options.hasOwnProperty('lt') || value < options.lt) && (!options.hasOwnProperty('gt') || value > options.gt);
 }
-
-var locales = Object.keys(_alpha.decimal);
-exports.locales = locales;
-},{"./alpha":41,"./util/assertString":138}],70:[function(require,module,exports){
+var locales = exports.locales = Object.keys(_alpha.decimal);
+},{"./alpha":65,"./util/assertString":165}],95:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12860,48 +14826,37 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = isFullWidth;
 exports.fullWidth = void 0;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var fullWidth = /[^\u0020-\u007E\uFF61-\uFF9F\uFFA0-\uFFDC\uFFE8-\uFFEE0-9a-zA-Z]/;
-exports.fullWidth = fullWidth;
-
+var fullWidth = exports.fullWidth = /[^\u0020-\u007E\uFF61-\uFF9F\uFFA0-\uFFDC\uFFE8-\uFFEE0-9a-zA-Z]/;
 function isFullWidth(str) {
   (0, _assertString.default)(str);
   return fullWidth.test(str);
 }
-},{"./util/assertString":138}],71:[function(require,module,exports){
+},{"./util/assertString":165}],96:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isHSL;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var hslComma = /^hsla?\(((\+|\-)?([0-9]+(\.[0-9]+)?(e(\+|\-)?[0-9]+)?|\.[0-9]+(e(\+|\-)?[0-9]+)?))(deg|grad|rad|turn)?(,(\+|\-)?([0-9]+(\.[0-9]+)?(e(\+|\-)?[0-9]+)?|\.[0-9]+(e(\+|\-)?[0-9]+)?)%){2}(,((\+|\-)?([0-9]+(\.[0-9]+)?(e(\+|\-)?[0-9]+)?|\.[0-9]+(e(\+|\-)?[0-9]+)?)%?))?\)$/i;
 var hslSpace = /^hsla?\(((\+|\-)?([0-9]+(\.[0-9]+)?(e(\+|\-)?[0-9]+)?|\.[0-9]+(e(\+|\-)?[0-9]+)?))(deg|grad|rad|turn)?(\s(\+|\-)?([0-9]+(\.[0-9]+)?(e(\+|\-)?[0-9]+)?|\.[0-9]+(e(\+|\-)?[0-9]+)?)%){2}\s?(\/\s((\+|\-)?([0-9]+(\.[0-9]+)?(e(\+|\-)?[0-9]+)?|\.[0-9]+(e(\+|\-)?[0-9]+)?)%?)\s?)?\)$/i;
-
 function isHSL(str) {
-  (0, _assertString.default)(str); // Strip duplicate spaces before calling the validation regex (See  #1598 for more info)
+  (0, _assertString.default)(str);
 
+  // Strip duplicate spaces before calling the validation regex (See  #1598 for more info)
   var strippedStr = str.replace(/\s+/g, ' ').replace(/\s?(hsla?\(|\)|,)\s?/ig, '$1');
-
   if (strippedStr.indexOf(',') !== -1) {
     return hslComma.test(strippedStr);
   }
-
   return hslSpace.test(strippedStr);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],72:[function(require,module,exports){
+},{"./util/assertString":165}],97:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12909,30 +14864,22 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = isHalfWidth;
 exports.halfWidth = void 0;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var halfWidth = /[\u0020-\u007E\uFF61-\uFF9F\uFFA0-\uFFDC\uFFE8-\uFFEE0-9a-zA-Z]/;
-exports.halfWidth = halfWidth;
-
+var halfWidth = exports.halfWidth = /[\u0020-\u007E\uFF61-\uFF9F\uFFA0-\uFFDC\uFFE8-\uFFEE0-9a-zA-Z]/;
 function isHalfWidth(str) {
   (0, _assertString.default)(str);
   return halfWidth.test(str);
 }
-},{"./util/assertString":138}],73:[function(require,module,exports){
+},{"./util/assertString":165}],98:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isHash;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var lengths = {
   md5: 32,
   md4: 32,
@@ -12948,58 +14895,46 @@ var lengths = {
   crc32: 8,
   crc32b: 8
 };
-
 function isHash(str, algorithm) {
   (0, _assertString.default)(str);
   var hash = new RegExp("^[a-fA-F0-9]{".concat(lengths[algorithm], "}$"));
   return hash.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],74:[function(require,module,exports){
+},{"./util/assertString":165}],99:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isHexColor;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var hexcolor = /^#?([0-9A-F]{3}|[0-9A-F]{4}|[0-9A-F]{6}|[0-9A-F]{8})$/i;
-
 function isHexColor(str) {
   (0, _assertString.default)(str);
   return hexcolor.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],75:[function(require,module,exports){
+},{"./util/assertString":165}],100:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isHexadecimal;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var hexadecimal = /^(0x|0h)?[0-9A-F]+$/i;
-
 function isHexadecimal(str) {
   (0, _assertString.default)(str);
   return hexadecimal.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],76:[function(require,module,exports){
+},{"./util/assertString":165}],101:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13007,11 +14942,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = isIBAN;
 exports.locales = void 0;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /**
  * List of country codes with
  * corresponding IBAN regular expression
@@ -13036,6 +14968,7 @@ var ibanRegexThroughCountryCode = {
   DE: /^(DE[0-9]{2})\d{18}$/,
   DK: /^(DK[0-9]{2})\d{14}$/,
   DO: /^(DO[0-9]{2})[A-Z]{4}\d{20}$/,
+  DZ: /^(DZ\d{24})$/,
   EE: /^(EE[0-9]{2})\d{16}$/,
   EG: /^(EG[0-9]{2})\d{25}$/,
   ES: /^(ES[0-9]{2})\d{20}$/,
@@ -13065,6 +14998,7 @@ var ibanRegexThroughCountryCode = {
   LT: /^(LT[0-9]{2})\d{16}$/,
   LU: /^(LU[0-9]{2})\d{3}[A-Z0-9]{13}$/,
   LV: /^(LV[0-9]{2})[A-Z]{4}[A-Z0-9]{13}$/,
+  MA: /^(MA[0-9]{26})$/,
   MC: /^(MC[0-9]{2})\d{10}[A-Z0-9]{11}\d{2}$/,
   MD: /^(MD[0-9]{2})[A-Z0-9]{20}$/,
   ME: /^(ME[0-9]{2})\d{18}$/,
@@ -13097,6 +15031,25 @@ var ibanRegexThroughCountryCode = {
   VG: /^(VG[0-9]{2})[A-Z0-9]{4}\d{16}$/,
   XK: /^(XK[0-9]{2})\d{16}$/
 };
+
+/**
+ * Check if the country codes passed are valid using the
+ * ibanRegexThroughCountryCode as a reference
+ *
+ * @param {array} countryCodeArray
+ * @return {boolean}
+ */
+
+function hasOnlyValidCountryCodes(countryCodeArray) {
+  var countryCodeArrayFilteredWithObjectIbanCode = countryCodeArray.filter(function (countryCode) {
+    return !(countryCode in ibanRegexThroughCountryCode);
+  });
+  if (countryCodeArrayFilteredWithObjectIbanCode.length > 0) {
+    return false;
+  }
+  return true;
+}
+
 /**
  * Check whether string has correct universal IBAN format
  * The IBAN consists of up to 34 alphanumeric characters, as follows:
@@ -13106,15 +15059,32 @@ var ibanRegexThroughCountryCode = {
  * NOTE: Permitted IBAN characters are: digits [0-9] and the 26 latin alphabetic [A-Z]
  *
  * @param {string} str - string under validation
+ * @param {object} options - object to pass the countries to be either whitelisted or blacklisted
  * @return {boolean}
  */
-
-function hasValidIbanFormat(str) {
+function hasValidIbanFormat(str, options) {
   // Strip white spaces and hyphens
   var strippedStr = str.replace(/[\s\-]+/gi, '').toUpperCase();
   var isoCountryCode = strippedStr.slice(0, 2).toUpperCase();
-  return isoCountryCode in ibanRegexThroughCountryCode && ibanRegexThroughCountryCode[isoCountryCode].test(strippedStr);
+  var isoCountryCodeInIbanRegexCodeObject = (isoCountryCode in ibanRegexThroughCountryCode);
+  if (options.whitelist) {
+    if (!hasOnlyValidCountryCodes(options.whitelist)) {
+      return false;
+    }
+    var isoCountryCodeInWhiteList = options.whitelist.includes(isoCountryCode);
+    if (!isoCountryCodeInWhiteList) {
+      return false;
+    }
+  }
+  if (options.blacklist) {
+    var isoCountryCodeInBlackList = options.blacklist.includes(isoCountryCode);
+    if (isoCountryCodeInBlackList) {
+      return false;
+    }
+  }
+  return isoCountryCodeInIbanRegexCodeObject && ibanRegexThroughCountryCode[isoCountryCode].test(strippedStr);
 }
+
 /**
    * Check whether string has valid IBAN Checksum
    * by performing basic mod-97 operation and
@@ -13128,11 +15098,8 @@ function hasValidIbanFormat(str) {
    * @param {string} str
    * @return {boolean}
    */
-
-
 function hasValidIbanChecksum(str) {
   var strippedStr = str.replace(/[^A-Z0-9]+/gi, '').toUpperCase(); // Keep only digits and A-Z latin alphabetic
-
   var rearranged = strippedStr.slice(4) + strippedStr.slice(0, 4);
   var alphaCapsReplacedWithDigits = rearranged.replace(/[A-Z]/g, function (char) {
     return char.charCodeAt(0) - 55;
@@ -13142,88 +15109,71 @@ function hasValidIbanChecksum(str) {
   }, '');
   return remainder === 1;
 }
-
 function isIBAN(str) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   (0, _assertString.default)(str);
-  return hasValidIbanFormat(str) && hasValidIbanChecksum(str);
+  return hasValidIbanFormat(str, options) && hasValidIbanChecksum(str);
 }
-
-var locales = Object.keys(ibanRegexThroughCountryCode);
-exports.locales = locales;
-},{"./util/assertString":138}],77:[function(require,module,exports){
+var locales = exports.locales = Object.keys(ibanRegexThroughCountryCode);
+},{"./util/assertString":165}],102:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isIMEI;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var imeiRegexWithoutHypens = /^[0-9]{15}$/;
 var imeiRegexWithHypens = /^\d{2}-\d{6}-\d{6}-\d{1}$/;
-
 function isIMEI(str, options) {
   (0, _assertString.default)(str);
-  options = options || {}; // default regex for checking imei is the one without hyphens
+  options = options || {};
+
+  // default regex for checking imei is the one without hyphens
 
   var imeiRegex = imeiRegexWithoutHypens;
-
   if (options.allow_hyphens) {
     imeiRegex = imeiRegexWithHypens;
   }
-
   if (!imeiRegex.test(str)) {
     return false;
   }
-
   str = str.replace(/-/g, '');
   var sum = 0,
-      mul = 2,
-      l = 14;
-
+    mul = 2,
+    l = 14;
   for (var i = 0; i < l; i++) {
     var digit = str.substring(l - i - 1, l - i);
     var tp = parseInt(digit, 10) * mul;
-
     if (tp >= 10) {
       sum += tp % 10 + 1;
     } else {
       sum += tp;
     }
-
     if (mul === 1) {
       mul += 1;
     } else {
       mul -= 1;
     }
   }
-
   var chk = (10 - sum % 10) % 10;
-
   if (chk !== parseInt(str.substring(14, 15), 10)) {
     return false;
   }
-
   return true;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],78:[function(require,module,exports){
+},{"./util/assertString":165}],103:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isIP;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /**
 11.3.  Examples
 
@@ -13258,114 +15208,92 @@ var IPv4AddressFormat = "(".concat(IPv4SegmentFormat, "[.]){3}").concat(IPv4Segm
 var IPv4AddressRegExp = new RegExp("^".concat(IPv4AddressFormat, "$"));
 var IPv6SegmentFormat = '(?:[0-9a-fA-F]{1,4})';
 var IPv6AddressRegExp = new RegExp('^(' + "(?:".concat(IPv6SegmentFormat, ":){7}(?:").concat(IPv6SegmentFormat, "|:)|") + "(?:".concat(IPv6SegmentFormat, ":){6}(?:").concat(IPv4AddressFormat, "|:").concat(IPv6SegmentFormat, "|:)|") + "(?:".concat(IPv6SegmentFormat, ":){5}(?::").concat(IPv4AddressFormat, "|(:").concat(IPv6SegmentFormat, "){1,2}|:)|") + "(?:".concat(IPv6SegmentFormat, ":){4}(?:(:").concat(IPv6SegmentFormat, "){0,1}:").concat(IPv4AddressFormat, "|(:").concat(IPv6SegmentFormat, "){1,3}|:)|") + "(?:".concat(IPv6SegmentFormat, ":){3}(?:(:").concat(IPv6SegmentFormat, "){0,2}:").concat(IPv4AddressFormat, "|(:").concat(IPv6SegmentFormat, "){1,4}|:)|") + "(?:".concat(IPv6SegmentFormat, ":){2}(?:(:").concat(IPv6SegmentFormat, "){0,3}:").concat(IPv4AddressFormat, "|(:").concat(IPv6SegmentFormat, "){1,5}|:)|") + "(?:".concat(IPv6SegmentFormat, ":){1}(?:(:").concat(IPv6SegmentFormat, "){0,4}:").concat(IPv4AddressFormat, "|(:").concat(IPv6SegmentFormat, "){1,6}|:)|") + "(?::((?::".concat(IPv6SegmentFormat, "){0,5}:").concat(IPv4AddressFormat, "|(?::").concat(IPv6SegmentFormat, "){1,7}|:))") + ')(%[0-9a-zA-Z-.:]{1,})?$');
-
 function isIP(str) {
   var version = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
   (0, _assertString.default)(str);
   version = String(version);
-
   if (!version) {
     return isIP(str, 4) || isIP(str, 6);
   }
-
   if (version === '4') {
     return IPv4AddressRegExp.test(str);
   }
-
   if (version === '6') {
     return IPv6AddressRegExp.test(str);
   }
-
   return false;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],79:[function(require,module,exports){
+},{"./util/assertString":165}],104:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isIPRange;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _isIP = _interopRequireDefault(require("./isIP"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var subnetMaybe = /^\d{1,3}$/;
 var v4Subnet = 32;
 var v6Subnet = 128;
-
 function isIPRange(str) {
   var version = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
   (0, _assertString.default)(str);
-  var parts = str.split('/'); // parts[0] -> ip, parts[1] -> subnet
+  var parts = str.split('/');
 
+  // parts[0] -> ip, parts[1] -> subnet
   if (parts.length !== 2) {
     return false;
   }
-
   if (!subnetMaybe.test(parts[1])) {
-    return false;
-  } // Disallow preceding 0 i.e. 01, 02, ...
-
-
-  if (parts[1].length > 1 && parts[1].startsWith('0')) {
     return false;
   }
 
+  // Disallow preceding 0 i.e. 01, 02, ...
+  if (parts[1].length > 1 && parts[1].startsWith('0')) {
+    return false;
+  }
   var isValidIP = (0, _isIP.default)(parts[0], version);
-
   if (!isValidIP) {
     return false;
-  } // Define valid subnet according to IP's version
+  }
 
-
+  // Define valid subnet according to IP's version
   var expectedSubnet = null;
-
   switch (String(version)) {
     case '4':
       expectedSubnet = v4Subnet;
       break;
-
     case '6':
       expectedSubnet = v6Subnet;
       break;
-
     default:
       expectedSubnet = (0, _isIP.default)(parts[0], '6') ? v6Subnet : v4Subnet;
   }
-
   return parts[1] <= expectedSubnet && parts[1] >= 0;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./isIP":78,"./util/assertString":138}],80:[function(require,module,exports){
+},{"./isIP":103,"./util/assertString":165}],105:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isISBN;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var possibleIsbn10 = /^(?:[0-9]{9}X|[0-9]{10})$/;
 var possibleIsbn13 = /^(?:[0-9]{13})$/;
 var factor = [1, 3];
-
 function isISBN(isbn, options) {
-  (0, _assertString.default)(isbn); // For backwards compatibility:
+  (0, _assertString.default)(isbn);
+
+  // For backwards compatibility:
   // isISBN(str [, version]), i.e. `options` could be used as argument for the legacy `version`
-
   var version = String((options === null || options === void 0 ? void 0 : options.version) || options);
-
   if (!(options !== null && options !== void 0 && options.version || options)) {
     return isISBN(isbn, {
       version: 10
@@ -13373,25 +15301,20 @@ function isISBN(isbn, options) {
       version: 13
     });
   }
-
   var sanitizedIsbn = isbn.replace(/[\s-]+/g, '');
   var checksum = 0;
-
   if (version === '10') {
     if (!possibleIsbn10.test(sanitizedIsbn)) {
       return false;
     }
-
     for (var i = 0; i < version - 1; i++) {
       checksum += (i + 1) * sanitizedIsbn.charAt(i);
     }
-
     if (sanitizedIsbn.charAt(9) === 'X') {
       checksum += 10 * 10;
     } else {
       checksum += 10 * sanitizedIsbn.charAt(9);
     }
-
     if (checksum % 11 === 0) {
       return true;
     }
@@ -13399,34 +15322,29 @@ function isISBN(isbn, options) {
     if (!possibleIsbn13.test(sanitizedIsbn)) {
       return false;
     }
-
     for (var _i = 0; _i < 12; _i++) {
       checksum += factor[_i % 2] * sanitizedIsbn.charAt(_i);
     }
-
     if (sanitizedIsbn.charAt(12) - (10 - checksum % 10) % 10 === 0) {
       return true;
     }
   }
-
   return false;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],81:[function(require,module,exports){
+},{"./util/assertString":165}],106:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isISIN;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var isin = /^[A-Z]{2}[0-9A-Z]{9}[0-9]$/;
 
-var isin = /^[A-Z]{2}[0-9A-Z]{9}[0-9]$/; // this link details how the check digit is calculated:
+// this link details how the check digit is calculated:
 // https://www.isin.org/isin-format/. it is a little bit
 // odd in that it works with digits, not numbers. in order
 // to make only one pass through the ISIN characters, the
@@ -13435,24 +15353,21 @@ var isin = /^[A-Z]{2}[0-9A-Z]{9}[0-9]$/; // this link details how the check digi
 
 function isISIN(str) {
   (0, _assertString.default)(str);
-
   if (!isin.test(str)) {
     return false;
   }
-
   var double = true;
-  var sum = 0; // convert values
-
+  var sum = 0;
+  // convert values
   for (var i = str.length - 2; i >= 0; i--) {
     if (str[i] >= 'A' && str[i] <= 'Z') {
       var value = str[i].charCodeAt(0) - 55;
       var lo = value % 10;
-      var hi = Math.trunc(value / 10); // letters have two digits, so handle the low order
+      var hi = Math.trunc(value / 10);
+      // letters have two digits, so handle the low order
       // and high order digits separately.
-
       for (var _i = 0, _arr = [lo, hi]; _i < _arr.length; _i++) {
         var digit = _arr[_i];
-
         if (double) {
           if (digit >= 5) {
             sum += 1 + (digit - 5) * 2;
@@ -13462,12 +15377,10 @@ function isISIN(str) {
         } else {
           sum += digit;
         }
-
         double = !double;
       }
     } else {
       var _digit = str[i].charCodeAt(0) - '0'.charCodeAt(0);
-
       if (double) {
         if (_digit >= 5) {
           sum += 1 + (_digit - 5) * 2;
@@ -13477,156 +15390,158 @@ function isISIN(str) {
       } else {
         sum += _digit;
       }
-
       double = !double;
     }
   }
-
   var check = Math.trunc((sum + 9) / 10) * 10 - sum;
   return +str[str.length - 1] === check;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],82:[function(require,module,exports){
+},{"./util/assertString":165}],107:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = isISO31661Alpha2;
 exports.CountryCodes = void 0;
-
+exports.default = isISO31661Alpha2;
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 // from https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
 var validISO31661Alpha2CountriesCodes = new Set(['AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BQ', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG', 'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IM', 'IN', 'IO', 'IQ', 'IR', 'IS', 'IT', 'JE', 'JM', 'JO', 'JP', 'KE', 'KG', 'KH', 'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'OM', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PW', 'PY', 'QA', 'RE', 'RO', 'RS', 'RU', 'RW', 'SA', 'SB', 'SC', 'SD', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'SS', 'ST', 'SV', 'SX', 'SY', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TN', 'TO', 'TR', 'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'UM', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WS', 'YE', 'YT', 'ZA', 'ZM', 'ZW']);
-
 function isISO31661Alpha2(str) {
   (0, _assertString.default)(str);
   return validISO31661Alpha2CountriesCodes.has(str.toUpperCase());
 }
-
-var CountryCodes = validISO31661Alpha2CountriesCodes;
-exports.CountryCodes = CountryCodes;
-},{"./util/assertString":138}],83:[function(require,module,exports){
+var CountryCodes = exports.CountryCodes = validISO31661Alpha2CountriesCodes;
+},{"./util/assertString":165}],108:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isISO31661Alpha3;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 // from https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
 var validISO31661Alpha3CountriesCodes = new Set(['AFG', 'ALA', 'ALB', 'DZA', 'ASM', 'AND', 'AGO', 'AIA', 'ATA', 'ATG', 'ARG', 'ARM', 'ABW', 'AUS', 'AUT', 'AZE', 'BHS', 'BHR', 'BGD', 'BRB', 'BLR', 'BEL', 'BLZ', 'BEN', 'BMU', 'BTN', 'BOL', 'BES', 'BIH', 'BWA', 'BVT', 'BRA', 'IOT', 'BRN', 'BGR', 'BFA', 'BDI', 'KHM', 'CMR', 'CAN', 'CPV', 'CYM', 'CAF', 'TCD', 'CHL', 'CHN', 'CXR', 'CCK', 'COL', 'COM', 'COG', 'COD', 'COK', 'CRI', 'CIV', 'HRV', 'CUB', 'CUW', 'CYP', 'CZE', 'DNK', 'DJI', 'DMA', 'DOM', 'ECU', 'EGY', 'SLV', 'GNQ', 'ERI', 'EST', 'ETH', 'FLK', 'FRO', 'FJI', 'FIN', 'FRA', 'GUF', 'PYF', 'ATF', 'GAB', 'GMB', 'GEO', 'DEU', 'GHA', 'GIB', 'GRC', 'GRL', 'GRD', 'GLP', 'GUM', 'GTM', 'GGY', 'GIN', 'GNB', 'GUY', 'HTI', 'HMD', 'VAT', 'HND', 'HKG', 'HUN', 'ISL', 'IND', 'IDN', 'IRN', 'IRQ', 'IRL', 'IMN', 'ISR', 'ITA', 'JAM', 'JPN', 'JEY', 'JOR', 'KAZ', 'KEN', 'KIR', 'PRK', 'KOR', 'KWT', 'KGZ', 'LAO', 'LVA', 'LBN', 'LSO', 'LBR', 'LBY', 'LIE', 'LTU', 'LUX', 'MAC', 'MKD', 'MDG', 'MWI', 'MYS', 'MDV', 'MLI', 'MLT', 'MHL', 'MTQ', 'MRT', 'MUS', 'MYT', 'MEX', 'FSM', 'MDA', 'MCO', 'MNG', 'MNE', 'MSR', 'MAR', 'MOZ', 'MMR', 'NAM', 'NRU', 'NPL', 'NLD', 'NCL', 'NZL', 'NIC', 'NER', 'NGA', 'NIU', 'NFK', 'MNP', 'NOR', 'OMN', 'PAK', 'PLW', 'PSE', 'PAN', 'PNG', 'PRY', 'PER', 'PHL', 'PCN', 'POL', 'PRT', 'PRI', 'QAT', 'REU', 'ROU', 'RUS', 'RWA', 'BLM', 'SHN', 'KNA', 'LCA', 'MAF', 'SPM', 'VCT', 'WSM', 'SMR', 'STP', 'SAU', 'SEN', 'SRB', 'SYC', 'SLE', 'SGP', 'SXM', 'SVK', 'SVN', 'SLB', 'SOM', 'ZAF', 'SGS', 'SSD', 'ESP', 'LKA', 'SDN', 'SUR', 'SJM', 'SWZ', 'SWE', 'CHE', 'SYR', 'TWN', 'TJK', 'TZA', 'THA', 'TLS', 'TGO', 'TKL', 'TON', 'TTO', 'TUN', 'TUR', 'TKM', 'TCA', 'TUV', 'UGA', 'UKR', 'ARE', 'GBR', 'USA', 'UMI', 'URY', 'UZB', 'VUT', 'VEN', 'VNM', 'VGB', 'VIR', 'WLF', 'ESH', 'YEM', 'ZMB', 'ZWE']);
-
 function isISO31661Alpha3(str) {
   (0, _assertString.default)(str);
   return validISO31661Alpha3CountriesCodes.has(str.toUpperCase());
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],84:[function(require,module,exports){
+},{"./util/assertString":165}],109:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = isISO4217;
 exports.CurrencyCodes = void 0;
-
+exports.default = isISO4217;
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 // from https://en.wikipedia.org/wiki/ISO_4217
-var validISO4217CurrencyCodes = new Set(['AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BOV', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD', 'CAD', 'CDF', 'CHE', 'CHF', 'CHW', 'CLF', 'CLP', 'CNY', 'COP', 'COU', 'CRC', 'CUC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD', 'EGP', 'ERN', 'ETB', 'EUR', 'FJD', 'FKP', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 'HKD', 'HNL', 'HRK', 'HTG', 'HUF', 'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR', 'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LYD', 'MAD', 'MDL', 'MGA', 'MKD', 'MMK', 'MNT', 'MOP', 'MRU', 'MUR', 'MVR', 'MWK', 'MXN', 'MXV', 'MYR', 'MZN', 'NAD', 'NGN', 'NIO', 'NOK', 'NPR', 'NZD', 'OMR', 'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG', 'QAR', 'RON', 'RSD', 'RUB', 'RWF', 'SAR', 'SBD', 'SCR', 'SDG', 'SEK', 'SGD', 'SHP', 'SLL', 'SOS', 'SRD', 'SSP', 'STN', 'SVC', 'SYP', 'SZL', 'THB', 'TJS', 'TMT', 'TND', 'TOP', 'TRY', 'TTD', 'TWD', 'TZS', 'UAH', 'UGX', 'USD', 'USN', 'UYI', 'UYU', 'UYW', 'UZS', 'VES', 'VND', 'VUV', 'WST', 'XAF', 'XAG', 'XAU', 'XBA', 'XBB', 'XBC', 'XBD', 'XCD', 'XDR', 'XOF', 'XPD', 'XPF', 'XPT', 'XSU', 'XTS', 'XUA', 'XXX', 'YER', 'ZAR', 'ZMW', 'ZWL']);
-
+var validISO4217CurrencyCodes = new Set(['AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BOV', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD', 'CAD', 'CDF', 'CHE', 'CHF', 'CHW', 'CLF', 'CLP', 'CNY', 'COP', 'COU', 'CRC', 'CUC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD', 'EGP', 'ERN', 'ETB', 'EUR', 'FJD', 'FKP', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 'HKD', 'HNL', 'HRK', 'HTG', 'HUF', 'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR', 'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LYD', 'MAD', 'MDL', 'MGA', 'MKD', 'MMK', 'MNT', 'MOP', 'MRU', 'MUR', 'MVR', 'MWK', 'MXN', 'MXV', 'MYR', 'MZN', 'NAD', 'NGN', 'NIO', 'NOK', 'NPR', 'NZD', 'OMR', 'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG', 'QAR', 'RON', 'RSD', 'RUB', 'RWF', 'SAR', 'SBD', 'SCR', 'SDG', 'SEK', 'SGD', 'SHP', 'SLE', 'SLL', 'SOS', 'SRD', 'SSP', 'STN', 'SVC', 'SYP', 'SZL', 'THB', 'TJS', 'TMT', 'TND', 'TOP', 'TRY', 'TTD', 'TWD', 'TZS', 'UAH', 'UGX', 'USD', 'USN', 'UYI', 'UYU', 'UYW', 'UZS', 'VES', 'VND', 'VUV', 'WST', 'XAF', 'XAG', 'XAU', 'XBA', 'XBB', 'XBC', 'XBD', 'XCD', 'XDR', 'XOF', 'XPD', 'XPF', 'XPT', 'XSU', 'XTS', 'XUA', 'XXX', 'YER', 'ZAR', 'ZMW', 'ZWL']);
 function isISO4217(str) {
   (0, _assertString.default)(str);
   return validISO4217CurrencyCodes.has(str.toUpperCase());
 }
+var CurrencyCodes = exports.CurrencyCodes = validISO4217CurrencyCodes;
+},{"./util/assertString":165}],110:[function(require,module,exports){
+"use strict";
 
-var CurrencyCodes = validISO4217CurrencyCodes;
-exports.CurrencyCodes = CurrencyCodes;
-},{"./util/assertString":138}],85:[function(require,module,exports){
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.isFreightContainerID = void 0;
+exports.isISO6346 = isISO6346;
+var _assertString = _interopRequireDefault(require("./util/assertString"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+// https://en.wikipedia.org/wiki/ISO_6346
+// according to ISO6346 standard, checksum digit is mandatory for freight container but recommended
+// for other container types (J and Z)
+var isISO6346Str = /^[A-Z]{3}(U[0-9]{7})|([J,Z][0-9]{6,7})$/;
+var isDigit = /^[0-9]$/;
+function isISO6346(str) {
+  (0, _assertString.default)(str);
+  str = str.toUpperCase();
+  if (!isISO6346Str.test(str)) return false;
+  if (str.length === 11) {
+    var sum = 0;
+    for (var i = 0; i < str.length - 1; i++) {
+      if (!isDigit.test(str[i])) {
+        var convertedCode = void 0;
+        var letterCode = str.charCodeAt(i) - 55;
+        if (letterCode < 11) convertedCode = letterCode;else if (letterCode >= 11 && letterCode <= 20) convertedCode = 12 + letterCode % 11;else if (letterCode >= 21 && letterCode <= 30) convertedCode = 23 + letterCode % 21;else convertedCode = 34 + letterCode % 31;
+        sum += convertedCode * Math.pow(2, i);
+      } else sum += str[i] * Math.pow(2, i);
+    }
+    var checkSumDigit = sum % 11;
+    return Number(str[str.length - 1]) === checkSumDigit;
+  }
+  return true;
+}
+var isFreightContainerID = exports.isFreightContainerID = isISO6346;
+},{"./util/assertString":165}],111:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isISO6391;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var isISO6391Set = new Set(['aa', 'ab', 'ae', 'af', 'ak', 'am', 'an', 'ar', 'as', 'av', 'ay', 'az', 'az', 'ba', 'be', 'bg', 'bh', 'bi', 'bm', 'bn', 'bo', 'br', 'bs', 'ca', 'ce', 'ch', 'co', 'cr', 'cs', 'cu', 'cv', 'cy', 'da', 'de', 'dv', 'dz', 'ee', 'el', 'en', 'eo', 'es', 'et', 'eu', 'fa', 'ff', 'fi', 'fj', 'fo', 'fr', 'fy', 'ga', 'gd', 'gl', 'gn', 'gu', 'gv', 'ha', 'he', 'hi', 'ho', 'hr', 'ht', 'hu', 'hy', 'hz', 'ia', 'id', 'ie', 'ig', 'ii', 'ik', 'io', 'is', 'it', 'iu', 'ja', 'jv', 'ka', 'kg', 'ki', 'kj', 'kk', 'kl', 'km', 'kn', 'ko', 'kr', 'ks', 'ku', 'kv', 'kw', 'ky', 'la', 'lb', 'lg', 'li', 'ln', 'lo', 'lt', 'lu', 'lv', 'mg', 'mh', 'mi', 'mk', 'ml', 'mn', 'mr', 'ms', 'mt', 'my', 'na', 'nb', 'nd', 'ne', 'ng', 'nl', 'nn', 'no', 'nr', 'nv', 'ny', 'oc', 'oj', 'om', 'or', 'os', 'pa', 'pi', 'pl', 'ps', 'pt', 'qu', 'rm', 'rn', 'ro', 'ru', 'rw', 'sa', 'sc', 'sd', 'se', 'sg', 'si', 'sk', 'sl', 'sm', 'sn', 'so', 'sq', 'sr', 'ss', 'st', 'su', 'sv', 'sw', 'ta', 'te', 'tg', 'th', 'ti', 'tk', 'tl', 'tn', 'to', 'tr', 'ts', 'tt', 'tw', 'ty', 'ug', 'uk', 'ur', 'uz', 've', 'vi', 'vo', 'wa', 'wo', 'xh', 'yi', 'yo', 'za', 'zh', 'zu']);
-
 function isISO6391(str) {
   (0, _assertString.default)(str);
   return isISO6391Set.has(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],86:[function(require,module,exports){
+},{"./util/assertString":165}],112:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isISO8601;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /* eslint-disable max-len */
 // from http://goo.gl/0ejHHW
-var iso8601 = /^([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-3])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24:?00)([\.,]\d+(?!:))?)?(\17[0-5]\d([\.,]\d+)?)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$/; // same as above, except with a strict 'T' separator between date and time
-
+var iso8601 = /^([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-3])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24:?00)([\.,]\d+(?!:))?)?(\17[0-5]\d([\.,]\d+)?)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$/;
+// same as above, except with a strict 'T' separator between date and time
 var iso8601StrictSeparator = /^([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-3])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T]((([01]\d|2[0-3])((:?)[0-5]\d)?|24:?00)([\.,]\d+(?!:))?)?(\17[0-5]\d([\.,]\d+)?)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$/;
 /* eslint-enable max-len */
-
 var isValidDate = function isValidDate(str) {
   // str must have passed the ISO8601 check
   // this check is meant to catch invalid dates
   // like 2009-02-31
   // first check for ordinal dates
   var ordinalMatch = str.match(/^(\d{4})-?(\d{3})([ T]{1}\.*|$)/);
-
   if (ordinalMatch) {
     var oYear = Number(ordinalMatch[1]);
-    var oDay = Number(ordinalMatch[2]); // if is leap year
-
+    var oDay = Number(ordinalMatch[2]);
+    // if is leap year
     if (oYear % 4 === 0 && oYear % 100 !== 0 || oYear % 400 === 0) return oDay <= 366;
     return oDay <= 365;
   }
-
   var match = str.match(/(\d{4})-?(\d{0,2})-?(\d*)/).map(Number);
   var year = match[1];
   var month = match[2];
   var day = match[3];
   var monthString = month ? "0".concat(month).slice(-2) : month;
-  var dayString = day ? "0".concat(day).slice(-2) : day; // create a date object and compare
+  var dayString = day ? "0".concat(day).slice(-2) : day;
 
+  // create a date object and compare
   var d = new Date("".concat(year, "-").concat(monthString || '01', "-").concat(dayString || '01'));
-
   if (month && day) {
     return d.getUTCFullYear() === year && d.getUTCMonth() + 1 === month && d.getUTCDate() === day;
   }
-
   return true;
 };
-
 function isISO8601(str) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   (0, _assertString.default)(str);
@@ -13634,83 +15549,64 @@ function isISO8601(str) {
   if (check && options.strict) return isValidDate(str);
   return check;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],87:[function(require,module,exports){
+},{"./util/assertString":165}],113:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isISRC;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 // see http://isrc.ifpi.org/en/isrc-standard/code-syntax
 var isrc = /^[A-Z]{2}[0-9A-Z]{3}\d{2}\d{5}$/;
-
 function isISRC(str) {
   (0, _assertString.default)(str);
   return isrc.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],88:[function(require,module,exports){
+},{"./util/assertString":165}],114:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isISSN;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var issn = '^\\d{4}-?\\d{3}[\\dX]$';
-
 function isISSN(str) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   (0, _assertString.default)(str);
   var testIssn = issn;
   testIssn = options.require_hyphen ? testIssn.replace('?', '') : testIssn;
   testIssn = options.case_sensitive ? new RegExp(testIssn) : new RegExp(testIssn, 'i');
-
   if (!testIssn.test(str)) {
     return false;
   }
-
   var digits = str.replace('-', '').toUpperCase();
   var checksum = 0;
-
   for (var i = 0; i < digits.length; i++) {
     var digit = digits[i];
     checksum += (digit === 'X' ? 10 : +digit) * (8 - i);
   }
-
   return checksum % 11 === 0;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],89:[function(require,module,exports){
+},{"./util/assertString":165}],115:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isIdentityCard;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _isInt = _interopRequireDefault(require("./isInt"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var validators = {
   PL: function PL(str) {
     (0, _assertString.default)(str);
@@ -13727,7 +15623,6 @@ var validators = {
       10: 3,
       11: 0
     };
-
     if (str != null && str.length === 11 && (0, _isInt.default)(str, {
       allow_leading_zeroes: true
     })) {
@@ -13737,12 +15632,10 @@ var validators = {
       }, 0);
       var modulo = sum % 10;
       var lastDigit = Number(str.charAt(str.length - 1));
-
       if (modulo === 0 && lastDigit === 0 || lastDigit === 10 - modulo) {
         return true;
       }
     }
-
     return false;
   },
   ES: function ES(str) {
@@ -13753,15 +15646,17 @@ var validators = {
       Y: 1,
       Z: 2
     };
-    var controlDigits = ['T', 'R', 'W', 'A', 'G', 'M', 'Y', 'F', 'P', 'D', 'X', 'B', 'N', 'J', 'Z', 'S', 'Q', 'V', 'H', 'L', 'C', 'K', 'E']; // sanitize user input
+    var controlDigits = ['T', 'R', 'W', 'A', 'G', 'M', 'Y', 'F', 'P', 'D', 'X', 'B', 'N', 'J', 'Z', 'S', 'Q', 'V', 'H', 'L', 'C', 'K', 'E'];
 
-    var sanitized = str.trim().toUpperCase(); // validate the data structure
+    // sanitize user input
+    var sanitized = str.trim().toUpperCase();
 
+    // validate the data structure
     if (!DNI.test(sanitized)) {
       return false;
-    } // validate the control digit
+    }
 
-
+    // validate the control digit
     var number = sanitized.slice(0, -1).replace(/[X,Y,Z]/g, function (char) {
       return charsValue[char];
     });
@@ -13770,15 +15665,12 @@ var validators = {
   FI: function FI(str) {
     // https://dvv.fi/en/personal-identity-code#:~:text=control%20character%20for%20a-,personal,-identity%20code%20calculated
     (0, _assertString.default)(str);
-
     if (str.length !== 11) {
       return false;
     }
-
     if (!str.match(/^\d{6}[\-A\+]\d{3}[0-9ABCDEFHJKLMNPRSTUVWXY]{1}$/)) {
       return false;
     }
-
     var checkDigits = '0123456789ABCDEFHJKLMNPRSTUVWXY';
     var idAsNumber = parseInt(str.slice(0, 6), 10) * 1000 + parseInt(str.slice(7, 10), 10);
     var remainder = idAsNumber % 31;
@@ -13786,18 +15678,21 @@ var validators = {
     return checkDigit === str.slice(10, 11);
   },
   IN: function IN(str) {
-    var DNI = /^[1-9]\d{3}\s?\d{4}\s?\d{4}$/; // multiplication table
+    var DNI = /^[1-9]\d{3}\s?\d{4}\s?\d{4}$/;
 
-    var d = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 2, 3, 4, 0, 6, 7, 8, 9, 5], [2, 3, 4, 0, 1, 7, 8, 9, 5, 6], [3, 4, 0, 1, 2, 8, 9, 5, 6, 7], [4, 0, 1, 2, 3, 9, 5, 6, 7, 8], [5, 9, 8, 7, 6, 0, 4, 3, 2, 1], [6, 5, 9, 8, 7, 1, 0, 4, 3, 2], [7, 6, 5, 9, 8, 2, 1, 0, 4, 3], [8, 7, 6, 5, 9, 3, 2, 1, 0, 4], [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]]; // permutation table
+    // multiplication table
+    var d = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 2, 3, 4, 0, 6, 7, 8, 9, 5], [2, 3, 4, 0, 1, 7, 8, 9, 5, 6], [3, 4, 0, 1, 2, 8, 9, 5, 6, 7], [4, 0, 1, 2, 3, 9, 5, 6, 7, 8], [5, 9, 8, 7, 6, 0, 4, 3, 2, 1], [6, 5, 9, 8, 7, 1, 0, 4, 3, 2], [7, 6, 5, 9, 8, 2, 1, 0, 4, 3], [8, 7, 6, 5, 9, 3, 2, 1, 0, 4], [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]];
 
-    var p = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 5, 7, 6, 2, 8, 3, 0, 9, 4], [5, 8, 0, 3, 7, 9, 6, 1, 4, 2], [8, 9, 1, 6, 0, 4, 3, 5, 2, 7], [9, 4, 5, 3, 1, 2, 6, 8, 7, 0], [4, 2, 8, 6, 5, 7, 3, 9, 0, 1], [2, 7, 9, 3, 8, 0, 6, 4, 1, 5], [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]]; // sanitize user input
+    // permutation table
+    var p = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 5, 7, 6, 2, 8, 3, 0, 9, 4], [5, 8, 0, 3, 7, 9, 6, 1, 4, 2], [8, 9, 1, 6, 0, 4, 3, 5, 2, 7], [9, 4, 5, 3, 1, 2, 6, 8, 7, 0], [4, 2, 8, 6, 5, 7, 3, 9, 0, 1], [2, 7, 9, 3, 8, 0, 6, 4, 1, 5], [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]];
 
-    var sanitized = str.trim(); // validate the data structure
+    // sanitize user input
+    var sanitized = str.trim();
 
+    // validate the data structure
     if (!DNI.test(sanitized)) {
       return false;
     }
-
     var c = 0;
     var invertedArray = sanitized.replace(/\s/g, '').split('').map(Number).reverse();
     invertedArray.forEach(function (val, i) {
@@ -13811,26 +15706,24 @@ var validators = {
     if (parseInt(str.slice(3, 9), 10) === 0) return false;
     var lastNumber = parseInt(str.slice(9, 10), 10);
     var sum = 0;
-
     for (var i = 0; i < 9; i++) {
       sum += parseInt(str.slice(i, i + 1), 10) * (10 - i);
     }
-
     sum %= 11;
     return sum < 2 && lastNumber === sum || sum >= 2 && lastNumber === 11 - sum;
   },
   IT: function IT(str) {
     if (str.length !== 9) return false;
     if (str === 'CA00000AA') return false; // https://it.wikipedia.org/wiki/Carta_d%27identit%C3%A0_elettronica_italiana
-
-    return str.search(/C[A-Z][0-9]{5}[A-Z]{2}/i) > -1;
+    return str.search(/C[A-Z]\d{5}[A-Z]{2}/i) > -1;
   },
   NO: function NO(str) {
     var sanitized = str.trim();
     if (isNaN(Number(sanitized))) return false;
     if (sanitized.length !== 11) return false;
-    if (sanitized === '00000000000') return false; // https://no.wikipedia.org/wiki/F%C3%B8dselsnummer
+    if (sanitized === '00000000000') return false;
 
+    // https://no.wikipedia.org/wiki/F%C3%B8dselsnummer
     var f = sanitized.split('').map(Number);
     var k1 = (11 - (3 * f[0] + 7 * f[1] + 6 * f[2] + 1 * f[3] + 8 * f[4] + 9 * f[5] + 4 * f[6] + 5 * f[7] + 2 * f[8]) % 11) % 11;
     var k2 = (11 - (5 * f[0] + 4 * f[1] + 3 * f[2] + 2 * f[3] + 7 * f[4] + 6 * f[5] + 5 * f[6] + 4 * f[7] + 3 * f[8] + 2 * k1) % 11) % 11;
@@ -13838,14 +15731,13 @@ var validators = {
     return true;
   },
   TH: function TH(str) {
-    if (!str.match(/^[1-8]\d{12}$/)) return false; // validate check digit
+    if (!str.match(/^[1-8]\d{12}$/)) return false;
 
+    // validate check digit
     var sum = 0;
-
     for (var i = 0; i < 12; i++) {
       sum += parseInt(str[i], 10) * (13 - i);
     }
-
     return str[12] === ((11 - sum % 11) % 10).toString();
   },
   LK: function LK(str) {
@@ -13855,124 +15747,150 @@ var validators = {
     return false;
   },
   'he-IL': function heIL(str) {
-    var DNI = /^\d{9}$/; // sanitize user input
+    var DNI = /^\d{9}$/;
 
-    var sanitized = str.trim(); // validate the data structure
+    // sanitize user input
+    var sanitized = str.trim();
 
+    // validate the data structure
     if (!DNI.test(sanitized)) {
       return false;
     }
-
     var id = sanitized;
     var sum = 0,
-        incNum;
-
+      incNum;
     for (var i = 0; i < id.length; i++) {
       incNum = Number(id[i]) * (i % 2 + 1); // Multiply number by 1 or 2
-
       sum += incNum > 9 ? incNum - 9 : incNum; // Sum the digits up and add to total
     }
-
     return sum % 10 === 0;
   },
   'ar-LY': function arLY(str) {
     // Libya National Identity Number NIN is 12 digits, the first digit is either 1 or 2
-    var NIN = /^(1|2)\d{11}$/; // sanitize user input
+    var NIN = /^(1|2)\d{11}$/;
 
-    var sanitized = str.trim(); // validate the data structure
+    // sanitize user input
+    var sanitized = str.trim();
 
+    // validate the data structure
     if (!NIN.test(sanitized)) {
       return false;
     }
-
     return true;
   },
   'ar-TN': function arTN(str) {
-    var DNI = /^\d{8}$/; // sanitize user input
+    var DNI = /^\d{8}$/;
 
-    var sanitized = str.trim(); // validate the data structure
+    // sanitize user input
+    var sanitized = str.trim();
 
+    // validate the data structure
     if (!DNI.test(sanitized)) {
       return false;
     }
-
     return true;
   },
   'zh-CN': function zhCN(str) {
-    var provincesAndCities = ['11', // 北京
-    '12', // 天津
-    '13', // 河北
-    '14', // 山西
-    '15', // 内蒙古
-    '21', // 辽宁
-    '22', // 吉林
-    '23', // 黑龙江
-    '31', // 上海
-    '32', // 江苏
-    '33', // 浙江
-    '34', // 安徽
-    '35', // 福建
-    '36', // 江西
-    '37', // 山东
-    '41', // 河南
-    '42', // 湖北
-    '43', // 湖南
-    '44', // 广东
-    '45', // 广西
-    '46', // 海南
-    '50', // 重庆
-    '51', // 四川
-    '52', // 贵州
-    '53', // 云南
-    '54', // 西藏
-    '61', // 陕西
-    '62', // 甘肃
-    '63', // 青海
-    '64', // 宁夏
-    '65', // 新疆
-    '71', // 台湾
-    '81', // 香港
-    '82', // 澳门
+    var provincesAndCities = ['11',
+    // 北京
+    '12',
+    // 天津
+    '13',
+    // 河北
+    '14',
+    // 山西
+    '15',
+    // 内蒙古
+    '21',
+    // 辽宁
+    '22',
+    // 吉林
+    '23',
+    // 黑龙江
+    '31',
+    // 上海
+    '32',
+    // 江苏
+    '33',
+    // 浙江
+    '34',
+    // 安徽
+    '35',
+    // 福建
+    '36',
+    // 江西
+    '37',
+    // 山东
+    '41',
+    // 河南
+    '42',
+    // 湖北
+    '43',
+    // 湖南
+    '44',
+    // 广东
+    '45',
+    // 广西
+    '46',
+    // 海南
+    '50',
+    // 重庆
+    '51',
+    // 四川
+    '52',
+    // 贵州
+    '53',
+    // 云南
+    '54',
+    // 西藏
+    '61',
+    // 陕西
+    '62',
+    // 甘肃
+    '63',
+    // 青海
+    '64',
+    // 宁夏
+    '65',
+    // 新疆
+    '71',
+    // 台湾
+    '81',
+    // 香港
+    '82',
+    // 澳门
     '91' // 国外
     ];
     var powers = ['7', '9', '10', '5', '8', '4', '2', '1', '6', '3', '7', '9', '10', '5', '8', '4', '2'];
     var parityBit = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'];
-
     var checkAddressCode = function checkAddressCode(addressCode) {
       return provincesAndCities.includes(addressCode);
     };
-
     var checkBirthDayCode = function checkBirthDayCode(birDayCode) {
       var yyyy = parseInt(birDayCode.substring(0, 4), 10);
       var mm = parseInt(birDayCode.substring(4, 6), 10);
       var dd = parseInt(birDayCode.substring(6), 10);
       var xdata = new Date(yyyy, mm - 1, dd);
-
       if (xdata > new Date()) {
-        return false; // eslint-disable-next-line max-len
+        return false;
+        // eslint-disable-next-line max-len
       } else if (xdata.getFullYear() === yyyy && xdata.getMonth() === mm - 1 && xdata.getDate() === dd) {
         return true;
       }
-
       return false;
     };
-
     var getParityBit = function getParityBit(idCardNo) {
       var id17 = idCardNo.substring(0, 17);
       var power = 0;
-
       for (var i = 0; i < 17; i++) {
         power += parseInt(id17.charAt(i), 10) * parseInt(powers[i], 10);
       }
-
       var mod = power % 11;
       return parityBit[mod];
     };
-
     var checkParityBit = function checkParityBit(idCardNo) {
       return getParityBit(idCardNo) === idCardNo.charAt(17).toUpperCase();
     };
-
     var check15IdCardNo = function check15IdCardNo(idCardNo) {
       var check = /^[1-9]\d{7}((0[1-9])|(1[0-2]))((0[1-9])|([1-2][0-9])|(3[0-1]))\d{3}$/.test(idCardNo);
       if (!check) return false;
@@ -13984,7 +15902,6 @@ var validators = {
       if (!check) return false;
       return true;
     };
-
     var check18IdCardNo = function check18IdCardNo(idCardNo) {
       var check = /^[1-9]\d{5}[1-9]\d{3}((0[1-9])|(1[0-2]))((0[1-9])|([1-2][0-9])|(3[0-1]))\d{3}(\d|x|X)$/.test(idCardNo);
       if (!check) return false;
@@ -13996,40 +15913,36 @@ var validators = {
       if (!check) return false;
       return checkParityBit(idCardNo);
     };
-
     var checkIdCardNo = function checkIdCardNo(idCardNo) {
       var check = /^\d{15}|(\d{17}(\d|x|X))$/.test(idCardNo);
       if (!check) return false;
-
       if (idCardNo.length === 15) {
         return check15IdCardNo(idCardNo);
       }
-
       return check18IdCardNo(idCardNo);
     };
-
     return checkIdCardNo(str);
   },
   'zh-HK': function zhHK(str) {
     // sanitize user input
-    str = str.trim(); // HKID number starts with 1 or 2 letters, followed by 6 digits,
+    str = str.trim();
+
+    // HKID number starts with 1 or 2 letters, followed by 6 digits,
     // then a checksum contained in square / round brackets or nothing
-
     var regexHKID = /^[A-Z]{1,2}[0-9]{6}((\([0-9A]\))|(\[[0-9A]\])|([0-9A]))$/;
-    var regexIsDigit = /^[0-9]$/; // convert the user input to all uppercase and apply regex
+    var regexIsDigit = /^[0-9]$/;
 
+    // convert the user input to all uppercase and apply regex
     str = str.toUpperCase();
     if (!regexHKID.test(str)) return false;
     str = str.replace(/\[|\]|\(|\)/g, '');
     if (str.length === 8) str = "3".concat(str);
     var checkSumVal = 0;
-
     for (var i = 0; i <= 7; i++) {
       var convertedChar = void 0;
       if (!regexIsDigit.test(str[i])) convertedChar = (str[i].charCodeAt(0) - 55) % 11;else convertedChar = str[i];
       checkSumVal += convertedChar * (9 - i);
     }
-
     checkSumVal %= 11;
     var checkSumConverted;
     if (checkSumVal === 0) checkSumConverted = '0';else if (checkSumVal === 1) checkSumConverted = 'A';else checkSumConverted = String(11 - checkSumVal);
@@ -14072,19 +15985,15 @@ var validators = {
         var code = ALPHABET_CODES[number];
         return code % 10 * 9 + Math.floor(code / 10);
       }
-
       if (index === 9) {
         return (10 - sum % 10 - Number(number)) % 10 === 0;
       }
-
       return sum + Number(number) * (9 - index);
     }, 0);
   }
 };
-
 function isIdentityCard(str, locale) {
   (0, _assertString.default)(str);
-
   if (locale in validators) {
     return validators[locale](str);
   } else if (locale === 'any') {
@@ -14093,44 +16002,33 @@ function isIdentityCard(str, locale) {
       // istanbul ignore else
       if (validators.hasOwnProperty(key)) {
         var validator = validators[key];
-
         if (validator(str)) {
           return true;
         }
       }
     }
-
     return false;
   }
-
   throw new Error("Invalid locale '".concat(locale, "'"));
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./isInt":91,"./util/assertString":138}],90:[function(require,module,exports){
+},{"./isInt":117,"./util/assertString":165}],116:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isIn;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _toString = _interopRequireDefault(require("./util/toString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function isIn(str, options) {
   (0, _assertString.default)(str);
   var i;
-
   if (Object.prototype.toString.call(options) === '[object Array]') {
     var array = [];
-
     for (i in options) {
       // https://github.com/gotwarlost/istanbul/blob/master/ignoring-code-for-coverage.md#ignoring-code-for-coverage-purposes
       // istanbul ignore else
@@ -14138,138 +16036,108 @@ function isIn(str, options) {
         array[i] = (0, _toString.default)(options[i]);
       }
     }
-
     return array.indexOf(str) >= 0;
   } else if (_typeof(options) === 'object') {
     return options.hasOwnProperty(str);
   } else if (options && typeof options.indexOf === 'function') {
     return options.indexOf(str) >= 0;
   }
-
   return false;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138,"./util/toString":142}],91:[function(require,module,exports){
+},{"./util/assertString":165,"./util/toString":169}],117:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isInt;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var int = /^(?:[-+]?(?:0|[1-9][0-9]*))$/;
 var intLeadingZeroes = /^[-+]?[0-9]+$/;
-
 function isInt(str, options) {
   (0, _assertString.default)(str);
-  options = options || {}; // Get the regex to use for testing, based on whether
+  options = options || {};
+
+  // Get the regex to use for testing, based on whether
   // leading zeroes are allowed or not.
+  var regex = options.allow_leading_zeroes === false ? int : intLeadingZeroes;
 
-  var regex = options.hasOwnProperty('allow_leading_zeroes') && !options.allow_leading_zeroes ? int : intLeadingZeroes; // Check min/max/lt/gt
-
+  // Check min/max/lt/gt
   var minCheckPassed = !options.hasOwnProperty('min') || str >= options.min;
   var maxCheckPassed = !options.hasOwnProperty('max') || str <= options.max;
   var ltCheckPassed = !options.hasOwnProperty('lt') || str < options.lt;
   var gtCheckPassed = !options.hasOwnProperty('gt') || str > options.gt;
   return regex.test(str) && minCheckPassed && maxCheckPassed && ltCheckPassed && gtCheckPassed;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],92:[function(require,module,exports){
+},{"./util/assertString":165}],118:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isJSON;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 var default_json_options = {
   allow_primitives: false
 };
-
 function isJSON(str, options) {
   (0, _assertString.default)(str);
-
   try {
     options = (0, _merge.default)(options, default_json_options);
     var primitives = [];
-
     if (options.allow_primitives) {
       primitives = [null, false, true];
     }
-
     var obj = JSON.parse(str);
     return primitives.includes(obj) || !!obj && _typeof(obj) === 'object';
-  } catch (e) {
-    /* ignore */
-  }
-
+  } catch (e) {/* ignore */}
   return false;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138,"./util/merge":140}],93:[function(require,module,exports){
+},{"./util/assertString":165,"./util/merge":167}],119:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isJWT;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _isBase = _interopRequireDefault(require("./isBase64"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isJWT(str) {
   (0, _assertString.default)(str);
   var dotSplit = str.split('.');
   var len = dotSplit.length;
-
-  if (len > 3 || len < 2) {
+  if (len !== 3) {
     return false;
   }
-
   return dotSplit.reduce(function (acc, currElem) {
     return acc && (0, _isBase.default)(currElem, {
       urlSafe: true
     });
   }, true);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./isBase64":53,"./util/assertString":138}],94:[function(require,module,exports){
+},{"./isBase64":78,"./util/assertString":165}],120:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isLatLong;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var lat = /^\(?[+-]?(90(\.0+)?|[1-8]?\d(\.\d+)?)$/;
 var long = /^\s?[+-]?(180(\.0+)?|1[0-7]\d(\.\d+)?|\d{1,2}(\.\d+)?)\)?$/;
 var latDMS = /^(([1-8]?\d)\D+([1-5]?\d|60)\D+([1-5]?\d|60)(\.\d+)?|90\D+0\D+0)\D+[NSns]?$/i;
@@ -14277,43 +16145,34 @@ var longDMS = /^\s*([1-7]?\d{1,2}\D+([1-5]?\d|60)\D+([1-5]?\d|60)(\.\d+)?|180\D+
 var defaultLatLongOptions = {
   checkDMS: false
 };
-
 function isLatLong(str, options) {
   (0, _assertString.default)(str);
   options = (0, _merge.default)(options, defaultLatLongOptions);
   if (!str.includes(',')) return false;
   var pair = str.split(',');
   if (pair[0].startsWith('(') && !pair[1].endsWith(')') || pair[1].endsWith(')') && !pair[0].startsWith('(')) return false;
-
   if (options.checkDMS) {
     return latDMS.test(pair[0]) && longDMS.test(pair[1]);
   }
-
   return lat.test(pair[0]) && long.test(pair[1]);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138,"./util/merge":140}],95:[function(require,module,exports){
+},{"./util/assertString":165,"./util/merge":167}],121:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isLength;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 /* eslint-disable prefer-rest-params */
 function isLength(str, options) {
   (0, _assertString.default)(str);
   var min;
   var max;
-
   if (_typeof(options) === 'object') {
     min = options.min || 0;
     max = options.max;
@@ -14322,27 +16181,22 @@ function isLength(str, options) {
     min = arguments[1] || 0;
     max = arguments[2];
   }
-
   var presentationSequences = str.match(/(\uFE0F|\uFE0E)/g) || [];
   var surrogatePairs = str.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g) || [];
   var len = str.length - presentationSequences.length - surrogatePairs.length;
   return len >= min && (typeof max === 'undefined' || len <= max);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],96:[function(require,module,exports){
+},{"./util/assertString":165}],122:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isLicensePlate;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var validators = {
   'cs-CZ': function csCZ(str) {
     return /^(([ABCDEFHIJKLMNPRSTUVXYZ]|[0-9])-?){5,8}$/.test(str);
@@ -14376,89 +16230,169 @@ var validators = {
   },
   'sv-SE': function svSE(str) {
     return /^[A-HJ-PR-UW-Z]{3} ?[\d]{2}[A-HJ-PR-UW-Z1-9]$|(^[A-ZÅÄÖ ]{2,7}$)/.test(str.trim());
+  },
+  'en-PK': function enPK(str) {
+    return /(^[A-Z]{2}((\s|-){0,1})[0-9]{3,4}((\s|-)[0-9]{2}){0,1}$)|(^[A-Z]{3}((\s|-){0,1})[0-9]{3,4}((\s|-)[0-9]{2}){0,1}$)|(^[A-Z]{4}((\s|-){0,1})[0-9]{3,4}((\s|-)[0-9]{2}){0,1}$)|(^[A-Z]((\s|-){0,1})[0-9]{4}((\s|-)[0-9]{2}){0,1}$)/.test(str.trim());
   }
 };
-
 function isLicensePlate(str, locale) {
   (0, _assertString.default)(str);
-
   if (locale in validators) {
     return validators[locale](str);
   } else if (locale === 'any') {
     for (var key in validators) {
       /* eslint guard-for-in: 0 */
       var validator = validators[key];
-
       if (validator(str)) {
         return true;
       }
     }
-
     return false;
   }
-
   throw new Error("Invalid locale '".concat(locale, "'"));
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],97:[function(require,module,exports){
+},{"./util/assertString":165}],123:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isLocale;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+/*
+  = 3ALPHA              ; selected ISO 639 codes
+    *2("-" 3ALPHA)      ; permanently reserved
+ */
+var extlang = '([A-Za-z]{3}(-[A-Za-z]{3}){0,2})';
 
-var localeReg = /^[A-Za-z]{2,4}([_-]([A-Za-z]{4}|[\d]{3}))?([_-]([A-Za-z]{2}|[\d]{3}))?$/;
+/*
+  = 2*3ALPHA            ; shortest ISO 639 code
+    ["-" extlang]       ; sometimes followed by
+                        ; extended language subtags
+  / 4ALPHA              ; or reserved for future use
+  / 5*8ALPHA            ; or registered language subtag
+ */
+var language = "(([a-zA-Z]{2,3}(-".concat(extlang, ")?)|([a-zA-Z]{5,8}))");
 
+/*
+  = 4ALPHA              ; ISO 15924 code
+ */
+var script = '([A-Za-z]{4})';
+
+/*
+  = 2ALPHA              ; ISO 3166-1 code
+  / 3DIGIT              ; UN M.49 code
+ */
+var region = '([A-Za-z]{2}|\\d{3})';
+
+/*
+  = 5*8alphanum         ; registered variants
+  / (DIGIT 3alphanum)
+ */
+var variant = '([A-Za-z0-9]{5,8}|(\\d[A-Z-a-z0-9]{3}))';
+
+/*
+  = DIGIT               ; 0 - 9
+  / %x41-57             ; A - W
+  / %x59-5A             ; Y - Z
+  / %x61-77             ; a - w
+  / %x79-7A             ; y - z
+ */
+var singleton = '(\\d|[A-W]|[Y-Z]|[a-w]|[y-z])';
+
+/*
+  = singleton 1*("-" (2*8alphanum))
+                        ; Single alphanumerics
+                        ; "x" reserved for private use
+ */
+var extension = "(".concat(singleton, "(-[A-Za-z0-9]{2,8})+)");
+
+/*
+  = "x" 1*("-" (1*8alphanum))
+ */
+var privateuse = '(x(-[A-Za-z0-9]{1,8})+)';
+
+// irregular tags do not match the 'langtag' production and would not
+// otherwise be considered 'well-formed'. These tags are all valid, but
+// most are deprecated in favor of more modern subtags or subtag combination
+
+var irregular = '((en-GB-oed)|(i-ami)|(i-bnn)|(i-default)|(i-enochian)|' + '(i-hak)|(i-klingon)|(i-lux)|(i-mingo)|(i-navajo)|(i-pwn)|(i-tao)|' + '(i-tay)|(i-tsu)|(sgn-BE-FR)|(sgn-BE-NL)|(sgn-CH-DE))';
+
+// regular tags match the 'langtag' production, but their subtags are not
+// extended language or variant subtags: their meaning is defined by
+// their registration and all of these are deprecated in favor of a more
+// modern subtag or sequence of subtags
+
+var regular = '((art-lojban)|(cel-gaulish)|(no-bok)|(no-nyn)|(zh-guoyu)|' + '(zh-hakka)|(zh-min)|(zh-min-nan)|(zh-xiang))';
+
+/*
+  = irregular           ; non-redundant tags registered
+  / regular             ; during the RFC 3066 era
+
+ */
+var grandfathered = "(".concat(irregular, "|").concat(regular, ")");
+
+/*
+  RFC 5646 defines delimitation of subtags via a hyphen:
+
+      "Subtag" refers to a specific section of a tag, delimited by a
+      hyphen, such as the subtags 'zh', 'Hant', and 'CN' in the tag "zh-
+      Hant-CN".  Examples of subtags in this document are enclosed in
+      single quotes ('Hant')
+
+  However, we need to add "_" to maintain the existing behaviour.
+ */
+var delimiter = '(-|_)';
+
+/*
+  = language
+    ["-" script]
+    ["-" region]
+    *("-" variant)
+    *("-" extension)
+    ["-" privateuse]
+ */
+var langtag = "".concat(language, "(").concat(delimiter).concat(script, ")?(").concat(delimiter).concat(region, ")?(").concat(delimiter).concat(variant, ")*(").concat(delimiter).concat(extension, ")*(").concat(delimiter).concat(privateuse, ")?");
+
+/*
+  Regex implementation based on BCP RFC 5646
+  Tags for Identifying Languages
+  https://www.rfc-editor.org/rfc/rfc5646.html
+ */
+var languageTagRegex = new RegExp("(^".concat(privateuse, "$)|(^").concat(grandfathered, "$)|(^").concat(langtag, "$)"));
 function isLocale(str) {
   (0, _assertString.default)(str);
-
-  if (str === 'en_US_POSIX' || str === 'ca_ES_VALENCIA') {
-    return true;
-  }
-
-  return localeReg.test(str);
+  return languageTagRegex.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],98:[function(require,module,exports){
+},{"./util/assertString":165}],124:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isLowercase;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isLowercase(str) {
   (0, _assertString.default)(str);
   return str === str.toLowerCase();
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],99:[function(require,module,exports){
+},{"./util/assertString":165}],125:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isLuhnNumber;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isLuhnNumber(str) {
   (0, _assertString.default)(str);
   var sanitized = str.replace(/[- ]+/g, '');
@@ -14466,14 +16400,11 @@ function isLuhnNumber(str) {
   var digit;
   var tmpNum;
   var shouldDouble;
-
   for (var i = sanitized.length - 1; i >= 0; i--) {
     digit = sanitized.substring(i, i + 1);
     tmpNum = parseInt(digit, 10);
-
     if (shouldDouble) {
       tmpNum *= 2;
-
       if (tmpNum >= 10) {
         sum += tmpNum % 10 + 1;
       } else {
@@ -14482,133 +16413,187 @@ function isLuhnNumber(str) {
     } else {
       sum += tmpNum;
     }
-
     shouldDouble = !shouldDouble;
   }
-
   return !!(sum % 10 === 0 ? sanitized : false);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],100:[function(require,module,exports){
+},{"./util/assertString":165}],126:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isMACAddress;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var macAddress48 = /^(?:[0-9a-fA-F]{2}([-:\s]))([0-9a-fA-F]{2}\1){4}([0-9a-fA-F]{2})$/;
 var macAddress48NoSeparators = /^([0-9a-fA-F]){12}$/;
 var macAddress48WithDots = /^([0-9a-fA-F]{4}\.){2}([0-9a-fA-F]{4})$/;
 var macAddress64 = /^(?:[0-9a-fA-F]{2}([-:\s]))([0-9a-fA-F]{2}\1){6}([0-9a-fA-F]{2})$/;
 var macAddress64NoSeparators = /^([0-9a-fA-F]){16}$/;
 var macAddress64WithDots = /^([0-9a-fA-F]{4}\.){3}([0-9a-fA-F]{4})$/;
-
 function isMACAddress(str, options) {
   (0, _assertString.default)(str);
-
   if (options !== null && options !== void 0 && options.eui) {
     options.eui = String(options.eui);
   }
   /**
    * @deprecated `no_colons` TODO: remove it in the next major
   */
-
-
   if (options !== null && options !== void 0 && options.no_colons || options !== null && options !== void 0 && options.no_separators) {
     if (options.eui === '48') {
       return macAddress48NoSeparators.test(str);
     }
-
     if (options.eui === '64') {
       return macAddress64NoSeparators.test(str);
     }
-
     return macAddress48NoSeparators.test(str) || macAddress64NoSeparators.test(str);
   }
-
   if ((options === null || options === void 0 ? void 0 : options.eui) === '48') {
     return macAddress48.test(str) || macAddress48WithDots.test(str);
   }
-
   if ((options === null || options === void 0 ? void 0 : options.eui) === '64') {
     return macAddress64.test(str) || macAddress64WithDots.test(str);
   }
-
   return isMACAddress(str, {
     eui: '48'
   }) || isMACAddress(str, {
     eui: '64'
   });
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],101:[function(require,module,exports){
+},{"./util/assertString":165}],127:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isMD5;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var md5 = /^[a-f0-9]{32}$/;
-
 function isMD5(str) {
   (0, _assertString.default)(str);
   return md5.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],102:[function(require,module,exports){
+},{"./util/assertString":165}],128:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isMagnetURI;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var magnetURIComponent = /(?:^magnet:\?|[^?&]&)xt(?:\.1)?=urn:(?:(?:aich|bitprint|btih|ed2k|ed2khash|kzhash|md5|sha1|tree:tiger):[a-z0-9]{32}(?:[a-z0-9]{8})?|btmh:1220[a-z0-9]{64})(?:$|&)/i;
-
 function isMagnetURI(url) {
   (0, _assertString.default)(url);
-
   if (url.indexOf('magnet:?') !== 0) {
     return false;
   }
-
   return magnetURIComponent.test(url);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],103:[function(require,module,exports){
+},{"./util/assertString":165}],129:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = isMailtoURI;
+var _trim = _interopRequireDefault(require("./trim"));
+var _isEmail = _interopRequireDefault(require("./isEmail"));
+var _assertString = _interopRequireDefault(require("./util/assertString"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+function parseMailtoQueryString(queryString) {
+  var allowedParams = new Set(['subject', 'body', 'cc', 'bcc']),
+    query = {
+      cc: '',
+      bcc: ''
+    };
+  var isParseFailed = false;
+  var queryParams = queryString.split('&');
+  if (queryParams.length > 4) {
+    return false;
+  }
+  var _iterator = _createForOfIteratorHelper(queryParams),
+    _step;
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var q = _step.value;
+      var _q$split = q.split('='),
+        _q$split2 = _slicedToArray(_q$split, 2),
+        key = _q$split2[0],
+        value = _q$split2[1];
+
+      // checked for invalid and duplicated query params
+      if (key && !allowedParams.has(key)) {
+        isParseFailed = true;
+        break;
+      }
+      if (value && (key === 'cc' || key === 'bcc')) {
+        query[key] = value;
+      }
+      if (key) {
+        allowedParams.delete(key);
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+  return isParseFailed ? false : query;
+}
+function isMailtoURI(url, options) {
+  (0, _assertString.default)(url);
+  if (url.indexOf('mailto:') !== 0) {
+    return false;
+  }
+  var _url$replace$split = url.replace('mailto:', '').split('?'),
+    _url$replace$split2 = _slicedToArray(_url$replace$split, 2),
+    to = _url$replace$split2[0],
+    _url$replace$split2$ = _url$replace$split2[1],
+    queryString = _url$replace$split2$ === void 0 ? '' : _url$replace$split2$;
+  if (!to && !queryString) {
+    return true;
+  }
+  var query = parseMailtoQueryString(queryString);
+  if (!query) {
+    return false;
+  }
+  return "".concat(to, ",").concat(query.cc, ",").concat(query.bcc).split(',').every(function (email) {
+    email = (0, _trim.default)(email, ' ');
+    if (email) {
+      return (0, _isEmail.default)(email, options);
+    }
+    return true;
+  });
+}
+module.exports = exports.default;
+module.exports.default = exports.default;
+},{"./isEmail":90,"./trim":162,"./util/assertString":165}],130:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isMimeType;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /*
   Checks if the provided string matches to a correct Media type format (MIME type)
 
@@ -14630,26 +16615,26 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   - https://tools.ietf.org/html/rfc7231#section-3.1.1.1
   - https://tools.ietf.org/html/rfc7231#section-3.1.1.5
 */
+
 // Match simple MIME types
 // NB :
 //   Subtype length must not exceed 100 characters.
 //   This rule does not comply to the RFC specs (what is the max length ?).
 var mimeTypeSimple = /^(application|audio|font|image|message|model|multipart|text|video)\/[a-zA-Z0-9\.\-\+_]{1,100}$/i; // eslint-disable-line max-len
+
 // Handle "charset" in "text/*"
-
 var mimeTypeText = /^text\/[a-zA-Z0-9\.\-\+]{1,100};\s?charset=("[a-zA-Z0-9\.\-\+\s]{0,70}"|[a-zA-Z0-9\.\-\+]{0,70})(\s?\([a-zA-Z0-9\.\-\+\s]{1,20}\))?$/i; // eslint-disable-line max-len
-// Handle "boundary" in "multipart/*"
 
+// Handle "boundary" in "multipart/*"
 var mimeTypeMultipart = /^multipart\/[a-zA-Z0-9\.\-\+]{1,100}(;\s?(boundary|charset)=("[a-zA-Z0-9\.\-\+\s]{0,70}"|[a-zA-Z0-9\.\-\+]{0,70})(\s?\([a-zA-Z0-9\.\-\+\s]{1,20}\))?){0,2}$/i; // eslint-disable-line max-len
 
 function isMimeType(str) {
   (0, _assertString.default)(str);
   return mimeTypeSimple.test(str) || mimeTypeText.test(str) || mimeTypeMultipart.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],104:[function(require,module,exports){
+},{"./util/assertString":165}],131:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14657,14 +16642,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = isMobilePhone;
 exports.locales = void 0;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /* eslint-disable max-len */
 var phones = {
-  'am-AM': /^(\+?374|0)((10|[9|7][0-9])\d{6}$|[2-4]\d{7}$)/,
+  'am-AM': /^(\+?374|0)(33|4[134]|55|77|88|9[13-689])\d{6}$/,
   'ar-AE': /^((\+?971)|0)?5[024568]\d{7}$/,
   'ar-BH': /^(\+?973)?(3|6)\d{7}$/,
   'ar-DZ': /^(\+?213|0)(5|6|7)\d{8}$/,
@@ -14678,6 +16660,7 @@ var phones = {
   'ar-OM': /^((\+|00)968)?(9[1-9])\d{6}$/,
   'ar-PS': /^(\+?970|0)5[6|9](\d{7})$/,
   'ar-SA': /^(!?(\+?966)|0)?5\d{8}$/,
+  'ar-SD': /^((\+?249)|0)?(9[012369]|1[012])\d{7}$/,
   'ar-SY': /^(!?(\+?963)|0)?9\d{8}$/,
   'ar-TN': /^(\+?216)?[2459]\d{7}$/,
   'az-AZ': /^(\+994|0)(10|5[015]|7[07]|99)\d{7}$/,
@@ -14710,12 +16693,14 @@ var phones = {
   'en-IN': /^(\+?91|0)?[6789]\d{9}$/,
   'en-JM': /^(\+?876)?\d{7}$/,
   'en-KE': /^(\+?254|0)(7|1)\d{8}$/,
+  'fr-CF': /^(\+?236| ?)(70|75|77|72|21|22)\d{6}$/,
   'en-SS': /^(\+?211|0)(9[1257])\d{7}$/,
   'en-KI': /^((\+686|686)?)?( )?((6|7)(2|3|8)[0-9]{6})$/,
   'en-KN': /^(?:\+1|1)869(?:46\d|48[89]|55[6-8]|66\d|76[02-7])\d{4}$/,
   'en-LS': /^(\+?266)(22|28|57|58|59|27|52)\d{6}$/,
   'en-MT': /^(\+?356|0)?(99|79|77|21|27|22|25)[0-9]{6}$/,
   'en-MU': /^(\+?230|0)?\d{8}$/,
+  'en-MW': /^(\+?265|0)(((77|88|31|99|98|21)\d{7})|(((111)|1)\d{6})|(32000\d{4}))$/,
   'en-NA': /^(\+?264|0)(6|8)\d{7}$/,
   'en-NG': /^(\+?234|0)?[789]\d{9}$/,
   'en-NZ': /^(\+?64|0)[28]\d{7,9}$/,
@@ -14737,7 +16722,7 @@ var phones = {
   'es-CO': /^(\+?57)?3(0(0|1|2|4|5)|1\d|2[0-4]|5(0|1))\d{7}$/,
   'es-CL': /^(\+?56|0)[2-9]\d{1}\d{7}$/,
   'es-CR': /^(\+506)?[2-8]\d{7}$/,
-  'es-CU': /^(\+53|0053)?5\d{7}/,
+  'es-CU': /^(\+53|0053)?5\d{7}$/,
   'es-DO': /^(\+?1)?8[024]9\d{7}$/,
   'es-HN': /^(\+?504)?[9|8|3|2]\d{7}$/,
   'es-EC': /^(\+?593|0)([2-7]|9[2-9])\d{7}$/,
@@ -14765,6 +16750,7 @@ var phones = {
   'fr-MQ': /^(\+?596|0|00596)[67]\d{8}$/,
   'fr-PF': /^(\+?689)?8[789]\d{6}$/,
   'fr-RE': /^(\+?262|0|00262)[67]\d{8}$/,
+  'fr-WF': /^(\+681)?\d{6}$/,
   'he-IL': /^(\+972|0)([23489]|5[012345689]|77)[1-9]\d{6}$/,
   'hu-HU': /^(\+?36|06)(20|30|31|50|70)\d{7}$/,
   'id-ID': /^(\+?62|0)8(1[123456789]|2[1238]|3[1238]|5[12356789]|7[78]|9[56789]|8[123456789])([\s?|\d]{5,11})$/,
@@ -14790,7 +16776,7 @@ var phones = {
   'nl-NL': /^(((\+|00)?31\(0\))|((\+|00)?31)|0)6{1}\d{8}$/,
   'nl-AW': /^(\+)?297(56|59|64|73|74|99)\d{5}$/,
   'nn-NO': /^(\+?47)?[49]\d{7}$/,
-  'pl-PL': /^(\+?48)? ?[5-8]\d ?\d{3} ?\d{2} ?\d{2}$/,
+  'pl-PL': /^(\+?48)? ?([5-8]\d|45) ?\d{3} ?\d{2} ?\d{2}$/,
   'pt-BR': /^((\+?55\ ?[1-9]{2}\ ?)|(\+?55\ ?\([1-9]{2}\)\ ?)|(0[1-9]{2}\ ?)|(\([1-9]{2}\)\ ?)|([1-9]{2}\ ?))((\d{4}\-?\d{4})|(9[1-9]{1}\d{3}\-?\d{4}))$/,
   'pt-PT': /^(\+?351)?9[1236]\d{7}$/,
   'pt-AO': /^(\+244)\d{9}$/,
@@ -14800,6 +16786,7 @@ var phones = {
   'si-LK': /^(?:0|94|\+94)?(7(0|1|2|4|5|6|7|8)( |-)?)\d{7}$/,
   'sl-SI': /^(\+386\s?|0)(\d{1}\s?\d{3}\s?\d{2}\s?\d{2}|\d{2}\s?\d{3}\s?\d{3})$/,
   'sk-SK': /^(\+?421)? ?[1-9][0-9]{2} ?[0-9]{3} ?[0-9]{3}$/,
+  'so-SO': /^(\+?252|0)((6[0-9])\d{7}|(7[1-9])\d{7})$/,
   'sq-AL': /^(\+355|0)6[789]\d{6}$/,
   'sr-RS': /^(\+3816|06)[- \d]{5,9}$/,
   'sv-SE': /^(\+?46|0)[\s\-]?7[\s\-]?[02369]([\s\-]?\d){7}$/,
@@ -14818,8 +16805,8 @@ var phones = {
   'fa-AF': /^(\+93|0)?(2{1}[0-8]{1}|[3-5]{1}[0-4]{1})(\d{7})$/
 };
 /* eslint-enable max-len */
-// aliases
 
+// aliases
 phones['en-CA'] = phones['en-US'];
 phones['fr-CA'] = phones['en-CA'];
 phones['fr-BE'] = phones['nl-BE'];
@@ -14828,83 +16815,66 @@ phones['zh-MO'] = phones['en-MO'];
 phones['ga-IE'] = phones['en-IE'];
 phones['fr-CH'] = phones['de-CH'];
 phones['it-CH'] = phones['fr-CH'];
-
 function isMobilePhone(str, locale, options) {
   (0, _assertString.default)(str);
-
   if (options && options.strictMode && !str.startsWith('+')) {
     return false;
   }
-
   if (Array.isArray(locale)) {
     return locale.some(function (key) {
       // https://github.com/gotwarlost/istanbul/blob/master/ignoring-code-for-coverage.md#ignoring-code-for-coverage-purposes
       // istanbul ignore else
       if (phones.hasOwnProperty(key)) {
         var phone = phones[key];
-
         if (phone.test(str)) {
           return true;
         }
       }
-
       return false;
     });
   } else if (locale in phones) {
-    return phones[locale].test(str); // alias falsey locale as 'any'
+    return phones[locale].test(str);
+    // alias falsey locale as 'any'
   } else if (!locale || locale === 'any') {
     for (var key in phones) {
       // istanbul ignore else
       if (phones.hasOwnProperty(key)) {
         var phone = phones[key];
-
         if (phone.test(str)) {
           return true;
         }
       }
     }
-
     return false;
   }
-
   throw new Error("Invalid locale '".concat(locale, "'"));
 }
-
-var locales = Object.keys(phones);
-exports.locales = locales;
-},{"./util/assertString":138}],105:[function(require,module,exports){
+var locales = exports.locales = Object.keys(phones);
+},{"./util/assertString":165}],132:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isMongoId;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _isHexadecimal = _interopRequireDefault(require("./isHexadecimal"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isMongoId(str) {
   (0, _assertString.default)(str);
   return (0, _isHexadecimal.default)(str) && str.length === 24;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./isHexadecimal":75,"./util/assertString":138}],106:[function(require,module,exports){
+},{"./isHexadecimal":100,"./util/assertString":165}],133:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isMultibyte;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /* eslint-disable no-control-regex */
 var multibyte = /[^\x00-\x7F]/;
 /* eslint-enable no-control-regex */
@@ -14913,70 +16883,53 @@ function isMultibyte(str) {
   (0, _assertString.default)(str);
   return multibyte.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],107:[function(require,module,exports){
+},{"./util/assertString":165}],134:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isNumeric;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _alpha = require("./alpha");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var numericNoSymbols = /^[0-9]+$/;
-
 function isNumeric(str, options) {
   (0, _assertString.default)(str);
-
   if (options && options.no_symbols) {
     return numericNoSymbols.test(str);
   }
-
   return new RegExp("^[+-]?([0-9]*[".concat((options || {}).locale ? _alpha.decimal[options.locale] : '.', "])?[0-9]+$")).test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./alpha":41,"./util/assertString":138}],108:[function(require,module,exports){
+},{"./alpha":65,"./util/assertString":165}],135:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isOctal;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var octal = /^(0o)?[0-7]+$/i;
-
 function isOctal(str) {
   (0, _assertString.default)(str);
   return octal.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],109:[function(require,module,exports){
+},{"./util/assertString":165}],136:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isPassportNumber;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /**
  * Reference:
  * https://en.wikipedia.org/ -- Wikipedia
@@ -14992,7 +16945,7 @@ var passportRegexByCountryCode = {
   // AUSTRIA
   AU: /^[A-Z]\d{7}$/,
   // AUSTRALIA
-  AZ: /^[A-Z]{2,3}\d{7,8}$/,
+  AZ: /^[A-Z]{1}\d{8}$/,
   // AZERBAIJAN
   BE: /^[A-Z]{2}\d{6}$/,
   // BELGIUM
@@ -15100,9 +17053,11 @@ var passportRegexByCountryCode = {
   // TURKEY
   UA: /^[A-Z]{2}\d{6}$/,
   // UKRAINE
-  US: /^\d{9}$/ // UNITED STATES
-
+  US: /^\d{9}$/,
+  // UNITED STATES
+  ZA: /^[TAMD]\d{8}$/ // SOUTH AFRICA
 };
+
 /**
  * Check if str is a valid passport number
  * relative to provided ISO Country Code.
@@ -15111,39 +17066,33 @@ var passportRegexByCountryCode = {
  * @param {string} countryCode
  * @return {boolean}
  */
-
 function isPassportNumber(str, countryCode) {
   (0, _assertString.default)(str);
   /** Remove All Whitespaces, Convert to UPPERCASE */
-
   var normalizedStr = str.replace(/\s/g, '').toUpperCase();
   return countryCode.toUpperCase() in passportRegexByCountryCode && passportRegexByCountryCode[countryCode].test(normalizedStr);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],110:[function(require,module,exports){
+},{"./util/assertString":165}],137:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isPort;
-
 var _isInt = _interopRequireDefault(require("./isInt"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isPort(str) {
   return (0, _isInt.default)(str, {
+    allow_leading_zeroes: false,
     min: 0,
     max: 65535
   });
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./isInt":91}],111:[function(require,module,exports){
+},{"./isInt":117}],138:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15151,11 +17100,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = isPostalCode;
 exports.locales = void 0;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 // common patterns
 var threeDigit = /^\d{3}$/;
 var fourDigit = /^\d{4}$/;
@@ -15207,7 +17153,7 @@ var patterns = {
   MX: fiveDigit,
   MT: /^[A-Za-z]{3}\s{0,1}\d{4}$/,
   MY: fiveDigit,
-  NL: /^\d{4}\s?[a-z]{2}$/i,
+  NL: /^[1-9]\d{3}\s?(?!sa|sd|ss)[a-z]{2}$/i,
   NO: fourDigit,
   NP: /^(10|21|22|32|33|34|44|45|56|57)\d{3}$|^(977)$/i,
   NZ: fourDigit,
@@ -15229,12 +17175,9 @@ var patterns = {
   ZA: fourDigit,
   ZM: fiveDigit
 };
-var locales = Object.keys(patterns);
-exports.locales = locales;
-
+var locales = exports.locales = Object.keys(patterns);
 function isPostalCode(str, locale) {
   (0, _assertString.default)(str);
-
   if (locale in patterns) {
     return patterns[locale].test(str);
   } else if (locale === 'any') {
@@ -15243,31 +17186,26 @@ function isPostalCode(str, locale) {
       // istanbul ignore else
       if (patterns.hasOwnProperty(key)) {
         var pattern = patterns[key];
-
         if (pattern.test(str)) {
           return true;
         }
       }
     }
-
     return false;
   }
-
   throw new Error("Invalid locale '".concat(locale, "'"));
 }
-},{"./util/assertString":138}],112:[function(require,module,exports){
+},{"./util/assertString":165}],139:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isRFC3339;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /* Based on https://tools.ietf.org/html/rfc3339#section-5.6 */
+
 var dateFullYear = /[0-9]{4}/;
 var dateMonth = /(0[1-9]|1[0-2])/;
 var dateMDay = /([12]\d|0[1-9]|3[01])/;
@@ -15281,58 +17219,45 @@ var partialTime = new RegExp("".concat(timeHour.source, ":").concat(timeMinute.s
 var fullDate = new RegExp("".concat(dateFullYear.source, "-").concat(dateMonth.source, "-").concat(dateMDay.source));
 var fullTime = new RegExp("".concat(partialTime.source).concat(timeOffset.source));
 var rfc3339 = new RegExp("^".concat(fullDate.source, "[ tT]").concat(fullTime.source, "$"));
-
 function isRFC3339(str) {
   (0, _assertString.default)(str);
   return rfc3339.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],113:[function(require,module,exports){
+},{"./util/assertString":165}],140:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isRgbColor;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var rgbColor = /^rgb\((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5]),){2}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\)$/;
 var rgbaColor = /^rgba\((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5]),){3}(0?\.\d|1(\.0)?|0(\.0)?)\)$/;
 var rgbColorPercent = /^rgb\((([0-9]%|[1-9][0-9]%|100%),){2}([0-9]%|[1-9][0-9]%|100%)\)$/;
 var rgbaColorPercent = /^rgba\((([0-9]%|[1-9][0-9]%|100%),){3}(0?\.\d|1(\.0)?|0(\.0)?)\)$/;
-
 function isRgbColor(str) {
   var includePercentValues = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
   (0, _assertString.default)(str);
-
   if (!includePercentValues) {
     return rgbColor.test(str) || rgbaColor.test(str);
   }
-
   return rgbColor.test(str) || rgbaColor.test(str) || rgbColorPercent.test(str) || rgbaColorPercent.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],114:[function(require,module,exports){
+},{"./util/assertString":165}],141:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isSemVer;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _multilineRegex = _interopRequireDefault(require("./util/multilineRegex"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /**
  * Regular Expression to match
  * semantic versioning (SemVer)
@@ -15340,53 +17265,42 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * Reference: https://semver.org/
  */
 var semanticVersioningRegex = (0, _multilineRegex.default)(['^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)', '(?:-((?:0|[1-9]\\d*|\\d*[a-z-][0-9a-z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-z-][0-9a-z-]*))*))', '?(?:\\+([0-9a-z-]+(?:\\.[0-9a-z-]+)*))?$'], 'i');
-
 function isSemVer(str) {
   (0, _assertString.default)(str);
   return semanticVersioningRegex.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138,"./util/multilineRegex":141}],115:[function(require,module,exports){
+},{"./util/assertString":165,"./util/multilineRegex":168}],142:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isSlug;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var charsetRegex = /^[^\s-_](?!.*?[-_]{2,})[a-z0-9-\\][^\s]*[^-_\s]$/;
-
 function isSlug(str) {
   (0, _assertString.default)(str);
   return charsetRegex.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],116:[function(require,module,exports){
+},{"./util/assertString":165}],143:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isStrongPassword;
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var upperCaseRegex = /^[A-Z]$/;
 var lowerCaseRegex = /^[a-z]$/;
 var numberRegex = /^[0-9]$/;
-var symbolRegex = /^[-#!$@£%^&*()_+|~=`{}\[\]:";'<>?,.\/ ]$/;
+var symbolRegex = /^[-#!$@£%^&*()_+|~=`{}\[\]:";'<>?,.\/\\ ]$/;
 var defaultOptions = {
   minLength: 8,
   minLowercase: 1,
@@ -15401,15 +17315,14 @@ var defaultOptions = {
   pointsForContainingNumber: 10,
   pointsForContainingSymbol: 10
 };
+
 /* Counts number of occurrences of each char in a string
  * could be moved to util/ ?
 */
-
 function countChars(str) {
   var result = {};
   Array.from(str).forEach(function (char) {
     var curVal = result[char];
-
     if (curVal) {
       result[char] += 1;
     } else {
@@ -15418,9 +17331,8 @@ function countChars(str) {
   });
   return result;
 }
+
 /* Return information about a password */
-
-
 function analyzePassword(password) {
   var charMap = countChars(password);
   var analysis = {
@@ -15445,101 +17357,72 @@ function analyzePassword(password) {
   });
   return analysis;
 }
-
 function scorePassword(analysis, scoringOptions) {
   var points = 0;
   points += analysis.uniqueChars * scoringOptions.pointsPerUnique;
   points += (analysis.length - analysis.uniqueChars) * scoringOptions.pointsPerRepeat;
-
   if (analysis.lowercaseCount > 0) {
     points += scoringOptions.pointsForContainingLower;
   }
-
   if (analysis.uppercaseCount > 0) {
     points += scoringOptions.pointsForContainingUpper;
   }
-
   if (analysis.numberCount > 0) {
     points += scoringOptions.pointsForContainingNumber;
   }
-
   if (analysis.symbolCount > 0) {
     points += scoringOptions.pointsForContainingSymbol;
   }
-
   return points;
 }
-
 function isStrongPassword(str) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   (0, _assertString.default)(str);
   var analysis = analyzePassword(str);
   options = (0, _merge.default)(options || {}, defaultOptions);
-
   if (options.returnScore) {
     return scorePassword(analysis, options);
   }
-
   return analysis.length >= options.minLength && analysis.lowercaseCount >= options.minLowercase && analysis.uppercaseCount >= options.minUppercase && analysis.numberCount >= options.minNumbers && analysis.symbolCount >= options.minSymbols;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138,"./util/merge":140}],117:[function(require,module,exports){
+},{"./util/assertString":165,"./util/merge":167}],144:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isSurrogatePair;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var surrogatePair = /[\uD800-\uDBFF][\uDC00-\uDFFF]/;
-
 function isSurrogatePair(str) {
   (0, _assertString.default)(str);
   return surrogatePair.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],118:[function(require,module,exports){
+},{"./util/assertString":165}],145:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isTaxID;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var algorithms = _interopRequireWildcard(require("./util/algorithms"));
-
 var _isDate = _interopRequireDefault(require("./isDate"));
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != _typeof(e) && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
-
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
 /**
  * TIN Validation
  * Validates Tax Identification Numbers (TINs) from the US, EU member states and the United Kingdom.
@@ -15560,6 +17443,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
  * See `http://www.irs.gov/Businesses/Small-Businesses-&-Self-Employed/How-EINs-are-Assigned-and-Valid-EIN-Prefixes`
  * for more information.
  */
+
 // Locale functions
 
 /*
@@ -15571,7 +17455,6 @@ function bgBgCheck(tin) {
   // Extract full year, normalize month and check birth date validity
   var century_year = tin.slice(0, 2);
   var month = parseInt(tin.slice(2, 4), 10);
-
   if (month > 40) {
     month -= 40;
     century_year = "20".concat(century_year);
@@ -15581,32 +17464,29 @@ function bgBgCheck(tin) {
   } else {
     century_year = "19".concat(century_year);
   }
-
   if (month < 10) {
     month = "0".concat(month);
   }
-
   var date = "".concat(century_year, "/").concat(month, "/").concat(tin.slice(4, 6));
-
   if (!(0, _isDate.default)(date, 'YYYY/MM/DD')) {
     return false;
-  } // split digits into an array for further processing
+  }
 
-
+  // split digits into an array for further processing
   var digits = tin.split('').map(function (a) {
     return parseInt(a, 10);
-  }); // Calculate checksum by multiplying digits with fixed values
+  });
 
+  // Calculate checksum by multiplying digits with fixed values
   var multip_lookup = [2, 4, 8, 5, 10, 9, 7, 3, 6];
   var checksum = 0;
-
   for (var i = 0; i < multip_lookup.length; i++) {
     checksum += digits[i] * multip_lookup[i];
   }
-
   checksum = checksum % 11 === 10 ? 0 : checksum % 11;
   return checksum === digits[9];
 }
+
 /**
  * Check if an input is a valid Canadian SIN (Social Insurance Number)
  *
@@ -15620,8 +17500,6 @@ function bgBgCheck(tin) {
  * @param {string} input
  * @return {boolean}
  */
-
-
 function isCanadianSIN(input) {
   var digitsArray = input.split('');
   var even = digitsArray.filter(function (_, idx) {
@@ -15638,6 +17516,7 @@ function isCanadianSIN(input) {
   });
   return total % 10 === 0;
 }
+
 /*
  * cs-CZ validation function
  * (Rodné číslo (RČ), persons only)
@@ -15646,13 +17525,11 @@ function isCanadianSIN(input) {
  * -`https://lorenc.info/3MA381/overeni-spravnosti-rodneho-cisla.htm`
  * -`https://www.mvcr.cz/clanek/rady-a-sluzby-dokumenty-rodne-cislo.aspx`
  */
-
-
 function csCzCheck(tin) {
-  tin = tin.replace(/\W/, ''); // Extract full year from TIN length
+  tin = tin.replace(/\W/, '');
 
+  // Extract full year from TIN length
   var full_year = parseInt(tin.slice(0, 2), 10);
-
   if (tin.length === 10) {
     if (full_year < 54) {
       full_year = "20".concat(full_year);
@@ -15663,54 +17540,45 @@ function csCzCheck(tin) {
     if (tin.slice(6) === '000') {
       return false;
     } // Three-zero serial not assigned before 1954
-
-
     if (full_year < 54) {
       full_year = "19".concat(full_year);
     } else {
       return false; // No 18XX years seen in any of the resources
     }
-  } // Add missing zero if needed
-
-
+  }
+  // Add missing zero if needed
   if (full_year.length === 3) {
     full_year = [full_year.slice(0, 2), '0', full_year.slice(2)].join('');
-  } // Extract month from TIN and normalize
+  }
 
-
+  // Extract month from TIN and normalize
   var month = parseInt(tin.slice(2, 4), 10);
-
   if (month > 50) {
     month -= 50;
   }
-
   if (month > 20) {
     // Month-plus-twenty was only introduced in 2004
     if (parseInt(full_year, 10) < 2004) {
       return false;
     }
-
     month -= 20;
   }
-
   if (month < 10) {
     month = "0".concat(month);
-  } // Check date validity
+  }
 
-
+  // Check date validity
   var date = "".concat(full_year, "/").concat(month, "/").concat(tin.slice(4, 6));
-
   if (!(0, _isDate.default)(date, 'YYYY/MM/DD')) {
     return false;
-  } // Verify divisibility by 11
+  }
 
-
+  // Verify divisibility by 11
   if (tin.length === 10) {
     if (parseInt(tin, 10) % 11 !== 0) {
       // Some numbers up to and including 1985 are still valid if
       // check (last) digit equals 0 and modulo of first 9 digits equals 10
       var checkdigit = parseInt(tin.slice(0, 9), 10) % 11;
-
       if (parseInt(full_year, 10) < 1986 && checkdigit === 10) {
         if (parseInt(tin.slice(9), 10) !== 0) {
           return false;
@@ -15720,88 +17588,79 @@ function csCzCheck(tin) {
       }
     }
   }
-
   return true;
 }
+
 /*
  * de-AT validation function
  * (Abgabenkontonummer, persons/entities)
  * Verify TIN validity by calling luhnCheck()
  */
-
-
 function deAtCheck(tin) {
   return algorithms.luhnCheck(tin);
 }
+
 /*
  * de-DE validation function
  * (Steueridentifikationsnummer (Steuer-IdNr.), persons only)
  * Tests for single duplicate/triplicate value, then calculates ISO 7064 check (last) digit
  * Partial implementation of spec (same result with both algorithms always)
  */
-
-
 function deDeCheck(tin) {
   // Split digits into an array for further processing
   var digits = tin.split('').map(function (a) {
     return parseInt(a, 10);
-  }); // Fill array with strings of number positions
+  });
 
+  // Fill array with strings of number positions
   var occurences = [];
-
   for (var i = 0; i < digits.length - 1; i++) {
     occurences.push('');
-
     for (var j = 0; j < digits.length - 1; j++) {
       if (digits[i] === digits[j]) {
         occurences[i] += j;
       }
     }
-  } // Remove digits with one occurence and test for only one duplicate/triplicate
+  }
 
-
+  // Remove digits with one occurence and test for only one duplicate/triplicate
   occurences = occurences.filter(function (a) {
     return a.length > 1;
   });
-
   if (occurences.length !== 2 && occurences.length !== 3) {
     return false;
-  } // In case of triplicate value only two digits are allowed next to each other
+  }
 
-
+  // In case of triplicate value only two digits are allowed next to each other
   if (occurences[0].length === 3) {
     var trip_locations = occurences[0].split('').map(function (a) {
       return parseInt(a, 10);
     });
     var recurrent = 0; // Amount of neighbour occurences
-
     for (var _i = 0; _i < trip_locations.length - 1; _i++) {
       if (trip_locations[_i] + 1 === trip_locations[_i + 1]) {
         recurrent += 1;
       }
     }
-
     if (recurrent === 2) {
       return false;
     }
   }
-
   return algorithms.iso7064Check(tin);
 }
+
 /*
  * dk-DK validation function
  * (CPR-nummer (personnummer), persons only)
  * Checks if birth date (first six digits) is valid and assigned to century (seventh) digit,
  * and calculates check (last) digit
  */
-
-
 function dkDkCheck(tin) {
-  tin = tin.replace(/\W/, ''); // Extract year, check if valid for given century digit and add century
+  tin = tin.replace(/\W/, '');
 
+  // Extract year, check if valid for given century digit and add century
   var year = parseInt(tin.slice(4, 6), 10);
   var century_digit = tin.slice(6, 7);
-
   switch (century_digit) {
     case '0':
     case '1':
@@ -15809,7 +17668,6 @@ function dkDkCheck(tin) {
     case '3':
       year = "19".concat(year);
       break;
-
     case '4':
     case '9':
       if (year < 37) {
@@ -15817,9 +17675,7 @@ function dkDkCheck(tin) {
       } else {
         year = "19".concat(year);
       }
-
       break;
-
     default:
       if (year < 37) {
         year = "20".concat(year);
@@ -15828,79 +17684,69 @@ function dkDkCheck(tin) {
       } else {
         return false;
       }
-
       break;
-  } // Add missing zero if needed
-
-
+  }
+  // Add missing zero if needed
   if (year.length === 3) {
     year = [year.slice(0, 2), '0', year.slice(2)].join('');
-  } // Check date validity
-
-
+  }
+  // Check date validity
   var date = "".concat(year, "/").concat(tin.slice(2, 4), "/").concat(tin.slice(0, 2));
-
   if (!(0, _isDate.default)(date, 'YYYY/MM/DD')) {
     return false;
-  } // Split digits into an array for further processing
+  }
 
-
+  // Split digits into an array for further processing
   var digits = tin.split('').map(function (a) {
     return parseInt(a, 10);
   });
   var checksum = 0;
-  var weight = 4; // Multiply by weight and add to checksum
-
+  var weight = 4;
+  // Multiply by weight and add to checksum
   for (var i = 0; i < 9; i++) {
     checksum += digits[i] * weight;
     weight -= 1;
-
     if (weight === 1) {
       weight = 7;
     }
   }
-
   checksum %= 11;
-
   if (checksum === 1) {
     return false;
   }
-
   return checksum === 0 ? digits[9] === 0 : digits[9] === 11 - checksum;
 }
+
 /*
  * el-CY validation function
  * (Arithmos Forologikou Mitroou (AFM/ΑΦΜ), persons only)
  * Verify TIN validity by calculating ASCII value of check (last) character
  */
-
-
 function elCyCheck(tin) {
   // split digits into an array for further processing
   var digits = tin.slice(0, 8).split('').map(function (a) {
     return parseInt(a, 10);
   });
-  var checksum = 0; // add digits in even places
-
+  var checksum = 0;
+  // add digits in even places
   for (var i = 1; i < digits.length; i += 2) {
     checksum += digits[i];
-  } // add digits in odd places
+  }
 
-
+  // add digits in odd places
   for (var _i2 = 0; _i2 < digits.length; _i2 += 2) {
     if (digits[_i2] < 2) {
       checksum += 1 - digits[_i2];
     } else {
       checksum += 2 * (digits[_i2] - 2) + 5;
-
       if (digits[_i2] > 4) {
         checksum += 2;
       }
     }
   }
-
   return String.fromCharCode(checksum % 26 + 65) === tin.charAt(8);
 }
+
 /*
  * el-GR validation function
  * (Arithmos Forologikou Mitroou (AFM/ΑΦΜ), persons/entities)
@@ -15908,21 +17754,18 @@ function elCyCheck(tin) {
  * Algorithm not in DG TAXUD document- sourced from:
  * - `http://epixeirisi.gr/%CE%9A%CE%A1%CE%99%CE%A3%CE%99%CE%9C%CE%91-%CE%98%CE%95%CE%9C%CE%91%CE%A4%CE%91-%CE%A6%CE%9F%CE%A1%CE%9F%CE%9B%CE%9F%CE%93%CE%99%CE%91%CE%A3-%CE%9A%CE%91%CE%99-%CE%9B%CE%9F%CE%93%CE%99%CE%A3%CE%A4%CE%99%CE%9A%CE%97%CE%A3/23791/%CE%91%CF%81%CE%B9%CE%B8%CE%BC%CF%8C%CF%82-%CE%A6%CE%BF%CF%81%CE%BF%CE%BB%CE%BF%CE%B3%CE%B9%CE%BA%CE%BF%CF%8D-%CE%9C%CE%B7%CF%84%CF%81%CF%8E%CE%BF%CF%85`
  */
-
-
 function elGrCheck(tin) {
   // split digits into an array for further processing
   var digits = tin.split('').map(function (a) {
     return parseInt(a, 10);
   });
   var checksum = 0;
-
   for (var i = 0; i < 8; i++) {
     checksum += digits[i] * Math.pow(2, 8 - i);
   }
-
   return checksum % 11 % 10 === digits[8];
 }
+
 /*
  * en-GB validation function (should go here if needed)
  * (National Insurance Number (NINO) or Unique Taxpayer Reference (UTR),
@@ -15934,27 +17777,21 @@ function elGrCheck(tin) {
  * (Personal Public Service Number (PPS No), persons only)
  * Verify TIN validity by calculating check (second to last) character
  */
-
-
 function enIeCheck(tin) {
   var checksum = algorithms.reverseMultiplyAndSum(tin.split('').slice(0, 7).map(function (a) {
     return parseInt(a, 10);
   }), 8);
-
   if (tin.length === 9 && tin[8] !== 'W') {
     checksum += (tin[8].charCodeAt(0) - 64) * 9;
   }
-
   checksum %= 23;
-
   if (checksum === 0) {
     return tin[7].toUpperCase() === 'W';
   }
-
   return tin[7].toUpperCase() === String.fromCharCode(64 + checksum);
-} // Valid US IRS campus prefixes
+}
 
-
+// Valid US IRS campus prefixes
 var enUsCampusPrefix = {
   andover: ['10', '12'],
   atlanta: ['60', '67'],
@@ -15968,11 +17805,11 @@ var enUsCampusPrefix = {
   ogden: ['80', '90'],
   philadelphia: ['33', '39', '41', '42', '43', '46', '48', '62', '63', '64', '66', '68', '71', '72', '73', '74', '75', '76', '77', '81', '82', '83', '84', '85', '86', '87', '88', '91', '92', '93', '98', '99'],
   sba: ['31']
-}; // Return an array of all US IRS campus prefixes
+};
 
+// Return an array of all US IRS campus prefixes
 function enUsGetPrefixes() {
   var prefixes = [];
-
   for (var location in enUsCampusPrefix) {
     // https://github.com/gotwarlost/istanbul/blob/master/ignoring-code-for-coverage.md#ignoring-code-for-coverage-purposes
     // istanbul ignore else
@@ -15980,58 +17817,78 @@ function enUsGetPrefixes() {
       prefixes.push.apply(prefixes, _toConsumableArray(enUsCampusPrefix[location]));
     }
   }
-
   return prefixes;
 }
+
 /*
  * en-US validation function
  * Verify that the TIN starts with a valid IRS campus prefix
  */
-
-
 function enUsCheck(tin) {
   return enUsGetPrefixes().indexOf(tin.slice(0, 2)) !== -1;
 }
+
+/*
+ * es-AR validation function
+ * Clave Única de Identificación Tributaria (CUIT/CUIL)
+ * Sourced from:
+ * - https://servicioscf.afip.gob.ar/publico/abc/ABCpaso2.aspx?id_nivel1=3036&id_nivel2=3040&p=Conceptos%20b%C3%A1sicos
+ * - https://es.wikipedia.org/wiki/Clave_%C3%9Anica_de_Identificaci%C3%B3n_Tributaria
+ */
+
+function esArCheck(tin) {
+  var accum = 0;
+  var digits = tin.split('');
+  var digit = parseInt(digits.pop(), 10);
+  for (var i = 0; i < digits.length; i++) {
+    accum += digits[9 - i] * (2 + i % 6);
+  }
+  var verif = 11 - accum % 11;
+  if (verif === 11) {
+    verif = 0;
+  } else if (verif === 10) {
+    verif = 9;
+  }
+  return digit === verif;
+}
+
 /*
  * es-ES validation function
  * (Documento Nacional de Identidad (DNI)
  * or Número de Identificación de Extranjero (NIE), persons only)
  * Verify TIN validity by calculating check (last) character
  */
-
-
 function esEsCheck(tin) {
   // Split characters into an array for further processing
-  var chars = tin.toUpperCase().split(''); // Replace initial letter if needed
+  var chars = tin.toUpperCase().split('');
 
+  // Replace initial letter if needed
   if (isNaN(parseInt(chars[0], 10)) && chars.length > 1) {
     var lead_replace = 0;
-
     switch (chars[0]) {
       case 'Y':
         lead_replace = 1;
         break;
-
       case 'Z':
         lead_replace = 2;
         break;
-
       default:
     }
-
-    chars.splice(0, 1, lead_replace); // Fill with zeros if smaller than proper
+    chars.splice(0, 1, lead_replace);
+    // Fill with zeros if smaller than proper
   } else {
     while (chars.length < 9) {
       chars.unshift(0);
     }
-  } // Calculate checksum and check according to lookup
+  }
 
-
+  // Calculate checksum and check according to lookup
   var lookup = ['T', 'R', 'W', 'A', 'G', 'M', 'Y', 'F', 'P', 'D', 'X', 'B', 'N', 'J', 'Z', 'S', 'Q', 'V', 'H', 'L', 'C', 'K', 'E'];
   chars = chars.join('');
   var checksum = parseInt(chars.slice(0, 8), 10) % 23;
   return chars[8] === lookup[checksum];
 }
+
 /*
  * et-EE validation function
  * (Isikukood (IK), persons only)
@@ -16039,215 +17896,181 @@ function esEsCheck(tin) {
  * Material not in DG TAXUD document sourced from:
  * - `https://www.oecd.org/tax/automatic-exchange/crs-implementation-and-assistance/tax-identification-numbers/Estonia-TIN.pdf`
  */
-
-
 function etEeCheck(tin) {
   // Extract year and add century
   var full_year = tin.slice(1, 3);
   var century_digit = tin.slice(0, 1);
-
   switch (century_digit) {
     case '1':
     case '2':
       full_year = "18".concat(full_year);
       break;
-
     case '3':
     case '4':
       full_year = "19".concat(full_year);
       break;
-
     default:
       full_year = "20".concat(full_year);
       break;
-  } // Check date validity
-
-
+  }
+  // Check date validity
   var date = "".concat(full_year, "/").concat(tin.slice(3, 5), "/").concat(tin.slice(5, 7));
-
   if (!(0, _isDate.default)(date, 'YYYY/MM/DD')) {
     return false;
-  } // Split digits into an array for further processing
+  }
 
-
+  // Split digits into an array for further processing
   var digits = tin.split('').map(function (a) {
     return parseInt(a, 10);
   });
   var checksum = 0;
-  var weight = 1; // Multiply by weight and add to checksum
-
+  var weight = 1;
+  // Multiply by weight and add to checksum
   for (var i = 0; i < 10; i++) {
     checksum += digits[i] * weight;
     weight += 1;
-
     if (weight === 10) {
       weight = 1;
     }
-  } // Do again if modulo 11 of checksum is 10
-
-
+  }
+  // Do again if modulo 11 of checksum is 10
   if (checksum % 11 === 10) {
     checksum = 0;
     weight = 3;
-
     for (var _i3 = 0; _i3 < 10; _i3++) {
       checksum += digits[_i3] * weight;
       weight += 1;
-
       if (weight === 10) {
         weight = 1;
       }
     }
-
     if (checksum % 11 === 10) {
       return digits[10] === 0;
     }
   }
-
   return checksum % 11 === digits[10];
 }
+
 /*
  * fi-FI validation function
  * (Henkilötunnus (HETU), persons only)
  * Checks if birth date (first six digits plus century symbol) is valid
  * and calculates check (last) digit
  */
-
-
 function fiFiCheck(tin) {
   // Extract year and add century
   var full_year = tin.slice(4, 6);
   var century_symbol = tin.slice(6, 7);
-
   switch (century_symbol) {
     case '+':
       full_year = "18".concat(full_year);
       break;
-
     case '-':
       full_year = "19".concat(full_year);
       break;
-
     default:
       full_year = "20".concat(full_year);
       break;
-  } // Check date validity
-
-
+  }
+  // Check date validity
   var date = "".concat(full_year, "/").concat(tin.slice(2, 4), "/").concat(tin.slice(0, 2));
-
   if (!(0, _isDate.default)(date, 'YYYY/MM/DD')) {
     return false;
-  } // Calculate check character
+  }
 
-
+  // Calculate check character
   var checksum = parseInt(tin.slice(0, 6) + tin.slice(7, 10), 10) % 31;
-
   if (checksum < 10) {
     return checksum === parseInt(tin.slice(10), 10);
   }
-
   checksum -= 10;
   var letters_lookup = ['A', 'B', 'C', 'D', 'E', 'F', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'];
   return letters_lookup[checksum] === tin.slice(10);
 }
+
 /*
  * fr/nl-BE validation function
  * (Numéro national (N.N.), persons only)
  * Checks if birth date (first six digits) is valid and calculates check (last two) digits
  */
-
-
 function frBeCheck(tin) {
   // Zero month/day value is acceptable
   if (tin.slice(2, 4) !== '00' || tin.slice(4, 6) !== '00') {
     // Extract date from first six digits of TIN
     var date = "".concat(tin.slice(0, 2), "/").concat(tin.slice(2, 4), "/").concat(tin.slice(4, 6));
-
     if (!(0, _isDate.default)(date, 'YY/MM/DD')) {
       return false;
     }
   }
-
   var checksum = 97 - parseInt(tin.slice(0, 9), 10) % 97;
   var checkdigits = parseInt(tin.slice(9, 11), 10);
-
   if (checksum !== checkdigits) {
     checksum = 97 - parseInt("2".concat(tin.slice(0, 9)), 10) % 97;
-
     if (checksum !== checkdigits) {
       return false;
     }
   }
-
   return true;
 }
+
 /*
  * fr-FR validation function
  * (Numéro fiscal de référence (numéro SPI), persons only)
  * Verify TIN validity by calculating check (last three) digits
  */
-
-
 function frFrCheck(tin) {
   tin = tin.replace(/\s/g, '');
   var checksum = parseInt(tin.slice(0, 10), 10) % 511;
   var checkdigits = parseInt(tin.slice(10, 13), 10);
   return checksum === checkdigits;
 }
+
 /*
  * fr/lb-LU validation function
  * (numéro d’identification personnelle, persons only)
  * Verify birth date validity and run Luhn and Verhoeff checks
  */
-
-
 function frLuCheck(tin) {
   // Extract date and check validity
   var date = "".concat(tin.slice(0, 4), "/").concat(tin.slice(4, 6), "/").concat(tin.slice(6, 8));
-
   if (!(0, _isDate.default)(date, 'YYYY/MM/DD')) {
     return false;
-  } // Run Luhn check
+  }
 
-
+  // Run Luhn check
   if (!algorithms.luhnCheck(tin.slice(0, 12))) {
     return false;
-  } // Remove Luhn check digit and run Verhoeff check
-
-
+  }
+  // Remove Luhn check digit and run Verhoeff check
   return algorithms.verhoeffCheck("".concat(tin.slice(0, 11)).concat(tin[12]));
 }
+
 /*
  * hr-HR validation function
  * (Osobni identifikacijski broj (OIB), persons/entities)
  * Verify TIN validity by calling iso7064Check(digits)
  */
-
-
 function hrHrCheck(tin) {
   return algorithms.iso7064Check(tin);
 }
+
 /*
  * hu-HU validation function
  * (Adóazonosító jel, persons only)
  * Verify TIN validity by calculating check (last) digit
  */
-
-
 function huHuCheck(tin) {
   // split digits into an array for further processing
   var digits = tin.split('').map(function (a) {
     return parseInt(a, 10);
   });
   var checksum = 8;
-
   for (var i = 1; i < 9; i++) {
     checksum += digits[i] * (i + 1);
   }
-
   return checksum % 11 === digits[9];
 }
+
 /*
  * lt-LT validation function (should go here if needed)
  * (Asmens kodas, persons/entities respectively)
@@ -16263,15 +18086,13 @@ function huHuCheck(tin) {
  * Vowels may only be followed by other vowels or an X character
  * and X characters after vowels may only be followed by other X characters.
  */
-
-
 function itItNameCheck(name) {
   // true at the first occurence of a vowel
-  var vowelflag = false; // true at the first occurence of an X AFTER vowel
+  var vowelflag = false;
+
+  // true at the first occurence of an X AFTER vowel
   // (to properly handle last names with X as consonant)
-
   var xflag = false;
-
   for (var i = 0; i < 3; i++) {
     if (!vowelflag && /[AEIOU]/.test(name[i])) {
       vowelflag = true;
@@ -16283,7 +18104,6 @@ function itItNameCheck(name) {
           return false;
         }
       }
-
       if (xflag) {
         if (!/X/.test(name[i])) {
           return false;
@@ -16291,9 +18111,9 @@ function itItNameCheck(name) {
       }
     }
   }
-
   return true;
 }
+
 /*
  * it-IT validation function
  * (Codice fiscale (TIN-IT), persons only)
@@ -16302,21 +18122,19 @@ function itItNameCheck(name) {
  * Material not in DG-TAXUD document sourced from:
  * `https://en.wikipedia.org/wiki/Italian_fiscal_code`
  */
-
-
 function itItCheck(tin) {
   // Capitalize and split characters into an array for further processing
-  var chars = tin.toUpperCase().split(''); // Check first and last name validity calling itItNameCheck()
+  var chars = tin.toUpperCase().split('');
 
+  // Check first and last name validity calling itItNameCheck()
   if (!itItNameCheck(chars.slice(0, 3))) {
     return false;
   }
-
   if (!itItNameCheck(chars.slice(3, 6))) {
     return false;
-  } // Convert letters in number spaces back to numbers if any
+  }
 
-
+  // Convert letters in number spaces back to numbers if any
   var number_locations = [6, 7, 9, 10, 12, 13, 14];
   var number_replace = {
     L: '0',
@@ -16330,16 +18148,14 @@ function itItCheck(tin) {
     U: '8',
     V: '9'
   };
-
   for (var _i4 = 0, _number_locations = number_locations; _i4 < _number_locations.length; _i4++) {
     var i = _number_locations[_i4];
-
     if (chars[i] in number_replace) {
       chars.splice(i, 1, number_replace[chars[i]]);
     }
-  } // Extract month and day, and check date validity
+  }
 
-
+  // Extract month and day, and check date validity
   var month_replace = {
     A: '01',
     B: '02',
@@ -16356,34 +18172,26 @@ function itItCheck(tin) {
   };
   var month = month_replace[chars[8]];
   var day = parseInt(chars[9] + chars[10], 10);
-
   if (day > 40) {
     day -= 40;
   }
-
   if (day < 10) {
     day = "0".concat(day);
   }
-
   var date = "".concat(chars[6]).concat(chars[7], "/").concat(month, "/").concat(day);
-
   if (!(0, _isDate.default)(date, 'YY/MM/DD')) {
     return false;
-  } // Calculate check character by adding up even and odd characters as numbers
+  }
 
-
+  // Calculate check character by adding up even and odd characters as numbers
   var checksum = 0;
-
   for (var _i5 = 1; _i5 < chars.length - 1; _i5 += 2) {
     var char_to_int = parseInt(chars[_i5], 10);
-
     if (isNaN(char_to_int)) {
       char_to_int = chars[_i5].charCodeAt(0) - 65;
     }
-
     checksum += char_to_int;
   }
-
   var odd_convert = {
     // Maps of characters at odd places
     A: 1,
@@ -16415,30 +18223,25 @@ function itItCheck(tin) {
     0: 1,
     1: 0
   };
-
   for (var _i6 = 0; _i6 < chars.length - 1; _i6 += 2) {
     var _char_to_int = 0;
-
     if (chars[_i6] in odd_convert) {
       _char_to_int = odd_convert[chars[_i6]];
     } else {
       var multiplier = parseInt(chars[_i6], 10);
       _char_to_int = 2 * multiplier + 1;
-
       if (multiplier > 4) {
         _char_to_int += 2;
       }
     }
-
     checksum += _char_to_int;
   }
-
   if (String.fromCharCode(65 + checksum % 26) !== chars[15]) {
     return false;
   }
-
   return true;
 }
+
 /*
  * lv-LV validation function
  * (Personas kods (PK), persons only)
@@ -16447,147 +18250,120 @@ function itItCheck(tin) {
  * Material not in DG TAXUD document sourced from:
  * `https://boot.ritakafija.lv/forums/index.php?/topic/88314-personas-koda-algoritms-%C4%8Deksumma/`
  */
-
-
 function lvLvCheck(tin) {
-  tin = tin.replace(/\W/, ''); // Extract date from TIN
-
+  tin = tin.replace(/\W/, '');
+  // Extract date from TIN
   var day = tin.slice(0, 2);
-
   if (day !== '32') {
     // No date/checksum check if new format
     var month = tin.slice(2, 4);
-
     if (month !== '00') {
       // No date check if unknown month
       var full_year = tin.slice(4, 6);
-
       switch (tin[6]) {
         case '0':
           full_year = "18".concat(full_year);
           break;
-
         case '1':
           full_year = "19".concat(full_year);
           break;
-
         default:
           full_year = "20".concat(full_year);
           break;
-      } // Check date validity
-
-
+      }
+      // Check date validity
       var date = "".concat(full_year, "/").concat(tin.slice(2, 4), "/").concat(day);
-
       if (!(0, _isDate.default)(date, 'YYYY/MM/DD')) {
         return false;
       }
-    } // Calculate check digit
+    }
 
-
+    // Calculate check digit
     var checksum = 1101;
     var multip_lookup = [1, 6, 3, 7, 9, 10, 5, 8, 4, 2];
-
     for (var i = 0; i < tin.length - 1; i++) {
       checksum -= parseInt(tin[i], 10) * multip_lookup[i];
     }
-
     return parseInt(tin[10], 10) === checksum % 11;
   }
-
   return true;
 }
+
 /*
  * mt-MT validation function
  * (Identity Card Number or Unique Taxpayer Reference, persons/entities)
  * Verify Identity Card Number structure (no other tests found)
  */
-
-
 function mtMtCheck(tin) {
   if (tin.length !== 9) {
     // No tests for UTR
-    var chars = tin.toUpperCase().split(''); // Fill with zeros if smaller than proper
-
+    var chars = tin.toUpperCase().split('');
+    // Fill with zeros if smaller than proper
     while (chars.length < 8) {
       chars.unshift(0);
-    } // Validate format according to last character
-
-
+    }
+    // Validate format according to last character
     switch (tin[7]) {
       case 'A':
       case 'P':
         if (parseInt(chars[6], 10) === 0) {
           return false;
         }
-
         break;
-
       default:
         {
           var first_part = parseInt(chars.join('').slice(0, 5), 10);
-
           if (first_part > 32000) {
             return false;
           }
-
           var second_part = parseInt(chars.join('').slice(5, 7), 10);
-
           if (first_part === second_part) {
             return false;
           }
         }
     }
   }
-
   return true;
 }
+
 /*
  * nl-NL validation function
  * (Burgerservicenummer (BSN) or Rechtspersonen Samenwerkingsverbanden Informatie Nummer (RSIN),
  * persons/entities respectively)
  * Verify TIN validity by calculating check (last) digit (variant of MOD 11)
  */
-
-
 function nlNlCheck(tin) {
   return algorithms.reverseMultiplyAndSum(tin.split('').slice(0, 8).map(function (a) {
     return parseInt(a, 10);
   }), 9) % 11 === parseInt(tin[8], 10);
 }
+
 /*
  * pl-PL validation function
  * (Powszechny Elektroniczny System Ewidencji Ludności (PESEL)
  * or Numer identyfikacji podatkowej (NIP), persons/entities)
  * Verify TIN validity by validating birth date (PESEL) and calculating check (last) digit
  */
-
-
 function plPlCheck(tin) {
   // NIP
   if (tin.length === 10) {
     // Calculate last digit by multiplying with lookup
     var lookup = [6, 5, 7, 2, 3, 4, 5, 6, 7];
     var _checksum = 0;
-
     for (var i = 0; i < lookup.length; i++) {
       _checksum += parseInt(tin[i], 10) * lookup[i];
     }
-
     _checksum %= 11;
-
     if (_checksum === 10) {
       return false;
     }
-
     return _checksum === parseInt(tin[9], 10);
-  } // PESEL
+  }
+
+  // PESEL
   // Extract full year using month
-
-
   var full_year = tin.slice(0, 2);
   var month = parseInt(tin.slice(2, 4), 10);
-
   if (month > 80) {
     full_year = "18".concat(full_year);
     month -= 80;
@@ -16602,38 +18378,33 @@ function plPlCheck(tin) {
     month -= 20;
   } else {
     full_year = "19".concat(full_year);
-  } // Add leading zero to month if needed
-
-
+  }
+  // Add leading zero to month if needed
   if (month < 10) {
     month = "0".concat(month);
-  } // Check date validity
-
-
+  }
+  // Check date validity
   var date = "".concat(full_year, "/").concat(month, "/").concat(tin.slice(4, 6));
-
   if (!(0, _isDate.default)(date, 'YYYY/MM/DD')) {
     return false;
-  } // Calculate last digit by mulitplying with odd one-digit numbers except 5
+  }
 
-
+  // Calculate last digit by mulitplying with odd one-digit numbers except 5
   var checksum = 0;
   var multiplier = 1;
-
   for (var _i7 = 0; _i7 < tin.length - 1; _i7++) {
     checksum += parseInt(tin[_i7], 10) * multiplier % 10;
     multiplier += 2;
-
     if (multiplier > 10) {
       multiplier = 1;
     } else if (multiplier === 5) {
       multiplier += 2;
     }
   }
-
   checksum = 10 - checksum % 10;
   return checksum === parseInt(tin[10], 10);
 }
+
 /*
 * pt-BR validation function
 * (Cadastro de Pessoas Físicas (CPF, persons)
@@ -16641,101 +18412,79 @@ function plPlCheck(tin) {
 * Both inputs will be validated
 */
 
-
 function ptBrCheck(tin) {
   if (tin.length === 11) {
     var _sum;
-
     var remainder;
     _sum = 0;
-    if ( // Reject known invalid CPFs
+    if (
+    // Reject known invalid CPFs
     tin === '11111111111' || tin === '22222222222' || tin === '33333333333' || tin === '44444444444' || tin === '55555555555' || tin === '66666666666' || tin === '77777777777' || tin === '88888888888' || tin === '99999999999' || tin === '00000000000') return false;
-
-    for (var i = 1; i <= 9; i++) {
-      _sum += parseInt(tin.substring(i - 1, i), 10) * (11 - i);
-    }
-
+    for (var i = 1; i <= 9; i++) _sum += parseInt(tin.substring(i - 1, i), 10) * (11 - i);
     remainder = _sum * 10 % 11;
     if (remainder === 10) remainder = 0;
     if (remainder !== parseInt(tin.substring(9, 10), 10)) return false;
     _sum = 0;
-
-    for (var _i8 = 1; _i8 <= 10; _i8++) {
-      _sum += parseInt(tin.substring(_i8 - 1, _i8), 10) * (12 - _i8);
-    }
-
+    for (var _i8 = 1; _i8 <= 10; _i8++) _sum += parseInt(tin.substring(_i8 - 1, _i8), 10) * (12 - _i8);
     remainder = _sum * 10 % 11;
     if (remainder === 10) remainder = 0;
     if (remainder !== parseInt(tin.substring(10, 11), 10)) return false;
     return true;
   }
-
-  if ( // Reject know invalid CNPJs
+  if (
+  // Reject know invalid CNPJs
   tin === '00000000000000' || tin === '11111111111111' || tin === '22222222222222' || tin === '33333333333333' || tin === '44444444444444' || tin === '55555555555555' || tin === '66666666666666' || tin === '77777777777777' || tin === '88888888888888' || tin === '99999999999999') {
     return false;
   }
-
   var length = tin.length - 2;
   var identifiers = tin.substring(0, length);
   var verificators = tin.substring(length);
   var sum = 0;
   var pos = length - 7;
-
   for (var _i9 = length; _i9 >= 1; _i9--) {
     sum += identifiers.charAt(length - _i9) * pos;
     pos -= 1;
-
     if (pos < 2) {
       pos = 9;
     }
   }
-
   var result = sum % 11 < 2 ? 0 : 11 - sum % 11;
-
   if (result !== parseInt(verificators.charAt(0), 10)) {
     return false;
   }
-
   length += 1;
   identifiers = tin.substring(0, length);
   sum = 0;
   pos = length - 7;
-
   for (var _i10 = length; _i10 >= 1; _i10--) {
     sum += identifiers.charAt(length - _i10) * pos;
     pos -= 1;
-
     if (pos < 2) {
       pos = 9;
     }
   }
-
   result = sum % 11 < 2 ? 0 : 11 - sum % 11;
-
   if (result !== parseInt(verificators.charAt(1), 10)) {
     return false;
   }
-
   return true;
 }
+
 /*
  * pt-PT validation function
  * (Número de identificação fiscal (NIF), persons/entities)
  * Verify TIN validity by calculating check (last) digit (variant of MOD 11)
  */
-
-
 function ptPtCheck(tin) {
   var checksum = 11 - algorithms.reverseMultiplyAndSum(tin.split('').slice(0, 8).map(function (a) {
     return parseInt(a, 10);
   }), 9) % 11;
-
   if (checksum > 9) {
     return parseInt(tin[8], 10) === 0;
   }
-
   return checksum === parseInt(tin[8], 10);
 }
+
 /*
  * ro-RO validation function
  * (Cod Numeric Personal (CNP) or Cod de înregistrare fiscală (CIF),
@@ -16744,64 +18493,54 @@ function ptPtCheck(tin) {
  * Material not in DG TAXUD document sourced from:
  * `https://en.wikipedia.org/wiki/National_identification_number#Romania`
  */
-
-
 function roRoCheck(tin) {
   if (tin.slice(0, 4) !== '9000') {
     // No test found for this format
     // Extract full year using century digit if possible
     var full_year = tin.slice(1, 3);
-
     switch (tin[0]) {
       case '1':
       case '2':
         full_year = "19".concat(full_year);
         break;
-
       case '3':
       case '4':
         full_year = "18".concat(full_year);
         break;
-
       case '5':
       case '6':
         full_year = "20".concat(full_year);
         break;
-
       default:
-    } // Check date validity
+    }
 
-
+    // Check date validity
     var date = "".concat(full_year, "/").concat(tin.slice(3, 5), "/").concat(tin.slice(5, 7));
-
     if (date.length === 8) {
       if (!(0, _isDate.default)(date, 'YY/MM/DD')) {
         return false;
       }
     } else if (!(0, _isDate.default)(date, 'YYYY/MM/DD')) {
       return false;
-    } // Calculate check digit
+    }
 
-
+    // Calculate check digit
     var digits = tin.split('').map(function (a) {
       return parseInt(a, 10);
     });
     var multipliers = [2, 7, 9, 1, 4, 6, 3, 5, 8, 2, 7, 9];
     var checksum = 0;
-
     for (var i = 0; i < multipliers.length; i++) {
       checksum += digits[i] * multipliers[i];
     }
-
     if (checksum % 11 === 10) {
       return digits[12] === 1;
     }
-
     return digits[12] === checksum % 11;
   }
-
   return true;
 }
+
 /*
  * sk-SK validation function
  * (Rodné číslo (RČ) or bezvýznamové identifikačné číslo (BIČ), persons only)
@@ -16809,101 +18548,83 @@ function roRoCheck(tin) {
  * Due to the introduction of the pseudo-random BIČ it is not possible to test
  * post-1954 birth numbers without knowing whether they are BIČ or RČ beforehand
  */
-
-
 function skSkCheck(tin) {
   if (tin.length === 9) {
     tin = tin.replace(/\W/, '');
-
     if (tin.slice(6) === '000') {
       return false;
     } // Three-zero serial not assigned before 1954
+
     // Extract full year from TIN length
-
-
     var full_year = parseInt(tin.slice(0, 2), 10);
-
     if (full_year > 53) {
       return false;
     }
-
     if (full_year < 10) {
       full_year = "190".concat(full_year);
     } else {
       full_year = "19".concat(full_year);
-    } // Extract month from TIN and normalize
+    }
 
-
+    // Extract month from TIN and normalize
     var month = parseInt(tin.slice(2, 4), 10);
-
     if (month > 50) {
       month -= 50;
     }
-
     if (month < 10) {
       month = "0".concat(month);
-    } // Check date validity
+    }
 
-
+    // Check date validity
     var date = "".concat(full_year, "/").concat(month, "/").concat(tin.slice(4, 6));
-
     if (!(0, _isDate.default)(date, 'YYYY/MM/DD')) {
       return false;
     }
   }
-
   return true;
 }
+
 /*
  * sl-SI validation function
  * (Davčna številka, persons/entities)
  * Verify TIN validity by calculating check (last) digit (variant of MOD 11)
  */
-
-
 function slSiCheck(tin) {
   var checksum = 11 - algorithms.reverseMultiplyAndSum(tin.split('').slice(0, 7).map(function (a) {
     return parseInt(a, 10);
   }), 8) % 11;
-
   if (checksum === 10) {
     return parseInt(tin[7], 10) === 0;
   }
-
   return checksum === parseInt(tin[7], 10);
 }
+
 /*
  * sv-SE validation function
  * (Personnummer or samordningsnummer, persons only)
  * Checks validity of birth date and calls luhnCheck() to validate check (last) digit
  */
-
-
 function svSeCheck(tin) {
   // Make copy of TIN and normalize to two-digit year form
   var tin_copy = tin.slice(0);
-
   if (tin.length > 11) {
     tin_copy = tin_copy.slice(2);
-  } // Extract date of birth
+  }
 
-
+  // Extract date of birth
   var full_year = '';
   var month = tin_copy.slice(2, 4);
   var day = parseInt(tin_copy.slice(4, 6), 10);
-
   if (tin.length > 11) {
     full_year = tin.slice(0, 4);
   } else {
     full_year = tin.slice(0, 2);
-
     if (tin.length === 11 && day < 60) {
       // Extract full year from centenarian symbol
       // Should work just fine until year 10000 or so
       var current_year = new Date().getFullYear().toString();
       var current_century = parseInt(current_year.slice(0, 2), 10);
       current_year = parseInt(current_year, 10);
-
       if (tin[6] === '-') {
         if (parseInt("".concat(current_century).concat(full_year), 10) > current_year) {
           full_year = "".concat(current_century - 1).concat(full_year);
@@ -16912,25 +18633,21 @@ function svSeCheck(tin) {
         }
       } else {
         full_year = "".concat(current_century - 1).concat(full_year);
-
         if (current_year - parseInt(full_year, 10) < 100) {
           return false;
         }
       }
     }
-  } // Normalize day and check date validity
+  }
 
-
+  // Normalize day and check date validity
   if (day > 60) {
     day -= 60;
   }
-
   if (day < 10) {
     day = "0".concat(day);
   }
-
   var date = "".concat(full_year, "/").concat(month, "/").concat(day);
-
   if (date.length === 8) {
     if (!(0, _isDate.default)(date, 'YY/MM/DD')) {
       return false;
@@ -16938,9 +18655,27 @@ function svSeCheck(tin) {
   } else if (!(0, _isDate.default)(date, 'YYYY/MM/DD')) {
     return false;
   }
-
   return algorithms.luhnCheck(tin.replace(/\W/, ''));
-} // Locale lookup objects
+}
+
+/**
+ * uk-UA validation function
+ * Verify TIN validity by calculating check (last) digit (variant of MOD 11)
+ */
+function ukUaCheck(tin) {
+  // Calculate check digit
+  var digits = tin.split('').map(function (a) {
+    return parseInt(a, 10);
+  });
+  var multipliers = [-1, 5, 7, 9, 4, 6, 10, 5, 7];
+  var checksum = 0;
+  for (var i = 0; i < multipliers.length; i++) {
+    checksum += digits[i] * multipliers[i];
+  }
+  return checksum % 11 === 10 ? digits[9] === 0 : digits[9] === checksum % 11;
+}
+
+// Locale lookup objects
 
 /*
  * Tax id regex formats for various locales
@@ -16948,8 +18683,6 @@ function svSeCheck(tin) {
  * Where not explicitly specified in DG-TAXUD document both
  * uppercase and lowercase letters are acceptable.
  */
-
-
 var taxIdFormat = {
   'bg-BG': /^\d{10}$/,
   'cs-CZ': /^\d{6}\/{0,1}\d{3,4}$/,
@@ -16962,6 +18695,7 @@ var taxIdFormat = {
   'en-GB': /^\d{10}$|^(?!GB|NK|TN|ZZ)(?![DFIQUV])[A-Z](?![DFIQUVO])[A-Z]\d{6}[ABCD ]$/i,
   'en-IE': /^\d{7}[A-W][A-IW]{0,1}$/i,
   'en-US': /^\d{2}[- ]{0,1}\d{7}$/,
+  'es-AR': /(20|23|24|27|30|33|34)[0-9]{8}[0-9]/,
   'es-ES': /^(\d{0,8}|[XYZKLM]\d{7})[A-HJ-NP-TV-Z]$/i,
   'et-EE': /^[1-6]\d{6}(00[1-9]|0[1-9][0-9]|[1-6][0-9]{2}|70[0-9]|710)\d$/,
   'fi-FI': /^\d{6}[-+A]\d{3}[0-9A-FHJ-NPR-Y]$/i,
@@ -16982,14 +18716,16 @@ var taxIdFormat = {
   'ro-RO': /^\d{13}$/,
   'sk-SK': /^\d{6}\/{0,1}\d{3,4}$/,
   'sl-SI': /^[1-9]\d{7}$/,
-  'sv-SE': /^(\d{6}[-+]{0,1}\d{4}|(18|19|20)\d{6}[-+]{0,1}\d{4})$/
-}; // taxIdFormat locale aliases
-
+  'sv-SE': /^(\d{6}[-+]{0,1}\d{4}|(18|19|20)\d{6}[-+]{0,1}\d{4})$/,
+  'uk-UA': /^\d{10}$/
+};
+// taxIdFormat locale aliases
 taxIdFormat['lb-LU'] = taxIdFormat['fr-LU'];
 taxIdFormat['lt-LT'] = taxIdFormat['et-EE'];
 taxIdFormat['nl-BE'] = taxIdFormat['fr-BE'];
-taxIdFormat['fr-CA'] = taxIdFormat['en-CA']; // Algorithmic tax id check functions for various locales
+taxIdFormat['fr-CA'] = taxIdFormat['en-CA'];
 
+// Algorithmic tax id check functions for various locales
 var taxIdCheck = {
   'bg-BG': bgBgCheck,
   'cs-CZ': csCzCheck,
@@ -17001,6 +18737,7 @@ var taxIdCheck = {
   'en-CA': isCanadianSIN,
   'en-IE': enIeCheck,
   'en-US': enUsCheck,
+  'es-AR': esArCheck,
   'es-ES': esEsCheck,
   'et-EE': etEeCheck,
   'fi-FI': fiFiCheck,
@@ -17019,69 +18756,62 @@ var taxIdCheck = {
   'ro-RO': roRoCheck,
   'sk-SK': skSkCheck,
   'sl-SI': slSiCheck,
-  'sv-SE': svSeCheck
-}; // taxIdCheck locale aliases
-
+  'sv-SE': svSeCheck,
+  'uk-UA': ukUaCheck
+};
+// taxIdCheck locale aliases
 taxIdCheck['lb-LU'] = taxIdCheck['fr-LU'];
 taxIdCheck['lt-LT'] = taxIdCheck['et-EE'];
 taxIdCheck['nl-BE'] = taxIdCheck['fr-BE'];
-taxIdCheck['fr-CA'] = taxIdCheck['en-CA']; // Regexes for locales where characters should be omitted before checking format
+taxIdCheck['fr-CA'] = taxIdCheck['en-CA'];
 
+// Regexes for locales where characters should be omitted before checking format
 var allsymbols = /[-\\\/!@#$%\^&\*\(\)\+\=\[\]]+/g;
 var sanitizeRegexes = {
   'de-AT': allsymbols,
   'de-DE': /[\/\\]/g,
   'fr-BE': allsymbols
-}; // sanitizeRegexes locale aliases
-
+};
+// sanitizeRegexes locale aliases
 sanitizeRegexes['nl-BE'] = sanitizeRegexes['fr-BE'];
+
 /*
  * Validator function
  * Return true if the passed string is a valid tax identification number
  * for the specified locale.
  * Throw an error exception if the locale is not supported.
  */
-
 function isTaxID(str) {
   var locale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'en-US';
-  (0, _assertString.default)(str); // Copy TIN to avoid replacement if sanitized
-
+  (0, _assertString.default)(str);
+  // Copy TIN to avoid replacement if sanitized
   var strcopy = str.slice(0);
-
   if (locale in taxIdFormat) {
     if (locale in sanitizeRegexes) {
       strcopy = strcopy.replace(sanitizeRegexes[locale], '');
     }
-
     if (!taxIdFormat[locale].test(strcopy)) {
       return false;
     }
-
     if (locale in taxIdCheck) {
       return taxIdCheck[locale](strcopy);
-    } // Fallthrough; not all locales have algorithmic checks
-
-
+    }
+    // Fallthrough; not all locales have algorithmic checks
     return true;
   }
-
   throw new Error("Invalid locale '".concat(locale, "'"));
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./isDate":61,"./util/algorithms":137,"./util/assertString":138}],119:[function(require,module,exports){
+},{"./isDate":86,"./util/algorithms":164,"./util/assertString":165}],146:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isTime;
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var default_time_options = {
   hourFormat: 'hour24',
   mode: 'default'
@@ -17096,45 +18826,31 @@ var formats = {
     withSeconds: /^(0?[1-9]|1[0-2]):([0-5][0-9]):([0-5][0-9]) (A|P)M$/
   }
 };
-
 function isTime(input, options) {
   options = (0, _merge.default)(options, default_time_options);
   if (typeof input !== 'string') return false;
   return formats[options.hourFormat][options.mode].test(input);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/merge":140}],120:[function(require,module,exports){
+},{"./util/merge":167}],147:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isURL;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _isFQDN = _interopRequireDefault(require("./isFQDN"));
-
 var _isIP = _interopRequireDefault(require("./isIP"));
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
 /*
 options for isURL method
 
@@ -17147,6 +18863,7 @@ allow_protocol_relative_urls - if set as true protocol relative URLs will be all
 validate_length - if set as false isURL will skip string length validation (IE maximum is 2083)
 
 */
+
 var default_url_options = {
   protocols: ['http', 'https', 'ftp'],
   require_tld: true,
@@ -17162,58 +18879,44 @@ var default_url_options = {
   validate_length: true
 };
 var wrapped_ipv6 = /^\[([^\]]+)\](?::([0-9]+))?$/;
-
 function isRegExp(obj) {
   return Object.prototype.toString.call(obj) === '[object RegExp]';
 }
-
 function checkHost(host, matches) {
   for (var i = 0; i < matches.length; i++) {
     var match = matches[i];
-
     if (host === match || isRegExp(match) && match.test(host)) {
       return true;
     }
   }
-
   return false;
 }
-
 function isURL(url, options) {
   (0, _assertString.default)(url);
-
   if (!url || /[\s<>]/.test(url)) {
     return false;
   }
-
   if (url.indexOf('mailto:') === 0) {
     return false;
   }
-
   options = (0, _merge.default)(options, default_url_options);
-
   if (options.validate_length && url.length >= 2083) {
     return false;
   }
-
   if (!options.allow_fragments && url.includes('#')) {
     return false;
   }
-
   if (!options.allow_query_components && (url.includes('?') || url.includes('&'))) {
     return false;
   }
-
   var protocol, auth, host, hostname, port, port_str, split, ipv6;
   split = url.split('#');
   url = split.shift();
   split = url.split('?');
   url = split.shift();
   split = url.split('://');
-
   if (split.length > 1) {
     protocol = split.shift().toLowerCase();
-
     if (options.require_valid_protocol && options.protocols.indexOf(protocol) === -1) {
       return false;
     }
@@ -17223,55 +18926,41 @@ function isURL(url, options) {
     if (!options.allow_protocol_relative_urls) {
       return false;
     }
-
     split[0] = url.slice(2);
   }
-
   url = split.join('://');
-
   if (url === '') {
     return false;
   }
-
   split = url.split('/');
   url = split.shift();
-
   if (url === '' && !options.require_host) {
     return true;
   }
-
   split = url.split('@');
-
   if (split.length > 1) {
     if (options.disallow_auth) {
       return false;
     }
-
     if (split[0] === '') {
       return false;
     }
-
     auth = split.shift();
-
     if (auth.indexOf(':') >= 0 && auth.split(':').length > 2) {
       return false;
     }
-
     var _auth$split = auth.split(':'),
-        _auth$split2 = _slicedToArray(_auth$split, 2),
-        user = _auth$split2[0],
-        password = _auth$split2[1];
-
+      _auth$split2 = _slicedToArray(_auth$split, 2),
+      user = _auth$split2[0],
+      password = _auth$split2[1];
     if (user === '' && password === '') {
       return false;
     }
   }
-
   hostname = split.join('@');
   port_str = null;
   ipv6 = null;
   var ipv6_match = hostname.match(wrapped_ipv6);
-
   if (ipv6_match) {
     host = '';
     ipv6 = ipv6_match[1];
@@ -17279,134 +18968,135 @@ function isURL(url, options) {
   } else {
     split = hostname.split(':');
     host = split.shift();
-
     if (split.length) {
       port_str = split.join(':');
     }
   }
-
   if (port_str !== null && port_str.length > 0) {
     port = parseInt(port_str, 10);
-
     if (!/^[0-9]+$/.test(port_str) || port <= 0 || port > 65535) {
       return false;
     }
   } else if (options.require_port) {
     return false;
   }
-
   if (options.host_whitelist) {
     return checkHost(host, options.host_whitelist);
   }
-
   if (host === '' && !options.require_host) {
     return true;
   }
-
   if (!(0, _isIP.default)(host) && !(0, _isFQDN.default)(host, options) && (!ipv6 || !(0, _isIP.default)(ipv6, 6))) {
     return false;
   }
-
   host = host || ipv6;
-
   if (options.host_blacklist && checkHost(host, options.host_blacklist)) {
     return false;
   }
-
   return true;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./isFQDN":68,"./isIP":78,"./util/assertString":138,"./util/merge":140}],121:[function(require,module,exports){
+},{"./isFQDN":93,"./isIP":103,"./util/assertString":165,"./util/merge":167}],148:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isUUID;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var uuid = {
   1: /^[0-9A-F]{8}-[0-9A-F]{4}-1[0-9A-F]{3}-[0-9A-F]{4}-[0-9A-F]{12}$/i,
   2: /^[0-9A-F]{8}-[0-9A-F]{4}-2[0-9A-F]{3}-[0-9A-F]{4}-[0-9A-F]{12}$/i,
   3: /^[0-9A-F]{8}-[0-9A-F]{4}-3[0-9A-F]{3}-[0-9A-F]{4}-[0-9A-F]{12}$/i,
   4: /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
   5: /^[0-9A-F]{8}-[0-9A-F]{4}-5[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
+  7: /^[0-9A-F]{8}-[0-9A-F]{4}-7[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
   all: /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i
 };
-
 function isUUID(str, version) {
   (0, _assertString.default)(str);
   var pattern = uuid[![undefined, null].includes(version) ? version : 'all'];
   return !!pattern && pattern.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],122:[function(require,module,exports){
+},{"./util/assertString":165}],149:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isUppercase;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isUppercase(str) {
   (0, _assertString.default)(str);
   return str === str.toUpperCase();
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],123:[function(require,module,exports){
+},{"./util/assertString":165}],150:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isVAT;
 exports.vatMatchers = void 0;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var algorithms = _interopRequireWildcard(require("./util/algorithms"));
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != _typeof(e) && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var PT = function PT(str) {
-  var match = str.match(/^(PT)?(\d{9})$/);
-
+var AU = function AU(str) {
+  var match = str.match(/^(AU)?(\d{11})$/);
   if (!match) {
     return false;
   }
+  // @see {@link https://abr.business.gov.au/Help/AbnFormat}
+  var weights = [10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19];
+  str = str.replace(/^AU/, '');
+  var ABN = (parseInt(str.slice(0, 1), 10) - 1).toString() + str.slice(1);
+  var total = 0;
+  for (var i = 0; i < 11; i++) {
+    total += weights[i] * ABN.charAt(i);
+  }
+  return total !== 0 && total % 89 === 0;
+};
+var CH = function CH(str) {
+  // @see {@link https://www.ech.ch/de/ech/ech-0097/5.2.0}
+  var hasValidCheckNumber = function hasValidCheckNumber(digits) {
+    var lastDigit = digits.pop(); // used as check number
+    var weights = [5, 4, 3, 2, 7, 6, 5, 4];
+    var calculatedCheckNumber = (11 - digits.reduce(function (acc, el, idx) {
+      return acc + el * weights[idx];
+    }, 0) % 11) % 11;
+    return lastDigit === calculatedCheckNumber;
+  };
 
+  // @see {@link https://www.estv.admin.ch/estv/de/home/mehrwertsteuer/uid/mwst-uid-nummer.html}
+  return /^(CHE[- ]?)?(\d{9}|(\d{3}\.\d{3}\.\d{3})|(\d{3} \d{3} \d{3})) ?(TVA|MWST|IVA)?$/.test(str) && hasValidCheckNumber(str.match(/\d/g).map(function (el) {
+    return +el;
+  }));
+};
+var PT = function PT(str) {
+  var match = str.match(/^(PT)?(\d{9})$/);
+  if (!match) {
+    return false;
+  }
   var tin = match[2];
   var checksum = 11 - algorithms.reverseMultiplyAndSum(tin.split('').slice(0, 8).map(function (a) {
     return parseInt(a, 10);
   }), 9) % 11;
-
   if (checksum > 9) {
     return parseInt(tin[8], 10) === 0;
   }
-
   return checksum === parseInt(tin[8], 10);
 };
-
-var vatMatchers = {
+var vatMatchers = exports.vatMatchers = {
   /**
    * European Union VAT identification numbers
    */
@@ -17489,7 +19179,6 @@ var vatMatchers = {
   SE: function SE(str) {
     return /^(SE)?\d{12}$/.test(str);
   },
-
   /**
    * VAT numbers of non-EU countries
    */
@@ -17499,9 +19188,7 @@ var vatMatchers = {
   MK: function MK(str) {
     return /^(MK)?\d{13}$/.test(str);
   },
-  AU: function AU(str) {
-    return /^(AU)?\d{11}$/.test(str);
-  },
+  AU: AU,
   BY: function BY(str) {
     return /^(УНП )?\d{9}$/.test(str);
   },
@@ -17521,7 +19208,7 @@ var vatMatchers = {
     return /^(IL)?\d{9}$/.test(str);
   },
   KZ: function KZ(str) {
-    return /^(KZ)?\d{9}$/.test(str);
+    return /^(KZ)?\d{12}$/.test(str);
   },
   NZ: function NZ(str) {
     return /^(NZ)?\d{9}$/.test(str);
@@ -17547,9 +19234,7 @@ var vatMatchers = {
   RS: function RS(str) {
     return /^(RS)?\d{9}$/.test(str);
   },
-  CH: function CH(str) {
-    return /^(CH)?(\d{6}|\d{9}|(\d{3}.\d{3})|(\d{3}.\d{3}.\d{3}))(TVA|MWST|IVA)$/.test(str);
-  },
+  CH: CH,
   TR: function TR(str) {
     return /^(TR)?\d{10}$/.test(str);
   },
@@ -17562,7 +19247,6 @@ var vatMatchers = {
   UZ: function UZ(str) {
     return /^(UZ)?\d{9}$/.test(str);
   },
-
   /**
    * VAT numbers of Latin American countries
    */
@@ -17621,124 +19305,95 @@ var vatMatchers = {
     return /^(VE)?[J,G,V,E]{1}-(\d{9}|(\d{8}-\d{1}))$/.test(str);
   }
 };
-exports.vatMatchers = vatMatchers;
-
 function isVAT(str, countryCode) {
   (0, _assertString.default)(str);
   (0, _assertString.default)(countryCode);
-
   if (countryCode in vatMatchers) {
     return vatMatchers[countryCode](str);
   }
-
   throw new Error("Invalid country code: '".concat(countryCode, "'"));
 }
-},{"./util/algorithms":137,"./util/assertString":138}],124:[function(require,module,exports){
+},{"./util/algorithms":164,"./util/assertString":165}],151:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isVariableWidth;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _isFullWidth = require("./isFullWidth");
-
 var _isHalfWidth = require("./isHalfWidth");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isVariableWidth(str) {
   (0, _assertString.default)(str);
   return _isFullWidth.fullWidth.test(str) && _isHalfWidth.halfWidth.test(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./isFullWidth":70,"./isHalfWidth":72,"./util/assertString":138}],125:[function(require,module,exports){
+},{"./isFullWidth":95,"./isHalfWidth":97,"./util/assertString":165}],152:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = isWhitelisted;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function isWhitelisted(str, chars) {
   (0, _assertString.default)(str);
-
   for (var i = str.length - 1; i >= 0; i--) {
     if (chars.indexOf(str[i]) === -1) {
       return false;
     }
   }
-
   return true;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],126:[function(require,module,exports){
+},{"./util/assertString":165}],153:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = ltrim;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function ltrim(str, chars) {
-  (0, _assertString.default)(str); // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping
-
+  (0, _assertString.default)(str);
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping
   var pattern = chars ? new RegExp("^[".concat(chars.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "]+"), 'g') : /^\s+/g;
   return str.replace(pattern, '');
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],127:[function(require,module,exports){
+},{"./util/assertString":165}],154:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = matches;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function matches(str, pattern, modifiers) {
   (0, _assertString.default)(str);
-
   if (Object.prototype.toString.call(pattern) !== '[object RegExp]') {
     pattern = new RegExp(pattern, modifiers);
   }
-
   return !!str.match(pattern);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],128:[function(require,module,exports){
+},{"./util/assertString":165}],155:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = normalizeEmail;
-
 var _merge = _interopRequireDefault(require("./util/merge"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var default_normalize_email_options = {
   // The following options apply to all email addresses
   // Lowercases the local part of the email address.
@@ -17772,67 +19427,64 @@ var default_normalize_email_options = {
   icloud_lowercase: true,
   // Removes the subaddress (e.g. "+foo") from the email address
   icloud_remove_subaddress: true
-}; // List of domains used by iCloud
+};
 
-var icloud_domains = ['icloud.com', 'me.com']; // List of domains used by Outlook.com and its predecessors
+// List of domains used by iCloud
+var icloud_domains = ['icloud.com', 'me.com'];
+
+// List of domains used by Outlook.com and its predecessors
 // This list is likely incomplete.
 // Partial reference:
 // https://blogs.office.com/2013/04/17/outlook-com-gets-two-step-verification-sign-in-by-alias-and-new-international-domains/
+var outlookdotcom_domains = ['hotmail.at', 'hotmail.be', 'hotmail.ca', 'hotmail.cl', 'hotmail.co.il', 'hotmail.co.nz', 'hotmail.co.th', 'hotmail.co.uk', 'hotmail.com', 'hotmail.com.ar', 'hotmail.com.au', 'hotmail.com.br', 'hotmail.com.gr', 'hotmail.com.mx', 'hotmail.com.pe', 'hotmail.com.tr', 'hotmail.com.vn', 'hotmail.cz', 'hotmail.de', 'hotmail.dk', 'hotmail.es', 'hotmail.fr', 'hotmail.hu', 'hotmail.id', 'hotmail.ie', 'hotmail.in', 'hotmail.it', 'hotmail.jp', 'hotmail.kr', 'hotmail.lv', 'hotmail.my', 'hotmail.ph', 'hotmail.pt', 'hotmail.sa', 'hotmail.sg', 'hotmail.sk', 'live.be', 'live.co.uk', 'live.com', 'live.com.ar', 'live.com.mx', 'live.de', 'live.es', 'live.eu', 'live.fr', 'live.it', 'live.nl', 'msn.com', 'outlook.at', 'outlook.be', 'outlook.cl', 'outlook.co.il', 'outlook.co.nz', 'outlook.co.th', 'outlook.com', 'outlook.com.ar', 'outlook.com.au', 'outlook.com.br', 'outlook.com.gr', 'outlook.com.pe', 'outlook.com.tr', 'outlook.com.vn', 'outlook.cz', 'outlook.de', 'outlook.dk', 'outlook.es', 'outlook.fr', 'outlook.hu', 'outlook.id', 'outlook.ie', 'outlook.in', 'outlook.it', 'outlook.jp', 'outlook.kr', 'outlook.lv', 'outlook.my', 'outlook.ph', 'outlook.pt', 'outlook.sa', 'outlook.sg', 'outlook.sk', 'passport.com'];
 
-var outlookdotcom_domains = ['hotmail.at', 'hotmail.be', 'hotmail.ca', 'hotmail.cl', 'hotmail.co.il', 'hotmail.co.nz', 'hotmail.co.th', 'hotmail.co.uk', 'hotmail.com', 'hotmail.com.ar', 'hotmail.com.au', 'hotmail.com.br', 'hotmail.com.gr', 'hotmail.com.mx', 'hotmail.com.pe', 'hotmail.com.tr', 'hotmail.com.vn', 'hotmail.cz', 'hotmail.de', 'hotmail.dk', 'hotmail.es', 'hotmail.fr', 'hotmail.hu', 'hotmail.id', 'hotmail.ie', 'hotmail.in', 'hotmail.it', 'hotmail.jp', 'hotmail.kr', 'hotmail.lv', 'hotmail.my', 'hotmail.ph', 'hotmail.pt', 'hotmail.sa', 'hotmail.sg', 'hotmail.sk', 'live.be', 'live.co.uk', 'live.com', 'live.com.ar', 'live.com.mx', 'live.de', 'live.es', 'live.eu', 'live.fr', 'live.it', 'live.nl', 'msn.com', 'outlook.at', 'outlook.be', 'outlook.cl', 'outlook.co.il', 'outlook.co.nz', 'outlook.co.th', 'outlook.com', 'outlook.com.ar', 'outlook.com.au', 'outlook.com.br', 'outlook.com.gr', 'outlook.com.pe', 'outlook.com.tr', 'outlook.com.vn', 'outlook.cz', 'outlook.de', 'outlook.dk', 'outlook.es', 'outlook.fr', 'outlook.hu', 'outlook.id', 'outlook.ie', 'outlook.in', 'outlook.it', 'outlook.jp', 'outlook.kr', 'outlook.lv', 'outlook.my', 'outlook.ph', 'outlook.pt', 'outlook.sa', 'outlook.sg', 'outlook.sk', 'passport.com']; // List of domains used by Yahoo Mail
+// List of domains used by Yahoo Mail
 // This list is likely incomplete
+var yahoo_domains = ['rocketmail.com', 'yahoo.ca', 'yahoo.co.uk', 'yahoo.com', 'yahoo.de', 'yahoo.fr', 'yahoo.in', 'yahoo.it', 'ymail.com'];
 
-var yahoo_domains = ['rocketmail.com', 'yahoo.ca', 'yahoo.co.uk', 'yahoo.com', 'yahoo.de', 'yahoo.fr', 'yahoo.in', 'yahoo.it', 'ymail.com']; // List of domains used by yandex.ru
+// List of domains used by yandex.ru
+var yandex_domains = ['yandex.ru', 'yandex.ua', 'yandex.kz', 'yandex.com', 'yandex.by', 'ya.ru'];
 
-var yandex_domains = ['yandex.ru', 'yandex.ua', 'yandex.kz', 'yandex.com', 'yandex.by', 'ya.ru']; // replace single dots, but not multiple consecutive dots
-
+// replace single dots, but not multiple consecutive dots
 function dotsReplacer(match) {
   if (match.length > 1) {
     return match;
   }
-
   return '';
 }
-
 function normalizeEmail(email, options) {
   options = (0, _merge.default)(options, default_normalize_email_options);
   var raw_parts = email.split('@');
   var domain = raw_parts.pop();
   var user = raw_parts.join('@');
-  var parts = [user, domain]; // The domain is always lowercased, as it's case-insensitive per RFC 1035
+  var parts = [user, domain];
 
+  // The domain is always lowercased, as it's case-insensitive per RFC 1035
   parts[1] = parts[1].toLowerCase();
-
   if (parts[1] === 'gmail.com' || parts[1] === 'googlemail.com') {
     // Address is GMail
     if (options.gmail_remove_subaddress) {
       parts[0] = parts[0].split('+')[0];
     }
-
     if (options.gmail_remove_dots) {
       // this does not replace consecutive dots like example..email@gmail.com
       parts[0] = parts[0].replace(/\.+/g, dotsReplacer);
     }
-
     if (!parts[0].length) {
       return false;
     }
-
     if (options.all_lowercase || options.gmail_lowercase) {
       parts[0] = parts[0].toLowerCase();
     }
-
     parts[1] = options.gmail_convert_googlemaildotcom ? 'gmail.com' : parts[1];
   } else if (icloud_domains.indexOf(parts[1]) >= 0) {
     // Address is iCloud
     if (options.icloud_remove_subaddress) {
       parts[0] = parts[0].split('+')[0];
     }
-
     if (!parts[0].length) {
       return false;
     }
-
     if (options.all_lowercase || options.icloud_lowercase) {
       parts[0] = parts[0].toLowerCase();
     }
@@ -17841,11 +19493,9 @@ function normalizeEmail(email, options) {
     if (options.outlookdotcom_remove_subaddress) {
       parts[0] = parts[0].split('+')[0];
     }
-
     if (!parts[0].length) {
       return false;
     }
-
     if (options.all_lowercase || options.outlookdotcom_lowercase) {
       parts[0] = parts[0].toLowerCase();
     }
@@ -17855,11 +19505,9 @@ function normalizeEmail(email, options) {
       var components = parts[0].split('-');
       parts[0] = components.length > 1 ? components.slice(0, -1).join('-') : components[0];
     }
-
     if (!parts[0].length) {
       return false;
     }
-
     if (options.all_lowercase || options.yahoo_lowercase) {
       parts[0] = parts[0].toLowerCase();
     }
@@ -17867,197 +19515,155 @@ function normalizeEmail(email, options) {
     if (options.all_lowercase || options.yandex_lowercase) {
       parts[0] = parts[0].toLowerCase();
     }
-
     parts[1] = 'yandex.ru'; // all yandex domains are equal, 1st preferred
   } else if (options.all_lowercase) {
     // Any other address
     parts[0] = parts[0].toLowerCase();
   }
-
   return parts.join('@');
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/merge":140}],129:[function(require,module,exports){
+},{"./util/merge":167}],156:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = rtrim;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function rtrim(str, chars) {
   (0, _assertString.default)(str);
-
   if (chars) {
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping
     var pattern = new RegExp("[".concat(chars.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "]+$"), 'g');
     return str.replace(pattern, '');
-  } // Use a faster and more safe than regex trim method https://blog.stevenlevithan.com/archives/faster-trim-javascript
-
-
+  }
+  // Use a faster and more safe than regex trim method https://blog.stevenlevithan.com/archives/faster-trim-javascript
   var strIndex = str.length - 1;
-
   while (/\s/.test(str.charAt(strIndex))) {
     strIndex -= 1;
   }
-
   return str.slice(0, strIndex + 1);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],130:[function(require,module,exports){
+},{"./util/assertString":165}],157:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = stripLow;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 var _blacklist = _interopRequireDefault(require("./blacklist"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function stripLow(str, keep_new_lines) {
   (0, _assertString.default)(str);
   var chars = keep_new_lines ? '\\x00-\\x09\\x0B\\x0C\\x0E-\\x1F\\x7F' : '\\x00-\\x1F\\x7F';
   return (0, _blacklist.default)(str, chars);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./blacklist":42,"./util/assertString":138}],131:[function(require,module,exports){
+},{"./blacklist":66,"./util/assertString":165}],158:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = toBoolean;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function toBoolean(str, strict) {
   (0, _assertString.default)(str);
-
   if (strict) {
     return str === '1' || /^true$/i.test(str);
   }
-
   return str !== '0' && !/^false$/i.test(str) && str !== '';
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],132:[function(require,module,exports){
+},{"./util/assertString":165}],159:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = toDate;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function toDate(date) {
   (0, _assertString.default)(date);
   date = Date.parse(date);
   return !isNaN(date) ? new Date(date) : null;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],133:[function(require,module,exports){
+},{"./util/assertString":165}],160:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = toFloat;
-
 var _isFloat = _interopRequireDefault(require("./isFloat"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function toFloat(str) {
   if (!(0, _isFloat.default)(str)) return NaN;
   return parseFloat(str);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./isFloat":69}],134:[function(require,module,exports){
+},{"./isFloat":94}],161:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = toInt;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function toInt(str, radix) {
   (0, _assertString.default)(str);
   return parseInt(str, radix || 10);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],135:[function(require,module,exports){
+},{"./util/assertString":165}],162:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = trim;
-
 var _rtrim = _interopRequireDefault(require("./rtrim"));
-
 var _ltrim = _interopRequireDefault(require("./ltrim"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function trim(str, chars) {
   return (0, _rtrim.default)((0, _ltrim.default)(str, chars), chars);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./ltrim":126,"./rtrim":129}],136:[function(require,module,exports){
+},{"./ltrim":153,"./rtrim":156}],163:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = unescape;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function unescape(str) {
   (0, _assertString.default)(str);
-  return str.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#x2F;/g, '/').replace(/&#x5C;/g, '\\').replace(/&#96;/g, '`').replace(/&amp;/g, '&'); // &amp; replacement has to be the last one to prevent
+  return str.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#x2F;/g, '/').replace(/&#x5C;/g, '\\').replace(/&#96;/g, '`').replace(/&amp;/g, '&');
+  // &amp; replacement has to be the last one to prevent
   // bugs with intermediate strings containing escape sequences
   // See: https://github.com/validatorjs/validator.js/issues/1827
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],137:[function(require,module,exports){
+},{"./util/assertString":165}],164:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18067,7 +19673,6 @@ exports.iso7064Check = iso7064Check;
 exports.luhnCheck = luhnCheck;
 exports.reverseMultiplyAndSum = reverseMultiplyAndSum;
 exports.verhoeffCheck = verhoeffCheck;
-
 /**
  * Algorithmic validation functions
  * May be used as is or implemented in the workflow of other validators.
@@ -18080,29 +19685,24 @@ exports.verhoeffCheck = verhoeffCheck;
  */
 function iso7064Check(str) {
   var checkvalue = 10;
-
   for (var i = 0; i < str.length - 1; i++) {
     checkvalue = (parseInt(str[i], 10) + checkvalue) % 10 === 0 ? 10 * 2 % 11 : (parseInt(str[i], 10) + checkvalue) % 10 * 2 % 11;
   }
-
   checkvalue = checkvalue === 1 ? 0 : 11 - checkvalue;
   return checkvalue === parseInt(str[10], 10);
 }
+
 /*
  * Luhn (mod 10) validation function
  * Called with a string of numbers (incl. check digit)
  * to validate according to the Luhn algorithm.
  */
-
-
 function luhnCheck(str) {
   var checksum = 0;
   var second = false;
-
   for (var i = str.length - 1; i >= 0; i--) {
     if (second) {
       var product = parseInt(str[i], 10) * 2;
-
       if (product > 9) {
         // sum digits of product and add to checksum
         checksum += product.toString().split('').map(function (a) {
@@ -18116,121 +19716,101 @@ function luhnCheck(str) {
     } else {
       checksum += parseInt(str[i], 10);
     }
-
     second = !second;
   }
-
   return checksum % 10 === 0;
 }
+
 /*
  * Reverse TIN multiplication and summation helper function
  * Called with an array of single-digit integers and a base multiplier
  * to calculate the sum of the digits multiplied in reverse.
  * Normally used in variations of MOD 11 algorithmic checks.
  */
-
-
 function reverseMultiplyAndSum(digits, base) {
   var total = 0;
-
   for (var i = 0; i < digits.length; i++) {
     total += digits[i] * (base - i);
   }
-
   return total;
 }
+
 /*
  * Verhoeff validation helper function
  * Called with a string of numbers
  * to validate according to the Verhoeff algorithm.
  */
-
-
 function verhoeffCheck(str) {
   var d_table = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 2, 3, 4, 0, 6, 7, 8, 9, 5], [2, 3, 4, 0, 1, 7, 8, 9, 5, 6], [3, 4, 0, 1, 2, 8, 9, 5, 6, 7], [4, 0, 1, 2, 3, 9, 5, 6, 7, 8], [5, 9, 8, 7, 6, 0, 4, 3, 2, 1], [6, 5, 9, 8, 7, 1, 0, 4, 3, 2], [7, 6, 5, 9, 8, 2, 1, 0, 4, 3], [8, 7, 6, 5, 9, 3, 2, 1, 0, 4], [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]];
-  var p_table = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 5, 7, 6, 2, 8, 3, 0, 9, 4], [5, 8, 0, 3, 7, 9, 6, 1, 4, 2], [8, 9, 1, 6, 0, 4, 3, 5, 2, 7], [9, 4, 5, 3, 1, 2, 6, 8, 7, 0], [4, 2, 8, 6, 5, 7, 3, 9, 0, 1], [2, 7, 9, 3, 8, 0, 6, 4, 1, 5], [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]]; // Copy (to prevent replacement) and reverse
+  var p_table = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 5, 7, 6, 2, 8, 3, 0, 9, 4], [5, 8, 0, 3, 7, 9, 6, 1, 4, 2], [8, 9, 1, 6, 0, 4, 3, 5, 2, 7], [9, 4, 5, 3, 1, 2, 6, 8, 7, 0], [4, 2, 8, 6, 5, 7, 3, 9, 0, 1], [2, 7, 9, 3, 8, 0, 6, 4, 1, 5], [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]];
 
+  // Copy (to prevent replacement) and reverse
   var str_copy = str.split('').reverse().join('');
   var checksum = 0;
-
   for (var i = 0; i < str_copy.length; i++) {
     checksum = d_table[checksum][p_table[i % 8][parseInt(str_copy[i], 10)]];
   }
-
   return checksum === 0;
 }
-},{}],138:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = assertString;
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function assertString(input) {
   var isString = typeof input === 'string' || input instanceof String;
-
   if (!isString) {
     var invalidType = _typeof(input);
-
     if (input === null) invalidType = 'null';else if (invalidType === 'object') invalidType = input.constructor.name;
     throw new TypeError("Expected a string but received a ".concat(invalidType));
   }
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{}],139:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-
 var includes = function includes(arr, val) {
   return arr.some(function (arrVal) {
     return val === arrVal;
   });
 };
-
-var _default = includes;
-exports.default = _default;
+var _default = exports.default = includes;
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{}],140:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = merge;
-
 function merge() {
   var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var defaults = arguments.length > 1 ? arguments[1] : undefined;
-
   for (var key in defaults) {
     if (typeof obj[key] === 'undefined') {
       obj[key] = defaults[key];
     }
   }
-
   return obj;
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{}],141:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = multilineRegexp;
-
 /**
  * Build RegExp object from an array
  * of multiple/multi-line regexp parts
@@ -18243,19 +19823,16 @@ function multilineRegexp(parts, flags) {
   var regexpAsStringLiteral = parts.join('');
   return new RegExp(regexpAsStringLiteral, flags);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{}],142:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = toString;
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function toString(input) {
   if (_typeof(input) === 'object' && input !== null) {
     if (typeof input.toString === 'function') {
@@ -18266,32 +19843,26 @@ function toString(input) {
   } else if (input === null || typeof input === 'undefined' || isNaN(input) && !input.length) {
     input = '';
   }
-
   return String(input);
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{}],143:[function(require,module,exports){
+},{}],170:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = whitelist;
-
 var _assertString = _interopRequireDefault(require("./util/assertString"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function whitelist(str, chars) {
   (0, _assertString.default)(str);
   return str.replace(new RegExp("[^".concat(chars, "]+"), 'g'), '');
 }
-
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"./util/assertString":138}],144:[function(require,module,exports){
+},{"./util/assertString":165}],171:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -18312,7 +19883,7 @@ function extend() {
     return target
 }
 
-},{}],145:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -18374,7 +19945,7 @@ module.exports = {
 
 };
 
-},{}],146:[function(require,module,exports){
+},{}],173:[function(require,module,exports){
 /*jshint maxlen: false*/
 
 var validator = require("validator");
@@ -18505,7 +20076,7 @@ var FormatValidators = {
 
 module.exports = FormatValidators;
 
-},{"validator":40}],147:[function(require,module,exports){
+},{"validator":64}],174:[function(require,module,exports){
 "use strict";
 
 var FormatValidators = require("./FormatValidators"),
@@ -18911,6 +20482,9 @@ var JsonValidators = {
             if (shouldSkipValidate(this.validateOptions, ["INVALID_FORMAT"])) {
                 return;
             }
+            if (report.hasError("INVALID_TYPE", [schema.type, Utils.whatIs(json)])) {
+                return;
+            }
             if (formatValidatorFn.length === 2) {
                 // async - need to clone the path here, because it will change by the time async function reports back
                 var pathBeforeAsync = Utils.clone(report.path);
@@ -19128,7 +20702,7 @@ exports.validate = function (report, schema, json) {
 
 };
 
-},{"./FormatValidators":146,"./Report":149,"./Utils":153}],148:[function(require,module,exports){
+},{"./FormatValidators":173,"./Report":176,"./Utils":180}],175:[function(require,module,exports){
 // Number.isFinite polyfill
 // http://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.isfinite
 if (typeof Number.isFinite !== "function") {
@@ -19146,7 +20720,7 @@ if (typeof Number.isFinite !== "function") {
     };
 }
 
-},{}],149:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 (function (process){(function (){
 "use strict";
 
@@ -19449,7 +21023,7 @@ Report.prototype.addCustomError = function (errorCode, errorMessage, params, sub
 module.exports = Report;
 
 }).call(this)}).call(this,require('_process'))
-},{"./Errors":145,"./Utils":153,"_process":11,"lodash.get":9}],150:[function(require,module,exports){
+},{"./Errors":172,"./Utils":180,"_process":32,"lodash.get":29}],177:[function(require,module,exports){
 "use strict";
 
 var isequal             = require("lodash.isequal");
@@ -19639,7 +21213,7 @@ exports.getSchemaByUri = function (report, uri, root) {
 
 exports.getRemotePath = getRemotePath;
 
-},{"./Report":149,"./SchemaCompilation":151,"./SchemaValidation":152,"./Utils":153,"lodash.isequal":10}],151:[function(require,module,exports){
+},{"./Report":176,"./SchemaCompilation":178,"./SchemaValidation":179,"./Utils":180,"lodash.isequal":30}],178:[function(require,module,exports){
 "use strict";
 
 var Report      = require("./Report");
@@ -19940,7 +21514,7 @@ exports.compileSchema = function (report, schema) {
 
 };
 
-},{"./Report":149,"./SchemaCache":150,"./Utils":153}],152:[function(require,module,exports){
+},{"./Report":176,"./SchemaCache":177,"./Utils":180}],179:[function(require,module,exports){
 "use strict";
 
 var FormatValidators = require("./FormatValidators"),
@@ -20561,7 +22135,7 @@ exports.validateSchema = function (report, schema) {
     return isValid;
 };
 
-},{"./FormatValidators":146,"./JsonValidation":147,"./Report":149,"./Utils":153}],153:[function(require,module,exports){
+},{"./FormatValidators":173,"./JsonValidation":174,"./Report":176,"./Utils":180}],180:[function(require,module,exports){
 "use strict";
 
 exports.jsonSymbol = Symbol.for("z-schema/json");
@@ -20837,7 +22411,7 @@ exports.ucs2decode = function (string) {
 };
 /*jshint +W016*/
 
-},{}],154:[function(require,module,exports){
+},{}],181:[function(require,module,exports){
 (function (process){(function (){
 "use strict";
 
@@ -21250,7 +22824,7 @@ ZSchema.jsonSymbol = Utils.jsonSymbol;
 module.exports = ZSchema;
 
 }).call(this)}).call(this,require('_process'))
-},{"./FormatValidators":146,"./JsonValidation":147,"./Polyfills":148,"./Report":149,"./SchemaCache":150,"./SchemaCompilation":151,"./SchemaValidation":152,"./Utils":153,"./schemas/hyper-schema.json":155,"./schemas/schema.json":156,"_process":11,"lodash.get":9}],155:[function(require,module,exports){
+},{"./FormatValidators":173,"./JsonValidation":174,"./Polyfills":175,"./Report":176,"./SchemaCache":177,"./SchemaCompilation":178,"./SchemaValidation":179,"./Utils":180,"./schemas/hyper-schema.json":182,"./schemas/schema.json":183,"_process":32,"lodash.get":29}],182:[function(require,module,exports){
 module.exports={
     "$schema": "http://json-schema.org/draft-04/hyper-schema#",
     "id": "http://json-schema.org/draft-04/hyper-schema#",
@@ -21410,7 +22984,7 @@ module.exports={
 }
 
 
-},{}],156:[function(require,module,exports){
+},{}],183:[function(require,module,exports){
 module.exports={
     "id": "http://json-schema.org/draft-04/schema#",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -21563,7 +23137,7 @@ module.exports={
     "default": {}
 }
 
-},{}],157:[function(require,module,exports){
+},{}],184:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -21663,7 +23237,7 @@ module.exports = {
     ]
 };
 
-},{}],158:[function(require,module,exports){
+},{}],185:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -21728,7 +23302,7 @@ module.exports = {
     ]
 };
 
-},{}],159:[function(require,module,exports){
+},{}],186:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -21787,7 +23361,7 @@ module.exports = {
     ]
 };
 
-},{}],160:[function(require,module,exports){
+},{}],187:[function(require,module,exports){
 "use strict";
 
 //Implement new 'shouldFail' keyword
@@ -21850,7 +23424,7 @@ module.exports = {
     ]
 };
 
-},{}],161:[function(require,module,exports){
+},{}],188:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -21878,7 +23452,7 @@ module.exports = {
     ]
 };
 
-},{}],162:[function(require,module,exports){
+},{}],189:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -21903,7 +23477,7 @@ module.exports = {
     ]
 };
 
-},{}],163:[function(require,module,exports){
+},{}],190:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -21939,7 +23513,7 @@ module.exports = {
     ]
 };
 
-},{}],164:[function(require,module,exports){
+},{}],191:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22012,7 +23586,7 @@ module.exports = {
     ]
 };
 
-},{}],165:[function(require,module,exports){
+},{}],192:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22040,7 +23614,7 @@ module.exports = {
     ]
 };
 
-},{}],166:[function(require,module,exports){
+},{}],193:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22068,7 +23642,7 @@ module.exports = {
     ]
 };
 
-},{}],167:[function(require,module,exports){
+},{}],194:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22096,7 +23670,7 @@ module.exports = {
     ]
 };
 
-},{}],168:[function(require,module,exports){
+},{}],195:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22124,7 +23698,7 @@ module.exports = {
     ]
 };
 
-},{}],169:[function(require,module,exports){
+},{}],196:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22152,7 +23726,7 @@ module.exports = {
     ]
 };
 
-},{}],170:[function(require,module,exports){
+},{}],197:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22208,7 +23782,7 @@ module.exports = {
     ]
 };
 
-},{}],171:[function(require,module,exports){
+},{}],198:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22252,7 +23826,7 @@ module.exports = {
     ]
 };
 
-},{}],172:[function(require,module,exports){
+},{}],199:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22365,7 +23939,7 @@ module.exports = {
     ]
 };
 
-},{}],173:[function(require,module,exports){
+},{}],200:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22382,7 +23956,7 @@ module.exports = {
     ]
 };
 
-},{}],174:[function(require,module,exports){
+},{}],201:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22404,7 +23978,7 @@ module.exports = {
     ]
 };
 
-},{}],175:[function(require,module,exports){
+},{}],202:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22422,7 +23996,7 @@ module.exports = {
     ]
 };
 
-},{}],176:[function(require,module,exports){
+},{}],203:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22491,7 +24065,7 @@ module.exports = {
     ]
 };
 
-},{}],177:[function(require,module,exports){
+},{}],204:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22506,7 +24080,7 @@ module.exports = {
     ]
 };
 
-},{}],178:[function(require,module,exports){
+},{}],205:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22530,7 +24104,7 @@ module.exports = {
     ]
 };
 
-},{}],179:[function(require,module,exports){
+},{}],206:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22605,7 +24179,7 @@ module.exports = {
     ]
 };
 
-},{}],180:[function(require,module,exports){
+},{}],207:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22626,7 +24200,46 @@ module.exports = {
     ]
 };
 
-},{}],181:[function(require,module,exports){
+},{}],208:[function(require,module,exports){
+"use strict";
+
+var REF_NAME = "int.json";
+
+module.exports = {
+    description: "Issue #125 - Why process format if type validation fails",
+    setup: function (validator, Class) {
+      Class.registerFormat("test", function (item) {
+          return typeof item === 'string';
+      });
+    },
+    tests: [
+        {
+            description: "should fail with one error",
+            schema: {
+              type: "object",
+              properties: {
+                callbacks: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                    format: "test",
+                  },
+                },
+              },
+            },
+            data: {
+              callbacks: [true],
+            },
+            valid: false,
+            after: function (err, valid, data, validator) {
+              expect(err.length).toBe(1);
+              expect(err[0].code).toBe("INVALID_TYPE");
+            }
+        }
+    ]
+};
+
+},{}],209:[function(require,module,exports){
 "use strict";
 
 var REF_NAME = "int.json";
@@ -22673,7 +24286,7 @@ module.exports = {
     ]
 };
 
-},{}],182:[function(require,module,exports){
+},{}],210:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22846,7 +24459,7 @@ module.exports = {
     ]
 };
 
-},{}],183:[function(require,module,exports){
+},{}],211:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22891,7 +24504,7 @@ module.exports = {
     ]
 };
 
-},{}],184:[function(require,module,exports){
+},{}],212:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22934,7 +24547,7 @@ module.exports = {
     ]
 };
 
-},{}],185:[function(require,module,exports){
+},{}],213:[function(require,module,exports){
 "use strict";
 
 var schema1 = {
@@ -23018,7 +24631,7 @@ module.exports = {
     ]
 };
 
-},{}],186:[function(require,module,exports){
+},{}],214:[function(require,module,exports){
 module.exports = {
     description: "Issue #139 - add schema id if present to erro message via addError method",
     tests: [
@@ -23077,7 +24690,7 @@ module.exports = {
     ]
 };
 
-},{}],187:[function(require,module,exports){
+},{}],215:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -23095,7 +24708,7 @@ module.exports = {
     ]
 };
 
-},{}],188:[function(require,module,exports){
+},{}],216:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -23125,7 +24738,7 @@ module.exports = {
     ]
 };
 
-},{}],189:[function(require,module,exports){
+},{}],217:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -23153,7 +24766,7 @@ module.exports = {
     ]
 };
 
-},{}],190:[function(require,module,exports){
+},{}],218:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -23180,7 +24793,7 @@ module.exports = {
     ]
 };
 
-},{}],191:[function(require,module,exports){
+},{}],219:[function(require,module,exports){
 "use strict";
 var ref1 = "http://www.example.org/schema1/#";
 var ref2 = "http://www.example.org/schema2/#";
@@ -23220,7 +24833,7 @@ module.exports = {
     }
   ]
 };
-},{}],192:[function(require,module,exports){
+},{}],220:[function(require,module,exports){
 "use strict";
 
 var testAsync = true;
@@ -23269,7 +24882,7 @@ module.exports = {
   ]
 };
 
-},{}],193:[function(require,module,exports){
+},{}],221:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -23345,7 +24958,7 @@ module.exports = {
     ]
 };
 
-},{}],194:[function(require,module,exports){
+},{}],222:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -23435,7 +25048,7 @@ module.exports = {
     ]
 };
 
-},{}],195:[function(require,module,exports){
+},{}],223:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -23497,7 +25110,7 @@ module.exports = {
     ]
 };
 
-},{}],196:[function(require,module,exports){
+},{}],224:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -23533,7 +25146,7 @@ module.exports = {
     ]
 };
 
-},{}],197:[function(require,module,exports){
+},{}],225:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -23556,7 +25169,7 @@ module.exports = {
     ]
 };
 
-},{}],198:[function(require,module,exports){
+},{}],226:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -23646,7 +25259,7 @@ module.exports = {
     ]
 };
 
-},{}],199:[function(require,module,exports){
+},{}],227:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -23671,7 +25284,7 @@ module.exports = {
     ]
 };
 
-},{}],200:[function(require,module,exports){
+},{}],228:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -23747,7 +25360,7 @@ module.exports = {
     ]
 };
 
-},{}],201:[function(require,module,exports){
+},{}],229:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -23860,7 +25473,7 @@ module.exports = {
     ]
 };
 
-},{}],202:[function(require,module,exports){
+},{}],230:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -24040,7 +25653,7 @@ module.exports = {
     ]
 };
 
-},{}],203:[function(require,module,exports){
+},{}],231:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -24087,7 +25700,7 @@ module.exports = {
     ]
 };
 
-},{}],204:[function(require,module,exports){
+},{}],232:[function(require,module,exports){
 "use strict";
 
 var resourceObject = {
@@ -24383,7 +25996,7 @@ module.exports = {
     ]
 };
 
-},{}],205:[function(require,module,exports){
+},{}],233:[function(require,module,exports){
 "use strict";
 
 var draft4 = require("./files/Issue47/draft4.json");
@@ -24412,7 +26025,7 @@ module.exports = {
     ]
 };
 
-},{"./files/Issue47/draft4.json":229,"./files/Issue47/sample.json":230,"./files/Issue47/swagger_draft.json":231,"./files/Issue47/swagger_draft_modified.json":232}],206:[function(require,module,exports){
+},{"./files/Issue47/draft4.json":257,"./files/Issue47/sample.json":258,"./files/Issue47/swagger_draft.json":259,"./files/Issue47/swagger_draft_modified.json":260}],234:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -24445,7 +26058,7 @@ module.exports = {
     ]
 };
 
-},{}],207:[function(require,module,exports){
+},{}],235:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -24463,7 +26076,7 @@ module.exports = {
     ]
 };
 
-},{}],208:[function(require,module,exports){
+},{}],236:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -24485,7 +26098,7 @@ module.exports = {
     ]
 };
 
-},{}],209:[function(require,module,exports){
+},{}],237:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -24556,7 +26169,7 @@ module.exports = {
     ]
 };
 
-},{}],210:[function(require,module,exports){
+},{}],238:[function(require,module,exports){
 "use strict";
 
 var dataTypeBaseJson = {
@@ -25241,7 +26854,7 @@ module.exports = {
     ]
 };
 
-},{}],211:[function(require,module,exports){
+},{}],239:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -25304,7 +26917,7 @@ module.exports = {
     ]
 };
 
-},{}],212:[function(require,module,exports){
+},{}],240:[function(require,module,exports){
 /*jshint -W101*/
 
 "use strict";
@@ -25881,7 +27494,7 @@ module.exports = {
     ]
 };
 
-},{}],213:[function(require,module,exports){
+},{}],241:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -25912,7 +27525,7 @@ module.exports = {
     ]
 };
 
-},{}],214:[function(require,module,exports){
+},{}],242:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -25963,7 +27576,7 @@ module.exports = {
     ]
 };
 
-},{}],215:[function(require,module,exports){
+},{}],243:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -26083,7 +27696,7 @@ module.exports = {
     ]
 };
 
-},{}],216:[function(require,module,exports){
+},{}],244:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -26141,7 +27754,7 @@ module.exports = {
     ]
 };
 
-},{}],217:[function(require,module,exports){
+},{}],245:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -26214,7 +27827,7 @@ module.exports = {
     ]
 };
 
-},{}],218:[function(require,module,exports){
+},{}],246:[function(require,module,exports){
 "use strict";
 
 var innerSchema = {
@@ -26259,7 +27872,7 @@ module.exports = {
     ]
 };
 
-},{}],219:[function(require,module,exports){
+},{}],247:[function(require,module,exports){
 "use strict";
 
 var schema1 = {
@@ -26303,7 +27916,7 @@ module.exports = {
     ]
 };
 
-},{}],220:[function(require,module,exports){
+},{}],248:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -26321,7 +27934,7 @@ module.exports = {
     ]
 };
 
-},{}],221:[function(require,module,exports){
+},{}],249:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -26353,7 +27966,7 @@ module.exports = {
     ]
 };
 
-},{}],222:[function(require,module,exports){
+},{}],250:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -26412,7 +28025,7 @@ module.exports = {
     ]
 };
 
-},{}],223:[function(require,module,exports){
+},{}],251:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -26437,7 +28050,7 @@ module.exports = {
     ]
 };
 
-},{}],224:[function(require,module,exports){
+},{}],252:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -26462,7 +28075,7 @@ module.exports = {
     ]
 };
 
-},{}],225:[function(require,module,exports){
+},{}],253:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -26507,7 +28120,7 @@ module.exports = {
     ]
 };
 
-},{}],226:[function(require,module,exports){
+},{}],254:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -26532,7 +28145,7 @@ module.exports = {
     ]
 };
 
-},{}],227:[function(require,module,exports){
+},{}],255:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -26571,7 +28184,7 @@ module.exports = {
     ]
 };
 
-},{}],228:[function(require,module,exports){
+},{}],256:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -26601,7 +28214,7 @@ module.exports = {
     ]
 };
 
-},{}],229:[function(require,module,exports){
+},{}],257:[function(require,module,exports){
 module.exports={
     "id": "http://json-schema.org/draft-04/schema#",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -26753,7 +28366,7 @@ module.exports={
     "default": {}
 }
 
-},{}],230:[function(require,module,exports){
+},{}],258:[function(require,module,exports){
 module.exports={
   "swagger": 2,
   "info": {
@@ -26844,7 +28457,7 @@ module.exports={
   }
 }
 
-},{}],231:[function(require,module,exports){
+},{}],259:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -27242,7 +28855,7 @@ module.exports={
 	}
 }
 
-},{}],232:[function(require,module,exports){
+},{}],260:[function(require,module,exports){
 module.exports={
 	"title": "A JSON Schema for Swagger 2.0 API.",
 	"$schema": "http://json-schema.org/draft-04/schema#",
@@ -27640,7 +29253,7 @@ module.exports={
 	}
 }
 
-},{}],233:[function(require,module,exports){
+},{}],261:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -27665,15 +29278,15 @@ module.exports = {
     ]
 };
 
-},{}],234:[function(require,module,exports){
-arguments[4][229][0].apply(exports,arguments)
-},{"dup":229}],235:[function(require,module,exports){
+},{}],262:[function(require,module,exports){
+arguments[4][257][0].apply(exports,arguments)
+},{"dup":257}],263:[function(require,module,exports){
 module.exports={
     "type": "integer"
 }
-},{}],236:[function(require,module,exports){
-arguments[4][235][0].apply(exports,arguments)
-},{"dup":235}],237:[function(require,module,exports){
+},{}],264:[function(require,module,exports){
+arguments[4][263][0].apply(exports,arguments)
+},{"dup":263}],265:[function(require,module,exports){
 module.exports={
     "integer": {
         "type": "integer"
@@ -27682,7 +29295,7 @@ module.exports={
         "$ref": "#/integer"
     }
 }
-},{}],238:[function(require,module,exports){
+},{}],266:[function(require,module,exports){
 module.exports=[
     {
         "description": "additionalItems as schema",
@@ -27766,7 +29379,7 @@ module.exports=[
     }
 ]
 
-},{}],239:[function(require,module,exports){
+},{}],267:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -27856,7 +29469,7 @@ module.exports=[
     }
 ]
 
-},{}],240:[function(require,module,exports){
+},{}],268:[function(require,module,exports){
 module.exports=[
     {
         "description": "allOf",
@@ -27970,7 +29583,7 @@ module.exports=[
     }
 ]
 
-},{}],241:[function(require,module,exports){
+},{}],269:[function(require,module,exports){
 module.exports=[
     {
         "description": "anyOf",
@@ -28040,7 +29653,7 @@ module.exports=[
     }
 ]
 
-},{}],242:[function(require,module,exports){
+},{}],270:[function(require,module,exports){
 module.exports=[
     {
         "description": "invalid type for default",
@@ -28091,7 +29704,7 @@ module.exports=[
     }
 ]
 
-},{}],243:[function(require,module,exports){
+},{}],271:[function(require,module,exports){
 module.exports=[
     {
         "description": "valid definition",
@@ -28125,7 +29738,7 @@ module.exports=[
     }
 ]
 
-},{}],244:[function(require,module,exports){
+},{}],272:[function(require,module,exports){
 module.exports=[
     {
         "description": "dependencies",
@@ -28240,7 +29853,7 @@ module.exports=[
     }
 ]
 
-},{}],245:[function(require,module,exports){
+},{}],273:[function(require,module,exports){
 module.exports=[
     {
         "description": "simple enum validation",
@@ -28314,7 +29927,7 @@ module.exports=[
     }
 ]
 
-},{}],246:[function(require,module,exports){
+},{}],274:[function(require,module,exports){
 module.exports=[
     {
         "description": "a schema given for items",
@@ -28362,7 +29975,7 @@ module.exports=[
     }
 ]
 
-},{}],247:[function(require,module,exports){
+},{}],275:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxItems validation",
@@ -28392,7 +30005,7 @@ module.exports=[
     }
 ]
 
-},{}],248:[function(require,module,exports){
+},{}],276:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxLength validation",
@@ -28427,7 +30040,7 @@ module.exports=[
     }
 ]
 
-},{}],249:[function(require,module,exports){
+},{}],277:[function(require,module,exports){
 module.exports=[
     {
         "description": "maxProperties validation",
@@ -28457,7 +30070,7 @@ module.exports=[
     }
 ]
 
-},{}],250:[function(require,module,exports){
+},{}],278:[function(require,module,exports){
 module.exports=[
     {
         "description": "maximum validation",
@@ -28501,7 +30114,7 @@ module.exports=[
     }
 ]
 
-},{}],251:[function(require,module,exports){
+},{}],279:[function(require,module,exports){
 module.exports=[
     {
         "description": "minItems validation",
@@ -28531,7 +30144,7 @@ module.exports=[
     }
 ]
 
-},{}],252:[function(require,module,exports){
+},{}],280:[function(require,module,exports){
 module.exports=[
     {
         "description": "minLength validation",
@@ -28566,7 +30179,7 @@ module.exports=[
     }
 ]
 
-},{}],253:[function(require,module,exports){
+},{}],281:[function(require,module,exports){
 module.exports=[
     {
         "description": "minProperties validation",
@@ -28596,7 +30209,7 @@ module.exports=[
     }
 ]
 
-},{}],254:[function(require,module,exports){
+},{}],282:[function(require,module,exports){
 module.exports=[
     {
         "description": "minimum validation",
@@ -28640,7 +30253,7 @@ module.exports=[
     }
 ]
 
-},{}],255:[function(require,module,exports){
+},{}],283:[function(require,module,exports){
 module.exports=[
     {
         "description": "by int",
@@ -28702,7 +30315,7 @@ module.exports=[
     }
 ]
 
-},{}],256:[function(require,module,exports){
+},{}],284:[function(require,module,exports){
 module.exports=[
     {
         "description": "not",
@@ -28800,7 +30413,7 @@ module.exports=[
 
 ]
 
-},{}],257:[function(require,module,exports){
+},{}],285:[function(require,module,exports){
 module.exports=[
     {
         "description": "oneOf",
@@ -28870,7 +30483,7 @@ module.exports=[
     }
 ]
 
-},{}],258:[function(require,module,exports){
+},{}],286:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer",
@@ -28979,7 +30592,7 @@ module.exports=[
     }
 ]
 
-},{}],259:[function(require,module,exports){
+},{}],287:[function(require,module,exports){
 module.exports=[
     {
         "description": "validation of date-time strings",
@@ -29124,7 +30737,7 @@ module.exports=[
     }
 ]
 
-},{}],260:[function(require,module,exports){
+},{}],288:[function(require,module,exports){
 module.exports=[
     {
         "description": "pattern validation",
@@ -29149,7 +30762,7 @@ module.exports=[
     }
 ]
 
-},{}],261:[function(require,module,exports){
+},{}],289:[function(require,module,exports){
 module.exports=[
     {
         "description":
@@ -29261,7 +30874,7 @@ module.exports=[
     }
 ]
 
-},{}],262:[function(require,module,exports){
+},{}],290:[function(require,module,exports){
 module.exports=[
     {
         "description": "object properties validation",
@@ -29355,7 +30968,7 @@ module.exports=[
     }
 ]
 
-},{}],263:[function(require,module,exports){
+},{}],291:[function(require,module,exports){
 module.exports=[
     {
         "description": "root pointer ref",
@@ -29501,7 +31114,7 @@ module.exports=[
     }
 ]
 
-},{}],264:[function(require,module,exports){
+},{}],292:[function(require,module,exports){
 module.exports=[
     {
         "description": "remote ref",
@@ -29577,7 +31190,7 @@ module.exports=[
     }
 ]
 
-},{}],265:[function(require,module,exports){
+},{}],293:[function(require,module,exports){
 module.exports=[
     {
         "description": "required validation",
@@ -29618,7 +31231,7 @@ module.exports=[
     }
 ]
 
-},{}],266:[function(require,module,exports){
+},{}],294:[function(require,module,exports){
 module.exports=[
     {
         "description": "integer type matches integers",
@@ -29950,7 +31563,7 @@ module.exports=[
     }
 ]
 
-},{}],267:[function(require,module,exports){
+},{}],295:[function(require,module,exports){
 module.exports=[
     {
         "description": "uniqueItems validation",
@@ -30031,7 +31644,7 @@ module.exports=[
     }
 ]
 
-},{}],268:[function(require,module,exports){
+},{}],296:[function(require,module,exports){
 "use strict";
 
 var isBrowser = typeof window !== "undefined";
@@ -30124,7 +31737,7 @@ describe("Automatic schema loading", function () {
 
 });
 
-},{"../../src/ZSchema":154,"https":6}],269:[function(require,module,exports){
+},{"../../src/ZSchema":181,"https":26}],297:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -30196,7 +31809,7 @@ describe("Basic", function () {
 
 });
 
-},{"../../src/ZSchema":154,"../files/draft-04-schema.json":234,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":235,"../jsonSchemaTestSuite/remotes/integer.json":236,"../jsonSchemaTestSuite/remotes/subSchemas.json":237}],270:[function(require,module,exports){
+},{"../../src/ZSchema":181,"../files/draft-04-schema.json":262,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":263,"../jsonSchemaTestSuite/remotes/integer.json":264,"../jsonSchemaTestSuite/remotes/subSchemas.json":265}],298:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -30292,7 +31905,7 @@ describe("JsonSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":154,"../files/draft-04-schema.json":234,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":235,"../jsonSchemaTestSuite/remotes/integer.json":236,"../jsonSchemaTestSuite/remotes/subSchemas.json":237,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":238,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":239,"../jsonSchemaTestSuite/tests/draft4/allOf.json":240,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":241,"../jsonSchemaTestSuite/tests/draft4/default.json":242,"../jsonSchemaTestSuite/tests/draft4/definitions.json":243,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":244,"../jsonSchemaTestSuite/tests/draft4/enum.json":245,"../jsonSchemaTestSuite/tests/draft4/items.json":246,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":247,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":248,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":249,"../jsonSchemaTestSuite/tests/draft4/maximum.json":250,"../jsonSchemaTestSuite/tests/draft4/minItems.json":251,"../jsonSchemaTestSuite/tests/draft4/minLength.json":252,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":253,"../jsonSchemaTestSuite/tests/draft4/minimum.json":254,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":255,"../jsonSchemaTestSuite/tests/draft4/not.json":256,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":257,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":258,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":259,"../jsonSchemaTestSuite/tests/draft4/pattern.json":260,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":261,"../jsonSchemaTestSuite/tests/draft4/properties.json":262,"../jsonSchemaTestSuite/tests/draft4/ref.json":263,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":264,"../jsonSchemaTestSuite/tests/draft4/required.json":265,"../jsonSchemaTestSuite/tests/draft4/type.json":266,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":267}],271:[function(require,module,exports){
+},{"../../src/ZSchema":181,"../files/draft-04-schema.json":262,"../jsonSchemaTestSuite/remotes/folder/folderInteger.json":263,"../jsonSchemaTestSuite/remotes/integer.json":264,"../jsonSchemaTestSuite/remotes/subSchemas.json":265,"../jsonSchemaTestSuite/tests/draft4/additionalItems.json":266,"../jsonSchemaTestSuite/tests/draft4/additionalProperties.json":267,"../jsonSchemaTestSuite/tests/draft4/allOf.json":268,"../jsonSchemaTestSuite/tests/draft4/anyOf.json":269,"../jsonSchemaTestSuite/tests/draft4/default.json":270,"../jsonSchemaTestSuite/tests/draft4/definitions.json":271,"../jsonSchemaTestSuite/tests/draft4/dependencies.json":272,"../jsonSchemaTestSuite/tests/draft4/enum.json":273,"../jsonSchemaTestSuite/tests/draft4/items.json":274,"../jsonSchemaTestSuite/tests/draft4/maxItems.json":275,"../jsonSchemaTestSuite/tests/draft4/maxLength.json":276,"../jsonSchemaTestSuite/tests/draft4/maxProperties.json":277,"../jsonSchemaTestSuite/tests/draft4/maximum.json":278,"../jsonSchemaTestSuite/tests/draft4/minItems.json":279,"../jsonSchemaTestSuite/tests/draft4/minLength.json":280,"../jsonSchemaTestSuite/tests/draft4/minProperties.json":281,"../jsonSchemaTestSuite/tests/draft4/minimum.json":282,"../jsonSchemaTestSuite/tests/draft4/multipleOf.json":283,"../jsonSchemaTestSuite/tests/draft4/not.json":284,"../jsonSchemaTestSuite/tests/draft4/oneOf.json":285,"../jsonSchemaTestSuite/tests/draft4/optional/bignum.json":286,"../jsonSchemaTestSuite/tests/draft4/optional/format.json":287,"../jsonSchemaTestSuite/tests/draft4/pattern.json":288,"../jsonSchemaTestSuite/tests/draft4/patternProperties.json":289,"../jsonSchemaTestSuite/tests/draft4/properties.json":290,"../jsonSchemaTestSuite/tests/draft4/ref.json":291,"../jsonSchemaTestSuite/tests/draft4/refRemote.json":292,"../jsonSchemaTestSuite/tests/draft4/required.json":293,"../jsonSchemaTestSuite/tests/draft4/type.json":294,"../jsonSchemaTestSuite/tests/draft4/uniqueItems.json":295}],299:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -30326,7 +31939,7 @@ describe("Using multiple instances of Z-Schema", function () {
 
 });
 
-},{"../../src/ZSchema":154}],272:[function(require,module,exports){
+},{"../../src/ZSchema":181}],300:[function(require,module,exports){
 /*jshint -W030 */
 
 "use strict";
@@ -30395,6 +32008,7 @@ var testSuiteFiles = [
     require("../ZSchemaTestSuite/Issue106.js"),
     require("../ZSchemaTestSuite/Issue107.js"),
     require("../ZSchemaTestSuite/Issue121.js"),
+    require("../ZSchemaTestSuite/Issue125.js"),
     require("../ZSchemaTestSuite/Issue126.js"),
     require("../ZSchemaTestSuite/Issue130.js"),
     require("../ZSchemaTestSuite/Issue131.js"),
@@ -30531,7 +32145,7 @@ describe("ZSchemaTestSuite", function () {
 
 });
 
-},{"../../src/ZSchema":154,"../ZSchemaTestSuite/AssumeAdditional.js":157,"../ZSchemaTestSuite/CustomFormats.js":158,"../ZSchemaTestSuite/CustomFormatsAsync.js":159,"../ZSchemaTestSuite/CustomValidator.js":160,"../ZSchemaTestSuite/ErrorPathAsArray.js":161,"../ZSchemaTestSuite/ErrorPathAsJSONPointer.js":162,"../ZSchemaTestSuite/ErrorPathContainsIntegerIndex.js":163,"../ZSchemaTestSuite/ForceAdditional.js":164,"../ZSchemaTestSuite/ForceItems.js":165,"../ZSchemaTestSuite/ForceMaxItems.js":166,"../ZSchemaTestSuite/ForceMaxLength.js":167,"../ZSchemaTestSuite/ForceMinItems.js":168,"../ZSchemaTestSuite/ForceMinLength.js":169,"../ZSchemaTestSuite/ForceProperties.js":170,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":171,"../ZSchemaTestSuite/IncludeErrors.js":172,"../ZSchemaTestSuite/InvalidId.js":173,"../ZSchemaTestSuite/Issue101.js":174,"../ZSchemaTestSuite/Issue102.js":175,"../ZSchemaTestSuite/Issue103.js":176,"../ZSchemaTestSuite/Issue106.js":177,"../ZSchemaTestSuite/Issue107.js":178,"../ZSchemaTestSuite/Issue12.js":179,"../ZSchemaTestSuite/Issue121.js":180,"../ZSchemaTestSuite/Issue126.js":181,"../ZSchemaTestSuite/Issue13.js":182,"../ZSchemaTestSuite/Issue130.js":183,"../ZSchemaTestSuite/Issue131.js":184,"../ZSchemaTestSuite/Issue137.js":185,"../ZSchemaTestSuite/Issue139.js":186,"../ZSchemaTestSuite/Issue142.js":187,"../ZSchemaTestSuite/Issue146.js":188,"../ZSchemaTestSuite/Issue151.js":189,"../ZSchemaTestSuite/Issue16.js":190,"../ZSchemaTestSuite/Issue199.js":191,"../ZSchemaTestSuite/Issue209.js":192,"../ZSchemaTestSuite/Issue22.js":193,"../ZSchemaTestSuite/Issue222.js":194,"../ZSchemaTestSuite/Issue229.js":195,"../ZSchemaTestSuite/Issue25.js":196,"../ZSchemaTestSuite/Issue250.js":197,"../ZSchemaTestSuite/Issue26.js":198,"../ZSchemaTestSuite/Issue37.js":199,"../ZSchemaTestSuite/Issue40.js":200,"../ZSchemaTestSuite/Issue41.js":201,"../ZSchemaTestSuite/Issue43.js":202,"../ZSchemaTestSuite/Issue44.js":203,"../ZSchemaTestSuite/Issue45.js":204,"../ZSchemaTestSuite/Issue47.js":205,"../ZSchemaTestSuite/Issue48.js":206,"../ZSchemaTestSuite/Issue49.js":207,"../ZSchemaTestSuite/Issue53.js":208,"../ZSchemaTestSuite/Issue56.js":209,"../ZSchemaTestSuite/Issue57.js":210,"../ZSchemaTestSuite/Issue58.js":211,"../ZSchemaTestSuite/Issue63.js":212,"../ZSchemaTestSuite/Issue64.js":213,"../ZSchemaTestSuite/Issue67.js":214,"../ZSchemaTestSuite/Issue71.js":215,"../ZSchemaTestSuite/Issue73.js":216,"../ZSchemaTestSuite/Issue76.js":217,"../ZSchemaTestSuite/Issue85.js":218,"../ZSchemaTestSuite/Issue94.js":219,"../ZSchemaTestSuite/Issue96.js":220,"../ZSchemaTestSuite/Issue98.js":221,"../ZSchemaTestSuite/MultipleSchemas.js":222,"../ZSchemaTestSuite/NoEmptyArrays.js":223,"../ZSchemaTestSuite/NoEmptyStrings.js":224,"../ZSchemaTestSuite/NoExtraKeywords.js":225,"../ZSchemaTestSuite/NoTypeless.js":226,"../ZSchemaTestSuite/PedanticCheck.js":227,"../ZSchemaTestSuite/StrictUris.js":228,"../ZSchemaTestSuite/getRegisteredFormats.js":233}],273:[function(require,module,exports){
+},{"../../src/ZSchema":181,"../ZSchemaTestSuite/AssumeAdditional.js":184,"../ZSchemaTestSuite/CustomFormats.js":185,"../ZSchemaTestSuite/CustomFormatsAsync.js":186,"../ZSchemaTestSuite/CustomValidator.js":187,"../ZSchemaTestSuite/ErrorPathAsArray.js":188,"../ZSchemaTestSuite/ErrorPathAsJSONPointer.js":189,"../ZSchemaTestSuite/ErrorPathContainsIntegerIndex.js":190,"../ZSchemaTestSuite/ForceAdditional.js":191,"../ZSchemaTestSuite/ForceItems.js":192,"../ZSchemaTestSuite/ForceMaxItems.js":193,"../ZSchemaTestSuite/ForceMaxLength.js":194,"../ZSchemaTestSuite/ForceMinItems.js":195,"../ZSchemaTestSuite/ForceMinLength.js":196,"../ZSchemaTestSuite/ForceProperties.js":197,"../ZSchemaTestSuite/IgnoreUnresolvableReferences.js":198,"../ZSchemaTestSuite/IncludeErrors.js":199,"../ZSchemaTestSuite/InvalidId.js":200,"../ZSchemaTestSuite/Issue101.js":201,"../ZSchemaTestSuite/Issue102.js":202,"../ZSchemaTestSuite/Issue103.js":203,"../ZSchemaTestSuite/Issue106.js":204,"../ZSchemaTestSuite/Issue107.js":205,"../ZSchemaTestSuite/Issue12.js":206,"../ZSchemaTestSuite/Issue121.js":207,"../ZSchemaTestSuite/Issue125.js":208,"../ZSchemaTestSuite/Issue126.js":209,"../ZSchemaTestSuite/Issue13.js":210,"../ZSchemaTestSuite/Issue130.js":211,"../ZSchemaTestSuite/Issue131.js":212,"../ZSchemaTestSuite/Issue137.js":213,"../ZSchemaTestSuite/Issue139.js":214,"../ZSchemaTestSuite/Issue142.js":215,"../ZSchemaTestSuite/Issue146.js":216,"../ZSchemaTestSuite/Issue151.js":217,"../ZSchemaTestSuite/Issue16.js":218,"../ZSchemaTestSuite/Issue199.js":219,"../ZSchemaTestSuite/Issue209.js":220,"../ZSchemaTestSuite/Issue22.js":221,"../ZSchemaTestSuite/Issue222.js":222,"../ZSchemaTestSuite/Issue229.js":223,"../ZSchemaTestSuite/Issue25.js":224,"../ZSchemaTestSuite/Issue250.js":225,"../ZSchemaTestSuite/Issue26.js":226,"../ZSchemaTestSuite/Issue37.js":227,"../ZSchemaTestSuite/Issue40.js":228,"../ZSchemaTestSuite/Issue41.js":229,"../ZSchemaTestSuite/Issue43.js":230,"../ZSchemaTestSuite/Issue44.js":231,"../ZSchemaTestSuite/Issue45.js":232,"../ZSchemaTestSuite/Issue47.js":233,"../ZSchemaTestSuite/Issue48.js":234,"../ZSchemaTestSuite/Issue49.js":235,"../ZSchemaTestSuite/Issue53.js":236,"../ZSchemaTestSuite/Issue56.js":237,"../ZSchemaTestSuite/Issue57.js":238,"../ZSchemaTestSuite/Issue58.js":239,"../ZSchemaTestSuite/Issue63.js":240,"../ZSchemaTestSuite/Issue64.js":241,"../ZSchemaTestSuite/Issue67.js":242,"../ZSchemaTestSuite/Issue71.js":243,"../ZSchemaTestSuite/Issue73.js":244,"../ZSchemaTestSuite/Issue76.js":245,"../ZSchemaTestSuite/Issue85.js":246,"../ZSchemaTestSuite/Issue94.js":247,"../ZSchemaTestSuite/Issue96.js":248,"../ZSchemaTestSuite/Issue98.js":249,"../ZSchemaTestSuite/MultipleSchemas.js":250,"../ZSchemaTestSuite/NoEmptyArrays.js":251,"../ZSchemaTestSuite/NoEmptyStrings.js":252,"../ZSchemaTestSuite/NoExtraKeywords.js":253,"../ZSchemaTestSuite/NoTypeless.js":254,"../ZSchemaTestSuite/PedanticCheck.js":255,"../ZSchemaTestSuite/StrictUris.js":256,"../ZSchemaTestSuite/getRegisteredFormats.js":261}],301:[function(require,module,exports){
 "use strict";
 
 var ZSchema = require("../../src/ZSchema");
@@ -30630,4 +32244,4 @@ describe("Using path to schema as a third argument", function () {
 
 });
 
-},{"../../src/ZSchema":154}]},{},[268,269,270,271,273,272]);
+},{"../../src/ZSchema":181}]},{},[296,297,298,299,301,300]);
