@@ -2,7 +2,9 @@ const child = require('child_process');
 const path = require('path');
 
 describe('Rollup smoke CLI', function() {
-  it('runs CLI against sample fixtures and returns exit code 0', function(done) {
+  it('runs CLI against sample fixtures and returns exit code 0', function() {
+    return new Promise((done) => {
+
     const bin = path.resolve(__dirname, '..', '..', 'bin', 'z-schema');
     const schema = path.resolve(__dirname, '..', 'fixtures', 'sample-schema.json');
     const sample = path.resolve(__dirname, '..', 'fixtures', 'sample-valid.json');
@@ -18,6 +20,8 @@ describe('Rollup smoke CLI', function() {
       } catch (err) {
         done.fail(err);
       }
+    });
+    
     });
   }, 20000);
 });

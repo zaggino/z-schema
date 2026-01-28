@@ -41,15 +41,11 @@
     "build:browser": "rollup -c --environment BROWSER",
     "build:watch": "rollup -c -w",
     "prepublishOnly": "npm test",
-    "test": "jasmine-node test/",
-    "test-z": "jasmine-node test/spec/ZSchemaTestSuiteSpec.js"
+    "test": "vitest run",
+    "test-z": "vitest run test/spec/ZSchemaTestSuiteSpec.js"
   },
   "testling": {
     "scripts": [
-      "test/lib/jasmine-2.0.1/jasmine.js",
-      "test/lib/jasmine-2.0.1/jasmine-html.js",
-      "test/lib/jasmine-2.0.1/boot.js",
-      "test/lib/jasmine-2.0.1/tap_reporter.js",
       "test/Runner.js",
       "dist/ZSchema-browser-min.js",
       "dist/ZSchema-browser-test.js"
@@ -77,22 +73,21 @@
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^15.1.0",
-    "@rollup/plugin-node-resolve": "^11.2.1",
     "@rollup/plugin-json": "^4.1.0",
-    "rollup": "^2.79.1",
-    "rollup-plugin-terser": "^7.0.2",
+    "@rollup/plugin-node-resolve": "^11.2.1",
     "browserify": "^17.0.0",
     "coveralls": "^3.1.1",
     "grunt-browserify": "^6.0.0",
     "grunt-cli": "^1.4.3",
     "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-jasmine": "^4.0.0",
     "grunt-contrib-jshint": "^3.2.0",
     "grunt-contrib-uglify": "^5.2.2",
     "grunt-jscs": "^3.0.1",
     "grunt-lineending": "^1.0.0",
-    "jasmine-node": "^3.0.0",
-    "jasmine-reporters": "^2.5.0",
-    "remapify": "^2.2.0"
+    "jsdom": "^27.4.0",
+    "remapify": "^2.2.0",
+    "rollup": "^2.79.1",
+    "rollup-plugin-terser": "^7.0.2",
+    "vitest": "^4.0.18"
   }
 }

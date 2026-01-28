@@ -46,7 +46,8 @@ function validateWithAutomaticDownloads(validator, data, schema, callback) {
 
 describe("Automatic schema loading", function () {
 
-    it("should download schemas and validate successfully", function (done) {
+    it("should download schemas and validate successfully", function () {
+        return new Promise((done) => {
 
         if (isBrowser) {
             // skip this test in browsers
@@ -65,9 +66,11 @@ describe("Automatic schema loading", function () {
             done();
         });
 
+        });
     });
 
-    it("should download schemas and fail validating", function (done) {
+    it("should download schemas and fail validating", function () {
+        return new Promise((done) => {
 
         if (typeof window !== "undefined") {
             // skip this test in browsers
@@ -86,6 +89,7 @@ describe("Automatic schema loading", function () {
             done();
         });
 
+        });
     });
 
 });

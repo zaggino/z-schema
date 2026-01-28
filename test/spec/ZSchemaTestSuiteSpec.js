@@ -168,7 +168,8 @@ describe("ZSchemaTestSuite", function () {
 
             });
 
-            async && it(testSuite.description + ", " + test.description, function (done) {
+            async && it(testSuite.description + ", " + test.description, function () {
+                return new Promise((done) => {
 
                 var validator = new ZSchema(options);
                 if (setup) { setup(validator, ZSchema); }
@@ -195,6 +196,7 @@ describe("ZSchemaTestSuite", function () {
                 expect(result).toBe(undefined, "validator returned something else than undefined in callback mode");
                 zalgo = true;
 
+                });
             });
 
         });
