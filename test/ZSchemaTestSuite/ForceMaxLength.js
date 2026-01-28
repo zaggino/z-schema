@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "forceMaxLength - Force maxLength to be defined on strings",
     options: {
         forceMaxLength: true

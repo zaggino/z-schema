@@ -1,4 +1,4 @@
-"use strict";
+
 
 var schema1 = {
     "definitions": {
@@ -57,7 +57,7 @@ var schema3 = {
     }
 };
 
-module.exports = {
+export default {
     description: "Issue #137 - circular dependencies between schemas",
     tests: [
         {

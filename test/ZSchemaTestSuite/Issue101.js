@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #101 - Cannot read property '__$compiled' of undefined",
     async: true,
     options: {

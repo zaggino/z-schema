@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "registerFormat - Custom formats async support",
     async: true,
     options: {

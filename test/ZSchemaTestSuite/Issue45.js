@@ -1,4 +1,4 @@
-"use strict";
+
 
 var resourceObject = {
     "id": "resourceObject.json",
@@ -257,7 +257,7 @@ var schemaCombinations = {
     ]
 };
 
-module.exports = {
+export default {
     description: "Issue #45 - recompiling schemas results in 'Reference could not be resolved'",
     tests: [
         {

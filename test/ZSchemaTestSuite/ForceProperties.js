@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "forceProperties - Force properties to be defined on objects",
     options: {
         forceProperties: true

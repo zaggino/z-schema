@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #37 - pass schema as an uri to load from cache",
     tests: [
         {

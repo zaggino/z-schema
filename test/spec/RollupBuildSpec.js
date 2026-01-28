@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 describe('Rollup build artifacts', function() {
   it('produces dist/ZSchema-browser.js and dist/ZSchema-browser-min.js', function() {

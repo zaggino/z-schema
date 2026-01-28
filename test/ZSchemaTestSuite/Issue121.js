@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #121 - ignoreUnknownFormats",
     options: {
         ignoreUnknownFormats: true

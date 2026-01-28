@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     description: "Issue #139 - add schema id if present to erro message via addError method",
     tests: [
         {

@@ -1,15 +1,13 @@
-"use strict";
+export const jsonSymbol = Symbol.for("z-schema/json");
 
-exports.jsonSymbol = Symbol.for("z-schema/json");
-
-exports.schemaSymbol = Symbol.for("z-schema/schema");
+export const schemaSymbol = Symbol.for("z-schema/schema");
 
 /**
  * @param {object} obj
  *
  * @returns {string[]}
  */
-var sortedKeys = exports.sortedKeys = function (obj) {
+export function sortedKeys(obj) {
     return Object.keys(obj).sort();
 };
 
@@ -19,7 +17,7 @@ var sortedKeys = exports.sortedKeys = function (obj) {
  *
  * @returns {boolean}
  */
-exports.isAbsoluteUri = function (uri) {
+export function isAbsoluteUri(uri) {
     return /^https?:\/\//.test(uri);
 };
 
@@ -29,12 +27,12 @@ exports.isAbsoluteUri = function (uri) {
  *
  * @returns {boolean}
  */
-exports.isRelativeUri = function (uri) {
+export function isRelativeUri(uri) {
     // relative URIs that end with a hash sign, issue #56
     return /.+#/.test(uri);
 };
 
-exports.whatIs = function (what) {
+export function whatIs(what) {
 
     var to = typeof what;
 
@@ -74,7 +72,7 @@ exports.whatIs = function (what) {
  *
  * @returns {boolean}
  */
-exports.areEqual = function areEqual(json1, json2, options) {
+export function areEqual(json1, json2, options) {
 
     options = options || {};
     var caseInsensitiveComparison = options.caseInsensitiveComparison || false;
@@ -115,7 +113,7 @@ exports.areEqual = function areEqual(json1, json2, options) {
     }
 
     // both are objects, and:
-    if (exports.whatIs(json1) === "object" && exports.whatIs(json2) === "object") {
+    if (whatIs(json1) === "object" && whatIs(json2) === "object") {
         // have the same set of property names; and
         var keys1 = sortedKeys(json1);
         var keys2 = sortedKeys(json2);
@@ -142,11 +140,11 @@ exports.areEqual = function areEqual(json1, json2, options) {
  *
  * @returns {boolean}
  */
-exports.isUniqueArray = function (arr, indexes) {
+export function isUniqueArray(arr, indexes) {
     var i, j, l = arr.length;
     for (i = 0; i < l; i++) {
         for (j = i + 1; j < l; j++) {
-            if (exports.areEqual(arr[i], arr[j])) {
+            if (areEqual(arr[i], arr[j])) {
                 if (indexes) { indexes.push(i, j); }
                 return false;
             }
@@ -162,7 +160,7 @@ exports.isUniqueArray = function (arr, indexes) {
  *
  * @returns {*[]}
  */
-exports.difference = function (bigSet, subSet) {
+export function difference(bigSet, subSet) {
     var arr = [],
         idx = bigSet.length;
     while (idx--) {
@@ -174,7 +172,7 @@ exports.difference = function (bigSet, subSet) {
 };
 
 // NOT a deep version of clone
-exports.clone = function (src) {
+export function clone(src) {
     if (typeof src === "undefined") { return void 0; }
     if (typeof src !== "object" || src === null) { return src; }
     var res, idx;
@@ -196,9 +194,9 @@ exports.clone = function (src) {
     return res;
 };
 
-exports.cloneDeep = function (src) {
+export function cloneDeep(src) {
     var vidx = 0, visited = new Map(), cloned = [];
-    function cloneDeep(src) {
+    function cloneDeepInner(src) {
         if (typeof src !== "object" || src === null) { return src; }
         var res, idx, cidx;
 
@@ -211,7 +209,7 @@ exports.cloneDeep = function (src) {
             cloned.push(res);
             idx = src.length;
             while (idx--) {
-                res[idx] = cloneDeep(src[idx]);
+                res[idx] = cloneDeepInner(src[idx]);
             }
         } else {
             res = {};
@@ -220,19 +218,18 @@ exports.cloneDeep = function (src) {
             idx = keys.length;
             while (idx--) {
                 var key = keys[idx];
-                res[key] = cloneDeep(src[key]);
+                res[key] = cloneDeepInner(src[key]);
             }
         }
         return res;
     }
-    return cloneDeep(src);
+    return cloneDeepInner(src);
 };
 
 /*
   following function comes from punycode.js library
   see: https://github.com/bestiejs/punycode.js
 */
-/*jshint -W016*/
 /**
  * Creates an array containing the numeric code points of each Unicode
  * character in the string. While JavaScript uses UCS-2 internally,
@@ -246,7 +243,7 @@ exports.cloneDeep = function (src) {
  * @param {String} string The Unicode input string (UCS-2).
  * @returns {Array} The new array of code points.
  */
-exports.ucs2decode = function (string) {
+export function ucs2decode(string) {
     var output = [],
         counter = 0,
         length = string.length,
@@ -271,4 +268,3 @@ exports.ucs2decode = function (string) {
     }
     return output;
 };
-/*jshint +W016*/

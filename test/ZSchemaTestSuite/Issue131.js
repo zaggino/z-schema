@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #131 - Top-level errors obscure deeper errors",
     tests: [
         {

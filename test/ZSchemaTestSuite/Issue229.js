@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #229 - Paths in errors are incorrect due to Issue #209 fix",
     tests: [
         {

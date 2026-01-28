@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #130 - Improve escaping of slashes in path",
     tests: [
         {

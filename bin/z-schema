@@ -3,15 +3,15 @@
 // set default exitCode for node 0.10
 process.exitCode = 0;
 
-var fs      = require("fs");
-var path    = require("path");
-var program = require("commander");
-var request = require("https").request;
-var package = require("./../package.json");
-var ZSchema = require("./../src/ZSchema");
+import fs from "fs";
+import path from "path";
+import { program } from "commander";
+import { request } from "https";
+import pkg from "../package.json" with { type: "json" };
+import ZSchema from "../src/ZSchema.js";
 
 program
-  .version(package.version)
+  .version(pkg.version)
   .usage("[options] <schema> <json1?> <json2?> <json3?>")
   .option("--asyncTimeout <n>", "default timeout for all async tasks", parseInt)
   .option("--forceAdditional", "force additionalProperties and additionalItems to be defined on \"object\" and \"array\" types")
@@ -33,6 +33,7 @@ program
   .option("--breakOnFirstError", "stops validation as soon as an error is found, true by default but can be turned off")
   .option("--pedanticCheck", "check if schema follow best practices and common sence")
   .option("--ignoreUnknownFormats", "ignore unknown formats (do not report them as an error)")
+  .allowExcessArguments()
   .parse(process.argv);
   
 var options = {};  

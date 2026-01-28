@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #222 - Object.keys() does not guarantee order",
     tests: [
         {

@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "noEmptyArrays - Don't allow empty arrays to validate as arrays",
     options: {
         noEmptyArrays: true

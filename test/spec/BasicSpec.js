@@ -1,6 +1,4 @@
-"use strict";
-
-var ZSchema = require("../../src/ZSchema");
+import ZSchema from "../../src/ZSchema";
 
 function setRemoteReferences(validator) {
     validator.setRemoteReference("http://json-schema.org/draft-04/schema",

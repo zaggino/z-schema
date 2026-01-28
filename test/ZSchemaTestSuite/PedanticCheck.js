@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "pedanticCheck - check if schema follow best practices and common sense",
     options: {
         pedanticCheck: true,

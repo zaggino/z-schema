@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "forceMinItems - Force minItems to be defined on arrays",
     options: {
         forceMinItems: true

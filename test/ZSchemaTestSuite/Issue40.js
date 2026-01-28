@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #40 - validator ends up in infinite loop",
     tests: [
         {

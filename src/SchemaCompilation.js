@@ -1,8 +1,6 @@
-"use strict";
-
-var Report      = require("./Report");
-var SchemaCache = require("./SchemaCache");
-var Utils       = require("./Utils");
+import { Report } from './Report.js'
+import { getSchemaByUri, checkCacheForUri, cacheSchemaByUri, removeFromCacheByUri } from './SchemaCache.js';
+import * as Utils from './Utils.js';
 
 function mergeReference(scope, ref) {
     if (Utils.isAbsoluteUri(ref)) {
@@ -99,7 +97,7 @@ var compileArrayOfSchemasLoop = function (mainReport, arr) {
 
         // try to compile each schema separately
         var report = new Report(mainReport);
-        var isValid = exports.compileSchema.call(this, report, arr[idx]);
+        var isValid = compileSchema.call(this, report, arr[idx]);
         if (isValid) { compiledCount++; }
 
         // copy errors to report
@@ -170,13 +168,13 @@ var compileArrayOfSchemas = function (report, arr) {
 
 };
 
-exports.compileSchema = function (report, schema) {
+export function compileSchema(report, schema) {
 
     report.commonErrorMessage = "SCHEMA_COMPILATION_FAILED";
 
     // if schema is a string, assume it's a uri
     if (typeof schema === "string") {
-        var loadedSchema = SchemaCache.getSchemaByUri.call(this, report, schema);
+        var loadedSchema = getSchemaByUri.call(this, report, schema);
         if (!loadedSchema) {
             report.addError("SCHEMA_NOT_REACHABLE", [schema]);
             return false;
@@ -190,7 +188,7 @@ exports.compileSchema = function (report, schema) {
     }
 
     // if we have an id than it should be cached already (if this instance has compiled it)
-    if (schema.__$compiled && schema.id && SchemaCache.checkCacheForUri.call(this, schema.id) === false) {
+    if (schema.__$compiled && schema.id && checkCacheForUri.call(this, schema.id) === false) {
         schema.__$compiled = undefined;
     }
 
@@ -201,7 +199,7 @@ exports.compileSchema = function (report, schema) {
 
     if (schema.id && typeof schema.id === "string") {
         // add this to our schemaCache (before compilation in case we have references including id)
-        SchemaCache.cacheSchemaByUri.call(this, schema.id, schema);
+        cacheSchemaByUri.call(this, schema.id, schema);
     }
 
     // this method can be called recursively, so we need to remember our root
@@ -221,7 +219,7 @@ exports.compileSchema = function (report, schema) {
     while (idx--) {
         // resolve all the collected references into __xxxResolved pointer
         var refObj = refs[idx];
-        var response = SchemaCache.getSchemaByUri.call(this, report, refObj.ref, schema);
+        var response = getSchemaByUri.call(this, report, refObj.ref, schema);
 
         // we can try to use custom schemaReader if available
         if (!response) {
@@ -234,11 +232,11 @@ exports.compileSchema = function (report, schema) {
                     s.id = refObj.ref;
                     // try to compile the schema
                     var subreport = new Report(report);
-                    if (!exports.compileSchema.call(this, subreport, s)) {
+                    if (!compileSchema.call(this, subreport, s)) {
                         // copy errors to report
                         report.errors = report.errors.concat(subreport.errors);
                     } else {
-                        response = SchemaCache.getSchemaByUri.call(this, report, refObj.ref, schema);
+                        response = getSchemaByUri.call(this, report, refObj.ref, schema);
                     }
                 }
             }
@@ -254,7 +252,7 @@ exports.compileSchema = function (report, schema) {
             if (isAbsolute) {
                 // we shouldn't add UNRESOLVABLE_REFERENCE for schemas we already have downloaded
                 // and set through setRemoteReference method
-                isDownloaded = SchemaCache.checkCacheForUri.call(this, refObj.ref);
+                isDownloaded = checkCacheForUri.call(this, refObj.ref);
             }
 
             if (hasNotValid) {
@@ -285,7 +283,7 @@ exports.compileSchema = function (report, schema) {
     } else {
         if (schema.id && typeof schema.id === "string") {
             // remove this schema from schemaCache because it failed to compile
-            SchemaCache.removeFromCacheByUri.call(this, schema.id);
+            removeFromCacheByUri.call(this, schema.id);
         }
     }
 

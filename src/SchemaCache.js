@@ -1,10 +1,8 @@
-"use strict";
-
-var isequal             = require("lodash.isequal");
-var Report              = require("./Report");
-var SchemaCompilation   = require("./SchemaCompilation");
-var SchemaValidation    = require("./SchemaValidation");
-var Utils               = require("./Utils");
+import isequal from "lodash.isequal";
+import { Report } from "./Report.js";
+import { compileSchema } from "./SchemaCompilation.js";
+import * as SchemaValidation from "./SchemaValidation.js";
+import * as Utils from "./Utils.js";
 
 function decodeJSONPointer(str) {
     // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07#section-3
@@ -13,7 +11,7 @@ function decodeJSONPointer(str) {
     });
 }
 
-function getRemotePath(uri) {
+export function getRemotePath(uri) {
     var io = uri.indexOf("#");
     return io === -1 ? uri : uri.slice(0, io);
 }
@@ -71,7 +69,7 @@ function findId(schema, id) {
  *
  * @returns {void}
  */
-exports.cacheSchemaByUri = function (uri, schema) {
+export function cacheSchemaByUri(uri, schema) {
     var remotePath = getRemotePath(uri);
     if (remotePath) {
         this.cache[remotePath] = schema;
@@ -84,7 +82,7 @@ exports.cacheSchemaByUri = function (uri, schema) {
  *
  * @returns {void}
  */
-exports.removeFromCacheByUri = function (uri) {
+export function removeFromCacheByUri(uri) {
     var remotePath = getRemotePath(uri);
     if (remotePath) {
         delete this.cache[remotePath];
@@ -97,22 +95,22 @@ exports.removeFromCacheByUri = function (uri) {
  *
  * @returns {boolean}
  */
-exports.checkCacheForUri = function (uri) {
+export function checkCacheForUri(uri) {
     var remotePath = getRemotePath(uri);
     return remotePath ? this.cache[remotePath] != null : false;
 };
 
-exports.getSchema = function (report, schema) {
+export function getSchema(report, schema) {
     if (typeof schema === "object") {
-        schema = exports.getSchemaByReference.call(this, report, schema);
+        schema = getSchemaByReference.call(this, report, schema);
     }
     if (typeof schema === "string") {
-        schema = exports.getSchemaByUri.call(this, report, schema);
+        schema = getSchemaByUri.call(this, report, schema);
     }
     return schema;
 };
 
-exports.getSchemaByReference = function (report, key) {
+export function getSchemaByReference(report, key) {
     var i = this.referenceCache.length;
     while (i--) {
         if (isequal(this.referenceCache[i][0], key)) {
@@ -125,7 +123,7 @@ exports.getSchemaByReference = function (report, key) {
     return schema;
 };
 
-exports.getSchemaByUri = function (report, uri, root) {
+export function getSchemaByUri(report, uri, root) {
     var remotePath = getRemotePath(uri),
         queryPath = getQueryPath(uri),
         result = remotePath ? this.cache[remotePath] : root;
@@ -145,7 +143,7 @@ exports.getSchemaByUri = function (report, uri, root) {
                 remoteReport = anscestorReport;
             } else {
                 remoteReport = new Report(report);
-                if (SchemaCompilation.compileSchema.call(this, remoteReport, result)) {
+                if (compileSchema.call(this, remoteReport, result)) {
                     var savedOptions = this.options;
                     try {
                         // If custom validationOptions were provided to setRemoteReference(),
@@ -184,5 +182,3 @@ exports.getSchemaByUri = function (report, uri, root) {
 
     return result;
 };
-
-exports.getRemotePath = getRemotePath;

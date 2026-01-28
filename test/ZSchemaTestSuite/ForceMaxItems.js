@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "forceMaxItems - Force maxItems to be defined on arrays",
     options: {
         forceMaxItems: true

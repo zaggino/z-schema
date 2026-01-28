@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #71 - additionalProperties problem",
     tests: [
         {

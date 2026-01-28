@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #103 - Validate async fails silently",
     options: {
         asyncTimeout: 500

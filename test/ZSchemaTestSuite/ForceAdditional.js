@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "forceAdditional - Force additional properties/items in schemas",
     options: {
         forceAdditional: true

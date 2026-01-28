@@ -1,16 +1,13 @@
-"use strict";
-
-require("./Polyfills");
-var get               = require("lodash.get");
-var Report            = require("./Report");
-var FormatValidators  = require("./FormatValidators");
-var JsonValidation    = require("./JsonValidation");
-var SchemaCache       = require("./SchemaCache");
-var SchemaCompilation = require("./SchemaCompilation");
-var SchemaValidation  = require("./SchemaValidation");
-var Utils             = require("./Utils");
-var Draft4Schema      = require("./schemas/schema.json");
-var Draft4HyperSchema = require("./schemas/hyper-schema.json");
+import get from "lodash.get";
+import { Report } from "./Report.js";
+import { FormatValidators } from "./FormatValidators.js";
+import * as JsonValidation from "./JsonValidation.js";
+import * as SchemaCache from "./SchemaCache.js";
+import * as SchemaCompilation from "./SchemaCompilation.js";
+import * as SchemaValidation from "./SchemaValidation.js";
+import * as Utils from "./Utils.js";
+import Draft4Schema from "./schemas/schema.json" with { type: "json" };
+import Draft4HyperSchema from "./schemas/hyper-schema.json" with { type: "json" };
 
 /**
  * default options
@@ -406,4 +403,4 @@ ZSchema.schemaSymbol = Utils.schemaSymbol;
 
 ZSchema.jsonSymbol = Utils.jsonSymbol;
 
-module.exports = ZSchema;
+export default ZSchema;

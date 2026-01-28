@@ -1,8 +1,8 @@
-"use strict";
+
 
 var REF_NAME = "int.json";
 
-module.exports = {
+export default {
     description: "Issue #126 - do not add UNRESOLVABLE_REFERENCE error when set through setRemoteReference",
     tests: [
         {

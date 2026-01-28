@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #12 - validation should fail when missing a reference",
     tests: [
         {

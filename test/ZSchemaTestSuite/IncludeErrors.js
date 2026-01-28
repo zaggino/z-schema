@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "includeErrors - Validate only against specified errors",
     options: {
         breakOnFirstError: false,

@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "noExtraKeywords - Forbid unrecognized keywords to be defined in schemas",
     options: {
         noExtraKeywords: true

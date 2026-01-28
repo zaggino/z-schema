@@ -1,7 +1,7 @@
-"use strict";
+import ZSchema from "../../src/ZSchema";
 
 var isBrowser = typeof window !== "undefined";
-var ZSchema = require("../../src/ZSchema");
+
 if (!isBrowser) {
     var request = require("https").request;
 }

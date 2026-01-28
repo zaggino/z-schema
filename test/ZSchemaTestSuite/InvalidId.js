@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "InvalidId - check if schema with invalid id can be processed",
     validateSchemaOnly: true,
     tests: [

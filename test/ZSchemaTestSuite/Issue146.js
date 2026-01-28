@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #146 - Only the first failure in an `allOf` block is returned",
     tests: [
         {

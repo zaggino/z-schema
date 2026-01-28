@@ -1,4 +1,4 @@
-"use strict";
+
 
 //Implement new 'shouldFail' keyword
 function customValidatorFn(report, schema, json) {
@@ -7,7 +7,7 @@ function customValidatorFn(report, schema, json) {
     }
 }
 
-module.exports = {
+export default {
     description: "customValidator - Function to be called on every schema",
     options: {
         customValidator: customValidatorFn

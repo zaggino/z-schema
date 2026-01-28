@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #151 - minProperties for object type doesn't work",
     tests: [
         {

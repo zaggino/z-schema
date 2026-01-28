@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #26 - noTypeless behaviour",
     options: {
         noTypeless: true

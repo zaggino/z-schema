@@ -1,4 +1,4 @@
-"use strict";
+
 
 var dataTypeBaseJson = {
     "id": "http://wordnik.github.io/schemas/v1.2/dataTypeBase.json#",
@@ -654,7 +654,7 @@ var apiDeclarationJson = {
     }
 };
 
-module.exports = {
+export default {
     description: "Issue #57 - maximum call stack exceeded error",
     setup: function (validator, Class) {
         Class.registerFormat("mime-type", function () {

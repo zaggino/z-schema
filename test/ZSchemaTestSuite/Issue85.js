@@ -1,4 +1,4 @@
-"use strict";
+
 
 var innerSchema = {
     type: "integer"
@@ -24,7 +24,7 @@ var getKeys = function (obj) {
 var originalSchemaKeys = getKeys(originalSchema);
 var innerSchemaKeys = getKeys(innerSchema);
 
-module.exports = {
+export default {
     description: "Issue #85 - zschema shouldn't have side effects on the schema object",
     tests: [
         {

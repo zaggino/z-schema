@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Report error paths with integer array indices",
     options: {
         reportPathAsArray: true

@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #73 - getLastError method should return an instance of native Error",
     tests: [
         {

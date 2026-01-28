@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "forceItems - Force items to be defined on arrays",
     options: {
         forceItems: true

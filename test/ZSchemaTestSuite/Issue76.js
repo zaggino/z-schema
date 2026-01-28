@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #76 - circular dependencies between schemas",
     tests: [
         {

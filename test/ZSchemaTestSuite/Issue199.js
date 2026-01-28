@@ -1,4 +1,4 @@
-"use strict";
+
 var ref1 = "http://www.example.org/schema1/#";
 var ref2 = "http://www.example.org/schema2/#";
 
@@ -22,7 +22,7 @@ var schema2 = {
   }
 };
 
-module.exports = {
+export default {
   description: "Issue #47 - references to draft4 subschema are not working",
   setup: function (validator) {
     validator.setRemoteReference(ref1, schema1);

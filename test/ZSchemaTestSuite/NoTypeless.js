@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "noTypeless - Don't allow schemas without type specified",
     validateSchemaOnly: true,
     options: {

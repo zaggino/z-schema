@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #53 - Include description (if any) in errors",
     tests: [
         {

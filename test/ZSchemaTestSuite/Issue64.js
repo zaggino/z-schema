@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #64 - fix inconsistent error paths for missing reference errors",
     tests: [
         {

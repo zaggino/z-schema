@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "strictUris - validates URIs as absolute and disallow URI references",
     options: {
         strictUris: true

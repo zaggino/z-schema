@@ -1,8 +1,8 @@
-"use strict";
+
 
 var testAsync = true;
 
-module.exports = {
+export default {
   description: "Issue #209 - async validator returns wrong path",
   async: true,
   options: {

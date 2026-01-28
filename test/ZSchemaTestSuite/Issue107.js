@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #107 - add Support for Controlling Remote Schema Reading",
     setup: function (validator, ZSchema) {
         ZSchema.setSchemaReader(function (uri) {

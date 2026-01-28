@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "registerFormat - Custom formats support",
     setup: function (validator, Class) {
         Class.registerFormat("xstring", function (str) {

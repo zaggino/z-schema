@@ -1,9 +1,7 @@
-"use strict";
-
-var FormatValidators = require("./FormatValidators"),
-    JsonValidation   = require("./JsonValidation"),
-    Report           = require("./Report"),
-    Utils            = require("./Utils");
+import { FormatValidators } from "./FormatValidators.js";
+import * as JsonValidation from "./JsonValidation.js";
+import { Report } from "./Report.js";
+import * as Utils from "./Utils.js";
 
 var SchemaValidators = {
     $ref: function (report, schema) {
@@ -90,7 +88,7 @@ var SchemaValidators = {
             report.addError("KEYWORD_TYPE_EXPECTED", ["additionalItems", ["boolean", "object"]]);
         } else if (type === "object") {
             report.path.push("additionalItems");
-            exports.validateSchema.call(this, report, schema.additionalItems);
+            validateSchema.call(this, report, schema.additionalItems);
             report.path.pop();
         }
     },
@@ -100,14 +98,14 @@ var SchemaValidators = {
 
         if (type === "object") {
             report.path.push("items");
-            exports.validateSchema.call(this, report, schema.items);
+            validateSchema.call(this, report, schema.items);
             report.path.pop();
         } else if (type === "array") {
             var idx = schema.items.length;
             while (idx--) {
                 report.path.push("items");
                 report.path.push(idx.toString());
-                exports.validateSchema.call(this, report, schema.items[idx]);
+                validateSchema.call(this, report, schema.items[idx]);
                 report.path.pop();
                 report.path.pop();
             }
@@ -187,7 +185,7 @@ var SchemaValidators = {
             report.addError("KEYWORD_TYPE_EXPECTED", ["additionalProperties", ["boolean", "object"]]);
         } else if (type === "object") {
             report.path.push("additionalProperties");
-            exports.validateSchema.call(this, report, schema.additionalProperties);
+            validateSchema.call(this, report, schema.additionalProperties);
             report.path.pop();
         }
     },
@@ -205,7 +203,7 @@ var SchemaValidators = {
                 val = schema.properties[key];
             report.path.push("properties");
             report.path.push(key);
-            exports.validateSchema.call(this, report, val);
+            validateSchema.call(this, report, val);
             report.path.pop();
             report.path.pop();
         }
@@ -242,7 +240,7 @@ var SchemaValidators = {
             }
             report.path.push("patternProperties");
             report.path.push(key.toString());
-            exports.validateSchema.call(this, report, val);
+            validateSchema.call(this, report, val);
             report.path.pop();
             report.path.pop();
         }
@@ -267,7 +265,7 @@ var SchemaValidators = {
                 if (type === "object") {
                     report.path.push("dependencies");
                     report.path.push(schemaKey);
-                    exports.validateSchema.call(this, report, schemaDependency);
+                    validateSchema.call(this, report, schemaDependency);
                     report.path.pop();
                     report.path.pop();
                 } else if (type === "array") {
@@ -400,7 +398,7 @@ var SchemaValidators = {
             while (idx--) {
                 report.path.push("allOf");
                 report.path.push(idx.toString());
-                exports.validateSchema.call(this, report, schema.allOf[idx]);
+                validateSchema.call(this, report, schema.allOf[idx]);
                 report.path.pop();
                 report.path.pop();
             }
@@ -417,7 +415,7 @@ var SchemaValidators = {
             while (idx--) {
                 report.path.push("anyOf");
                 report.path.push(idx.toString());
-                exports.validateSchema.call(this, report, schema.anyOf[idx]);
+                validateSchema.call(this, report, schema.anyOf[idx]);
                 report.path.pop();
                 report.path.pop();
             }
@@ -434,7 +432,7 @@ var SchemaValidators = {
             while (idx--) {
                 report.path.push("oneOf");
                 report.path.push(idx.toString());
-                exports.validateSchema.call(this, report, schema.oneOf[idx]);
+                validateSchema.call(this, report, schema.oneOf[idx]);
                 report.path.pop();
                 report.path.pop();
             }
@@ -446,7 +444,7 @@ var SchemaValidators = {
             report.addError("KEYWORD_TYPE_EXPECTED", ["not", "object"]);
         } else {
             report.path.push("not");
-            exports.validateSchema.call(this, report, schema.not);
+            validateSchema.call(this, report, schema.not);
             report.path.pop();
         }
     },
@@ -462,7 +460,7 @@ var SchemaValidators = {
                     val = schema.definitions[key];
                 report.path.push("definitions");
                 report.path.push(key);
-                exports.validateSchema.call(this, report, val);
+                validateSchema.call(this, report, val);
                 report.path.pop();
                 report.path.pop();
             }
@@ -511,7 +509,7 @@ var SchemaValidators = {
 var validateArrayOfSchemas = function (report, arr) {
     var idx = arr.length;
     while (idx--) {
-        exports.validateSchema.call(this, report, arr[idx]);
+        validateSchema.call(this, report, arr[idx]);
     }
     return report.isValid();
 };
@@ -521,7 +519,7 @@ var validateArrayOfSchemas = function (report, arr) {
  * @param {Report} report
  * @param {*} schema
  */
-exports.validateSchema = function (report, schema) {
+export function validateSchema(report, schema) {
 
     report.commonErrorMessage = "SCHEMA_VALIDATION_FAILED";
 

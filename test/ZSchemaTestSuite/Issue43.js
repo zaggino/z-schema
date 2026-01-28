@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #43 - maximum call stack size exceeded error",
     tests: [
         {

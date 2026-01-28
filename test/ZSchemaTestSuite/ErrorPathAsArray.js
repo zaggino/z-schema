@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "reportPathAsArray - Report error paths as an array of path segments",
     options: {
         reportPathAsArray: true

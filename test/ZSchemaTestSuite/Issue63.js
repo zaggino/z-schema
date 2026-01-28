@@ -1,8 +1,4 @@
-/*jshint -W101*/
-
-"use strict";
-
-module.exports = {
+export default {
     description: "Issue #63 - unresolvable reference due to hash sign in id",
     tests: [
         {

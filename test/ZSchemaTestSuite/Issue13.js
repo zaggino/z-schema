@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #13 - compile multiple schemas tied together with an id",
     tests: [
         {

@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "forceMinLength - Force minLength to be defined on strings",
     options: {
         forceMinLength: true

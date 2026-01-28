@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "compile a schema array and validate against one of the schemas - README sample",
     tests: [
         {

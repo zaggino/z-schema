@@ -1,9 +1,9 @@
-const child = require('child_process');
-const path = require('path');
+import child from 'child_process';
+import path from 'path';
 
 describe('Rollup smoke CLI', function() {
   it('runs CLI against sample fixtures and returns exit code 0', function() {
-    return new Promise((done) => {
+    return new Promise((done, fail) => {
 
     const bin = path.resolve(__dirname, '..', '..', 'bin', 'z-schema');
     const schema = path.resolve(__dirname, '..', 'fixtures', 'sample-schema.json');
@@ -18,7 +18,7 @@ describe('Rollup smoke CLI', function() {
         expect(out.toLowerCase()).toContain('pass');
         done();
       } catch (err) {
-        done.fail(err);
+        fail(err);
       }
     });
     

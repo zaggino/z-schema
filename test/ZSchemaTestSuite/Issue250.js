@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #250 - Floating point precision is lost",
     tests: [
         {

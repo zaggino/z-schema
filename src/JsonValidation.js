@@ -1,8 +1,6 @@
-"use strict";
-
-var FormatValidators = require("./FormatValidators"),
-    Report           = require("./Report"),
-    Utils            = require("./Utils");
+import { FormatValidators } from "./FormatValidators.js";
+import { Report } from "./Report.js";
+import * as Utils from "./Utils.js";
 
 var shouldSkipValidate = function (options, errors) {
     return options &&
@@ -11,7 +9,7 @@ var shouldSkipValidate = function (options, errors) {
         !errors.some(function (err) { return options.includeErrors.includes(err);});
 };
 
-var JsonValidators = {
+export const JsonValidators = {
     multipleOf: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.1.2
         if (shouldSkipValidate(this.validateOptions, ["MULTIPLE_OF"])) {
@@ -287,7 +285,7 @@ var JsonValidators = {
                 var dependencyDefinition = schema.dependencies[dependencyName];
                 if (Utils.whatIs(dependencyDefinition) === "object") {
                     // if dependency is a schema, validate against this schema
-                    exports.validate.call(this, report, dependencyDefinition, json);
+                    validate.call(this, report, dependencyDefinition, json);
                 } else { // Array
                     // if dependency is an array, object needs to have all properties in this array
                     var idx2 = dependencyDefinition.length;
@@ -343,7 +341,7 @@ var JsonValidators = {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
         var idx = schema.allOf.length;
         while (idx--) {
-            var validateResult = exports.validate.call(this, report, schema.allOf[idx], json);
+            var validateResult = validate.call(this, report, schema.allOf[idx], json);
             if (this.options.breakOnFirstError && validateResult === false) {
                 break;
             }
@@ -358,7 +356,7 @@ var JsonValidators = {
         while (idx-- && passed === false) {
             var subReport = new Report(report);
             subReports.push(subReport);
-            passed = exports.validate.call(this, subReport, schema.anyOf[idx], json);
+            passed = validate.call(this, subReport, schema.anyOf[idx], json);
         }
 
         if (passed === false) {
@@ -374,7 +372,7 @@ var JsonValidators = {
         while (idx--) {
             var subReport = new Report(report, { maxErrors: 1 });
             subReports.push(subReport);
-            if (exports.validate.call(this, subReport, schema.oneOf[idx], json) === true) {
+            if (validate.call(this, subReport, schema.oneOf[idx], json) === true) {
                 passes++;
             }
         }
@@ -388,7 +386,7 @@ var JsonValidators = {
     not: function (report, schema, json) {
         // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
         var subReport = new Report(report);
-        if (exports.validate.call(this, subReport, schema.not, json) === true) {
+        if (validate.call(this, subReport, schema.not, json) === true) {
             report.addError("NOT_PASSED", null, null, schema);
         }
     },
@@ -444,13 +442,13 @@ var recurseArray = function (report, schema, json) {
             // equal to doesn't make sense here
             if (idx < schema.items.length) {
                 report.path.push(idx);
-                exports.validate.call(this, report, schema.items[idx], json[idx]);
+                validate.call(this, report, schema.items[idx], json[idx]);
                 report.path.pop();
             } else {
                 // might be boolean, so check that it's an object
                 if (typeof schema.additionalItems === "object") {
                     report.path.push(idx);
-                    exports.validate.call(this, report, schema.additionalItems, json[idx]);
+                    validate.call(this, report, schema.additionalItems, json[idx]);
                     report.path.pop();
                 }
             }
@@ -462,7 +460,7 @@ var recurseArray = function (report, schema, json) {
         // regardless of its index, and regardless of the value of "additionalItems".
         while (idx--) {
             report.path.push(idx);
-            exports.validate.call(this, report, schema.items, json[idx]);
+            validate.call(this, report, schema.items, json[idx]);
             report.path.pop();
         }
 
@@ -523,13 +521,11 @@ var recurseObject = function (report, schema, json) {
         idx2 = s.length;
         while (idx2--) {
             report.path.push(m);
-            exports.validate.call(this, report, s[idx2], propertyValue);
+            validate.call(this, report, s[idx2], propertyValue);
             report.path.pop();
         }
     }
 };
-
-exports.JsonValidators = JsonValidators;
 
 /**
  *
@@ -537,7 +533,7 @@ exports.JsonValidators = JsonValidators;
  * @param {*} schema
  * @param {*} json
  */
-exports.validate = function (report, schema, json) {
+export function validate(report, schema, json) {
 
     report.commonErrorMessage = "JSON_OBJECT_VALIDATION_FAILED";
 

@@ -1,6 +1,5 @@
-"use strict";
+import ZSchema from "../../src/ZSchema";
 
-var ZSchema = require("../../src/ZSchema");
 var validator = new ZSchema();
 var schema = {
     "type": [

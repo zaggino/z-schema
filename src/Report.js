@@ -1,8 +1,6 @@
-"use strict";
-
-var get    = require("lodash.get");
-var Errors = require("./Errors");
-var Utils  = require("./Utils");
+import get from "lodash.get";
+import { Errors } from "./Errors.js";
+import * as Utils from "./Utils.js";
 
 /**
  * @class
@@ -10,7 +8,7 @@ var Utils  = require("./Utils");
  * @param {Report|object} parentOrOptions
  * @param {object} [reportOptions]
  */
-function Report(parentOrOptions, reportOptions) {
+export function Report(parentOrOptions, reportOptions) {
     this.parentReport = parentOrOptions instanceof Report ?
                             parentOrOptions :
                             undefined;
@@ -295,5 +293,3 @@ Report.prototype.addCustomError = function (errorCode, errorMessage, params, sub
 
     this.errors.push(err);
 };
-
-module.exports = Report;

@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "noEmptyStrings - Don't allow empty strings to validate as strings",
     options: {
         noEmptyStrings: true

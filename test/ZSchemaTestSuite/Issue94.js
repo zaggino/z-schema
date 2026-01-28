@@ -1,4 +1,4 @@
-"use strict";
+
 
 var schema1 = {
     "id": "long-string",
@@ -25,7 +25,7 @@ var expectedResult = {
         }
     }
 };
-module.exports = {
+export default {
     description: "Issue #94 - get a resolved schema for documentation purposes",
     tests: [
         {

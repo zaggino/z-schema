@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #48 - email validation too strict",
     schema: {
         type: "string",

@@ -1,8 +1,6 @@
-/*jshint maxlen: false*/
+import validator from "validator";
 
-var validator = require("validator");
-
-var FormatValidators = {
+export const FormatValidators = {
     "date": function (date) {
         if (typeof date !== "string") {
             return true;
@@ -125,5 +123,3 @@ var FormatValidators = {
         return typeof uri !== "string" || validator.isURL(uri);
     }
 };
-
-module.exports = FormatValidators;

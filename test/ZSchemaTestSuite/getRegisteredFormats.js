@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = {
+export default {
     description: "getRegisteredFormats - return an array of format names",
     setup: function (validator, Class) {
         Class.registerFormat('phone', function (str) {

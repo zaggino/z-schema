@@ -1,8 +1,8 @@
-"use strict";
+
 
 var REF_NAME = "int.json";
 
-module.exports = {
+export default {
     description: "Issue #125 - Why process format if type validation fails",
     setup: function (validator, Class) {
       Class.registerFormat("test", function (item) {

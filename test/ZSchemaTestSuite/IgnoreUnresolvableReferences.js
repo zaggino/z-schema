@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "ignoreUnresolvableReferences - Ignore remote references in schemas",
     options: {
         ignoreUnresolvableReferences: true

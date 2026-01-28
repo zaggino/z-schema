@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #44 - unresolvable reference due to hash sign",
     tests: [
         {

@@ -1,6 +1,6 @@
-"use strict";
 
-module.exports = {
+
+export default {
     description: "Issue #16 - schemas should be validated by references in $schema property",
     tests: [
         {
