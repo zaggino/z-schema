@@ -77,11 +77,11 @@ Report.prototype.processAsyncTasks = function (timeout, callback) {
         self              = this;
 
     function finish() {
-        process.nextTick(function () {
+        setTimeout(function () {
             var valid = self.errors.length === 0,
                 err = valid ? null : self.errors;
             callback(err, valid);
-        });
+        }, 0);
     }
 
     function respond(asyncTaskResultProcessFn) {

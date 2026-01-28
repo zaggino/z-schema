@@ -2,13 +2,17 @@ import ZSchema from "../../src/ZSchema";
 
 function setRemoteReferences(validator) {
     validator.setRemoteReference("http://json-schema.org/draft-04/schema",
-                                 require("../files/draft-04-schema.json"));
+                                 import("../files/draft-04-schema.json")
+                                );
     validator.setRemoteReference("http://localhost:1234/integer.json",
-                                 require("../jsonSchemaTestSuite/remotes/integer.json"));
+                                 import("../jsonSchemaTestSuite/remotes/integer.json")
+                                );
     validator.setRemoteReference("http://localhost:1234/subSchemas.json",
-                                 require("../jsonSchemaTestSuite/remotes/subSchemas.json"));
+                                 import("../jsonSchemaTestSuite/remotes/subSchemas.json")
+                                );
     validator.setRemoteReference("http://localhost:1234/folder/folderInteger.json",
-                                 require("../jsonSchemaTestSuite/remotes/folder/folderInteger.json"));
+                                 import("../jsonSchemaTestSuite/remotes/folder/folderInteger.json")
+                                );
 }
 
 describe("Basic", function () {

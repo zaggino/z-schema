@@ -27,8 +27,7 @@ describe('Rollup smoke CLI', function() {
 });
 describe('Rollup CLI smoke test', function() {
   it('runs `bin/z-schema` against sample fixtures and passes', function() {
-    var spawnSync = require('child_process').spawnSync;
-    var res = spawnSync(process.execPath, ['bin/z-schema', 'test/fixtures/sample-schema.json', 'test/fixtures/sample-valid.json'], { encoding: 'utf8' });
+    var res = child.spawnSync(process.execPath, ['bin/z-schema', 'test/fixtures/sample-schema.json', 'test/fixtures/sample-valid.json'], { encoding: 'utf8' });
     // Exit code should be 0
     expect(res.status).toBe(0);
     // stdout should indicate validation passed

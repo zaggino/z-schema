@@ -77,6 +77,7 @@
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^0.4.4",
+    "@vitest/browser-playwright": "^4.0.18",
     "browserify": "^17.0.0",
     "coveralls": "^3.1.1",
     "grunt-browserify": "^6.0.0",

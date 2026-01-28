@@ -12,7 +12,6 @@ describe('Rollup build artifacts', function() {
 });
 describe('Rollup build artifacts', function() {
   it('creates browser bundles in dist/', function() {
-    var fs = require('fs');
     expect(fs.existsSync('dist/ZSchema-browser.js')).toBe(true);
     expect(fs.existsSync('dist/ZSchema-browser-min.js')).toBe(true);
   });
