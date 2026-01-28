@@ -2,7 +2,7 @@
   "name": "z-schema",
   "version": "7.0.0",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=22.0.0"
   },
   "description": "JSON schema validator",
   "homepage": "https://github.com/zaggino/z-schema",
