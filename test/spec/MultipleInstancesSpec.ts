@@ -1,4 +1,4 @@
-import ZSchema from "../../src/ZSchema";
+import ZSchema from "../../src/ZSchema.ts";
 
 describe("Using multiple instances of Z-Schema", function () {
 

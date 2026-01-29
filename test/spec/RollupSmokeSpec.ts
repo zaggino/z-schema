@@ -3,7 +3,7 @@ import path from 'path';
 
 describe('Rollup smoke CLI', function() {
   it('runs CLI against sample fixtures and returns exit code 0', function() {
-    return new Promise((done, fail) => {
+    return new Promise<void>((done, fail) => {
 
     const bin = path.resolve(__dirname, '..', '..', 'bin', 'z-schema');
     const schema = path.resolve(__dirname, '..', 'fixtures', 'sample-schema.json');

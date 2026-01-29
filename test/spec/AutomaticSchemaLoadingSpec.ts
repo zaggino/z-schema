@@ -1,4 +1,4 @@
-import ZSchema from "../../src/ZSchema";
+import ZSchema from "../../src/ZSchema.ts";
 
 var isBrowser = typeof window !== "undefined";
 
@@ -47,7 +47,7 @@ function validateWithAutomaticDownloads(validator, data, schema, callback) {
 describe("Automatic schema loading", function () {
 
     it("should download schemas and validate successfully", function () {
-        return new Promise((done) => {
+        return new Promise<void>((done) => {
 
         if (isBrowser) {
             // skip this test in browsers
@@ -70,7 +70,7 @@ describe("Automatic schema loading", function () {
     });
 
     it("should download schemas and fail validating", function () {
-        return new Promise((done) => {
+        return new Promise<void>((done) => {
 
         if (typeof window !== "undefined") {
             // skip this test in browsers

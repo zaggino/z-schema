@@ -72,7 +72,7 @@ export function whatIs(what) {
  *
  * @returns {boolean}
  */
-export function areEqual(json1, json2, options) {
+export function areEqual(json1, json2, options?) {
 
     options = options || {};
     var caseInsensitiveComparison = options.caseInsensitiveComparison || false;
@@ -140,7 +140,7 @@ export function areEqual(json1, json2, options) {
  *
  * @returns {boolean}
  */
-export function isUniqueArray(arr, indexes) {
+export function isUniqueArray(arr, indexes?) {
     var i, j, l = arr.length;
     for (i = 0; i < l; i++) {
         for (j = i + 1; j < l; j++) {

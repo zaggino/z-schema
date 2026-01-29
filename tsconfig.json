@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "target": "esnext",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext"
+  },
+  "include": ["./src/**/*"]
+}
+ 

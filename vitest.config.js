@@ -10,15 +10,15 @@ export default defineConfig({
         test: {
           name: "node",
           environment: "node",
-          include: ["test/spec/*.js"],
+          include: ["test/spec/*.{js,ts}"],
         }
       },
       {
         extends: true,
         test: {
           name: "browsers",
-          include: ["test/spec/*.js"],
-          exclude: ["test/spec/RollupBuildSpec.js","test/spec/RollupSmokeSpec.js"],
+          include: ["test/spec/*.{js,ts}"],
+          exclude: ["test/spec/RollupBuildSpec.{js,ts}","test/spec/RollupSmokeSpec.{js,ts}"],
           browser: {
             enabled: true,
             provider: playwright(),

@@ -38,7 +38,7 @@
   "types": "index.d.ts",
   "scripts": {
     "prepare": "npm run build",
-    "build": "rollup -c",
+    "build": "tsc && rollup -c",
     "build:browser": "rollup -c --environment BROWSER",
     "build:watch": "rollup -c -w",
     "prepublishOnly": "npm test",
@@ -79,6 +79,9 @@
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/lodash.get": "^4.4.9",
+    "@types/node": "^25.1.0",
     "@vitest/browser-playwright": "^4.0.18",
     "browserify": "^17.0.0",
     "coveralls": "^3.1.1",
@@ -92,6 +95,8 @@
     "jsdom": "^27.4.0",
     "remapify": "^2.2.0",
     "rollup": "^4.57.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   }
 }

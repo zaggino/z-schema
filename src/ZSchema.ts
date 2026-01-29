@@ -110,7 +110,7 @@ function normalizeOptions(options) {
  *
  * @param {*} [options]
  */
-function ZSchema(options) {
+function ZSchema(options?) {
     this.cache = {};
     this.referenceCache = [];
     this.validateOptions = {};
@@ -257,7 +257,7 @@ ZSchema.prototype.getLastError = function () {
     var e = new Error();
     e.name = "z-schema validation error";
     e.message = this.lastReport.commonErrorMessage;
-    e.details = this.lastReport.errors;
+    (e as any).details = this.lastReport.errors;
     return e;
 };
 ZSchema.prototype.getLastErrors = function () {

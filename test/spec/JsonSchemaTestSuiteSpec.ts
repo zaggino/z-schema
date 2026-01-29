@@ -1,4 +1,4 @@
-import ZSchema from "../../src/ZSchema";
+import ZSchema from "../../src/ZSchema.ts";
 
 const [draft_04_schema_json, remotes_integer_json, remotes_subSchemas_json, remotes_folderInteger_json] = (await Promise.all([
 import("../files/draft-04-schema.json"),
@@ -65,7 +65,7 @@ describe("JsonSchemaTestSuite", function () {
         expect(jsonSchemaTestSuiteFiles.length).toBe(30);
     });
 
-    jsonSchemaTestSuiteFiles.forEach(function (testDefinitions, fileIndex) {
+    jsonSchemaTestSuiteFiles.forEach(function (testDefinitions: any, fileIndex) {
 
         testDefinitions.forEach(function (testDefinition) {
 

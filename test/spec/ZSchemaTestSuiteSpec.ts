@@ -1,4 +1,4 @@
-import ZSchema from "../../src/ZSchema";
+import ZSchema from "../../src/ZSchema.ts";
 
 const testSuiteFiles = (await Promise.all([
     import("../ZSchemaTestSuite/CustomFormats.js"),
@@ -87,7 +87,7 @@ describe("ZSchemaTestSuite", function () {
         }
     }
 
-    testSuiteFiles.forEach(function (testSuite) {
+    testSuiteFiles.forEach(function (testSuite: any) {
 
         testSuite.tests.forEach(function (test) {
 
@@ -163,7 +163,7 @@ describe("ZSchemaTestSuite", function () {
             });
 
             async && it(testSuite.description + ", " + test.description, function () {
-                return new Promise((done) => {
+                return new Promise<void>((done) => {
 
                 var validator = new ZSchema(options);
                 if (setup) { setup(validator, ZSchema); }

@@ -8,13 +8,13 @@ import * as Utils from "./Utils.js";
  * @param {Report|object} parentOrOptions
  * @param {object} [reportOptions]
  */
-export function Report(parentOrOptions, reportOptions) {
+export function Report(parentOrOptions, reportOptions?) {
     this.parentReport = parentOrOptions instanceof Report ?
                             parentOrOptions :
                             undefined;
 
     this.options = parentOrOptions instanceof Report ?
-                       parentOrOptions.options :
+                       (parentOrOptions as any).options :
                        parentOrOptions || {};
 
     this.reportOptions = reportOptions || {};
@@ -133,7 +133,7 @@ Report.prototype.getPath = function (returnPathAsString) {
 
     if (returnPathAsString !== true) {
         // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
-        path = "#/" + path.map(function (segment) {
+        return "#/" + path.map(function (segment) {
             segment = segment.toString();
 
             if (Utils.isAbsoluteUri(segment)) {
@@ -251,7 +251,7 @@ Report.prototype.addCustomError = function (errorCode, errorMessage, params, sub
         errorMessage = errorMessage.replace("{" + idx + "}", param);
     }
 
-    var err = {
+    var err: any = {
         code: errorCode,
         params: params,
         message: errorMessage,

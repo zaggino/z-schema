@@ -1,0 +1,8 @@
+{
+  "extends": "../tsconfig",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+  },
+  "include": ["./**/*"]
+}
