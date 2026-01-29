@@ -1,14 +1,21 @@
 import ZSchema from "../../src/ZSchema";
 
+const [draft_04_schema_json, remotes_integer_json, remotes_subSchemas_json, remotes_folderInteger_json] = (await Promise.all([
+import("../files/draft-04-schema.json"),
+import("../jsonSchemaTestSuite/remotes/integer.json"),
+import("../jsonSchemaTestSuite/remotes/subSchemas.json"),
+import("../jsonSchemaTestSuite/remotes/folder/folderInteger.json"),
+])).map(m => m.default ?? m);
+
 function setRemoteReferences(validator) {
     validator.setRemoteReference("http://json-schema.org/draft-04/schema",
-                                 import("../files/draft-04-schema.json"));
+                                 draft_04_schema_json);
     validator.setRemoteReference("http://localhost:1234/integer.json",
-                                 import("../jsonSchemaTestSuite/remotes/integer.json"));
+                                 remotes_integer_json);
     validator.setRemoteReference("http://localhost:1234/subSchemas.json",
-                                 import("../jsonSchemaTestSuite/remotes/subSchemas.json"));
+                                 remotes_subSchemas_json);
     validator.setRemoteReference("http://localhost:1234/folder/folderInteger.json",
-                                 import("../jsonSchemaTestSuite/remotes/folder/folderInteger.json"));
+                                 remotes_folderInteger_json);
 }
 
 var jsonSchemaTestSuiteFiles = (await Promise.all([
@@ -70,7 +77,7 @@ describe("JsonSchemaTestSuite", function () {
 
                     var validator = new ZSchema();
                     setRemoteReferences(validator);
-
+                    
                     var valid = validator.validate(test.data, testDefinition.schema);
                     expect(valid).toBe(test.valid);
 

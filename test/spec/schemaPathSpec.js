@@ -1,6 +1,5 @@
 import ZSchema from "../../src/ZSchema";
 
-var validator = new ZSchema();
 var schema = {
     "type": [
         "object"
@@ -80,7 +79,7 @@ var schema = {
 describe("Using path to schema as a third argument", function () {
 
     it("Should pass the test", function () {
-
+        var validator = new ZSchema();
         var cars = [
                 {
                     "brand": "Lexus",

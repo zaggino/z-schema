@@ -43,7 +43,9 @@
     "build:watch": "rollup -c -w",
     "prepublishOnly": "npm test",
     "test": "vitest run",
-    "test-z": "vitest run test/spec/ZSchemaTestSuiteSpec.js"
+    "test:browsers": "vitest run --project browsers --silent=true",
+    "test:node": "vitest run --project node --silent=true",
+    "test:sample": "npx vitest run --silent=false --hideSkippedTests --project node -t \"invalid definition\""
   },
   "testling": {
     "scripts": [
