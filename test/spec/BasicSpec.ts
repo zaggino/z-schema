@@ -22,10 +22,10 @@ describe('Basic', function () {
   });
 
   it('Work in progress test...', function () {
-    var validator = new ZSchema();
+    const validator = new ZSchema();
     setRemoteReferences(validator);
 
-    var schema = [
+    const schema = [
       {
         id: 'schemaA',
         type: 'integer',
@@ -45,13 +45,13 @@ describe('Basic', function () {
       },
     ];
 
-    var data = {
+    const data = {
       a: 1,
       b: 'str',
       c: 'C',
     };
 
-    var validSchema = validator.validateSchema(schema);
+    const validSchema = validator.validateSchema(schema);
     expect(validSchema).toBe(true);
 
     if (!validSchema) {
@@ -59,7 +59,7 @@ describe('Basic', function () {
       return;
     }
 
-    var valid = validator.validate(data, schema[2]);
+    const valid = validator.validate(data, schema[2]);
     expect(valid).toBe(true);
 
     if (!valid) {

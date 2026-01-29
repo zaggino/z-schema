@@ -6,7 +6,7 @@ export const FormatValidators = {
       return true;
     }
     // full-date from http://tools.ietf.org/html/rfc3339#section-5.6
-    var matches = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(date);
+    const matches = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(date);
     if (matches === null) {
       return false;
     }
@@ -23,11 +23,11 @@ export const FormatValidators = {
       return true;
     }
     // date-time from http://tools.ietf.org/html/rfc3339#section-5.6
-    var s = dateTime.toLowerCase().split('t');
+    const s = dateTime.toLowerCase().split('t');
     if (!FormatValidators.date(s[0])) {
       return false;
     }
-    var matches = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]+)?(z|([+-][0-9]{2}:[0-9]{2}))$/.exec(s[1]);
+    const matches = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]+)?(z|([+-][0-9]{2}:[0-9]{2}))$/.exec(s[1]);
     if (matches === null) {
       return false;
     }
@@ -82,15 +82,15 @@ export const FormatValidators = {
             <domain> ::= <subdomain> | " "
             var domain = null;
         */
-    var valid = /^[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?(\.[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?)*$/.test(hostname);
+    const valid = /^[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?(\.[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?)*$/.test(hostname);
     if (valid) {
       // the sum of all label octets and label lengths is limited to 255.
       if (hostname.length > 255) {
         return false;
       }
       // Each node has a label, which is zero to 63 octets in length
-      var labels = hostname.split('.');
-      for (var i = 0; i < labels.length; i++) {
+      const labels = hostname.split('.');
+      for (let i = 0; i < labels.length; i++) {
         if (labels[i].length > 63) {
           return false;
         }

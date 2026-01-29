@@ -29,7 +29,7 @@ describe('Rollup smoke CLI', function () {
 });
 describe('Rollup CLI smoke test', function () {
   it('runs `bin/z-schema` against sample fixtures and passes', function () {
-    var res = child.spawnSync(
+    const res = child.spawnSync(
       process.execPath,
       ['bin/z-schema', 'test/fixtures/sample-schema.json', 'test/fixtures/sample-valid.json'],
       { encoding: 'utf8' }

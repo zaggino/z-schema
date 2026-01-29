@@ -2,7 +2,7 @@ import ZSchema from '../../src/ZSchema.ts';
 
 describe('Using multiple instances of Z-Schema', function () {
   it('Should pass all tests', function () {
-    var schema = {
+    const schema = {
       $schema: 'http://json-schema.org/draft-04/schema#',
       type: 'object',
       properties: {
@@ -12,7 +12,7 @@ describe('Using multiple instances of Z-Schema', function () {
       },
     };
 
-    var v;
+    let v;
     v = new ZSchema({ strictMode: true });
     // Should fail because "additionalProperties" is missing
     expect(v.validateSchema(schema)).toBe(false, '1st');

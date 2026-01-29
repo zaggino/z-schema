@@ -30,7 +30,7 @@ These repository has several submodules and should be cloned as follows:
 
 ## CLI:
 
-```
+```bash
 npm install --global z-schema
 z-schema --help
 z-schema mySchema.json

@@ -3,7 +3,7 @@ import * as JsonValidation from './JsonValidation.js';
 import { Report } from './Report.js';
 import * as Utils from './Utils.js';
 
-var SchemaValidators = {
+const SchemaValidators = {
   $ref: function (report, schema) {
     // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07
     // http://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03
@@ -83,7 +83,7 @@ var SchemaValidators = {
   },
   additionalItems: function (report, schema) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.1
-    var type = Utils.whatIs(schema.additionalItems);
+    const type = Utils.whatIs(schema.additionalItems);
     if (type !== 'boolean' && type !== 'object') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['additionalItems', ['boolean', 'object']]);
     } else if (type === 'object') {
@@ -94,14 +94,14 @@ var SchemaValidators = {
   },
   items: function (report, schema) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.1
-    var type = Utils.whatIs(schema.items);
+    const type = Utils.whatIs(schema.items);
 
     if (type === 'object') {
       report.path.push('items');
       validateSchema.call(this, report, schema.items);
       report.path.pop();
     } else if (type === 'array') {
-      var idx = schema.items.length;
+      let idx = schema.items.length;
       while (idx--) {
         report.path.push('items');
         report.path.push(idx.toString());
@@ -167,7 +167,7 @@ var SchemaValidators = {
     } else if (schema.required.length === 0) {
       report.addError('KEYWORD_MUST_BE', ['required', 'an array with at least one element']);
     } else {
-      var idx = schema.required.length;
+      let idx = schema.required.length;
       while (idx--) {
         if (typeof schema.required[idx] !== 'string') {
           report.addError('KEYWORD_VALUE_TYPE', ['required', 'string']);
@@ -180,7 +180,7 @@ var SchemaValidators = {
   },
   additionalProperties: function (report, schema) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.1
-    var type = Utils.whatIs(schema.additionalProperties);
+    const type = Utils.whatIs(schema.additionalProperties);
     if (type !== 'boolean' && type !== 'object') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['additionalProperties', ['boolean', 'object']]);
     } else if (type === 'object') {
@@ -196,10 +196,10 @@ var SchemaValidators = {
       return;
     }
 
-    var keys = Object.keys(schema.properties),
+    let keys = Object.keys(schema.properties),
       idx = keys.length;
     while (idx--) {
-      var key = keys[idx],
+      const key = keys[idx],
         val = schema.properties[key];
       report.path.push('properties');
       report.path.push(key);
@@ -228,10 +228,10 @@ var SchemaValidators = {
       return;
     }
 
-    var keys = Object.keys(schema.patternProperties),
+    let keys = Object.keys(schema.patternProperties),
       idx = keys.length;
     while (idx--) {
-      var key = keys[idx],
+      const key = keys[idx],
         val = schema.patternProperties[key];
       try {
         RegExp(key);
@@ -255,10 +255,10 @@ var SchemaValidators = {
     if (Utils.whatIs(schema.dependencies) !== 'object') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['dependencies', 'object']);
     } else {
-      var keys = Object.keys(schema.dependencies),
+      let keys = Object.keys(schema.dependencies),
         idx = keys.length;
       while (idx--) {
-        var schemaKey = keys[idx],
+        const schemaKey = keys[idx],
           schemaDependency = schema.dependencies[schemaKey],
           type = Utils.whatIs(schemaDependency);
 
@@ -269,7 +269,7 @@ var SchemaValidators = {
           report.path.pop();
           report.path.pop();
         } else if (type === 'array') {
-          var idx2 = schemaDependency.length;
+          let idx2 = schemaDependency.length;
           if (idx2 === 0) {
             report.addError('KEYWORD_MUST_BE', ['dependencies', 'not empty array']);
           }
@@ -299,12 +299,12 @@ var SchemaValidators = {
   },
   type: function (report, schema) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.1
-    var primitiveTypes = ['array', 'boolean', 'integer', 'number', 'null', 'object', 'string'],
+    const primitiveTypes = ['array', 'boolean', 'integer', 'number', 'null', 'object', 'string'],
       primitiveTypeStr = primitiveTypes.join(','),
       isArray = Array.isArray(schema.type);
 
     if (isArray) {
-      var idx = schema.type.length;
+      let idx = schema.type.length;
       while (idx--) {
         if (primitiveTypes.indexOf(schema.type[idx]) === -1) {
           report.addError('KEYWORD_TYPE_EXPECTED', ['type', primitiveTypeStr]);
@@ -395,7 +395,7 @@ var SchemaValidators = {
     } else if (schema.allOf.length === 0) {
       report.addError('KEYWORD_MUST_BE', ['allOf', 'an array with at least one element']);
     } else {
-      var idx = schema.allOf.length;
+      let idx = schema.allOf.length;
       while (idx--) {
         report.path.push('allOf');
         report.path.push(idx.toString());
@@ -412,7 +412,7 @@ var SchemaValidators = {
     } else if (schema.anyOf.length === 0) {
       report.addError('KEYWORD_MUST_BE', ['anyOf', 'an array with at least one element']);
     } else {
-      var idx = schema.anyOf.length;
+      let idx = schema.anyOf.length;
       while (idx--) {
         report.path.push('anyOf');
         report.path.push(idx.toString());
@@ -429,7 +429,7 @@ var SchemaValidators = {
     } else if (schema.oneOf.length === 0) {
       report.addError('KEYWORD_MUST_BE', ['oneOf', 'an array with at least one element']);
     } else {
-      var idx = schema.oneOf.length;
+      let idx = schema.oneOf.length;
       while (idx--) {
         report.path.push('oneOf');
         report.path.push(idx.toString());
@@ -454,10 +454,10 @@ var SchemaValidators = {
     if (Utils.whatIs(schema.definitions) !== 'object') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['definitions', 'object']);
     } else {
-      var keys = Object.keys(schema.definitions),
+      let keys = Object.keys(schema.definitions),
         idx = keys.length;
       while (idx--) {
-        var key = keys[idx],
+        const key = keys[idx],
           val = schema.definitions[key];
         report.path.push('definitions');
         report.path.push(key);
@@ -507,8 +507,8 @@ var SchemaValidators = {
  *
  * @returns {boolean}
  */
-var validateArrayOfSchemas = function (report, arr) {
-  var idx = arr.length;
+const validateArrayOfSchemas = function (report, arr) {
+  let idx = arr.length;
   while (idx--) {
     validateSchema.call(this, report, arr[idx]);
   }
@@ -534,11 +534,11 @@ export function validateSchema(report, schema) {
   }
 
   // if $schema is present, this schema should validate against that $schema
-  var hasParentSchema = schema.$schema && schema.id !== schema.$schema;
+  const hasParentSchema = schema.$schema && schema.id !== schema.$schema;
   if (hasParentSchema) {
     if (schema.__$schemaResolved && schema.__$schemaResolved !== schema) {
-      var subReport = new Report(report);
-      var valid = JsonValidation.validate.call(this, subReport, schema.__$schemaResolved, schema);
+      const subReport = new Report(report);
+      const valid = JsonValidation.validate.call(this, subReport, schema.__$schemaResolved, schema);
       if (valid === false) {
         report.addError('PARENT_SCHEMA_VALIDATION_FAILED', null, subReport);
       }
@@ -552,7 +552,7 @@ export function validateSchema(report, schema) {
   if (this.options.noTypeless === true) {
     // issue #36 - inherit type to anyOf, oneOf, allOf if noTypeless is defined
     if (schema.type !== undefined) {
-      var schemas = [];
+      let schemas = [];
       if (Array.isArray(schema.anyOf)) {
         schemas = schemas.concat(schema.anyOf);
       }
@@ -581,10 +581,10 @@ export function validateSchema(report, schema) {
     }
   }
 
-  var keys = Object.keys(schema),
+  let keys = Object.keys(schema),
     idx = keys.length;
   while (idx--) {
-    var key = keys[idx];
+    const key = keys[idx];
     if (key.indexOf('__') === 0) {
       continue;
     }
@@ -600,7 +600,7 @@ export function validateSchema(report, schema) {
   if (this.options.pedanticCheck === true) {
     if (schema.enum) {
       // break recursion
-      var tmpSchema = Utils.clone(schema);
+      const tmpSchema = Utils.clone(schema);
       delete tmpSchema.enum;
       delete tmpSchema.default;
 
@@ -621,7 +621,7 @@ export function validateSchema(report, schema) {
     }
   }
 
-  var isValid = report.isValid();
+  const isValid = report.isValid();
   if (isValid) {
     schema.__$validated = true;
   }

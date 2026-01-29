@@ -7,7 +7,7 @@ function mergeReference(scope, ref) {
     return ref;
   }
 
-  var joinedScope = scope.join(''),
+  let joinedScope = scope.join(''),
     isScopeAbsolute = Utils.isAbsoluteUri(joinedScope),
     isScopeRelative = Utils.isRelativeUri(joinedScope),
     isRefRelative = Utils.isRelativeUri(ref),
@@ -27,7 +27,7 @@ function mergeReference(scope, ref) {
     }
   }
 
-  var res = joinedScope + ref;
+  let res = joinedScope + ref;
   res = res.replace(/##/, '#');
   return res;
 }
@@ -62,7 +62,7 @@ function collectReferences(obj, results, scope, path) {
     });
   }
 
-  var idx;
+  let idx;
   if (Array.isArray(obj)) {
     idx = obj.length;
     while (idx--) {
@@ -71,7 +71,7 @@ function collectReferences(obj, results, scope, path) {
       path.pop();
     }
   } else {
-    var keys = Object.keys(obj);
+    const keys = Object.keys(obj);
     idx = keys.length;
     while (idx--) {
       // do not recurse through resolved references and other z-schema props
@@ -91,14 +91,14 @@ function collectReferences(obj, results, scope, path) {
   return results;
 }
 
-var compileArrayOfSchemasLoop = function (mainReport, arr) {
-  var idx = arr.length,
+const compileArrayOfSchemasLoop = function (mainReport, arr) {
+  let idx = arr.length,
     compiledCount = 0;
 
   while (idx--) {
     // try to compile each schema separately
-    var report = new Report(mainReport);
-    var isValid = compileSchema.call(this, report, arr[idx]);
+    const report = new Report(mainReport);
+    const isValid = compileSchema.call(this, report, arr[idx]);
     if (isValid) {
       compiledCount++;
     }
@@ -111,7 +111,7 @@ var compileArrayOfSchemasLoop = function (mainReport, arr) {
 };
 
 function findId(arr, id) {
-  var idx = arr.length;
+  let idx = arr.length;
   while (idx--) {
     if (arr[idx].id === id) {
       return arr[idx];
@@ -120,13 +120,13 @@ function findId(arr, id) {
   return null;
 }
 
-var compileArrayOfSchemas = function (report, arr) {
-  var compiled = 0,
+const compileArrayOfSchemas = function (report, arr) {
+  let compiled = 0,
     lastLoopCompiled;
 
   do {
     // remove all UNRESOLVABLE_REFERENCE errors before compiling array again
-    var idx = report.errors.length;
+    let idx = report.errors.length;
     while (idx--) {
       if (report.errors[idx].code === 'UNRESOLVABLE_REFERENCE') {
         report.errors.splice(idx, 1);
@@ -142,12 +142,12 @@ var compileArrayOfSchemas = function (report, arr) {
     // fix __$missingReferences if possible
     idx = arr.length;
     while (idx--) {
-      var sch = arr[idx];
+      const sch = arr[idx];
       if (sch.__$missingReferences) {
-        var idx2 = sch.__$missingReferences.length;
+        let idx2 = sch.__$missingReferences.length;
         while (idx2--) {
-          var refObj = sch.__$missingReferences[idx2];
-          var response = findId(arr, refObj.ref);
+          const refObj = sch.__$missingReferences[idx2];
+          const response = findId(arr, refObj.ref);
           if (response) {
             // this might create circular references
             refObj.obj['__' + refObj.key + 'Resolved'] = response;
@@ -172,7 +172,7 @@ export function compileSchema(report, schema) {
 
   // if schema is a string, assume it's a uri
   if (typeof schema === 'string') {
-    var loadedSchema = getSchemaByUri.call(this, report, schema);
+    const loadedSchema = getSchemaByUri.call(this, report, schema);
     if (!loadedSchema) {
       report.addError('SCHEMA_NOT_REACHABLE', [schema]);
       return false;
@@ -201,35 +201,35 @@ export function compileSchema(report, schema) {
   }
 
   // this method can be called recursively, so we need to remember our root
-  var isRoot = false;
+  let isRoot = false;
   if (!report.rootSchema) {
     report.rootSchema = schema;
     isRoot = true;
   }
 
   // delete all __$missingReferences from previous compilation attempts
-  var isValidExceptReferences = report.isValid();
+  const isValidExceptReferences = report.isValid();
   delete schema.__$missingReferences;
 
   // collect all references that need to be resolved - $ref and $schema
-  var refs = collectReferences.call(this, schema),
+  let refs = collectReferences.call(this, schema),
     idx = refs.length;
   while (idx--) {
     // resolve all the collected references into __xxxResolved pointer
-    var refObj = refs[idx];
-    var response = getSchemaByUri.call(this, report, refObj.ref, schema);
+    const refObj = refs[idx];
+    let response = getSchemaByUri.call(this, report, refObj.ref, schema);
 
     // we can try to use custom schemaReader if available
     if (!response) {
-      var schemaReader = this.getSchemaReader();
+      const schemaReader = this.getSchemaReader();
       if (schemaReader) {
         // it's supposed to return a valid schema
-        var s = schemaReader(refObj.ref);
+        const s = schemaReader(refObj.ref);
         if (s) {
           // it needs to have the id
           s.id = refObj.ref;
           // try to compile the schema
-          var subreport = new Report(report);
+          const subreport = new Report(report);
           if (!compileSchema.call(this, subreport, s)) {
             // copy errors to report
             report.errors = report.errors.concat(subreport.errors);
@@ -241,10 +241,10 @@ export function compileSchema(report, schema) {
     }
 
     if (!response) {
-      var hasNotValid = report.hasError('REMOTE_NOT_VALID', [refObj.ref]);
-      var isAbsolute = Utils.isAbsoluteUri(refObj.ref);
-      var isDownloaded = false;
-      var ignoreUnresolvableRemotes = this.options.ignoreUnresolvableReferences === true;
+      const hasNotValid = report.hasError('REMOTE_NOT_VALID', [refObj.ref]);
+      const isAbsolute = Utils.isAbsoluteUri(refObj.ref);
+      let isDownloaded = false;
+      const ignoreUnresolvableRemotes = this.options.ignoreUnresolvableReferences === true;
 
       if (isAbsolute) {
         // we shouldn't add UNRESOLVABLE_REFERENCE for schemas we already have downloaded
@@ -274,7 +274,7 @@ export function compileSchema(report, schema) {
     refObj.obj['__' + refObj.key + 'Resolved'] = response;
   }
 
-  var isValid = report.isValid();
+  const isValid = report.isValid();
   if (isValid) {
     schema.__$compiled = true;
   } else {

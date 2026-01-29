@@ -1,3 +1,3 @@
-declare var describe: any;
-declare var expect: any;
-declare var it: any;
+declare let describe: any;
+declare let expect: any;
+declare let it: any;

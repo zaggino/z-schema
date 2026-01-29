@@ -115,7 +115,7 @@ export class Report {
   }
 
   processAsyncTasks(timeout, callback) {
-    var validationTimeout = timeout || 2000,
+    let validationTimeout = timeout || 2000,
       tasksCount = this.asyncTasks.length,
       idx = tasksCount,
       timedOut = false,
@@ -123,7 +123,7 @@ export class Report {
 
     function finish() {
       setTimeout(function () {
-        var valid = self.errors.length === 0,
+        const valid = self.errors.length === 0,
           err = valid ? null : self.errors;
         callback(err, valid);
       }, 0);
@@ -148,7 +148,7 @@ export class Report {
     }
 
     while (idx--) {
-      var task = this.asyncTasks[idx];
+      const task = this.asyncTasks[idx];
       task[0].apply(null, task[1].concat(respond(task[2])));
     }
 
@@ -165,7 +165,7 @@ export class Report {
     /**
      * @type {string[]|string}
      */
-    var path = [];
+    let path = [];
     if (this.parentReport) {
       path = path.concat(this.parentReport.path);
     }
@@ -197,7 +197,7 @@ export class Report {
     }
 
     // get the error path as an array
-    var path = [];
+    let path = [];
     if (this.parentReport) {
       path = path.concat(this.parentReport.path);
     }
@@ -205,7 +205,7 @@ export class Report {
 
     // try to find id in the error path
     while (path.length > 0) {
-      var obj = get(this.rootSchema, path);
+      const obj = get(this.rootSchema, path);
       if (obj && obj.id) {
         return obj.id;
       }
@@ -217,14 +217,14 @@ export class Report {
   }
 
   hasError(errorCode, params) {
-    var idx = this.errors.length;
+    let idx = this.errors.length;
     while (idx--) {
       if (this.errors[idx].code === errorCode) {
         // assume match
-        var match = true;
+        let match = true;
 
         // check the params too
-        var idx2 = this.errors[idx].params.length;
+        let idx2 = this.errors[idx].params.length;
         while (idx2--) {
           if (this.errors[idx].params[idx2] !== params[idx2]) {
             match = false;
@@ -248,7 +248,7 @@ export class Report {
   }
 
   getJson() {
-    var self: any = this;
+    let self: any = this;
     while (self.json === undefined) {
       self = self.parentReport;
       if (self === undefined) {
@@ -275,14 +275,14 @@ export class Report {
 
     params = params || [];
 
-    var idx = params.length;
+    let idx = params.length;
     while (idx--) {
-      var whatIs = Utils.whatIs(params[idx]);
-      var param = whatIs === 'object' || whatIs === 'null' ? JSON.stringify(params[idx]) : params[idx];
+      const whatIs = Utils.whatIs(params[idx]);
+      const param = whatIs === 'object' || whatIs === 'null' ? JSON.stringify(params[idx]) : params[idx];
       errorMessage = errorMessage.replace('{' + idx + '}', param);
     }
 
-    var err: SchemaErrorDetail = {
+    const err: SchemaErrorDetail = {
       code: errorCode,
       params: params,
       message: errorMessage,
@@ -311,7 +311,7 @@ export class Report {
       err.inner = [];
       idx = subReports.length;
       while (idx--) {
-        var subReport = subReports[idx],
+        let subReport = subReports[idx],
           idx2 = subReport.errors.length;
         while (idx2--) {
           err.inner.push(subReport.errors[idx2]);

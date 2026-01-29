@@ -12,13 +12,13 @@ function decodeJSONPointer(str) {
 }
 
 export function getRemotePath(uri) {
-  var io = uri.indexOf('#');
+  const io = uri.indexOf('#');
   return io === -1 ? uri : uri.slice(0, io);
 }
 
 function getQueryPath(uri) {
-  var io = uri.indexOf('#');
-  var res = io === -1 ? undefined : uri.slice(io + 1);
+  const io = uri.indexOf('#');
+  const res = io === -1 ? undefined : uri.slice(io + 1);
   // WARN: do not slice slash, #/ means take root and go down from it
   // if (res && res[0] === "/") { res = res.slice(1); }
   return res;
@@ -41,7 +41,7 @@ function findId(schema, id) {
     }
   }
 
-  var idx, result;
+  let idx, result;
   if (Array.isArray(schema)) {
     idx = schema.length;
     while (idx--) {
@@ -51,10 +51,10 @@ function findId(schema, id) {
       }
     }
   } else {
-    var keys = Object.keys(schema);
+    const keys = Object.keys(schema);
     idx = keys.length;
     while (idx--) {
-      var k = keys[idx];
+      const k = keys[idx];
       if (k.indexOf('__$') === 0) {
         continue;
       }
@@ -74,7 +74,7 @@ function findId(schema, id) {
  * @returns {void}
  */
 export function cacheSchemaByUri(uri, schema) {
-  var remotePath = getRemotePath(uri);
+  const remotePath = getRemotePath(uri);
   if (remotePath) {
     this.cache[remotePath] = schema;
   }
@@ -87,7 +87,7 @@ export function cacheSchemaByUri(uri, schema) {
  * @returns {void}
  */
 export function removeFromCacheByUri(uri) {
-  var remotePath = getRemotePath(uri);
+  const remotePath = getRemotePath(uri);
   if (remotePath) {
     delete this.cache[remotePath];
   }
@@ -100,7 +100,7 @@ export function removeFromCacheByUri(uri) {
  * @returns {boolean}
  */
 export function checkCacheForUri(uri) {
-  var remotePath = getRemotePath(uri);
+  const remotePath = getRemotePath(uri);
   return remotePath ? this.cache[remotePath] != null : false;
 }
 
@@ -115,39 +115,39 @@ export function getSchema(report, schema) {
 }
 
 export function getSchemaByReference(report, key) {
-  var i = this.referenceCache.length;
+  let i = this.referenceCache.length;
   while (i--) {
     if (isequal(this.referenceCache[i][0], key)) {
       return this.referenceCache[i][1];
     }
   }
   // not found
-  var schema = Utils.cloneDeep(key);
+  const schema = Utils.cloneDeep(key);
   this.referenceCache.push([key, schema]);
   return schema;
 }
 
 export function getSchemaByUri(report, uri, root) {
-  var remotePath = getRemotePath(uri),
+  let remotePath = getRemotePath(uri),
     queryPath = getQueryPath(uri),
     result = remotePath ? this.cache[remotePath] : root;
 
   if (result && remotePath) {
     // we need to avoid compiling schemas in a recursive loop
-    var compileRemote = result !== root;
+    const compileRemote = result !== root;
     // now we need to compile and validate resolved schema (in case it's not already)
     if (compileRemote) {
       report.path.push(remotePath);
 
-      var remoteReport;
+      let remoteReport;
 
-      var anscestorReport = report.getAncestor(result.id);
+      const anscestorReport = report.getAncestor(result.id);
       if (anscestorReport) {
         remoteReport = anscestorReport;
       } else {
         remoteReport = new Report(report);
         if (compileSchema.call(this, remoteReport, result)) {
-          var savedOptions = this.options;
+          const savedOptions = this.options;
           try {
             // If custom validationOptions were provided to setRemoteReference(),
             // use them instead of the default options
@@ -158,7 +158,7 @@ export function getSchemaByUri(report, uri, root) {
           }
         }
       }
-      var remoteReportIsValid = remoteReport.isValid();
+      const remoteReportIsValid = remoteReport.isValid();
       if (!remoteReportIsValid) {
         report.addError('REMOTE_NOT_VALID', [uri], remoteReport);
       }
@@ -172,9 +172,9 @@ export function getSchemaByUri(report, uri, root) {
   }
 
   if (result && queryPath) {
-    var parts = queryPath.split('/');
-    for (var idx = 0, lim = parts.length; result && idx < lim; idx++) {
-      var key = decodeJSONPointer(parts[idx]);
+    const parts = queryPath.split('/');
+    for (let idx = 0, lim = parts.length; result && idx < lim; idx++) {
+      const key = decodeJSONPointer(parts[idx]);
       if (idx === 0) {
         // it's an id
         result = findId(result, key);

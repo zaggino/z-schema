@@ -12,7 +12,7 @@ import Draft4HyperSchema from './schemas/hyper-schema.json' with { type: 'json' 
 /**
  * default options
  */
-var defaultOptions = {
+const defaultOptions = {
   // default timeout for all async tasks
   asyncTimeout: 2000,
   // force additionalProperties and additionalItems to be defined on "object" and "array" types
@@ -60,11 +60,11 @@ var defaultOptions = {
 };
 
 function normalizeOptions(options) {
-  var normalized;
+  let normalized;
 
   // options
   if (typeof options === 'object') {
-    var keys = Object.keys(options),
+    let keys = Object.keys(options),
       idx = keys.length,
       key;
 
@@ -129,7 +129,7 @@ export interface ZSchemaOptions {
   customValidator?: (report: Report, schema: any, json: any) => void;
 }
 
-export class ZSchema {
+class ZSchema {
   public lastReport: Report | undefined;
 
   /**
@@ -181,7 +181,7 @@ export class ZSchema {
     this.options = normalizeOptions(options);
 
     // Disable strict validation for the built-in schemas
-    var metaschemaOptions = normalizeOptions({});
+    const metaschemaOptions = normalizeOptions({});
 
     this.setRemoteReference('http://json-schema.org/draft-04/schema', Draft4Schema, metaschemaOptions);
     this.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', Draft4HyperSchema, metaschemaOptions);
@@ -196,11 +196,11 @@ export class ZSchema {
       throw new Error('.validateSchema was called with an empty array');
     }
 
-    var report = new Report(this.options);
+    const report = new Report(this.options);
 
     schema = SchemaCache.getSchema.call(this, report, schema);
 
-    var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
+    const compiled = SchemaCompilation.compileSchema.call(this, report, schema);
     if (compiled) {
       SchemaValidation.validateSchema.call(this, report, schema);
     }
@@ -225,9 +225,9 @@ export class ZSchema {
 
     this.validateOptions = options;
 
-    var whatIs = Utils.whatIs(schema);
+    const whatIs = Utils.whatIs(schema);
     if (whatIs !== 'string' && whatIs !== 'object') {
-      var e = new Error('Invalid .validate call - schema must be a string or object but ' + whatIs + ' was passed!');
+      const e = new Error('Invalid .validate call - schema must be a string or object but ' + whatIs + ' was passed!');
       if (callback) {
         setTimeout(function () {
           callback(e, false);
@@ -237,12 +237,12 @@ export class ZSchema {
       throw e;
     }
 
-    var foundError = false;
-    var report = new Report(this.options);
+    let foundError = false;
+    const report = new Report(this.options);
     report.json = json;
 
     if (typeof schema === 'string') {
-      var schemaName = schema;
+      const schemaName = schema;
       schema = SchemaCache.getSchema.call(this, report, schemaName);
       if (!schema) {
         throw new Error("Schema with id '" + schemaName + "' wasn't found in the validator cache!");
@@ -251,7 +251,7 @@ export class ZSchema {
       schema = SchemaCache.getSchema.call(this, report, schema);
     }
 
-    var compiled = false;
+    let compiled = false;
     if (!foundError) {
       compiled = SchemaCompilation.compileSchema.call(this, report, schema);
     }
@@ -260,7 +260,7 @@ export class ZSchema {
       foundError = true;
     }
 
-    var validated = false;
+    let validated = false;
     if (!foundError) {
       validated = SchemaValidation.validateSchema.call(this, report, schema);
     }
@@ -302,7 +302,7 @@ export class ZSchema {
     if (this.lastReport.errors.length === 0) {
       return null;
     }
-    var e: SchemaError = new Error();
+    const e: SchemaError = new Error();
     e.name = 'z-schema validation error';
     e.message = this.lastReport.commonErrorMessage;
     (e as any).details = this.lastReport.errors;
@@ -332,7 +332,7 @@ export class ZSchema {
   }
 
   compileSchema(schema) {
-    var report = new Report(this.options);
+    const report = new Report(this.options);
 
     schema = SchemaCache.getSchema.call(this, report, schema);
 
@@ -344,12 +344,12 @@ export class ZSchema {
 
   getMissingReferences(arr?) {
     arr = arr || this.lastReport.errors;
-    var res = [],
+    let res = [],
       idx = arr.length;
     while (idx--) {
-      var error = arr[idx];
+      const error = arr[idx];
       if (error.code === 'UNRESOLVABLE_REFERENCE') {
-        var reference = error.params[0];
+        const reference = error.params[0];
         if (res.indexOf(reference) === -1) {
           res.push(reference);
         }
@@ -362,11 +362,11 @@ export class ZSchema {
   }
 
   getMissingRemoteReferences() {
-    var missingReferences = this.getMissingReferences(),
+    let missingReferences = this.getMissingReferences(),
       missingRemoteReferences = [],
       idx = missingReferences.length;
     while (idx--) {
-      var remoteReference = SchemaCache.getRemotePath(missingReferences[idx]);
+      const remoteReference = SchemaCache.getRemotePath(missingReferences[idx]);
       if (remoteReference && missingRemoteReferences.indexOf(remoteReference) === -1) {
         missingRemoteReferences.push(remoteReference);
       }
@@ -375,17 +375,17 @@ export class ZSchema {
   }
 
   getResolvedSchema(schema) {
-    var report = new Report(this.options);
+    const report = new Report(this.options);
     schema = SchemaCache.getSchema.call(this, report, schema);
 
     // clone before making any modifications
     schema = Utils.cloneDeep(schema);
 
-    var visited = [];
+    const visited = [];
 
     // clean-up the schema and resolve references
-    var cleanup = function (schema) {
-      var key,
+    const cleanup = function (schema) {
+      let key,
         typeOf = Utils.whatIs(schema);
       if (typeOf !== 'object' && typeOf !== 'array') {
         return;
@@ -399,8 +399,8 @@ export class ZSchema {
       visited.push(schema);
 
       if (schema.$ref && schema.__$refResolved) {
-        var from = schema.__$refResolved;
-        var to = schema;
+        const from = schema.__$refResolved;
+        const to = schema;
         delete schema.$ref;
         delete schema.__$refResolved;
         for (key in from) {

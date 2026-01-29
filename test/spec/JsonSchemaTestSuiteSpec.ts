@@ -16,7 +16,7 @@ function setRemoteReferences(validator) {
   validator.setRemoteReference('http://localhost:1234/folder/folderInteger.json', remotes_folderInteger_json);
 }
 
-var jsonSchemaTestSuiteFiles = (
+const jsonSchemaTestSuiteFiles = (
   await Promise.all([
     import('../jsonSchemaTestSuite/tests/draft4/additionalItems.json'),
     import('../jsonSchemaTestSuite/tests/draft4/additionalProperties.json'),
@@ -54,7 +54,7 @@ var jsonSchemaTestSuiteFiles = (
   ])
 ).map((m) => m.default ?? m);
 
-var testExcludes = ['an invalid URI', 'an invalid URI though valid URI reference'];
+const testExcludes = ['an invalid URI', 'an invalid URI though valid URI reference'];
 
 describe('JsonSchemaTestSuite', function () {
   it('should contain 30 files', function () {
@@ -78,15 +78,15 @@ describe('JsonSchemaTestSuite', function () {
             ': ' +
             JSON.stringify(test.data),
           function () {
-            var validator = new ZSchema();
+            const validator = new ZSchema();
             setRemoteReferences(validator);
 
-            var valid = validator.validate(test.data, testDefinition.schema);
+            const valid = validator.validate(test.data, testDefinition.schema);
             expect(valid).toBe(test.valid);
 
             if (valid !== test.valid) {
               if (!valid) {
-                var errors = validator.getLastErrors();
+                const errors = validator.getLastErrors();
                 expect(errors).toBe(null);
               }
             }

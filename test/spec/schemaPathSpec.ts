@@ -1,6 +1,6 @@
 import ZSchema from '../../src/ZSchema.ts';
 
-var schema = {
+const schema = {
   type: ['object'],
   definitions: {
     car: {
@@ -66,14 +66,14 @@ var schema = {
 
 describe('Using path to schema as a third argument', function () {
   it('Should pass the test', function () {
-    var validator = new ZSchema();
-    var cars = [
+    const validator = new ZSchema();
+    const cars = [
       {
         brand: 'Lexus',
         engine: 'big',
       },
     ];
-    var valid = validator.validate(cars, schema, { schemaPath: 'definitions.car.definitions.cars' });
+    const valid = validator.validate(cars, schema, { schemaPath: 'definitions.car.definitions.cars' });
     expect(valid).toBe(true);
     expect(validator.getLastError()).toBe(null);
   });

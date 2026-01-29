@@ -33,7 +33,7 @@ export function isRelativeUri(uri) {
 }
 
 export function whatIs(what) {
-  var to = typeof what;
+  const to = typeof what;
 
   if (to === 'object') {
     if (what === null) {
@@ -72,7 +72,7 @@ export function whatIs(what) {
  */
 export function areEqual(json1, json2, options?) {
   options = options || {};
-  var caseInsensitiveComparison = options.caseInsensitiveComparison || false;
+  const caseInsensitiveComparison = options.caseInsensitiveComparison || false;
 
   // http://json-schema.org/latest/json-schema-core.html#rfc.section.3.6
 
@@ -93,7 +93,7 @@ export function areEqual(json1, json2, options?) {
     return true;
   }
 
-  var i, len;
+  let i, len;
 
   // both are arrays, and:
   if (Array.isArray(json1) && Array.isArray(json2)) {
@@ -114,8 +114,8 @@ export function areEqual(json1, json2, options?) {
   // both are objects, and:
   if (whatIs(json1) === 'object' && whatIs(json2) === 'object') {
     // have the same set of property names; and
-    var keys1 = sortedKeys(json1);
-    var keys2 = sortedKeys(json2);
+    const keys1 = sortedKeys(json1);
+    const keys2 = sortedKeys(json2);
     if (!areEqual(keys1, keys2, { caseInsensitiveComparison: caseInsensitiveComparison })) {
       return false;
     }
@@ -140,7 +140,7 @@ export function areEqual(json1, json2, options?) {
  * @returns {boolean}
  */
 export function isUniqueArray(arr, indexes?) {
-  var i,
+  let i,
     j,
     l = arr.length;
   for (i = 0; i < l; i++) {
@@ -164,7 +164,7 @@ export function isUniqueArray(arr, indexes?) {
  * @returns {*[]}
  */
 export function difference(bigSet, subSet) {
-  var arr = [],
+  let arr = [],
     idx = bigSet.length;
   while (idx--) {
     if (subSet.indexOf(bigSet[idx]) === -1) {
@@ -182,7 +182,7 @@ export function clone(src) {
   if (typeof src !== 'object' || src === null) {
     return src;
   }
-  var res, idx;
+  let res, idx;
   if (Array.isArray(src)) {
     res = [];
     idx = src.length;
@@ -191,10 +191,10 @@ export function clone(src) {
     }
   } else {
     res = {};
-    var keys = Object.keys(src);
+    const keys = Object.keys(src);
     idx = keys.length;
     while (idx--) {
-      var key = keys[idx];
+      const key = keys[idx];
       res[key] = src[key];
     }
   }
@@ -202,14 +202,14 @@ export function clone(src) {
 }
 
 export function cloneDeep(src) {
-  var vidx = 0,
+  let vidx = 0,
     visited = new Map(),
     cloned = [];
   function cloneDeepInner(src) {
     if (typeof src !== 'object' || src === null) {
       return src;
     }
-    var res, idx, cidx;
+    let res, idx, cidx;
 
     cidx = visited.get(src);
     if (cidx !== undefined) {
@@ -227,10 +227,10 @@ export function cloneDeep(src) {
     } else {
       res = {};
       cloned.push(res);
-      var keys = Object.keys(src);
+      const keys = Object.keys(src);
       idx = keys.length;
       while (idx--) {
-        var key = keys[idx];
+        const key = keys[idx];
         res[key] = cloneDeepInner(src[key]);
       }
     }
@@ -257,7 +257,7 @@ export function cloneDeep(src) {
  * @returns {Array} The new array of code points.
  */
 export function ucs2decode(string) {
-  var output = [],
+  let output = [],
     counter = 0,
     length = string.length,
     value,

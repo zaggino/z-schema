@@ -1,13 +1,14 @@
 import ZSchema from '../../src/ZSchema.ts';
 
-var isBrowser = typeof window !== 'undefined';
+const isBrowser = typeof window !== 'undefined';
 
+let request;
 if (!isBrowser) {
-  var request = require('https').request;
+  request = require('https').request;
 }
 
 function validateWithAutomaticDownloads(validator, data, schema, callback) {
-  var lastResult;
+  let lastResult;
 
   function finish() {
     callback(validator.getLastErrors(), lastResult);
@@ -16,12 +17,12 @@ function validateWithAutomaticDownloads(validator, data, schema, callback) {
   function validate() {
     lastResult = validator.validate(data, schema);
 
-    var missingReferences = validator.getMissingRemoteReferences();
+    const missingReferences = validator.getMissingRemoteReferences();
     if (missingReferences.length > 0) {
-      var finished = 0;
+      let finished = 0;
       missingReferences.forEach(function (url) {
         request(url, function (response) {
-          var body = '';
+          const body = '';
           response.on('data', function (chunk) {
             data += chunk;
           });
@@ -52,9 +53,9 @@ describe('Automatic schema loading', function () {
         return;
       }
 
-      var validator = new ZSchema();
-      var schema = { $ref: 'http://json-schema.org/draft-04/schema#' };
-      var data = { minLength: 1 };
+      const validator = new ZSchema();
+      const schema = { $ref: 'http://json-schema.org/draft-04/schema#' };
+      const data = { minLength: 1 };
 
       validateWithAutomaticDownloads(validator, data, schema, function (err, valid) {
         expect(valid).toBe(true);
@@ -73,9 +74,9 @@ describe('Automatic schema loading', function () {
         return;
       }
 
-      var validator = new ZSchema();
-      var schema = { $ref: 'http://json-schema.org/draft-04/schema#' };
-      var data = { minLength: -1 };
+      const validator = new ZSchema();
+      const schema = { $ref: 'http://json-schema.org/draft-04/schema#' };
+      const data = { minLength: -1 };
 
       validateWithAutomaticDownloads(validator, data, schema, function (err, valid) {
         expect(valid).toBe(false);

@@ -81,7 +81,7 @@ const testSuiteFiles = (
 ).map((m) => m.default ?? m);
 
 describe('ZSchemaTestSuite', function () {
-  var idx = testSuiteFiles.length;
+  let idx = testSuiteFiles.length;
   while (idx--) {
     if (testSuiteFiles[idx] == null) {
       testSuiteFiles.splice(idx, 1);
@@ -90,17 +90,17 @@ describe('ZSchemaTestSuite', function () {
 
   testSuiteFiles.forEach(function (testSuite: any) {
     testSuite.tests.forEach(function (test) {
-      var data = test.data;
+      let data = test.data;
       if (typeof data === 'undefined') {
         data = testSuite.data;
       }
 
-      var validateOptions = test.validateOptions;
+      let validateOptions = test.validateOptions;
       if (typeof validateOptions === 'undefined') {
         validateOptions = testSuite.validateOptions;
       }
 
-      var async = test.async || testSuite.async || false,
+      let async = test.async || testSuite.async || false,
         options = test.options || testSuite.options || undefined,
         setup = test.setup || testSuite.setup,
         schema = test.schema || testSuite.schema,
@@ -109,18 +109,18 @@ describe('ZSchemaTestSuite', function () {
         validateSchemaOnly = test.validateSchemaOnly || testSuite.validateSchemaOnly,
         failWithException = test.failWithException || testSuite.failWithException;
 
-      !async &&
+      if (!async) {
         it(testSuite.description + ', ' + test.description, function () {
           ZSchema.setSchemaReader(null);
 
-          var validator = new ZSchema(options);
-          var caughtErr;
+          const validator = new ZSchema(options);
+          let caughtErr;
 
           if (setup) {
             setup(validator, ZSchema);
           }
 
-          var valid;
+          let valid;
           try {
             valid = validator.validateSchema(schema);
           } catch (err) {
@@ -144,7 +144,7 @@ describe('ZSchemaTestSuite', function () {
             }
           }
 
-          var err = caughtErr || validator.getLastErrors();
+          const err = caughtErr || validator.getLastErrors();
 
           if (failWithException) {
             expect(caughtErr).toBeTruthy();
@@ -161,19 +161,20 @@ describe('ZSchemaTestSuite', function () {
             after(err, valid, data, validator);
           }
         });
+      }
 
-      async &&
+      if (async) {
         it(testSuite.description + ', ' + test.description, function () {
           return new Promise<void>((done) => {
-            var validator = new ZSchema(options);
+            const validator = new ZSchema(options);
             if (setup) {
               setup(validator, ZSchema);
             }
 
             // see http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony
-            var zalgo = false;
+            let zalgo = false;
 
-            var result = validator.validate(data, schema, function (err, valid) {
+            const result = validator.validate(data, schema, function (err, valid) {
               // make sure callback wasn't called synchronously
               expect(zalgo).toBe(true, 'callback was fired in synchronous way');
               expect(typeof valid).toBe('boolean', 'returned response is not a boolean');
@@ -192,6 +193,7 @@ describe('ZSchemaTestSuite', function () {
             zalgo = true;
           });
         });
+      }
     });
   });
 });
