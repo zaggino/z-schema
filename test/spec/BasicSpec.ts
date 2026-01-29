@@ -1,72 +1,70 @@
-import ZSchema from "../../src/ZSchema.ts";
+import ZSchema from '../../src/ZSchema.ts';
 
 function setRemoteReferences(validator) {
-    validator.setRemoteReference("http://json-schema.org/draft-04/schema",
-                                 import("../files/draft-04-schema.json")
-                                );
-    validator.setRemoteReference("http://localhost:1234/integer.json",
-                                 import("../jsonSchemaTestSuite/remotes/integer.json")
-                                );
-    validator.setRemoteReference("http://localhost:1234/subSchemas.json",
-                                 import("../jsonSchemaTestSuite/remotes/subSchemas.json")
-                                );
-    validator.setRemoteReference("http://localhost:1234/folder/folderInteger.json",
-                                 import("../jsonSchemaTestSuite/remotes/folder/folderInteger.json")
-                                );
+  validator.setRemoteReference('http://json-schema.org/draft-04/schema', import('../../src/schemas/schema.json'));
+  validator.setRemoteReference(
+    'http://localhost:1234/integer.json',
+    import('../jsonSchemaTestSuite/remotes/integer.json')
+  );
+  validator.setRemoteReference(
+    'http://localhost:1234/subSchemas.json',
+    import('../jsonSchemaTestSuite/remotes/subSchemas.json')
+  );
+  validator.setRemoteReference(
+    'http://localhost:1234/folder/folderInteger.json',
+    import('../jsonSchemaTestSuite/remotes/folder/folderInteger.json')
+  );
 }
 
-describe("Basic", function () {
+describe('Basic', function () {
+  it('ZSchema constructor should take one argument - options', function () {
+    expect(ZSchema.length).toBe(1);
+  });
 
-    it("ZSchema constructor should take one argument - options", function () {
-        expect(ZSchema.length).toBe(1);
-    });
+  it('Work in progress test...', function () {
+    var validator = new ZSchema();
+    setRemoteReferences(validator);
 
-    it("Work in progress test...", function () {
-        var validator = new ZSchema();
-        setRemoteReferences(validator);
+    var schema = [
+      {
+        id: 'schemaA',
+        type: 'integer',
+      },
+      {
+        id: 'schemaB',
+        type: 'string',
+      },
+      {
+        id: 'mainSchema',
+        type: 'object',
+        properties: {
+          a: { $ref: 'schemaA' },
+          b: { $ref: 'schemaB' },
+          c: { enum: ['C'] },
+        },
+      },
+    ];
 
-        var schema = [
-                {
-                    id: "schemaA",
-                    type: "integer"
-                },
-                {
-                    id: "schemaB",
-                    type: "string"
-                },
-                {
-                    id: "mainSchema",
-                    type: "object",
-                    properties: {
-                        a: { "$ref": "schemaA" },
-                        b: { "$ref": "schemaB" },
-                        c: { "enum": ["C"] }
-                    }
-                }
-            ];
+    var data = {
+      a: 1,
+      b: 'str',
+      c: 'C',
+    };
 
-        var data = {
-            a: 1,
-            b: "str",
-            c: "C"
-        };
+    var validSchema = validator.validateSchema(schema);
+    expect(validSchema).toBe(true);
 
-        var validSchema = validator.validateSchema(schema);
-        expect(validSchema).toBe(true);
+    if (!validSchema) {
+      console.log(validator.getLastErrors());
+      return;
+    }
 
-        if (!validSchema) {
-            console.log(validator.getLastErrors());
-            return;
-        }
+    var valid = validator.validate(data, schema[2]);
+    expect(valid).toBe(true);
 
-        var valid = validator.validate(data, schema[2]);
-        expect(valid).toBe(true);
-
-        if (!valid) {
-            console.log(validator.getLastErrors());
-            return;
-        }
-
-    });
-
+    if (!valid) {
+      console.log(validator.getLastErrors());
+      return;
+    }
+  });
 });

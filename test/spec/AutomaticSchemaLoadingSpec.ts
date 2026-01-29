@@ -1,95 +1,87 @@
-import ZSchema from "../../src/ZSchema.ts";
+import ZSchema from '../../src/ZSchema.ts';
 
-var isBrowser = typeof window !== "undefined";
+var isBrowser = typeof window !== 'undefined';
 
 if (!isBrowser) {
-    var request = require("https").request;
+  var request = require('https').request;
 }
 
 function validateWithAutomaticDownloads(validator, data, schema, callback) {
+  var lastResult;
 
-    var lastResult;
+  function finish() {
+    callback(validator.getLastErrors(), lastResult);
+  }
 
-    function finish() {
-        callback(validator.getLastErrors(), lastResult);
+  function validate() {
+    lastResult = validator.validate(data, schema);
+
+    var missingReferences = validator.getMissingRemoteReferences();
+    if (missingReferences.length > 0) {
+      var finished = 0;
+      missingReferences.forEach(function (url) {
+        request(url, function (response) {
+          var body = '';
+          response.on('data', function (chunk) {
+            data += chunk;
+          });
+          response.on('end', function () {
+            validator.setRemoteReference(url, JSON.parse(body));
+            finished++;
+            if (finished === missingReferences.length) {
+              validate();
+            }
+          });
+        });
+      });
+    } else {
+      finish();
     }
+  }
 
-    function validate() {
-
-        lastResult = validator.validate(data, schema);
-
-        var missingReferences = validator.getMissingRemoteReferences();
-        if (missingReferences.length > 0) {
-            var finished = 0;
-            missingReferences.forEach(function (url) {
-                request(url, function (response) {
-                    var body = "";
-                    response.on("data", function (chunk) { data += chunk; });
-                    response.on("end", function () {
-                        validator.setRemoteReference(url, JSON.parse(body));
-                        finished++;
-                        if (finished === missingReferences.length) {
-                            validate();
-                        }
-                    });
-                });
-            });
-        } else {
-            finish();
-        }
-
-    }
-
-    validate();
-
+  validate();
 }
 
-describe("Automatic schema loading", function () {
+describe('Automatic schema loading', function () {
+  it('should download schemas and validate successfully', function () {
+    return new Promise<void>((done) => {
+      if (isBrowser) {
+        // skip this test in browsers
+        expect(1).toBe(1);
+        done();
+        return;
+      }
 
-    it("should download schemas and validate successfully", function () {
-        return new Promise<void>((done) => {
+      var validator = new ZSchema();
+      var schema = { $ref: 'http://json-schema.org/draft-04/schema#' };
+      var data = { minLength: 1 };
 
-        if (isBrowser) {
-            // skip this test in browsers
-            expect(1).toBe(1);
-            done();
-            return;
-        }
-
-        var validator = new ZSchema();
-        var schema = { "$ref": "http://json-schema.org/draft-04/schema#" };
-        var data = { "minLength": 1 };
-
-        validateWithAutomaticDownloads(validator, data, schema, function (err, valid) {
-            expect(valid).toBe(true);
-            expect(err).toBe(null);
-            done();
-        });
-
-        });
+      validateWithAutomaticDownloads(validator, data, schema, function (err, valid) {
+        expect(valid).toBe(true);
+        expect(err).toBe(null);
+        done();
+      });
     });
+  });
 
-    it("should download schemas and fail validating", function () {
-        return new Promise<void>((done) => {
+  it('should download schemas and fail validating', function () {
+    return new Promise<void>((done) => {
+      if (typeof window !== 'undefined') {
+        // skip this test in browsers
+        expect(1).toBe(1);
+        done();
+        return;
+      }
 
-        if (typeof window !== "undefined") {
-            // skip this test in browsers
-            expect(1).toBe(1);
-            done();
-            return;
-        }
+      var validator = new ZSchema();
+      var schema = { $ref: 'http://json-schema.org/draft-04/schema#' };
+      var data = { minLength: -1 };
 
-        var validator = new ZSchema();
-        var schema = { "$ref": "http://json-schema.org/draft-04/schema#" };
-        var data = { "minLength": -1 };
-
-        validateWithAutomaticDownloads(validator, data, schema, function (err, valid) {
-            expect(valid).toBe(false);
-            expect(err[0].code).toBe("MINIMUM");
-            done();
-        });
-
-        });
+      validateWithAutomaticDownloads(validator, data, schema, function (err, valid) {
+        expect(valid).toBe(false);
+        expect(err[0].code).toBe('MINIMUM');
+        done();
+      });
     });
-
+  });
 });

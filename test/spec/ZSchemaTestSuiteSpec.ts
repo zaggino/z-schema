@@ -1,200 +1,197 @@
-import ZSchema from "../../src/ZSchema.ts";
+import ZSchema from '../../src/ZSchema.ts';
 
-const testSuiteFiles = (await Promise.all([
-    import("../ZSchemaTestSuite/CustomFormats.js"),
-    import("../ZSchemaTestSuite/CustomFormatsAsync.js"),
-    import("../ZSchemaTestSuite/ForceAdditional.js"),
-    import("../ZSchemaTestSuite/ForceItems.js"),
-    import("../ZSchemaTestSuite/ForceMinLength.js"),
-    import("../ZSchemaTestSuite/ForceMaxLength.js"),
-    import("../ZSchemaTestSuite/ForceMinItems.js"),
-    import("../ZSchemaTestSuite/ForceMaxItems.js"),
-    import("../ZSchemaTestSuite/ForceProperties.js"),
-    import("../ZSchemaTestSuite/IgnoreUnresolvableReferences.js"),
-    import("../ZSchemaTestSuite/AssumeAdditional.js"),
-    import("../ZSchemaTestSuite/NoEmptyArrays.js"),
-    import("../ZSchemaTestSuite/NoEmptyStrings.js"),
-    import("../ZSchemaTestSuite/NoTypeless.js"),
-    import("../ZSchemaTestSuite/NoExtraKeywords.js"),
-    import("../ZSchemaTestSuite/StrictUris.js"),
-    import("../ZSchemaTestSuite/MultipleSchemas.js"),
-    import("../ZSchemaTestSuite/ErrorPathAsArray.js"),
-    import("../ZSchemaTestSuite/ErrorPathAsJSONPointer.js"),
-    import("../ZSchemaTestSuite/ErrorPathContainsIntegerIndex.js"),
-    import("../ZSchemaTestSuite/PedanticCheck.js"),
-    import("../ZSchemaTestSuite/getRegisteredFormats.js"),
-    import("../ZSchemaTestSuite/InvalidId.js"),
-    import("../ZSchemaTestSuite/IncludeErrors.js"),
-    import("../ZSchemaTestSuite/CustomValidator.js"),
+const testSuiteFiles = (
+  await Promise.all([
+    import('../ZSchemaTestSuite/CustomFormats.js'),
+    import('../ZSchemaTestSuite/CustomFormatsAsync.js'),
+    import('../ZSchemaTestSuite/ForceAdditional.js'),
+    import('../ZSchemaTestSuite/ForceItems.js'),
+    import('../ZSchemaTestSuite/ForceMinLength.js'),
+    import('../ZSchemaTestSuite/ForceMaxLength.js'),
+    import('../ZSchemaTestSuite/ForceMinItems.js'),
+    import('../ZSchemaTestSuite/ForceMaxItems.js'),
+    import('../ZSchemaTestSuite/ForceProperties.js'),
+    import('../ZSchemaTestSuite/IgnoreUnresolvableReferences.js'),
+    import('../ZSchemaTestSuite/AssumeAdditional.js'),
+    import('../ZSchemaTestSuite/NoEmptyArrays.js'),
+    import('../ZSchemaTestSuite/NoEmptyStrings.js'),
+    import('../ZSchemaTestSuite/NoTypeless.js'),
+    import('../ZSchemaTestSuite/NoExtraKeywords.js'),
+    import('../ZSchemaTestSuite/StrictUris.js'),
+    import('../ZSchemaTestSuite/MultipleSchemas.js'),
+    import('../ZSchemaTestSuite/ErrorPathAsArray.js'),
+    import('../ZSchemaTestSuite/ErrorPathAsJSONPointer.js'),
+    import('../ZSchemaTestSuite/ErrorPathContainsIntegerIndex.js'),
+    import('../ZSchemaTestSuite/PedanticCheck.js'),
+    import('../ZSchemaTestSuite/getRegisteredFormats.js'),
+    import('../ZSchemaTestSuite/InvalidId.js'),
+    import('../ZSchemaTestSuite/IncludeErrors.js'),
+    import('../ZSchemaTestSuite/CustomValidator.js'),
     // issues
-    import("../ZSchemaTestSuite/Issue12.js"),
-    import("../ZSchemaTestSuite/Issue13.js"),
-    import("../ZSchemaTestSuite/Issue16.js"),
-    import("../ZSchemaTestSuite/Issue22.js"),
-    import("../ZSchemaTestSuite/Issue25.js"),
-    import("../ZSchemaTestSuite/Issue26.js"),
-    import("../ZSchemaTestSuite/Issue37.js"),
-    import("../ZSchemaTestSuite/Issue40.js"),
-    import("../ZSchemaTestSuite/Issue41.js"),
-    import("../ZSchemaTestSuite/Issue43.js"),
-    import("../ZSchemaTestSuite/Issue44.js"),
-    import("../ZSchemaTestSuite/Issue45.js"),
-    import("../ZSchemaTestSuite/Issue47.js"),
-    import("../ZSchemaTestSuite/Issue48.js"),
-    import("../ZSchemaTestSuite/Issue49.js"),
-    import("../ZSchemaTestSuite/Issue53.js"),
-    import("../ZSchemaTestSuite/Issue56.js"),
-    import("../ZSchemaTestSuite/Issue57.js"),
-    import("../ZSchemaTestSuite/Issue58.js"),
-    import("../ZSchemaTestSuite/Issue63.js"),
-    import("../ZSchemaTestSuite/Issue64.js"),
-    import("../ZSchemaTestSuite/Issue67.js"),
-    import("../ZSchemaTestSuite/Issue71.js"),
-    import("../ZSchemaTestSuite/Issue73.js"),
-    import("../ZSchemaTestSuite/Issue76.js"),
-    import("../ZSchemaTestSuite/Issue85.js"),
-    import("../ZSchemaTestSuite/Issue94.js"),
-    import("../ZSchemaTestSuite/Issue96.js"),
-    import("../ZSchemaTestSuite/Issue98.js"),
-    import("../ZSchemaTestSuite/Issue101.js"),
-    import("../ZSchemaTestSuite/Issue102.js"),
-    import("../ZSchemaTestSuite/Issue103.js"),
-    import("../ZSchemaTestSuite/Issue106.js"),
-    import("../ZSchemaTestSuite/Issue107.js"),
-    import("../ZSchemaTestSuite/Issue121.js"),
-    import("../ZSchemaTestSuite/Issue125.js"),
-    import("../ZSchemaTestSuite/Issue126.js"),
-    import("../ZSchemaTestSuite/Issue130.js"),
-    import("../ZSchemaTestSuite/Issue131.js"),
-    import("../ZSchemaTestSuite/Issue137.js"),
-    import("../ZSchemaTestSuite/Issue139.js"),
-    import("../ZSchemaTestSuite/Issue142.js"),
-    import("../ZSchemaTestSuite/Issue146.js"),
-    import("../ZSchemaTestSuite/Issue151.js"),
-    import("../ZSchemaTestSuite/Issue199.js"),
-    import("../ZSchemaTestSuite/Issue209.js"),
-    import("../ZSchemaTestSuite/Issue222.js"),
-    import("../ZSchemaTestSuite/Issue229.js"),
-    import("../ZSchemaTestSuite/Issue250.js"),
-])).map(m => m.default ?? m);
+    import('../ZSchemaTestSuite/Issue12.js'),
+    import('../ZSchemaTestSuite/Issue13.js'),
+    import('../ZSchemaTestSuite/Issue16.js'),
+    import('../ZSchemaTestSuite/Issue22.js'),
+    import('../ZSchemaTestSuite/Issue25.js'),
+    import('../ZSchemaTestSuite/Issue26.js'),
+    import('../ZSchemaTestSuite/Issue37.js'),
+    import('../ZSchemaTestSuite/Issue40.js'),
+    import('../ZSchemaTestSuite/Issue41.js'),
+    import('../ZSchemaTestSuite/Issue43.js'),
+    import('../ZSchemaTestSuite/Issue44.js'),
+    import('../ZSchemaTestSuite/Issue45.js'),
+    import('../ZSchemaTestSuite/Issue47.js'),
+    import('../ZSchemaTestSuite/Issue48.js'),
+    import('../ZSchemaTestSuite/Issue49.js'),
+    import('../ZSchemaTestSuite/Issue53.js'),
+    import('../ZSchemaTestSuite/Issue56.js'),
+    import('../ZSchemaTestSuite/Issue57.js'),
+    import('../ZSchemaTestSuite/Issue58.js'),
+    import('../ZSchemaTestSuite/Issue63.js'),
+    import('../ZSchemaTestSuite/Issue64.js'),
+    import('../ZSchemaTestSuite/Issue67.js'),
+    import('../ZSchemaTestSuite/Issue71.js'),
+    import('../ZSchemaTestSuite/Issue73.js'),
+    import('../ZSchemaTestSuite/Issue76.js'),
+    import('../ZSchemaTestSuite/Issue85.js'),
+    import('../ZSchemaTestSuite/Issue94.js'),
+    import('../ZSchemaTestSuite/Issue96.js'),
+    import('../ZSchemaTestSuite/Issue98.js'),
+    import('../ZSchemaTestSuite/Issue101.js'),
+    import('../ZSchemaTestSuite/Issue102.js'),
+    import('../ZSchemaTestSuite/Issue103.js'),
+    import('../ZSchemaTestSuite/Issue106.js'),
+    import('../ZSchemaTestSuite/Issue107.js'),
+    import('../ZSchemaTestSuite/Issue121.js'),
+    import('../ZSchemaTestSuite/Issue125.js'),
+    import('../ZSchemaTestSuite/Issue126.js'),
+    import('../ZSchemaTestSuite/Issue130.js'),
+    import('../ZSchemaTestSuite/Issue131.js'),
+    import('../ZSchemaTestSuite/Issue137.js'),
+    import('../ZSchemaTestSuite/Issue139.js'),
+    import('../ZSchemaTestSuite/Issue142.js'),
+    import('../ZSchemaTestSuite/Issue146.js'),
+    import('../ZSchemaTestSuite/Issue151.js'),
+    import('../ZSchemaTestSuite/Issue199.js'),
+    import('../ZSchemaTestSuite/Issue209.js'),
+    import('../ZSchemaTestSuite/Issue222.js'),
+    import('../ZSchemaTestSuite/Issue229.js'),
+    import('../ZSchemaTestSuite/Issue250.js'),
+  ])
+).map((m) => m.default ?? m);
 
-describe("ZSchemaTestSuite", function () {
-
-    var idx = testSuiteFiles.length;
-    while (idx--) {
-        if (testSuiteFiles[idx] == null) {
-            testSuiteFiles.splice(idx, 1);
-        }
+describe('ZSchemaTestSuite', function () {
+  var idx = testSuiteFiles.length;
+  while (idx--) {
+    if (testSuiteFiles[idx] == null) {
+      testSuiteFiles.splice(idx, 1);
     }
+  }
 
-    testSuiteFiles.forEach(function (testSuite: any) {
+  testSuiteFiles.forEach(function (testSuite: any) {
+    testSuite.tests.forEach(function (test) {
+      var data = test.data;
+      if (typeof data === 'undefined') {
+        data = testSuite.data;
+      }
 
-        testSuite.tests.forEach(function (test) {
+      var validateOptions = test.validateOptions;
+      if (typeof validateOptions === 'undefined') {
+        validateOptions = testSuite.validateOptions;
+      }
 
-            var data = test.data;
-            if (typeof data === "undefined") {
-                data = testSuite.data;
+      var async = test.async || testSuite.async || false,
+        options = test.options || testSuite.options || undefined,
+        setup = test.setup || testSuite.setup,
+        schema = test.schema || testSuite.schema,
+        schemaIndex = test.schemaIndex || testSuite.schemaIndex || 0,
+        after = test.after || testSuite.after,
+        validateSchemaOnly = test.validateSchemaOnly || testSuite.validateSchemaOnly,
+        failWithException = test.failWithException || testSuite.failWithException;
+
+      !async &&
+        it(testSuite.description + ', ' + test.description, function () {
+          ZSchema.setSchemaReader(null);
+
+          var validator = new ZSchema(options);
+          var caughtErr;
+
+          if (setup) {
+            setup(validator, ZSchema);
+          }
+
+          var valid;
+          try {
+            valid = validator.validateSchema(schema);
+          } catch (err) {
+            if (!failWithException) {
+              throw err;
             }
+            caughtErr = err;
+          }
 
-            var validateOptions = test.validateOptions;
-            if (typeof validateOptions === "undefined") {
-                validateOptions = testSuite.validateOptions;
+          if (valid && !validateSchemaOnly) {
+            if (Array.isArray(schema)) {
+              schema = schema[schemaIndex];
             }
+            try {
+              valid = validator.validate(data, schema, validateOptions);
+            } catch (err) {
+              if (!failWithException) {
+                throw err;
+              }
+              caughtErr = err;
+            }
+          }
 
-            var async               = test.async              || testSuite.async        || false,
-                options             = test.options            || testSuite.options      || undefined,
-                setup               = test.setup              || testSuite.setup,
-                schema              = test.schema             || testSuite.schema,
-                schemaIndex         = test.schemaIndex        || testSuite.schemaIndex  || 0,
-                after               = test.after              || testSuite.after,
-                validateSchemaOnly  = test.validateSchemaOnly || testSuite.validateSchemaOnly,
-                failWithException   = test.failWithException  || testSuite.failWithException;
+          var err = caughtErr || validator.getLastErrors();
 
-            !async && it(testSuite.description + ", " + test.description, function () {
+          if (failWithException) {
+            expect(caughtErr).toBeTruthy();
+          } else {
+            expect(typeof valid).toBe('boolean', 'returned response is not a boolean');
+            expect(valid).toBe(test.valid, "test result doesn't match expected test result");
+          }
 
-                ZSchema.setSchemaReader(null);
+          if (test.valid === true) {
+            expect(err).toBe(null, 'errors are not undefined when test is valid');
+          }
 
-                var validator = new ZSchema(options);
-                var caughtErr;
-
-                if (setup) { setup(validator, ZSchema); }
-
-                var valid;
-                try {
-                    valid = validator.validateSchema(schema);
-                } catch (err) {
-                    if (!failWithException) {
-                        throw err;
-                    }
-                    caughtErr = err;
-                }
-
-                if (valid && !validateSchemaOnly) {
-                    if (Array.isArray(schema)) {
-                        schema = schema[schemaIndex];
-                    }
-                    try {
-                        valid = validator.validate(data, schema, validateOptions);
-                    } catch (err) {
-                        if (!failWithException) {
-                            throw err;
-                        }
-                        caughtErr = err;
-                    }
-                }
-
-                var err = caughtErr || validator.getLastErrors();
-
-                if (failWithException) {
-                    expect(caughtErr).toBeTruthy();
-                } else {
-                    expect(typeof valid).toBe("boolean", "returned response is not a boolean");
-                    expect(valid).toBe(test.valid, "test result doesn't match expected test result");
-                }
-
-                if (test.valid === true) {
-                    expect(err).toBe(null, "errors are not undefined when test is valid");
-                }
-
-                if (after) {
-                    after(err, valid, data, validator);
-                }
-
-            });
-
-            async && it(testSuite.description + ", " + test.description, function () {
-                return new Promise<void>((done) => {
-
-                var validator = new ZSchema(options);
-                if (setup) { setup(validator, ZSchema); }
-
-                // see http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony
-                var zalgo = false;
-
-                var result = validator.validate(data, schema, function (err, valid) {
-                    // make sure callback wasn't called synchronously
-                    expect(zalgo).toBe(true, "callback was fired in synchronous way");
-                    expect(typeof valid).toBe("boolean", "returned response is not a boolean");
-                    expect(valid).toBe(test.valid, "test result doesn't match expected test result");
-                    if (test.valid === true) {
-                        expect(err).toBe(null, "errors are not undefined when test is valid");
-                    }
-                    if (after) {
-                        after(err, valid, data);
-                    }
-                    done();
-
-                });
-
-                // never return anything when callback is specified
-                expect(result).toBe(undefined, "validator returned something else than undefined in callback mode");
-                zalgo = true;
-
-                });
-            });
-
+          if (after) {
+            after(err, valid, data, validator);
+          }
         });
 
-    });
+      async &&
+        it(testSuite.description + ', ' + test.description, function () {
+          return new Promise<void>((done) => {
+            var validator = new ZSchema(options);
+            if (setup) {
+              setup(validator, ZSchema);
+            }
 
+            // see http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony
+            var zalgo = false;
+
+            var result = validator.validate(data, schema, function (err, valid) {
+              // make sure callback wasn't called synchronously
+              expect(zalgo).toBe(true, 'callback was fired in synchronous way');
+              expect(typeof valid).toBe('boolean', 'returned response is not a boolean');
+              expect(valid).toBe(test.valid, "test result doesn't match expected test result");
+              if (test.valid === true) {
+                expect(err).toBe(null, 'errors are not undefined when test is valid');
+              }
+              if (after) {
+                after(err, valid, data);
+              }
+              done();
+            });
+
+            // never return anything when callback is specified
+            expect(result).toBe(undefined, 'validator returned something else than undefined in callback mode');
+            zalgo = true;
+          });
+        });
+    });
+  });
 });

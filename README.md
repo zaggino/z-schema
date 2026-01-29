@@ -25,7 +25,8 @@ Validator will try to perform sync validation when possible for speed, but suppo
 ## Development:
 
 These repository has several submodules and should be cloned as follows:
->git clone **--recursive** https://github.com/zaggino/z-schema.git
+
+> git clone **--recursive** https://github.com/zaggino/z-schema.git
 
 ## CLI:
 
@@ -75,16 +76,16 @@ import ZSchema from 'z-schema/dist/ZSchema.cjs';
 ```html
 <script type="text/javascript" src="../dist/ZSchema-umd-min.js"></script>
 <script type="text/javascript">
-	var validator = new ZSchema();
-	var valid = validator.validate("string", { "type": "string" });
-	console.log(valid);
+  var validator = new ZSchema();
+  var valid = validator.validate('string', { type: 'string' });
+  console.log(valid);
 </script>
 ```
 
 ## Remote references and schemas:
 
 In case you have some remote references in your schemas, you have to download those schemas before using validator.
-Otherwise you'll get ```UNRESOLVABLE_REFERENCE``` error when trying to compile a schema.
+Otherwise you'll get `UNRESOLVABLE_REFERENCE` error when trying to compile a schema.
 
 ```javascript
 var validator = new ZSchema();
@@ -114,8 +115,8 @@ If you're able to load schemas synchronously, you can use `ZSchema.setSchemaRead
 
 ```javascript
 ZSchema.setSchemaReader(function (uri) {
-    var someFilename = path.resolve(__dirname, "..", "schemas", uri + ".json");
-    return JSON.parse(fs.readFileSync(someFilename, "utf8"));
+  var someFilename = path.resolve(__dirname, '..', 'schemas', uri + '.json');
+  return JSON.parse(fs.readFileSync(someFilename, 'utf8'));
 });
 ```
 
@@ -151,7 +152,7 @@ ZSchema.setSchemaReader(function (uri) {
 In case you don't want to split your schema into multiple schemas using reference for any reason, you can use option schemaPath when validating:
 
 ```javascript
-var valid = validator.validate(cars, schema, { schemaPath: "definitions.car.definitions.cars" });
+var valid = validator.validate(cars, schema, { schemaPath: 'definitions.car.definitions.cars' });
 ```
 
 See more details in the [test](/test/spec/schemaPathSpec.js).
@@ -162,38 +163,35 @@ You can use validator to compile an array of schemas that have references betwee
 
 ```javascript
 var schemas = [
-    {
-        id: "personDetails",
-        type: "object",
-        properties: {
-            firstName: { type: "string" },
-            lastName: { type: "string" }
-        },
-        required: ["firstName", "lastName"]
+  {
+    id: 'personDetails',
+    type: 'object',
+    properties: {
+      firstName: { type: 'string' },
+      lastName: { type: 'string' },
     },
-    {
-        id: "addressDetails",
-        type: "object",
-        properties: {
-            street: { type: "string" },
-            city: { type: "string" }
-        },
-        required: ["street", "city"]
+    required: ['firstName', 'lastName'],
+  },
+  {
+    id: 'addressDetails',
+    type: 'object',
+    properties: {
+      street: { type: 'string' },
+      city: { type: 'string' },
     },
-    {
-        id: "personWithAddress",
-        allOf: [
-            { $ref: "personDetails" },
-            { $ref: "addressDetails" }
-        ]
-    }
+    required: ['street', 'city'],
+  },
+  {
+    id: 'personWithAddress',
+    allOf: [{ $ref: 'personDetails' }, { $ref: 'addressDetails' }],
+  },
 ];
 
 var data = {
-    firstName: "Martin",
-    lastName: "Zagora",
-    street: "George St",
-    city: "Sydney"
+  firstName: 'Martin',
+  lastName: 'Zagora',
+  street: 'George St',
+  city: 'Sydney',
 };
 
 var validator = new ZSchema();
@@ -212,28 +210,31 @@ var valid = validator.validate(data, schemas[2]);
 You can register any format of your own. Your sync validator function should always respond with a boolean:
 
 ```javascript
-ZSchema.registerFormat("xstring", function (str) {
-    return str === "xxx";
+ZSchema.registerFormat('xstring', function (str) {
+  return str === 'xxx';
 });
 ```
 
 Async format validators are also supported, they should accept two arguments, value and a callback to which they need to respond:
 
 ```javascript
-ZSchema.registerFormat("xstring", function (str, callback) {
-    setTimeout(function () {
-        callback(str === "xxx");
-    }, 1);
+ZSchema.registerFormat('xstring', function (str, callback) {
+  setTimeout(function () {
+    callback(str === 'xxx');
+  }, 1);
 });
 ```
+
 ## Helper method to check the formats that have been registered
+
 ```javascript
 var registeredFormats = ZSchema.getRegisteredFormats();
 //registeredFormats will now contain an array of all formats that have been registered with z-schema
 ```
+
 ## Automatic downloading of remote schemas
 
-Automatic downloading of remote schemas was removed from version ```3.x``` but is still possible with a bit of extra code,
+Automatic downloading of remote schemas was removed from version `3.x` but is still possible with a bit of extra code,
 see [this test](test/spec/AutomaticSchemaLoadingSpec.js) for more information on this.
 
 ## Prefill default values to object using format
@@ -241,16 +242,16 @@ see [this test](test/spec/AutomaticSchemaLoadingSpec.js) for more information on
 Using format, you can pre-fill values of your choosing into the objects like this:
 
 ```javascript
-ZSchema.registerFormat("fillHello", function (obj) {
-    obj.hello = "world";
-    return true;
+ZSchema.registerFormat('fillHello', function (obj) {
+  obj.hello = 'world';
+  return true;
 });
 
 var data = {};
 
 var schema = {
-    "type": "object",
-    "format": "fillHello"
+  type: 'object',
+  format: 'fillHello',
 };
 
 validator.validate(data, schema);
@@ -262,51 +263,51 @@ validator.validate(data, schema);
 ## asyncTimeout
 
 Defines a time limit, which should be used when waiting for async tasks like async format validators to perform their validation,
-before the validation fails with an ```ASYNC_TIMEOUT``` error.
+before the validation fails with an `ASYNC_TIMEOUT` error.
 
 ```javascript
 var validator = new ZSchema({
-    asyncTimeout: 2000
+  asyncTimeout: 2000,
 });
 ```
 
 ## noEmptyArrays
 
-When true, validator will assume that minimum count of items in any ```array``` is 1, except when ```minItems: 0``` is explicitly defined.
+When true, validator will assume that minimum count of items in any `array` is 1, except when `minItems: 0` is explicitly defined.
 
 ```javascript
 var validator = new ZSchema({
-    noEmptyArrays: true
+  noEmptyArrays: true,
 });
 ```
 
 ## noEmptyStrings
 
-When true, validator will assume that minimum length of any string to pass type ```string``` validation is 1, except when ```minLength: 0``` is explicitly defined.
+When true, validator will assume that minimum length of any string to pass type `string` validation is 1, except when `minLength: 0` is explicitly defined.
 
 ```javascript
 var validator = new ZSchema({
-    noEmptyStrings: true
+  noEmptyStrings: true,
 });
 ```
 
 ## noTypeless
 
-When true, validator will fail validation for schemas that don't specify a ```type``` of object that they expect.
+When true, validator will fail validation for schemas that don't specify a `type` of object that they expect.
 
 ```javascript
 var validator = new ZSchema({
-    noTypeless: true
+  noTypeless: true,
 });
 ```
 
 ## noExtraKeywords
 
-When true, validator will fail for schemas that use keywords not defined in JSON Schema specification and doesn't provide a parent schema in ```$schema``` property to validate the schema.
+When true, validator will fail for schemas that use keywords not defined in JSON Schema specification and doesn't provide a parent schema in `$schema` property to validate the schema.
 
 ```javascript
 var validator = new ZSchema({
-    noExtraKeywords: true
+  noExtraKeywords: true,
 });
 ```
 
@@ -316,7 +317,7 @@ When true, validator assumes that additionalItems/additionalProperties are defin
 
 ```javascript
 var validator = new ZSchema({
-    assumeAdditional: true
+  assumeAdditional: true,
 });
 ```
 
@@ -324,7 +325,7 @@ When an array, validator assumes that additionalItems/additionalProperties are d
 
 ```javascript
 var validator = new ZSchema({
-    assumeAdditional: ["$ref"]
+  assumeAdditional: ['$ref'],
 });
 ```
 
@@ -334,74 +335,73 @@ When true, validator doesn't validate schemas where additionalItems/additionalPr
 
 ```javascript
 var validator = new ZSchema({
-    forceAdditional: true
+  forceAdditional: true,
 });
 ```
 
 ## forceItems
 
-When true, validator doesn't validate schemas where ```items``` are not defined for ```array``` type schemas.
+When true, validator doesn't validate schemas where `items` are not defined for `array` type schemas.
 This is to avoid passing anything through an array definition.
 
 ```javascript
 var validator = new ZSchema({
-    forceItems: true
+  forceItems: true,
 });
 ```
 
 ## forceMinItems
 
-When true, validator doesn't validate schemas where ```minItems``` is not defined for ```array``` type schemas.
+When true, validator doesn't validate schemas where `minItems` is not defined for `array` type schemas.
 This is to avoid passing zero-length arrays which application doesn't expect to handle.
 
 ```javascript
 var validator = new ZSchema({
-    forceMinItems: true
+  forceMinItems: true,
 });
 ```
 
 ## forceMaxItems
 
-When true, validator doesn't validate schemas where ```maxItems``` is not defined for ```array``` type schemas.
+When true, validator doesn't validate schemas where `maxItems` is not defined for `array` type schemas.
 This is to avoid passing arrays with unlimited count of elements which application doesn't expect to handle.
 
 ```javascript
 var validator = new ZSchema({
-    forceMaxItems: true
+  forceMaxItems: true,
 });
 ```
 
 ## forceMinLength
 
-When true, validator doesn't validate schemas where ```minLength``` is not defined for ```string``` type schemas.
+When true, validator doesn't validate schemas where `minLength` is not defined for `string` type schemas.
 This is to avoid passing zero-length strings which application doesn't expect to handle.
 
 ```javascript
 var validator = new ZSchema({
-    forceMinLength: true
+  forceMinLength: true,
 });
 ```
 
-
 ## forceMaxLength
 
-When true, validator doesn't validate schemas where ```maxLength``` is not defined for ```string``` type schemas.
+When true, validator doesn't validate schemas where `maxLength` is not defined for `string` type schemas.
 This is to avoid passing extremly large strings which application doesn't expect to handle.
 
 ```javascript
 var validator = new ZSchema({
-    forceMaxLength: true
+  forceMaxLength: true,
 });
 ```
 
 ## forceProperties
 
-When true, validator doesn't validate schemas where ```properties``` or ```patternProperties``` is not defined for ```object``` type schemas.
+When true, validator doesn't validate schemas where `properties` or `patternProperties` is not defined for `object` type schemas.
 This is to avoid having objects with unexpected properties in application.
 
 ```javascript
 var validator = new ZSchema({
-    forceProperties: true
+  forceProperties: true,
 });
 ```
 
@@ -411,26 +411,27 @@ When true, validator doesn't end with error when a remote reference is unreachab
 
 ```javascript
 var validator = new ZSchema({
-    ignoreUnresolvableReferences: true
+  ignoreUnresolvableReferences: true,
 });
 ```
+
 ## enumCaseInsensitiveComparison
 
-When true, validator will return a ```ENUM_CASE_MISMATCH``` when the enum values mismatch only in case.
+When true, validator will return a `ENUM_CASE_MISMATCH` when the enum values mismatch only in case.
 
 ```javascript
 var validator = new ZSchema({
-    enumCaseInsensitiveComparison: true
+  enumCaseInsensitiveComparison: true,
 });
 ```
 
 ## strictUris
 
-When true, all strings of format ```uri``` must be an absolute URIs and not only URI references. See more details in [this issue](https://github.com/zaggino/z-schema/issues/18).
+When true, all strings of format `uri` must be an absolute URIs and not only URI references. See more details in [this issue](https://github.com/zaggino/z-schema/issues/18).
 
 ```javascript
 var validator = new ZSchema({
-    strictUris: true
+  strictUris: true,
 });
 ```
 
@@ -440,20 +441,20 @@ Strict mode of z-schema is currently equal to the following:
 
 ```javascript
 if (this.options.strictMode === true) {
-    this.options.forceAdditional  = true;
-    this.options.forceItems       = true;
-    this.options.forceMaxLength   = true;
-    this.options.forceProperties  = true;
-    this.options.noExtraKeywords  = true;
-    this.options.noTypeless       = true;
-    this.options.noEmptyStrings   = true;
-    this.options.noEmptyArrays    = true;
+  this.options.forceAdditional = true;
+  this.options.forceItems = true;
+  this.options.forceMaxLength = true;
+  this.options.forceProperties = true;
+  this.options.noExtraKeywords = true;
+  this.options.noTypeless = true;
+  this.options.noEmptyStrings = true;
+  this.options.noEmptyArrays = true;
 }
 ```
 
 ```javascript
 var validator = new ZSchema({
-    strictMode: true
+  strictMode: true,
 });
 ```
 
@@ -464,7 +465,7 @@ When true, will stop validation after the first error is found:
 
 ```javascript
 var validator = new ZSchema({
-    breakOnFirstError: true
+  breakOnFirstError: true,
 });
 ```
 
@@ -474,21 +475,21 @@ Report error paths as an array of path segments instead of a string:
 
 ```javascript
 var validator = new ZSchema({
-    reportPathAsArray: true
+  reportPathAsArray: true,
 });
 ```
 
 ## ignoreUnknownFormats
 
 By default, z-schema reports all unknown formats, formats not defined by JSON Schema and not registered using
-`ZSchema.registerFormat`, as an error.  But the
+`ZSchema.registerFormat`, as an error. But the
 [JSON Schema specification](http://json-schema.org/latest/json-schema-validation.html#anchor106) says that validator
-implementations *"they SHOULD offer an option to disable validation"* for `format`.  That being said, setting this
+implementations _"they SHOULD offer an option to disable validation"_ for `format`. That being said, setting this
 option to `true` will disable treating unknown formats as errlrs
 
 ```javascript
 var validator = new ZSchema({
-    ignoreUnknownFormats: true
+  ignoreUnknownFormats: true,
 });
 ```
 
@@ -499,7 +500,7 @@ By default, z-schema reports all errors. If interested only in a subset of the e
 ```javascript
 var validator = new ZSchema();
 // will only execute validation for "INVALID_TYPE" error.
-validator.validate(json, schema, {includeErrors: ["INVALID_TYPE"]});
+validator.validate(json, schema, { includeErrors: ['INVALID_TYPE'] });
 ```
 
 ## customValidator
@@ -510,83 +511,97 @@ Register function to be called as part of validation process on every subshema e
 
 Let's make a real-life example with this feature.
 Imagine you have number of transactions:
+
 ```json
 {
-    "fromId": 1034834329,
-    "toId": 1034834543,
-    "amount": 200
+  "fromId": 1034834329,
+  "toId": 1034834543,
+  "amount": 200
 }
 ```
+
 So you write the schema:
+
 ```json
 {
-    "type": "object",
-    "properties": {
-        "fromId": {
-            "type": "integer"
-        },
-        "toId": {
-            "type": "integer"
-        },
-        "amount": {
-            "type": "number"
-        }
+  "type": "object",
+  "properties": {
+    "fromId": {
+      "type": "integer"
+    },
+    "toId": {
+      "type": "integer"
+    },
+    "amount": {
+      "type": "number"
     }
+  }
 }
 ```
+
 But how to check that `fromId` and `toId` are never equal.
 In JSON Schema Draft4 there is no possibility to do this.
 Actually, it's easy to just write validation code for such simple payloads.
 But what if you have to do the same check for many objects in different places of JSON payload.
 One solution is to add custom keyword `uniqueProperties` with array of property names as a value. So in our schema we would need to add:
+
 ```json
 "uniqueProperties": [
     "fromId",
     "toId"
 ]
 ```
+
 To teach `z-schema` about this new keyword we need to write handler for it:
+
 ```javascript
 function customValidatorFn(report, schema, json) {
-    // check if our custom property is present
-    if (Array.isArray(schema.uniqueProperties)) {
-        var seenValues = [];
-        schema.uniqueProperties.forEach(function (prop) {
-            var value = json[prop];
-            if (typeof value !== 'undefined') {
-                if (seenValues.indexOf(value) !== -1) {
-                    // report error back to z-schema core
-                    report.addCustomError("NON_UNIQUE_PROPERTY_VALUE",
-                        "Property \"{0}\" has non-unique value: {1}",
-                        [prop, value], null, schema.description);
-                }
-                seenValues.push(value)
-            }
-        });
-    }
+  // check if our custom property is present
+  if (Array.isArray(schema.uniqueProperties)) {
+    var seenValues = [];
+    schema.uniqueProperties.forEach(function (prop) {
+      var value = json[prop];
+      if (typeof value !== 'undefined') {
+        if (seenValues.indexOf(value) !== -1) {
+          // report error back to z-schema core
+          report.addCustomError(
+            'NON_UNIQUE_PROPERTY_VALUE',
+            'Property "{0}" has non-unique value: {1}',
+            [prop, value],
+            null,
+            schema.description
+          );
+        }
+        seenValues.push(value);
+      }
+    });
+  }
 }
 
 var validator = new ZSchema({
-    // register our custom validator inside z-schema
-    customValidator: customValidatorFn
+  // register our custom validator inside z-schema
+  customValidator: customValidatorFn,
 });
 ```
+
 Let's test it:
+
 ```javascript
 var data = {
-    fromId: 1034834346,
-    toId: 1034834346,
-    amount: 50
+  fromId: 1034834346,
+  toId: 1034834346,
+  amount: 50,
 };
 
 validator.validate(data, schema);
-console.log(validator.getLastErrors())
+console.log(validator.getLastErrors());
 //[ { code: 'NON_UNIQUE_PROPERTY_VALUE',
 //    params: [ 'toId', 1034834346 ],
 //    message: 'Property "toId" has non-unique value: 1034834346',
 //    path: '#/',
 //    schemaId: undefined } ]
 ```
+
 **Note:** before creating your own keywords you should consider all compatibility issues.
 
 # Benchmarks

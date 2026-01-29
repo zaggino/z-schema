@@ -1,7 +1,7 @@
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
-import terser from "@rollup/plugin-terser";
+import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
 
 export default [
@@ -10,8 +10,8 @@ export default [
     plugins: [resolve(), json(), commonjs(), typescript()],
     output: {
       file: 'dist/ZSchema.cjs',
-      format: 'cjs'
-    }
+      format: 'cjs',
+    },
   },
   {
     input: 'src/ZSchema.ts',
@@ -19,8 +19,8 @@ export default [
     output: {
       file: 'dist/ZSchema-umd.js',
       format: 'umd',
-      name: 'ZSchema'
-    }
+      name: 'ZSchema',
+    },
   },
   {
     input: 'src/ZSchema.ts',
@@ -28,7 +28,7 @@ export default [
     output: {
       file: 'dist/ZSchema-umd-min.js',
       format: 'umd',
-      name: 'ZSchema'
-    }
+      name: 'ZSchema',
+    },
   },
 ];

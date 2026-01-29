@@ -14,15 +14,11 @@
   },
   "host": "http://petstore.swagger.wordnik.com",
   "basePath": "/api",
-  "schemes": [
-    "http"
-  ],
+  "schemes": ["http"],
   "paths": {
     "/pets": {
       "get": {
-        "tags": [
-          "Pet Operations"
-        ],
+        "tags": ["Pet Operations"],
         "summary": "finds pets in the system",
         "responses": {
           "200": {
@@ -53,10 +49,7 @@
   },
   "schemas": {
     "Pet": {
-      "required": [
-        "id",
-        "name"
-      ],
+      "required": ["id", "name"],
       "properties": {
         "id": {
           "type": "integer",
@@ -71,10 +64,7 @@
       }
     },
     "Error": {
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "properties": {
         "code": {
           "type": "integer",
