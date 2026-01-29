@@ -36,7 +36,11 @@
     "README.md"
   ],
   "scripts": {
-    "prepare": "npm run build",
+    "prepare": "husky",
+    "pre-commit": "npx lint-staged",
+    "pre-push": "",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "build": "npm run copy:schemas && tsc && rollup -c",
     "build:browser": "rollup -c --environment BROWSER",
     "build:watch": "rollup -c -w",
@@ -75,7 +79,10 @@
     "grunt-contrib-uglify": "^5.2.2",
     "grunt-jscs": "^3.0.1",
     "grunt-lineending": "^1.0.0",
+    "husky": "^9.1.7",
     "jsdom": "^27.4.0",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
     "remapify": "^2.2.0",
     "rollup": "^4.57.0",
     "tslib": "^2.8.1",
