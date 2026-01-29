@@ -40,7 +40,7 @@ z-schema --strictMode mySchema.json myJson.json
 ## NodeJS:
 
 ```javascript
-var ZSchema = require("z-schema");
+import ZSchema from 'z-schema';
 var options = ... // see below for possible option values
 var validator = new ZSchema(options);
 ```
@@ -64,10 +64,16 @@ validator.validate(json, schema, function (err, valid) {
 });
 ```
 
+## CommonJs
+
+```javascript
+import ZSchema from 'z-schema/dist/ZSchema.cjs';
+```
+
 ## Browser:
 
 ```html
-<script type="text/javascript" src="../dist/ZSchema-browser-min.js"></script>
+<script type="text/javascript" src="../dist/ZSchema-umd-min.js"></script>
 <script type="text/javascript">
 	var validator = new ZSchema();
 	var valid = validator.validate("string", { "type": "string" });

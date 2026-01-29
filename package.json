@@ -23,7 +23,8 @@
     "url": "https://github.com/zaggino/z-schema/issues"
   },
   "type": "module",
-  "main": "src/ZSchema.js",
+  "main": "dist/ZSchema.js",
+  "types": "dist/types/ZSchema.d.ts",
   "bin": {
     "z-schema": "./bin/z-schema"
   },
@@ -35,7 +36,6 @@
     "LICENSE",
     "README.md"
   ],
-  "types": "index.d.ts",
   "scripts": {
     "prepare": "npm run build",
     "build": "tsc && rollup -c",
@@ -46,25 +46,6 @@
     "test:browsers": "vitest run --project browsers --silent=true",
     "test:node": "vitest run --project node --silent=true",
     "test:sample": "npx vitest run --silent=false --hideSkippedTests --project node -t \"invalid definition\""
-  },
-  "testling": {
-    "scripts": [
-      "test/Runner.js",
-      "dist/ZSchema-browser-min.js",
-      "dist/ZSchema-browser-test.js"
-    ],
-    "browsers": [
-      "iexplore/9..latest",
-      "chrome/4",
-      "chrome/28..latest",
-      "firefox/3.5",
-      "firefox/23..latest",
-      "safari/5.1..latest",
-      "opera/12..latest",
-      "iphone/6..latest",
-      "ipad/6..latest",
-      "android-browser/4.2..latest"
-    ]
   },
   "dependencies": {
     "lodash.get": "^4.4.2",

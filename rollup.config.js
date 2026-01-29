@@ -9,7 +9,15 @@ export default [
     input: 'src/ZSchema.ts',
     plugins: [resolve(), json(), commonjs(), typescript()],
     output: {
-      file: 'dist/ZSchema-browser.js',
+      file: 'dist/ZSchema.cjs',
+      format: 'cjs'
+    }
+  },
+  {
+    input: 'src/ZSchema.ts',
+    plugins: [resolve(), json(), commonjs(), typescript()],
+    output: {
+      file: 'dist/ZSchema-umd.js',
       format: 'umd',
       name: 'ZSchema'
     }
@@ -18,9 +26,9 @@ export default [
     input: 'src/ZSchema.ts',
     plugins: [resolve(), json(), commonjs(), typescript(), terser()],
     output: {
-      file: 'dist/ZSchema-browser-min.js',
+      file: 'dist/ZSchema-umd-min.js',
       format: 'umd',
       name: 'ZSchema'
     }
-  }
+  },
 ];

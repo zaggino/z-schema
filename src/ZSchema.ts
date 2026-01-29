@@ -1,5 +1,5 @@
 import get from "lodash.get";
-import { Report } from "./Report.js";
+import { Report, SchemaError, SchemaErrorDetail } from "./Report.js";
 import { FormatValidators } from "./FormatValidators.js";
 import * as JsonValidation from "./JsonValidation.js";
 import * as SchemaCache from "./SchemaCache.js";
@@ -105,302 +105,347 @@ function normalizeOptions(options) {
     return normalized;
 }
 
-/**
- * @class
- *
- * @param {*} [options]
- */
-function ZSchema(options?) {
-    this.cache = {};
-    this.referenceCache = [];
-    this.validateOptions = {};
-
-    this.options = normalizeOptions(options);
-
-    // Disable strict validation for the built-in schemas
-    var metaschemaOptions = normalizeOptions({ });
-
-    this.setRemoteReference("http://json-schema.org/draft-04/schema", Draft4Schema, metaschemaOptions);
-    this.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", Draft4HyperSchema, metaschemaOptions);
-}
-
-/**
- * instance methods
- *
- * @param {*} schema
- *
- * @returns {boolean}
- */
-ZSchema.prototype.compileSchema = function (schema) {
-    var report = new Report(this.options);
-
-    schema = SchemaCache.getSchema.call(this, report, schema);
-
-    SchemaCompilation.compileSchema.call(this, report, schema);
-
-    this.lastReport = report;
-    return report.isValid();
-};
-
-/**
- *
- * @param {*} schema
- *
- * @returns {boolean}
- */
-ZSchema.prototype.validateSchema = function (schema) {
-    if (Array.isArray(schema) && schema.length === 0) {
-        throw new Error(".validateSchema was called with an empty array");
+export interface ZSchemaOptions {
+        asyncTimeout?: number;
+        forceAdditional?: boolean;
+        assumeAdditional?: boolean;
+        forceItems?: boolean;
+        forceMinItems?: boolean;
+        forceMaxItems?: boolean;
+        forceMinLength?: boolean;
+        forceMaxLength?: boolean;
+        forceProperties?: boolean;
+        ignoreUnresolvableReferences?: boolean;
+        noExtraKeywords?: boolean;
+        noTypeless?: boolean;
+        noEmptyStrings?: boolean;
+        noEmptyArrays?: boolean;
+        strictUris?: boolean;
+        strictMode?: boolean;
+        reportPathAsArray?: boolean;
+        breakOnFirstError?: boolean;
+        pedanticCheck?: boolean;
+        ignoreUnknownFormats?: boolean;
+        customValidator?: (report: Report, schema: any, json: any) => void;
     }
 
-    var report = new Report(this.options);
+export class ZSchema {
+    public lastReport: Report | undefined;
 
-    schema = SchemaCache.getSchema.call(this, report, schema);
-
-    var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
-    if (compiled) { SchemaValidation.validateSchema.call(this, report, schema); }
-
-    this.lastReport = report;
-    return report.isValid();
-};
-
-/**
- *
- * @param {*} json
- * @param {*} schema
- * @param {*} [options]
- * @param {function(*, *)} [callback]
- *
- * @returns {boolean}
- */
-ZSchema.prototype.validate = function (json, schema, options, callback) {
-
-    if (Utils.whatIs(options) === "function") {
-        callback = options;
-        options = {};
+    /**
+     * Register a custom format.
+     *
+     * @param name - name of the custom format
+     * @param validatorFunction - custom format validator function.
+     *   Returns `true` if `value` matches the custom format.
+     */
+    public static registerFormat(formatName: string, validatorFunction: (value: any) => boolean): void {
+        FormatValidators[formatName] = validatorFunction;
     }
-    if (!options) { options = {}; }
 
-    this.validateOptions = options;
+    /**
+     * Unregister a format.
+     *
+     * @param name - name of the custom format
+     */
+    public static unregisterFormat(name: string): void {
+        delete FormatValidators[name];
+    }
 
-    var whatIs = Utils.whatIs(schema);
-    if (whatIs !== "string" && whatIs !== "object") {
-        var e = new Error("Invalid .validate call - schema must be a string or object but " + whatIs + " was passed!");
-        if (callback) {
-            setTimeout(function () {
-                callback(e, false);
-            }, 0);
-            return;
+    /**
+     * Get the list of all registered formats.
+     *
+     * Both the names of the burned-in formats and the custom format names are
+     * returned by this function.
+     *
+     * @returns {string[]} the list of all registered format names.
+     */
+    public static getRegisteredFormats(): string[] {
+        return Object.keys(FormatValidators);
+    }
+
+    public static getDefaultOptions(): ZSchemaOptions {
+        return Utils.cloneDeep(defaultOptions);
+    }
+
+    private cache: any;
+    private referenceCache: any;
+    private validateOptions: any;
+    options: ZSchemaOptions;
+
+    constructor(options?: ZSchemaOptions) {
+        this.cache = {};
+        this.referenceCache = [];
+        this.validateOptions = {};
+
+        this.options = normalizeOptions(options);
+
+        // Disable strict validation for the built-in schemas
+        var metaschemaOptions = normalizeOptions({ });
+
+        this.setRemoteReference("http://json-schema.org/draft-04/schema", Draft4Schema, metaschemaOptions);
+        this.setRemoteReference("http://json-schema.org/draft-04/hyper-schema", Draft4HyperSchema, metaschemaOptions);
+    }
+
+    /**
+     * @param schema - JSON object representing schema
+     * @returns {boolean} true if schema is valid.
+     */
+    validateSchema(schema: any): boolean {
+        if (Array.isArray(schema) && schema.length === 0) {
+            throw new Error(".validateSchema was called with an empty array");
         }
-        throw e;
-    }
 
-    var foundError = false;
-    var report = new Report(this.options);
-    report.json = json;
+        var report = new Report(this.options);
 
-    if (typeof schema === "string") {
-        var schemaName = schema;
-        schema = SchemaCache.getSchema.call(this, report, schemaName);
-        if (!schema) {
-            throw new Error("Schema with id '" + schemaName + "' wasn't found in the validator cache!");
-        }
-    } else {
         schema = SchemaCache.getSchema.call(this, report, schema);
-    }
 
-    var compiled = false;
-    if (!foundError) {
-        compiled = SchemaCompilation.compileSchema.call(this, report, schema);
-    }
-    if (!compiled) {
+        var compiled = SchemaCompilation.compileSchema.call(this, report, schema);
+        if (compiled) { SchemaValidation.validateSchema.call(this, report, schema); }
+
         this.lastReport = report;
-        foundError = true;
+        return report.isValid();
     }
 
-    var validated = false;
-    if (!foundError) {
-        validated = SchemaValidation.validateSchema.call(this, report, schema);
-    }
-    if (!validated) {
-        this.lastReport = report;
-        foundError = true;
-    }
-
-    if (options.schemaPath) {
-        report.rootSchema = schema;
-        schema = get(schema, options.schemaPath);
-        if (!schema) {
-            throw new Error("Schema path '" + options.schemaPath + "' wasn't found in the schema!");
+    /**
+     * @param json - either a JSON string or a parsed JSON object
+     * @param schema - the JSON object representing the schema
+     * @returns true if json matches schema
+     */
+    validate(json, schema, options?, callback?): boolean {
+        if (Utils.whatIs(options) === "function") {
+            callback = options;
+            options = {};
         }
-    }
+        if (!options) { options = {}; }
 
-    if (!foundError) {
-        JsonValidation.validate.call(this, report, schema, json);
-    }
+        this.validateOptions = options;
 
-    if (callback) {
-        report.processAsyncTasks(this.options.asyncTimeout, callback);
-        return;
-    } else if (report.asyncTasks.length > 0) {
-        throw new Error("This validation has async tasks and cannot be done in sync mode, please provide callback argument.");
-    }
+        var whatIs = Utils.whatIs(schema);
+        if (whatIs !== "string" && whatIs !== "object") {
+            var e = new Error("Invalid .validate call - schema must be a string or object but " + whatIs + " was passed!");
+            if (callback) {
+                setTimeout(function () {
+                    callback(e, false);
+                }, 0);
+                return;
+            }
+            throw e;
+        }
 
-    // assign lastReport so errors are retrievable in sync mode
-    this.lastReport = report;
-    return report.isValid();
-};
-ZSchema.prototype.getLastError = function () {
-    if (this.lastReport.errors.length === 0) {
-        return null;
-    }
-    var e = new Error();
-    e.name = "z-schema validation error";
-    e.message = this.lastReport.commonErrorMessage;
-    (e as any).details = this.lastReport.errors;
-    return e;
-};
-ZSchema.prototype.getLastErrors = function () {
-    return this.lastReport && this.lastReport.errors.length > 0 ? this.lastReport.errors : null;
-};
-ZSchema.prototype.getMissingReferences = function (arr) {
-    arr = arr || this.lastReport.errors;
-    var res = [],
-        idx = arr.length;
-    while (idx--) {
-        var error = arr[idx];
-        if (error.code === "UNRESOLVABLE_REFERENCE") {
-            var reference = error.params[0];
-            if (res.indexOf(reference) === -1) {
-                res.push(reference);
+        var foundError = false;
+        var report = new Report(this.options);
+        report.json = json;
+
+        if (typeof schema === "string") {
+            var schemaName = schema;
+            schema = SchemaCache.getSchema.call(this, report, schemaName);
+            if (!schema) {
+                throw new Error("Schema with id '" + schemaName + "' wasn't found in the validator cache!");
+            }
+        } else {
+            schema = SchemaCache.getSchema.call(this, report, schema);
+        }
+
+        var compiled = false;
+        if (!foundError) {
+            compiled = SchemaCompilation.compileSchema.call(this, report, schema);
+        }
+        if (!compiled) {
+            this.lastReport = report;
+            foundError = true;
+        }
+
+        var validated = false;
+        if (!foundError) {
+            validated = SchemaValidation.validateSchema.call(this, report, schema);
+        }
+        if (!validated) {
+            this.lastReport = report;
+            foundError = true;
+        }
+
+        if (options.schemaPath) {
+            report.rootSchema = schema;
+            schema = get(schema, options.schemaPath);
+            if (!schema) {
+                throw new Error("Schema path '" + options.schemaPath + "' wasn't found in the schema!");
             }
         }
-        if (error.inner) {
-            res = res.concat(this.getMissingReferences(error.inner));
+
+        if (!foundError) {
+            JsonValidation.validate.call(this, report, schema, json);
         }
-    }
-    return res;
-};
-ZSchema.prototype.getMissingRemoteReferences = function () {
-    var missingReferences = this.getMissingReferences(),
-        missingRemoteReferences = [],
-        idx = missingReferences.length;
-    while (idx--) {
-        var remoteReference = SchemaCache.getRemotePath(missingReferences[idx]);
-        if (remoteReference && missingRemoteReferences.indexOf(remoteReference) === -1) {
-            missingRemoteReferences.push(remoteReference);
+
+        if (callback) {
+            report.processAsyncTasks(this.options.asyncTimeout, callback);
+            return;
+        } else if (report.asyncTasks.length > 0) {
+            throw new Error("This validation has async tasks and cannot be done in sync mode, please provide callback argument.");
         }
+
+        // assign lastReport so errors are retrievable in sync mode
+        this.lastReport = report;
+        return report.isValid();
     }
-    return missingRemoteReferences;
-};
-ZSchema.prototype.setRemoteReference = function (uri, schema, validationOptions) {
-    if (typeof schema === "string") {
-        schema = JSON.parse(schema);
-    } else {
+
+    
+
+    /**
+     * Returns an Error object for the most recent failed validation, or null if the validation was successful.
+     */
+    getLastError(): SchemaError {
+        if (this.lastReport.errors.length === 0) {
+            return null;
+        }
+        var e: SchemaError = new Error();
+        e.name = "z-schema validation error";
+        e.message = this.lastReport.commonErrorMessage;
+        (e as any).details = this.lastReport.errors;
+        return e;
+    }
+
+    /**
+     * Returns the error details for the most recent validation, or undefined if the validation was successful.
+     * This is the same list as the SchemaError.details property.
+     */
+    getLastErrors(): SchemaErrorDetail[] {
+        return this.lastReport && this.lastReport.errors.length > 0 ? this.lastReport.errors : null;
+    }
+
+    setRemoteReference(uri, schema, validationOptions) {
+        if (typeof schema === "string") {
+            schema = JSON.parse(schema);
+        } else {
+            schema = Utils.cloneDeep(schema);
+        }
+
+        if (validationOptions) {
+            schema.__$validationOptions = normalizeOptions(validationOptions);
+        }
+
+        SchemaCache.cacheSchemaByUri.call(this, uri, schema);
+    }
+
+    compileSchema(schema) {
+        var report = new Report(this.options);
+
+        schema = SchemaCache.getSchema.call(this, report, schema);
+
+        SchemaCompilation.compileSchema.call(this, report, schema);
+
+        this.lastReport = report;
+        return report.isValid();
+    }
+
+    getMissingReferences(arr?) {
+        arr = arr || this.lastReport.errors;
+        var res = [],
+            idx = arr.length;
+        while (idx--) {
+            var error = arr[idx];
+            if (error.code === "UNRESOLVABLE_REFERENCE") {
+                var reference = error.params[0];
+                if (res.indexOf(reference) === -1) {
+                    res.push(reference);
+                }
+            }
+            if (error.inner) {
+                res = res.concat(this.getMissingReferences(error.inner));
+            }
+        }
+        return res;
+    }
+
+    getMissingRemoteReferences() {
+        var missingReferences = this.getMissingReferences(),
+            missingRemoteReferences = [],
+            idx = missingReferences.length;
+        while (idx--) {
+            var remoteReference = SchemaCache.getRemotePath(missingReferences[idx]);
+            if (remoteReference && missingRemoteReferences.indexOf(remoteReference) === -1) {
+                missingRemoteReferences.push(remoteReference);
+            }
+        }
+        return missingRemoteReferences;
+    }
+
+    getResolvedSchema(schema) {
+        var report = new Report(this.options);
+        schema = SchemaCache.getSchema.call(this, report, schema);
+
+        // clone before making any modifications
         schema = Utils.cloneDeep(schema);
-    }
 
-    if (validationOptions) {
-        schema.__$validationOptions = normalizeOptions(validationOptions);
-    }
+        var visited = [];
 
-    SchemaCache.cacheSchemaByUri.call(this, uri, schema);
-};
-ZSchema.prototype.getResolvedSchema = function (schema) {
-    var report = new Report(this.options);
-    schema = SchemaCache.getSchema.call(this, report, schema);
+        // clean-up the schema and resolve references
+        var cleanup = function (schema) {
+            var key,
+                typeOf = Utils.whatIs(schema);
+            if (typeOf !== "object" && typeOf !== "array") {
+                return;
+            }
 
-    // clone before making any modifications
-    schema = Utils.cloneDeep(schema);
+            if (schema.___$visited) {
+                return;
+            }
 
-    var visited = [];
+            schema.___$visited = true;
+            visited.push(schema);
 
-    // clean-up the schema and resolve references
-    var cleanup = function (schema) {
-        var key,
-            typeOf = Utils.whatIs(schema);
-        if (typeOf !== "object" && typeOf !== "array") {
-            return;
-        }
-
-        if (schema.___$visited) {
-            return;
-        }
-
-        schema.___$visited = true;
-        visited.push(schema);
-
-        if (schema.$ref && schema.__$refResolved) {
-            var from = schema.__$refResolved;
-            var to = schema;
-            delete schema.$ref;
-            delete schema.__$refResolved;
-            for (key in from) {
-                if (from.hasOwnProperty(key)) {
-                    to[key] = from[key];
+            if (schema.$ref && schema.__$refResolved) {
+                var from = schema.__$refResolved;
+                var to = schema;
+                delete schema.$ref;
+                delete schema.__$refResolved;
+                for (key in from) {
+                    if (from.hasOwnProperty(key)) {
+                        to[key] = from[key];
+                    }
                 }
             }
-        }
-        for (key in schema) {
-            if (schema.hasOwnProperty(key)) {
-                if (key.indexOf("__$") === 0) {
-                    delete schema[key];
-                } else {
-                    cleanup(schema[key]);
+            for (key in schema) {
+                if (schema.hasOwnProperty(key)) {
+                    if (key.indexOf("__$") === 0) {
+                        delete schema[key];
+                    } else {
+                        cleanup(schema[key]);
+                    }
                 }
             }
+        };
+
+        cleanup(schema);
+        visited.forEach(function (s) {
+            delete s.___$visited;
+        });
+
+        this.lastReport = report;
+        if (report.isValid()) {
+            return schema;
+        } else {
+            throw this.getLastError();
         }
-    };
-
-    cleanup(schema);
-    visited.forEach(function (s) {
-        delete s.___$visited;
-    });
-
-    this.lastReport = report;
-    if (report.isValid()) {
-        return schema;
-    } else {
-        throw this.getLastError();
     }
-};
 
-/**
- *
- * @param {*} schemaReader
- *
- * @returns {void}
- */
-ZSchema.prototype.setSchemaReader = function (schemaReader) {
-    return ZSchema.setSchemaReader(schemaReader);
-};
+    static schemaReader: any;
 
-ZSchema.prototype.getSchemaReader = function () {
-    return ZSchema.schemaReader;
-};
+    setSchemaReader(schemaReader) {
+        return ZSchema.setSchemaReader(schemaReader);
+    }
 
-ZSchema.schemaReader = undefined;
-/*
-    static methods
-*/
-ZSchema.setSchemaReader = function (schemaReader) {
-    ZSchema.schemaReader = schemaReader;
-};
-ZSchema.registerFormat = function (formatName, validatorFunction) {
-    FormatValidators[formatName] = validatorFunction;
-};
-ZSchema.unregisterFormat = function (formatName) {
-    delete FormatValidators[formatName];
-};
-ZSchema.getRegisteredFormats = function () {
-    return Object.keys(FormatValidators);
-};
-ZSchema.getDefaultOptions = function () {
-    return Utils.cloneDeep(defaultOptions);
-};
+    getSchemaReader() {
+        return ZSchema.schemaReader
+    }
 
-ZSchema.schemaSymbol = Utils.schemaSymbol;
+    static setSchemaReader(schemaReader) {
+        ZSchema.schemaReader = schemaReader;
+    }
 
-ZSchema.jsonSymbol = Utils.jsonSymbol;
+    static schemaSymbol = Utils.schemaSymbol;
+
+    static jsonSymbol = Utils.jsonSymbol;
+}
 
 export default ZSchema;

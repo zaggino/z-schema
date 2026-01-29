@@ -6,7 +6,9 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "module": "nodenext",
-    "moduleResolution": "nodenext"
+    "moduleResolution": "nodenext",
+    "declaration": true,
+    "declarationDir": "./dist/types"
   },
   "include": ["./src/**/*"]
 }
