@@ -1,4 +1,4 @@
-# z-schema validator
+# z-schema - a JSON Schema validator
 
 [![NPM](https://nodei.co/npm/z-schema.png?downloads=true&downloadRank=true)](https://www.npmjs.com/package/z-schema)
 
@@ -6,12 +6,17 @@
 
 ## Topics
 
+- [What](#what)
 - [Usage](#usage)
 - [Features](#features)
 - [Options](#options)
 - [Benchmarks](#benchmarks)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
+
+## What
+
+What is a JSON Schema? Find here: [https://json-schema.org/](https://json-schema.org/)
 
 ## Usage
 
