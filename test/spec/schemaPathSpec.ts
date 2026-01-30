@@ -1,4 +1,4 @@
-import ZSchema from '../../src/ZSchema.ts';
+import ZSchema from '../../src/index.ts';
 
 const schema = {
   type: ['object'],

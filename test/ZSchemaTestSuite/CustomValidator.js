@@ -1,5 +1,5 @@
 //Implement new 'shouldFail' keyword
-function customValidatorFn(report, schema, json) {
+function customValidatorFn(report, schema, _json) {
   if (schema.shouldFail === true) {
     report.addCustomError('SHOULD_FAIL', 'Forced fail', [], null, schema.description);
   }

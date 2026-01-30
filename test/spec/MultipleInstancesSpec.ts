@@ -1,4 +1,4 @@
-import ZSchema from '../../src/ZSchema.ts';
+import ZSchema from '../../src/index.ts';
 
 describe('Using multiple instances of Z-Schema', function () {
   it('Should pass all tests', function () {
@@ -15,12 +15,12 @@ describe('Using multiple instances of Z-Schema', function () {
     let v;
     v = new ZSchema({ strictMode: true });
     // Should fail because "additionalProperties" is missing
-    expect(v.validateSchema(schema)).toBe(false, '1st');
+    expect(v.validateSchema(schema)).toBe(false);
 
     v = new ZSchema();
-    expect(v.validateSchema(schema)).toBe(true, '2nd');
+    expect(v.validateSchema(schema)).toBe(true);
 
     v = new ZSchema({ strictMode: true });
-    expect(v.validateSchema(schema)).toBe(false, '3rd');
+    expect(v.validateSchema(schema)).toBe(false);
   });
 });

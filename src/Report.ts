@@ -41,7 +41,7 @@ export interface SchemaErrorDetail {
    * A JSON path indicating the location of the error.
    * Example: "#/projects/1"
    */
-  path: string | any[];
+  path: string | string[];
   /**
    * The schema rule description, which is included for certain errors where
    * this information is useful (e.g. to describe a constraint).
@@ -63,21 +63,29 @@ export interface ReportOptions {
   maxErrors?: number;
 }
 
+type TaskResult = unknown;
+type TaskFn = (...args: unknown[]) => TaskResult;
+type TaskFnArgs = Parameters<TaskFn>;
+type TaskProcessFn = (result: ReturnType<TaskFn>) => void;
+type AsyncTask = [TaskFn, TaskFnArgs, TaskProcessFn];
+
 export class Report {
   errors: SchemaErrorDetail[];
   parentReport?: Report;
   options: ZSchemaOptions;
   reportOptions: ReportOptions;
   path: string[];
-  asyncTasks: any[];
-  rootSchema?: any;
-  commonErrorMessage?: any;
-  json?: any;
+  asyncTasks: AsyncTask[];
+  rootSchema?: {
+    id?: string;
+  };
+  commonErrorMessage?: string;
+  json?: unknown;
 
   constructor(parentOrOptions, reportOptions?) {
     this.parentReport = parentOrOptions instanceof Report ? parentOrOptions : undefined;
 
-    this.options = parentOrOptions instanceof Report ? (parentOrOptions as any).options : parentOrOptions || {};
+    this.options = parentOrOptions instanceof Report ? parentOrOptions.options : parentOrOptions || {};
 
     this.reportOptions = reportOptions || {};
 
@@ -115,21 +123,20 @@ export class Report {
   }
 
   processAsyncTasks(timeout, callback) {
-    let validationTimeout = timeout || 2000,
-      tasksCount = this.asyncTasks.length,
-      idx = tasksCount,
-      timedOut = false,
-      self = this;
+    const validationTimeout = timeout || 2000;
+    let tasksCount = this.asyncTasks.length;
+    let idx = tasksCount;
+    let timedOut = false;
 
-    function finish() {
-      setTimeout(function () {
-        const valid = self.errors.length === 0,
-          err = valid ? null : self.errors;
+    const finish = () => {
+      setTimeout(() => {
+        const valid = this.errors.length === 0,
+          err = valid ? null : this.errors;
         callback(err, valid);
       }, 0);
-    }
+    };
 
-    function respond(asyncTaskResultProcessFn) {
+    function respond(asyncTaskResultProcessFn: TaskProcessFn) {
       return function (asyncTaskResult) {
         if (timedOut) {
           return;
@@ -148,15 +155,16 @@ export class Report {
     }
 
     while (idx--) {
-      const task = this.asyncTasks[idx];
-      task[0].apply(null, task[1].concat(respond(task[2])));
+      const [fn, fnArgs, processFn] = this.asyncTasks[idx];
+      const respondCallback = respond(processFn);
+      fn(...fnArgs, respondCallback);
     }
 
-    setTimeout(function () {
+    setTimeout(() => {
       if (tasksCount > 0) {
         timedOut = true;
-        self.addError('ASYNC_TIMEOUT', [tasksCount, validationTimeout]);
-        callback(self.errors, false);
+        this.addError('ASYNC_TIMEOUT', [tasksCount, validationTimeout]);
+        callback(this.errors, false);
       }
     }, validationTimeout);
   }
@@ -183,7 +191,7 @@ export class Report {
               return 'uri(' + segment + ')';
             }
 
-            return segment.replace(/\~/g, '~0').replace(/\//g, '~1');
+            return segment.replace(/~/g, '~0').replace(/\//g, '~1');
           })
           .join('/')
       );
@@ -248,22 +256,24 @@ export class Report {
   }
 
   getJson() {
-    let self: any = this;
-    while (self.json === undefined) {
-      self = self.parentReport;
-      if (self === undefined) {
-        return undefined;
-      }
+    if (this.json) {
+      return this.json;
     }
-    return self.json;
+    if (this.parentReport) {
+      return this.parentReport.getJson();
+    }
+    return undefined;
   }
 
   addCustomError(
     errorCode: string,
     errorMessage: string,
     params: string[],
-    subReports: string | any[],
-    schema: string | any
+    subReports?: Report[] | Report,
+    schema?: {
+      title?: string;
+      description?: string;
+    }
   ) {
     if (this.errors.length >= this.reportOptions.maxErrors) {
       return;
@@ -311,8 +321,8 @@ export class Report {
       err.inner = [];
       idx = subReports.length;
       while (idx--) {
-        let subReport = subReports[idx],
-          idx2 = subReport.errors.length;
+        const subReport = subReports[idx];
+        let idx2 = subReport.errors.length;
         while (idx2--) {
           err.inner.push(subReport.errors[idx2]);
         }

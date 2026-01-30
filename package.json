@@ -1,6 +1,6 @@
 {
   "name": "z-schema",
-  "version": "7.0.0-beta.1",
+  "version": "7.0.0-beta.5",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -17,21 +17,33 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/zaggino/z-schema.git"
+    "url": "git+https://github.com/zaggino/z-schema.git"
   },
   "bugs": {
     "url": "https://github.com/zaggino/z-schema/issues"
   },
-  "type": "module",
-  "main": "dist/ZSchema.js",
-  "types": "dist/types/ZSchema.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./cjs/index.d.ts",
+        "default": "./cjs/index.js"
+      },
+      "default": "./dist/index.js"
+    }
+  },
   "bin": {
-    "z-schema": "./bin/z-schema"
+    "z-schema": "bin/z-schema"
   },
   "files": [
     "bin/",
+    "cjs/",
     "dist/",
     "src/",
+    "umd/",
     "LICENSE",
     "README.md"
   ],
@@ -43,13 +55,15 @@
     "format:check": "prettier --check .",
     "lint": "eslint --fix",
     "lint:check": "eslint",
-    "build": "npm run copy:schemas && tsc && rollup -c",
+    "clean": "rimraf ./cjs && rimraf ./dist && rimraf ./umd && rimraf --glob \"./src/schemas/*.json\"",
+    "build": "npm run copy:schemas && tsc && npm run copy:module-json && rollup -c",
     "build:browser": "rollup -c --environment BROWSER",
     "build:watch": "rollup -c -w",
+    "copy:module-json": "node -e \"fs.copyFileSync('./src/package.json', './dist/package.json')\"",
     "copy:schemas": "npm run copy:schema && npm run copy:hyper-schema",
     "copy:schema": "node -e \"fs.copyFileSync('./json-schema/draft-04/schema', './src/schemas/schema.json')\"",
     "copy:hyper-schema": "node -e \"fs.copyFileSync('./json-schema/draft-04/hyper-schema', './src/schemas/hyper-schema.json')\"",
-    "prepublishOnly": "npm test",
+    "prepublishOnly": "npm run clean && npm run build && npm test",
     "test": "vitest run",
     "test:browsers": "vitest run --project browsers --silent=true",
     "test:node": "vitest run --project node --silent=true",
@@ -92,7 +106,9 @@
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
     "remapify": "^2.2.0",
+    "rimraf": "^6.1.2",
     "rollup": "^4.57.0",
+    "rollup-plugin-dts": "^6.3.0",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0",

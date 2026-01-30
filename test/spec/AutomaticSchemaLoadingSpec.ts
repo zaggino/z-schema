@@ -1,11 +1,6 @@
-import ZSchema from '../../src/ZSchema.ts';
+import ZSchema from '../../src/index.ts';
 
 const isBrowser = typeof window !== 'undefined';
-
-let request;
-if (!isBrowser) {
-  request = require('https').request;
-}
 
 function validateWithAutomaticDownloads(validator, data, schema, callback) {
   let lastResult;
@@ -21,18 +16,17 @@ function validateWithAutomaticDownloads(validator, data, schema, callback) {
     if (missingReferences.length > 0) {
       let finished = 0;
       missingReferences.forEach(function (url) {
-        request(url, function (response) {
-          const body = '';
-          response.on('data', function (chunk) {
-            data += chunk;
-          });
-          response.on('end', function () {
-            validator.setRemoteReference(url, JSON.parse(body));
-            finished++;
-            if (finished === missingReferences.length) {
-              validate();
-            }
-          });
+        fetch(url).then(async (res) => {
+          if (!res.ok) {
+            const text = await res.text().catch(() => '');
+            throw new Error(`HTTP ${res.status} ${res.statusText}: ${text}`);
+          }
+          const json = await res.json();
+          validator.setRemoteReference(url, json);
+          finished++;
+          if (finished === missingReferences.length) {
+            validate();
+          }
         });
       });
     } else {

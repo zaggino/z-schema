@@ -8,6 +8,7 @@ import * as SchemaValidation from './SchemaValidation.js';
 import * as Utils from './Utils.js';
 import Draft4Schema from './schemas/schema.json' with { type: 'json' };
 import Draft4HyperSchema from './schemas/hyper-schema.json' with { type: 'json' };
+import type { Errors } from './Errors.js';
 
 /**
  * default options
@@ -126,10 +127,20 @@ export interface ZSchemaOptions {
   breakOnFirstError?: boolean;
   pedanticCheck?: boolean;
   ignoreUnknownFormats?: boolean;
-  customValidator?: (report: Report, schema: any, json: any) => void;
+  customValidator?: (report: Report, schema: unknown, json: unknown) => void;
 }
 
-class ZSchema {
+export interface ValidateOptions {
+  schemaPath?: string;
+  includeErrors?: Array<keyof typeof Errors>;
+}
+
+type ValidateCallback = (e: Error, valid: boolean) => void;
+
+// a sync function that loads schemas for future use, for example from schemas directory, during server startup
+type SchemaReader = (uri: string) => unknown;
+
+export class ZSchema {
   public lastReport: Report | undefined;
 
   /**
@@ -139,7 +150,7 @@ class ZSchema {
    * @param validatorFunction - custom format validator function.
    *   Returns `true` if `value` matches the custom format.
    */
-  public static registerFormat(formatName: string, validatorFunction: (value: any) => boolean): void {
+  public static registerFormat(formatName: string, validatorFunction: (value: unknown) => boolean): void {
     FormatValidators[formatName] = validatorFunction;
   }
 
@@ -168,9 +179,9 @@ class ZSchema {
     return Utils.cloneDeep(defaultOptions);
   }
 
-  private cache: any;
-  private referenceCache: any;
-  private validateOptions: any;
+  private cache: Record<string, string>;
+  private referenceCache: Array<string>;
+  private validateOptions: ValidateOptions;
   options: ZSchemaOptions;
 
   constructor(options?: ZSchemaOptions) {
@@ -191,7 +202,7 @@ class ZSchema {
    * @param schema - JSON object representing schema
    * @returns {boolean} true if schema is valid.
    */
-  validateSchema(schema: any): boolean {
+  validateSchema(schema: unknown): boolean {
     if (Array.isArray(schema) && schema.length === 0) {
       throw new Error('.validateSchema was called with an empty array');
     }
@@ -214,8 +225,11 @@ class ZSchema {
    * @param schema - the JSON object representing the schema
    * @returns true if json matches schema
    */
-  validate(json, schema, options?, callback?): boolean {
-    if (Utils.whatIs(options) === 'function') {
+  validate(json, schema, options?: ValidateOptions, callback?: ValidateCallback): boolean;
+  validate(json, schema, callback?): boolean;
+  validate(json, schema): boolean;
+  validate(json, schema, options?: ValidateOptions | ValidateCallback, callback?: ValidateCallback): boolean {
+    if (typeof options === 'function') {
       callback = options;
       options = {};
     }
@@ -305,7 +319,7 @@ class ZSchema {
     const e: SchemaError = new Error();
     e.name = 'z-schema validation error';
     e.message = this.lastReport.commonErrorMessage;
-    (e as any).details = this.lastReport.errors;
+    e.details = this.lastReport.errors;
     return e;
   }
 
@@ -362,9 +376,9 @@ class ZSchema {
   }
 
   getMissingRemoteReferences() {
-    let missingReferences = this.getMissingReferences(),
-      missingRemoteReferences = [],
-      idx = missingReferences.length;
+    const missingReferences = this.getMissingReferences();
+    const missingRemoteReferences = [];
+    let idx = missingReferences.length;
     while (idx--) {
       const remoteReference = SchemaCache.getRemotePath(missingReferences[idx]);
       if (remoteReference && missingRemoteReferences.indexOf(remoteReference) === -1) {
@@ -385,8 +399,8 @@ class ZSchema {
 
     // clean-up the schema and resolve references
     const cleanup = function (schema) {
-      let key,
-        typeOf = Utils.whatIs(schema);
+      let key;
+      const typeOf = Utils.whatIs(schema);
       if (typeOf !== 'object' && typeOf !== 'array') {
         return;
       }
@@ -404,13 +418,13 @@ class ZSchema {
         delete schema.$ref;
         delete schema.__$refResolved;
         for (key in from) {
-          if (from.hasOwnProperty(key)) {
+          if (Object.prototype.hasOwnProperty.call(from, key)) {
             to[key] = from[key];
           }
         }
       }
       for (key in schema) {
-        if (schema.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(schema, key)) {
           if (key.indexOf('__$') === 0) {
             delete schema[key];
           } else {
@@ -433,7 +447,7 @@ class ZSchema {
     }
   }
 
-  static schemaReader: any;
+  static schemaReader: SchemaReader;
 
   setSchemaReader(schemaReader) {
     return ZSchema.setSchemaReader(schemaReader);
@@ -451,5 +465,3 @@ class ZSchema {
 
   static jsonSymbol = Utils.jsonSymbol;
 }
-
-export default ZSchema;

@@ -7,7 +7,7 @@ export default {
       data: {},
       valid: true,
       after: function (err, valid, data, validator) {
-        var resolvedSchema = validator.getResolvedSchema('http://json-schema.org/draft-04/schema#');
+        validator.getResolvedSchema('http://json-schema.org/draft-04/schema#');
       },
     },
   ],

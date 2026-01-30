@@ -1,4 +1,4 @@
-import ZSchema from '../../src/ZSchema.ts';
+import ZSchema from '../../src/index.ts';
 
 const [draft_04_schema_json, remotes_integer_json, remotes_subSchemas_json, remotes_folderInteger_json] = (
   await Promise.all([
@@ -15,6 +15,16 @@ function setRemoteReferences(validator) {
   validator.setRemoteReference('http://localhost:1234/subSchemas.json', remotes_subSchemas_json);
   validator.setRemoteReference('http://localhost:1234/folder/folderInteger.json', remotes_folderInteger_json);
 }
+
+type JsonSchemaTestSuiteFile = Array<{
+  description: string;
+  schema: unknown;
+  tests: Array<{
+    description: string;
+    data: unknown;
+    valid: boolean;
+  }>;
+}>;
 
 const jsonSchemaTestSuiteFiles = (
   await Promise.all([
@@ -52,7 +62,7 @@ const jsonSchemaTestSuiteFiles = (
     // zeroTerminatedFloats.json is excluded because JavaScript doesn't distinguish between different types of numeric values
     // import("../jsonSchemaTestSuite/tests/draft4/optional/zeroTerminatedFloats.json")
   ])
-).map((m) => m.default ?? m);
+).map((m) => m.default ?? m) as JsonSchemaTestSuiteFile[];
 
 const testExcludes = ['an invalid URI', 'an invalid URI though valid URI reference'];
 
@@ -61,7 +71,7 @@ describe('JsonSchemaTestSuite', function () {
     expect(jsonSchemaTestSuiteFiles.length).toBe(30);
   });
 
-  jsonSchemaTestSuiteFiles.forEach(function (testDefinitions: any, fileIndex) {
+  jsonSchemaTestSuiteFiles.forEach(function (testDefinitions, fileIndex) {
     testDefinitions.forEach(function (testDefinition) {
       testDefinition.tests.forEach(function (test) {
         if (testExcludes.indexOf(test.description) !== -1) {

@@ -17,15 +17,20 @@ export default defineConfig([
   {
     files: ['**/*.{js,ts}'],
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-require-imports': 'off',
-      '@typescript-eslint/no-this-alias': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      'json/no-empty-keys': 'off',
-      'no-prototype-builtins': 'off',
-      'no-useless-escape': 'off',
-      'prefer-const': 'off',
-      'prefer-rest-params': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          // https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/src/rules/no-unused-vars.ts#L220-L288
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+          caughtErrors: 'all',
+          caughtErrorsIgnorePattern: '^_',
+          // destructuredArrayIgnorePattern: '^_',
+          // vars: 'all',
+          // varsIgnorePattern: '^_',
+          // ignoreRestSiblings: true,
+        },
+      ],
     },
   },
   {
@@ -61,10 +66,12 @@ export default defineConfig([
   globalIgnores([
     '.github/',
     'benchmark/',
+    'cjs/',
     'dist/',
     'json-schema/',
-    'test/jsonSchemaTestSuite/',
     'specs/',
+    'test/jsonSchemaTestSuite/',
+    'umd/',
     'package-lock.json',
   ]),
 ]);

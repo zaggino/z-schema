@@ -117,14 +117,15 @@ export const FormatValidators = {
     try {
       RegExp(str);
       return true;
-    } catch (e) {
+    } catch (_e) {
       return false;
     }
   },
-  uri: function (uri) {
+  uri: function (...args: [string]) {
     if (this.options.strictUris) {
-      return FormatValidators['strict-uri'].apply(this, arguments);
+      return FormatValidators['strict-uri'].apply(this, args);
     }
+    const [uri] = args;
     // https://github.com/zaggino/z-schema/issues/18
     // RegExp from http://tools.ietf.org/html/rfc3986#appendix-B
     return typeof uri !== 'string' || RegExp('^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?').test(uri);

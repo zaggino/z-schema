@@ -140,9 +140,9 @@ export function areEqual(json1, json2, options?) {
  * @returns {boolean}
  */
 export function isUniqueArray(arr, indexes?) {
-  let i,
-    j,
-    l = arr.length;
+  let i;
+  let j;
+  const l = arr.length;
   for (i = 0; i < l; i++) {
     for (j = i + 1; j < l; j++) {
       if (areEqual(arr[i], arr[j])) {
@@ -164,8 +164,8 @@ export function isUniqueArray(arr, indexes?) {
  * @returns {*[]}
  */
 export function difference(bigSet, subSet) {
-  let arr = [],
-    idx = bigSet.length;
+  const arr = [];
+  let idx = bigSet.length;
   while (idx--) {
     if (subSet.indexOf(bigSet[idx]) === -1) {
       arr.push(bigSet[idx]);
@@ -202,16 +202,18 @@ export function clone(src) {
 }
 
 export function cloneDeep(src) {
-  let vidx = 0,
-    visited = new Map(),
-    cloned = [];
+  let vidx = 0;
+  const visited = new Map();
+  const cloned = [];
   function cloneDeepInner(src) {
     if (typeof src !== 'object' || src === null) {
       return src;
     }
-    let res, idx, cidx;
 
-    cidx = visited.get(src);
+    let res;
+    let idx;
+    const cidx = visited.get(src);
+
     if (cidx !== undefined) {
       return cloned[cidx];
     }
@@ -257,11 +259,11 @@ export function cloneDeep(src) {
  * @returns {Array} The new array of code points.
  */
 export function ucs2decode(string) {
-  let output = [],
-    counter = 0,
-    length = string.length,
-    value,
-    extra;
+  const output = [];
+  let counter = 0;
+  const length = string.length;
+  let value;
+  let extra;
   while (counter < length) {
     value = string.charCodeAt(counter++);
     if (value >= 0xd800 && value <= 0xdbff && counter < length) {

@@ -1,4 +1,4 @@
-import ZSchema from '../../src/ZSchema.ts';
+import ZSchema from '../../src/index.ts';
 
 function setRemoteReferences(validator) {
   validator.setRemoteReference('http://json-schema.org/draft-04/schema', import('../../src/schemas/schema.json'));

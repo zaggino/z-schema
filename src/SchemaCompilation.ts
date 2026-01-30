@@ -7,14 +7,14 @@ function mergeReference(scope, ref) {
     return ref;
   }
 
-  let joinedScope = scope.join(''),
-    isScopeAbsolute = Utils.isAbsoluteUri(joinedScope),
-    isScopeRelative = Utils.isRelativeUri(joinedScope),
-    isRefRelative = Utils.isRelativeUri(ref),
-    toRemove;
+  let joinedScope = scope.join('');
+  const isScopeAbsolute = Utils.isAbsoluteUri(joinedScope);
+  const isScopeRelative = Utils.isRelativeUri(joinedScope);
+  const isRefRelative = Utils.isRelativeUri(ref);
+  let toRemove;
 
   if (isScopeAbsolute && isRefRelative) {
-    toRemove = joinedScope.match(/\/[^\/]*$/);
+    toRemove = joinedScope.match(/\/[^/]*$/);
     if (toRemove) {
       joinedScope = joinedScope.slice(0, toRemove.index + 1);
     }
@@ -212,8 +212,8 @@ export function compileSchema(report, schema) {
   delete schema.__$missingReferences;
 
   // collect all references that need to be resolved - $ref and $schema
-  let refs = collectReferences.call(this, schema),
-    idx = refs.length;
+  const refs = collectReferences.call(this, schema);
+  let idx = refs.length;
   while (idx--) {
     // resolve all the collected references into __xxxResolved pointer
     const refObj = refs[idx];

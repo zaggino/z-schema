@@ -128,9 +128,9 @@ export function getSchemaByReference(report, key) {
 }
 
 export function getSchemaByUri(report, uri, root) {
-  let remotePath = getRemotePath(uri),
-    queryPath = getQueryPath(uri),
-    result = remotePath ? this.cache[remotePath] : root;
+  const remotePath = getRemotePath(uri);
+  const queryPath = getQueryPath(uri);
+  let result = remotePath ? this.cache[remotePath] : root;
 
   if (result && remotePath) {
     // we need to avoid compiling schemas in a recursive loop

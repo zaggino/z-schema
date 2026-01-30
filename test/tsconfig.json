@@ -2,7 +2,8 @@
   "extends": "../tsconfig",
   "compilerOptions": {
     "noEmit": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "types": ["vitest/globals"]
   },
   "include": ["./**/*"]
 }

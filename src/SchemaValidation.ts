@@ -76,7 +76,7 @@ const SchemaValidators = {
     } else {
       try {
         RegExp(schema.pattern);
-      } catch (e) {
+      } catch (_e) {
         report.addError('KEYWORD_PATTERN', ['pattern', schema.pattern]);
       }
     }
@@ -196,8 +196,8 @@ const SchemaValidators = {
       return;
     }
 
-    let keys = Object.keys(schema.properties),
-      idx = keys.length;
+    const keys = Object.keys(schema.properties);
+    let idx = keys.length;
     while (idx--) {
       const key = keys[idx],
         val = schema.properties[key];
@@ -228,14 +228,14 @@ const SchemaValidators = {
       return;
     }
 
-    let keys = Object.keys(schema.patternProperties),
-      idx = keys.length;
+    const keys = Object.keys(schema.patternProperties);
+    let idx = keys.length;
     while (idx--) {
       const key = keys[idx],
         val = schema.patternProperties[key];
       try {
         RegExp(key);
-      } catch (e) {
+      } catch (_e) {
         report.addError('KEYWORD_PATTERN', ['patternProperties', key]);
       }
       report.path.push('patternProperties');
@@ -255,8 +255,8 @@ const SchemaValidators = {
     if (Utils.whatIs(schema.dependencies) !== 'object') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['dependencies', 'object']);
     } else {
-      let keys = Object.keys(schema.dependencies),
-        idx = keys.length;
+      const keys = Object.keys(schema.dependencies);
+      let idx = keys.length;
       while (idx--) {
         const schemaKey = keys[idx],
           schemaDependency = schema.dependencies[schemaKey],
@@ -454,8 +454,8 @@ const SchemaValidators = {
     if (Utils.whatIs(schema.definitions) !== 'object') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['definitions', 'object']);
     } else {
-      let keys = Object.keys(schema.definitions),
-        idx = keys.length;
+      const keys = Object.keys(schema.definitions);
+      let idx = keys.length;
       while (idx--) {
         const key = keys[idx],
           val = schema.definitions[key];
@@ -581,8 +581,8 @@ export function validateSchema(report, schema) {
     }
   }
 
-  let keys = Object.keys(schema),
-    idx = keys.length;
+  const keys = Object.keys(schema);
+  let idx = keys.length;
   while (idx--) {
     const key = keys[idx];
     if (key.indexOf('__') === 0) {

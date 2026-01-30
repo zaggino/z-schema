@@ -242,8 +242,8 @@ export const JsonValidators = {
       // for each regex in "pp", remove all elements of "s" which this regex matches.
       let idx = pp.length;
       while (idx--) {
-        let regExp = RegExp(pp[idx]),
-          idx2 = s.length;
+        const regExp = RegExp(pp[idx]);
+        let idx2 = s.length;
         while (idx2--) {
           if (regExp.test(s[idx2]) === true) {
             s.splice(idx2, 1);
@@ -280,8 +280,8 @@ export const JsonValidators = {
       return;
     }
 
-    let keys = Object.keys(schema.dependencies),
-      idx = keys.length;
+    const keys = Object.keys(schema.dependencies);
+    let idx = keys.length;
 
     while (idx--) {
       // iterate all dependencies
@@ -356,9 +356,9 @@ export const JsonValidators = {
   },
   anyOf: function (report, schema, json) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.2
-    let subReports = [],
-      passed = false,
-      idx = schema.anyOf.length;
+    const subReports = [];
+    let passed = false;
+    let idx = schema.anyOf.length;
 
     while (idx-- && passed === false) {
       const subReport = new Report(report);
@@ -372,9 +372,9 @@ export const JsonValidators = {
   },
   oneOf: function (report, schema, json) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.2
-    let passes = 0,
-      subReports = [],
-      idx = schema.oneOf.length;
+    let passes = 0;
+    const subReports = [];
+    let idx = schema.oneOf.length;
 
     while (idx--) {
       const subReport = new Report(report, { maxErrors: 1 });
@@ -488,8 +488,8 @@ const recurseObject = function (report, schema, json) {
   const pp = schema.patternProperties ? Object.keys(schema.patternProperties) : [];
 
   // m - The property name of the child.
-  let keys = Object.keys(json),
-    idx = keys.length;
+  const keys = Object.keys(json);
+  let idx = keys.length;
 
   while (idx--) {
     const m = keys[idx],

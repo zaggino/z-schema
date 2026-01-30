@@ -1,4 +1,4 @@
-var REF_NAME = 'int.json';
+// var REF_NAME = 'int.json';
 
 export default {
   description: 'Issue #125 - Why process format if type validation fails',
@@ -26,7 +26,7 @@ export default {
         callbacks: [true],
       },
       valid: false,
-      after: function (err, valid, data, validator) {
+      after: function (err, _valid, _data, _validator) {
         expect(err.length).toBe(1);
         expect(err[0].code).toBe('INVALID_TYPE');
       },
