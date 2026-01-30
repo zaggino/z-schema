@@ -1,118 +1,116 @@
-"use strict";
+export default {
+  description: 'Issue #71 - additionalProperties problem',
+  tests: [
+    {
+      description: 'should have two errors #1',
 
-module.exports = {
-    description: "Issue #71 - additionalProperties problem",
-    tests: [
-        {
-            description: "should have two errors #1",
-
-            schema: {
-                type: "object",
-                minProperties: 1,
-                additionalProperties: false,
-                properties: {
-                    foo: {
-                        type: "object",
-                        minProperties: 1
-                    }
-                }
-            },
-
-            data: { foo: {}, bar: 1 },
-
-            valid: false,
-
-            after: function (errors) {
-                expect(errors.length).toBe(2);
-            }
+      schema: {
+        type: 'object',
+        minProperties: 1,
+        additionalProperties: false,
+        properties: {
+          foo: {
+            type: 'object',
+            minProperties: 1,
+          },
         },
+      },
 
-        {
-            description: "should have two errors #2",
+      data: { foo: {}, bar: 1 },
 
-            schema: {
-                type: "object",
-                minProperties: 1,
-                additionalProperties: false,
-                properties: {
-                    foo: {
-                        type: "object",
-                        minProperties: 1,
-                        additionalProperties: false,
-                        properties: {
-                            foo: {}
-                        }
-                    }
-                }
+      valid: false,
+
+      after: function (errors) {
+        expect(errors.length).toBe(2);
+      },
+    },
+
+    {
+      description: 'should have two errors #2',
+
+      schema: {
+        type: 'object',
+        minProperties: 1,
+        additionalProperties: false,
+        properties: {
+          foo: {
+            type: 'object',
+            minProperties: 1,
+            additionalProperties: false,
+            properties: {
+              foo: {},
             },
-
-            data: { foo: {}, bar: 1 },
-
-            valid: false,
-
-            after: function (errors) {
-                expect(errors.length).toBe(2);
-            }
+          },
         },
+      },
 
-        {
-            description: "should have more than one error with breakOnFirstError false #1",
+      data: { foo: {}, bar: 1 },
 
-            options: {
-                breakOnFirstError: false
-            },
+      valid: false,
 
-            schema: {
-                type: "object",
-                minProperties: 1,
-                additionalProperties: false,
-                properties: {
-                    foo: {
-                        type: "object",
-                        minProperties: 1
-                    }
-                }
-            },
+      after: function (errors) {
+        expect(errors.length).toBe(2);
+      },
+    },
 
-            data: { foo: {}, bar: 1 },
+    {
+      description: 'should have more than one error with breakOnFirstError false #1',
 
-            valid: false,
+      options: {
+        breakOnFirstError: false,
+      },
 
-            after: function (errors) {
-                expect(errors.length).toBeGreaterThan(1);
-            }
+      schema: {
+        type: 'object',
+        minProperties: 1,
+        additionalProperties: false,
+        properties: {
+          foo: {
+            type: 'object',
+            minProperties: 1,
+          },
         },
+      },
 
-        {
-            description: "should have more than one error with breakOnFirstError false #2",
+      data: { foo: {}, bar: 1 },
 
-            options: {
-                breakOnFirstError: false
+      valid: false,
+
+      after: function (errors) {
+        expect(errors.length).toBeGreaterThan(1);
+      },
+    },
+
+    {
+      description: 'should have more than one error with breakOnFirstError false #2',
+
+      options: {
+        breakOnFirstError: false,
+      },
+
+      schema: {
+        type: 'object',
+        minProperties: 1,
+        additionalProperties: false,
+        properties: {
+          foo: {
+            type: 'object',
+            minProperties: 1,
+            additionalProperties: false,
+            properties: {
+              foo: {},
             },
+          },
+        },
+      },
 
-            schema: {
-                type: "object",
-                minProperties: 1,
-                additionalProperties: false,
-                properties: {
-                    foo: {
-                        type: "object",
-                        minProperties: 1,
-                        additionalProperties: false,
-                        properties: {
-                            foo: {}
-                        }
-                    }
-                }
-            },
+      data: { foo: {}, bar: 1 },
 
-            data: { foo: {}, bar: 1 },
+      valid: false,
 
-            valid: false,
-
-            after: function (errors) {
-                expect(errors.length).toBeGreaterThan(1);
-            }
-        }
-    ]
+      after: function (errors) {
+        expect(errors.length).toBeGreaterThan(1);
+      },
+    },
+  ],
 };

@@ -1,8 +1,8 @@
 {
   "name": "z-schema",
-  "version": "6.0.2",
+  "version": "7.0.0",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=22.0.0"
   },
   "description": "JSON schema validator",
   "homepage": "https://github.com/zaggino/z-schema",
@@ -17,53 +17,57 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/zaggino/z-schema.git"
+    "url": "git+https://github.com/zaggino/z-schema.git"
   },
   "bugs": {
     "url": "https://github.com/zaggino/z-schema/issues"
   },
-  "main": "src/ZSchema.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./cjs/index.d.ts",
+        "default": "./cjs/index.js"
+      },
+      "default": "./dist/index.js"
+    }
+  },
   "bin": {
-    "z-schema": "./bin/z-schema"
+    "z-schema": "bin/z-schema"
   },
   "files": [
-    "bin",
-    "src",
-    "dist",
+    "bin/",
+    "cjs/",
+    "dist/",
+    "src/",
+    "umd/",
     "LICENSE",
-    "README.md",
-    "index.d.ts"
+    "README.md"
   ],
-  "types": "index.d.ts",
   "scripts": {
-    "prepare": "grunt",
-    "prepublishOnly": "npm test",
-    "test": "jasmine-node test/ && grunt lint",
-    "test-z": "jasmine-node test/spec/ZSchemaTestSuiteSpec.js",
-    "grunt": "grunt"
-  },
-  "testling": {
-    "scripts": [
-      "test/lib/jasmine-2.0.1/jasmine.js",
-      "test/lib/jasmine-2.0.1/jasmine-html.js",
-      "test/lib/jasmine-2.0.1/boot.js",
-      "test/lib/jasmine-2.0.1/tap_reporter.js",
-      "test/Runner.js",
-      "dist/ZSchema-browser-min.js",
-      "dist/ZSchema-browser-test.js"
-    ],
-    "browsers": [
-      "iexplore/9..latest",
-      "chrome/4",
-      "chrome/28..latest",
-      "firefox/3.5",
-      "firefox/23..latest",
-      "safari/5.1..latest",
-      "opera/12..latest",
-      "iphone/6..latest",
-      "ipad/6..latest",
-      "android-browser/4.2..latest"
-    ]
+    "prepare": "husky",
+    "pre-commit": "npx lint-staged",
+    "pre-push": "",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint --fix",
+    "lint:check": "eslint",
+    "clean": "rimraf ./cjs && rimraf ./dist && rimraf ./umd && rimraf --glob \"./src/schemas/*.json\"",
+    "build": "npm run copy:schemas && tsc && npm run copy:module-json && rollup -c",
+    "build:browser": "rollup -c --environment BROWSER",
+    "build:watch": "rollup -c -w",
+    "copy:module-json": "node -e \"fs.copyFileSync('./src/package.json', './dist/package.json')\"",
+    "copy:schemas": "npm run copy:schema && npm run copy:hyper-schema",
+    "copy:schema": "node -e \"fs.copyFileSync('./json-schema/draft-04/schema', './src/schemas/schema.json')\"",
+    "copy:hyper-schema": "node -e \"fs.copyFileSync('./json-schema/draft-04/hyper-schema', './src/schemas/hyper-schema.json')\"",
+    "prepublishOnly": "npm run clean && npm run build && npm test",
+    "test": "vitest run",
+    "test:browsers": "vitest run --project browsers --silent=true",
+    "test:node": "vitest run --project node --silent=true",
+    "test:sample": "npx vitest run --silent=false --hideSkippedTests --project node -t \"invalid definition\""
   },
   "dependencies": {
     "lodash.get": "^4.4.2",
@@ -71,22 +75,43 @@
     "validator": "^13.7.0"
   },
   "optionalDependencies": {
-    "commander": "^11.0.0"
+    "commander": "^14.0.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@eslint/json": "^0.14.0",
+    "@eslint/markdown": "^7.5.1",
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/lodash.get": "^4.4.9",
+    "@types/node": "^25.1.0",
+    "@vitest/browser-playwright": "^4.0.18",
+    "@vitest/eslint-plugin": "^1.6.6",
     "browserify": "^17.0.0",
     "coveralls": "^3.1.1",
-    "grunt": "^1.4.1",
+    "eslint": "^9.39.2",
+    "globals": "^17.2.0",
     "grunt-browserify": "^6.0.0",
     "grunt-cli": "^1.4.3",
     "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-jasmine": "^4.0.0",
     "grunt-contrib-jshint": "^3.2.0",
     "grunt-contrib-uglify": "^5.2.2",
     "grunt-jscs": "^3.0.1",
     "grunt-lineending": "^1.0.0",
-    "jasmine-node": "^3.0.0",
-    "jasmine-reporters": "^2.5.0",
-    "remapify": "^2.2.0"
+    "husky": "^9.1.7",
+    "jsdom": "^27.4.0",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
+    "remapify": "^2.2.0",
+    "rimraf": "^6.1.2",
+    "rollup": "^4.57.0",
+    "rollup-plugin-dts": "^6.3.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0",
+    "vitest": "^4.0.18"
   }
 }
