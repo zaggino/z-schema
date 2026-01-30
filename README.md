@@ -1,34 +1,41 @@
 # z-schema validator
 
-[![npm version](https://badge.fury.io/js/z-schema.svg)](http://badge.fury.io/js/z-schema)
+[![NPM](https://nodei.co/npm/z-schema.png?downloads=true&downloadRank=true)](https://nodei.co/npm/z-schema/)
 
 [![coverage status](https://coveralls.io/repos/zaggino/z-schema/badge.svg)](https://coveralls.io/r/zaggino/z-schema)
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/zaggino/z-schema.svg)](https://greenkeeper.io/)
-
-[![NPM](https://nodei.co/npm/z-schema.png?downloads=true&downloadRank=true)](https://nodei.co/npm/z-schema/)
-
-- version 3.0 runs also in the browsers now, run tests yourself [here](https://rawgit.com/zaggino/z-schema/master/test/SpecRunner.html)
-
-# Topics
+## Topics
 
 - [Usage](#usage)
 - [Features](#features)
 - [Options](#options)
 - [Benchmarks](#benchmarks)
+- [Contributing](#contributing)
 - [Contributors](#contributors)
 
-# Usage
+## Usage
 
 Validator will try to perform sync validation when possible for speed, but supports async callbacks when they are necessary.
 
-## Development:
+### ESM and Typescript:
 
-These repository has several submodules and should be cloned as follows:
+```javascript
+import ZSchema from 'z-schema';
+const validator = new ZSchema();
+console.log(validator.validate(1, { type: 'number' })); // true
+console.log(validator.validate(1, { type: 'string' })); // false
+```
 
-> git clone **--recursive** https://github.com/zaggino/z-schema.git
+### CommonJs:
 
-## CLI:
+```javascript
+const ZSchema = require('z-schema');
+const validator = new ZSchema();
+console.log(validator.validate(1, { type: 'number' })); // true
+console.log(validator.validate(1, { type: 'string' })); // false
+```
+
+### CLI:
 
 ```bash
 npm install --global z-schema
@@ -38,15 +45,7 @@ z-schema mySchema.json myJson.json
 z-schema --strictMode mySchema.json myJson.json
 ```
 
-## NodeJS:
-
-```javascript
-import ZSchema from 'z-schema';
-var options = ... // see below for possible option values
-var validator = new ZSchema(options);
-```
-
-## Sync mode:
+### Sync mode:
 
 ```javascript
 var valid = validator.validate(json, schema);
@@ -57,7 +56,7 @@ var errors = validator.getLastErrors();
 ...
 ```
 
-## Async mode:
+### Async mode:
 
 ```javascript
 validator.validate(json, schema, function (err, valid) {
@@ -65,24 +64,17 @@ validator.validate(json, schema, function (err, valid) {
 });
 ```
 
-## CommonJs
-
-```javascript
-import ZSchema from 'z-schema/dist/ZSchema.cjs';
-```
-
-## Browser:
+### Browser:
 
 ```html
-<script type="text/javascript" src="../dist/ZSchema-umd-min.js"></script>
+<script type="text/javascript" src="z-schema/umd/ZSchema.min.js"></script>
 <script type="text/javascript">
   var validator = new ZSchema();
-  var valid = validator.validate('string', { type: 'string' });
-  console.log(valid);
+  console.log(validator.validate('string', { type: 'string' }));
 </script>
 ```
 
-## Remote references and schemas:
+### Remote references and schemas:
 
 In case you have some remote references in your schemas, you have to download those schemas before using validator.
 Otherwise you'll get `UNRESOLVABLE_REFERENCE` error when trying to compile a schema.
@@ -120,7 +112,7 @@ ZSchema.setSchemaReader(function (uri) {
 });
 ```
 
-# Features
+## Features
 
 - [Validate against subschema](#validate-against-subschema)
 - [Compile arrays of schemas and use references between them](#compile-arrays-of-schemas-and-use-references-between-them)
@@ -147,7 +139,7 @@ ZSchema.setSchemaReader(function (uri) {
 - [Set validator to collect as many errors as possible](#breakonfirsterror)
 - [Report paths in errors as arrays so they can be processed easier](#reportpathasarray)
 
-## Validate against subschema
+### Validate against subschema
 
 In case you don't want to split your schema into multiple schemas using reference for any reason, you can use option schemaPath when validating:
 
@@ -157,7 +149,7 @@ var valid = validator.validate(cars, schema, { schemaPath: 'definitions.car.defi
 
 See more details in the [test](/test/spec/schemaPathSpec.js).
 
-## Compile arrays of schemas and use references between them
+### Compile arrays of schemas and use references between them
 
 You can use validator to compile an array of schemas that have references between them and then validate against one of those schemas:
 
@@ -225,19 +217,19 @@ ZSchema.registerFormat('xstring', function (str, callback) {
 });
 ```
 
-## Helper method to check the formats that have been registered
+### Helper method to check the formats that have been registered
 
 ```javascript
 var registeredFormats = ZSchema.getRegisteredFormats();
 //registeredFormats will now contain an array of all formats that have been registered with z-schema
 ```
 
-## Automatic downloading of remote schemas
+### Automatic downloading of remote schemas
 
 Automatic downloading of remote schemas was removed from version `3.x` but is still possible with a bit of extra code,
 see [this test](test/spec/AutomaticSchemaLoadingSpec.js) for more information on this.
 
-## Prefill default values to object using format
+### Prefill default values to object using format
 
 Using format, you can pre-fill values of your choosing into the objects like this:
 
@@ -258,9 +250,9 @@ validator.validate(data, schema);
 // data.hello === "world"
 ```
 
-# Options
+## Options
 
-## asyncTimeout
+### asyncTimeout
 
 Defines a time limit, which should be used when waiting for async tasks like async format validators to perform their validation,
 before the validation fails with an `ASYNC_TIMEOUT` error.
@@ -271,7 +263,7 @@ var validator = new ZSchema({
 });
 ```
 
-## noEmptyArrays
+### noEmptyArrays
 
 When true, validator will assume that minimum count of items in any `array` is 1, except when `minItems: 0` is explicitly defined.
 
@@ -281,7 +273,7 @@ var validator = new ZSchema({
 });
 ```
 
-## noEmptyStrings
+### noEmptyStrings
 
 When true, validator will assume that minimum length of any string to pass type `string` validation is 1, except when `minLength: 0` is explicitly defined.
 
@@ -291,7 +283,7 @@ var validator = new ZSchema({
 });
 ```
 
-## noTypeless
+### noTypeless
 
 When true, validator will fail validation for schemas that don't specify a `type` of object that they expect.
 
@@ -301,7 +293,7 @@ var validator = new ZSchema({
 });
 ```
 
-## noExtraKeywords
+### noExtraKeywords
 
 When true, validator will fail for schemas that use keywords not defined in JSON Schema specification and doesn't provide a parent schema in `$schema` property to validate the schema.
 
@@ -311,7 +303,7 @@ var validator = new ZSchema({
 });
 ```
 
-## assumeAdditional
+### assumeAdditional
 
 When true, validator assumes that additionalItems/additionalProperties are defined as false so you don't have to manually fix all your schemas.
 
@@ -329,7 +321,7 @@ var validator = new ZSchema({
 });
 ```
 
-## forceAdditional
+### forceAdditional
 
 When true, validator doesn't validate schemas where additionalItems/additionalProperties should be defined to either true or false.
 
@@ -339,7 +331,7 @@ var validator = new ZSchema({
 });
 ```
 
-## forceItems
+### forceItems
 
 When true, validator doesn't validate schemas where `items` are not defined for `array` type schemas.
 This is to avoid passing anything through an array definition.
@@ -350,7 +342,7 @@ var validator = new ZSchema({
 });
 ```
 
-## forceMinItems
+### forceMinItems
 
 When true, validator doesn't validate schemas where `minItems` is not defined for `array` type schemas.
 This is to avoid passing zero-length arrays which application doesn't expect to handle.
@@ -361,7 +353,7 @@ var validator = new ZSchema({
 });
 ```
 
-## forceMaxItems
+### forceMaxItems
 
 When true, validator doesn't validate schemas where `maxItems` is not defined for `array` type schemas.
 This is to avoid passing arrays with unlimited count of elements which application doesn't expect to handle.
@@ -372,7 +364,7 @@ var validator = new ZSchema({
 });
 ```
 
-## forceMinLength
+### forceMinLength
 
 When true, validator doesn't validate schemas where `minLength` is not defined for `string` type schemas.
 This is to avoid passing zero-length strings which application doesn't expect to handle.
@@ -383,7 +375,7 @@ var validator = new ZSchema({
 });
 ```
 
-## forceMaxLength
+### forceMaxLength
 
 When true, validator doesn't validate schemas where `maxLength` is not defined for `string` type schemas.
 This is to avoid passing extremly large strings which application doesn't expect to handle.
@@ -394,7 +386,7 @@ var validator = new ZSchema({
 });
 ```
 
-## forceProperties
+### forceProperties
 
 When true, validator doesn't validate schemas where `properties` or `patternProperties` is not defined for `object` type schemas.
 This is to avoid having objects with unexpected properties in application.
@@ -405,7 +397,7 @@ var validator = new ZSchema({
 });
 ```
 
-## ignoreUnresolvableReferences
+### ignoreUnresolvableReferences
 
 When true, validator doesn't end with error when a remote reference is unreachable. **This setting is not recommended in production outside of testing.**
 
@@ -415,7 +407,7 @@ var validator = new ZSchema({
 });
 ```
 
-## enumCaseInsensitiveComparison
+### enumCaseInsensitiveComparison
 
 When true, validator will return a `ENUM_CASE_MISMATCH` when the enum values mismatch only in case.
 
@@ -425,7 +417,7 @@ var validator = new ZSchema({
 });
 ```
 
-## strictUris
+### strictUris
 
 When true, all strings of format `uri` must be an absolute URIs and not only URI references. See more details in [this issue](https://github.com/zaggino/z-schema/issues/18).
 
@@ -435,7 +427,7 @@ var validator = new ZSchema({
 });
 ```
 
-## strictMode
+### strictMode
 
 Strict mode of z-schema is currently equal to the following:
 
@@ -458,7 +450,7 @@ var validator = new ZSchema({
 });
 ```
 
-## breakOnFirstError
+### breakOnFirstError
 
 default: `false`<br />
 When true, will stop validation after the first error is found:
@@ -469,7 +461,7 @@ var validator = new ZSchema({
 });
 ```
 
-## reportPathAsArray
+### reportPathAsArray
 
 Report error paths as an array of path segments instead of a string:
 
@@ -479,7 +471,7 @@ var validator = new ZSchema({
 });
 ```
 
-## ignoreUnknownFormats
+### ignoreUnknownFormats
 
 By default, z-schema reports all unknown formats, formats not defined by JSON Schema and not registered using
 `ZSchema.registerFormat`, as an error. But the
@@ -493,7 +485,7 @@ var validator = new ZSchema({
 });
 ```
 
-## includeErrors
+### includeErrors
 
 By default, z-schema reports all errors. If interested only in a subset of the errors, passing the option `includeErrors` to `validate` will perform validations only for those errors.
 
@@ -503,7 +495,7 @@ var validator = new ZSchema();
 validator.validate(json, schema, { includeErrors: ['INVALID_TYPE'] });
 ```
 
-## customValidator
+### customValidator
 
 **Warning**: Use only if know what you are doing. Always consider using [custom format](#register-a-custom-format) before using this option.
 
@@ -604,7 +596,7 @@ console.log(validator.getLastErrors());
 
 **Note:** before creating your own keywords you should consider all compatibility issues.
 
-# Benchmarks
+## Benchmarks
 
 So how does it compare to version 2.x and others?
 
@@ -612,7 +604,13 @@ So how does it compare to version 2.x and others?
 
 [rawgithub.com/zaggino/z-schema/master/benchmark/results.html](https://rawgithub.com/zaggino/z-schema/master/benchmark/results.html)
 
-# Contributors
+## Contributing:
+
+These repository has several submodules and should be cloned as follows:
+
+> git clone **--recursive** https://github.com/zaggino/z-schema.git
+
+## Contributors
 
 Thanks for contributing to:
 
