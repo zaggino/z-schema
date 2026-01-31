@@ -1,6 +1,5 @@
 import isequal from 'lodash.isequal';
 import { Report } from './Report.js';
-import { compileSchema } from './SchemaCompilation.js';
 import * as SchemaValidation from './SchemaValidation.js';
 import * as Utils from './Utils.js';
 
@@ -146,7 +145,7 @@ export function getSchemaByUri(report, uri, root) {
         remoteReport = anscestorReport;
       } else {
         remoteReport = new Report(report);
-        if (compileSchema.call(this, remoteReport, result)) {
+        if (this._compileSchema(remoteReport, result)) {
           const savedOptions = this.options;
           try {
             // If custom validationOptions were provided to setRemoteReference(),

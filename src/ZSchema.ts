@@ -198,6 +198,11 @@ export class ZSchema {
     this.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', Draft4HyperSchema, metaschemaOptions);
   }
 
+  /** Used by SchemaCache to break circular dependency with SchemaCompilation */
+  _compileSchema(report: Report, schema: unknown): boolean {
+    return SchemaCompilation.compileSchema.call(this, report, schema);
+  }
+
   /**
    * @param schema - JSON object representing schema
    * @returns {boolean} true if schema is valid.
