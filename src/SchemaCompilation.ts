@@ -1,6 +1,7 @@
 import { Report } from './Report.js';
 import { getSchemaByUri, checkCacheForUri, cacheSchemaByUri, removeFromCacheByUri } from './SchemaCache.js';
-import { isAbsoluteUri, isRelativeUri } from './Utils.js';
+import { isAbsoluteUri } from './utils/is-absolute-uri.js';
+import { isRelativeUri } from './utils/is-relative-uri.js';
 
 const mergeReference = (scope, ref) => {
   if (isAbsoluteUri(ref)) {

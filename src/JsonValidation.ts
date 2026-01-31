@@ -1,6 +1,11 @@
 import { FormatValidators } from './FormatValidators.js';
 import { Report } from './Report.js';
-import { whatIs, ucs2decode, isUniqueArray, difference, areEqual, shallowClone } from './Utils.js';
+import { whatIs } from './utils/what-is.js';
+import { ucs2decode } from './utils/ucs2-decode.js';
+import { isUniqueArray } from './utils/is-unique-array.js';
+import { difference } from './utils/difference.js';
+import { areEqual } from './utils/are-equal.js';
+import { shallowClone } from './utils/shallow-clone.js';
 
 const shouldSkipValidate = function (options, errors) {
   return (

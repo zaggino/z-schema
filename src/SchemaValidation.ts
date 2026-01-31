@@ -1,7 +1,9 @@
 import { FormatValidators } from './FormatValidators.js';
 import { validate } from './JsonValidation.js';
 import { Report } from './Report.js';
-import { whatIs, isUniqueArray, shallowClone } from './Utils.js';
+import { whatIs } from './utils/what-is.js';
+import { isUniqueArray } from './utils/is-unique-array.js';
+import { shallowClone } from './utils/shallow-clone.js';
 
 const SchemaValidators = {
   $ref: function (report, schema) {

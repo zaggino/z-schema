@@ -1,7 +1,7 @@
 import isequal from 'lodash.isequal';
 import { Report } from './Report.js';
 import { validateSchema } from './SchemaValidation.js';
-import { deepClone } from './Utils.js';
+import { deepClone } from './utils/deep-clone.js';
 
 const decodeJSONPointer = (str) => {
   // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07#section-3
