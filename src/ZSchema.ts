@@ -60,7 +60,7 @@ const defaultOptions = {
   customValidator: null,
 };
 
-function normalizeOptions(options) {
+const normalizeOptions = (options) => {
   let normalized;
 
   // options
@@ -83,13 +83,13 @@ function normalizeOptions(options) {
     while (idx--) {
       key = keys[idx];
       if (options[key] === undefined) {
-        options[key] = Utils.clone(defaultOptions[key]);
+        options[key] = Utils.shallowClone(defaultOptions[key]);
       }
     }
 
     normalized = options;
   } else {
-    normalized = Utils.clone(defaultOptions);
+    normalized = Utils.shallowClone(defaultOptions);
   }
 
   if (normalized.strictMode === true) {
@@ -104,7 +104,7 @@ function normalizeOptions(options) {
   }
 
   return normalized;
-}
+};
 
 export interface ZSchemaOptions {
   asyncTimeout?: number;
@@ -176,7 +176,7 @@ export class ZSchema {
   }
 
   public static getDefaultOptions(): ZSchemaOptions {
-    return Utils.cloneDeep(defaultOptions);
+    return Utils.deepClone(defaultOptions);
   }
 
   private cache: Record<string, string>;
@@ -340,7 +340,7 @@ export class ZSchema {
     if (typeof schema === 'string') {
       schema = JSON.parse(schema);
     } else {
-      schema = Utils.cloneDeep(schema);
+      schema = Utils.deepClone(schema);
     }
 
     if (validationOptions) {
@@ -398,7 +398,7 @@ export class ZSchema {
     schema = SchemaCache.getSchema.call(this, report, schema);
 
     // clone before making any modifications
-    schema = Utils.cloneDeep(schema);
+    schema = Utils.deepClone(schema);
 
     const visited = [];
 

@@ -1,7 +1,7 @@
 import validator from 'validator';
 
 export const FormatValidators = {
-  date: function (date) {
+  date: (date) => {
     if (typeof date !== 'string') {
       return true;
     }
@@ -18,7 +18,7 @@ export const FormatValidators = {
     }
     return true;
   },
-  'date-time': function (dateTime) {
+  'date-time': (dateTime) => {
     if (typeof dateTime !== 'string') {
       return true;
     }
@@ -41,13 +41,13 @@ export const FormatValidators = {
     }
     return true;
   },
-  email: function (email) {
+  email: (email) => {
     if (typeof email !== 'string') {
       return true;
     }
     return validator.isEmail(email, { require_tld: true });
   },
-  hostname: function (hostname) {
+  hostname: (hostname) => {
     if (typeof hostname !== 'string') {
       return true;
     }
@@ -101,19 +101,19 @@ export const FormatValidators = {
   'host-name': function (hostname) {
     return FormatValidators.hostname.call(this, hostname);
   },
-  ipv4: function (ipv4) {
+  ipv4: (ipv4) => {
     if (typeof ipv4 !== 'string') {
       return true;
     }
     return validator.isIP(ipv4, 4);
   },
-  ipv6: function (ipv6) {
+  ipv6: (ipv6) => {
     if (typeof ipv6 !== 'string') {
       return true;
     }
     return validator.isIP(ipv6, 6);
   },
-  regex: function (str) {
+  regex: (str) => {
     try {
       RegExp(str);
       return true;
@@ -130,7 +130,5 @@ export const FormatValidators = {
     // RegExp from http://tools.ietf.org/html/rfc3986#appendix-B
     return typeof uri !== 'string' || RegExp('^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?').test(uri);
   },
-  'strict-uri': function (uri) {
-    return typeof uri !== 'string' || validator.isURL(uri);
-  },
+  'strict-uri': (uri) => typeof uri !== 'string' || validator.isURL(uri),
 };

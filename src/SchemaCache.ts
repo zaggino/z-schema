@@ -3,27 +3,25 @@ import { Report } from './Report.js';
 import * as SchemaValidation from './SchemaValidation.js';
 import * as Utils from './Utils.js';
 
-function decodeJSONPointer(str) {
+const decodeJSONPointer = (str) => {
   // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07#section-3
-  return decodeURIComponent(str).replace(/~[0-1]/g, function (x) {
-    return x === '~1' ? '/' : '~';
-  });
-}
+  return decodeURIComponent(str).replace(/~[0-1]/g, (x) => (x === '~1' ? '/' : '~'));
+};
 
-export function getRemotePath(uri) {
+export const getRemotePath = (uri) => {
   const io = uri.indexOf('#');
   return io === -1 ? uri : uri.slice(0, io);
-}
+};
 
-function getQueryPath(uri) {
+const getQueryPath = (uri) => {
   const io = uri.indexOf('#');
   const res = io === -1 ? undefined : uri.slice(io + 1);
   // WARN: do not slice slash, #/ means take root and go down from it
   // if (res && res[0] === "/") { res = res.slice(1); }
   return res;
-}
+};
 
-function findId(schema, id) {
+const findId = (schema, id) => {
   // process only arrays and objects
   if (typeof schema !== 'object' || schema === null) {
     return;
@@ -63,7 +61,7 @@ function findId(schema, id) {
       }
     }
   }
-}
+};
 
 /**
  *
@@ -121,7 +119,7 @@ export function getSchemaByReference(report, key) {
     }
   }
   // not found
-  const schema = Utils.cloneDeep(key);
+  const schema = Utils.deepClone(key);
   this.referenceCache.push([key, schema]);
   return schema;
 }

@@ -7,9 +7,7 @@ export const schemaSymbol = Symbol.for('z-schema/schema');
  *
  * @returns {string[]}
  */
-export function sortedKeys(obj) {
-  return Object.keys(obj).sort();
-}
+export const sortedKeys = (obj) => Object.keys(obj).sort();
 
 /**
  *
@@ -17,9 +15,7 @@ export function sortedKeys(obj) {
  *
  * @returns {boolean}
  */
-export function isAbsoluteUri(uri) {
-  return /^https?:\/\//.test(uri);
-}
+export const isAbsoluteUri = (uri) => /^https?:\/\//.test(uri);
 
 /**
  *
@@ -27,12 +23,11 @@ export function isAbsoluteUri(uri) {
  *
  * @returns {boolean}
  */
-export function isRelativeUri(uri) {
+export const isRelativeUri = (uri) =>
   // relative URIs that end with a hash sign, issue #56
-  return /.+#/.test(uri);
-}
+  /.+#/.test(uri);
 
-export function whatIs(what) {
+export const whatIs = (what) => {
   const to = typeof what;
 
   if (to === 'object') {
@@ -60,7 +55,7 @@ export function whatIs(what) {
   }
 
   return to; // undefined, boolean, string, function
-}
+};
 
 /**
  *
@@ -70,7 +65,7 @@ export function whatIs(what) {
  *
  * @returns {boolean}
  */
-export function areEqual(json1, json2, options?) {
+export const areEqual = (json1, json2, options?) => {
   options = options || {};
   const caseInsensitiveComparison = options.caseInsensitiveComparison || false;
 
@@ -130,7 +125,7 @@ export function areEqual(json1, json2, options?) {
   }
 
   return false;
-}
+};
 
 /**
  *
@@ -139,7 +134,7 @@ export function areEqual(json1, json2, options?) {
  *
  * @returns {boolean}
  */
-export function isUniqueArray(arr, indexes?) {
+export const isUniqueArray = (arr, indexes?) => {
   let i;
   let j;
   const l = arr.length;
@@ -154,7 +149,7 @@ export function isUniqueArray(arr, indexes?) {
     }
   }
   return true;
-}
+};
 
 /**
  *
@@ -163,7 +158,7 @@ export function isUniqueArray(arr, indexes?) {
  *
  * @returns {*[]}
  */
-export function difference(bigSet, subSet) {
+export const difference = (bigSet, subSet) => {
   const arr = [];
   let idx = bigSet.length;
   while (idx--) {
@@ -172,10 +167,10 @@ export function difference(bigSet, subSet) {
     }
   }
   return arr;
-}
+};
 
 // NOT a deep version of clone
-export function clone(src) {
+export const shallowClone = (src) => {
   if (typeof src === 'undefined') {
     return void 0;
   }
@@ -199,13 +194,13 @@ export function clone(src) {
     }
   }
   return res;
-}
+};
 
-export function cloneDeep(src) {
+export const deepClone = (src) => {
   let vidx = 0;
   const visited = new Map();
   const cloned = [];
-  function cloneDeepInner(src) {
+  const cloneDeepInner = (src) => {
     if (typeof src !== 'object' || src === null) {
       return src;
     }
@@ -237,9 +232,9 @@ export function cloneDeep(src) {
       }
     }
     return res;
-  }
+  };
   return cloneDeepInner(src);
-}
+};
 
 /*
   following function comes from punycode.js library

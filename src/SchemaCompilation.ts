@@ -2,7 +2,7 @@ import { Report } from './Report.js';
 import { getSchemaByUri, checkCacheForUri, cacheSchemaByUri, removeFromCacheByUri } from './SchemaCache.js';
 import * as Utils from './Utils.js';
 
-function mergeReference(scope, ref) {
+const mergeReference = (scope, ref) => {
   if (Utils.isAbsoluteUri(ref)) {
     return ref;
   }
@@ -30,9 +30,9 @@ function mergeReference(scope, ref) {
   let res = joinedScope + ref;
   res = res.replace(/##/, '#');
   return res;
-}
+};
 
-function collectReferences(obj, results, scope, path) {
+const collectReferences = (obj, results, scope, path) => {
   results = results || [];
   scope = scope || [];
   path = path || [];
@@ -89,7 +89,7 @@ function collectReferences(obj, results, scope, path) {
   }
 
   return results;
-}
+};
 
 const compileArrayOfSchemasLoop = function (mainReport, arr) {
   let idx = arr.length,
@@ -110,7 +110,7 @@ const compileArrayOfSchemasLoop = function (mainReport, arr) {
   return compiledCount;
 };
 
-function findId(arr, id) {
+const findId = (arr, id) => {
   let idx = arr.length;
   while (idx--) {
     if (arr[idx].id === id) {
@@ -118,7 +118,7 @@ function findId(arr, id) {
     }
   }
   return null;
-}
+};
 
 const compileArrayOfSchemas = function (report, arr) {
   let compiled = 0,

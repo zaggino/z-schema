@@ -414,7 +414,7 @@ export const JsonValidators = {
       }
       if (formatValidatorFn.length === 2) {
         // async - need to clone the path here, because it will change by the time async function reports back
-        const pathBeforeAsync = Utils.clone(report.path);
+        const pathBeforeAsync = Utils.shallowClone(report.path);
         report.addAsyncTask(formatValidatorFn, [json], function (result) {
           if (result !== true) {
             const backup = report.path;

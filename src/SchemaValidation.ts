@@ -600,7 +600,7 @@ export function validateSchema(report, schema) {
   if (this.options.pedanticCheck === true) {
     if (schema.enum) {
       // break recursion
-      const tmpSchema = Utils.clone(schema);
+      const tmpSchema = Utils.shallowClone(schema);
       delete tmpSchema.enum;
       delete tmpSchema.default;
 

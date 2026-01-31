@@ -136,17 +136,15 @@ export class Report {
       }, 0);
     };
 
-    function respond(asyncTaskResultProcessFn: TaskProcessFn) {
-      return function (asyncTaskResult) {
-        if (timedOut) {
-          return;
-        }
-        asyncTaskResultProcessFn(asyncTaskResult);
-        if (--tasksCount === 0) {
-          finish();
-        }
-      };
-    }
+    const respond = (asyncTaskResultProcessFn: TaskProcessFn) => (asyncTaskResult) => {
+      if (timedOut) {
+        return;
+      }
+      asyncTaskResultProcessFn(asyncTaskResult);
+      if (--tasksCount === 0) {
+        finish();
+      }
+    };
 
     // finish if tasks are completed or there are any errors and breaking on first error was requested
     if (tasksCount === 0 || (this.errors.length > 0 && this.options.breakOnFirstError)) {
