@@ -1,5 +1,17 @@
 # Changelog
 
+## [7.0.5](https://github.com/zaggino/z-schema/compare/v7.0.4...v7.0.5) (2026-01-31)
+
+
+### Bug Fixes
+
+* add verbose arg to npm publish ([16228d2](https://github.com/zaggino/z-schema/commit/16228d211134e7f269f2e1837bf499462c9686b6))
+
+
+### Miscellaneous Chores
+
+* release 7.0.5 ([8e862d6](https://github.com/zaggino/z-schema/commit/8e862d6eee0473b271799df69c1433adf892c7ae))
+
 ## [7.0.4](https://github.com/zaggino/z-schema/compare/v7.0.3...v7.0.4) (2026-01-31)
 
 
