@@ -46,5 +46,5 @@ jobs:
       - run: npm run format:check
         if: ${{ steps.release.outputs.release_created }}
 
-      - run: npm publish # runs both build & tests in prepublishOnly script
+      - run: npm publish --verbose # runs both build & tests in prepublishOnly script
         if: ${{ steps.release.outputs.release_created }}
