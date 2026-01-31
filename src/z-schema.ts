@@ -9,9 +9,14 @@ import { shallowClone } from './utils/shallow-clone.js';
 import { deepClone } from './utils/deep-clone.js';
 import { whatIs } from './utils/what-is.js';
 import { schemaSymbol, jsonSymbol } from './utils/symbols.js';
-import Draft4Schema from './schemas/schema.json' with { type: 'json' };
-import Draft4HyperSchema from './schemas/hyper-schema.json' with { type: 'json' };
 import type { Errors } from './errors.js';
+// import schemas so they don't have to be downloaded for validation purposes
+import type { JsonSchema } from './json-schema.js';
+import _Draft4Schema from './schemas/schema.json' with { type: 'json' };
+import _Draft4HyperSchema from './schemas/hyper-schema.json' with { type: 'json' };
+
+const Draft4Schema: JsonSchema = _Draft4Schema;
+const Draft4HyperSchema: JsonSchema = _Draft4HyperSchema;
 
 /**
  * default options
@@ -228,15 +233,15 @@ export class ZSchema {
     return report.isValid();
   }
 
-  /**
-   * @param json - either a JSON string or a parsed JSON object
-   * @param schema - the JSON object representing the schema
-   * @returns true if json matches schema
-   */
-  validate(json, schema, options?: ValidateOptions, callback?: ValidateCallback): boolean;
-  validate(json, schema, callback?): boolean;
-  validate(json, schema): boolean;
-  validate(json, schema, options?: ValidateOptions | ValidateCallback, callback?: ValidateCallback): boolean {
+  validate(json: unknown, schema: JsonSchema, options?: ValidateOptions, callback?: ValidateCallback): boolean;
+  validate(json: unknown, schema: JsonSchema, callback?): boolean;
+  validate(json: unknown, schema: JsonSchema): boolean;
+  validate(
+    json: unknown,
+    schema: JsonSchema,
+    options?: ValidateOptions | ValidateCallback,
+    callback?: ValidateCallback
+  ): boolean {
     if (typeof options === 'function') {
       callback = options;
       options = {};

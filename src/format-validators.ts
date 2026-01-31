@@ -131,4 +131,4 @@ export const FormatValidators = {
     return typeof uri !== 'string' || RegExp('^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?').test(uri);
   },
   'strict-uri': (uri) => typeof uri !== 'string' || validator.isURL(uri),
-};
+} as const;

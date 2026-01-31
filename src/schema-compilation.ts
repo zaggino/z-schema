@@ -1,3 +1,4 @@
+import { JsonSchemaInternal } from './json-schema.js';
 import { Report } from './report.js';
 import { getSchemaByUri, checkCacheForUri, cacheSchemaByUri, removeFromCacheByUri } from './schema-cache.js';
 import { isAbsoluteUri } from './utils/is-absolute-uri.js';
@@ -67,7 +68,7 @@ const collectReferences = (obj, results, scope, path) => {
   if (Array.isArray(obj)) {
     idx = obj.length;
     while (idx--) {
-      path.push(idx.toString());
+      path.push(idx);
       collectReferences(obj[idx], results, scope, path);
       path.pop();
     }
@@ -168,7 +169,7 @@ const compileArrayOfSchemas = function (report, arr) {
   return report.isValid();
 };
 
-export function compileSchema(report, schema) {
+export function compileSchema(report: Report, schema: JsonSchemaInternal) {
   report.commonErrorMessage = 'SCHEMA_COMPILATION_FAILED';
 
   // if schema is a string, assume it's a uri

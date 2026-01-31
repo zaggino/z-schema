@@ -6,6 +6,7 @@ import { isUniqueArray } from './utils/is-unique-array.js';
 import { difference } from './utils/difference.js';
 import { areEqual } from './utils/are-equal.js';
 import { shallowClone } from './utils/shallow-clone.js';
+import { JsonSchemaInternal } from './json-schema.js';
 
 const shouldSkipValidate = function (options, errors) {
   return (
@@ -19,7 +20,7 @@ const shouldSkipValidate = function (options, errors) {
 };
 
 export const JsonValidators = {
-  multipleOf: function (report, schema, json) {
+  multipleOf: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.1.2
     if (shouldSkipValidate(this.validateOptions, ['MULTIPLE_OF'])) {
       return;
@@ -34,7 +35,7 @@ export const JsonValidators = {
       report.addError('MULTIPLE_OF', [json, schema.multipleOf], null, schema);
     }
   },
-  maximum: function (report, schema, json) {
+  maximum: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.2.2
     if (shouldSkipValidate(this.validateOptions, ['MAXIMUM', 'MAXIMUM_EXCLUSIVE'])) {
       return;
@@ -55,7 +56,7 @@ export const JsonValidators = {
   exclusiveMaximum: function () {
     // covered in maximum
   },
-  minimum: function (report, schema, json) {
+  minimum: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.2
     if (shouldSkipValidate(this.validateOptions, ['MINIMUM', 'MINIMUM_EXCLUSIVE'])) {
       return;
@@ -76,7 +77,7 @@ export const JsonValidators = {
   exclusiveMinimum: function () {
     // covered in minimum
   },
-  maxLength: function (report, schema, json) {
+  maxLength: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.1.2
     if (shouldSkipValidate(this.validateOptions, ['MAX_LENGTH'])) {
       return;
@@ -88,7 +89,7 @@ export const JsonValidators = {
       report.addError('MAX_LENGTH', [json.length, schema.maxLength], null, schema);
     }
   },
-  minLength: function (report, schema, json) {
+  minLength: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.2.2
     if (shouldSkipValidate(this.validateOptions, ['MIN_LENGTH'])) {
       return;
@@ -100,7 +101,7 @@ export const JsonValidators = {
       report.addError('MIN_LENGTH', [json.length, schema.minLength], null, schema);
     }
   },
-  pattern: function (report, schema, json) {
+  pattern: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.3.2
     if (shouldSkipValidate(this.validateOptions, ['PATTERN'])) {
       return;
@@ -112,7 +113,7 @@ export const JsonValidators = {
       report.addError('PATTERN', [schema.pattern, json], null, schema);
     }
   },
-  additionalItems: function (report, schema, json) {
+  additionalItems: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.2
     if (shouldSkipValidate(this.validateOptions, ['ARRAY_ADDITIONAL_ITEMS'])) {
       return;
@@ -129,10 +130,10 @@ export const JsonValidators = {
     }
   },
   items: function () {
-    /*report, schema, json*/
+    /*report: Report, schema: JsonSchemaInternal, json: unknown*/
     // covered in additionalItems
   },
-  maxItems: function (report, schema, json) {
+  maxItems: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.2.2
     if (shouldSkipValidate(this.validateOptions, ['ARRAY_LENGTH_LONG'])) {
       return;
@@ -144,7 +145,7 @@ export const JsonValidators = {
       report.addError('ARRAY_LENGTH_LONG', [json.length, schema.maxItems], null, schema);
     }
   },
-  minItems: function (report, schema, json) {
+  minItems: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.3.2
     if (shouldSkipValidate(this.validateOptions, ['ARRAY_LENGTH_SHORT'])) {
       return;
@@ -156,7 +157,7 @@ export const JsonValidators = {
       report.addError('ARRAY_LENGTH_SHORT', [json.length, schema.minItems], null, schema);
     }
   },
-  uniqueItems: function (report, schema, json) {
+  uniqueItems: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.4.2
     if (shouldSkipValidate(this.validateOptions, ['ARRAY_UNIQUE'])) {
       return;
@@ -171,7 +172,7 @@ export const JsonValidators = {
       }
     }
   },
-  maxProperties: function (report, schema, json) {
+  maxProperties: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.1.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_PROPERTIES_MAXIMUM'])) {
       return;
@@ -184,7 +185,7 @@ export const JsonValidators = {
       report.addError('OBJECT_PROPERTIES_MAXIMUM', [keysCount, schema.maxProperties], null, schema);
     }
   },
-  minProperties: function (report, schema, json) {
+  minProperties: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.2.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_PROPERTIES_MINIMUM'])) {
       return;
@@ -197,7 +198,7 @@ export const JsonValidators = {
       report.addError('OBJECT_PROPERTIES_MINIMUM', [keysCount, schema.minProperties], null, schema);
     }
   },
-  required: function (report, schema, json) {
+  required: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.3.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_MISSING_REQUIRED_PROPERTY'])) {
       return;
@@ -213,19 +214,19 @@ export const JsonValidators = {
       }
     }
   },
-  additionalProperties: function (report, schema, json) {
+  additionalProperties: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // covered in properties and patternProperties
     if (schema.properties === undefined && schema.patternProperties === undefined) {
       return JsonValidators.properties.call(this, report, schema, json);
     }
   },
-  patternProperties: function (report, schema, json) {
+  patternProperties: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // covered in properties
     if (schema.properties === undefined) {
       return JsonValidators.properties.call(this, report, schema, json);
     }
   },
-  properties: function (report, schema, json) {
+  properties: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_ADDITIONAL_PROPERTIES'])) {
       return;
@@ -276,7 +277,7 @@ export const JsonValidators = {
       }
     }
   },
-  dependencies: function (report, schema, json) {
+  dependencies: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.5.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_DEPENDENCY_KEY'])) {
       return;
@@ -310,7 +311,7 @@ export const JsonValidators = {
       }
     }
   },
-  enum: function (report, schema, json) {
+  enum: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.1.2
     if (shouldSkipValidate(this.validateOptions, ['ENUM_CASE_MISMATCH', 'ENUM_MISMATCH'])) {
       return;
@@ -333,7 +334,7 @@ export const JsonValidators = {
       report.addError(error, [json], null, schema);
     }
   },
-  type: function (report, schema, json) {
+  type: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.2
     if (shouldSkipValidate(this.validateOptions, ['INVALID_TYPE'])) {
       return;
@@ -349,7 +350,7 @@ export const JsonValidators = {
       }
     }
   },
-  allOf: function (report, schema, json) {
+  allOf: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
     let idx = schema.allOf.length;
     while (idx--) {
@@ -359,7 +360,7 @@ export const JsonValidators = {
       }
     }
   },
-  anyOf: function (report, schema, json) {
+  anyOf: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.2
     const subReports = [];
     let passed = false;
@@ -375,7 +376,7 @@ export const JsonValidators = {
       report.addError('ANY_OF_MISSING', undefined, subReports, schema);
     }
   },
-  oneOf: function (report, schema, json) {
+  oneOf: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.2
     let passes = 0;
     const subReports = [];
@@ -395,7 +396,7 @@ export const JsonValidators = {
       report.addError('ONE_OF_MULTIPLE', null, null, schema);
     }
   },
-  not: function (report, schema, json) {
+  not: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
     const subReport = new Report(report);
     if (validate.call(this, subReport, schema.not, json) === true) {
@@ -403,11 +404,11 @@ export const JsonValidators = {
     }
   },
   definitions: function () {
-    /*report, schema, json*/
+    /*report: Report, schema: JsonSchemaInternal, json: unknown*/
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.2
     // nothing to do here
   },
-  format: function (report, schema, json) {
+  format: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
     const formatValidatorFn = FormatValidators[schema.format];
     if (typeof formatValidatorFn === 'function') {
@@ -438,9 +439,9 @@ export const JsonValidators = {
       report.addError('UNKNOWN_FORMAT', [schema.format], null, schema);
     }
   },
-};
+} as const;
 
-const recurseArray = function (report, schema, json) {
+const recurseArray = function (report: Report, schema: JsonSchemaInternal, json: Array<unknown>) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.2
 
   let idx = json.length;
@@ -476,7 +477,7 @@ const recurseArray = function (report, schema, json) {
   }
 };
 
-const recurseObject = function (report, schema, json) {
+const recurseObject = function (report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.3
 
   // If "additionalProperties" is absent, it is considered present with an empty schema as a value.
@@ -536,13 +537,7 @@ const recurseObject = function (report, schema, json) {
   }
 };
 
-/**
- *
- * @param {Report} report
- * @param {*} schema
- * @param {*} json
- */
-export function validate(report, schema, json) {
+export function validate(report: Report, schema: JsonSchemaInternal, json: unknown): boolean {
   report.commonErrorMessage = 'JSON_OBJECT_VALIDATION_FAILED';
 
   // check if schema is an object

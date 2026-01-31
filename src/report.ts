@@ -76,7 +76,7 @@ export class Report {
   parentReport?: Report;
   options: ZSchemaOptions;
   reportOptions: ReportOptions;
-  path: string[];
+  path: Array<number | string>;
   asyncTasks: AsyncTask[];
   rootSchema?: {
     id?: string;
