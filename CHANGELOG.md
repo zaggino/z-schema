@@ -1,5 +1,18 @@
 # Changelog
 
+## [7.0.2](https://github.com/zaggino/z-schema/compare/v7.0.1...v7.0.2) (2026-01-31)
+
+
+### Bug Fixes
+
+* add .nvmrc file ([88d1be5](https://github.com/zaggino/z-schema/commit/88d1be5a7c33ca9ff82528d52a6873439c26086e))
+
+
+### Miscellaneous Chores
+
+* release 7.0.1 ([c0d7819](https://github.com/zaggino/z-schema/commit/c0d7819a3f3e035748f661abe66fabe5262daf46))
+* release 7.0.2 ([1bcc93c](https://github.com/zaggino/z-schema/commit/1bcc93c72c33c8db0d32937d45fa15a41dd490a8))
+
 ## [7.0.1](https://github.com/zaggino/z-schema/compare/v7.0.1...v7.0.1) (2026-01-31)
 
 
