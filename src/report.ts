@@ -1,9 +1,9 @@
 import get from 'lodash.get';
-import { Errors } from './Errors.js';
+import { Errors } from './errors.js';
 import { isAbsoluteUri } from './utils/is-absolute-uri.js';
 import { whatIs } from './utils/what-is.js';
 import { schemaSymbol, jsonSymbol } from './utils/symbols.js';
-import { ZSchemaOptions } from './ZSchema.js';
+import { ZSchemaOptions } from './z-schema.js';
 
 export interface SchemaError extends Error {
   /**

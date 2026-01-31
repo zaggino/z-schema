@@ -1,5 +1,5 @@
-import { Report } from './Report.js';
-import { getSchemaByUri, checkCacheForUri, cacheSchemaByUri, removeFromCacheByUri } from './SchemaCache.js';
+import { Report } from './report.js';
+import { getSchemaByUri, checkCacheForUri, cacheSchemaByUri, removeFromCacheByUri } from './schema-cache.js';
 import { isAbsoluteUri } from './utils/is-absolute-uri.js';
 import { isRelativeUri } from './utils/is-relative-uri.js';
 

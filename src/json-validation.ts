@@ -1,5 +1,5 @@
-import { FormatValidators } from './FormatValidators.js';
-import { Report } from './Report.js';
+import { FormatValidators } from './format-validators.js';
+import { Report } from './report.js';
 import { whatIs } from './utils/what-is.js';
 import { ucs2decode } from './utils/ucs2-decode.js';
 import { isUniqueArray } from './utils/is-unique-array.js';

@@ -33,7 +33,7 @@ export default [
     plugins: [dts()],
   },
   {
-    input: 'src/ZSchema.ts',
+    input: 'src/z-schema.ts',
     plugins: [
       resolve(),
       json(),
@@ -52,7 +52,7 @@ export default [
     },
   },
   {
-    input: 'src/ZSchema.ts',
+    input: 'src/z-schema.ts',
     plugins: [
       resolve(),
       json(),

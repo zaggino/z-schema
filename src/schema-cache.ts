@@ -1,6 +1,6 @@
 import isequal from 'lodash.isequal';
-import { Report } from './Report.js';
-import { validateSchema } from './SchemaValidation.js';
+import { Report } from './report.js';
+import { validateSchema } from './schema-validation.js';
 import { deepClone } from './utils/deep-clone.js';
 
 const decodeJSONPointer = (str) => {

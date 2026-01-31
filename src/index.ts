@@ -1,3 +1,3 @@
-import { ZSchema } from './ZSchema.js';
+import { ZSchema } from './z-schema.js';
 
 export default ZSchema;

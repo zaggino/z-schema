@@ -1,5 +1,5 @@
 import ZSchema from '../../src/index.ts';
-import { ValidateOptions, ZSchemaOptions } from '../../src/ZSchema.ts';
+import { ValidateOptions, ZSchemaOptions } from '../../src/z-schema.ts';
 
 type ZSchemaClass = new (...args: ConstructorParameters<typeof ZSchema>) => ZSchema;
 

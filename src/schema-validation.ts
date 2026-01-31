@@ -1,6 +1,6 @@
-import { FormatValidators } from './FormatValidators.js';
-import { validate } from './JsonValidation.js';
-import { Report } from './Report.js';
+import { FormatValidators } from './format-validators.js';
+import { validate } from './json-validation.js';
+import { Report } from './report.js';
 import { whatIs } from './utils/what-is.js';
 import { isUniqueArray } from './utils/is-unique-array.js';
 import { shallowClone } from './utils/shallow-clone.js';

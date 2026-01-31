@@ -18,7 +18,7 @@ export default defineConfig({
         test: {
           name: 'browsers',
           include: ['test/spec/*.{js,ts}'],
-          exclude: ['test/spec/RollupBuildSpec.{js,ts}', 'test/spec/RollupSmokeSpec.{js,ts}'],
+          exclude: ['test/spec/rollup-build-spec.{js,ts}', 'test/spec/rollup-smoke-spec.{js,ts}'],
           browser: {
             enabled: true,
             provider: playwright(),
