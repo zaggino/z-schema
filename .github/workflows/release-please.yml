@@ -5,6 +5,7 @@ on:
       - main
 
 permissions:
+  id-token: write # Required for OIDC
   contents: write
   pull-requests: write
 
@@ -28,6 +29,7 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
         with:
           node-version-file: .nvmrc
+          registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
         if: ${{ steps.release.outputs.release_created }}
@@ -43,5 +45,3 @@ jobs:
 
       - run: npm publish # runs both build & tests in prepublishOnly script
         if: ${{ steps.release.outputs.release_created }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
