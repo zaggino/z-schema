@@ -1,5 +1,17 @@
 # Changelog
 
+## [7.0.4](https://github.com/zaggino/z-schema/compare/v7.0.3...v7.0.4) (2026-01-31)
+
+
+### Bug Fixes
+
+* make sure we're using latest version of npm ([b4a80fc](https://github.com/zaggino/z-schema/commit/b4a80fc0701c2b12c5784a290057146a3963dfd9))
+
+
+### Miscellaneous Chores
+
+* release 7.0.4 ([d932988](https://github.com/zaggino/z-schema/commit/d9329884845ba224420247bb9bcede121864da31))
+
 ## [7.0.3](https://github.com/zaggino/z-schema/compare/v7.0.2...v7.0.3) (2026-01-31)
 
 
