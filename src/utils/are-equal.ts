@@ -1,15 +1,11 @@
 import { whatIs } from './what-is.js';
 import { sortedKeys } from './sorted-keys.js';
 
-/**
- *
- * @param {*} json1
- * @param {*} json2
- * @param {*} [options]
- *
- * @returns {boolean}
- */
-export const areEqual = (json1, json2, options?) => {
+interface AreEqualOptions {
+  caseInsensitiveComparison?: boolean;
+}
+
+export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptions): boolean => {
   options = options || {};
   const caseInsensitiveComparison = options.caseInsensitiveComparison || false;
 
@@ -53,8 +49,8 @@ export const areEqual = (json1, json2, options?) => {
   // both are objects, and:
   if (whatIs(json1) === 'object' && whatIs(json2) === 'object') {
     // have the same set of property names; and
-    const keys1 = sortedKeys(json1);
-    const keys2 = sortedKeys(json2);
+    const keys1 = sortedKeys(json1 as Record<string, unknown>);
+    const keys2 = sortedKeys(json2 as Record<string, unknown>);
     if (!areEqual(keys1, keys2, { caseInsensitiveComparison: caseInsensitiveComparison })) {
       return false;
     }

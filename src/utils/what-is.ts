@@ -1,7 +1,20 @@
-export const whatIs = (what) => {
-  const to = typeof what;
+export type WHAT_IS =
+  | 'undefined'
+  | 'null'
+  | 'object'
+  | 'array'
+  | 'integer'
+  | 'number'
+  | 'string'
+  | 'not-a-number'
+  | 'unknown-number'
+  | 'bigint'
+  | 'boolean'
+  | 'symbol'
+  | 'function';
 
-  if (to === 'object') {
+export const whatIs = (what: unknown): WHAT_IS => {
+  if (typeof what === 'object') {
     if (what === null) {
       return 'null';
     }
@@ -11,7 +24,7 @@ export const whatIs = (what) => {
     return 'object'; // typeof what === 'object' && what === Object(what) && !Array.isArray(what);
   }
 
-  if (to === 'number') {
+  if (typeof what === 'number') {
     if (Number.isFinite(what)) {
       if (what % 1 === 0) {
         return 'integer';
@@ -25,5 +38,5 @@ export const whatIs = (what) => {
     return 'unknown-number';
   }
 
-  return to; // undefined, boolean, string, function
+  return typeof what; // undefined, boolean, string, function
 };

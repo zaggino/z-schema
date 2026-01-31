@@ -1,13 +1,6 @@
 import { areEqual } from './are-equal.js';
 
-/**
- *
- * @param {*[]} arr
- * @param {number[]} [indexes]
- *
- * @returns {boolean}
- */
-export const isUniqueArray = (arr, indexes?) => {
+export const isUniqueArray = <T>(arr: T[], indexes?: number[]): boolean => {
   let i;
   let j;
   const l = arr.length;

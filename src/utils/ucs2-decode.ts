@@ -15,7 +15,7 @@
  * @param {String} string The Unicode input string (UCS-2).
  * @returns {Array} The new array of code points.
  */
-export function ucs2decode(string) {
+export function ucs2decode(string: string): number[] {
   const output = [];
   let counter = 0;
   const length = string.length;

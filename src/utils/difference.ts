@@ -1,11 +1,4 @@
-/**
- *
- * @param {*} bigSet
- * @param {*} subSet
- *
- * @returns {*[]}
- */
-export const difference = (bigSet, subSet) => {
+export const difference = (bigSet: any[], subSet: any[]) => {
   const arr = [];
   let idx = bigSet.length;
   while (idx--) {

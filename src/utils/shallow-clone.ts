@@ -1,5 +1,5 @@
 // NOT a deep version of clone
-export const shallowClone = (src) => {
+export const shallowClone = <T>(src: T): T => {
   if (typeof src === 'undefined') {
     return void 0;
   }

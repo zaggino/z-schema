@@ -1,4 +1,4 @@
-export const deepClone = (src) => {
+export const deepClone = <T>(src: T): T => {
   let vidx = 0;
   const visited = new Map();
   const cloned = [];

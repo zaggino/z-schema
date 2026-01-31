@@ -1,6 +1,1 @@
-/**
- * @param {object} obj
- *
- * @returns {string[]}
- */
-export const sortedKeys = (obj) => Object.keys(obj).sort();
+export const sortedKeys = (obj: Record<string, unknown>): string[] => Object.keys(obj).sort();
