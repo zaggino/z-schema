@@ -1,5 +1,18 @@
 # Changelog
 
+## [7.0.3](https://github.com/zaggino/z-schema/compare/v7.0.2...v7.0.3) (2026-01-31)
+
+
+### Bug Fixes
+
+* eslint config file extension ([eb6117d](https://github.com/zaggino/z-schema/commit/eb6117dbc632122215e8972f71ff3dc0d55535bb))
+* setup trusted publishing with npm ([02437ad](https://github.com/zaggino/z-schema/commit/02437adc10d8f05fe1f3bb51d166ca2b4492d7c1))
+
+
+### Miscellaneous Chores
+
+* release 7.0.3 ([296d202](https://github.com/zaggino/z-schema/commit/296d202b542ab1e3c4c6c5c8a81524a5856b76d1))
+
 ## [7.0.2](https://github.com/zaggino/z-schema/compare/v7.0.1...v7.0.2) (2026-01-31)
 
 
