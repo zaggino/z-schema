@@ -1,13 +1,13 @@
 export const deepClone = <T>(src: T): T => {
   let vidx = 0;
   const visited = new Map();
-  const cloned = [];
-  const cloneDeepInner = (src) => {
+  const cloned: any[] = [];
+  const cloneDeepInner = <T>(src: T): T => {
     if (typeof src !== 'object' || src === null) {
       return src;
     }
 
-    let res;
+    let res: any;
     let idx;
     const cidx = visited.get(src);
 
@@ -26,7 +26,7 @@ export const deepClone = <T>(src: T): T => {
     } else {
       res = {};
       cloned.push(res);
-      const keys = Object.keys(src);
+      const keys = Object.keys(src) as Array<keyof T>;
       idx = keys.length;
       while (idx--) {
         const key = keys[idx];

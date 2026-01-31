@@ -40,3 +40,7 @@ export const whatIs = (what: unknown): WHAT_IS => {
 
   return typeof what; // undefined, boolean, string, function
 };
+
+export function isObject(value: unknown): value is Record<any, any> {
+  return whatIs(value) === 'object';
+}

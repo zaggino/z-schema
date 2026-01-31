@@ -1,12 +1,9 @@
-// NOT a deep version of clone
 export const shallowClone = <T>(src: T): T => {
-  if (typeof src === 'undefined') {
-    return void 0;
-  }
-  if (typeof src !== 'object' || src === null) {
+  if (src == null || typeof src !== 'object') {
     return src;
   }
-  let res, idx;
+  let res: any;
+  let idx;
   if (Array.isArray(src)) {
     res = [];
     idx = src.length;
@@ -15,7 +12,7 @@ export const shallowClone = <T>(src: T): T => {
     }
   } else {
     res = {};
-    const keys = Object.keys(src);
+    const keys = Object.keys(src) as Array<keyof T>;
     idx = keys.length;
     while (idx--) {
       const key = keys[idx];

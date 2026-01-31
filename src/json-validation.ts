@@ -294,10 +294,7 @@ export const JsonValidators = {
       const dependencyName = keys[idx];
       if (json[dependencyName]) {
         const dependencyDefinition = schema.dependencies[dependencyName];
-        if (whatIs(dependencyDefinition) === 'object') {
-          // if dependency is a schema, validate against this schema
-          validate.call(this, report, dependencyDefinition, json);
-        } else {
+        if (Array.isArray(dependencyDefinition)) {
           // Array
           // if dependency is an array, object needs to have all properties in this array
           let idx2 = dependencyDefinition.length;
@@ -307,6 +304,9 @@ export const JsonValidators = {
               report.addError('OBJECT_DEPENDENCY_KEY', [requiredPropertyName, dependencyName], null, schema);
             }
           }
+        } else {
+          // if dependency is a schema, validate against this schema
+          validate.call(this, report, dependencyDefinition, json);
         }
       }
     }

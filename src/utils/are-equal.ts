@@ -1,4 +1,4 @@
-import { whatIs } from './what-is.js';
+import { isObject } from './what-is.js';
 import { sortedKeys } from './sorted-keys.js';
 
 interface AreEqualOptions {
@@ -47,7 +47,7 @@ export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptio
   }
 
   // both are objects, and:
-  if (whatIs(json1) === 'object' && whatIs(json2) === 'object') {
+  if (isObject(json1) && isObject(json2)) {
     // have the same set of property names; and
     const keys1 = sortedKeys(json1 as Record<string, unknown>);
     const keys2 = sortedKeys(json2 as Record<string, unknown>);
