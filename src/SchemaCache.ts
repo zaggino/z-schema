@@ -1,7 +1,7 @@
 import isequal from 'lodash.isequal';
 import { Report } from './Report.js';
-import * as SchemaValidation from './SchemaValidation.js';
-import * as Utils from './Utils.js';
+import { validateSchema } from './SchemaValidation.js';
+import { deepClone } from './Utils.js';
 
 const decodeJSONPointer = (str) => {
   // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07#section-3
@@ -119,7 +119,7 @@ export function getSchemaByReference(report, key) {
     }
   }
   // not found
-  const schema = Utils.deepClone(key);
+  const schema = deepClone(key);
   this.referenceCache.push([key, schema]);
   return schema;
 }
@@ -149,7 +149,7 @@ export function getSchemaByUri(report, uri, root) {
             // If custom validationOptions were provided to setRemoteReference(),
             // use them instead of the default options
             this.options = result.__$validationOptions || this.options;
-            SchemaValidation.validateSchema.call(this, remoteReport, result);
+            validateSchema.call(this, remoteReport, result);
           } finally {
             this.options = savedOptions;
           }

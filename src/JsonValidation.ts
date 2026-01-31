@@ -1,6 +1,6 @@
 import { FormatValidators } from './FormatValidators.js';
 import { Report } from './Report.js';
-import * as Utils from './Utils.js';
+import { whatIs, ucs2decode, isUniqueArray, difference, areEqual, shallowClone } from './Utils.js';
 
 const shouldSkipValidate = function (options, errors) {
   return (
@@ -25,7 +25,7 @@ export const JsonValidators = {
 
     const stringMultipleOf = String(schema.multipleOf);
     const scale = Math.pow(10, stringMultipleOf.length - stringMultipleOf.indexOf('.') - 1);
-    if (Utils.whatIs((json * scale) / (schema.multipleOf * scale)) !== 'integer') {
+    if (whatIs((json * scale) / (schema.multipleOf * scale)) !== 'integer') {
       report.addError('MULTIPLE_OF', [json, schema.multipleOf], null, schema);
     }
   },
@@ -79,7 +79,7 @@ export const JsonValidators = {
     if (typeof json !== 'string') {
       return;
     }
-    if (Utils.ucs2decode(json).length > schema.maxLength) {
+    if (ucs2decode(json).length > schema.maxLength) {
       report.addError('MAX_LENGTH', [json.length, schema.maxLength], null, schema);
     }
   },
@@ -91,7 +91,7 @@ export const JsonValidators = {
     if (typeof json !== 'string') {
       return;
     }
-    if (Utils.ucs2decode(json).length < schema.minLength) {
+    if (ucs2decode(json).length < schema.minLength) {
       report.addError('MIN_LENGTH', [json.length, schema.minLength], null, schema);
     }
   },
@@ -161,7 +161,7 @@ export const JsonValidators = {
     }
     if (schema.uniqueItems === true) {
       const matches = [];
-      if (Utils.isUniqueArray(json, matches) === false) {
+      if (isUniqueArray(json, matches) === false) {
         report.addError('ARRAY_UNIQUE', matches, null, schema);
       }
     }
@@ -171,7 +171,7 @@ export const JsonValidators = {
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_PROPERTIES_MAXIMUM'])) {
       return;
     }
-    if (Utils.whatIs(json) !== 'object') {
+    if (whatIs(json) !== 'object') {
       return;
     }
     const keysCount = Object.keys(json).length;
@@ -184,7 +184,7 @@ export const JsonValidators = {
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_PROPERTIES_MINIMUM'])) {
       return;
     }
-    if (Utils.whatIs(json) !== 'object') {
+    if (whatIs(json) !== 'object') {
       return;
     }
     const keysCount = Object.keys(json).length;
@@ -197,7 +197,7 @@ export const JsonValidators = {
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_MISSING_REQUIRED_PROPERTY'])) {
       return;
     }
-    if (Utils.whatIs(json) !== 'object') {
+    if (whatIs(json) !== 'object') {
       return;
     }
     let idx = schema.required.length;
@@ -225,7 +225,7 @@ export const JsonValidators = {
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_ADDITIONAL_PROPERTIES'])) {
       return;
     }
-    if (Utils.whatIs(json) !== 'object') {
+    if (whatIs(json) !== 'object') {
       return;
     }
     const properties = schema.properties !== undefined ? schema.properties : {};
@@ -238,7 +238,7 @@ export const JsonValidators = {
       // The property set from "patternProperties".
       const pp = Object.keys(patternProperties);
       // remove from "s" all elements of "p", if any;
-      s = Utils.difference(s, p);
+      s = difference(s, p);
       // for each regex in "pp", remove all elements of "s" which this regex matches.
       let idx = pp.length;
       while (idx--) {
@@ -276,7 +276,7 @@ export const JsonValidators = {
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_DEPENDENCY_KEY'])) {
       return;
     }
-    if (Utils.whatIs(json) !== 'object') {
+    if (whatIs(json) !== 'object') {
       return;
     }
 
@@ -288,7 +288,7 @@ export const JsonValidators = {
       const dependencyName = keys[idx];
       if (json[dependencyName]) {
         const dependencyDefinition = schema.dependencies[dependencyName];
-        if (Utils.whatIs(dependencyDefinition) === 'object') {
+        if (whatIs(dependencyDefinition) === 'object') {
           // if dependency is a schema, validate against this schema
           validate.call(this, report, dependencyDefinition, json);
         } else {
@@ -314,10 +314,10 @@ export const JsonValidators = {
       caseInsensitiveMatch = false,
       idx = schema.enum.length;
     while (idx--) {
-      if (Utils.areEqual(json, schema.enum[idx])) {
+      if (areEqual(json, schema.enum[idx])) {
         match = true;
         break;
-      } else if (Utils.areEqual(json, schema.enum[idx], { caseInsensitiveComparison: true })) {
+      } else if (areEqual(json, schema.enum[idx], { caseInsensitiveComparison: true })) {
         caseInsensitiveMatch = true;
       }
     }
@@ -333,7 +333,7 @@ export const JsonValidators = {
     if (shouldSkipValidate(this.validateOptions, ['INVALID_TYPE'])) {
       return;
     }
-    const jsonType = Utils.whatIs(json);
+    const jsonType = whatIs(json);
     if (typeof schema.type === 'string') {
       if (jsonType !== schema.type && (jsonType !== 'integer' || schema.type !== 'number')) {
         report.addError('INVALID_TYPE', [schema.type, jsonType], null, schema);
@@ -409,12 +409,12 @@ export const JsonValidators = {
       if (shouldSkipValidate(this.validateOptions, ['INVALID_FORMAT'])) {
         return;
       }
-      if (report.hasError('INVALID_TYPE', [schema.type, Utils.whatIs(json)])) {
+      if (report.hasError('INVALID_TYPE', [schema.type, whatIs(json)])) {
         return;
       }
       if (formatValidatorFn.length === 2) {
         // async - need to clone the path here, because it will change by the time async function reports back
-        const pathBeforeAsync = Utils.shallowClone(report.path);
+        const pathBeforeAsync = shallowClone(report.path);
         report.addAsyncTask(formatValidatorFn, [json], function (result) {
           if (result !== true) {
             const backup = report.path;
@@ -541,7 +541,7 @@ export function validate(report, schema, json) {
   report.commonErrorMessage = 'JSON_OBJECT_VALIDATION_FAILED';
 
   // check if schema is an object
-  const to = Utils.whatIs(schema);
+  const to = whatIs(schema);
   if (to !== 'object') {
     report.addError('SCHEMA_NOT_AN_OBJECT', [to], null, schema);
     return false;
@@ -582,7 +582,7 @@ export function validate(report, schema, json) {
   }
 
   // type checking first
-  const jsonType = Utils.whatIs(json);
+  const jsonType = whatIs(json);
   if (schema.type) {
     keys.splice(keys.indexOf('type'), 1);
     JsonValidators.type.call(this, report, schema, json);

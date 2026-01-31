@@ -1,6 +1,6 @@
 import get from 'lodash.get';
 import { Errors } from './Errors.js';
-import * as Utils from './Utils.js';
+import { isAbsoluteUri, whatIs, schemaSymbol, jsonSymbol } from './Utils.js';
 import { ZSchemaOptions } from './ZSchema.js';
 
 export interface SchemaError extends Error {
@@ -185,7 +185,7 @@ export class Report {
           .map(function (segment) {
             segment = segment.toString();
 
-            if (Utils.isAbsoluteUri(segment)) {
+            if (isAbsoluteUri(segment)) {
               return 'uri(' + segment + ')';
             }
 
@@ -285,8 +285,8 @@ export class Report {
 
     let idx = params.length;
     while (idx--) {
-      const whatIs = Utils.whatIs(params[idx]);
-      const param = whatIs === 'object' || whatIs === 'null' ? JSON.stringify(params[idx]) : params[idx];
+      const paramType = whatIs(params[idx]);
+      const param = paramType === 'object' || paramType === 'null' ? JSON.stringify(params[idx]) : params[idx];
       errorMessage = errorMessage.replace('{' + idx + '}', param);
     }
 
@@ -298,8 +298,8 @@ export class Report {
       schemaId: this.getSchemaId(),
     };
 
-    err[Utils.schemaSymbol] = schema;
-    err[Utils.jsonSymbol] = this.getJson();
+    err[schemaSymbol] = schema;
+    err[jsonSymbol] = this.getJson();
 
     if (schema && typeof schema === 'string') {
       err.description = schema;

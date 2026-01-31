@@ -1,16 +1,16 @@
 import { Report } from './Report.js';
 import { getSchemaByUri, checkCacheForUri, cacheSchemaByUri, removeFromCacheByUri } from './SchemaCache.js';
-import * as Utils from './Utils.js';
+import { isAbsoluteUri, isRelativeUri } from './Utils.js';
 
 const mergeReference = (scope, ref) => {
-  if (Utils.isAbsoluteUri(ref)) {
+  if (isAbsoluteUri(ref)) {
     return ref;
   }
 
   let joinedScope = scope.join('');
-  const isScopeAbsolute = Utils.isAbsoluteUri(joinedScope);
-  const isScopeRelative = Utils.isRelativeUri(joinedScope);
-  const isRefRelative = Utils.isRelativeUri(ref);
+  const isScopeAbsolute = isAbsoluteUri(joinedScope);
+  const isScopeRelative = isRelativeUri(joinedScope);
+  const isRefRelative = isRelativeUri(ref);
   let toRemove;
 
   if (isScopeAbsolute && isRefRelative) {
@@ -242,7 +242,7 @@ export function compileSchema(report, schema) {
 
     if (!response) {
       const hasNotValid = report.hasError('REMOTE_NOT_VALID', [refObj.ref]);
-      const isAbsolute = Utils.isAbsoluteUri(refObj.ref);
+      const isAbsolute = isAbsoluteUri(refObj.ref);
       let isDownloaded = false;
       const ignoreUnresolvableRemotes = this.options.ignoreUnresolvableReferences === true;
 

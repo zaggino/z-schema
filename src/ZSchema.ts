@@ -1,11 +1,11 @@
 import get from 'lodash.get';
 import { Report, SchemaError, SchemaErrorDetail } from './Report.js';
 import { FormatValidators } from './FormatValidators.js';
-import * as JsonValidation from './JsonValidation.js';
-import * as SchemaCache from './SchemaCache.js';
-import * as SchemaCompilation from './SchemaCompilation.js';
-import * as SchemaValidation from './SchemaValidation.js';
-import * as Utils from './Utils.js';
+import { validate as validateJson } from './JsonValidation.js';
+import { getSchema, cacheSchemaByUri, getRemotePath } from './SchemaCache.js';
+import { compileSchema } from './SchemaCompilation.js';
+import { validateSchema } from './SchemaValidation.js';
+import { shallowClone, deepClone, whatIs, schemaSymbol, jsonSymbol } from './Utils.js';
 import Draft4Schema from './schemas/schema.json' with { type: 'json' };
 import Draft4HyperSchema from './schemas/hyper-schema.json' with { type: 'json' };
 import type { Errors } from './Errors.js';
@@ -83,13 +83,13 @@ const normalizeOptions = (options) => {
     while (idx--) {
       key = keys[idx];
       if (options[key] === undefined) {
-        options[key] = Utils.shallowClone(defaultOptions[key]);
+        options[key] = shallowClone(defaultOptions[key]);
       }
     }
 
     normalized = options;
   } else {
-    normalized = Utils.shallowClone(defaultOptions);
+    normalized = shallowClone(defaultOptions);
   }
 
   if (normalized.strictMode === true) {
@@ -176,7 +176,7 @@ export class ZSchema {
   }
 
   public static getDefaultOptions(): ZSchemaOptions {
-    return Utils.deepClone(defaultOptions);
+    return deepClone(defaultOptions);
   }
 
   private cache: Record<string, string>;
@@ -200,7 +200,7 @@ export class ZSchema {
 
   /** Used by SchemaCache to break circular dependency with SchemaCompilation */
   _compileSchema(report: Report, schema: unknown): boolean {
-    return SchemaCompilation.compileSchema.call(this, report, schema);
+    return compileSchema.call(this, report, schema);
   }
 
   /**
@@ -214,11 +214,11 @@ export class ZSchema {
 
     const report = new Report(this.options);
 
-    schema = SchemaCache.getSchema.call(this, report, schema);
+    schema = getSchema.call(this, report, schema);
 
-    const compiled = SchemaCompilation.compileSchema.call(this, report, schema);
+    const compiled = compileSchema.call(this, report, schema);
     if (compiled) {
-      SchemaValidation.validateSchema.call(this, report, schema);
+      validateSchema.call(this, report, schema);
     }
 
     this.lastReport = report;
@@ -244,9 +244,11 @@ export class ZSchema {
 
     this.validateOptions = options;
 
-    const whatIs = Utils.whatIs(schema);
-    if (whatIs !== 'string' && whatIs !== 'object') {
-      const e = new Error('Invalid .validate call - schema must be a string or object but ' + whatIs + ' was passed!');
+    const schemaType = whatIs(schema);
+    if (schemaType !== 'string' && schemaType !== 'object') {
+      const e = new Error(
+        'Invalid .validate call - schema must be a string or object but ' + schemaType + ' was passed!'
+      );
       if (callback) {
         setTimeout(function () {
           callback(e, false);
@@ -262,17 +264,17 @@ export class ZSchema {
 
     if (typeof schema === 'string') {
       const schemaName = schema;
-      schema = SchemaCache.getSchema.call(this, report, schemaName);
+      schema = getSchema.call(this, report, schemaName);
       if (!schema) {
         throw new Error("Schema with id '" + schemaName + "' wasn't found in the validator cache!");
       }
     } else {
-      schema = SchemaCache.getSchema.call(this, report, schema);
+      schema = getSchema.call(this, report, schema);
     }
 
     let compiled = false;
     if (!foundError) {
-      compiled = SchemaCompilation.compileSchema.call(this, report, schema);
+      compiled = compileSchema.call(this, report, schema);
     }
     if (!compiled) {
       this.lastReport = report;
@@ -281,7 +283,7 @@ export class ZSchema {
 
     let validated = false;
     if (!foundError) {
-      validated = SchemaValidation.validateSchema.call(this, report, schema);
+      validated = validateSchema.call(this, report, schema);
     }
     if (!validated) {
       this.lastReport = report;
@@ -297,7 +299,7 @@ export class ZSchema {
     }
 
     if (!foundError) {
-      JsonValidation.validate.call(this, report, schema, json);
+      validateJson.call(this, report, schema, json);
     }
 
     if (callback) {
@@ -340,22 +342,22 @@ export class ZSchema {
     if (typeof schema === 'string') {
       schema = JSON.parse(schema);
     } else {
-      schema = Utils.deepClone(schema);
+      schema = deepClone(schema);
     }
 
     if (validationOptions) {
       schema.__$validationOptions = normalizeOptions(validationOptions);
     }
 
-    SchemaCache.cacheSchemaByUri.call(this, uri, schema);
+    cacheSchemaByUri.call(this, uri, schema);
   }
 
   compileSchema(schema) {
     const report = new Report(this.options);
 
-    schema = SchemaCache.getSchema.call(this, report, schema);
+    schema = getSchema.call(this, report, schema);
 
-    SchemaCompilation.compileSchema.call(this, report, schema);
+    compileSchema.call(this, report, schema);
 
     this.lastReport = report;
     return report.isValid();
@@ -385,7 +387,7 @@ export class ZSchema {
     const missingRemoteReferences = [];
     let idx = missingReferences.length;
     while (idx--) {
-      const remoteReference = SchemaCache.getRemotePath(missingReferences[idx]);
+      const remoteReference = getRemotePath(missingReferences[idx]);
       if (remoteReference && missingRemoteReferences.indexOf(remoteReference) === -1) {
         missingRemoteReferences.push(remoteReference);
       }
@@ -395,17 +397,17 @@ export class ZSchema {
 
   getResolvedSchema(schema) {
     const report = new Report(this.options);
-    schema = SchemaCache.getSchema.call(this, report, schema);
+    schema = getSchema.call(this, report, schema);
 
     // clone before making any modifications
-    schema = Utils.deepClone(schema);
+    schema = deepClone(schema);
 
     const visited = [];
 
     // clean-up the schema and resolve references
     const cleanup = function (schema) {
       let key;
-      const typeOf = Utils.whatIs(schema);
+      const typeOf = whatIs(schema);
       if (typeOf !== 'object' && typeOf !== 'array') {
         return;
       }
@@ -466,7 +468,7 @@ export class ZSchema {
     ZSchema.schemaReader = schemaReader;
   }
 
-  static schemaSymbol = Utils.schemaSymbol;
+  static schemaSymbol = schemaSymbol;
 
-  static jsonSymbol = Utils.jsonSymbol;
+  static jsonSymbol = jsonSymbol;
 }
