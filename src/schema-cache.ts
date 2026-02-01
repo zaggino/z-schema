@@ -2,18 +2,25 @@ import isequal from 'lodash.isequal';
 import { Report } from './report.js';
 import { validateSchema } from './schema-validation.js';
 import { deepClone } from './utils/deep-clone.js';
+import { JsonSchemaInternal } from './json-schema.js';
+import { isObject } from './utils/what-is.js';
+import { ZSchema } from './z-schema.js';
 
-const decodeJSONPointer = (str) => {
+export type SchemaCacheStorage = Record<string, JsonSchemaInternal>;
+
+export type ReferenceSchemaCacheStorage = Array<any>;
+
+const decodeJSONPointer = (str: string) => {
   // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07#section-3
   return decodeURIComponent(str).replace(/~[0-1]/g, (x) => (x === '~1' ? '/' : '~'));
 };
 
-export const getRemotePath = (uri) => {
+export const getRemotePath = (uri: string) => {
   const io = uri.indexOf('#');
   return io === -1 ? uri : uri.slice(0, io);
 };
 
-const getQueryPath = (uri) => {
+const getQueryPath = (uri: string) => {
   const io = uri.indexOf('#');
   const res = io === -1 ? undefined : uri.slice(io + 1);
   // WARN: do not slice slash, #/ means take root and go down from it
@@ -21,7 +28,7 @@ const getQueryPath = (uri) => {
   return res;
 };
 
-const findId = (schema, id) => {
+const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaInternal | undefined => {
   // process only arrays and objects
   if (typeof schema !== 'object' || schema === null) {
     return;
@@ -47,15 +54,16 @@ const findId = (schema, id) => {
         return result;
       }
     }
-  } else {
-    const keys = Object.keys(schema);
+  }
+  if (isObject(schema)) {
+    const keys = Object.keys(schema) as Array<keyof JsonSchemaInternal>;
     idx = keys.length;
     while (idx--) {
       const k = keys[idx];
       if (k.indexOf('__$') === 0) {
         continue;
       }
-      result = findId(schema[k], id);
+      result = findId(schema[k] as JsonSchemaInternal, id);
       if (result) {
         return result;
       }
@@ -63,51 +71,52 @@ const findId = (schema, id) => {
   }
 };
 
-export function cacheSchemaByUri(cache: Record<string, string>, uri, schema) {
+export function cacheSchemaByUri(cache: SchemaCacheStorage, uri: string, schema: JsonSchemaInternal) {
   const remotePath = getRemotePath(uri);
   if (remotePath) {
     cache[remotePath] = schema;
   }
 }
 
-export function removeFromCacheByUri(cache: Record<string, string>, uri) {
+export function removeFromCacheByUri(cache: SchemaCacheStorage, uri: string) {
   const remotePath = getRemotePath(uri);
   if (remotePath) {
     delete cache[remotePath];
   }
 }
 
-export function checkCacheForUri(cache: Record<string, string>, uri) {
+export function checkCacheForUri(cache: SchemaCacheStorage, uri: string) {
   const remotePath = getRemotePath(uri);
   return remotePath ? cache[remotePath] != null : false;
 }
 
-export function getSchema(report, schema) {
-  if (typeof schema === 'object') {
-    schema = getSchemaByReference(this.referenceCache, report, schema);
+export function getSchema(this: ZSchema, report: Report, refOrSchema: string | JsonSchemaInternal) {
+  if (typeof refOrSchema === 'string') {
+    // ref input
+    refOrSchema = getSchemaByUri.call(this, report, refOrSchema);
+  } else if (typeof refOrSchema === 'object') {
+    // schema obj input
+    refOrSchema = getSchemaByReference(this.referenceCache, report, refOrSchema);
   }
-  if (typeof schema === 'string') {
-    schema = getSchemaByUri.call(this, report, schema);
-  }
-  return schema;
+  return refOrSchema;
 }
 
-type ReferenceCache = Array<[any, any]>;
+type ReferenceCache = Array<[JsonSchemaInternal, JsonSchemaInternal]>;
 
-function getSchemaByReference(referenceCache: ReferenceCache, report, key) {
+function getSchemaByReference(referenceCache: ReferenceCache, report: Report, schema: JsonSchemaInternal) {
   let i = referenceCache.length;
   while (i--) {
-    if (isequal(referenceCache[i][0], key)) {
+    if (isequal(referenceCache[i][0], schema)) {
       return referenceCache[i][1];
     }
   }
   // not found
-  const schema = deepClone(key);
-  referenceCache.push([key, schema]);
-  return schema;
+  const schemaClone = deepClone(schema);
+  referenceCache.push([schema, schemaClone]);
+  return schemaClone;
 }
 
-export function getSchemaByUri(report, uri, root) {
+export function getSchemaByUri(report: Report, uri: string, root?: JsonSchemaInternal) {
   const remotePath = getRemotePath(uri);
   const queryPath = getQueryPath(uri);
   let result = remotePath ? this.cache[remotePath] : root;

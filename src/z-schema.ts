@@ -2,7 +2,13 @@ import get from 'lodash.get';
 import { Report, SchemaError, SchemaErrorDetail } from './report.js';
 import { FormatValidatorFn, FormatValidators } from './format-validators.js';
 import { validate as validateJson } from './json-validation.js';
-import { getSchema, cacheSchemaByUri, getRemotePath } from './schema-cache.js';
+import {
+  getSchema,
+  cacheSchemaByUri,
+  getRemotePath,
+  SchemaCacheStorage,
+  ReferenceSchemaCacheStorage,
+} from './schema-cache.js';
 import { compileSchema } from './schema-compilation.js';
 import { validateSchema } from './schema-validation.js';
 import { shallowClone } from './utils/shallow-clone.js';
@@ -167,8 +173,8 @@ export class ZSchema {
   }
 
   public lastReport: Report | undefined;
-  protected cache: Record<string, string>;
-  protected referenceCache: Array<string>;
+  protected cache: SchemaCacheStorage;
+  protected referenceCache: ReferenceSchemaCacheStorage;
   protected validateOptions: ValidateOptions;
   options: ZSchemaOptions;
 
