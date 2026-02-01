@@ -3,7 +3,8 @@ import { Errors } from './errors.js';
 import { isAbsoluteUri } from './utils/is-absolute-uri.js';
 import { whatIs } from './utils/what-is.js';
 import { schemaSymbol, jsonSymbol } from './utils/symbols.js';
-import { ZSchemaOptions } from './z-schema.js';
+import { ValidateCallback, ZSchemaOptions } from './z-schema.js';
+import { JsonSchema } from './json-schema.js';
 
 export interface SchemaError extends Error {
   /**
@@ -43,7 +44,7 @@ export interface SchemaErrorDetail {
    * A JSON path indicating the location of the error.
    * Example: "#/projects/1"
    */
-  path: string | string[];
+  path: string | Array<string | number>;
   /**
    * The schema rule description, which is included for certain errors where
    * this information is useful (e.g. to describe a constraint).
@@ -84,7 +85,10 @@ export class Report {
   commonErrorMessage?: string;
   json?: unknown;
 
-  constructor(parentOrOptions, reportOptions?) {
+  constructor(zschemaOptions: ZSchemaOptions); // primary
+  constructor(parentReport: Report); // subreport
+  constructor(parentReport: Report, reportOptions: ReportOptions); // subreport with options
+  constructor(parentOrOptions: ZSchemaOptions | Report, reportOptions?: ReportOptions) {
     this.parentReport = parentOrOptions instanceof Report ? parentOrOptions : undefined;
 
     this.options = parentOrOptions instanceof Report ? parentOrOptions.options : parentOrOptions || {};
@@ -110,11 +114,15 @@ export class Report {
     return this.errors.length === 0;
   }
 
-  addAsyncTask(fn, args, asyncTaskResultProcessFn) {
-    this.asyncTasks.push([fn, args, asyncTaskResultProcessFn]);
+  addAsyncTask<FV, FN extends (...args: any[]) => FV>(
+    fn: FN,
+    args: Parameters<FN>,
+    asyncTaskResultProcessFn: (result: ReturnType<FN>) => void
+  ) {
+    this.asyncTasks.push([fn, args, asyncTaskResultProcessFn as TaskProcessFn]);
   }
 
-  getAncestor(id) {
+  getAncestor(id: string): Report | undefined {
     if (!this.parentReport) {
       return undefined;
     }
@@ -124,7 +132,7 @@ export class Report {
     return this.parentReport.getAncestor(id);
   }
 
-  processAsyncTasks(timeout, callback) {
+  processAsyncTasks(timeout: number | undefined, callback: ValidateCallback) {
     const validationTimeout = timeout || 2000;
     let tasksCount = this.asyncTasks.length;
     let idx = tasksCount;
@@ -138,7 +146,7 @@ export class Report {
       }, 0);
     };
 
-    const respond = (asyncTaskResultProcessFn: TaskProcessFn) => (asyncTaskResult) => {
+    const respond = (asyncTaskResultProcessFn: TaskProcessFn) => (asyncTaskResult: TaskResult) => {
       if (timedOut) {
         return;
       }
@@ -169,11 +177,8 @@ export class Report {
     }, validationTimeout);
   }
 
-  getPath(returnPathAsString) {
-    /**
-     * @type {string[]|string}
-     */
-    let path = [];
+  getPath(returnPathAsString?: boolean) {
+    let path: Array<string | number> = [];
     if (this.parentReport) {
       path = path.concat(this.parentReport.path);
     }
@@ -199,13 +204,13 @@ export class Report {
     return path;
   }
 
-  getSchemaId() {
+  getSchemaId(): string | null | undefined {
     if (!this.rootSchema) {
       return null;
     }
 
     // get the error path as an array
-    let path = [];
+    let path: Array<string | number> = [];
     if (this.parentReport) {
       path = path.concat(this.parentReport.path);
     }
@@ -224,17 +229,17 @@ export class Report {
     return this.rootSchema.id;
   }
 
-  hasError(errorCode, params) {
+  hasError(errCode: string, errParams: Array<any>) {
     let idx = this.errors.length;
     while (idx--) {
-      if (this.errors[idx].code === errorCode) {
+      if (this.errors[idx].code === errCode) {
         // assume match
         let match = true;
 
         // check the params too
         let idx2 = this.errors[idx].params.length;
         while (idx2--) {
-          if (this.errors[idx].params[idx2] !== params[idx2]) {
+          if (this.errors[idx].params[idx2] !== errParams[idx2]) {
             match = false;
           }
         }
@@ -248,11 +253,11 @@ export class Report {
     return false;
   }
 
-  addError(errorCode, params, subReports?, schema?) {
-    if (!errorCode) {
+  addError(errCode: string, errParams?: any[], subReports?: Report | Report[], schema?: JsonSchema) {
+    if (!errCode) {
       throw new Error('No errorCode passed into addError()');
     }
-    this.addCustomError(errorCode, Errors[errorCode], params, subReports, schema);
+    this.addCustomError(errCode, Errors[errCode], errParams, subReports, schema);
   }
 
   getJson() {
@@ -269,7 +274,7 @@ export class Report {
     errorCode: string,
     errorMessage: string,
     params: string[],
-    subReports?: Report[] | Report,
+    subReports?: Report | Report[],
     schema?: {
       title?: string;
       description?: string;

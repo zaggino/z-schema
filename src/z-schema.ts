@@ -117,7 +117,8 @@ const normalizeOptions = (options) => {
 export interface ZSchemaOptions {
   asyncTimeout?: number;
   forceAdditional?: boolean;
-  assumeAdditional?: boolean;
+  assumeAdditional?: boolean | string[];
+  enumCaseInsensitiveComparison?: boolean;
   forceItems?: boolean;
   forceMinItems?: boolean;
   forceMaxItems?: boolean;
@@ -143,7 +144,7 @@ export interface ValidateOptions {
   includeErrors?: Array<keyof typeof Errors>;
 }
 
-type ValidateCallback = (e: Error, valid: boolean) => void;
+export type ValidateCallback = (e: Error | SchemaErrorDetail[] | null, valid: boolean) => void;
 
 // a sync function that loads schemas for future use, for example from schemas directory, during server startup
 type SchemaReader = (uri: string) => unknown;
@@ -166,9 +167,9 @@ export class ZSchema {
   }
 
   public lastReport: Report | undefined;
-  private cache: Record<string, string>;
-  private referenceCache: Array<string>;
-  private validateOptions: ValidateOptions;
+  protected cache: Record<string, string>;
+  protected referenceCache: Array<string>;
+  protected validateOptions: ValidateOptions;
   options: ZSchemaOptions;
 
   constructor(options?: ZSchemaOptions) {

@@ -1,26 +1,35 @@
 import { FormatValidators } from './format-validators.js';
 import { Report } from './report.js';
-import { whatIs } from './utils/what-is.js';
+import { isObject, whatIs } from './utils/what-is.js';
 import { ucs2decode } from './utils/ucs2-decode.js';
 import { isUniqueArray } from './utils/is-unique-array.js';
 import { difference } from './utils/difference.js';
 import { areEqual } from './utils/are-equal.js';
 import { shallowClone } from './utils/shallow-clone.js';
-import { JsonSchemaInternal } from './json-schema.js';
+import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { ValidateOptions, ZSchema } from './z-schema.js';
 
-const shouldSkipValidate = function (options, errors) {
+const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
   return (
     options &&
     Array.isArray(options.includeErrors) &&
     options.includeErrors.length > 0 &&
-    !errors.some(function (err) {
-      return options.includeErrors.includes(err);
+    !errors.some(function (err: any) {
+      return options.includeErrors!.includes(err);
     })
   );
 };
 
-export const JsonValidators = {
-  multipleOf: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+type JsonValidatorFn = (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) => void;
+
+export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
+  id: () => {},
+  $ref: () => {},
+  $schema: () => {},
+  title: () => {},
+  description: () => {},
+  default: () => {},
+  multipleOf: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.1.2
     if (shouldSkipValidate(this.validateOptions, ['MULTIPLE_OF'])) {
       return;
@@ -31,11 +40,11 @@ export const JsonValidators = {
 
     const stringMultipleOf = String(schema.multipleOf);
     const scale = Math.pow(10, stringMultipleOf.length - stringMultipleOf.indexOf('.') - 1);
-    if (whatIs((json * scale) / (schema.multipleOf * scale)) !== 'integer') {
-      report.addError('MULTIPLE_OF', [json, schema.multipleOf], null, schema);
+    if (whatIs((json * scale) / (schema.multipleOf! * scale)) !== 'integer') {
+      report.addError('MULTIPLE_OF', [json, schema.multipleOf], undefined, schema);
     }
   },
-  maximum: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  maximum: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.2.2
     if (shouldSkipValidate(this.validateOptions, ['MAXIMUM', 'MAXIMUM_EXCLUSIVE'])) {
       return;
@@ -44,19 +53,19 @@ export const JsonValidators = {
       return;
     }
     if (schema.exclusiveMaximum !== true) {
-      if (json > schema.maximum) {
-        report.addError('MAXIMUM', [json, schema.maximum], null, schema);
+      if (json > schema.maximum!) {
+        report.addError('MAXIMUM', [json, schema.maximum], undefined, schema);
       }
     } else {
-      if (json >= schema.maximum) {
-        report.addError('MAXIMUM_EXCLUSIVE', [json, schema.maximum], null, schema);
+      if (json >= schema.maximum!) {
+        report.addError('MAXIMUM_EXCLUSIVE', [json, schema.maximum], undefined, schema);
       }
     }
   },
   exclusiveMaximum: function () {
     // covered in maximum
   },
-  minimum: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  minimum: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.2
     if (shouldSkipValidate(this.validateOptions, ['MINIMUM', 'MINIMUM_EXCLUSIVE'])) {
       return;
@@ -65,19 +74,19 @@ export const JsonValidators = {
       return;
     }
     if (schema.exclusiveMinimum !== true) {
-      if (json < schema.minimum) {
-        report.addError('MINIMUM', [json, schema.minimum], null, schema);
+      if (json < schema.minimum!) {
+        report.addError('MINIMUM', [json, schema.minimum], undefined, schema);
       }
     } else {
-      if (json <= schema.minimum) {
-        report.addError('MINIMUM_EXCLUSIVE', [json, schema.minimum], null, schema);
+      if (json <= schema.minimum!) {
+        report.addError('MINIMUM_EXCLUSIVE', [json, schema.minimum], undefined, schema);
       }
     }
   },
   exclusiveMinimum: function () {
     // covered in minimum
   },
-  maxLength: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  maxLength: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.1.2
     if (shouldSkipValidate(this.validateOptions, ['MAX_LENGTH'])) {
       return;
@@ -85,11 +94,11 @@ export const JsonValidators = {
     if (typeof json !== 'string') {
       return;
     }
-    if (ucs2decode(json).length > schema.maxLength) {
-      report.addError('MAX_LENGTH', [json.length, schema.maxLength], null, schema);
+    if (ucs2decode(json).length > schema.maxLength!) {
+      report.addError('MAX_LENGTH', [json.length, schema.maxLength], undefined, schema);
     }
   },
-  minLength: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  minLength: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.2.2
     if (shouldSkipValidate(this.validateOptions, ['MIN_LENGTH'])) {
       return;
@@ -97,11 +106,11 @@ export const JsonValidators = {
     if (typeof json !== 'string') {
       return;
     }
-    if (ucs2decode(json).length < schema.minLength) {
-      report.addError('MIN_LENGTH', [json.length, schema.minLength], null, schema);
+    if (ucs2decode(json).length < schema.minLength!) {
+      report.addError('MIN_LENGTH', [json.length, schema.minLength], undefined, schema);
     }
   },
-  pattern: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  pattern: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.3.2
     if (shouldSkipValidate(this.validateOptions, ['PATTERN'])) {
       return;
@@ -109,11 +118,11 @@ export const JsonValidators = {
     if (typeof json !== 'string') {
       return;
     }
-    if (RegExp(schema.pattern).test(json) === false) {
-      report.addError('PATTERN', [schema.pattern, json], null, schema);
+    if (RegExp(schema.pattern!).test(json) === false) {
+      report.addError('PATTERN', [schema.pattern, json], undefined, schema);
     }
   },
-  additionalItems: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  additionalItems: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.2
     if (shouldSkipValidate(this.validateOptions, ['ARRAY_ADDITIONAL_ITEMS'])) {
       return;
@@ -125,7 +134,7 @@ export const JsonValidators = {
     // the json is valid if its size is less than, or equal to, the size of "items".
     if (schema.additionalItems === false && Array.isArray(schema.items)) {
       if (json.length > schema.items.length) {
-        report.addError('ARRAY_ADDITIONAL_ITEMS', null, null, schema);
+        report.addError('ARRAY_ADDITIONAL_ITEMS', undefined, undefined, schema);
       }
     }
   },
@@ -133,7 +142,7 @@ export const JsonValidators = {
     /*report: Report, schema: JsonSchemaInternal, json: unknown*/
     // covered in additionalItems
   },
-  maxItems: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  maxItems: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.2.2
     if (shouldSkipValidate(this.validateOptions, ['ARRAY_LENGTH_LONG'])) {
       return;
@@ -141,11 +150,11 @@ export const JsonValidators = {
     if (!Array.isArray(json)) {
       return;
     }
-    if (json.length > schema.maxItems) {
-      report.addError('ARRAY_LENGTH_LONG', [json.length, schema.maxItems], null, schema);
+    if (json.length > schema.maxItems!) {
+      report.addError('ARRAY_LENGTH_LONG', [json.length, schema.maxItems], undefined, schema);
     }
   },
-  minItems: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  minItems: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.3.2
     if (shouldSkipValidate(this.validateOptions, ['ARRAY_LENGTH_SHORT'])) {
       return;
@@ -153,11 +162,11 @@ export const JsonValidators = {
     if (!Array.isArray(json)) {
       return;
     }
-    if (json.length < schema.minItems) {
-      report.addError('ARRAY_LENGTH_SHORT', [json.length, schema.minItems], null, schema);
+    if (json.length < schema.minItems!) {
+      report.addError('ARRAY_LENGTH_SHORT', [json.length, schema.minItems], undefined, schema);
     }
   },
-  uniqueItems: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  uniqueItems: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.4.2
     if (shouldSkipValidate(this.validateOptions, ['ARRAY_UNIQUE'])) {
       return;
@@ -166,72 +175,72 @@ export const JsonValidators = {
       return;
     }
     if (schema.uniqueItems === true) {
-      const matches = [];
+      const matches: any[] = [];
       if (isUniqueArray(json, matches) === false) {
-        report.addError('ARRAY_UNIQUE', matches, null, schema);
+        report.addError('ARRAY_UNIQUE', matches, undefined, schema);
       }
     }
   },
-  maxProperties: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  maxProperties: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.1.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_PROPERTIES_MAXIMUM'])) {
       return;
     }
-    if (whatIs(json) !== 'object') {
+    if (!isObject(json)) {
       return;
     }
     const keysCount = Object.keys(json).length;
-    if (keysCount > schema.maxProperties) {
-      report.addError('OBJECT_PROPERTIES_MAXIMUM', [keysCount, schema.maxProperties], null, schema);
+    if (keysCount > schema.maxProperties!) {
+      report.addError('OBJECT_PROPERTIES_MAXIMUM', [keysCount, schema.maxProperties], undefined, schema);
     }
   },
-  minProperties: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  minProperties: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.2.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_PROPERTIES_MINIMUM'])) {
       return;
     }
-    if (whatIs(json) !== 'object') {
+    if (!isObject(json)) {
       return;
     }
     const keysCount = Object.keys(json).length;
-    if (keysCount < schema.minProperties) {
-      report.addError('OBJECT_PROPERTIES_MINIMUM', [keysCount, schema.minProperties], null, schema);
+    if (keysCount < schema.minProperties!) {
+      report.addError('OBJECT_PROPERTIES_MINIMUM', [keysCount, schema.minProperties], undefined, schema);
     }
   },
-  required: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  required: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.3.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_MISSING_REQUIRED_PROPERTY'])) {
       return;
     }
-    if (whatIs(json) !== 'object') {
+    if (!isObject(json)) {
       return;
     }
-    let idx = schema.required.length;
+    let idx = schema.required!.length;
     while (idx--) {
-      const requiredPropertyName = schema.required[idx];
+      const requiredPropertyName = schema.required![idx];
       if (json[requiredPropertyName] === undefined) {
-        report.addError('OBJECT_MISSING_REQUIRED_PROPERTY', [requiredPropertyName], null, schema);
+        report.addError('OBJECT_MISSING_REQUIRED_PROPERTY', [requiredPropertyName], undefined, schema);
       }
     }
   },
-  additionalProperties: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  additionalProperties: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // covered in properties and patternProperties
     if (schema.properties === undefined && schema.patternProperties === undefined) {
       return JsonValidators.properties.call(this, report, schema, json);
     }
   },
-  patternProperties: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  patternProperties: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // covered in properties
     if (schema.properties === undefined) {
       return JsonValidators.properties.call(this, report, schema, json);
     }
   },
-  properties: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  properties: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_ADDITIONAL_PROPERTIES'])) {
       return;
     }
-    if (whatIs(json) !== 'object') {
+    if (!isObject(json)) {
       return;
     }
     const properties = schema.properties !== undefined ? schema.properties : {};
@@ -259,41 +268,43 @@ export const JsonValidators = {
       // Validation of the json succeeds if, after these two steps, set "s" is empty.
       if (s.length > 0) {
         // assumeAdditional can be an array of allowed properties
-        let idx3 = this.options.assumeAdditional.length;
-        if (idx3) {
-          while (idx3--) {
-            const io = s.indexOf(this.options.assumeAdditional[idx3]);
-            if (io !== -1) {
-              s.splice(io, 1);
+        if (Array.isArray(this.options.assumeAdditional)) {
+          let idx3 = this.options.assumeAdditional.length;
+          if (idx3) {
+            while (idx3--) {
+              const io = s.indexOf(this.options.assumeAdditional[idx3]);
+              if (io !== -1) {
+                s.splice(io, 1);
+              }
             }
           }
         }
         let idx4 = s.length;
         if (idx4) {
           while (idx4--) {
-            report.addError('OBJECT_ADDITIONAL_PROPERTIES', [s[idx4]], null, schema);
+            report.addError('OBJECT_ADDITIONAL_PROPERTIES', [s[idx4]], undefined, schema);
           }
         }
       }
     }
   },
-  dependencies: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  dependencies: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.5.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_DEPENDENCY_KEY'])) {
       return;
     }
-    if (whatIs(json) !== 'object') {
+    if (!isObject(json)) {
       return;
     }
 
-    const keys = Object.keys(schema.dependencies);
+    const keys = Object.keys(schema.dependencies!);
     let idx = keys.length;
 
     while (idx--) {
       // iterate all dependencies
       const dependencyName = keys[idx];
       if (json[dependencyName]) {
-        const dependencyDefinition = schema.dependencies[dependencyName];
+        const dependencyDefinition = schema.dependencies![dependencyName];
         if (Array.isArray(dependencyDefinition)) {
           // Array
           // if dependency is an array, object needs to have all properties in this array
@@ -301,7 +312,7 @@ export const JsonValidators = {
           while (idx2--) {
             const requiredPropertyName = dependencyDefinition[idx2];
             if (json[requiredPropertyName] === undefined) {
-              report.addError('OBJECT_DEPENDENCY_KEY', [requiredPropertyName, dependencyName], null, schema);
+              report.addError('OBJECT_DEPENDENCY_KEY', [requiredPropertyName, dependencyName], undefined, schema);
             }
           }
         } else {
@@ -311,19 +322,19 @@ export const JsonValidators = {
       }
     }
   },
-  enum: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  enum: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.1.2
     if (shouldSkipValidate(this.validateOptions, ['ENUM_CASE_MISMATCH', 'ENUM_MISMATCH'])) {
       return;
     }
     let match = false,
       caseInsensitiveMatch = false,
-      idx = schema.enum.length;
+      idx = schema.enum!.length;
     while (idx--) {
-      if (areEqual(json, schema.enum[idx])) {
+      if (areEqual(json, schema.enum![idx])) {
         match = true;
         break;
-      } else if (areEqual(json, schema.enum[idx], { caseInsensitiveComparison: true })) {
+      } else if (areEqual(json, schema.enum![idx], { caseInsensitiveComparison: true })) {
         caseInsensitiveMatch = true;
       }
     }
@@ -331,10 +342,10 @@ export const JsonValidators = {
     if (match === false) {
       const error =
         caseInsensitiveMatch && this.options.enumCaseInsensitiveComparison ? 'ENUM_CASE_MISMATCH' : 'ENUM_MISMATCH';
-      report.addError(error, [json], null, schema);
+      report.addError(error, [json], undefined, schema);
     }
   },
-  type: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  type: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.2
     if (shouldSkipValidate(this.validateOptions, ['INVALID_TYPE'])) {
       return;
@@ -342,50 +353,50 @@ export const JsonValidators = {
     const jsonType = whatIs(json);
     if (typeof schema.type === 'string') {
       if (jsonType !== schema.type && (jsonType !== 'integer' || schema.type !== 'number')) {
-        report.addError('INVALID_TYPE', [schema.type, jsonType], null, schema);
+        report.addError('INVALID_TYPE', [schema.type, jsonType], undefined, schema);
       }
     } else {
-      if (schema.type.indexOf(jsonType) === -1 && (jsonType !== 'integer' || schema.type.indexOf('number') === -1)) {
-        report.addError('INVALID_TYPE', [schema.type, jsonType], null, schema);
+      if (schema.type!.indexOf(jsonType) === -1 && (jsonType !== 'integer' || schema.type!.indexOf('number') === -1)) {
+        report.addError('INVALID_TYPE', [schema.type, jsonType], undefined, schema);
       }
     }
   },
-  allOf: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  allOf: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
-    let idx = schema.allOf.length;
+    let idx = schema.allOf!.length;
     while (idx--) {
-      const validateResult = validate.call(this, report, schema.allOf[idx], json);
+      const validateResult = validate.call(this, report, schema.allOf![idx], json);
       if (this.options.breakOnFirstError && validateResult === false) {
         break;
       }
     }
   },
-  anyOf: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  anyOf: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.2
     const subReports = [];
     let passed = false;
-    let idx = schema.anyOf.length;
+    let idx = schema.anyOf!.length;
 
     while (idx-- && passed === false) {
       const subReport = new Report(report);
       subReports.push(subReport);
-      passed = validate.call(this, subReport, schema.anyOf[idx], json);
+      passed = validate.call(this, subReport, schema.anyOf![idx], json);
     }
 
     if (passed === false) {
       report.addError('ANY_OF_MISSING', undefined, subReports, schema);
     }
   },
-  oneOf: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  oneOf: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.2
     let passes = 0;
     const subReports = [];
-    let idx = schema.oneOf.length;
+    let idx = schema.oneOf!.length;
 
     while (idx--) {
       const subReport = new Report(report, { maxErrors: 1 });
       subReports.push(subReport);
-      if (validate.call(this, subReport, schema.oneOf[idx], json) === true) {
+      if (validate.call(this, subReport, schema.oneOf![idx], json) === true) {
         passes++;
       }
     }
@@ -393,14 +404,14 @@ export const JsonValidators = {
     if (passes === 0) {
       report.addError('ONE_OF_MISSING', undefined, subReports, schema);
     } else if (passes > 1) {
-      report.addError('ONE_OF_MULTIPLE', null, null, schema);
+      report.addError('ONE_OF_MULTIPLE', undefined, undefined, schema);
     }
   },
-  not: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  not: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
     const subReport = new Report(report);
-    if (validate.call(this, subReport, schema.not, json) === true) {
-      report.addError('NOT_PASSED', null, null, schema);
+    if (validate.call(this, subReport, schema.not!, json) === true) {
+      report.addError('NOT_PASSED', undefined, undefined, schema);
     }
   },
   definitions: function () {
@@ -408,9 +419,9 @@ export const JsonValidators = {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.2
     // nothing to do here
   },
-  format: function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+  format: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
-    const formatValidatorFn = FormatValidators[schema.format];
+    const formatValidatorFn = FormatValidators[schema.format!];
     if (typeof formatValidatorFn === 'function') {
       if (shouldSkipValidate(this.validateOptions, ['INVALID_FORMAT'])) {
         return;
@@ -425,23 +436,23 @@ export const JsonValidators = {
           if (result !== true) {
             const backup = report.path;
             report.path = pathBeforeAsync;
-            report.addError('INVALID_FORMAT', [schema.format, json], null, schema);
+            report.addError('INVALID_FORMAT', [schema.format, json], undefined, schema);
             report.path = backup;
           }
         });
       } else {
         // sync
         if (formatValidatorFn.call(this, json) !== true) {
-          report.addError('INVALID_FORMAT', [schema.format, json], null, schema);
+          report.addError('INVALID_FORMAT', [schema.format, json], undefined, schema);
         }
       }
     } else if (this.options.ignoreUnknownFormats !== true) {
-      report.addError('UNKNOWN_FORMAT', [schema.format], null, schema);
+      report.addError('UNKNOWN_FORMAT', [schema.format], undefined, schema);
     }
   },
-} as const;
+};
 
-const recurseArray = function (report: Report, schema: JsonSchemaInternal, json: Array<unknown>) {
+const recurseArray = function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: Array<unknown>) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.2
 
   let idx = json.length;
@@ -477,7 +488,7 @@ const recurseArray = function (report: Report, schema: JsonSchemaInternal, json:
   }
 };
 
-const recurseObject = function (report: Report, schema: JsonSchemaInternal, json: unknown) {
+const recurseObject = function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: Record<any, any>) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.3
 
   // If "additionalProperties" is absent, it is considered present with an empty schema as a value.
@@ -506,7 +517,7 @@ const recurseObject = function (report: Report, schema: JsonSchemaInternal, json
 
     // 1. If set "p" contains value "m", then the corresponding schema in "properties" is added to "s".
     if (p.indexOf(m) !== -1) {
-      s.push(schema.properties[m]);
+      s.push(schema.properties![m]);
     }
 
     // 2. For each regex in "pp", if it matches "m" successfully, the corresponding schema in "patternProperties" is added to "s".
@@ -514,7 +525,7 @@ const recurseObject = function (report: Report, schema: JsonSchemaInternal, json
     while (idx2--) {
       const regexString = pp[idx2];
       if (RegExp(regexString).test(m) === true) {
-        s.push(schema.patternProperties[regexString]);
+        s.push(schema.patternProperties![regexString]);
       }
     }
 
@@ -537,18 +548,18 @@ const recurseObject = function (report: Report, schema: JsonSchemaInternal, json
   }
 };
 
-export function validate(report: Report, schema: JsonSchemaInternal, json: unknown): boolean {
+export function validate(this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown): boolean {
   report.commonErrorMessage = 'JSON_OBJECT_VALIDATION_FAILED';
 
   // check if schema is an object
   const to = whatIs(schema);
   if (to !== 'object') {
-    report.addError('SCHEMA_NOT_AN_OBJECT', [to], null, schema);
+    report.addError('SCHEMA_NOT_AN_OBJECT', [to], undefined, schema);
     return false;
   }
 
   // check if schema is empty, everything is valid against empty schema
-  let keys = Object.keys(schema);
+  let keys = Object.keys(schema) as Array<keyof JsonSchema>;
   if (keys.length === 0) {
     return true;
   }
@@ -566,13 +577,13 @@ export function validate(report: Report, schema: JsonSchemaInternal, json: unkno
     let maxRefs = 99;
     while (schema.$ref && maxRefs > 0) {
       if (!schema.__$refResolved) {
-        report.addError('REF_UNRESOLVED', [schema.$ref], null, schema);
+        report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
         break;
       } else if (schema.__$refResolved === schema) {
         break;
       } else {
         schema = schema.__$refResolved;
-        keys = Object.keys(schema);
+        keys = Object.keys(schema) as Array<keyof JsonSchema>;
       }
       maxRefs--;
     }
@@ -582,7 +593,6 @@ export function validate(report: Report, schema: JsonSchemaInternal, json: unkno
   }
 
   // type checking first
-  const jsonType = whatIs(json);
   if (schema.type) {
     keys.splice(keys.indexOf('type'), 1);
     JsonValidators.type.call(this, report, schema, json);
@@ -603,9 +613,9 @@ export function validate(report: Report, schema: JsonSchemaInternal, json: unkno
   }
 
   if (report.errors.length === 0 || this.options.breakOnFirstError === false) {
-    if (jsonType === 'array') {
+    if (Array.isArray(json)) {
       recurseArray.call(this, report, schema, json);
-    } else if (jsonType === 'object') {
+    } else if (isObject(json)) {
       recurseObject.call(this, report, schema, json);
     }
   }
