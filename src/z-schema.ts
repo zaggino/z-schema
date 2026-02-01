@@ -1,6 +1,6 @@
 import get from 'lodash.get';
 import { Report, SchemaError, SchemaErrorDetail } from './report.js';
-import { FormatValidators } from './format-validators.js';
+import { FormatValidatorFn, FormatValidators } from './format-validators.js';
 import { validate as validateJson } from './json-validation.js';
 import { getSchema, cacheSchemaByUri, getRemotePath } from './schema-cache.js';
 import { compileSchema } from './schema-compilation.js';
@@ -149,36 +149,14 @@ type ValidateCallback = (e: Error, valid: boolean) => void;
 type SchemaReader = (uri: string) => unknown;
 
 export class ZSchema {
-  public lastReport: Report | undefined;
-
-  /**
-   * Register a custom format.
-   *
-   * @param name - name of the custom format
-   * @param validatorFunction - custom format validator function.
-   *   Returns `true` if `value` matches the custom format.
-   */
-  public static registerFormat(formatName: string, validatorFunction: (value: unknown) => boolean): void {
-    FormatValidators[formatName] = validatorFunction;
+  public static registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
+    FormatValidators[name] = validatorFunction;
   }
 
-  /**
-   * Unregister a format.
-   *
-   * @param name - name of the custom format
-   */
   public static unregisterFormat(name: string): void {
     delete FormatValidators[name];
   }
 
-  /**
-   * Get the list of all registered formats.
-   *
-   * Both the names of the burned-in formats and the custom format names are
-   * returned by this function.
-   *
-   * @returns {string[]} the list of all registered format names.
-   */
   public static getRegisteredFormats(): string[] {
     return Object.keys(FormatValidators);
   }
@@ -187,6 +165,7 @@ export class ZSchema {
     return deepClone(defaultOptions);
   }
 
+  public lastReport: Report | undefined;
   private cache: Record<string, string>;
   private referenceCache: Array<string>;
   private validateOptions: ValidateOptions;
@@ -357,7 +336,7 @@ export class ZSchema {
       schema.__$validationOptions = normalizeOptions(validationOptions);
     }
 
-    cacheSchemaByUri.call(this, uri, schema);
+    cacheSchemaByUri(this.cache, uri, schema);
   }
 
   compileSchema(schema) {

@@ -63,47 +63,28 @@ const findId = (schema, id) => {
   }
 };
 
-/**
- *
- * @param {*} uri
- * @param {*} schema
- *
- * @returns {void}
- */
-export function cacheSchemaByUri(uri, schema) {
+export function cacheSchemaByUri(cache: Record<string, string>, uri, schema) {
   const remotePath = getRemotePath(uri);
   if (remotePath) {
-    this.cache[remotePath] = schema;
+    cache[remotePath] = schema;
   }
 }
 
-/**
- *
- * @param {*} uri
- *
- * @returns {void}
- */
-export function removeFromCacheByUri(uri) {
+export function removeFromCacheByUri(cache: Record<string, string>, uri) {
   const remotePath = getRemotePath(uri);
   if (remotePath) {
-    delete this.cache[remotePath];
+    delete cache[remotePath];
   }
 }
 
-/**
- *
- * @param {*} uri
- *
- * @returns {boolean}
- */
-export function checkCacheForUri(uri) {
+export function checkCacheForUri(cache: Record<string, string>, uri) {
   const remotePath = getRemotePath(uri);
-  return remotePath ? this.cache[remotePath] != null : false;
+  return remotePath ? cache[remotePath] != null : false;
 }
 
 export function getSchema(report, schema) {
   if (typeof schema === 'object') {
-    schema = getSchemaByReference.call(this, report, schema);
+    schema = getSchemaByReference(this.referenceCache, report, schema);
   }
   if (typeof schema === 'string') {
     schema = getSchemaByUri.call(this, report, schema);
@@ -111,16 +92,18 @@ export function getSchema(report, schema) {
   return schema;
 }
 
-export function getSchemaByReference(report, key) {
-  let i = this.referenceCache.length;
+type ReferenceCache = Array<[any, any]>;
+
+function getSchemaByReference(referenceCache: ReferenceCache, report, key) {
+  let i = referenceCache.length;
   while (i--) {
-    if (isequal(this.referenceCache[i][0], key)) {
-      return this.referenceCache[i][1];
+    if (isequal(referenceCache[i][0], key)) {
+      return referenceCache[i][1];
     }
   }
   // not found
   const schema = deepClone(key);
-  this.referenceCache.push([key, schema]);
+  referenceCache.push([key, schema]);
   return schema;
 }
 

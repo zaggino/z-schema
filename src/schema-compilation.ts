@@ -188,7 +188,7 @@ export function compileSchema(report: Report, schema: JsonSchemaInternal) {
   }
 
   // if we have an id than it should be cached already (if this instance has compiled it)
-  if (schema.__$compiled && schema.id && checkCacheForUri.call(this, schema.id) === false) {
+  if (schema.__$compiled && schema.id && checkCacheForUri(this.cache, schema.id) === false) {
     schema.__$compiled = undefined;
   }
 
@@ -199,7 +199,7 @@ export function compileSchema(report: Report, schema: JsonSchemaInternal) {
 
   if (schema.id && typeof schema.id === 'string') {
     // add this to our schemaCache (before compilation in case we have references including id)
-    cacheSchemaByUri.call(this, schema.id, schema);
+    cacheSchemaByUri(this.cache, schema.id, schema);
   }
 
   // this method can be called recursively, so we need to remember our root
@@ -251,7 +251,7 @@ export function compileSchema(report: Report, schema: JsonSchemaInternal) {
       if (isAbsolute) {
         // we shouldn't add UNRESOLVABLE_REFERENCE for schemas we already have downloaded
         // and set through setRemoteReference method
-        isDownloaded = checkCacheForUri.call(this, refObj.ref);
+        isDownloaded = checkCacheForUri(this.cache, refObj.ref);
       }
 
       if (hasNotValid) {
@@ -282,7 +282,7 @@ export function compileSchema(report: Report, schema: JsonSchemaInternal) {
   } else {
     if (schema.id && typeof schema.id === 'string') {
       // remove this schema from schemaCache because it failed to compile
-      removeFromCacheByUri.call(this, schema.id);
+      removeFromCacheByUri(this.cache, schema.id);
     }
   }
 
