@@ -186,18 +186,25 @@ export class ZSchema {
     this.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', Draft4HyperSchema, metaschemaOptions);
   }
 
-  validateSchema(schema: JsonSchema): boolean {
-    if (Array.isArray(schema) && schema.length === 0) {
+  validateSchema(schemaOrArr: JsonSchema | JsonSchema[]): boolean {
+    if (Array.isArray(schemaOrArr) && schemaOrArr.length === 0) {
       throw new Error('.validateSchema was called with an empty array');
     }
 
     const report = new Report(this.options);
 
-    schema = this.scache.getSchema(report, schema)!;
-
-    const compiled = this.sc.compileSchema(report, schema);
-    if (compiled) {
-      this.sv.validateSchema(report, schema);
+    if (Array.isArray(schemaOrArr)) {
+      const arr = this.scache.getSchema(report, schemaOrArr)!;
+      const compiled = this.sc.compileSchema(report, arr);
+      if (compiled) {
+        this.sv.validateSchema(report, arr);
+      }
+    } else {
+      const schema = this.scache.getSchema(report, schemaOrArr)!;
+      const compiled = this.sc.compileSchema(report, schema);
+      if (compiled) {
+        this.sv.validateSchema(report, schema);
+      }
     }
 
     this.lastReport = report;

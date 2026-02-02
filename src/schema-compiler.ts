@@ -107,7 +107,7 @@ const mergeReference = (scope: string[], ref: string) => {
 export class SchemaCompiler {
   constructor(private validator: ZSchema) {}
 
-  compileSchema(report: Report, schema: JsonSchemaInternal) {
+  compileSchema(report: Report, schema: JsonSchemaInternal | JsonSchemaInternal[]) {
     report.commonErrorMessage = 'SCHEMA_COMPILATION_FAILED';
 
     // if schema is a string, assume it's a uri
