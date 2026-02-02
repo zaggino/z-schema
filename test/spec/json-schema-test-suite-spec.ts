@@ -2,7 +2,7 @@ import ZSchema from '../../src/index.ts';
 
 const [draft_04_schema_json, remotes_integer_json, remotes_subSchemas_json, remotes_folderInteger_json] = (
   await Promise.all([
-    import('../../src/schemas/schema.json'),
+    import('../../src/schemas/draft-04-schema.json'),
     import('../jsonSchemaTestSuite/remotes/integer.json'),
     import('../jsonSchemaTestSuite/remotes/subSchemas.json'),
     import('../jsonSchemaTestSuite/remotes/folder/folderInteger.json'),

@@ -1,5 +1,5 @@
 import validator from 'validator';
-import type { ZSchema } from './z-schema.js';
+import { sortedKeys } from './utils/json.js';
 
 const { isEmail, isIP, isURL } = validator;
 
@@ -134,16 +134,17 @@ const regexValidator: FormatValidatorFn = (input: unknown) => {
 
 const strictUriValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string' || isURL(uri);
 
-const uriValidator: FormatValidatorFn = function (this: ZSchema, uri: unknown) {
-  if (this.options && this.options.strictUris) {
-    return strictUriValidator(uri);
-  }
+const uriValidator: FormatValidatorFn = function (uri: unknown) {
   // https://github.com/zaggino/z-schema/issues/18
   // RegExp from http://tools.ietf.org/html/rfc3986#appendix-B
   return typeof uri !== 'string' || RegExp('^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?').test(uri);
 };
 
-export const FormatValidators: Record<string, FormatValidatorFn> = {
+export interface FormatValidatorsOptions {
+  strictUris?: boolean;
+}
+
+const inbuiltValidators: Record<string, FormatValidatorFn> = {
   date: dateValidator,
   'date-time': dateTimeValidator,
   email: emailValidator,
@@ -155,3 +156,36 @@ export const FormatValidators: Record<string, FormatValidatorFn> = {
   uri: uriValidator,
   'strict-uri': strictUriValidator,
 };
+
+const customValidators: Record<string, FormatValidatorFn> = {};
+
+export function getFormatValidators(options?: FormatValidatorsOptions): Record<string, FormatValidatorFn> {
+  return {
+    ...inbuiltValidators,
+    ...(options?.strictUris ? { uri: strictUriValidator } : {}),
+    ...customValidators,
+  };
+}
+
+export function registerFormat(name: string, validatorFunction: FormatValidatorFn) {
+  customValidators[name] = validatorFunction;
+}
+
+export function unregisterFormat(name: string) {
+  delete customValidators[name];
+}
+
+export function getSupportedFormats() {
+  return sortedKeys({
+    ...inbuiltValidators,
+    ...customValidators,
+  });
+}
+
+export function isFormatSupported(name: string): boolean {
+  return inbuiltValidators[name] != null || customValidators[name] != null;
+}
+
+export function getRegisteredFormats() {
+  return sortedKeys(customValidators);
+}

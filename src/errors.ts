@@ -1,3 +1,7 @@
+export type ErrorCode = keyof typeof Errors;
+
+export type ErrorParam = string | number | Array<string | number>;
+
 export const Errors = {
   INVALID_TYPE: 'Expected type {0} but found type {1}',
   INVALID_FORMAT: "Object didn't pass validation for format {0}: {1}",

@@ -7,7 +7,8 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "declaration": true,
-    "declarationDir": "./dist/types"
+    "declarationDir": "./dist/types",
+    "strict": true
   },
   "include": ["./src/**/*"]
 }

@@ -1,7 +1,10 @@
 import ZSchema from '../../src/index.ts';
 
 function setRemoteReferences(validator) {
-  validator.setRemoteReference('http://json-schema.org/draft-04/schema', import('../../src/schemas/schema.json'));
+  validator.setRemoteReference(
+    'http://json-schema.org/draft-04/schema',
+    import('../../src/schemas/draft-04-schema.json')
+  );
   validator.setRemoteReference(
     'http://localhost:1234/integer.json',
     import('../jsonSchemaTestSuite/remotes/integer.json')

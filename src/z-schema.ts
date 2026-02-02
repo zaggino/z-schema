@@ -1,25 +1,19 @@
 import get from 'lodash.get';
 import { Report, SchemaError, SchemaErrorDetail } from './report.js';
-import { FormatValidatorFn, FormatValidators } from './format-validators.js';
+import { FormatValidatorFn, getRegisteredFormats, registerFormat, unregisterFormat } from './format-validators.js';
 import { validate as validateJson } from './json-validation.js';
-import {
-  getSchema,
-  cacheSchemaByUri,
-  getRemotePath,
-  SchemaCacheStorage,
-  ReferenceSchemaCacheStorage,
-} from './schema-cache.js';
-import { compileSchema } from './schema-compilation.js';
-import { validateSchema } from './schema-validation.js';
-import { shallowClone } from './utils/shallow-clone.js';
-import { deepClone } from './utils/deep-clone.js';
+import { SchemaCache } from './schema-cache.js';
+import { SchemaCompiler } from './schema-compiler.js';
+import { SchemaValidator } from './schema-validator.js';
+import { shallowClone, deepClone } from './utils/clone.js';
 import { whatIs } from './utils/what-is.js';
 import { schemaSymbol, jsonSymbol } from './utils/symbols.js';
+import { getRemotePath } from './utils/uri.js';
 import type { Errors } from './errors.js';
 // import schemas so they don't have to be downloaded for validation purposes
-import type { JsonSchema } from './json-schema.js';
-import _Draft4Schema from './schemas/schema.json' with { type: 'json' };
-import _Draft4HyperSchema from './schemas/hyper-schema.json' with { type: 'json' };
+import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import _Draft4Schema from './schemas/draft-04-schema.json' with { type: 'json' };
+import _Draft4HyperSchema from './schemas/draft-04-hyper-schema.json' with { type: 'json' };
 
 const Draft4Schema: JsonSchema = _Draft4Schema;
 const Draft4HyperSchema: JsonSchema = _Draft4HyperSchema;
@@ -27,7 +21,7 @@ const Draft4HyperSchema: JsonSchema = _Draft4HyperSchema;
 /**
  * default options
  */
-const defaultOptions = {
+const defaultOptions: ZSchemaOptions = {
   // default timeout for all async tasks
   asyncTimeout: 2000,
   // force additionalProperties and additionalItems to be defined on "object" and "array" types
@@ -71,17 +65,17 @@ const defaultOptions = {
   // ignore unknown formats (do not report them as an error)
   ignoreUnknownFormats: false,
   // function to be called on every schema
-  customValidator: null,
+  customValidator: null as unknown as undefined,
 };
 
-const normalizeOptions = (options) => {
+const normalizeOptions = (options?: ZSchemaOptions) => {
   let normalized;
 
   // options
   if (typeof options === 'object') {
-    let keys = Object.keys(options),
-      idx = keys.length,
-      key;
+    let keys = Object.keys(options) as Array<keyof ZSchemaOptions>;
+    let idx = keys.length;
+    let key;
 
     // check that the options are correctly configured
     while (idx--) {
@@ -92,12 +86,12 @@ const normalizeOptions = (options) => {
     }
 
     // copy the default options into passed options
-    keys = Object.keys(defaultOptions);
+    keys = Object.keys(defaultOptions) as Array<keyof ZSchemaOptions>;
     idx = keys.length;
     while (idx--) {
       key = keys[idx];
       if (options[key] === undefined) {
-        options[key] = shallowClone(defaultOptions[key]);
+        (options as any)[key] = shallowClone(defaultOptions[key]);
       }
     }
 
@@ -153,36 +147,36 @@ export interface ValidateOptions {
 export type ValidateCallback = (e: Error | SchemaErrorDetail[] | null, valid: boolean) => void;
 
 // a sync function that loads schemas for future use, for example from schemas directory, during server startup
-type SchemaReader = (uri: string) => unknown;
+type SchemaReader = (uri: string) => JsonSchema;
 
 export class ZSchema {
   public static registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
-    FormatValidators[name] = validatorFunction;
+    return registerFormat(name, validatorFunction);
   }
 
   public static unregisterFormat(name: string): void {
-    delete FormatValidators[name];
+    return unregisterFormat(name);
   }
 
   public static getRegisteredFormats(): string[] {
-    return Object.keys(FormatValidators);
+    return getRegisteredFormats();
   }
 
   public static getDefaultOptions(): ZSchemaOptions {
     return deepClone(defaultOptions);
   }
 
-  public lastReport: Report | undefined;
-  protected cache: SchemaCacheStorage;
-  protected referenceCache: ReferenceSchemaCacheStorage;
-  protected validateOptions: ValidateOptions;
+  lastReport: Report | undefined;
+  scache: SchemaCache;
+  sc: SchemaCompiler;
+  sv: SchemaValidator;
+  validateOptions: ValidateOptions = {};
   options: ZSchemaOptions;
 
   constructor(options?: ZSchemaOptions) {
-    this.cache = {};
-    this.referenceCache = [];
-    this.validateOptions = {};
-
+    this.scache = new SchemaCache(this);
+    this.sc = new SchemaCompiler(this);
+    this.sv = new SchemaValidator(this);
     this.options = normalizeOptions(options);
 
     // Disable strict validation for the built-in schemas
@@ -192,42 +186,33 @@ export class ZSchema {
     this.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', Draft4HyperSchema, metaschemaOptions);
   }
 
-  /** Used by SchemaCache to break circular dependency with SchemaCompilation */
-  _compileSchema(report: Report, schema: unknown): boolean {
-    return compileSchema.call(this, report, schema);
-  }
-
-  /**
-   * @param schema - JSON object representing schema
-   * @returns {boolean} true if schema is valid.
-   */
-  validateSchema(schema: unknown): boolean {
+  validateSchema(schema: JsonSchemaInternal): boolean {
     if (Array.isArray(schema) && schema.length === 0) {
       throw new Error('.validateSchema was called with an empty array');
     }
 
     const report = new Report(this.options);
 
-    schema = getSchema.call(this, report, schema);
+    schema = this.scache.getSchema(report, schema)!;
 
-    const compiled = compileSchema.call(this, report, schema);
+    const compiled = this.sc.compileSchema(report, schema);
     if (compiled) {
-      validateSchema.call(this, report, schema);
+      this.sv.validateSchema(report, schema);
     }
 
     this.lastReport = report;
     return report.isValid();
   }
 
-  validate(json: unknown, schema: JsonSchema, options?: ValidateOptions, callback?: ValidateCallback): boolean;
-  validate(json: unknown, schema: JsonSchema, callback?): boolean;
+  validate(json: unknown, schema: JsonSchema, options?: ValidateOptions, callback?: ValidateCallback): void;
+  validate(json: unknown, schema: JsonSchema, callback?: ValidateCallback): void;
   validate(json: unknown, schema: JsonSchema): boolean;
   validate(
     json: unknown,
     schema: JsonSchema,
     options?: ValidateOptions | ValidateCallback,
     callback?: ValidateCallback
-  ): boolean {
+  ): boolean | void {
     if (typeof options === 'function') {
       callback = options;
       options = {};
@@ -258,17 +243,18 @@ export class ZSchema {
 
     if (typeof schema === 'string') {
       const schemaName = schema;
-      schema = getSchema.call(this, report, schemaName);
-      if (!schema) {
+      const _schema = this.scache.getSchema(report, schemaName);
+      if (!_schema) {
         throw new Error("Schema with id '" + schemaName + "' wasn't found in the validator cache!");
       }
+      schema = _schema;
     } else {
-      schema = getSchema.call(this, report, schema);
+      schema = this.scache.getSchema(report, schema)!;
     }
 
     let compiled = false;
     if (!foundError) {
-      compiled = compileSchema.call(this, report, schema);
+      compiled = this.sc.compileSchema(report, schema);
     }
     if (!compiled) {
       this.lastReport = report;
@@ -277,7 +263,7 @@ export class ZSchema {
 
     let validated = false;
     if (!foundError) {
-      validated = validateSchema.call(this, report, schema);
+      validated = this.sv.validateSchema(report, schema);
     }
     if (!validated) {
       this.lastReport = report;
@@ -313,13 +299,16 @@ export class ZSchema {
   /**
    * Returns an Error object for the most recent failed validation, or null if the validation was successful.
    */
-  getLastError(): SchemaError {
+  getLastError(): SchemaError | null {
+    if (!this.lastReport) {
+      throw new Error(`getLastError() called before doing any validation!`);
+    }
     if (this.lastReport.errors.length === 0) {
       return null;
     }
     const e: SchemaError = new Error();
     e.name = 'z-schema validation error';
-    e.message = this.lastReport.commonErrorMessage;
+    e.message = this.lastReport.commonErrorMessage!;
     e.details = this.lastReport.errors;
     return e;
   }
@@ -328,43 +317,45 @@ export class ZSchema {
    * Returns the error details for the most recent validation, or undefined if the validation was successful.
    * This is the same list as the SchemaError.details property.
    */
-  getLastErrors(): SchemaErrorDetail[] {
+  getLastErrors(): SchemaErrorDetail[] | null {
     return this.lastReport && this.lastReport.errors.length > 0 ? this.lastReport.errors : null;
   }
 
-  setRemoteReference(uri, schema, validationOptions) {
+  setRemoteReference(uri: string, schema: string | JsonSchema, validationOptions: ZSchemaOptions) {
+    let _schema: JsonSchemaInternal;
+
     if (typeof schema === 'string') {
-      schema = JSON.parse(schema);
+      _schema = JSON.parse(schema);
     } else {
-      schema = deepClone(schema);
+      _schema = deepClone(schema);
     }
 
     if (validationOptions) {
-      schema.__$validationOptions = normalizeOptions(validationOptions);
+      _schema.__$validationOptions = normalizeOptions(validationOptions);
     }
 
-    cacheSchemaByUri(this.cache, uri, schema);
+    this.scache.cacheSchemaByUri(uri, _schema);
   }
 
-  compileSchema(schema) {
+  compileSchema(schema: JsonSchema) {
     const report = new Report(this.options);
 
-    schema = getSchema.call(this, report, schema);
+    schema = this.scache.getSchema(report, schema)!;
 
-    compileSchema.call(this, report, schema);
+    this.sc.compileSchema(report, schema);
 
     this.lastReport = report;
     return report.isValid();
   }
 
-  getMissingReferences(arr?) {
-    arr = arr || this.lastReport.errors;
-    let res = [],
-      idx = arr.length;
+  getMissingReferences(arr?: SchemaErrorDetail[]) {
+    arr = arr || this.lastReport?.errors || [];
+    let res: string[] = [];
+    let idx = arr.length;
     while (idx--) {
       const error = arr[idx];
       if (error.code === 'UNRESOLVABLE_REFERENCE') {
-        const reference = error.params[0];
+        const reference = error.params[0] as string;
         if (res.indexOf(reference) === -1) {
           res.push(reference);
         }
@@ -389,17 +380,20 @@ export class ZSchema {
     return missingRemoteReferences;
   }
 
-  getResolvedSchema(schema) {
+  getResolvedSchema(schema: JsonSchemaInternal): JsonSchema {
     const report = new Report(this.options);
-    schema = getSchema.call(this, report, schema);
+    schema = this.scache.getSchema(report, schema)!;
 
     // clone before making any modifications
     schema = deepClone(schema);
 
-    const visited = [];
+    const visited: JsonSchemaInternalCleanup[] = [];
 
     // clean-up the schema and resolve references
-    const cleanup = function (schema) {
+    interface JsonSchemaInternalCleanup extends JsonSchemaInternal {
+      ___$visited?: boolean;
+    }
+    const cleanup = function (schema: JsonSchemaInternalCleanup) {
       let key;
       const typeOf = whatIs(schema);
       if (typeOf !== 'object' && typeOf !== 'array') {
@@ -420,16 +414,16 @@ export class ZSchema {
         delete schema.__$refResolved;
         for (key in from) {
           if (Object.prototype.hasOwnProperty.call(from, key)) {
-            to[key] = from[key];
+            (to as any)[key] = (from as any)[key];
           }
         }
       }
       for (key in schema) {
         if (Object.prototype.hasOwnProperty.call(schema, key)) {
           if (key.indexOf('__$') === 0) {
-            delete schema[key];
+            delete (schema as any)[key];
           } else {
-            cleanup(schema[key]);
+            cleanup((schema as any)[key]);
           }
         }
       }
@@ -450,7 +444,7 @@ export class ZSchema {
 
   static schemaReader: SchemaReader;
 
-  setSchemaReader(schemaReader) {
+  setSchemaReader(schemaReader: SchemaReader) {
     return ZSchema.setSchemaReader(schemaReader);
   }
 
@@ -458,7 +452,7 @@ export class ZSchema {
     return ZSchema.schemaReader;
   }
 
-  static setSchemaReader(schemaReader) {
+  static setSchemaReader(schemaReader: SchemaReader) {
     ZSchema.schemaReader = schemaReader;
   }
 

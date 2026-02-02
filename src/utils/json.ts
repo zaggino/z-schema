@@ -1,5 +1,4 @@
 import { isObject } from './what-is.js';
-import { sortedKeys } from './sorted-keys.js';
 
 interface AreEqualOptions {
   caseInsensitiveComparison?: boolean;
@@ -66,3 +65,10 @@ export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptio
 
   return false;
 };
+
+export const decodeJSONPointer = (str: string) => {
+  // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07#section-3
+  return decodeURIComponent(str).replace(/~[0-1]/g, (x) => (x === '~1' ? '/' : '~'));
+};
+
+export const sortedKeys = (obj: Record<string, unknown>): string[] => Object.keys(obj).sort();

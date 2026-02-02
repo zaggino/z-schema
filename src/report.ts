@@ -1,10 +1,10 @@
 import get from 'lodash.get';
-import { Errors } from './errors.js';
-import { isAbsoluteUri } from './utils/is-absolute-uri.js';
+import { ErrorCode, ErrorParam, Errors } from './errors.js';
 import { whatIs } from './utils/what-is.js';
 import { schemaSymbol, jsonSymbol } from './utils/symbols.js';
 import { ValidateCallback, ZSchemaOptions } from './z-schema.js';
-import { JsonSchema } from './json-schema.js';
+import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import { isAbsoluteUri } from './utils/uri.js';
 
 export interface SchemaError extends Error {
   /**
@@ -39,7 +39,7 @@ export interface SchemaErrorDetail {
    * Format parameters that can be used to format a custom error message.
    * Example: ["string","array"]
    */
-  params: Array<string>;
+  params: ErrorParam[];
   /**
    * A JSON path indicating the location of the error.
    * Example: "#/projects/1"
@@ -73,38 +73,24 @@ type TaskProcessFn = (result: ReturnType<TaskFn>) => void;
 type AsyncTask = [TaskFn, TaskFnArgs, TaskProcessFn];
 
 export class Report {
-  errors: SchemaErrorDetail[];
+  asyncTasks: AsyncTask[] = [];
+  commonErrorMessage?: string;
+  errors: SchemaErrorDetail[] = [];
+  json?: unknown;
+  path: Array<number | string> = [];
+  rootSchema?: JsonSchemaInternal;
+
   parentReport?: Report;
   options: ZSchemaOptions;
   reportOptions: ReportOptions;
-  path: Array<number | string>;
-  asyncTasks: AsyncTask[];
-  rootSchema?: {
-    id?: string;
-  };
-  commonErrorMessage?: string;
-  json?: unknown;
 
   constructor(zschemaOptions: ZSchemaOptions); // primary
   constructor(parentReport: Report); // subreport
   constructor(parentReport: Report, reportOptions: ReportOptions); // subreport with options
   constructor(parentOrOptions: ZSchemaOptions | Report, reportOptions?: ReportOptions) {
     this.parentReport = parentOrOptions instanceof Report ? parentOrOptions : undefined;
-
     this.options = parentOrOptions instanceof Report ? parentOrOptions.options : parentOrOptions || {};
-
     this.reportOptions = reportOptions || {};
-
-    this.errors = [];
-    /**
-     * @type {string[]}
-     */
-    this.path = [];
-    this.asyncTasks = [];
-
-    this.rootSchema = undefined;
-    this.commonErrorMessage = undefined;
-    this.json = undefined;
   }
 
   isValid(): boolean {
@@ -204,9 +190,9 @@ export class Report {
     return path;
   }
 
-  getSchemaId(): string | null | undefined {
+  getSchemaId(): string | undefined {
     if (!this.rootSchema) {
-      return null;
+      return undefined;
     }
 
     // get the error path as an array
@@ -253,14 +239,15 @@ export class Report {
     return false;
   }
 
-  addError(errCode: string, errParams?: any[], subReports?: Report | Report[], schema?: JsonSchema) {
+  addError(errCode: ErrorCode, errParams?: ErrorParam[], subReports?: Report | Report[], schema?: JsonSchema) {
     if (!errCode) {
       throw new Error('No errorCode passed into addError()');
     }
     this.addCustomError(errCode, Errors[errCode], errParams, subReports, schema);
   }
 
-  getJson() {
+  // this returns the root object being validated (the one passed into validator.validate)
+  getJson(): unknown {
     if (this.json) {
       return this.json;
     }
@@ -273,14 +260,11 @@ export class Report {
   addCustomError(
     errorCode: string,
     errorMessage: string,
-    params: string[],
+    params?: ErrorParam[],
     subReports?: Report | Report[],
-    schema?: {
-      title?: string;
-      description?: string;
-    }
+    schema?: JsonSchema
   ) {
-    if (this.errors.length >= this.reportOptions.maxErrors) {
+    if (typeof this.reportOptions.maxErrors === 'number' && this.errors.length >= this.reportOptions.maxErrors) {
       return;
     }
 
@@ -294,7 +278,7 @@ export class Report {
     while (idx--) {
       const paramType = whatIs(params[idx]);
       const param = paramType === 'object' || paramType === 'null' ? JSON.stringify(params[idx]) : params[idx];
-      errorMessage = errorMessage.replace('{' + idx + '}', param);
+      errorMessage = errorMessage.replace('{' + idx + '}', param.toString());
     }
 
     const err: SchemaErrorDetail = {
@@ -305,8 +289,9 @@ export class Report {
       schemaId: this.getSchemaId(),
     };
 
-    err[schemaSymbol] = schema;
-    err[jsonSymbol] = this.getJson();
+    // TODO v8: remove Symbol usage
+    (err as any)[schemaSymbol] = schema;
+    (err as any)[jsonSymbol] = this.getJson();
 
     if (schema && typeof schema === 'string') {
       err.description = schema;
