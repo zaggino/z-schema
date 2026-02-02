@@ -1,7 +1,7 @@
 import type { ZSchema } from './z-schema.js';
 import isequal from 'lodash.isequal';
 import { Report } from './report.js';
-import { findId, JsonSchemaInternal } from './json-schema.js';
+import { findId, JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import { getQueryPath, getRemotePath } from './utils/uri.js';
 import { deepClone } from './utils/clone.js';
 import { decodeJSONPointer } from './utils/json.js';
@@ -34,7 +34,13 @@ export class SchemaCache {
     return remotePath ? this.cache[remotePath] != null : false;
   }
 
-  getSchema(report: Report, refOrSchema: string | JsonSchemaInternal) {
+  getSchema(report: Report, refOrSchema: string): JsonSchemaInternal | undefined;
+  getSchema(report: Report, refOrSchema: JsonSchema): JsonSchemaInternal;
+  getSchema(report: Report, refOrSchema: JsonSchema[]): JsonSchemaInternal[];
+  getSchema(report: Report, refOrSchema: string | JsonSchema | JsonSchema[]) {
+    if (Array.isArray(refOrSchema)) {
+      return refOrSchema.map((i) => this.getSchema(report, i));
+    }
     if (typeof refOrSchema === 'string') {
       // ref input
       return this.getSchemaByUri(report, refOrSchema);
