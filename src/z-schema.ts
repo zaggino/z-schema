@@ -204,9 +204,9 @@ export class ZSchema {
     return report.isValid();
   }
 
-  validate(json: unknown, schema: JsonSchema | string, options?: ValidateOptions, callback?: ValidateCallback): void;
-  validate(json: unknown, schema: JsonSchema | string, callback?: ValidateCallback): void;
-  validate(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): boolean;
+  validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions, callback: ValidateCallback): void;
+  validate(json: unknown, schema: JsonSchema | string, callback: ValidateCallback): void;
+  validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions): boolean;
   validate(json: unknown, schema: JsonSchema | string): boolean;
   validate(
     json: unknown,
