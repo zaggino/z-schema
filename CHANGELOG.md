@@ -1,5 +1,18 @@
 # Changelog
 
+## [7.0.7](https://github.com/zaggino/z-schema/compare/v7.0.6...v7.0.7) (2026-02-02)
+
+
+### Bug Fixes
+
+* limit exported typings ([a9c775e](https://github.com/zaggino/z-schema/commit/a9c775eb1e66897d3861f5725f94d834a925d897))
+* validate input typings ([09c656a](https://github.com/zaggino/z-schema/commit/09c656a894e0dbb903cda6167aed3eb1f2b328c7))
+
+
+### Miscellaneous Chores
+
+* release 7.0.7 ([bb2c30d](https://github.com/zaggino/z-schema/commit/bb2c30d9ee95aaf130a485f8245bacda62fb5528))
+
 ## [7.0.6](https://github.com/zaggino/z-schema/compare/v7.0.5...v7.0.6) (2026-02-02)
 
 
