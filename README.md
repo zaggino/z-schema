@@ -10,7 +10,6 @@
 - [Usage](#usage)
 - [Features](#features)
 - [Options](#options)
-- [Benchmarks](#benchmarks)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
 
@@ -600,14 +599,6 @@ console.log(validator.getLastErrors());
 ```
 
 **Note:** before creating your own keywords you should consider all compatibility issues.
-
-## Benchmarks
-
-So how does it compare to version 2.x and others?
-
-**NOTE: these tests are purely orientational, they don't consider extra features any of the validator may support and implement**
-
-[rawgithub.com/zaggino/z-schema/master/benchmark/results.html](https://rawgithub.com/zaggino/z-schema/master/benchmark/results.html)
 
 ## Contributing:
 
