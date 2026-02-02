@@ -147,7 +147,7 @@ export interface ValidateOptions {
 export type ValidateCallback = (e: Error | SchemaErrorDetail[] | null, valid: boolean) => void;
 
 // a sync function that loads schemas for future use, for example from schemas directory, during server startup
-type SchemaReader = (uri: string) => JsonSchema;
+export type SchemaReader = (uri: string) => JsonSchema;
 
 export class ZSchema {
   public static registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
@@ -186,7 +186,7 @@ export class ZSchema {
     this.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', Draft4HyperSchema, metaschemaOptions);
   }
 
-  validateSchema(schema: JsonSchemaInternal): boolean {
+  validateSchema(schema: JsonSchema): boolean {
     if (Array.isArray(schema) && schema.length === 0) {
       throw new Error('.validateSchema was called with an empty array');
     }
@@ -381,7 +381,7 @@ export class ZSchema {
     return missingRemoteReferences;
   }
 
-  getResolvedSchema(schema: JsonSchemaInternal): JsonSchema {
+  getResolvedSchema(schema: JsonSchema): JsonSchema {
     const report = new Report(this.options);
     schema = this.scache.getSchema(report, schema)!;
 

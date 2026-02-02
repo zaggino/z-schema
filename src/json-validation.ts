@@ -19,7 +19,7 @@ const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
   );
 };
 
-type JsonValidatorFn = (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) => void;
+type JsonValidatorFn = (this: ZSchema, report: Report, schema: JsonSchema, json: unknown) => void;
 
 export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
   id: () => {},
