@@ -1,5 +1,19 @@
 # Changelog
 
+## [7.0.8](https://github.com/zaggino/z-schema/compare/v7.0.7...v7.0.8) (2026-02-02)
+
+
+### Bug Fixes
+
+* schema caching ([0886ec4](https://github.com/zaggino/z-schema/commit/0886ec4161d6d63c639460ff480ba5e45829a92e))
+* validate type signatures ([1c85ef7](https://github.com/zaggino/z-schema/commit/1c85ef78a2b7594450838fb85db73da8099e1c0e))
+* validateSchema type signatures ([f6a5617](https://github.com/zaggino/z-schema/commit/f6a5617685f60bdb69430088de83802cf1bdee80))
+
+
+### Miscellaneous Chores
+
+* release 7.0.8 ([0e0d991](https://github.com/zaggino/z-schema/commit/0e0d9918e12c2b3c168d9a37283642d288d17985))
+
 ## [7.0.7](https://github.com/zaggino/z-schema/compare/v7.0.6...v7.0.7) (2026-02-02)
 
 
