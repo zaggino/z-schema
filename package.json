@@ -1,6 +1,6 @@
 {
   "name": "z-schema",
-  "version": "7.0.6",
+  "version": "7.0.7",
   "engines": {
     "node": ">=22.0.0"
   },
