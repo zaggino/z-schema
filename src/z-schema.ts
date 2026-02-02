@@ -204,12 +204,13 @@ export class ZSchema {
     return report.isValid();
   }
 
-  validate(json: unknown, schema: JsonSchema, options?: ValidateOptions, callback?: ValidateCallback): void;
-  validate(json: unknown, schema: JsonSchema, callback?: ValidateCallback): void;
-  validate(json: unknown, schema: JsonSchema): boolean;
+  validate(json: unknown, schema: JsonSchema | string, options?: ValidateOptions, callback?: ValidateCallback): void;
+  validate(json: unknown, schema: JsonSchema | string, callback?: ValidateCallback): void;
+  validate(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): boolean;
+  validate(json: unknown, schema: JsonSchema | string): boolean;
   validate(
     json: unknown,
-    schema: JsonSchema,
+    schema: JsonSchema | string,
     options?: ValidateOptions | ValidateCallback,
     callback?: ValidateCallback
   ): boolean | void {
@@ -241,20 +242,20 @@ export class ZSchema {
     const report = new Report(this.options);
     report.json = json;
 
+    let _schema: JsonSchemaInternal;
     if (typeof schema === 'string') {
       const schemaName = schema;
-      const _schema = this.scache.getSchema(report, schemaName);
+      _schema = this.scache.getSchema(report, schemaName)!;
       if (!_schema) {
         throw new Error("Schema with id '" + schemaName + "' wasn't found in the validator cache!");
       }
-      schema = _schema;
     } else {
-      schema = this.scache.getSchema(report, schema)!;
+      _schema = this.scache.getSchema(report, schema)!;
     }
 
     let compiled = false;
     if (!foundError) {
-      compiled = this.sc.compileSchema(report, schema);
+      compiled = this.sc.compileSchema(report, _schema);
     }
     if (!compiled) {
       this.lastReport = report;
@@ -263,7 +264,7 @@ export class ZSchema {
 
     let validated = false;
     if (!foundError) {
-      validated = this.sv.validateSchema(report, schema);
+      validated = this.sv.validateSchema(report, _schema);
     }
     if (!validated) {
       this.lastReport = report;
@@ -271,15 +272,15 @@ export class ZSchema {
     }
 
     if (options.schemaPath) {
-      report.rootSchema = schema;
-      schema = get(schema, options.schemaPath);
-      if (!schema) {
+      report.rootSchema = _schema;
+      _schema = get(_schema, options.schemaPath);
+      if (!_schema) {
         throw new Error("Schema path '" + options.schemaPath + "' wasn't found in the schema!");
       }
     }
 
     if (!foundError) {
-      validateJson.call(this, report, schema, json);
+      validateJson.call(this, report, _schema, json);
     }
 
     if (callback) {
