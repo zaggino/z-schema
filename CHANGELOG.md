@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.0.9](https://github.com/zaggino/z-schema/compare/v7.0.8...v7.0.9) (2026-02-03)
+
+
+### Bug Fixes
+
+* drop dependency on lodash.get, fixes [#303](https://github.com/zaggino/z-schema/issues/303) ([8700310](https://github.com/zaggino/z-schema/commit/8700310e044e81a0f4fb1d3c2bf5cf82aa89a9f8))
+
 ## [7.0.8](https://github.com/zaggino/z-schema/compare/v7.0.7...v7.0.8) (2026-02-02)
 
 
