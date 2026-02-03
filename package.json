@@ -72,7 +72,6 @@
     "release:commit": "node -e \"const v=process.argv[1]; if(!v) throw new Error('Usage: npm run release:empty-commit -- <version>'); require('child_process').execSync(`git commit --allow-empty -m \\\"chore: release ${v}\\\" -m \\\"Release-As: ${v}\\\"`, {stdio:'inherit'});\" --"
   },
   "dependencies": {
-    "lodash.get": "^4.4.2",
     "lodash.isequal": "^4.5.0",
     "validator": "^13.7.0"
   },
@@ -88,7 +87,6 @@
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.3.0",
-    "@types/lodash.get": "^4.4.9",
     "@types/lodash.isequal": "^4.5.8",
     "@types/node": "^25.1.0",
     "@types/validator": "^13.15.10",

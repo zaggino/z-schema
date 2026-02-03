@@ -1,10 +1,10 @@
-import get from 'lodash.get';
 import { ErrorCode, ErrorParam, Errors } from './errors.js';
 import { whatIs } from './utils/what-is.js';
 import { schemaSymbol, jsonSymbol } from './utils/symbols.js';
 import { ValidateCallback, ZSchemaOptions } from './z-schema.js';
 import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import { isAbsoluteUri } from './utils/uri.js';
+import { get } from './utils/json.js';
 
 export interface SchemaError extends Error {
   /**

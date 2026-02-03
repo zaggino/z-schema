@@ -1,4 +1,3 @@
-import get from 'lodash.get';
 import { Report, SchemaError, SchemaErrorDetail } from './report.js';
 import { FormatValidatorFn, getRegisteredFormats, registerFormat, unregisterFormat } from './format-validators.js';
 import { validate as validateJson } from './json-validation.js';
@@ -14,6 +13,7 @@ import type { Errors } from './errors.js';
 import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import _Draft4Schema from './schemas/draft-04-schema.json' with { type: 'json' };
 import _Draft4HyperSchema from './schemas/draft-04-hyper-schema.json' with { type: 'json' };
+import { get } from './utils/json.js';
 
 const Draft4Schema: JsonSchema = _Draft4Schema;
 const Draft4HyperSchema: JsonSchema = _Draft4HyperSchema;

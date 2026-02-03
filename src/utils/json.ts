@@ -72,3 +72,10 @@ export const decodeJSONPointer = (str: string) => {
 };
 
 export const sortedKeys = (obj: Record<string, unknown>): string[] => Object.keys(obj).sort();
+
+export const get = (obj: any, path: string | Array<string | number>): any => {
+  if (typeof path === 'string') {
+    path = path.split('.');
+  }
+  return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj);
+};
