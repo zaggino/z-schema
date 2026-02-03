@@ -73,7 +73,7 @@
   },
   "dependencies": {
     "lodash.isequal": "^4.5.0",
-    "validator": "^13.7.0"
+    "validator": "^13.15.26"
   },
   "optionalDependencies": {
     "commander": "^14.0.2"
