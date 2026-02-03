@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.1.0](https://github.com/zaggino/z-schema/compare/v7.0.9...v7.1.0) (2026-02-03)
+
+
+### Features
+
+* support for unicode properties, fixes [#298](https://github.com/zaggino/z-schema/issues/298) ([b7906d7](https://github.com/zaggino/z-schema/commit/b7906d74a1ddedf51374976e5f0ccc7e5a6e5b49))
+
 ## [7.0.9](https://github.com/zaggino/z-schema/compare/v7.0.8...v7.0.9) (2026-02-03)
 
 
