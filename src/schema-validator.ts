@@ -6,6 +6,7 @@ import { shallowClone } from './utils/clone.js';
 import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import { isUniqueArray } from './utils/array.js';
 import { isFormatSupported } from './format-validators.js';
+import { compileSchemaRegex } from './utils/schema-regex.js';
 
 const SchemaValidators = {
   $ref: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -78,10 +79,11 @@ const SchemaValidators = {
     if (typeof schema.pattern !== 'string') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['pattern', 'string']);
     } else {
-      try {
-        RegExp(schema.pattern);
-      } catch (_e) {
-        report.addError('KEYWORD_PATTERN', ['pattern', schema.pattern]);
+      // Use shared regex compilation helper
+      // Import at top of file
+      const result = compileSchemaRegex(schema.pattern);
+      if (!result.ok) {
+        report.addError('KEYWORD_PATTERN', ['pattern', schema.pattern, result.error.message]);
       }
     }
   },
@@ -231,15 +233,15 @@ const SchemaValidators = {
       return;
     }
 
+    // Use shared regex compilation helper
     const keys = Object.keys(schema.patternProperties!);
     let idx = keys.length;
     while (idx--) {
       const key = keys[idx],
         val = schema.patternProperties![key];
-      try {
-        RegExp(key);
-      } catch (_e) {
-        report.addError('KEYWORD_PATTERN', ['patternProperties', key]);
+      const result = compileSchemaRegex(key);
+      if (!result.ok) {
+        report.addError('KEYWORD_PATTERN', ['patternProperties', key, result.error.message]);
       }
       report.path.push('patternProperties');
       report.path.push(key);
