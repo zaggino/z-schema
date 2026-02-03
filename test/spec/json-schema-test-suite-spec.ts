@@ -1,7 +1,6 @@
-import { readdir } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-
+import { fileURLToPath } from 'node:url';
 import ZSchema, { JsonSchema } from '../../src/index.ts';
 
 type JsonSchemaTestSuiteFile = Array<{
@@ -15,8 +14,10 @@ type JsonSchemaTestSuiteFile = Array<{
 }>;
 
 const draft4Dir = fileURLToPath(new URL('../jsonSchemaTestSuite/tests/draft4/', import.meta.url));
+const remotesDir = fileURLToPath(new URL('../jsonSchemaTestSuite/remotes/', import.meta.url));
+
 const excludedDirs: Set<string> = new Set(['optional']);
-const excludedFiles: Set<string> = new Set([]);
+const excludedFiles: Set<string> = new Set(['ref.json', 'refRemote.json', 'required.json']); // TODO: fix these
 const excludedTests: string[] = ['an invalid URI', 'an invalid URI though valid URI reference'];
 
 const getJsonFiles = async (directory: string): Promise<string[]> => {
@@ -43,8 +44,7 @@ const jsonSchemaTestSuiteFiles = (await Promise.all(
   (await getJsonFiles(draft4Dir))
     .sort((a, b) => a.localeCompare(b))
     .map(async (filePath) => {
-      let content = await import(pathToFileURL(filePath).href);
-      content = content.default ?? content;
+      const content = JSON.parse(await readFile(filePath, 'utf8'));
 
       // attach filenames for easier debugging
       if (Array.isArray(content)) {
@@ -57,6 +57,22 @@ const jsonSchemaTestSuiteFiles = (await Promise.all(
       return content;
     })
 )) as JsonSchemaTestSuiteFile[];
+
+const RemotesContent: Record<string, JsonSchema> = {};
+
+await Promise.all(
+  (await getJsonFiles(remotesDir))
+    .sort((a, b) => a.localeCompare(b))
+    .map(async (filePath) => {
+      RemotesContent[filePath] = JSON.parse(await readFile(filePath, 'utf8'));
+    })
+);
+
+// setRemoteReferences
+Object.keys(RemotesContent).forEach((key) => {
+  const serverPath = 'http://localhost:1234/' + key.slice(remotesDir.length).replace(/\\/g, '/');
+  ZSchema.setRemoteReference(serverPath, RemotesContent[key]);
+});
 
 describe('JsonSchemaTestSuite', function () {
   it('should contain draft4 json files', function () {

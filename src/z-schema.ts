@@ -14,6 +14,7 @@ import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import _Draft4Schema from './schemas/draft-04-schema.json' with { type: 'json' };
 import _Draft4HyperSchema from './schemas/draft-04-hyper-schema.json' with { type: 'json' };
 import { get } from './utils/json.js';
+import { copyProp } from './utils/properties.js';
 
 const Draft4Schema: JsonSchema = _Draft4Schema;
 const Draft4HyperSchema: JsonSchema = _Draft4HyperSchema;
@@ -329,7 +330,23 @@ export class ZSchema {
     return this.lastReport && this.lastReport.errors.length > 0 ? this.lastReport.errors : null;
   }
 
-  setRemoteReference(uri: string, schema: string | JsonSchema, validationOptions: ZSchemaOptions) {
+  public static setRemoteReference(uri: string, schema: string | JsonSchema, validationOptions?: ZSchemaOptions) {
+    let _schema: JsonSchemaInternal;
+
+    if (typeof schema === 'string') {
+      _schema = JSON.parse(schema);
+    } else {
+      _schema = deepClone(schema);
+    }
+
+    if (validationOptions) {
+      _schema.__$validationOptions = normalizeOptions(validationOptions);
+    }
+
+    SchemaCache.cacheSchemaByUri(uri, _schema);
+  }
+
+  setRemoteReference(uri: string, schema: string | JsonSchema, validationOptions?: ZSchemaOptions) {
     let _schema: JsonSchemaInternal;
 
     if (typeof schema === 'string') {
@@ -421,9 +438,7 @@ export class ZSchema {
         delete schema.$ref;
         delete schema.__$refResolved;
         for (key in from) {
-          if (Object.prototype.hasOwnProperty.call(from, key)) {
-            (to as any)[key] = (from as any)[key];
-          }
+          copyProp(from, to, key);
         }
       }
       for (key in schema) {

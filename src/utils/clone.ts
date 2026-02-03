@@ -1,3 +1,5 @@
+import { copyProp } from './properties.js';
+
 export const shallowClone = <T>(src: T): T => {
   if (src == null || typeof src !== 'object') {
     return src;
@@ -16,7 +18,7 @@ export const shallowClone = <T>(src: T): T => {
     idx = keys.length;
     while (idx--) {
       const key = keys[idx];
-      res[key] = src[key];
+      copyProp(src, res, key);
     }
   }
   return res;
@@ -53,8 +55,7 @@ export const deepClone = <T>(src: T): T => {
       const keys = Object.keys(src) as Array<keyof T>;
       idx = keys.length;
       while (idx--) {
-        const key = keys[idx];
-        res[key] = cloneDeepInner(src[key]);
+        copyProp(src, res, keys[idx], cloneDeepInner);
       }
     }
     return res;

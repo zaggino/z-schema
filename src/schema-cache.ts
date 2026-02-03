@@ -10,10 +10,18 @@ export type SchemaCacheStorage = Record<string, JsonSchemaInternal>;
 export type ReferenceSchemaCacheStorage = Array<[JsonSchemaInternal, JsonSchemaInternal]>;
 
 export class SchemaCache {
+  static global_cache: SchemaCacheStorage = {};
   cache: SchemaCacheStorage = {};
   referenceCache: ReferenceSchemaCacheStorage = [];
 
   constructor(private validator: ZSchema) {}
+
+  static cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
+    const remotePath = getRemotePath(uri);
+    if (remotePath) {
+      this.global_cache[remotePath] = schema;
+    }
+  }
 
   cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
     const remotePath = getRemotePath(uri);
