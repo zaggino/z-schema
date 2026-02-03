@@ -142,6 +142,7 @@ ZSchema.setSchemaReader(function (uri) {
 - [Turn on z-schema strict mode](#strictmode)
 - [Set validator to collect as many errors as possible](#breakonfirsterror)
 - [Report paths in errors as arrays so they can be processed easier](#reportpathasarray)
+- [Unicode Property Escapes Support](#unicode-property-escapes-support)
 
 ### Validate against subschema
 
@@ -253,6 +254,21 @@ var schema = {
 validator.validate(data, schema);
 // data.hello === "world"
 ```
+
+### Unicode Property Escapes Support
+
+Fully supports [Unicode property escapes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions/Unicode_property_escapes) in JSON Schema `pattern` values (e.g., `/\p{L}/u`). This allows you to write patterns that match Unicode character properties, such as letters, numbers, or scripts, provided your JavaScript environment supports them (Node.js ≥ 10, all modern browsers).
+
+**Example:**
+
+```json
+{
+  "type": "string",
+  "pattern": "^\\p{L}+$" // matches only Unicode letters
+}
+```
+
+z-schema will automatically use the `u` (Unicode) flag for all patterns containing Unicode property escapes, both in Node.js and browser environments. If your environment does not support Unicode property escapes, such patterns will be reported as invalid.
 
 ## Options
 

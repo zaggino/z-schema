@@ -5,6 +5,7 @@ import { difference, isUniqueArray } from './utils/array.js';
 import { areEqual } from './utils/json.js';
 import { shallowClone } from './utils/clone.js';
 import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import { compileSchemaRegex } from './utils/schema-regex.js';
 import type { ValidateOptions, ZSchema } from './z-schema.js';
 import { getFormatValidators } from './format-validators.js';
 
@@ -117,7 +118,13 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     if (typeof json !== 'string') {
       return;
     }
-    if (RegExp(schema.pattern!).test(json) === false) {
+    const result = compileSchemaRegex(schema.pattern!);
+    if (!result.ok) {
+      // Should not happen: schema should have been validated already
+      report.addError('PATTERN', [schema.pattern!, json, result.error.message], undefined, schema);
+      return;
+    }
+    if (!result.value.test(json)) {
       report.addError('PATTERN', [schema.pattern!, json], undefined, schema);
     }
   },
