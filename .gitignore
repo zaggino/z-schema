@@ -13,3 +13,5 @@
 /test/dist
 /src/schemas/*
 /.vscode
+/test/node_modules/
+/test/package-lock.json

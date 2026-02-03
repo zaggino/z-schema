@@ -1,24 +1,5 @@
 import ZSchema from '../../src/index.ts';
 
-function setRemoteReferences(validator) {
-  validator.setRemoteReference(
-    'http://json-schema.org/draft-04/schema',
-    import('../../src/schemas/draft-04-schema.json')
-  );
-  validator.setRemoteReference(
-    'http://localhost:1234/integer.json',
-    import('../jsonSchemaTestSuite/remotes/integer.json')
-  );
-  validator.setRemoteReference(
-    'http://localhost:1234/subSchemas.json',
-    import('../jsonSchemaTestSuite/remotes/subSchemas.json')
-  );
-  validator.setRemoteReference(
-    'http://localhost:1234/folder/folderInteger.json',
-    import('../jsonSchemaTestSuite/remotes/folder/folderInteger.json')
-  );
-}
-
 describe('Basic', function () {
   it('ZSchema constructor should take one argument - options', function () {
     expect(ZSchema.length).toBe(1);
@@ -26,7 +7,6 @@ describe('Basic', function () {
 
   it('Work in progress test...', function () {
     const validator = new ZSchema();
-    setRemoteReferences(validator);
 
     const schema = [
       {
