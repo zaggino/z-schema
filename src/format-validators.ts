@@ -1,7 +1,7 @@
-import validator from 'validator';
+import isEmailModule from 'validator/es/lib/isEmail.js';
+import isIPModule from 'validator/es/lib/isIP.js';
+import isURLModule from 'validator/es/lib/isURL.js';
 import { sortedKeys } from './utils/json.js';
-
-const { isEmail, isIP, isURL } = validator;
 
 export type FormatValidatorFn = (input: unknown) => boolean;
 
@@ -51,7 +51,7 @@ const emailValidator: FormatValidatorFn = (email: unknown) => {
   if (typeof email !== 'string') {
     return true;
   }
-  return isEmail(email, { require_tld: true });
+  return isEmailModule.default(email, { require_tld: true });
 };
 
 const hostnameValidator: FormatValidatorFn = (hostname: unknown) => {
@@ -110,14 +110,14 @@ const ipv4Validator: FormatValidatorFn = (ipv4: unknown) => {
   if (typeof ipv4 !== 'string') {
     return true;
   }
-  return isIP(ipv4, 4);
+  return isIPModule.default(ipv4, 4);
 };
 
 const ipv6Validator: FormatValidatorFn = (ipv6: unknown) => {
   if (typeof ipv6 !== 'string') {
     return true;
   }
-  return isIP(ipv6, 6);
+  return isIPModule.default(ipv6, 6);
 };
 
 const regexValidator: FormatValidatorFn = (input: unknown) => {
@@ -132,7 +132,7 @@ const regexValidator: FormatValidatorFn = (input: unknown) => {
   }
 };
 
-const strictUriValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string' || isURL(uri);
+const strictUriValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string' || isURLModule.default(uri);
 
 const uriValidator: FormatValidatorFn = function (uri: unknown) {
   // https://github.com/zaggino/z-schema/issues/18
