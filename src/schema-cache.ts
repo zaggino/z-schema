@@ -60,14 +60,18 @@ export class SchemaCache {
     throw new Error(`unexpected code reached`);
   }
 
-  fromCache(path: string) {
-    if (this.cache[path]) {
+  fromCache(path: string): JsonSchemaInternal | undefined {
+    let found = this.cache[path];
+    if (found) {
       return this.cache[path];
     }
-    if (SchemaCache.global_cache[path]) {
-      const schema = SchemaCache.global_cache[path];
-      schema.id ??= path;
-      return deepClone(schema);
+    const asClone = (s: JsonSchema) => {
+      s.id ??= path;
+      return deepClone(s);
+    };
+    found = SchemaCache.global_cache[path];
+    if (found) {
+      return asClone(found);
     }
     return undefined;
   }

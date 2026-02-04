@@ -1,5 +1,6 @@
 import { Reference } from './schema-compiler.js';
 import { isObject } from './utils/what-is.js';
+import { ZSchemaOptions } from './z-schema.js';
 
 export interface JsonSchema {
   $ref?: string;
@@ -47,7 +48,7 @@ export interface ZSchemaInternalProperties {
   __$refResolved?: JsonSchema;
   __$schemaResolved?: unknown;
   __$validated?: boolean;
-  __$validationOptions?: unknown;
+  __$validationOptions?: ZSchemaOptions;
   __$visited?: boolean;
 }
 

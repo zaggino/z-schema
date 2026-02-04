@@ -23,6 +23,7 @@ const Draft4HyperSchema: JsonSchema = _Draft4HyperSchema;
  * default options
  */
 const defaultOptions: ZSchemaOptions = {
+  version: 'draft-04',
   // default timeout for all async tasks
   asyncTimeout: 2000,
   // force additionalProperties and additionalItems to be defined on "object" and "array" types
@@ -116,6 +117,7 @@ const normalizeOptions = (options?: ZSchemaOptions) => {
 };
 
 export interface ZSchemaOptions {
+  version: 'draft-04' | 'none';
   asyncTimeout?: number;
   forceAdditional?: boolean;
   assumeAdditional?: boolean | string[];
@@ -179,12 +181,13 @@ export class ZSchema {
     this.sc = new SchemaCompiler(this);
     this.sv = new SchemaValidator(this);
     this.options = normalizeOptions(options);
+  }
 
-    // Disable strict validation for the built-in schemas
-    const metaschemaOptions = normalizeOptions({});
-
-    this.setRemoteReference('http://json-schema.org/draft-04/schema', Draft4Schema, metaschemaOptions);
-    this.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', Draft4HyperSchema, metaschemaOptions);
+  getDefaultSchemaId() {
+    if (this.options.version === 'draft-04') {
+      return 'http://json-schema.org/draft-04/schema#';
+    }
+    return undefined;
   }
 
   validateSchema(schemaOrArr: JsonSchema | JsonSchema[]): boolean {
@@ -483,3 +486,6 @@ export class ZSchema {
 
   static jsonSymbol = jsonSymbol;
 }
+
+ZSchema.setRemoteReference('http://json-schema.org/draft-04/schema', Draft4Schema, { version: 'none' });
+ZSchema.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', Draft4HyperSchema, { version: 'none' });
