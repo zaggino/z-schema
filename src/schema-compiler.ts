@@ -1,7 +1,7 @@
 import type { ZSchema } from './z-schema.js';
 import { JsonSchemaInternal } from './json-schema.js';
 import { Report } from './report.js';
-import { isAbsoluteUri, isRelativeUri } from './utils/uri.js';
+import { isAbsoluteUri } from './utils/uri.js';
 
 interface Id {
   id: string;
@@ -89,17 +89,14 @@ export const collectReferences = (
   let addedScope = false;
   const isRootScope = scope.length === 0;
   if (typeof obj.id === 'string' && (isRootScope || !hasRef)) {
-    if (scope.length > 0) {
-      scope.push('#' + obj.id);
-    } else {
-      scope.push(obj.id);
-    }
+    const base = scope.length > 0 ? scope[scope.length - 1] : undefined;
+    scope.push(resolveIdScope(base, obj.id));
     addedScope = true;
   }
 
   if (hasRef) {
     results.push({
-      ref: mergeReference(scope, obj.$ref),
+      ref: resolveReference(scope[scope.length - 1], obj.$ref),
       key: '$ref',
       obj: obj,
       path: path.slice(0),
@@ -107,7 +104,7 @@ export const collectReferences = (
   }
   if (typeof obj.$schema === 'string' && typeof obj.__$schemaResolved === 'undefined') {
     results.push({
-      ref: mergeReference(scope, obj.$schema),
+      ref: resolveReference(scope[scope.length - 1], obj.$schema),
       key: '$schema',
       obj: obj,
       path: path.slice(0),
@@ -143,41 +140,56 @@ export const collectReferences = (
   return results;
 };
 
-const mergeReference = (scope: string[], ref: string) => {
+const resolveReference = (base: string | undefined, ref: string) => {
   if (isAbsoluteUri(ref)) {
     return ref;
   }
 
-  let joinedScope = scope.join('');
+  const baseStr = base ?? '';
+
   if (ref[0] === '#') {
-    const hashIndex = joinedScope.indexOf('#');
-    if (hashIndex !== -1) {
-      joinedScope = joinedScope.slice(0, hashIndex);
-    }
-    return joinedScope + ref;
+    const hashIndex = baseStr.indexOf('#');
+    const baseNoFrag = hashIndex === -1 ? baseStr : baseStr.slice(0, hashIndex);
+    return baseNoFrag + ref;
   }
-  const isScopeAbsolute = isAbsoluteUri(joinedScope);
-  const isScopeRelative = isRelativeUri(joinedScope);
-  const isRefRelative = isRelativeUri(ref);
-  let toRemove;
 
-  if (isScopeAbsolute && isRefRelative) {
-    toRemove = joinedScope.match(/\/[^/]*$/);
-    if (toRemove) {
-      joinedScope = joinedScope.slice(0, toRemove.index! + 1);
-    }
-  } else if (isScopeRelative && isRefRelative) {
-    joinedScope = '';
-  } else {
-    toRemove = joinedScope.match(/[^#/]+$/);
-    if (toRemove) {
-      joinedScope = joinedScope.slice(0, toRemove.index);
+  if (!baseStr) {
+    return ref;
+  }
+
+  const hashIndex = baseStr.indexOf('#');
+  const baseNoFrag = hashIndex === -1 ? baseStr : baseStr.slice(0, hashIndex);
+
+  if (isAbsoluteUri(baseNoFrag)) {
+    try {
+      return new URL(ref, baseNoFrag).toString();
+    } catch {
+      // fall back to manual resolution below
     }
   }
 
-  let res = joinedScope + ref;
-  res = res.replace(/##/, '#');
-  return res;
+  let baseDir = baseNoFrag;
+  if (!baseDir.endsWith('/')) {
+    baseDir = baseDir.replace(/[^/]*$/, '');
+  }
+  return baseDir + ref;
+};
+
+const resolveIdScope = (base: string | undefined, id: string) => {
+  if (isAbsoluteUri(id)) {
+    return id;
+  }
+
+  const baseStr = base ?? '';
+
+  // Treat simple identifiers (no '/', '.', or '#') as same-document fragment ids
+  if (id[0] !== '#' && !id.includes('/') && !id.includes('.') && !id.includes('#')) {
+    const hashIndex = baseStr.indexOf('#');
+    const baseNoFrag = hashIndex === -1 ? baseStr : baseStr.slice(0, hashIndex);
+    return baseNoFrag + '#' + id;
+  }
+
+  return resolveReference(base, id);
 };
 
 export class SchemaCompiler {
