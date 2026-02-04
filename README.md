@@ -145,13 +145,6 @@ Big thanks to:
 	<tbody>
 		<tr>
             <td align="center">
-                <a href="https://github.com/zaggino">
-                    <img src="https://avatars.githubusercontent.com/u/1067319?v=4" width="100;" alt="zaggino"/>
-                    <br />
-                    <sub><b>Martin Zagora</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/sergey-shandar">
                     <img src="https://avatars.githubusercontent.com/u/902339?v=4" width="100;" alt="sergey-shandar"/>
                     <br />
@@ -186,8 +179,6 @@ Big thanks to:
                     <sub><b>Jason Oettinger</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/whitlockjc">
                     <img src="https://avatars.githubusercontent.com/u/98899?v=4" width="100;" alt="whitlockjc"/>
@@ -195,6 +186,8 @@ Big thanks to:
                     <sub><b>Jeremy Whitlock</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/epoberezkin">
                     <img src="https://avatars.githubusercontent.com/u/2769109?v=4" width="100;" alt="epoberezkin"/>
@@ -230,8 +223,6 @@ Big thanks to:
                     <sub><b>Marco Santarelli</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/Hirse">
                     <img src="https://avatars.githubusercontent.com/u/2564094?v=4" width="100;" alt="Hirse"/>
@@ -239,6 +230,8 @@ Big thanks to:
                     <sub><b>Jan Pilzer</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/geraintluff">
                     <img src="https://avatars.githubusercontent.com/u/1957191?v=4" width="100;" alt="geraintluff"/>
@@ -274,8 +267,6 @@ Big thanks to:
                     <sub><b>barrtender</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/RomanHotsiy">
                     <img src="https://avatars.githubusercontent.com/u/3975738?v=4" width="100;" alt="RomanHotsiy"/>
@@ -283,6 +274,8 @@ Big thanks to:
                     <sub><b>Roman Hotsiy</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/sauvainr">
                     <img src="https://avatars.githubusercontent.com/u/1715747?v=4" width="100;" alt="sauvainr"/>
@@ -318,8 +311,6 @@ Big thanks to:
                     <sub><b>José F. Romaniello</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/KEIII">
                     <img src="https://avatars.githubusercontent.com/u/1167833?v=4" width="100;" alt="KEIII"/>
@@ -327,6 +318,8 @@ Big thanks to:
                     <sub><b>Ivan Kasenkov</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/HanOterLin">
                     <img src="https://avatars.githubusercontent.com/u/21137108?v=4" width="100;" alt="HanOterLin"/>
