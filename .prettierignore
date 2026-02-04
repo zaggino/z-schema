@@ -1,5 +1,5 @@
 json-schema/
-test/jsonSchemaTestSuite/
+test/public/json-schema-test-suite/
 CHANGELOG.md
 node_modules/
 dist/

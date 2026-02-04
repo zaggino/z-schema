@@ -71,7 +71,7 @@ export default defineConfig([
     'dist/',
     'json-schema/',
     'specs/',
-    'test/jsonSchemaTestSuite/',
+    'test/public/json-schema-test-suite/',
     'umd/',
     'package-lock.json',
   ]),
