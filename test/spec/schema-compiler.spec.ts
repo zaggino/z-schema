@@ -156,4 +156,35 @@ describe('collectReferences', () => {
     expect.soft(isValid).toBe(true);
     expect(validator.getLastErrors()).toBe(null);
   });
+
+  it('should correctly collect refs', () => {
+    const schema = {
+      id: 'http://localhost:1234/sibling_id/base/',
+      definitions: {
+        foo: {
+          id: 'http://localhost:1234/sibling_id/foo.json',
+          type: 'string',
+        },
+        base_foo: {
+          $comment: 'this canonical uri is http://localhost:1234/sibling_id/base/foo.json',
+          id: 'foo.json',
+          type: 'number',
+        },
+      },
+      allOf: [
+        {
+          $comment:
+            '$ref resolves to http://localhost:1234/sibling_id/base/foo.json, not http://localhost:1234/sibling_id/foo.json',
+          id: 'http://localhost:1234/sibling_id/',
+          $ref: 'foo.json',
+        },
+      ],
+    };
+    const refs = collectReferences(schema as any);
+    expect(refs.length).toBe(1);
+    expect(refs[0].ref).toBe('http://localhost:1234/sibling_id/base/foo.json');
+    const validator = new ZSchema();
+    expect(validator.validate(1, schema)).toBe(true);
+    expect(validator.validate('a', schema)).toBe(false);
+  });
 });

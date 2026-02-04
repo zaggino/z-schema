@@ -56,7 +56,7 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
             console.warn(`excluded by test description: ${test.description}`);
             return;
           }
-          it(test.description, function () {
+          it([testSuite.description, test.description].join(' '), function () {
             const validator = new ZSchema();
             const valid = validator.validate(test.data, schema);
             expect.soft(valid).toBe(test.valid);

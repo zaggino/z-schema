@@ -28,10 +28,12 @@ export const collectIds = (obj: JsonSchemaInternal) => {
         type,
         obj: node,
       };
-      if (type === 'absolute') {
+      if (type === 'absolute' || (type === 'root' && isAbsoluteUri(node.id))) {
         id.absoluteUri = node.id;
       } else if (type === 'relative') {
-        id.absoluteParent = scope.filter((x) => x.type === 'absolute').slice(-1)[0];
+        id.absoluteParent = scope
+          .filter((x) => x.type === 'absolute' || (x.type === 'root' && x.absoluteUri))
+          .slice(-1)[0];
         if (id.absoluteParent) {
           id.absoluteUri = id.absoluteParent.id.split('/').slice(0, -1).concat(id.id).join('/');
         }
@@ -67,6 +69,8 @@ export interface Reference {
   path: Array<string | number>;
 }
 
+const doNotCollectReferencesFrom = ['enum'];
+
 export const collectReferences = (
   obj: JsonSchemaInternal,
   results?: Reference[],
@@ -81,15 +85,19 @@ export const collectReferences = (
     return results;
   }
 
-  if (typeof obj.id === 'string') {
+  const hasRef = typeof obj.$ref === 'string' && typeof obj.__$refResolved === 'undefined';
+  let addedScope = false;
+  const isRootScope = scope.length === 0;
+  if (typeof obj.id === 'string' && (isRootScope || !hasRef)) {
     if (scope.length > 0) {
       scope.push('#' + obj.id);
     } else {
       scope.push(obj.id);
     }
+    addedScope = true;
   }
 
-  if (typeof obj.$ref === 'string' && typeof obj.__$refResolved === 'undefined') {
+  if (hasRef) {
     results.push({
       ref: mergeReference(scope, obj.$ref),
       key: '$ref',
@@ -119,7 +127,7 @@ export const collectReferences = (
     idx = keys.length;
     while (idx--) {
       // do not recurse through resolved references and other z-schema props
-      if (keys[idx].indexOf('__$') === 0) {
+      if (keys[idx].indexOf('__$') === 0 || doNotCollectReferencesFrom.includes(keys[idx])) {
         continue;
       }
       path.push(keys[idx]);
@@ -128,7 +136,7 @@ export const collectReferences = (
     }
   }
 
-  if (typeof obj.id === 'string') {
+  if (addedScope) {
     scope.pop();
   }
 
