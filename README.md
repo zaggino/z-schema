@@ -140,7 +140,7 @@ These repository has several submodules and should be cloned as follows:
 
 Big thanks to:
 
-<!-- readme: contributors -start -->
+<!-- readme: contributors,zaggino/- -start -->
 <table>
 	<tbody>
 		<tr>
@@ -365,6 +365,6 @@ Big thanks to:
 		</tr>
 	<tbody>
 </table>
-<!-- readme: contributors -end -->
+<!-- readme: contributors,zaggino/- -end -->
 
 and to everyone submitting [issues](https://github.com/zaggino/z-schema/issues) on GitHub
