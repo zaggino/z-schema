@@ -4,21 +4,24 @@ import { playwright } from '@vitest/browser-playwright';
 export default defineConfig({
   test: {
     globals: true,
+    globalSetup: 'test/vitest.setup.ts',
     projects: [
       {
         extends: true,
         test: {
           name: 'node',
           environment: 'node',
-          include: ['test/spec/*.{js,ts}'],
+          include: ['test/spec/*[.-]spec.{js,ts}'],
+          exclude: ['**/*.browser-spec.{js,ts}'],
         },
       },
       {
         extends: true,
+        publicDir: 'test/public',
         test: {
-          name: 'browsers',
-          include: ['test/spec/*.{js,ts}'],
-          exclude: ['test/spec/rollup-build-spec.{js,ts}', 'test/spec/rollup-smoke-spec.{js,ts}'],
+          name: 'browser',
+          include: ['test/spec/*[.-]spec.{js,ts}'],
+          exclude: ['**/*.node-spec.{js,ts}'],
           browser: {
             enabled: true,
             provider: playwright(),

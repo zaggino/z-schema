@@ -1,6 +1,6 @@
 [submodule "json-schema"]
 	path = json-schema
 	url = https://github.com/json-schema/json-schema.git
-[submodule "test/jsonSchemaTestSuite"]
-	path = test/jsonSchemaTestSuite
+[submodule "test/public/json-schema-test-suite"]
+	path = test/public/json-schema-test-suite
 	url = https://github.com/json-schema-org/JSON-Schema-Test-Suite

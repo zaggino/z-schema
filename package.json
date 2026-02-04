@@ -66,7 +66,7 @@
     "prepublishOnly": "npm run clean && npm run build && npm test",
     "test": "vitest run",
     "test:quick": "npm run build && npm run test:node",
-    "test:browsers": "vitest run --project browsers --silent=true",
+    "test:browser": "vitest run --project browser --silent=false",
     "test:node": "vitest run --project node --silent=false",
     "test:sample": "npx vitest run --silent=false --hideSkippedTests --project node -t \"invalid definition\"",
     "release:commit": "node -e \"const v=process.argv[1]; if(!v) throw new Error('Usage: npm run release:empty-commit -- <version>'); require('child_process').execSync(`git commit --allow-empty -m \\\"chore: release ${v}\\\" -m \\\"Release-As: ${v}\\\"`, {stdio:'inherit'});\" --"
