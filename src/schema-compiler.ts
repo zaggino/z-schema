@@ -96,7 +96,7 @@ export const collectReferences = (
 
   if (hasRef) {
     results.push({
-      ref: resolveReference(scope[scope.length - 1], obj.$ref),
+      ref: resolveReference(scope[scope.length - 1], obj.$ref!),
       key: '$ref',
       obj: obj,
       path: path.slice(0),

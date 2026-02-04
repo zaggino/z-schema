@@ -50,7 +50,7 @@
   "scripts": {
     "prepare": "husky",
     "pre-commit": "npx lint-staged",
-    "pre-push": "",
+    "pre-push": "npm run build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint --fix",
