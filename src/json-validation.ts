@@ -8,6 +8,7 @@ import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
 import type { ValidateOptions, ZSchema } from './z-schema.js';
 import { getFormatValidators } from './format-validators.js';
+import { hasOwn } from './utils/properties.js';
 
 const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
   return (
@@ -224,7 +225,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     let idx = schema.required!.length;
     while (idx--) {
       const requiredPropertyName = schema.required![idx];
-      if (json[requiredPropertyName] === undefined) {
+      if (!hasOwn(json, requiredPropertyName)) {
         report.addError('OBJECT_MISSING_REQUIRED_PROPERTY', [requiredPropertyName], undefined, schema);
       }
     }
@@ -309,7 +310,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     while (idx--) {
       // iterate all dependencies
       const dependencyName = keys[idx];
-      if (json[dependencyName]) {
+      if (hasOwn(json, dependencyName)) {
         const dependencyDefinition = schema.dependencies![dependencyName];
         if (Array.isArray(dependencyDefinition)) {
           // Array
@@ -317,7 +318,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
           let idx2 = dependencyDefinition.length;
           while (idx2--) {
             const requiredPropertyName = dependencyDefinition[idx2];
-            if (json[requiredPropertyName] === undefined) {
+            if (!hasOwn(json, requiredPropertyName)) {
               report.addError('OBJECT_DEPENDENCY_KEY', [requiredPropertyName, dependencyName], undefined, schema);
             }
           }
