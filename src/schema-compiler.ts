@@ -10,7 +10,7 @@ export interface Reference {
   path: Array<string | number>;
 }
 
-const collectReferences = (
+export const collectReferences = (
   obj: JsonSchemaInternal,
   results?: Reference[],
   scope?: string[],
@@ -25,7 +25,11 @@ const collectReferences = (
   }
 
   if (typeof obj.id === 'string') {
-    scope.push(obj.id);
+    if (scope.length > 0) {
+      scope.push('#' + obj.id);
+    } else {
+      scope.push(obj.id);
+    }
   }
 
   if (typeof obj.$ref === 'string' && typeof obj.__$refResolved === 'undefined') {
@@ -80,6 +84,13 @@ const mergeReference = (scope: string[], ref: string) => {
   }
 
   let joinedScope = scope.join('');
+  if (ref[0] === '#') {
+    const hashIndex = joinedScope.indexOf('#');
+    if (hashIndex !== -1) {
+      joinedScope = joinedScope.slice(0, hashIndex);
+    }
+    return joinedScope + ref;
+  }
   const isScopeAbsolute = isAbsoluteUri(joinedScope);
   const isScopeRelative = isRelativeUri(joinedScope);
   const isRefRelative = isRelativeUri(ref);

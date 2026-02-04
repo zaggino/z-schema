@@ -389,7 +389,7 @@ export class ZSchema {
         res = res.concat(this.getMissingReferences(error.inner));
       }
     }
-    return res;
+    return res.sort();
   }
 
   getMissingRemoteReferences() {

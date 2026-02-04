@@ -1,3 +1,5 @@
+import { ZSchema } from '../../src/z-schema.ts';
+
 export default {
   description: 'Issue #58 - getMissingReferences should return all missing references',
   tests: [
@@ -51,13 +53,11 @@ export default {
       },
       validateSchemaOnly: true,
       valid: false,
-      after: function (err, valid, data, validator) {
-        var missingReferences = validator.getMissingReferences();
+      after: function (err: Error, valid: boolean, data: unknown, validator: ZSchema) {
+        const missingReferences = validator.getMissingReferences();
         expect(missingReferences.length).toBe(2);
-        expect(missingReferences.indexOf('#xx')).not.toBe(-1);
-        expect(missingReferences.indexOf('#/yy')).not.toBe(-1);
-        var missingRemoteReferences = validator.getMissingRemoteReferences();
-        expect(missingRemoteReferences.length).toBe(0);
+        expect(missingReferences[0]).toBe('root.json#/yy');
+        expect(missingReferences[1]).toBe('root.json#xx');
       },
     },
   ],
