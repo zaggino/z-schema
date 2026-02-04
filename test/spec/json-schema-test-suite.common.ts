@@ -15,7 +15,7 @@ interface TestSuite {
 
 const excludedDirs: string[] = ['draft4/optional', 'draft4/optional/format'];
 const excludedFiles: string[] = [];
-const excludedTests: string[] = ['an invalid URI', 'an invalid URI though valid URI reference']; // TODO: fix these
+const excludedTests: string[] = [];
 
 export async function runTests({ reader }: { reader: <T>(testFilePath: string) => Promise<T> }) {
   const manifest = await reader<string[]>('/manifest.json');
