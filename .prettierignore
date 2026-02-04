@@ -10,3 +10,6 @@ coverage/
 .DS_Store
 .idea/
 .vscode/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

@@ -279,7 +279,7 @@ const SchemaValidators = {
           }
           while (idx2--) {
             if (typeof schemaDependency[idx2] !== 'string') {
-              report.addError('KEYWORD_VALUE_TYPE', ['dependensices', 'string']);
+              report.addError('KEYWORD_VALUE_TYPE', ['dependencies', 'string']);
             }
           }
           if (isUniqueArray(schemaDependency) === false) {

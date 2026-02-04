@@ -11,7 +11,7 @@ export default defineConfig({
         test: {
           name: 'node',
           environment: 'node',
-          include: ['test/spec/*[.-]spec.{js,ts}'],
+          include: ['test/spec/*.(spec|node-spec).{js,ts}'],
           exclude: ['**/*.browser-spec.{js,ts}'],
         },
       },
@@ -20,7 +20,7 @@ export default defineConfig({
         publicDir: 'test/public',
         test: {
           name: 'browser',
-          include: ['test/spec/*[.-]spec.{js,ts}'],
+          include: ['test/spec/*.(spec|browser-spec).{js,ts}'],
           exclude: ['**/*.node-spec.{js,ts}'],
           browser: {
             enabled: true,

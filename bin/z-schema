@@ -103,7 +103,7 @@ function validateWithAutomaticDownloads(filePath, data, schema, callback) {
           request(url, function (response) {
             var body = '';
             response.on('data', function (chunk) {
-              data += chunk;
+              body += chunk;
             });
             response.on('end', function () {
               console.log(urlString + response.statusCode);

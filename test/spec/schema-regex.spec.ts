@@ -1,5 +1,4 @@
-import { describe, it, expect } from 'vitest';
-import { compileSchemaRegex } from '../../src/utils/schema-regex';
+import { compileSchemaRegex } from '../../src/utils/schema-regex.ts';
 
 describe('compileSchemaRegex', () => {
   it('fails for invalid regex pattern (no Unicode)', () => {

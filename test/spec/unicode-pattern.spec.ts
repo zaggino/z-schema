@@ -1,5 +1,4 @@
-import { describe, it, expect } from 'vitest';
-import ZSchema from '../../src/index';
+import ZSchema from '../../src/index.ts';
 
 // Runtime check for Unicode property escape support (must actually match ASCII letters)
 function supportsUnicodePropertyEscapes() {

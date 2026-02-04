@@ -1,0 +1,13 @@
+# Exclude development and test artifacts from npm package
+/.github/
+/specs/
+/test/
+/benchmark/
+/coverage/
+/node_modules/
+*.log
+.env*
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp

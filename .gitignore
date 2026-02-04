@@ -16,3 +16,9 @@
 /test/node_modules/
 /test/package-lock.json
 /test/public/manifest.json
+build/
+*.log
+.env*
+Thumbs.db
+*.tmp
+*.swp
