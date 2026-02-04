@@ -2,7 +2,7 @@ import type { ZSchema } from './z-schema.js';
 import isequal from 'lodash.isequal';
 import { Report } from './report.js';
 import { findId, JsonSchema, JsonSchemaInternal } from './json-schema.js';
-import { getQueryPath, getRemotePath } from './utils/uri.js';
+import { getQueryPath, getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { deepClone } from './utils/clone.js';
 import { decodeJSONPointer } from './utils/json.js';
 
@@ -60,10 +60,22 @@ export class SchemaCache {
     throw new Error(`unexpected code reached`);
   }
 
+  fromCache(path: string) {
+    if (this.cache[path]) {
+      return this.cache[path];
+    }
+    if (SchemaCache.global_cache[path]) {
+      const schema = SchemaCache.global_cache[path];
+      schema.id ??= path;
+      return deepClone(schema);
+    }
+    return undefined;
+  }
+
   getSchemaByUri(report: Report, uri: string, root?: JsonSchemaInternal) {
     const remotePath = getRemotePath(uri);
     const queryPath = getQueryPath(uri);
-    let result = remotePath ? this.cache[remotePath] : root;
+    let result = remotePath ? this.fromCache(remotePath) : root;
 
     if (result && remotePath) {
       // we need to avoid compiling schemas in a recursive loop
@@ -79,7 +91,8 @@ export class SchemaCache {
           remoteReport = anscestorReport;
         } else {
           remoteReport = new Report(report);
-          if (this.validator.sc.compileSchema(remoteReport, result, { noCache: true })) {
+          const noCache = result.id && isAbsoluteUri(result.id) ? false : true;
+          if (this.validator.sc.compileSchema(remoteReport, result, { noCache })) {
             const savedOptions = this.validator.options;
             try {
               // If custom validationOptions were provided to setRemoteReference(),

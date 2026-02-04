@@ -14,14 +14,14 @@ interface TestSuite {
 }
 
 const excludedDirs: string[] = ['draft4/optional', 'draft4/optional/format'];
-const excludedFiles: string[] = ['draft4/ref.json', 'draft4/refRemote.json', 'draft4/required.json']; // TODO: fix these
+const excludedFiles: string[] = ['draft4/refRemote.json', 'draft4/required.json']; // TODO: fix these
 const excludedTests: string[] = ['an invalid URI', 'an invalid URI though valid URI reference']; // TODO: fix these
 
 export async function runTests({ reader }: { reader: <T>(testFilePath: string) => Promise<T> }) {
   const manifest = await reader<string[]>('/manifest.json');
   const draftPath = '/json-schema-test-suite/tests/draft4';
 
-  const remoteFiles = manifest.filter((f) => f.startsWith('/json-schema-test-suite/remotes/draft4'));
+  const remoteFiles = manifest.filter((f) => f.startsWith('/json-schema-test-suite/remotes'));
   await Promise.all(
     remoteFiles.map(async (file) => {
       // desired serverPath example: http://localhost:1234/draft4/locationIndependentIdentifier.json
