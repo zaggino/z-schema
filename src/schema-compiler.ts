@@ -3,6 +3,63 @@ import { JsonSchemaInternal } from './json-schema.js';
 import { Report } from './report.js';
 import { isAbsoluteUri, isRelativeUri } from './utils/uri.js';
 
+interface Id {
+  id: string;
+  type: 'absolute' | 'relative' | 'root';
+  obj: object;
+  absoluteParent?: Id;
+  absoluteUri?: string;
+}
+
+export const collectIds = (obj: JsonSchemaInternal) => {
+  const ids: Id[] = [];
+  function walk(node: any, scope: Id[]) {
+    if (typeof node !== 'object' || node == null) return;
+
+    let addedScope = false;
+
+    if (node.id && typeof node.id === 'string') {
+      let type: Id['type'] = isAbsoluteUri(node.id) ? 'absolute' : 'relative';
+      if (scope.length === 0) {
+        type = 'root';
+      }
+      const id: Id = {
+        id: node.id,
+        type,
+        obj: node,
+      };
+      if (type === 'absolute') {
+        id.absoluteUri = node.id;
+      } else if (type === 'relative') {
+        id.absoluteParent = scope.filter((x) => x.type === 'absolute').slice(-1)[0];
+        if (id.absoluteParent) {
+          id.absoluteUri = id.absoluteParent.id.split('/').slice(0, -1).concat(id.id).join('/');
+        }
+      }
+      ids.push(id);
+      scope.push(id);
+      addedScope = true;
+    }
+
+    if (Array.isArray(node)) {
+      for (const item of node) {
+        walk(item, scope);
+      }
+    } else {
+      for (const key of Object.keys(node)) {
+        if (key.indexOf('__$') === 0) continue;
+        walk(node[key], scope);
+      }
+    }
+
+    if (addedScope) {
+      scope.pop();
+    }
+  }
+  walk(obj, []);
+  return ids;
+};
+
 export interface Reference {
   ref: string;
   key: '$ref' | '$schema';
@@ -118,7 +175,18 @@ const mergeReference = (scope: string[], ref: string) => {
 export class SchemaCompiler {
   constructor(private validator: ZSchema) {}
 
-  compileSchema(report: Report, schema: JsonSchemaInternal | JsonSchemaInternal[]) {
+  collectAndCacheIds(schema: JsonSchemaInternal) {
+    const ids = collectIds(schema);
+    for (const item of ids) {
+      if (item.absoluteUri) {
+        this.validator.scache.cacheSchemaByUri(item.absoluteUri, item.obj);
+      } else if (item.type === 'root') {
+        this.validator.scache.cacheSchemaByUri(item.id, item.obj);
+      }
+    }
+  }
+
+  compileSchema(report: Report, schema: JsonSchemaInternal | JsonSchemaInternal[], options?: { noCache?: boolean }) {
     report.commonErrorMessage = 'SCHEMA_COMPILATION_FAILED';
 
     // if schema is a string, assume it's a uri
@@ -133,7 +201,14 @@ export class SchemaCompiler {
 
     // if schema is an array, assume it's an array of schemas
     if (Array.isArray(schema)) {
+      if (!options?.noCache) {
+        schema.forEach((s) => this.collectAndCacheIds(s));
+      }
       return this.compileArrayOfSchemas(report, schema);
+    } else {
+      if (!options?.noCache) {
+        this.collectAndCacheIds(schema);
+      }
     }
 
     // if we have an id than it should be cached already (if this instance has compiled it)
@@ -146,7 +221,7 @@ export class SchemaCompiler {
       return true;
     }
 
-    if (schema.id && typeof schema.id === 'string') {
+    if (schema.id && typeof schema.id === 'string' && !options?.noCache) {
       // add this to our schemaCache (before compilation in case we have references including id)
       this.validator.scache.cacheSchemaByUri(schema.id, schema);
     }
@@ -228,12 +303,14 @@ export class SchemaCompiler {
     const isValid = report.isValid();
     if (isValid) {
       schema.__$compiled = true;
-    } else {
-      if (schema.id && typeof schema.id === 'string') {
-        // remove this schema from schemaCache because it failed to compile
-        this.validator.scache.removeFromCacheByUri(schema.id);
-      }
     }
+    // else {
+    //   if (schema.id && typeof schema.id === 'string') {
+    //     console.log(report.errors);
+    //     // remove this schema from schemaCache because it failed to compile
+    //     this.validator.scache.removeFromCacheByUri(schema.id);
+    //   }
+    // }
 
     // we don't need the root pointer anymore
     if (isRoot) {

@@ -1,5 +1,5 @@
 import { JsonSchema } from '../../src/json-schema.ts';
-import { collectReferences } from '../../src/schema-compiler.js';
+import { collectIds, collectReferences } from '../../src/schema-compiler.js';
 import { ZSchema } from '../../src/z-schema.ts';
 
 describe('collectReferences', () => {
@@ -59,5 +59,101 @@ describe('collectReferences', () => {
     expect(missingRefs).toHaveLength(0);
     const missingRemoteRefs = validator.getMissingRemoteReferences();
     expect(missingRemoteRefs).toHaveLength(0);
+  });
+
+  it('should collect $ref with nested ids and not/definitions', () => {
+    const schema: JsonSchema = {
+      id: 'http://example.com/a.json',
+      definitions: {
+        x: {
+          id: 'http://example.com/b/c.json',
+          not: {
+            definitions: {
+              y: {
+                id: 'd.json',
+                type: 'number',
+              },
+            },
+          },
+        },
+      },
+      allOf: [
+        {
+          $ref: 'http://example.com/b/d.json',
+        },
+      ],
+    };
+    const ids = collectIds(schema);
+    expect(ids).toHaveLength(3);
+
+    const validator = new ZSchema();
+    const isValid = validator.validateSchema(schema);
+    expect(Object.keys(validator.scache.cache)).toEqual([
+      'http://json-schema.org/draft-04/schema',
+      'http://json-schema.org/draft-04/hyper-schema',
+      'http://example.com/a.json',
+      'http://example.com/b/c.json',
+      'http://example.com/b/d.json',
+    ]);
+
+    const absoluteIds = ids.filter((x) => x.type === 'absolute');
+    for (const absoluteId of absoluteIds) {
+      expect(validator.scache.checkCacheForUri(absoluteId.id)).toBe(true);
+    }
+
+    const relativeIds = ids.filter((x) => x.type === 'relative');
+    expect(relativeIds.length).toBe(1);
+    expect(relativeIds[0].absoluteParent).toBeTruthy();
+    expect(relativeIds[0].absoluteUri).toBe('http://example.com/b/d.json');
+
+    expect.soft(isValid).toBe(true);
+    expect(validator.getLastErrors()).toBe(null);
+  });
+
+  it('should compile an array of schemas', () => {
+    const schemas: JsonSchema[] = [
+      {
+        id: 'id',
+        type: 'number',
+      },
+      {
+        id: 'user',
+        type: 'object',
+        properties: {
+          id: {
+            $ref: 'id',
+          },
+          posts: {
+            type: 'array',
+            items: {
+              $ref: 'post',
+            },
+          },
+        },
+      },
+      {
+        id: 'post',
+        type: 'object',
+        properties: {
+          id: {
+            $ref: 'id',
+          },
+          author: {
+            $ref: 'user',
+          },
+        },
+      },
+    ];
+    const validator = new ZSchema();
+    const isValid = validator.validateSchema(schemas);
+    expect(Object.keys(validator.scache.cache)).toEqual([
+      'http://json-schema.org/draft-04/schema',
+      'http://json-schema.org/draft-04/hyper-schema',
+      'id',
+      'user',
+      'post',
+    ]);
+    expect.soft(isValid).toBe(true);
+    expect(validator.getLastErrors()).toBe(null);
   });
 });

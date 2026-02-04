@@ -79,7 +79,7 @@ export class SchemaCache {
           remoteReport = anscestorReport;
         } else {
           remoteReport = new Report(report);
-          if (this.validator.sc.compileSchema(remoteReport, result)) {
+          if (this.validator.sc.compileSchema(remoteReport, result, { noCache: true })) {
             const savedOptions = this.validator.options;
             try {
               // If custom validationOptions were provided to setRemoteReference(),

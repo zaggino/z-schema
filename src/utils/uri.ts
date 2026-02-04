@@ -11,7 +11,7 @@ export const getRemotePath = (uri: string) => {
   return io === -1 ? uri : uri.slice(0, io);
 };
 
-export const isAbsoluteUri = (uri: string): boolean => /^https?:\/\//.test(uri);
+export const isAbsoluteUri = (uri: string): boolean => /^(https?|file):\/\//.test(uri);
 
 export const isRelativeUri = (uri: string): boolean =>
   // relative URIs that end with a hash sign, issue #56
