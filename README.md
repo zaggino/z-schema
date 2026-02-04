@@ -20,8 +20,8 @@ What is a JSON Schema? Find here: [https://json-schema.org/](https://json-schema
 
 ## Versions
 
-v6 - old version which has been around a long time, supports JSON Schema Draft 04
-v7 - updated version (to ESM module with Typescript) which passes all tests from JSON Schema Test Suite for Draft 04
+- v6 - old version which has been around a long time, supports JSON Schema draft-04
+- v7 - modernized version (to ESM module with Typescript) which passes all tests from JSON Schema Test Suite for draft-04
 
 ## Usage
 
