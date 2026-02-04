@@ -7,6 +7,7 @@
 ## Topics
 
 - [What](#what)
+- [Versions](#versions)
 - [Usage](#usage)
 - [Features](#features)
 - [Options](#options)
@@ -16,6 +17,11 @@
 ## What
 
 What is a JSON Schema? Find here: [https://json-schema.org/](https://json-schema.org/)
+
+## Versions
+
+v6 - old version which has been around a long time, supports JSON Schema Draft 04
+v7 - updated version (to ESM module with Typescript) which passes all tests from JSON Schema Test Suite for Draft 04
 
 ## Usage
 
@@ -626,7 +632,7 @@ These repository has several submodules and should be cloned as follows:
 
 Thanks for contributing to:
 
-- [Jeremy Whitlock](https://github.com/whitlockjc)
-- [Oleksiy Krivoshey](https://github.com/oleksiyk)
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
 
 and to everyone submitting [issues](https://github.com/zaggino/z-schema/issues) on GitHub
