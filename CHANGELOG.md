@@ -1,5 +1,23 @@
 # Changelog
 
+## [7.2.0](https://github.com/zaggino/z-schema/compare/v7.1.0...v7.2.0) (2026-02-04)
+
+
+### Features
+
+* improve global schema caching ([8d79501](https://github.com/zaggino/z-schema/commit/8d795019b420f022d9e4a31ecb075b061aaa2e87))
+
+
+### Bug Fixes
+
+* error in collectReferences where scope was not reset when traversing inside an element with id ([fa883f0](https://github.com/zaggino/z-schema/commit/fa883f09deaa58934fb2e71dd3d8921cc877d0be))
+* improve reference resolution ([390aae0](https://github.com/zaggino/z-schema/commit/390aae036248572250983aba2de04164660ff577))
+* improving handling of JavaScript property names ([e74c294](https://github.com/zaggino/z-schema/commit/e74c294fc8908ba1cd8c389c20432a49d914b211))
+* improving reference resolution ([d692677](https://github.com/zaggino/z-schema/commit/d692677d6fb6217ed99f91d58c332b9f2f1d0094))
+* improving remote reference resolution ([67f25e2](https://github.com/zaggino/z-schema/commit/67f25e2e51044cd19f8190db795e8b5e64f1c5d7))
+* Only import validator functions we actually use ([3487951](https://github.com/zaggino/z-schema/commit/34879513d8c1348f0ece972f0cb3eb1146108c97))
+* some issues running tests with new validator imports ([dddb367](https://github.com/zaggino/z-schema/commit/dddb36758b4b4355a285da083a06b66cb0094c64))
+
 ## [7.1.0](https://github.com/zaggino/z-schema/compare/v7.0.9...v7.1.0) (2026-02-03)
 
 
