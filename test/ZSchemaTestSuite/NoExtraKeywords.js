@@ -1,4 +1,5 @@
 export default {
+  version: 'none',
   description: 'noExtraKeywords - Forbid unrecognized keywords to be defined in schemas',
   options: {
     noExtraKeywords: true,

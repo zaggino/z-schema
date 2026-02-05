@@ -16,9 +16,6 @@ import _Draft4HyperSchema from './schemas/draft-04-hyper-schema.json' with { typ
 import { get } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
 
-const Draft4Schema: JsonSchema = _Draft4Schema;
-const Draft4HyperSchema: JsonSchema = _Draft4HyperSchema;
-
 /**
  * default options
  */
@@ -116,8 +113,10 @@ const normalizeOptions = (options?: ZSchemaOptions) => {
   return normalized;
 };
 
+export type JsonSchemaVersion = 'draft-04'; // TODO: 'draft-06', 'draft-07', '2019-09', '2020-12'
+
 export interface ZSchemaOptions {
-  version: 'draft-04' | 'none';
+  version?: JsonSchemaVersion | 'none';
   asyncTimeout?: number;
   forceAdditional?: boolean;
   assumeAdditional?: boolean | string[];
@@ -183,11 +182,10 @@ export class ZSchema {
     this.options = normalizeOptions(options);
   }
 
-  getDefaultSchemaId() {
-    if (this.options.version === 'draft-04') {
-      return 'http://json-schema.org/draft-04/schema#';
-    }
-    return undefined;
+  getDefaultSchemaId(): string {
+    return this.options.version && this.options.version !== 'none'
+      ? VERSION_SCHEMA_URL_MAPPING[this.options.version]
+      : VERSION_SCHEMA_URL_MAPPING[defaultOptions.version as JsonSchemaVersion];
   }
 
   validateSchema(schemaOrArr: JsonSchema | JsonSchema[]): boolean {
@@ -486,6 +484,13 @@ export class ZSchema {
 
   static jsonSymbol = jsonSymbol;
 }
+
+const Draft4Schema: JsonSchema = _Draft4Schema;
+const Draft4HyperSchema: JsonSchema = _Draft4HyperSchema;
+
+export const VERSION_SCHEMA_URL_MAPPING: Record<JsonSchemaVersion, string> = {
+  'draft-04': 'http://json-schema.org/draft-04/schema#',
+};
 
 ZSchema.setRemoteReference('http://json-schema.org/draft-04/schema', Draft4Schema, { version: 'none' });
 ZSchema.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', Draft4HyperSchema, { version: 'none' });

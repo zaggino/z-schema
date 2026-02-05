@@ -1,7 +1,7 @@
 /* eslint-disable vitest/valid-title */
 
 import { JsonSchema } from '../../src/json-schema.ts';
-import { ZSchema } from '../../src/z-schema.ts';
+import { JsonSchemaVersion, ZSchema } from '../../src/z-schema.ts';
 
 interface TestSuite {
   description: string;
@@ -13,16 +13,11 @@ interface TestSuite {
   }>;
 }
 
-export const JSON_SCHEMA_TEST_SUITE_TEST_FOLDERS = [
-  'draft3',
-  'draft4',
-  'draft6',
-  'draft7',
-  'draft2019-09',
-  'draft2020-12',
-  'v1',
-  'latest',
-];
+type JSONSchemaTestSuiteTestFolder = 'draft4' | 'draft6' | 'draft7' | 'draft2019-09' | 'draft2020-12';
+
+const VERSION_FOLDER_MAPPING: Record<JsonSchemaVersion, JSONSchemaTestSuiteTestFolder> = {
+  'draft-04': 'draft4',
+};
 
 const excludedDirs: string[] = ['draft4/optional', 'draft4/optional/format'];
 const excludedFiles: string[] = [];
@@ -30,7 +25,7 @@ const excludedTests: string[] = [];
 
 export async function runTests({ reader }: { reader: <T>(testFilePath: string) => Promise<T> }) {
   const manifest = await reader<string[]>('/manifest.json');
-  const draftPath = '/json-schema-test-suite/tests/draft4';
+  const testsPath = '/json-schema-test-suite/tests';
 
   const remoteFiles = manifest.filter((f) => f.startsWith('/json-schema-test-suite/remotes'));
   await Promise.all(
@@ -42,44 +37,50 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
     })
   );
 
-  const testFiles = manifest.filter((f) => f.startsWith(draftPath));
-  testFiles.forEach((testFilePath) => {
-    // excludedDirs
-    const file = testFilePath.slice('/json-schema-test-suite/tests/'.length);
-    const fileDir = file.replace(/\/[^/]+$/, '');
-    if (excludedDirs.some((d) => d === fileDir)) {
-      console.warn(`excluded by dir: ${testFilePath}`);
-      return;
-    }
+  const versionsTested = Object.keys(VERSION_FOLDER_MAPPING) as JsonSchemaVersion[];
+  for (const version of versionsTested) {
+    describe(`${version}`, () => {
+      const draftPath = `${testsPath}/${VERSION_FOLDER_MAPPING[version]}`;
+      const testFiles = manifest.filter((f) => f.startsWith(draftPath));
+      testFiles.forEach((testFilePath) => {
+        // excludedDirs
+        const file = testFilePath.slice('/json-schema-test-suite/tests/'.length);
+        const fileDir = file.replace(/\/[^/]+$/, '');
+        if (excludedDirs.some((d) => d === fileDir)) {
+          console.warn(`excluded by dir: ${testFilePath}`);
+          return;
+        }
 
-    // excludedFiles
-    if (excludedFiles.some((f) => f === file)) {
-      console.warn(`excluded by file: ${testFilePath}`);
-      return;
-    }
+        // excludedFiles
+        if (excludedFiles.some((f) => f === file)) {
+          console.warn(`excluded by file: ${testFilePath}`);
+          return;
+        }
 
-    describe(file, async () => {
-      const testSuites = await reader<TestSuite[]>(testFilePath);
-      testSuites.forEach((testSuite) => {
-        const schema = testSuite.schema;
-        testSuite.tests.forEach((test) => {
-          if (excludedTests.some((t) => t === test.description)) {
-            console.warn(`excluded by test description: ${test.description}`);
-            return;
-          }
-          it([testSuite.description, test.description].join(' '), function () {
-            const validator = new ZSchema();
-            const valid = validator.validate(test.data, schema);
-            expect.soft(valid).toBe(test.valid);
-            if (valid !== test.valid) {
-              if (!valid) {
-                const errors = validator.getLastErrors();
-                expect(errors).toBe(null);
+        describe(file, async () => {
+          const testSuites = await reader<TestSuite[]>(testFilePath);
+          testSuites.forEach((testSuite) => {
+            const schema = testSuite.schema;
+            testSuite.tests.forEach((test) => {
+              if (excludedTests.some((t) => t === test.description)) {
+                console.warn(`excluded by test description: ${test.description}`);
+                return;
               }
-            }
+              it([testSuite.description, test.description].join(' '), function () {
+                const validator = new ZSchema({ version });
+                const valid = validator.validate(test.data, schema);
+                expect.soft(valid).toBe(test.valid);
+                if (valid !== test.valid) {
+                  if (!valid) {
+                    const errors = validator.getLastErrors();
+                    expect(errors).toBe(null);
+                  }
+                }
+              });
+            });
           });
         });
       });
     });
-  });
+  }
 }

@@ -22,6 +22,7 @@ What is a JSON Schema? Find here: [https://json-schema.org/](https://json-schema
 
 - v6 - old version which has been around a long time, supports JSON Schema draft-04
 - v7 - modernized version (to ESM module with Typescript) which passes all tests from JSON Schema Test Suite for draft-04
+- v8 - by default assumes all schemas without $schema tag are draft-04, the old behaviour from v7 can be explicitly turned on by specifying `validator = new ZSchema({ version: 'none' });`
 
 ## Usage
 

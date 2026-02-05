@@ -88,13 +88,14 @@ describe('collectReferences', () => {
 
     const validator = new ZSchema();
     const isValid = validator.validateSchema(schema);
-    expect(Object.keys(validator.scache.cache)).toEqual([
-      'http://json-schema.org/draft-04/schema',
-      'http://json-schema.org/draft-04/hyper-schema',
-      'http://example.com/a.json',
-      'http://example.com/b/c.json',
-      'http://example.com/b/d.json',
-    ]);
+    expect(Object.keys(validator.scache.cache).sort()).toEqual(
+      [
+        'http://json-schema.org/draft-04/schema',
+        'http://example.com/a.json',
+        'http://example.com/b/c.json',
+        'http://example.com/b/d.json',
+      ].sort()
+    );
 
     const absoluteIds = ids.filter((x) => x.type === 'absolute');
     for (const absoluteId of absoluteIds) {
@@ -146,13 +147,9 @@ describe('collectReferences', () => {
     ];
     const validator = new ZSchema();
     const isValid = validator.validateSchema(schemas);
-    expect(Object.keys(validator.scache.cache)).toEqual([
-      'http://json-schema.org/draft-04/schema',
-      'http://json-schema.org/draft-04/hyper-schema',
-      'id',
-      'user',
-      'post',
-    ]);
+    expect(Object.keys(validator.scache.cache).sort()).toEqual(
+      ['http://json-schema.org/draft-04/schema', 'id', 'user', 'post'].sort()
+    );
     expect.soft(isValid).toBe(true);
     expect(validator.getLastErrors()).toBe(null);
   });
