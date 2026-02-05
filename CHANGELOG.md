@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.1.0](https://github.com/zaggino/z-schema/compare/v8.0.0...v8.1.0) (2026-02-05)
+
+
+### Features
+
+* export global format functions ([f8cc7cf](https://github.com/zaggino/z-schema/commit/f8cc7cf25c2beb5a829338108073f49ad05e3252))
+
 ## [8.0.0](https://github.com/zaggino/z-schema/compare/v7.2.0...v8.0.0) (2026-02-05)
 
 
