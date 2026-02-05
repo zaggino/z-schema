@@ -60,6 +60,12 @@ export interface SchemaErrorDetail {
   inner?: SchemaErrorDetail[];
 
   schemaId?: string;
+
+  /**
+   * The schema keyword that caused this validation error.
+   * Example: "required", "type", "minLength"
+   */
+  keyword?: keyof JsonSchema;
 }
 
 export interface ReportOptions {
@@ -252,11 +258,17 @@ export class Report {
     return false;
   }
 
-  addError(errCode: ErrorCode, errParams?: ErrorParam[], subReports?: Report | Report[], schema?: JsonSchema) {
+  addError(
+    errCode: ErrorCode,
+    errParams?: ErrorParam[],
+    subReports?: Report | Report[],
+    schema?: JsonSchema,
+    keyword?: keyof JsonSchema
+  ) {
     if (!errCode) {
       throw new Error('No errorCode passed into addError()');
     }
-    this.addCustomError(errCode, Errors[errCode], errParams, subReports, schema);
+    this.addCustomError(errCode, Errors[errCode], errParams, subReports, schema, keyword);
   }
 
   // this returns the root object being validated (the one passed into validator.validate)
@@ -275,7 +287,8 @@ export class Report {
     errorMessage: string,
     params?: ErrorParam[],
     subReports?: Report | Report[],
-    schema?: JsonSchema
+    schema?: JsonSchema,
+    keyword?: keyof JsonSchema
   ) {
     if (typeof this.reportOptions.maxErrors === 'number' && this.errors.length >= this.reportOptions.maxErrors) {
       return;
@@ -300,6 +313,7 @@ export class Report {
       message: errorMessage,
       path: this.getPath(this.options.reportPathAsArray),
       schemaId: this.getSchemaId(),
+      keyword: keyword,
     };
 
     // TODO v8: remove Symbol usage
