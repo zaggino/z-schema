@@ -1,5 +1,16 @@
 # Changelog
 
+## [8.0.0](https://github.com/zaggino/z-schema/compare/v7.2.0...v8.0.0) (2026-02-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* treat all schemas without $schema specified as draft-04 ([#325](https://github.com/zaggino/z-schema/issues/325))
+
+### Features
+
+* treat all schemas without $schema specified as draft-04 ([#325](https://github.com/zaggino/z-schema/issues/325)) ([15d2855](https://github.com/zaggino/z-schema/commit/15d285597d887e7d61b2134d44f6c6d73dcd9f05))
+
 ## [7.2.0](https://github.com/zaggino/z-schema/compare/v7.1.0...v7.2.0) (2026-02-04)
 
 
