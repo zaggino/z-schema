@@ -25,6 +25,7 @@
 - [Set validator to collect as many errors as possible](OPTIONS.md#breakonfirsterror)
 - [Report paths in errors as arrays so they can be processed easier](OPTIONS.md#reportpathasarray)
 - [Unicode Property Escapes Support](#unicode-property-escapes-support)
+- [Keyword field](#keyword-field)
 
 ### Validate against subschema
 
@@ -151,3 +152,20 @@ Fully supports [Unicode property escapes](https://developer.mozilla.org/en-US/do
 ```
 
 z-schema will automatically use the `u` (Unicode) flag for all patterns containing Unicode property escapes, both in Node.js and browser environments. If your environment does not support Unicode property escapes, such patterns will be reported as invalid.
+
+### Keyword field
+
+Error objects returned by `getLastErrors()` (and included on the `details` property of `getLastError()`'s Error) include a `keyword` field indicating the schema keyword that triggered the error (for example: `"required"`, `"type"`, `"minLength"`).
+
+Example error detail:
+
+```json
+{
+  "message": "Missing required property",
+  "code": "OBJECT_MISSING_REQUIRED_PROPERTY",
+  "params": ["name"],
+  "path": "#/",
+  "schemaId": "http://example.com/schema",
+  "keyword": "required"
+}
+```

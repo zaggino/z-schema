@@ -42,7 +42,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     const stringMultipleOf = String(schema.multipleOf);
     const scale = Math.pow(10, stringMultipleOf.length - stringMultipleOf.indexOf('.') - 1);
     if (whatIs((json * scale) / (schema.multipleOf! * scale)) !== 'integer') {
-      report.addError('MULTIPLE_OF', [json, schema.multipleOf!], undefined, schema);
+      report.addError('MULTIPLE_OF', [json, schema.multipleOf!], undefined, schema, 'multipleOf');
     }
   },
   maximum: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
@@ -55,11 +55,11 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     }
     if (schema.exclusiveMaximum !== true) {
       if (json > schema.maximum!) {
-        report.addError('MAXIMUM', [json, schema.maximum!], undefined, schema);
+        report.addError('MAXIMUM', [json, schema.maximum!], undefined, schema, 'maximum');
       }
     } else {
       if (json >= schema.maximum!) {
-        report.addError('MAXIMUM_EXCLUSIVE', [json, schema.maximum!], undefined, schema);
+        report.addError('MAXIMUM_EXCLUSIVE', [json, schema.maximum!], undefined, schema, 'maximum');
       }
     }
   },
@@ -76,11 +76,11 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     }
     if (schema.exclusiveMinimum !== true) {
       if (json < schema.minimum!) {
-        report.addError('MINIMUM', [json, schema.minimum!], undefined, schema);
+        report.addError('MINIMUM', [json, schema.minimum!], undefined, schema, 'minimum');
       }
     } else {
       if (json <= schema.minimum!) {
-        report.addError('MINIMUM_EXCLUSIVE', [json, schema.minimum!], undefined, schema);
+        report.addError('MINIMUM_EXCLUSIVE', [json, schema.minimum!], undefined, schema, 'minimum');
       }
     }
   },
@@ -96,7 +96,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       return;
     }
     if (ucs2decode(json).length > schema.maxLength!) {
-      report.addError('MAX_LENGTH', [json.length, schema.maxLength!], undefined, schema);
+      report.addError('MAX_LENGTH', [json.length, schema.maxLength!], undefined, schema, 'maxLength');
     }
   },
   minLength: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
@@ -108,7 +108,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       return;
     }
     if (ucs2decode(json).length < schema.minLength!) {
-      report.addError('MIN_LENGTH', [json.length, schema.minLength!], undefined, schema);
+      report.addError('MIN_LENGTH', [json.length, schema.minLength!], undefined, schema, 'minLength');
     }
   },
   pattern: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
@@ -122,11 +122,11 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     const result = compileSchemaRegex(schema.pattern!);
     if (!result.ok) {
       // Should not happen: schema should have been validated already
-      report.addError('PATTERN', [schema.pattern!, json, result.error.message], undefined, schema);
+      report.addError('PATTERN', [schema.pattern!, json, result.error.message], undefined, schema, 'pattern');
       return;
     }
     if (!result.value.test(json)) {
-      report.addError('PATTERN', [schema.pattern!, json], undefined, schema);
+      report.addError('PATTERN', [schema.pattern!, json], undefined, schema, 'pattern');
     }
   },
   additionalItems: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
@@ -141,7 +141,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     // the json is valid if its size is less than, or equal to, the size of "items".
     if (schema.additionalItems === false && Array.isArray(schema.items)) {
       if (json.length > schema.items.length) {
-        report.addError('ARRAY_ADDITIONAL_ITEMS', undefined, undefined, schema);
+        report.addError('ARRAY_ADDITIONAL_ITEMS', undefined, undefined, schema, 'additionalItems');
       }
     }
   },
@@ -158,7 +158,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       return;
     }
     if (json.length > schema.maxItems!) {
-      report.addError('ARRAY_LENGTH_LONG', [json.length, schema.maxItems!], undefined, schema);
+      report.addError('ARRAY_LENGTH_LONG', [json.length, schema.maxItems!], undefined, schema, 'maxItems');
     }
   },
   minItems: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
@@ -170,7 +170,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       return;
     }
     if (json.length < schema.minItems!) {
-      report.addError('ARRAY_LENGTH_SHORT', [json.length, schema.minItems!], undefined, schema);
+      report.addError('ARRAY_LENGTH_SHORT', [json.length, schema.minItems!], undefined, schema, 'minItems');
     }
   },
   uniqueItems: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
@@ -184,7 +184,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     if (schema.uniqueItems === true) {
       const matches: any[] = [];
       if (isUniqueArray(json, matches) === false) {
-        report.addError('ARRAY_UNIQUE', matches, undefined, schema);
+        report.addError('ARRAY_UNIQUE', matches, undefined, schema, 'uniqueItems');
       }
     }
   },
@@ -198,7 +198,13 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     }
     const keysCount = Object.keys(json).length;
     if (keysCount > schema.maxProperties!) {
-      report.addError('OBJECT_PROPERTIES_MAXIMUM', [keysCount, schema.maxProperties!], undefined, schema);
+      report.addError(
+        'OBJECT_PROPERTIES_MAXIMUM',
+        [keysCount, schema.maxProperties!],
+        undefined,
+        schema,
+        'maxProperties'
+      );
     }
   },
   minProperties: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
@@ -211,7 +217,13 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     }
     const keysCount = Object.keys(json).length;
     if (keysCount < schema.minProperties!) {
-      report.addError('OBJECT_PROPERTIES_MINIMUM', [keysCount, schema.minProperties!], undefined, schema);
+      report.addError(
+        'OBJECT_PROPERTIES_MINIMUM',
+        [keysCount, schema.minProperties!],
+        undefined,
+        schema,
+        'minProperties'
+      );
     }
   },
   required: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
@@ -226,7 +238,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     while (idx--) {
       const requiredPropertyName = schema.required![idx];
       if (!hasOwn(json, requiredPropertyName)) {
-        report.addError('OBJECT_MISSING_REQUIRED_PROPERTY', [requiredPropertyName], undefined, schema);
+        report.addError('OBJECT_MISSING_REQUIRED_PROPERTY', [requiredPropertyName], undefined, schema, 'required');
       }
     }
   },
@@ -289,7 +301,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
         let idx4 = s.length;
         if (idx4) {
           while (idx4--) {
-            report.addError('OBJECT_ADDITIONAL_PROPERTIES', [s[idx4]], undefined, schema);
+            report.addError('OBJECT_ADDITIONAL_PROPERTIES', [s[idx4]], undefined, schema, 'properties');
           }
         }
       }
@@ -319,7 +331,13 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
           while (idx2--) {
             const requiredPropertyName = dependencyDefinition[idx2];
             if (!hasOwn(json, requiredPropertyName)) {
-              report.addError('OBJECT_DEPENDENCY_KEY', [requiredPropertyName, dependencyName], undefined, schema);
+              report.addError(
+                'OBJECT_DEPENDENCY_KEY',
+                [requiredPropertyName, dependencyName],
+                undefined,
+                schema,
+                'dependencies'
+              );
             }
           }
         } else {
@@ -349,7 +367,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     if (match === false) {
       const error =
         caseInsensitiveMatch && this.options.enumCaseInsensitiveComparison ? 'ENUM_CASE_MISMATCH' : 'ENUM_MISMATCH';
-      report.addError(error, [JSON.stringify(json)], undefined, schema);
+      report.addError(error, [JSON.stringify(json)], undefined, schema, 'enum');
     }
   },
   type: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
@@ -360,11 +378,11 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     const jsonType = whatIs(json);
     if (typeof schema.type === 'string') {
       if (jsonType !== schema.type && (jsonType !== 'integer' || schema.type !== 'number')) {
-        report.addError('INVALID_TYPE', [schema.type, jsonType], undefined, schema);
+        report.addError('INVALID_TYPE', [schema.type, jsonType], undefined, schema, 'type');
       }
     } else {
       if (schema.type!.indexOf(jsonType) === -1 && (jsonType !== 'integer' || schema.type!.indexOf('number') === -1)) {
-        report.addError('INVALID_TYPE', [JSON.stringify(schema.type), jsonType], undefined, schema);
+        report.addError('INVALID_TYPE', [JSON.stringify(schema.type), jsonType], undefined, schema, 'type');
       }
     }
   },
@@ -391,7 +409,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     }
 
     if (passed === false) {
-      report.addError('ANY_OF_MISSING', undefined, subReports, schema);
+      report.addError('ANY_OF_MISSING', undefined, subReports, schema, 'anyOf');
     }
   },
   oneOf: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
@@ -409,16 +427,16 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     }
 
     if (passes === 0) {
-      report.addError('ONE_OF_MISSING', undefined, subReports, schema);
+      report.addError('ONE_OF_MISSING', undefined, subReports, schema, 'oneOf');
     } else if (passes > 1) {
-      report.addError('ONE_OF_MULTIPLE', undefined, undefined, schema);
+      report.addError('ONE_OF_MULTIPLE', undefined, undefined, schema, 'oneOf');
     }
   },
   not: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
     const subReport = new Report(report);
     if (validate.call(this, subReport, schema.not!, json) === true) {
-      report.addError('NOT_PASSED', undefined, undefined, schema);
+      report.addError('NOT_PASSED', undefined, undefined, schema, 'not');
     }
   },
   definitions: function () {
@@ -444,18 +462,18 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
           if (result !== true) {
             const backup = report.path;
             report.path = pathBeforeAsync;
-            report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema);
+            report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
             report.path = backup;
           }
         });
       } else {
         // sync
         if (formatValidatorFn.call(this, json) !== true) {
-          report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema);
+          report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
         }
       }
     } else if (this.options.ignoreUnknownFormats !== true) {
-      report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema);
+      report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
     }
   },
 };

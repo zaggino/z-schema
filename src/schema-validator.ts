@@ -13,77 +13,83 @@ const SchemaValidators = {
     // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07
     // http://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03
     if (typeof schema.$ref !== 'string') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['$ref', 'string']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['$ref', 'string'], undefined, schema, '$ref');
     }
   },
   $schema: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-core.html#rfc.section.6
     if (typeof schema.$schema !== 'string') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['$schema', 'string']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['$schema', 'string'], undefined, schema, '$schema');
     }
   },
   multipleOf: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.1.1
     if (typeof schema.multipleOf !== 'number') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['multipleOf', 'number']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['multipleOf', 'number'], undefined, schema, 'multipleOf');
     } else if (schema.multipleOf <= 0) {
-      report.addError('KEYWORD_MUST_BE', ['multipleOf', 'strictly greater than 0']);
+      report.addError('KEYWORD_MUST_BE', ['multipleOf', 'strictly greater than 0'], undefined, schema, 'multipleOf');
     }
   },
   maximum: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.2.1
     if (typeof schema.maximum !== 'number') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['maximum', 'number']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['maximum', 'number'], undefined, schema, 'maximum');
     }
   },
   exclusiveMaximum: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.2.1
     if (typeof schema.exclusiveMaximum !== 'boolean') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['exclusiveMaximum', 'boolean']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['exclusiveMaximum', 'boolean'], undefined, schema, 'exclusiveMaximum');
     } else if (schema.maximum === undefined) {
-      report.addError('KEYWORD_DEPENDENCY', ['exclusiveMaximum', 'maximum']);
+      report.addError('KEYWORD_DEPENDENCY', ['exclusiveMaximum', 'maximum'], undefined, schema, 'exclusiveMaximum');
     }
   },
   minimum: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.1
     if (typeof schema.minimum !== 'number') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['minimum', 'number']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['minimum', 'number'], undefined, schema, 'minimum');
     }
   },
   exclusiveMinimum: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.1
     if (typeof schema.exclusiveMinimum !== 'boolean') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['exclusiveMinimum', 'boolean']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['exclusiveMinimum', 'boolean'], undefined, schema, 'exclusiveMinimum');
     } else if (schema.minimum === undefined) {
-      report.addError('KEYWORD_DEPENDENCY', ['exclusiveMinimum', 'minimum']);
+      report.addError('KEYWORD_DEPENDENCY', ['exclusiveMinimum', 'minimum'], undefined, schema, 'exclusiveMinimum');
     }
   },
   maxLength: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.1.1
     if (whatIs(schema.maxLength) !== 'integer') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['maxLength', 'integer']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['maxLength', 'integer'], undefined, schema, 'maxLength');
     } else if (schema.maxLength! < 0) {
-      report.addError('KEYWORD_MUST_BE', ['maxLength', 'greater than, or equal to 0']);
+      report.addError('KEYWORD_MUST_BE', ['maxLength', 'greater than, or equal to 0'], undefined, schema, 'maxLength');
     }
   },
   minLength: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.2.1
     if (whatIs(schema.minLength) !== 'integer') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['minLength', 'integer']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['minLength', 'integer'], undefined, schema, 'minLength');
     } else if (schema.minLength! < 0) {
-      report.addError('KEYWORD_MUST_BE', ['minLength', 'greater than, or equal to 0']);
+      report.addError('KEYWORD_MUST_BE', ['minLength', 'greater than, or equal to 0'], undefined, schema, 'minLength');
     }
   },
   pattern: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.3.1
     if (typeof schema.pattern !== 'string') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['pattern', 'string']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['pattern', 'string'], undefined, schema, 'pattern');
     } else {
       // Use shared regex compilation helper
       // Import at top of file
       const result = compileSchemaRegex(schema.pattern);
       if (!result.ok) {
-        report.addError('KEYWORD_PATTERN', ['pattern', schema.pattern, result.error.message]);
+        report.addError(
+          'KEYWORD_PATTERN',
+          ['pattern', schema.pattern, result.error.message],
+          undefined,
+          schema,
+          'pattern'
+        );
       }
     }
   },
@@ -91,7 +97,13 @@ const SchemaValidators = {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.1
     const type = whatIs(schema.additionalItems);
     if (type !== 'boolean' && type !== 'object') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['additionalItems', ['boolean', 'object']]);
+      report.addError(
+        'KEYWORD_TYPE_EXPECTED',
+        ['additionalItems', ['boolean', 'object']],
+        undefined,
+        schema,
+        'additionalItems'
+      );
     } else if (isObject(schema.additionalItems)) {
       report.path.push('additionalItems');
       this.validateSchema(report, schema.additionalItems);
@@ -115,12 +127,12 @@ const SchemaValidators = {
         report.path.pop();
       }
     } else {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['items', ['array', 'object']]);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['items', ['array', 'object']], undefined, schema, 'items');
     }
 
     // custom - strict mode
     if (this.options.forceAdditional === true && schema.additionalItems === undefined && Array.isArray(schema.items)) {
-      report.addError('KEYWORD_UNDEFINED_STRICT', ['additionalItems']);
+      report.addError('KEYWORD_UNDEFINED_STRICT', ['additionalItems'], undefined, schema, 'additionalItems');
     }
     // custome - assume defined false mode
     if (this.options.assumeAdditional && schema.additionalItems === undefined && Array.isArray(schema.items)) {
@@ -130,56 +142,74 @@ const SchemaValidators = {
   maxItems: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.2.1
     if (typeof schema.maxItems !== 'number') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['maxItems', 'integer']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['maxItems', 'integer'], undefined, schema, 'maxItems');
     } else if (schema.maxItems < 0) {
-      report.addError('KEYWORD_MUST_BE', ['maxItems', 'greater than, or equal to 0']);
+      report.addError('KEYWORD_MUST_BE', ['maxItems', 'greater than, or equal to 0'], undefined, schema, 'maxItems');
     }
   },
   minItems: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.3.1
     if (whatIs(schema.minItems) !== 'integer') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['minItems', 'integer']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['minItems', 'integer'], undefined, schema, 'minItems');
     } else if (schema.minItems! < 0) {
-      report.addError('KEYWORD_MUST_BE', ['minItems', 'greater than, or equal to 0']);
+      report.addError('KEYWORD_MUST_BE', ['minItems', 'greater than, or equal to 0'], undefined, schema, 'minItems');
     }
   },
   uniqueItems: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.4.1
     if (typeof schema.uniqueItems !== 'boolean') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['uniqueItems', 'boolean']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['uniqueItems', 'boolean'], undefined, schema, 'uniqueItems');
     }
   },
   maxProperties: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.1.1
     if (whatIs(schema.maxProperties) !== 'integer') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['maxProperties', 'integer']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['maxProperties', 'integer'], undefined, schema, 'maxProperties');
     } else if (schema.maxProperties! < 0) {
-      report.addError('KEYWORD_MUST_BE', ['maxProperties', 'greater than, or equal to 0']);
+      report.addError(
+        'KEYWORD_MUST_BE',
+        ['maxProperties', 'greater than, or equal to 0'],
+        undefined,
+        schema,
+        'maxProperties'
+      );
     }
   },
   minProperties: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.2.1
     if (whatIs(schema.minProperties) !== 'integer') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['minProperties', 'integer']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['minProperties', 'integer'], undefined, schema, 'minProperties');
     } else if (schema.minProperties! < 0) {
-      report.addError('KEYWORD_MUST_BE', ['minProperties', 'greater than, or equal to 0']);
+      report.addError(
+        'KEYWORD_MUST_BE',
+        ['minProperties', 'greater than, or equal to 0'],
+        undefined,
+        schema,
+        'minProperties'
+      );
     }
   },
   required: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.3.1
     if (whatIs(schema.required) !== 'array') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['required', 'array']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['required', 'array'], undefined, schema, 'required');
     } else if (schema.required!.length === 0) {
-      report.addError('KEYWORD_MUST_BE', ['required', 'an array with at least one element']);
+      report.addError(
+        'KEYWORD_MUST_BE',
+        ['required', 'an array with at least one element'],
+        undefined,
+        schema,
+        'required'
+      );
     } else {
       let idx = schema.required!.length;
       while (idx--) {
         if (typeof schema.required![idx] !== 'string') {
-          report.addError('KEYWORD_VALUE_TYPE', ['required', 'string']);
+          report.addError('KEYWORD_VALUE_TYPE', ['required', 'string'], undefined, schema, 'required');
         }
       }
       if (isUniqueArray(schema.required!) === false) {
-        report.addError('KEYWORD_MUST_BE', ['required', 'an array with unique items']);
+        report.addError('KEYWORD_MUST_BE', ['required', 'an array with unique items'], undefined, schema, 'required');
       }
     }
   },
@@ -187,7 +217,13 @@ const SchemaValidators = {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.1
     const type = whatIs(schema.additionalProperties);
     if (type !== 'boolean' && type !== 'object') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['additionalProperties', ['boolean', 'object']]);
+      report.addError(
+        'KEYWORD_TYPE_EXPECTED',
+        ['additionalProperties', ['boolean', 'object']],
+        undefined,
+        schema,
+        'additionalProperties'
+      );
     } else if (isObject(schema.additionalProperties)) {
       report.path.push('additionalProperties');
       this.validateSchema(report, schema.additionalProperties);
@@ -197,7 +233,7 @@ const SchemaValidators = {
   properties: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.1
     if (whatIs(schema.properties) !== 'object') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['properties', 'object']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['properties', 'object'], undefined, schema, 'properties');
       return;
     }
 
@@ -215,7 +251,7 @@ const SchemaValidators = {
 
     // custom - strict mode
     if (this.options.forceAdditional === true && schema.additionalProperties === undefined) {
-      report.addError('KEYWORD_UNDEFINED_STRICT', ['additionalProperties']);
+      report.addError('KEYWORD_UNDEFINED_STRICT', ['additionalProperties'], undefined, schema, 'additionalProperties');
     }
     // custome - assume defined false mode
     if (this.options.assumeAdditional && schema.additionalProperties === undefined) {
@@ -223,13 +259,13 @@ const SchemaValidators = {
     }
     // custom - forceProperties
     if (this.options.forceProperties === true && keys.length === 0) {
-      report.addError('CUSTOM_MODE_FORCE_PROPERTIES', ['properties']);
+      report.addError('CUSTOM_MODE_FORCE_PROPERTIES', ['properties'], undefined, schema, 'properties');
     }
   },
   patternProperties: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.1
     if (whatIs(schema.patternProperties) !== 'object') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['patternProperties', 'object']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['patternProperties', 'object'], undefined, schema, 'patternProperties');
       return;
     }
 
@@ -241,7 +277,13 @@ const SchemaValidators = {
         val = schema.patternProperties![key];
       const result = compileSchemaRegex(key);
       if (!result.ok) {
-        report.addError('KEYWORD_PATTERN', ['patternProperties', key, result.error.message]);
+        report.addError(
+          'KEYWORD_PATTERN',
+          ['patternProperties', key, result.error.message],
+          undefined,
+          schema,
+          'patternProperties'
+        );
       }
       report.path.push('patternProperties');
       report.path.push(key);
@@ -252,13 +294,13 @@ const SchemaValidators = {
 
     // custom - forceProperties
     if (this.options.forceProperties === true && keys.length === 0) {
-      report.addError('CUSTOM_MODE_FORCE_PROPERTIES', ['patternProperties']);
+      report.addError('CUSTOM_MODE_FORCE_PROPERTIES', ['patternProperties'], undefined, schema, 'patternProperties');
     }
   },
   dependencies: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.5.1
     if (whatIs(schema.dependencies) !== 'object') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['dependencies', 'object']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['dependencies', 'object'], undefined, schema, 'dependencies');
     } else {
       const keys = Object.keys(schema.dependencies!);
       let idx = keys.length;
@@ -275,18 +317,24 @@ const SchemaValidators = {
         } else if (type === 'array') {
           let idx2 = schemaDependency.length;
           if (idx2 === 0) {
-            report.addError('KEYWORD_MUST_BE', ['dependencies', 'not empty array']);
+            report.addError('KEYWORD_MUST_BE', ['dependencies', 'not empty array'], undefined, schema, 'dependencies');
           }
           while (idx2--) {
             if (typeof schemaDependency[idx2] !== 'string') {
-              report.addError('KEYWORD_VALUE_TYPE', ['dependencies', 'string']);
+              report.addError('KEYWORD_VALUE_TYPE', ['dependencies', 'string'], undefined, schema, 'dependencies');
             }
           }
           if (isUniqueArray(schemaDependency) === false) {
-            report.addError('KEYWORD_MUST_BE', ['dependencies', 'an array with unique items']);
+            report.addError(
+              'KEYWORD_MUST_BE',
+              ['dependencies', 'an array with unique items'],
+              undefined,
+              schema,
+              'dependencies'
+            );
           }
         } else {
-          report.addError('KEYWORD_VALUE_TYPE', ['dependencies', 'object or array']);
+          report.addError('KEYWORD_VALUE_TYPE', ['dependencies', 'object or array'], undefined, schema, 'dependencies');
         }
       }
     }
@@ -294,11 +342,11 @@ const SchemaValidators = {
   enum: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.1.1
     if (Array.isArray(schema.enum) === false) {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['enum', 'array']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['enum', 'array'], undefined, schema, 'enum');
     } else if (schema.enum.length === 0) {
-      report.addError('KEYWORD_MUST_BE', ['enum', 'an array with at least one element']);
+      report.addError('KEYWORD_MUST_BE', ['enum', 'an array with at least one element'], undefined, schema, 'enum');
     } else if (isUniqueArray(schema.enum) === false) {
-      report.addError('KEYWORD_MUST_BE', ['enum', 'an array with unique elements']);
+      report.addError('KEYWORD_MUST_BE', ['enum', 'an array with unique elements'], undefined, schema, 'enum');
     }
   },
   type: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -311,18 +359,18 @@ const SchemaValidators = {
       let idx = schema.type.length;
       while (idx--) {
         if (primitiveTypes.indexOf(schema.type[idx]) === -1) {
-          report.addError('KEYWORD_TYPE_EXPECTED', ['type', primitiveTypeStr]);
+          report.addError('KEYWORD_TYPE_EXPECTED', ['type', primitiveTypeStr], undefined, schema, 'type');
         }
       }
       if (isUniqueArray(schema.type) === false) {
-        report.addError('KEYWORD_MUST_BE', ['type', 'an object with unique properties']);
+        report.addError('KEYWORD_MUST_BE', ['type', 'an object with unique properties'], undefined, schema, 'type');
       }
     } else if (typeof schema.type === 'string') {
       if (primitiveTypes.indexOf(schema.type) === -1) {
-        report.addError('KEYWORD_TYPE_EXPECTED', ['type', primitiveTypeStr]);
+        report.addError('KEYWORD_TYPE_EXPECTED', ['type', primitiveTypeStr], undefined, schema, 'type');
       }
     } else {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['type', ['string', 'array']]);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['type', ['string', 'array']], undefined, schema, 'type');
     }
 
     if (this.options.noEmptyStrings === true) {
@@ -342,28 +390,28 @@ const SchemaValidators = {
     if (this.options.forceProperties === true) {
       if (schema.type === 'object' || (isArray && schema.type!.indexOf('object') !== -1)) {
         if (schema.properties === undefined && schema.patternProperties === undefined) {
-          report.addError('KEYWORD_UNDEFINED_STRICT', ['properties']);
+          report.addError('KEYWORD_UNDEFINED_STRICT', ['properties'], undefined, schema, 'properties');
         }
       }
     }
     if (this.options.forceItems === true) {
       if (schema.type === 'array' || (isArray && schema.type!.indexOf('array') !== -1)) {
         if (schema.items === undefined) {
-          report.addError('KEYWORD_UNDEFINED_STRICT', ['items']);
+          report.addError('KEYWORD_UNDEFINED_STRICT', ['items'], undefined, schema, 'items');
         }
       }
     }
     if (this.options.forceMinItems === true) {
       if (schema.type === 'array' || (isArray && schema.type!.indexOf('array') !== -1)) {
         if (schema.minItems === undefined) {
-          report.addError('KEYWORD_UNDEFINED_STRICT', ['minItems']);
+          report.addError('KEYWORD_UNDEFINED_STRICT', ['minItems'], undefined, schema, 'minItems');
         }
       }
     }
     if (this.options.forceMaxItems === true) {
       if (schema.type === 'array' || (isArray && schema.type!.indexOf('array') !== -1)) {
         if (schema.maxItems === undefined) {
-          report.addError('KEYWORD_UNDEFINED_STRICT', ['maxItems']);
+          report.addError('KEYWORD_UNDEFINED_STRICT', ['maxItems'], undefined, schema, 'maxItems');
         }
       }
     }
@@ -375,7 +423,7 @@ const SchemaValidators = {
           schema.enum === undefined &&
           schema.pattern === undefined
         ) {
-          report.addError('KEYWORD_UNDEFINED_STRICT', ['minLength']);
+          report.addError('KEYWORD_UNDEFINED_STRICT', ['minLength'], undefined, schema, 'minLength');
         }
       }
     }
@@ -387,7 +435,7 @@ const SchemaValidators = {
           schema.enum === undefined &&
           schema.pattern === undefined
         ) {
-          report.addError('KEYWORD_UNDEFINED_STRICT', ['maxLength']);
+          report.addError('KEYWORD_UNDEFINED_STRICT', ['maxLength'], undefined, schema, 'maxLength');
         }
       }
     }
@@ -395,9 +443,9 @@ const SchemaValidators = {
   allOf: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.1
     if (Array.isArray(schema.allOf) === false) {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['allOf', 'array']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['allOf', 'array'], undefined, schema, 'allOf');
     } else if (schema.allOf.length === 0) {
-      report.addError('KEYWORD_MUST_BE', ['allOf', 'an array with at least one element']);
+      report.addError('KEYWORD_MUST_BE', ['allOf', 'an array with at least one element'], undefined, schema, 'allOf');
     } else {
       let idx = schema.allOf.length;
       while (idx--) {
@@ -412,9 +460,9 @@ const SchemaValidators = {
   anyOf: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.1
     if (Array.isArray(schema.anyOf) === false) {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['anyOf', 'array']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['anyOf', 'array'], undefined, schema, 'anyOf');
     } else if (schema.anyOf.length === 0) {
-      report.addError('KEYWORD_MUST_BE', ['anyOf', 'an array with at least one element']);
+      report.addError('KEYWORD_MUST_BE', ['anyOf', 'an array with at least one element'], undefined, schema, 'anyOf');
     } else {
       let idx = schema.anyOf.length;
       while (idx--) {
@@ -429,9 +477,9 @@ const SchemaValidators = {
   oneOf: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.1
     if (Array.isArray(schema.oneOf) === false) {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['oneOf', 'array']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['oneOf', 'array'], undefined, schema, 'oneOf');
     } else if (schema.oneOf.length === 0) {
-      report.addError('KEYWORD_MUST_BE', ['oneOf', 'an array with at least one element']);
+      report.addError('KEYWORD_MUST_BE', ['oneOf', 'an array with at least one element'], undefined, schema, 'oneOf');
     } else {
       let idx = schema.oneOf.length;
       while (idx--) {
@@ -446,7 +494,7 @@ const SchemaValidators = {
   not: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.1
     if (whatIs(schema.not) !== 'object') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['not', 'object']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['not', 'object'], undefined, schema, 'not');
     } else {
       report.path.push('not');
       this.validateSchema(report, schema.not!);
@@ -456,7 +504,7 @@ const SchemaValidators = {
   definitions: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.1
     if (whatIs(schema.definitions) !== 'object') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['definitions', 'object']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['definitions', 'object'], undefined, schema, 'definitions');
     } else {
       const keys = Object.keys(schema.definitions!);
       let idx = keys.length;
@@ -473,29 +521,29 @@ const SchemaValidators = {
   },
   format: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     if (typeof schema.format !== 'string') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['format', 'string']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['format', 'string'], undefined, schema, 'format');
     } else {
       if (!isFormatSupported(schema.format) && this.options.ignoreUnknownFormats !== true) {
-        report.addError('UNKNOWN_FORMAT', [schema.format]);
+        report.addError('UNKNOWN_FORMAT', [schema.format], undefined, schema, 'format');
       }
     }
   },
   id: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-core.html#rfc.section.7.2
     if (typeof schema.id !== 'string') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['id', 'string']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['id', 'string'], undefined, schema, 'id');
     }
   },
   title: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.6.1
     if (typeof schema.title !== 'string') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['title', 'string']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['title', 'string'], undefined, schema, 'title');
     }
   },
   description: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.6.1
     if (typeof schema.description !== 'string') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['description', 'string']);
+      report.addError('KEYWORD_TYPE_EXPECTED', ['description', 'string'], undefined, schema, 'description');
     }
   },
   default: function (this: SchemaValidator /* report, schema */) {
@@ -539,11 +587,11 @@ export class SchemaValidator {
         const subReport = new Report(report);
         const valid = validate.call(this.validator, subReport, schema.__$schemaResolved, schema);
         if (valid === false) {
-          report.addError('PARENT_SCHEMA_VALIDATION_FAILED', undefined, subReport);
+          report.addError('PARENT_SCHEMA_VALIDATION_FAILED', undefined, subReport, schema, '$schema');
         }
       } else {
         if (this.validator.options.ignoreUnresolvableReferences !== true) {
-          report.addError('REF_UNRESOLVED', [schema.$schema!]);
+          report.addError('REF_UNRESOLVED', [schema.$schema!], undefined, schema, '$schema');
         }
       }
     }
@@ -576,7 +624,7 @@ export class SchemaValidator {
         schema.not === undefined &&
         schema.$ref === undefined
       ) {
-        report.addError('KEYWORD_UNDEFINED_STRICT', ['type']);
+        report.addError('KEYWORD_UNDEFINED_STRICT', ['type'], undefined, schema, 'type');
       }
     }
 
@@ -591,7 +639,7 @@ export class SchemaValidator {
         SchemaValidators[key as keyof typeof SchemaValidators].call(this, report, schema);
       } else if (!hasParentSchema) {
         if (this.validator.options.noExtraKeywords === true) {
-          report.addError('KEYWORD_UNEXPECTED', [key]);
+          report.addError('KEYWORD_UNEXPECTED', [key], undefined, schema, undefined);
         }
       }
     }
