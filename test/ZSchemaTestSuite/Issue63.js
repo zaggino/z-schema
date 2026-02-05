@@ -1,4 +1,5 @@
 export default {
+  version: 'none',
   description: 'Issue #63 - unresolvable reference due to hash sign in id',
   tests: [
     {

@@ -1,9 +1,10 @@
 import ZSchema from '../../src/index.ts';
-import { ValidateOptions, ZSchemaOptions } from '../../src/z-schema.ts';
+import { JsonSchemaVersion, ValidateOptions, ZSchemaOptions } from '../../src/z-schema.ts';
 
 type ZSchemaClass = new (...args: ConstructorParameters<typeof ZSchema>) => ZSchema;
 
 interface TestCommon {
+  version?: JsonSchemaVersion;
   async?: boolean;
   data?: unknown;
   schema?: unknown;
@@ -127,13 +128,17 @@ describe('ZSchemaTestSuite', function () {
       }
 
       const async = test.async || testSuite.async || false;
-      const options = test.options || testSuite.options || undefined;
+      const options: ZSchemaOptions = test.options || testSuite.options || {};
       const setup = test.setup || testSuite.setup;
       let schema = test.schema || testSuite.schema;
       const schemaIndex = test.schemaIndex || testSuite.schemaIndex || 0;
       const after = test.after || testSuite.after;
       const validateSchemaOnly = test.validateSchemaOnly || testSuite.validateSchemaOnly;
       const failWithException = test.failWithException || testSuite.failWithException;
+      const version = test.version || testSuite.version;
+      if (version) {
+        options.version = version;
+      }
 
       if (!async) {
         it(testSuite.description + ', ' + test.description, function () {
@@ -176,7 +181,7 @@ describe('ZSchemaTestSuite', function () {
             expect(caughtErr).toBeTruthy();
           } else {
             expect(typeof valid).toBe('boolean' /*, 'returned response is not a boolean'*/);
-            expect(valid).toBe(test.valid /*, "test result doesn't match expected test result"*/);
+            expect.soft(valid).toBe(test.valid /*, "test result doesn't match expected test result"*/);
           }
 
           if (test.valid === true) {

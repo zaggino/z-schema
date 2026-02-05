@@ -1,6 +1,23 @@
-[submodule "json-schema"]
-	path = json-schema
-	url = https://github.com/json-schema/json-schema.git
 [submodule "test/public/json-schema-test-suite"]
 	path = test/public/json-schema-test-suite
 	url = https://github.com/json-schema-org/JSON-Schema-Test-Suite
+[submodule "json-schema-spec/draft-04"]
+	path = json-schema-spec/draft-04
+	url = https://github.com/json-schema-org/json-schema-spec.git
+	branch = draft-04
+[submodule "json-schema-spec/draft-06"]
+	path = json-schema-spec/draft-06
+	url = https://github.com/json-schema-org/json-schema-spec.git
+	branch = draft-06
+[submodule "json-schema-spec/draft-07"]
+	path = json-schema-spec/draft-07
+	url = https://github.com/json-schema-org/json-schema-spec.git
+	branch = draft-07
+[submodule "json-schema-spec/draft/2019-09"]
+	path = json-schema-spec/draft/2019-09
+	url = https://github.com/json-schema-org/json-schema-spec.git
+	branch = 2019-09
+[submodule "json-schema-spec/draft/2020-12"]
+	path = json-schema-spec/draft/2020-12
+	url = https://github.com/json-schema-org/json-schema-spec.git
+	branch = 2020-12

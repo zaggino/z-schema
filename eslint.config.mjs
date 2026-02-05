@@ -72,7 +72,7 @@ export default defineConfig([
     'dist/',
     'node_modules/',
     'build/',
-    'json-schema/',
+    'json-schema-spec/',
     'specs/',
     'test/public/json-schema-test-suite/',
     'umd/',

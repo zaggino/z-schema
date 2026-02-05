@@ -1,4 +1,4 @@
-json-schema/
+json-schema-spec/
 test/public/json-schema-test-suite/
 CHANGELOG.md
 node_modules/

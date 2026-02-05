@@ -24,6 +24,7 @@ var expectedResult = {
   },
 };
 export default {
+  version: 'none',
   description: 'Issue #94 - get a resolved schema for documentation purposes',
   tests: [
     {

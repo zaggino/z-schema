@@ -241,6 +241,11 @@ export class SchemaCompiler {
       return true;
     }
 
+    // v8 - if $schema is not present, set $schema to default
+    if (!schema.$schema && this.validator.options.version !== 'none') {
+      schema.$schema = this.validator.getDefaultSchemaId();
+    }
+
     if (schema.id && typeof schema.id === 'string' && !options?.noCache) {
       // add this to our schemaCache (before compilation in case we have references including id)
       this.validator.scache.cacheSchemaByUri(schema.id, schema);

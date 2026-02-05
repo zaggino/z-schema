@@ -16,13 +16,11 @@ import _Draft4HyperSchema from './schemas/draft-04-hyper-schema.json' with { typ
 import { get } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
 
-const Draft4Schema: JsonSchema = _Draft4Schema;
-const Draft4HyperSchema: JsonSchema = _Draft4HyperSchema;
+// TODO: currently unsupported 'draft-06', 'draft-07', '2019-09', '2020-12'
+export type JsonSchemaVersion = 'draft-04';
 
-/**
- * default options
- */
 const defaultOptions: ZSchemaOptions = {
+  version: 'draft-04',
   // default timeout for all async tasks
   asyncTimeout: 2000,
   // force additionalProperties and additionalItems to be defined on "object" and "array" types
@@ -116,6 +114,7 @@ const normalizeOptions = (options?: ZSchemaOptions) => {
 };
 
 export interface ZSchemaOptions {
+  version?: JsonSchemaVersion | 'none';
   asyncTimeout?: number;
   forceAdditional?: boolean;
   assumeAdditional?: boolean | string[];
@@ -179,12 +178,12 @@ export class ZSchema {
     this.sc = new SchemaCompiler(this);
     this.sv = new SchemaValidator(this);
     this.options = normalizeOptions(options);
+  }
 
-    // Disable strict validation for the built-in schemas
-    const metaschemaOptions = normalizeOptions({});
-
-    this.setRemoteReference('http://json-schema.org/draft-04/schema', Draft4Schema, metaschemaOptions);
-    this.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', Draft4HyperSchema, metaschemaOptions);
+  getDefaultSchemaId(): string {
+    return this.options.version && this.options.version !== 'none'
+      ? VERSION_SCHEMA_URL_MAPPING[this.options.version]
+      : VERSION_SCHEMA_URL_MAPPING[defaultOptions.version as JsonSchemaVersion];
   }
 
   validateSchema(schemaOrArr: JsonSchema | JsonSchema[]): boolean {
@@ -483,3 +482,13 @@ export class ZSchema {
 
   static jsonSymbol = jsonSymbol;
 }
+
+const Draft4Schema: JsonSchema = _Draft4Schema;
+const Draft4HyperSchema: JsonSchema = _Draft4HyperSchema;
+
+export const VERSION_SCHEMA_URL_MAPPING: Record<JsonSchemaVersion, string> = {
+  'draft-04': 'http://json-schema.org/draft-04/schema#',
+};
+
+ZSchema.setRemoteReference('http://json-schema.org/draft-04/schema', Draft4Schema, { version: 'none' });
+ZSchema.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', Draft4HyperSchema, { version: 'none' });

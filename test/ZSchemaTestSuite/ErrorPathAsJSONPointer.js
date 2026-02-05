@@ -1,4 +1,5 @@
 export default {
+  version: 'none',
   description: 'Report error paths as a JSON Pointer string',
   tests: [
     {
