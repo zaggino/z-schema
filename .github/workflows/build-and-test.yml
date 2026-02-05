@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.58.0-noble
+      options: --user 1001
 
     strategy:
       matrix:
@@ -27,8 +30,6 @@ jobs:
         run: git submodule update --init
       - name: Install dependencies
         run: npm ci
-      - name: Install Playwright
-        run: npx playwright install --with-deps
       - name: ESLint
         run: npm run lint:check
       - name: Prettier
