@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.58.0-noble
-      options: --user 1001
 
     strategy:
       matrix:
@@ -46,4 +45,4 @@ jobs:
         name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
