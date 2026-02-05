@@ -419,7 +419,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     let idx = schema.oneOf!.length;
 
     while (idx--) {
-      const subReport = new Report(report, { maxErrors: 1 });
+      const subReport = new Report(report);
       subReports.push(subReport);
       if (validate.call(this, subReport, schema.oneOf![idx], json) === true) {
         passes++;
