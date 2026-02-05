@@ -1,5 +1,17 @@
 # Changelog
 
+## [8.4.0](https://github.com/zaggino/z-schema/compare/v8.3.0...v8.4.0) (2026-02-05)
+
+
+### Features
+
+* add instance scoped format functions, fixes [#214](https://github.com/zaggino/z-schema/issues/214) ([ec4f5cb](https://github.com/zaggino/z-schema/commit/ec4f5cbe2b863c7fbd053ac69c85c2aba436522f))
+
+
+### Bug Fixes
+
+* report all errors from optional parent object, fixes [#224](https://github.com/zaggino/z-schema/issues/224) ([7b79332](https://github.com/zaggino/z-schema/commit/7b793326372921065d6c5babf195821eec38d52f))
+
 ## [8.3.0](https://github.com/zaggino/z-schema/compare/v8.2.0...v8.3.0) (2026-02-05)
 
 
