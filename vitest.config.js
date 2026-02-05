@@ -3,6 +3,11 @@ import { playwright } from '@vitest/browser-playwright';
 
 export default defineConfig({
   test: {
+    coverage: {
+      provider: 'istanbul',
+      include: ['src/'],
+      exclude: ['src/package.json', 'src/schemas/*.json'],
+    },
     globals: true,
     globalSetup: 'test/vitest.setup.ts',
     projects: [

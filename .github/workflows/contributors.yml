@@ -1,3 +1,5 @@
+name: Maintain contributors
+
 on:
   push:
     branches:
