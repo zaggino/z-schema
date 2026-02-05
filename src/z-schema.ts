@@ -142,6 +142,7 @@ export interface ZSchemaOptions {
 export interface ValidateOptions {
   schemaPath?: string;
   includeErrors?: Array<keyof typeof Errors>;
+  excludeErrors?: Array<keyof typeof Errors>;
 }
 
 export type ValidateCallback = (e: Error | SchemaErrorDetail[] | null, valid: boolean) => void;
@@ -246,7 +247,7 @@ export class ZSchema {
     }
 
     let foundError = false;
-    const report = new Report(this.options);
+    const report = new Report(this.options, options);
     report.json = json;
 
     let _schema: JsonSchemaInternal;
