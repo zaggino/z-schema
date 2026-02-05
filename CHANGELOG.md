@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.3.0](https://github.com/zaggino/z-schema/compare/v8.2.0...v8.3.0) (2026-02-05)
+
+
+### Features
+
+* add keyword in error objects, fixes [#232](https://github.com/zaggino/z-schema/issues/232) ([b243a13](https://github.com/zaggino/z-schema/commit/b243a13823e6836e3e2f5aafd64b140ce39c6e21))
+
 ## [8.2.0](https://github.com/zaggino/z-schema/compare/v8.1.0...v8.2.0) (2026-02-05)
 
 
