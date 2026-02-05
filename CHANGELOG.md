@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.2.0](https://github.com/zaggino/z-schema/compare/v8.1.0...v8.2.0) (2026-02-05)
+
+
+### Features
+
+* added an option to exclude errors from being reported, fixes [#263](https://github.com/zaggino/z-schema/issues/263) ([417f7d7](https://github.com/zaggino/z-schema/commit/417f7d7889452d2291f8716d91c9d8baa550dbc9))
+
 ## [8.1.0](https://github.com/zaggino/z-schema/compare/v8.0.0...v8.1.0) (2026-02-05)
 
 
