@@ -1,6 +1,3 @@
 [submodule "test/public/json-schema-test-suite"]
 	path = test/public/json-schema-test-suite
 	url = https://github.com/json-schema-org/JSON-Schema-Test-Suite
-[submodule "json-schema-website"]
-	path = json-schema-website
-	url = https://github.com/json-schema-org/website
