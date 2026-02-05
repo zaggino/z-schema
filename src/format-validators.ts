@@ -142,6 +142,7 @@ const uriValidator: FormatValidatorFn = function (uri: unknown) {
 
 export interface FormatValidatorsOptions {
   strictUris?: boolean;
+  customFormats?: Record<string, FormatValidatorFn | null>;
 }
 
 const inbuiltValidators: Record<string, FormatValidatorFn> = {
@@ -164,6 +165,7 @@ export function getFormatValidators(options?: FormatValidatorsOptions): Record<s
     ...inbuiltValidators,
     ...(options?.strictUris ? { uri: strictUriValidator } : {}),
     ...customValidators,
+    ...(options?.customFormats || {}),
   };
 }
 
@@ -182,8 +184,15 @@ export function getSupportedFormats() {
   });
 }
 
-export function isFormatSupported(name: string): boolean {
-  return inbuiltValidators[name] != null || customValidators[name] != null;
+export function isFormatSupported(
+  name: string,
+  options?: { customFormats?: Record<string, FormatValidatorFn | null> }
+): boolean {
+  return !!(
+    inbuiltValidators[name] != null ||
+    customValidators[name] != null ||
+    (options?.customFormats && options.customFormats[name] != null)
+  );
 }
 
 export function getRegisteredFormats() {

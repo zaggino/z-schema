@@ -523,7 +523,7 @@ const SchemaValidators = {
     if (typeof schema.format !== 'string') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['format', 'string'], undefined, schema, 'format');
     } else {
-      if (!isFormatSupported(schema.format) && this.options.ignoreUnknownFormats !== true) {
+      if (!isFormatSupported(schema.format, this.options) && this.options.ignoreUnknownFormats !== true) {
         report.addError('UNKNOWN_FORMAT', [schema.format], undefined, schema, 'format');
       }
     }

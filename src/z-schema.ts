@@ -13,7 +13,7 @@ import type { Errors } from './errors.js';
 import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import _Draft4Schema from './schemas/draft-04-schema.json' with { type: 'json' };
 import _Draft4HyperSchema from './schemas/draft-04-hyper-schema.json' with { type: 'json' };
-import { get } from './utils/json.js';
+import { sortedKeys, get } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
 
 // TODO: currently unsupported 'draft-06', 'draft-07', '2019-09', '2020-12'
@@ -137,6 +137,7 @@ export interface ZSchemaOptions {
   pedanticCheck?: boolean;
   ignoreUnknownFormats?: boolean;
   customValidator?: (report: Report, schema: unknown, json: unknown) => void;
+  customFormats?: Record<string, FormatValidatorFn | null>;
 }
 
 export interface ValidateOptions {
@@ -151,6 +152,7 @@ export type ValidateCallback = (e: Error | SchemaErrorDetail[] | null, valid: bo
 export type SchemaReader = (uri: string) => JsonSchema;
 
 export class ZSchema {
+  // class scoped format functions
   public static registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
     return registerFormat(name, validatorFunction);
   }
@@ -163,6 +165,26 @@ export class ZSchema {
     return getRegisteredFormats();
   }
 
+  // instance scoped format functions
+  public registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
+    if (!this.options.customFormats) {
+      this.options.customFormats = {};
+    }
+    this.options.customFormats[name] = validatorFunction;
+  }
+
+  public unregisterFormat(name: string): void {
+    if (!this.options.customFormats) {
+      this.options.customFormats = {};
+    }
+    this.options.customFormats[name] = null;
+  }
+
+  public getRegisteredFormats(): string[] {
+    return sortedKeys(this.options.customFormats || {});
+  }
+
+  // default options for validator instance
   public static getDefaultOptions(): ZSchemaOptions {
     return deepClone(defaultOptions);
   }
