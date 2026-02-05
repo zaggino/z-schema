@@ -155,7 +155,7 @@ const inbuiltValidators: Record<string, FormatValidatorFn> = {
   regex: regexValidator,
   uri: uriValidator,
   'strict-uri': strictUriValidator,
-};
+} as const;
 
 const customValidators: Record<string, FormatValidatorFn> = {};
 
