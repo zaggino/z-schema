@@ -11,6 +11,18 @@ var validator = new ZSchema({
 });
 ```
 
+### excludeErrors
+
+An array of error codes to exclude from validation reports. When specified, any errors with matching codes will be filtered out from the report, allowing you to suppress specific validation errors while keeping others.
+
+```javascript
+var validator = new ZSchema({
+  excludeErrors: ['MIN_LENGTH', 'MINIMUM'],
+});
+
+var report = validator.validate(data, schema, { excludeErrors: ['MAX_LENGTH'] });
+```
+
 ### noEmptyArrays
 
 When true, validator will assume that minimum count of items in any `array` is 1, except when `minItems: 0` is explicitly defined.

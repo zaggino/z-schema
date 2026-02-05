@@ -1,7 +1,7 @@
 import { ErrorCode, ErrorParam, Errors } from './errors.js';
 import { whatIs } from './utils/what-is.js';
 import { schemaSymbol, jsonSymbol } from './utils/symbols.js';
-import { ValidateCallback, ZSchemaOptions } from './z-schema.js';
+import { ValidateCallback, ValidateOptions, ZSchemaOptions } from './z-schema.js';
 import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import { isAbsoluteUri } from './utils/uri.js';
 import { get } from './utils/json.js';
@@ -83,14 +83,27 @@ export class Report {
   parentReport?: Report;
   options: ZSchemaOptions;
   reportOptions: ReportOptions;
+  validateOptions: ValidateOptions = {};
 
-  constructor(zschemaOptions: ZSchemaOptions); // primary
-  constructor(parentReport: Report); // subreport
-  constructor(parentReport: Report, reportOptions: ReportOptions); // subreport with options
-  constructor(parentOrOptions: ZSchemaOptions | Report, reportOptions?: ReportOptions) {
+  constructor(zschemaOptions: ZSchemaOptions, validateOptions?: ValidateOptions); // primary
+  constructor(parentReport: Report, validateOptions?: ValidateOptions); // subreport
+  constructor(parentReport: Report, reportOptions: ReportOptions, validateOptions?: ValidateOptions); // subreport with options
+  constructor(
+    parentOrOptions: ZSchemaOptions | Report,
+    reportOptionsOrValidate?: ReportOptions | ValidateOptions,
+    validateOptions?: ValidateOptions
+  ) {
     this.parentReport = parentOrOptions instanceof Report ? parentOrOptions : undefined;
     this.options = parentOrOptions instanceof Report ? parentOrOptions.options : parentOrOptions || {};
-    this.reportOptions = reportOptions || {};
+    if (parentOrOptions instanceof Report) {
+      // subreport
+      this.reportOptions = (reportOptionsOrValidate as ReportOptions) || {};
+      this.validateOptions = validateOptions || parentOrOptions.validateOptions;
+    } else {
+      // primary
+      this.reportOptions = {};
+      this.validateOptions = (reportOptionsOrValidate as ValidateOptions) || {};
+    }
   }
 
   isValid(): boolean {
@@ -258,7 +271,7 @@ export class Report {
   }
 
   addCustomError(
-    errorCode: string,
+    errorCode: ErrorCode,
     errorMessage: string,
     params?: ErrorParam[],
     subReports?: Report | Report[],
@@ -320,6 +333,11 @@ export class Report {
       if (err.inner.length === 0) {
         err.inner = undefined;
       }
+    }
+
+    // Check if this error code should be excluded
+    if (Array.isArray(this.validateOptions.excludeErrors) && this.validateOptions.excludeErrors.includes(errorCode)) {
+      return;
     }
 
     this.errors.push(err);
