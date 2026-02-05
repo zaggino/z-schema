@@ -2,7 +2,7 @@
 
 [![NPM](https://nodei.co/npm/z-schema.png?downloads=true&downloadRank=true)](https://www.npmjs.com/package/z-schema)
 
-[![coverage status](https://coveralls.io/repos/zaggino/z-schema/badge.svg)](https://coveralls.io/r/zaggino/z-schema)
+[![Coverage Status](https://coveralls.io/repos/github/zaggino/z-schema/badge.svg?branch=main)](https://coveralls.io/github/zaggino/z-schema?branch=main)
 
 ## Topics
 
