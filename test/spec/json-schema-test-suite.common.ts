@@ -13,6 +13,17 @@ interface TestSuite {
   }>;
 }
 
+export const JSON_SCHEMA_TEST_SUITE_TEST_FOLDERS = [
+  'draft3',
+  'draft4',
+  'draft6',
+  'draft7',
+  'draft2019-09',
+  'draft2020-12',
+  'v1',
+  'latest',
+];
+
 const excludedDirs: string[] = ['draft4/optional', 'draft4/optional/format'];
 const excludedFiles: string[] = [];
 const excludedTests: string[] = [];
