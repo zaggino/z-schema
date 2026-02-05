@@ -16,9 +16,9 @@ import _Draft4HyperSchema from './schemas/draft-04-hyper-schema.json' with { typ
 import { get } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
 
-/**
- * default options
- */
+// TODO: currently unsupported 'draft-06', 'draft-07', '2019-09', '2020-12'
+export type JsonSchemaVersion = 'draft-04';
+
 const defaultOptions: ZSchemaOptions = {
   version: 'draft-04',
   // default timeout for all async tasks
@@ -112,8 +112,6 @@ const normalizeOptions = (options?: ZSchemaOptions) => {
 
   return normalized;
 };
-
-export type JsonSchemaVersion = 'draft-04'; // TODO: 'draft-06', 'draft-07', '2019-09', '2020-12'
 
 export interface ZSchemaOptions {
   version?: JsonSchemaVersion | 'none';
