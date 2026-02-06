@@ -398,38 +398,125 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
   },
   anyOf: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.2
-    const subReports = [];
-    let passed = false;
+    const subReports: Report[] = [];
     let idx = schema.anyOf!.length;
 
-    while (idx-- && passed === false) {
+    while (idx--) {
       const subReport = new Report(report);
       subReports.push(subReport);
-      passed = validate.call(this, subReport, schema.anyOf![idx], json);
+      validate.call(this, subReport, schema.anyOf![idx], json);
     }
 
-    if (passed === false) {
-      report.addError('ANY_OF_MISSING', undefined, subReports, schema, 'anyOf');
+    // Aggregate async tasks from sub-reports to the main report
+    const asyncTasksBefore = report.asyncTasks.length;
+    for (const subReport of subReports) {
+      report.asyncTasks.push(...subReport.asyncTasks);
+    }
+    const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
+
+    if (hasAsyncTasks) {
+      // Defer the decision until async tasks complete
+      const pathBeforeAsync = shallowClone(report.path);
+      report.addAsyncTask(
+        (callback) => {
+          setTimeout(() => callback(null), 0);
+        },
+        [] as any,
+        () => {
+          const backup = report.path;
+          report.path = pathBeforeAsync;
+
+          let passed = false;
+          for (const subReport of subReports) {
+            if (subReport.errors.length === 0) {
+              passed = true;
+              break;
+            }
+          }
+
+          if (passed === false) {
+            report.addError('ANY_OF_MISSING', undefined, subReports, schema, 'anyOf');
+          }
+
+          report.path = backup;
+        }
+      );
+    } else {
+      // No async tasks, decide immediately
+      let passed = false;
+      for (const subReport of subReports) {
+        if (subReport.errors.length === 0) {
+          passed = true;
+          break;
+        }
+      }
+
+      if (passed === false) {
+        report.addError('ANY_OF_MISSING', undefined, subReports, schema, 'anyOf');
+      }
     }
   },
   oneOf: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.2
-    let passes = 0;
-    const subReports = [];
+    const subReports: Report[] = [];
     let idx = schema.oneOf!.length;
 
     while (idx--) {
       const subReport = new Report(report);
       subReports.push(subReport);
-      if (validate.call(this, subReport, schema.oneOf![idx], json) === true) {
-        passes++;
-      }
+      validate.call(this, subReport, schema.oneOf![idx], json);
     }
 
-    if (passes === 0) {
-      report.addError('ONE_OF_MISSING', undefined, subReports, schema, 'oneOf');
-    } else if (passes > 1) {
-      report.addError('ONE_OF_MULTIPLE', undefined, undefined, schema, 'oneOf');
+    // Aggregate async tasks from sub-reports to the main report
+    const asyncTasksBefore = report.asyncTasks.length;
+    for (const subReport of subReports) {
+      report.asyncTasks.push(...subReport.asyncTasks);
+    }
+    const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
+
+    if (hasAsyncTasks) {
+      // Defer the decision until async tasks complete
+      const pathBeforeAsync = shallowClone(report.path);
+      report.addAsyncTask(
+        (callback) => {
+          // This task runs after all async tasks, so we can check final state
+          setTimeout(() => callback(null), 0);
+        },
+        [] as any,
+        () => {
+          const backup = report.path;
+          report.path = pathBeforeAsync;
+
+          let passes = 0;
+          for (const subReport of subReports) {
+            if (subReport.errors.length === 0) {
+              passes++;
+            }
+          }
+
+          if (passes === 0) {
+            report.addError('ONE_OF_MISSING', undefined, subReports, schema, 'oneOf');
+          } else if (passes > 1) {
+            report.addError('ONE_OF_MULTIPLE', undefined, undefined, schema, 'oneOf');
+          }
+
+          report.path = backup;
+        }
+      );
+    } else {
+      // No async tasks, decide immediately
+      let passes = 0;
+      for (const subReport of subReports) {
+        if (subReport.errors.length === 0) {
+          passes++;
+        }
+      }
+
+      if (passes === 0) {
+        report.addError('ONE_OF_MISSING', undefined, subReports, schema, 'oneOf');
+      } else if (passes > 1) {
+        report.addError('ONE_OF_MULTIPLE', undefined, undefined, schema, 'oneOf');
+      }
     }
   },
   not: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
