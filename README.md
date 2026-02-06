@@ -67,12 +67,89 @@ var errors = validator.getLastErrors();
 ...
 ```
 
-### Async mode:
+### Async validation:
 
-```javascript
-validator.validate(json, schema, function (err, valid) {
-    ...
+ZSchema supports custom format validators that can perform both synchronous and asynchronous validation. This example shows how to validate a person payload with:
+
+- **Async validation**: User ID against a database
+- **Async validation**: Postcode against an external service
+- **Sync validation**: Phone number format
+
+```typescript
+import ZSchema from 'z-schema';
+import db from './db';
+
+// Initialize ZSchema
+const validator = new ZSchema();
+
+// Register async and sync format validators
+validator.registerFormat('user-exists', async (input: unknown): Promise<boolean> => {
+  if (typeof input !== 'number') return false;
+  const user = await db.getUserById(input);
+  return user != null;
 });
+validator.registerFormat('valid-postcode', async (input: unknown): Promise<boolean> => {
+  if (typeof input !== 'string') return false;
+  const postcode = await db.getPostcode(input);
+  return postcode != null;
+});
+validator.registerFormat('phone-number', (input: unknown): boolean => {
+  if (typeof input !== 'string') return false;
+  const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+  return phoneRegex.test(input);
+});
+
+// Define the JSON Schema
+const personSchema = {
+  $schema: 'http://json-schema.org/draft-04/schema#',
+  type: 'object',
+  required: ['personId', 'address'],
+  properties: {
+    personId: {
+      type: 'number',
+      format: 'user-exists',
+    },
+    address: {
+      type: 'object',
+      required: ['postcode', 'phone'],
+      properties: {
+        postcode: {
+          type: 'string',
+          format: 'valid-postcode',
+        },
+        phone: {
+          type: 'string',
+          format: 'phone-number',
+        },
+      },
+    },
+  },
+};
+
+// Example payload
+const payload = {
+  personId: 'user123',
+  address: {
+    postcode: 'SW1A 1AA',
+    phone: '+441234567890',
+  },
+};
+
+// Validate asynchronously
+try {
+  await validator.validateAsync(payload, personSchema);
+  console.log('✅ Validation successful!');
+} catch (err) {
+  console.log('❌ Validation failed:', err);
+}
+
+// or validate without try-catch
+const res = await validator.validateAsyncSafe(payload, personSchema);
+if (res.valid) {
+  console.log('✅ Validation successful!');
+} else {
+  console.log('❌ Validation failed:', res.errs);
+}
 ```
 
 ### Browser:

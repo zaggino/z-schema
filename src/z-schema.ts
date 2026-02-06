@@ -327,6 +327,40 @@ export class ZSchema {
     return report.isValid();
   }
 
+  // validateAsync always returns true, implement using try-catch
+  validateAsync(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): Promise<true> {
+    return new Promise((resolve, reject) => {
+      try {
+        this.validate(json, schema, options || {}, (err, valid) =>
+          err || valid !== true ? reject(err) : resolve(valid)
+        );
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  // validateAsyncSafe never throws, but returns complex object
+  validateAsyncSafe(
+    json: unknown,
+    schema: JsonSchema | string,
+    options?: ValidateOptions
+  ): Promise<{ valid: boolean; errs?: any[] }> {
+    return new Promise((resolve) => {
+      try {
+        this.validate(json, schema, options || {}, (err, valid) => {
+          let errs;
+          if (err != null) {
+            errs = Array.isArray(err) ? err : [err];
+          }
+          resolve({ valid, errs });
+        });
+      } catch (err) {
+        resolve({ valid: false, errs: Array.isArray(err) ? err : [err] });
+      }
+    });
+  }
+
   /**
    * Returns an Error object for the most recent failed validation, or null if the validation was successful.
    */
