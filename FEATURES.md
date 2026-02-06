@@ -105,6 +105,22 @@ ZSchema.registerFormat('xstring', function (str, callback) {
 });
 ```
 
+Alternatively, async format validators can return a Promise that resolves to a boolean:
+
+```javascript
+ZSchema.registerFormat('xstring', async function (str) {
+  // Simulate async operation
+  await someAsyncCheck(str);
+  return str === 'xxx';
+});
+```
+
+The default timeout for async format validation is 2000ms and can be configured per validator instance:
+
+```javascript
+const validator = new ZSchema({ asyncTimeout: 5000 }); // 5 second timeout
+```
+
 ### Helper method to check the formats that have been registered
 
 ```javascript

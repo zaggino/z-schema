@@ -3,7 +3,7 @@ import isIPModule from 'validator/lib/isIP.js';
 import isURLModule from 'validator/lib/isURL.js';
 import { sortedKeys } from './utils/json.js';
 
-export type FormatValidatorFn = (input: unknown) => boolean;
+export type FormatValidatorFn = (input: unknown) => boolean | Promise<boolean>;
 
 const dateValidator: FormatValidatorFn = (date: unknown) => {
   if (typeof date !== 'string') {

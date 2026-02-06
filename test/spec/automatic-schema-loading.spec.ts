@@ -2,20 +2,25 @@ import ZSchema from '../../src/index.ts';
 
 const isBrowser = typeof window !== 'undefined';
 
-function validateWithAutomaticDownloads(validator, data, schema, callback) {
-  let lastResult;
+function validateWithAutomaticDownloads(
+  validator: ZSchema,
+  data: unknown,
+  schema: unknown,
+  callback: (err: unknown, valid: boolean) => void
+) {
+  let lastResult: boolean;
 
   function finish() {
     callback(validator.getLastErrors(), lastResult);
   }
 
   function validate() {
-    lastResult = validator.validate(data, schema);
+    lastResult = validator.validate(data, schema as any);
 
     const missingReferences = validator.getMissingRemoteReferences();
     if (missingReferences.length > 0) {
       let finished = 0;
-      missingReferences.forEach(function (url) {
+      missingReferences.forEach(function (url: string) {
         fetch(url).then(async (res) => {
           if (!res.ok) {
             const text = await res.text().catch(() => '');
@@ -51,7 +56,7 @@ describe('Automatic schema loading', function () {
       const schema = { $ref: 'http://json-schema.org/draft-04/schema#' };
       const data = { minLength: 1 };
 
-      validateWithAutomaticDownloads(validator, data, schema, function (err, valid) {
+      validateWithAutomaticDownloads(validator, data, schema, function (err: unknown, valid: boolean) {
         expect(valid).toBe(true);
         expect(err).toBe(null);
         done();
@@ -72,9 +77,9 @@ describe('Automatic schema loading', function () {
       const schema = { $ref: 'http://json-schema.org/draft-04/schema#' };
       const data = { minLength: -1 };
 
-      validateWithAutomaticDownloads(validator, data, schema, function (err, valid) {
+      validateWithAutomaticDownloads(validator, data, schema, function (err: unknown, valid: boolean) {
         expect(valid).toBe(false);
-        expect(err[0].code).toBe('MINIMUM');
+        expect((err as any)[0].code).toBe('MINIMUM');
         done();
       });
     });

@@ -3,15 +3,10 @@
   "compilerOptions": {
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "types": ["vitest/globals", "node"],
-    "typeRoots": ["../node_modules", "../node_modules/@types", "../node_modules/@types/node"],
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
     "esModuleInterop": true,
-    "moduleResolution": "NodeNext",
-    "module": "NodeNext",
-    "target": "ES2020"
+    "types": ["vitest/globals", "node"],
+    "typeRoots": ["../node_modules", "../node_modules/@types", "../node_modules/@types/node"]
   },
-  "include": ["./**/*"]
+  "include": ["./**/*"],
+  "exclude": ["./public/json-schema-test-suite/bin/annotation-tests.ts"]
 }

@@ -146,7 +146,7 @@ export interface ValidateOptions {
   excludeErrors?: Array<keyof typeof Errors>;
 }
 
-export type ValidateCallback = (e: Error | SchemaErrorDetail[] | null, valid: boolean) => void;
+export type ValidateCallback = (err: Error | SchemaErrorDetail[] | null, valid: boolean) => void;
 
 // a sync function that loads schemas for future use, for example from schemas directory, during server startup
 export type SchemaReader = (uri: string) => JsonSchema;
@@ -487,9 +487,9 @@ export class ZSchema {
     }
   }
 
-  static schemaReader: SchemaReader;
+  static schemaReader: SchemaReader | undefined;
 
-  setSchemaReader(schemaReader: SchemaReader) {
+  setSchemaReader(schemaReader: SchemaReader | undefined) {
     return ZSchema.setSchemaReader(schemaReader);
   }
 
@@ -497,7 +497,7 @@ export class ZSchema {
     return ZSchema.schemaReader;
   }
 
-  static setSchemaReader(schemaReader: SchemaReader) {
+  static setSchemaReader(schemaReader: SchemaReader | undefined) {
     ZSchema.schemaReader = schemaReader;
   }
 

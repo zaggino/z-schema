@@ -456,7 +456,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
         return;
       }
       if (formatValidatorFn.length === 2) {
-        // async - need to clone the path here, because it will change by the time async function reports back
+        // callback-based async - need to clone the path here, because it will change by the time async function reports back
         const pathBeforeAsync = shallowClone(report.path);
         report.addAsyncTask(formatValidatorFn, [json], function (result) {
           if (result !== true) {
@@ -467,9 +467,42 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
           }
         });
       } else {
-        // sync
-        if (formatValidatorFn.call(this, json) !== true) {
-          report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
+        const result = formatValidatorFn.call(this, json);
+        if (result instanceof Promise) {
+          // Promise-based async
+          const pathBeforeAsync = shallowClone(report.path);
+          const timeoutMs = this.options.asyncTimeout || 2000;
+          report.addAsyncTask(
+            async (callback) => {
+              try {
+                const timeoutPromise = new Promise<never>((_, reject) => {
+                  setTimeout(() => reject(new Error('Async timeout')), timeoutMs);
+                });
+                const resolved = await Promise.race([result, timeoutPromise]);
+                callback(resolved);
+              } catch (error) {
+                if ((error as Error).message === 'Async timeout') {
+                  // Don't call callback, let global timeout handle it
+                  return;
+                }
+                callback(false);
+              }
+            },
+            [] as any,
+            function (resolvedResult: boolean) {
+              if (resolvedResult !== true) {
+                const backup = report.path;
+                report.path = pathBeforeAsync;
+                report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
+                report.path = backup;
+              }
+            } as any
+          );
+        } else {
+          // sync
+          if (result !== true) {
+            report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
+          }
         }
       }
     } else if (this.options.ignoreUnknownFormats !== true) {

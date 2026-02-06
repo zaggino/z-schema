@@ -142,7 +142,7 @@ describe('ZSchemaTestSuite', function () {
 
       if (!async) {
         it(testSuite.description + ', ' + test.description, function () {
-          ZSchema.setSchemaReader(null);
+          ZSchema.setSchemaReader(undefined);
 
           const validator = new ZSchema(options);
           let caughtErr;
@@ -153,7 +153,7 @@ describe('ZSchemaTestSuite', function () {
 
           let valid;
           try {
-            valid = validator.validateSchema(schema);
+            valid = validator.validateSchema(schema as any);
           } catch (err) {
             if (!failWithException) {
               throw err;
@@ -166,7 +166,7 @@ describe('ZSchemaTestSuite', function () {
               schema = schema[schemaIndex];
             }
             try {
-              valid = validator.validate(data, schema, validateOptions);
+              valid = validator.validate(data, schema as any, validateOptions as any);
             } catch (err) {
               if (!failWithException) {
                 throw err;
@@ -189,7 +189,7 @@ describe('ZSchemaTestSuite', function () {
           }
 
           if (after) {
-            after(err, valid, data, validator);
+            after(err as Error, valid as boolean, data, validator);
           }
         });
       }
@@ -205,7 +205,7 @@ describe('ZSchemaTestSuite', function () {
             // see http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony
             let zalgo = false;
 
-            const result = validator.validate(data, schema, function (err, valid) {
+            const result = validator.validate(data, schema as any, function (err, valid) {
               // make sure callback wasn't called synchronously
               expect(zalgo).toBe(true /*, 'callback was fired in synchronous way'*/);
               expect(typeof valid).toBe('boolean' /*, 'returned response is not a boolean'*/);
@@ -214,7 +214,7 @@ describe('ZSchemaTestSuite', function () {
                 expect(err).toBe(null /*, 'errors are not undefined when test is valid'*/);
               }
               if (after) {
-                after(err, valid, data, validator);
+                after(err as Error, valid, data, validator);
               }
               done();
             });
