@@ -6,7 +6,7 @@ import ZSchema from '../../src/index.ts';
 describe('Issue #224: Not getting all schema errors from optional parent object', function () {
   it('should report all errors for optional object with oneOf including null', function () {
     const options = { breakOnFirstError: false };
-    const validator = new ZSchema(options);
+    const validator = ZSchema.create(options);
     const schema = {
       $schema: 'http://json-schema.org/draft-04/schema#',
       id: 'OptionalFatherOptionalSon',
@@ -61,9 +61,9 @@ describe('Issue #224: Not getting all schema errors from optional parent object'
       },
     };
     const data = { anotherField: 10, optionalFatherObject: { birthUnixTime: 'not_unix_date', name: 5 } };
-    const valid = validator.validate(data, schema);
-    const error = validator.getLastError();
-    expect(valid).toBe(false);
+    const result = validator.validateSafe(data, schema);
+    const error = result.err;
+    expect(result.valid).toBe(false);
     expect(error).not.toBeNull();
     expect(error!.details).toBeDefined();
     expect(error!.details!.length).toBe(1);
@@ -80,7 +80,7 @@ describe('Issue #224: Not getting all schema errors from optional parent object'
 
   it('should report all errors for optional object without oneOf', function () {
     const options = { breakOnFirstError: false };
-    const validator = new ZSchema(options);
+    const validator = ZSchema.create(options);
     const schema = {
       $schema: 'http://json-schema.org/draft-04/schema#',
       id: 'OptionalFatherOptionalSon',
@@ -128,9 +128,9 @@ describe('Issue #224: Not getting all schema errors from optional parent object'
       },
     };
     const data = { anotherField: 10, optionalFatherObject: { birthUnixTime: 'not_unix_date', name: 5 } };
-    const valid = validator.validate(data, schema);
-    const error = validator.getLastError();
-    expect(valid).toBe(false);
+    const result = validator.validateSafe(data, schema);
+    const error = result.err;
+    expect(result.valid).toBe(false);
     expect(error).not.toBeNull();
     expect(error!.details).toBeDefined();
     expect(error!.details!.length).toBe(3);

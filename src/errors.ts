@@ -1,3 +1,5 @@
+import type { SchemaErrorDetail } from './report.js';
+
 export type ErrorCode = keyof typeof Errors;
 
 export type ErrorParam = string | number | Array<string | number>;
@@ -58,3 +60,18 @@ export const Errors = {
   PARENT_SCHEMA_VALIDATION_FAILED: 'Schema failed to validate against its parent schema, see inner errors for details.',
   REMOTE_NOT_VALID: "Remote reference didn't compile successfully: {0}",
 };
+
+export class ValidateError extends Error {
+  name: string;
+  details?: SchemaErrorDetail[];
+
+  constructor(message: string, details?: SchemaErrorDetail[]) {
+    super(message);
+    this.name = 'z-schema validation error';
+    this.details = details;
+  }
+}
+
+export function getValidateError({ message, details }: { message?: string; details: SchemaErrorDetail[] }) {
+  return new ValidateError(message || '', details);
+}

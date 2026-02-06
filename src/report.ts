@@ -1,29 +1,10 @@
-import { ErrorCode, ErrorParam, Errors } from './errors.js';
+import { ErrorCode, ErrorParam, Errors, getValidateError } from './errors.js';
 import { whatIs } from './utils/what-is.js';
 import { schemaSymbol, jsonSymbol } from './utils/symbols.js';
 import { ValidateCallback, ValidateOptions, ZSchemaOptions } from './z-schema.js';
 import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import { isAbsoluteUri } from './utils/uri.js';
 import { get } from './utils/json.js';
-
-export interface SchemaError extends Error {
-  /**
-   * Implements the Error.name contract.  The value is always "z-schema validation error".
-   */
-  name: string;
-
-  /**
-   * An identifier indicating the type of error.
-   * Example: "JSON_OBJECT_VALIDATION_FAILED"
-   */
-  message: string;
-
-  /**
-   * Returns details for each error that occurred during validation.
-   * See Options.breakOnFirstError.
-   */
-  details?: SchemaErrorDetail[];
-}
 
 export interface SchemaErrorDetail {
   /**
@@ -145,8 +126,8 @@ export class Report {
 
     const finish = () => {
       setTimeout(() => {
-        const valid = this.errors.length === 0,
-          err = valid ? null : this.errors;
+        const valid = this.errors.length === 0;
+        const err = valid ? undefined : getValidateError({ details: this.errors });
         callback(err, valid);
       }, 0);
     };
@@ -177,7 +158,7 @@ export class Report {
       if (tasksCount > 0) {
         timedOut = true;
         this.addError('ASYNC_TIMEOUT', [tasksCount, validationTimeout]);
-        callback(this.errors, false);
+        callback(getValidateError({ details: this.errors }), false);
       }
     }, validationTimeout);
   }

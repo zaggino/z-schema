@@ -16,7 +16,7 @@ describe('Async Validation Example', () => {
   const phoneRegex = /^\+?[1-9]\d{1,14}$/;
 
   const createValidator = () => {
-    const validator = new ZSchema();
+    const validator = ZSchema.create();
 
     validator.registerFormat('user-exists', async (input: unknown): Promise<boolean> => {
       if (typeof input !== 'string') return false;
@@ -80,7 +80,7 @@ describe('Async Validation Example', () => {
       });
 
       expect(result.valid).toBe(true);
-      expect(result.err).toBe(null);
+      expect(result.err).toBeUndefined();
     });
 
     it('should fail validation with invalid user ID', async () => {
@@ -102,7 +102,7 @@ describe('Async Validation Example', () => {
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
-      expect(result.err[0].path).toBe('#/personId');
+      expect(result.err.details[0].path).toBe('#/personId');
     });
   });
 
@@ -125,7 +125,7 @@ describe('Async Validation Example', () => {
       });
 
       expect(result.valid).toBe(true);
-      expect(result.err).toBe(null);
+      expect(result.err).toBeUndefined();
     });
 
     it('should fail validation with invalid postcode', async () => {
@@ -147,7 +147,7 @@ describe('Async Validation Example', () => {
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
-      expect(result.err[0].path).toBe('#/address/postcode');
+      expect(result.err.details[0].path).toBe('#/address/postcode');
     });
   });
 
@@ -170,7 +170,7 @@ describe('Async Validation Example', () => {
       });
 
       expect(result.valid).toBe(true);
-      expect(result.err).toBe(null);
+      expect(result.err).toBeUndefined();
     });
 
     it('should fail validation with invalid phone number', async () => {
@@ -192,7 +192,7 @@ describe('Async Validation Example', () => {
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
-      expect(result.err[0].path).toBe('#/address/phone');
+      expect(result.err.details[0].path).toBe('#/address/phone');
     });
   });
 
@@ -215,7 +215,7 @@ describe('Async Validation Example', () => {
       });
 
       expect(result.valid).toBe(true);
-      expect(result.err).toBe(null);
+      expect(result.err).toBeUndefined();
     });
 
     it('should fail validation with multiple invalid fields', async () => {
@@ -237,14 +237,14 @@ describe('Async Validation Example', () => {
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
-      expect(result.err.length).toBeGreaterThan(1);
+      expect(result.err.details.length).toBeGreaterThan(1);
     });
   });
 
   describe('Edge Cases', () => {
     it('should handle database unavailability simulation', async () => {
       // For this test, we can mock a failing database check
-      const validator = new ZSchema();
+      const validator = ZSchema.create();
 
       validator.registerFormat('user-exists', async (): Promise<boolean> => {
         throw new Error('Database unavailable');
@@ -396,7 +396,7 @@ describe('Async Validation Example', () => {
       const result = await validator.validateAsyncSafe(validPayload, personSchema);
 
       expect(result.valid).toBe(true);
-      expect(result.errs).toBeUndefined();
+      expect(result.err).toBeUndefined();
     });
 
     it('should fail validation with invalid payload using Promise API', async () => {

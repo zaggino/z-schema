@@ -67,13 +67,12 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
                 return;
               }
               it([testSuite.description, test.description].join(' '), function () {
-                const validator = new ZSchema({ version });
-                const valid = validator.validate(test.data, schema);
+                const validator = ZSchema.create({ version });
+                const { valid, err } = validator.validateSafe(test.data, schema);
                 expect.soft(valid).toBe(test.valid);
                 if (valid !== test.valid) {
                   if (!valid) {
-                    const errors = validator.getLastErrors();
-                    expect(errors).toBe(null);
+                    expect(err!.details).toBe(null);
                   }
                 }
               });

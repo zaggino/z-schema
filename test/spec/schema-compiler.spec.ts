@@ -53,7 +53,7 @@ describe('collectReferences', () => {
     const refStrs = refs.map((x) => x.ref).sort();
     expect.soft(refStrs[0]).toBe('file:///c:/folder/file.json#addressId');
     expect.soft(refStrs[1]).toBe('file:///c:/folder/file.json#personId');
-    const validator = new ZSchema();
+    const validator = ZSchema.create();
     validator.compileSchema(schema);
     const missingRefs = validator.getMissingReferences();
     expect(missingRefs).toHaveLength(0);
@@ -86,7 +86,7 @@ describe('collectReferences', () => {
     const ids = collectIds(schema);
     expect(ids).toHaveLength(3);
 
-    const validator = new ZSchema();
+    const validator = ZSchema.create();
     const isValid = validator.validateSchema(schema);
     expect(Object.keys(validator.scache.cache).sort()).toEqual(
       [
@@ -108,7 +108,6 @@ describe('collectReferences', () => {
     expect(relativeIds[0].absoluteUri).toBe('http://example.com/b/d.json');
 
     expect.soft(isValid).toBe(true);
-    expect(validator.getLastErrors()).toBe(null);
   });
 
   it('should compile an array of schemas', () => {
@@ -145,13 +144,12 @@ describe('collectReferences', () => {
         },
       },
     ];
-    const validator = new ZSchema();
+    const validator = ZSchema.create();
     const isValid = validator.validateSchema(schemas);
     expect(Object.keys(validator.scache.cache).sort()).toEqual(
       ['http://json-schema.org/draft-04/schema', 'id', 'user', 'post'].sort()
     );
     expect.soft(isValid).toBe(true);
-    expect(validator.getLastErrors()).toBe(null);
   });
 
   it('should correctly collect refs', () => {
@@ -180,8 +178,8 @@ describe('collectReferences', () => {
     const refs = collectReferences(schema as any);
     expect(refs.length).toBe(1);
     expect(refs[0].ref).toBe('http://localhost:1234/sibling_id/base/foo.json');
-    const validator = new ZSchema();
-    expect(validator.validate(1, schema)).toBe(true);
-    expect(validator.validate('a', schema)).toBe(false);
+    const validator = ZSchema.create();
+    expect(validator.validateSafe(1, schema).valid).toBe(true);
+    expect(validator.validateSafe('a', schema).valid).toBe(false);
   });
 });

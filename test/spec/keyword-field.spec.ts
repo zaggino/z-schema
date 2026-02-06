@@ -2,7 +2,7 @@ import ZSchema from '../../src/index.ts';
 
 describe('Error objects include `keyword` field', function () {
   it('JSON validation errors include the keyword that caused the error', function () {
-    const validator = new ZSchema({ version: 'draft-04' });
+    const validator = ZSchema.create({ version: 'draft-04' });
     const schema = {
       type: 'object',
       required: ['name'],
@@ -12,9 +12,9 @@ describe('Error objects include `keyword` field', function () {
     };
 
     const data = {}; // missing 'name'
-    const valid = validator.validate(data, schema);
-    expect(valid).toBe(false);
-    const errors = validator.getLastErrors();
+    const result = validator.validateSafe(data, schema);
+    expect(result.valid).toBe(false);
+    const errors = result.err!.details;
     expect(errors).not.toBeNull();
     // find the missing required property error
     const missing = errors!.find((e) => e.code === 'OBJECT_MISSING_REQUIRED_PROPERTY');
@@ -23,7 +23,7 @@ describe('Error objects include `keyword` field', function () {
   });
 
   it('Schema validation errors include the keyword that caused the schema validation error', function () {
-    const validator = new ZSchema({ version: 'draft-04' });
+    const validator = ZSchema.create({ version: 'draft-04' });
     const badSchema = {
       type: 'array',
       maxItems: -1, // invalid value should trigger schema validation error
@@ -31,7 +31,7 @@ describe('Error objects include `keyword` field', function () {
 
     const valid = validator.validateSchema(badSchema as any);
     expect(valid).toBe(false);
-    const errors = validator.getLastErrors();
+    const errors = validator.lastReport!.errors;
     expect(errors).not.toBeNull();
     const schemaErr = errors!.find((e) => e.code === 'KEYWORD_MUST_BE' || e.code === 'KEYWORD_TYPE_EXPECTED');
     expect(schemaErr).toBeDefined();

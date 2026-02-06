@@ -72,26 +72,27 @@ function readJson(fileName) {
   return ret;
 }
 
-var validator = new ZSchema(options);
+var validator = ZSchema.create(options);
 var schemaFilePath = program.args.shift();
 var schema = readJson(schemaFilePath);
 
 function validateWithAutomaticDownloads(filePath, data, schema, callback) {
   var lastResult;
+  var lastErrors;
 
   function finish() {
-    callback(validator.getLastErrors(), lastResult);
+    callback(lastErrors, lastResult);
   }
 
   function validate() {
     if (data !== undefined) {
-      lastResult = validator.validate(data, schema);
+      var result = validator.validateSafe(data, schema);
+      lastResult = result.valid;
+      lastErrors = result.valid ? null : result.err.details;
     } else {
       lastResult = validator.validateSchema(schema);
+      lastErrors = lastResult ? null : validator.lastReport.errors;
     }
-
-    // console.log(lastResult);
-    // console.log(JSON.stringify(validator.getLastErrors(), null, 4));
 
     var missingReferences = validator.getMissingRemoteReferences();
     if (missingReferences.length > 0) {
@@ -150,7 +151,7 @@ function validateJsons() {
   var json = readJson(filePath);
   validateWithAutomaticDownloads(filePath, json, schema, function (errs, isValid) {
     if (!isValid) {
-      console.log(JSON.stringify(validator.getLastErrors(), null, 4));
+      console.log(JSON.stringify(errs, null, 4));
       console.log('json #' + i + ' validation failed');
       process.exitCode = 1;
     } else {
@@ -163,7 +164,7 @@ function validateJsons() {
 // validate schema
 validateWithAutomaticDownloads(schemaFilePath, undefined, schema, function (errs, isValid) {
   if (!isValid) {
-    console.log(JSON.stringify(validator.getLastErrors(), null, 4));
+    console.log(JSON.stringify(errs, null, 4));
     console.log('schema validation failed');
     process.exit(1);
   } else {

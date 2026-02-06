@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import ZSchema, { SchemaErrorDetail } from '../../src/index.js';
+import ZSchema from '../../src/index.js';
 
 describe('Async Format Validation Integration', () => {
   it('should validate successfully with async format validator', async () => {
-    const validator = new ZSchema();
+    const validator = ZSchema.create();
 
     const asyncValidator = async (input: unknown): Promise<boolean> => {
       // Simulate async check
@@ -17,18 +17,13 @@ describe('Async Format Validation Integration', () => {
       format: 'async-check',
     };
 
-    const result = await new Promise<{ err: SchemaErrorDetail[] | null; valid: boolean }>((resolve) => {
-      validator.validate('valid', schema, (err, valid) => {
-        resolve({ err: err as SchemaErrorDetail[] | null, valid });
-      });
-    });
-
+    const result = await validator.validateAsyncSafe('valid', schema);
     expect(result.valid).toBe(true);
-    expect(result.err).toBe(null);
+    expect(result.err).toBeUndefined();
   });
 
   it('should fail validation with async format validator', async () => {
-    const validator = new ZSchema();
+    const validator = ZSchema.create();
 
     const asyncValidator = async (input: unknown): Promise<boolean> => {
       return typeof input === 'string' && input === 'valid';
@@ -41,18 +36,13 @@ describe('Async Format Validation Integration', () => {
       format: 'async-check',
     };
 
-    const result = await new Promise<{ err: SchemaErrorDetail[] | null; valid: boolean }>((resolve) => {
-      validator.validate('invalid', schema, (err, valid) => {
-        resolve({ err: err as SchemaErrorDetail[] | null, valid });
-      });
-    });
-
+    const result = await validator.validateAsyncSafe('invalid', schema);
     expect(result.valid).toBe(false);
-    expect(result.err).toHaveLength(1);
+    expect(result.err!.details).toHaveLength(1);
   });
 
   it('should work with async format validators in oneOf', async () => {
-    const validator = new ZSchema();
+    const validator = ZSchema.create();
 
     const syncValidator = (input: unknown): boolean => {
       return typeof input === 'string' && input === 'sync-valid';
@@ -73,18 +63,13 @@ describe('Async Format Validation Integration', () => {
     };
 
     // Test data that matches the async option
-    const result = await new Promise<{ err: SchemaErrorDetail[] | null; valid: boolean }>((resolve) => {
-      validator.validate('async-valid', schema, (err, valid) => {
-        resolve({ err: err as SchemaErrorDetail[] | null, valid });
-      });
-    });
-
+    const result = await validator.validateAsyncSafe('async-valid', schema);
     expect(result.valid).toBe(true);
-    expect(result.err).toBe(null);
+    expect(result.err).toBeUndefined();
   });
 
   it('should work with async format validators in anyOf', async () => {
-    const validator = new ZSchema();
+    const validator = ZSchema.create();
 
     const asyncValidator = async (input: unknown): Promise<boolean> => {
       return typeof input === 'string' && input === 'async-valid';
@@ -97,18 +82,13 @@ describe('Async Format Validation Integration', () => {
     };
 
     // Test data that matches the async option
-    const result = await new Promise<{ err: SchemaErrorDetail[] | null; valid: boolean }>((resolve) => {
-      validator.validate('async-valid', schema, (err, valid) => {
-        resolve({ err: err as SchemaErrorDetail[] | null, valid });
-      });
-    });
-
+    const result = await validator.validateAsyncSafe('async-valid', schema);
     expect(result.valid).toBe(true);
-    expect(result.err).toBe(null);
+    expect(result.err).toBeUndefined();
   });
 
   it('should fail validation when async format validator in oneOf fails', async () => {
-    const validator = new ZSchema();
+    const validator = ZSchema.create();
 
     const asyncValidator = async (input: unknown): Promise<boolean> => {
       return typeof input === 'string' && input === 'async-valid';
@@ -121,14 +101,9 @@ describe('Async Format Validation Integration', () => {
     };
 
     // Test data that doesn't match any option
-    const result = await new Promise<{ err: SchemaErrorDetail[] | null; valid: boolean }>((resolve) => {
-      validator.validate('invalid', schema, (err, valid) => {
-        resolve({ err: err as SchemaErrorDetail[] | null, valid });
-      });
-    });
-
+    const result = await validator.validateAsyncSafe('invalid', schema);
     expect(result.valid).toBe(false);
-    expect(result.err).toHaveLength(1);
-    expect(result.err![0].code).toBe('ONE_OF_MISSING');
+    expect(result.err!.details).toHaveLength(1);
+    expect(result.err!.details![0].code).toBe('ONE_OF_MISSING');
   });
 });

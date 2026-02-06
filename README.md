@@ -8,6 +8,7 @@
 
 - [What](#what)
 - [Versions](#versions)
+- [Getting started](#getting-started)
 - [Usage](#usage)
 - [Features](#features)
 - [Options](#options)
@@ -22,28 +23,40 @@ What is a JSON Schema? Find here: [https://json-schema.org/](https://json-schema
 
 - v6 - old version which has been around a long time, supports JSON Schema draft-04
 - v7 - modernized version (to ESM module with Typescript) which passes all tests from JSON Schema Test Suite for draft-04
-- v8 - by default assumes all schemas without $schema tag are draft-04, the old behaviour from v7 can be explicitly turned on by specifying `validator = new ZSchema({ version: 'none' });`
+- v8 - by default assumes all schemas without $schema tag are draft-04, the old behaviour from v7 can be explicitly turned on by specifying `validator = ZSchema.create({ version: 'none' });`
+- v9 - new api, `new ZSchema()` replaced by `ZSchema.create()` for initialization
 
-## Usage
+## Getting started
 
 Validator will try to perform sync validation when possible for speed, but supports async callbacks when they are necessary.
 
 ### ESM and Typescript:
 
-```javascript
+```typescript
 import ZSchema from 'z-schema';
-const validator = new ZSchema();
-console.log(validator.validate(1, { type: 'number' })); // true
-console.log(validator.validate(1, { type: 'string' })); // false
+const validator = ZSchema.create();
 ```
 
 ### CommonJs:
 
 ```javascript
 const ZSchema = require('z-schema');
-const validator = new ZSchema();
-console.log(validator.validate(1, { type: 'number' })); // true
-console.log(validator.validate(1, { type: 'string' })); // false
+const validator = ZSchema.create();
+```
+
+### Browser:
+
+```html
+<script type="text/javascript" src="z-schema/umd/ZSchema.min.js"></script>
+<script type="text/javascript">
+  var validator = ZSchema.create();
+  try {
+    validator.validate('string', { type: 'string' });
+    console.log('Validation passed');
+  } catch (error) {
+    console.log('Validation failed:', error.details);
+  }
+</script>
 ```
 
 ### CLI:
@@ -56,14 +69,29 @@ z-schema mySchema.json myJson.json
 z-schema --strictMode mySchema.json myJson.json
 ```
 
+## Usage
+
 ### Sync mode:
 
 ```javascript
-var valid = validator.validate(json, schema);
-// this will return a native error object with name and message
-var error = validator.getLastError();
-// this will return an array of validation errors encountered
-var errors = validator.getLastErrors();
+try {
+  validator.validate(json, schema);
+  // validation passed
+} catch (error) {
+  // this will return a native error object with name and message
+  console.log(error.name); // 'z-schema validation error'
+  console.log(error.message); // common error message
+  // this will return an array of validation errors encountered
+  console.log(error.details); // array of detailed errors
+}
+
+// Or use validateSafe for object-based result
+const result = validator.validateSafe(json, schema);
+if (!result.valid) {
+  console.log(result.errs); // array of error objects
+}
+
+**Note:** `getLastErrors()` and `getLastError()` are deprecated. Use the thrown error from `validate()` or the `errs` property from `validateSafe()` instead.
 ...
 ```
 
@@ -80,7 +108,7 @@ import ZSchema from 'z-schema';
 import db from './db';
 
 // Initialize ZSchema
-const validator = new ZSchema();
+const validator = ZSchema.create();
 
 // Register async and sync format validators
 validator.registerFormat('user-exists', async (input: unknown): Promise<boolean> => {
@@ -152,41 +180,35 @@ if (res.valid) {
 }
 ```
 
-### Browser:
-
-```html
-<script type="text/javascript" src="z-schema/umd/ZSchema.min.js"></script>
-<script type="text/javascript">
-  var validator = new ZSchema();
-  console.log(validator.validate('string', { type: 'string' }));
-</script>
-```
-
 ### Remote references and schemas:
 
 In case you have some remote references in your schemas, you have to download those schemas before using validator.
 Otherwise you'll get `UNRESOLVABLE_REFERENCE` error when trying to compile a schema.
 
 ```javascript
-var validator = new ZSchema();
+var validator = ZSchema.create();
 var json = {};
 var schema = { "$ref": "http://json-schema.org/draft-04/schema#" };
 
-var valid = validator.validate(json, schema);
-var errors = validator.getLastErrors();
-// valid === false
-// errors.length === 1
-// errors[0].code === "UNRESOLVABLE_REFERENCE"
+try {
+  validator.validate(json, schema);
+  // This won't reach here due to unresolvable reference
+} catch (error) {
+  // error.details will contain the validation errors
+  console.log(error.details[0].code); // "UNRESOLVABLE_REFERENCE"
+}
 
 var requiredUrl = "http://json-schema.org/draft-04/schema";
 request(requiredUrl, function (error, response, body) {
 
     validator.setRemoteReference(requiredUrl, JSON.parse(body));
 
-    var valid = validator.validate(json, schema);
-    var errors = validator.getLastErrors();
-    // valid === true
-    // errors === undefined
+    try {
+      validator.validate(json, schema);
+      // validation passed
+    } catch (error) {
+      // shouldn't happen after setting remote reference
+    }
 
 }
 ```

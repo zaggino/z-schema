@@ -1,4 +1,4 @@
-import { Report, SchemaError, SchemaErrorDetail } from './report.js';
+import { Report, SchemaErrorDetail } from './report.js';
 import { FormatValidatorFn, getRegisteredFormats, registerFormat, unregisterFormat } from './format-validators.js';
 import { validate as validateJson } from './json-validation.js';
 import { SchemaCache } from './schema-cache.js';
@@ -8,7 +8,7 @@ import { shallowClone, deepClone } from './utils/clone.js';
 import { whatIs } from './utils/what-is.js';
 import { schemaSymbol, jsonSymbol } from './utils/symbols.js';
 import { getRemotePath } from './utils/uri.js';
-import type { Errors } from './errors.js';
+import { getValidateError, ValidateError, type Errors } from './errors.js';
 // import schemas so they don't have to be downloaded for validation purposes
 import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import _Draft4Schema from './schemas/draft-04-schema.json' with { type: 'json' };
@@ -146,49 +146,14 @@ export interface ValidateOptions {
   excludeErrors?: Array<keyof typeof Errors>;
 }
 
-export type ValidateCallback = (err: Error | SchemaErrorDetail[] | null, valid: boolean) => void;
+export type ValidateResponse = { valid: boolean; err?: ValidateError };
+
+export type ValidateCallback = (err: ValidateResponse['err'], valid: ValidateResponse['valid']) => void;
 
 // a sync function that loads schemas for future use, for example from schemas directory, during server startup
 export type SchemaReader = (uri: string) => JsonSchema;
 
-export class ZSchema {
-  // class scoped format functions
-  public static registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
-    return registerFormat(name, validatorFunction);
-  }
-
-  public static unregisterFormat(name: string): void {
-    return unregisterFormat(name);
-  }
-
-  public static getRegisteredFormats(): string[] {
-    return getRegisteredFormats();
-  }
-
-  // instance scoped format functions
-  public registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
-    if (!this.options.customFormats) {
-      this.options.customFormats = {};
-    }
-    this.options.customFormats[name] = validatorFunction;
-  }
-
-  public unregisterFormat(name: string): void {
-    if (!this.options.customFormats) {
-      this.options.customFormats = {};
-    }
-    this.options.customFormats[name] = null;
-  }
-
-  public getRegisteredFormats(): string[] {
-    return sortedKeys(this.options.customFormats || {});
-  }
-
-  // default options for validator instance
-  public static getDefaultOptions(): ZSchemaOptions {
-    return deepClone(defaultOptions);
-  }
-
+class ZSchemaImpl {
   lastReport: Report | undefined;
   scache: SchemaCache;
   sc: SchemaCompiler;
@@ -236,14 +201,14 @@ export class ZSchema {
 
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions, callback: ValidateCallback): void;
   validate(json: unknown, schema: JsonSchema | string, callback: ValidateCallback): void;
-  validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions): boolean;
-  validate(json: unknown, schema: JsonSchema | string): boolean;
+  validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions): true;
+  validate(json: unknown, schema: JsonSchema | string): true;
   validate(
     json: unknown,
     schema: JsonSchema | string,
     options?: ValidateOptions | ValidateCallback,
     callback?: ValidateCallback
-  ): boolean | void {
+  ): true | void {
     if (typeof options === 'function') {
       callback = options;
       options = {};
@@ -277,7 +242,14 @@ export class ZSchema {
       const schemaName = schema;
       _schema = this.scache.getSchema(report, schemaName)!;
       if (!_schema) {
-        throw new Error("Schema with id '" + schemaName + "' wasn't found in the validator cache!");
+        const e = new Error("Schema with id '" + schemaName + "' wasn't found in the validator cache!");
+        if (callback) {
+          setTimeout(function () {
+            callback(e, false);
+          }, 0);
+          return;
+        }
+        throw e;
       }
     } else {
       _schema = this.scache.getSchema(report, schema)!;
@@ -288,7 +260,6 @@ export class ZSchema {
       compiled = this.sc.compileSchema(report, _schema);
     }
     if (!compiled) {
-      this.lastReport = report;
       foundError = true;
     }
 
@@ -297,7 +268,6 @@ export class ZSchema {
       validated = this.sv.validateSchema(report, _schema);
     }
     if (!validated) {
-      this.lastReport = report;
       foundError = true;
     }
 
@@ -305,7 +275,14 @@ export class ZSchema {
       report.rootSchema = _schema;
       _schema = get(_schema, options.schemaPath);
       if (!_schema) {
-        throw new Error("Schema path '" + options.schemaPath + "' wasn't found in the schema!");
+        const e = new Error("Schema path '" + options.schemaPath + "' wasn't found in the schema!");
+        if (callback) {
+          setTimeout(function () {
+            callback(e, false);
+          }, 0);
+          return;
+        }
+        throw e;
       }
     }
 
@@ -322,9 +299,26 @@ export class ZSchema {
       );
     }
 
-    // assign lastReport so errors are retrievable in sync mode
-    this.lastReport = report;
-    return report.isValid();
+    if (!report.isValid()) {
+      throw getValidateError({
+        message: report.commonErrorMessage!,
+        details: report.errors,
+      });
+    }
+    return true;
+  }
+
+  /**
+   * Validates JSON data against a schema and returns a result object.
+   * This method never throws and provides backward compatibility.
+   */
+  validateSafe(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): ValidateResponse {
+    try {
+      this.validate(json, schema, options ?? {});
+      return { valid: true };
+    } catch (err) {
+      return { valid: false, err: err as ValidateError };
+    }
   }
 
   // validateAsync always returns true, implement using try-catch
@@ -341,65 +335,60 @@ export class ZSchema {
   }
 
   // validateAsyncSafe never throws, but returns complex object
-  validateAsyncSafe(
-    json: unknown,
-    schema: JsonSchema | string,
-    options?: ValidateOptions
-  ): Promise<{ valid: boolean; errs?: any[] }> {
+  validateAsyncSafe(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): Promise<ValidateResponse> {
     return new Promise((resolve) => {
       try {
         this.validate(json, schema, options || {}, (err, valid) => {
-          let errs;
-          if (err != null) {
-            errs = Array.isArray(err) ? err : [err];
-          }
-          resolve({ valid, errs });
+          resolve({ valid, err });
         });
       } catch (err) {
-        resolve({ valid: false, errs: Array.isArray(err) ? err : [err] });
+        resolve({ valid: false, err: err as ValidateError });
       }
     });
   }
 
+  // instance scoped format functions
+  public registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
+    if (!this.options.customFormats) {
+      this.options.customFormats = {};
+    }
+    this.options.customFormats[name] = validatorFunction;
+  }
+
+  public unregisterFormat(name: string): void {
+    if (!this.options.customFormats) {
+      this.options.customFormats = {};
+    }
+    this.options.customFormats[name] = null;
+  }
+
+  public getRegisteredFormats(): string[] {
+    return sortedKeys(this.options.customFormats || {});
+  }
+
   /**
    * Returns an Error object for the most recent failed validation, or null if the validation was successful.
+   * @deprecated Use validate() with try-catch or validateSafe() instead. This method will be removed in a future version.
    */
-  getLastError(): SchemaError | null {
+  getLastError(): ValidateError | null {
+    console.warn('getLastError() is deprecated. Use validate() with try-catch or validateSafe() instead.');
     if (!this.lastReport) {
       throw new Error(`getLastError() called before doing any validation!`);
     }
     if (this.lastReport.errors.length === 0) {
       return null;
     }
-    const e: SchemaError = new Error();
-    e.name = 'z-schema validation error';
-    e.message = this.lastReport.commonErrorMessage!;
-    e.details = this.lastReport.errors;
-    return e;
+    return getValidateError({ message: this.lastReport.commonErrorMessage!, details: this.lastReport.errors });
   }
 
   /**
    * Returns the error details for the most recent validation, or undefined if the validation was successful.
    * This is the same list as the SchemaError.details property.
+   * @deprecated Use validate() with try-catch or validateSafe() instead. This method will be removed in a future version.
    */
   getLastErrors(): SchemaErrorDetail[] | null {
+    console.warn('getLastErrors() is deprecated. Use validate() with try-catch or validateSafe() instead.');
     return this.lastReport && this.lastReport.errors.length > 0 ? this.lastReport.errors : null;
-  }
-
-  public static setRemoteReference(uri: string, schema: string | JsonSchema, validationOptions?: ZSchemaOptions) {
-    let _schema: JsonSchemaInternal;
-
-    if (typeof schema === 'string') {
-      _schema = JSON.parse(schema);
-    } else {
-      _schema = deepClone(schema);
-    }
-
-    if (validationOptions) {
-      _schema.__$validationOptions = normalizeOptions(validationOptions);
-    }
-
-    SchemaCache.cacheSchemaByUri(uri, _schema);
   }
 
   setRemoteReference(uri: string, schema: string | JsonSchema, validationOptions?: ZSchemaOptions) {
@@ -520,24 +509,73 @@ export class ZSchema {
       throw this.getLastError();
     }
   }
+}
 
-  static schemaReader: SchemaReader | undefined;
+export class ZSchema extends ZSchemaImpl {
+  // ----- static methods start -----
 
-  setSchemaReader(schemaReader: SchemaReader | undefined) {
-    return ZSchema.setSchemaReader(schemaReader);
+  // class scoped format functions
+  public static registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
+    return registerFormat(name, validatorFunction);
   }
 
-  getSchemaReader() {
+  public static unregisterFormat(name: string): void {
+    return unregisterFormat(name);
+  }
+
+  public static getRegisteredFormats(): string[] {
+    return getRegisteredFormats();
+  }
+
+  // default options for validator instance
+  public static getDefaultOptions(): ZSchemaOptions {
+    return deepClone(defaultOptions);
+  }
+
+  public static setRemoteReference(uri: string, schema: string | JsonSchema, validationOptions?: ZSchemaOptions) {
+    let _schema: JsonSchemaInternal;
+
+    if (typeof schema === 'string') {
+      _schema = JSON.parse(schema);
+    } else {
+      _schema = deepClone(schema);
+    }
+
+    if (validationOptions) {
+      _schema.__$validationOptions = normalizeOptions(validationOptions);
+    }
+
+    SchemaCache.cacheSchemaByUri(uri, _schema);
+  }
+
+  private static schemaReader: SchemaReader | undefined;
+
+  public static getSchemaReader(): SchemaReader | undefined {
     return ZSchema.schemaReader;
   }
 
-  static setSchemaReader(schemaReader: SchemaReader | undefined) {
+  public static setSchemaReader(schemaReader: SchemaReader | undefined) {
     ZSchema.schemaReader = schemaReader;
   }
 
-  static schemaSymbol = schemaSymbol;
+  public static schemaSymbol = schemaSymbol;
 
-  static jsonSymbol = jsonSymbol;
+  public static jsonSymbol = jsonSymbol;
+
+  // ----- static methods end -----
+
+  public static create(options: ZSchemaOptions = {}): ZSchema {
+    (options as any).__called_from_factory__ = true;
+    return new ZSchema(options);
+  }
+
+  constructor(options?: ZSchemaOptions) {
+    if (!(options as any)?.__called_from_factory__) {
+      throw new Error('do not use new ZSchema(), use ZSchema.create() instead');
+    }
+    delete (options as any).__called_from_factory__;
+    super(options);
+  }
 }
 
 const Draft4Schema: JsonSchema = _Draft4Schema;
