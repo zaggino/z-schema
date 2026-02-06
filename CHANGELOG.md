@@ -1,5 +1,18 @@
 # Changelog
 
+## [8.5.0](https://github.com/zaggino/z-schema/compare/v8.4.0...v8.5.0) (2026-02-06)
+
+
+### Features
+
+* add promise api and document how to perform async validation in README ([4921400](https://github.com/zaggino/z-schema/commit/492140012b25db4812a18da1c0aefbfc7245dc0c))
+* support async format validators returning Promise&lt;boolean&gt; ([dd5d99d](https://github.com/zaggino/z-schema/commit/dd5d99dd1cf63c1a1d293c03285dd5428425853f))
+
+
+### Bug Fixes
+
+* async format validator behavior in oneOf, fixes [#207](https://github.com/zaggino/z-schema/issues/207) ([2aac679](https://github.com/zaggino/z-schema/commit/2aac6793cd8db835454a74b7b71740aec44aa49a))
+
 ## [8.4.0](https://github.com/zaggino/z-schema/compare/v8.3.0...v8.4.0) (2026-02-05)
 
 
