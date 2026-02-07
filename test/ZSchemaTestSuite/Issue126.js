@@ -1,3 +1,5 @@
+import { ValidateError } from '../../src/errors.ts';
+
 var REF_NAME = 'int.json';
 
 export default {
@@ -34,7 +36,7 @@ export default {
             expect(e.code).not.toBe('UNRESOLVABLE_REFERENCE');
           }
         });
-        expect(validator.getMissingRemoteReferences().length).toBe(1);
+        expect(validator.getMissingRemoteReferences(new ValidateError('', err)).length).toBe(1);
       },
     },
   ],

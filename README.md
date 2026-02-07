@@ -91,7 +91,6 @@ if (!result.valid) {
   console.log(result.errs); // array of error objects
 }
 
-**Note:** `getLastErrors()` and `getLastError()` are deprecated. Use the thrown error from `validate()` or the `errs` property from `validateSafe()` instead.
 ...
 ```
 

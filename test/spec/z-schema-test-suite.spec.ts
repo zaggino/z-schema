@@ -154,10 +154,11 @@ describe('ZSchemaTestSuite', function () {
 
             let valid;
             try {
-              valid = validator.validateSchema(schema as any);
+              validator.validateSchema(schema as any);
+              valid = true;
             } catch (err) {
               if (!failWithException) {
-                throw err;
+                valid = false;
               }
               caughtErr = err;
             }
@@ -174,7 +175,7 @@ describe('ZSchemaTestSuite', function () {
               }
             }
 
-            const err = (caughtErr || validator.getLastErrors()) as ValidateError | undefined;
+            const err = caughtErr as ValidateError | undefined;
 
             if (failWithException) {
               expect(caughtErr).toBeTruthy();
@@ -184,7 +185,7 @@ describe('ZSchemaTestSuite', function () {
             }
 
             if (test.valid === true) {
-              expect(err).toBe(null /*, 'errors are not undefined when test is valid'*/);
+              expect(err).toBeFalsy(/*, 'errors are not undefined when test is valid'*/);
             }
 
             if (after) {

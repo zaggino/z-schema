@@ -344,8 +344,6 @@ describe('Async Validation Example', () => {
       const result = await validator.validateAsync(validPayload, personSchema);
 
       expect(result).toBe(true);
-      const errors = validator.getLastErrors();
-      expect(errors).toBeNull();
     });
 
     it('should fail validation with invalid payload using Promise API', async () => {
@@ -376,8 +374,6 @@ describe('Async Validation Example', () => {
       const result = await validator.validateAsync(payload, personSchema);
 
       expect(result).toBe(true);
-      const errors = validator.getLastErrors();
-      expect(errors).toBeNull();
     });
   });
 

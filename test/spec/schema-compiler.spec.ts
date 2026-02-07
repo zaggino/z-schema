@@ -1,6 +1,7 @@
 import { JsonSchema } from '../../src/json-schema.ts';
 import { collectIds, collectReferences } from '../../src/schema-compiler.js';
 import { ZSchema } from '../../src/z-schema.ts';
+import { ValidateError } from '../../src/errors.ts';
 
 describe('collectReferences', () => {
   it('should collect $ref with id scope', () => {
@@ -55,10 +56,6 @@ describe('collectReferences', () => {
     expect.soft(refStrs[1]).toBe('file:///c:/folder/file.json#personId');
     const validator = ZSchema.create();
     validator.compileSchema(schema);
-    const missingRefs = validator.getMissingReferences();
-    expect(missingRefs).toHaveLength(0);
-    const missingRemoteRefs = validator.getMissingRemoteReferences();
-    expect(missingRemoteRefs).toHaveLength(0);
   });
 
   it('should collect $ref with nested ids and not/definitions', () => {
@@ -181,5 +178,21 @@ describe('collectReferences', () => {
     const validator = ZSchema.create();
     expect(validator.validateSafe(1, schema).valid).toBe(true);
     expect(validator.validateSafe('a', schema).valid).toBe(false);
+  });
+
+  it('compileSchemaSafe returns ValidateResponse for valid schema', () => {
+    const validator = ZSchema.create();
+    const validSchema = { type: 'string' };
+    const result = validator.compileSchemaSafe(validSchema);
+    expect(result.valid).toBe(true);
+    expect(result.err).toBeUndefined();
+  });
+
+  it('compileSchemaSafe returns ValidateResponse for invalid schema', () => {
+    const validator = ZSchema.create();
+    const invalidSchema = { $ref: '#/nonexistent' }; // circular or invalid
+    const result = validator.compileSchemaSafe(invalidSchema);
+    expect(result.valid).toBe(false);
+    expect(result.err).toBeInstanceOf(ValidateError);
   });
 });

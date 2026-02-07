@@ -20,7 +20,7 @@ function validateWithAutomaticDownloads(
     lastResult = result.valid;
     lastError = result.valid ? null : result.err?.details;
 
-    const missingReferences = validator.getMissingRemoteReferences();
+    const missingReferences = result.valid ? [] : validator.getMissingRemoteReferences(result.err!);
     if (missingReferences.length > 0) {
       let finished = 0;
       missingReferences.forEach(function (url: string) {

@@ -1,4 +1,4 @@
-import ZSchema from '../../src/index.ts';
+import ZSchema, { ValidateError } from '../../src/index.ts';
 
 describe('Error objects include `keyword` field', function () {
   it('JSON validation errors include the keyword that caused the error', function () {
@@ -29,13 +29,19 @@ describe('Error objects include `keyword` field', function () {
       maxItems: -1, // invalid value should trigger schema validation error
     } as any;
 
-    const valid = validator.validateSchema(badSchema as any);
-    expect(valid).toBe(false);
-    const errors = validator.lastReport!.errors;
-    expect(errors).not.toBeNull();
-    const schemaErr = errors!.find((e) => e.code === 'KEYWORD_MUST_BE' || e.code === 'KEYWORD_TYPE_EXPECTED');
-    expect(schemaErr).toBeDefined();
-    // The schema keyword responsible should be 'maxItems'
-    expect(schemaErr!.keyword).toBe('maxItems');
+    try {
+      validator.validateSchema(badSchema as any);
+      expect.fail('Expected validateSchema to throw');
+    } catch (error) {
+      expect(error).toBeInstanceOf(ValidateError);
+      const validateError = error as ValidateError;
+      expect(validateError.details).toBeDefined();
+      const schemaErr = validateError.details!.find(
+        (e) => e.code === 'KEYWORD_MUST_BE' || e.code === 'KEYWORD_TYPE_EXPECTED'
+      );
+      expect(schemaErr).toBeDefined();
+      // The schema keyword responsible should be 'maxItems'
+      expect(schemaErr!.keyword).toBe('maxItems');
+    }
   });
 });

@@ -180,7 +180,7 @@ z-schema will automatically use the `u` (Unicode) flag for all patterns containi
 
 ### Keyword field
 
-Error objects returned by `getLastErrors()` (and included on the `details` property of `getLastError()`'s Error) include a `keyword` field indicating the schema keyword that triggered the error (for example: `"required"`, `"type"`, `"minLength"`).
+Error objects thrown by `validate()` (and included on the `details` property of the ValidateError) include a `keyword` field indicating the schema keyword that triggered the error (for example: `"required"`, `"type"`, `"minLength"`).
 
 Example error detail:
 

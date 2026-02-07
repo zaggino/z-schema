@@ -154,7 +154,6 @@ export type ValidateCallback = (err: ValidateResponse['err'], valid: ValidateRes
 export type SchemaReader = (uri: string) => JsonSchema;
 
 class ZSchemaImpl {
-  lastReport: Report | undefined;
   scache: SchemaCache;
   sc: SchemaCompiler;
   sv: SchemaValidator;
@@ -172,31 +171,6 @@ class ZSchemaImpl {
     return this.options.version && this.options.version !== 'none'
       ? VERSION_SCHEMA_URL_MAPPING[this.options.version]
       : VERSION_SCHEMA_URL_MAPPING[defaultOptions.version as JsonSchemaVersion];
-  }
-
-  validateSchema(schemaOrArr: JsonSchema | JsonSchema[]): boolean {
-    if (Array.isArray(schemaOrArr) && schemaOrArr.length === 0) {
-      throw new Error('.validateSchema was called with an empty array');
-    }
-
-    const report = new Report(this.options);
-
-    if (Array.isArray(schemaOrArr)) {
-      const arr = this.scache.getSchema(report, schemaOrArr)!;
-      const compiled = this.sc.compileSchema(report, arr);
-      if (compiled) {
-        this.sv.validateSchema(report, arr);
-      }
-    } else {
-      const schema = this.scache.getSchema(report, schemaOrArr)!;
-      const compiled = this.sc.compileSchema(report, schema);
-      if (compiled) {
-        this.sv.validateSchema(report, schema);
-      }
-    }
-
-    this.lastReport = report;
-    return report.isValid();
   }
 
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions, callback: ValidateCallback): void;
@@ -347,6 +321,67 @@ class ZSchemaImpl {
     });
   }
 
+  compileSchema(schemaOrArr: JsonSchema | JsonSchema[]): void {
+    if (Array.isArray(schemaOrArr) && schemaOrArr.length === 0) {
+      throw new Error('.compileSchema was called with an empty array');
+    }
+
+    const report = new Report(this.options);
+
+    if (Array.isArray(schemaOrArr)) {
+      const arr = this.scache.getSchema(report, schemaOrArr)!;
+      const compiled = this.sc.compileSchema(report, arr);
+      if (compiled) {
+        this.sv.validateSchema(report, arr);
+      }
+    } else {
+      const schema = this.scache.getSchema(report, schemaOrArr)!;
+      const compiled = this.sc.compileSchema(report, schema);
+      if (compiled) {
+        this.sv.validateSchema(report, schema);
+      }
+    }
+
+    if (!report.isValid()) {
+      throw getValidateError({ message: report.commonErrorMessage!, details: report.errors });
+    }
+  }
+
+  /**
+   * Compiles a schema and returns a result object.
+   * This method never throws and provides safe schema compilation.
+   */
+  compileSchemaSafe(schema: JsonSchema | JsonSchema[]): ValidateResponse {
+    try {
+      this.compileSchema(schema);
+      return { valid: true };
+    } catch (err) {
+      return { valid: false, err: err as ValidateError };
+    }
+  }
+
+  /**
+   * Validates a schema against the meta schema.
+   * Returns true if valid, throws ValidateError if invalid.
+   */
+  validateSchema(schema: JsonSchema | JsonSchema[]): true {
+    this.compileSchema(schema);
+    return true;
+  }
+
+  /**
+   * Validates a schema and returns a result object.
+   * This method never throws and provides safe schema validation.
+   */
+  validateSchemaSafe(schemaOrArr: JsonSchema | JsonSchema[]): ValidateResponse {
+    try {
+      this.validateSchema(schemaOrArr);
+      return { valid: true };
+    } catch (err) {
+      return { valid: false, err: err as ValidateError };
+    }
+  }
+
   // instance scoped format functions
   public registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
     if (!this.options.customFormats) {
@@ -366,31 +401,6 @@ class ZSchemaImpl {
     return sortedKeys(this.options.customFormats || {});
   }
 
-  /**
-   * Returns an Error object for the most recent failed validation, or null if the validation was successful.
-   * @deprecated Use validate() with try-catch or validateSafe() instead. This method will be removed in a future version.
-   */
-  getLastError(): ValidateError | null {
-    console.warn('getLastError() is deprecated. Use validate() with try-catch or validateSafe() instead.');
-    if (!this.lastReport) {
-      throw new Error(`getLastError() called before doing any validation!`);
-    }
-    if (this.lastReport.errors.length === 0) {
-      return null;
-    }
-    return getValidateError({ message: this.lastReport.commonErrorMessage!, details: this.lastReport.errors });
-  }
-
-  /**
-   * Returns the error details for the most recent validation, or undefined if the validation was successful.
-   * This is the same list as the SchemaError.details property.
-   * @deprecated Use validate() with try-catch or validateSafe() instead. This method will be removed in a future version.
-   */
-  getLastErrors(): SchemaErrorDetail[] | null {
-    console.warn('getLastErrors() is deprecated. Use validate() with try-catch or validateSafe() instead.');
-    return this.lastReport && this.lastReport.errors.length > 0 ? this.lastReport.errors : null;
-  }
-
   setRemoteReference(uri: string, schema: string | JsonSchema, validationOptions?: ZSchemaOptions) {
     let _schema: JsonSchemaInternal;
 
@@ -407,38 +417,26 @@ class ZSchemaImpl {
     this.scache.cacheSchemaByUri(uri, _schema);
   }
 
-  compileSchema(schema: JsonSchema) {
-    const report = new Report(this.options);
-
-    schema = this.scache.getSchema(report, schema)!;
-
-    this.sc.compileSchema(report, schema);
-
-    this.lastReport = report;
-    return report.isValid();
-  }
-
-  getMissingReferences(arr?: SchemaErrorDetail[]) {
-    arr = arr || this.lastReport?.errors || [];
-    let res: string[] = [];
-    let idx = arr.length;
-    while (idx--) {
-      const error = arr[idx];
-      if (error.code === 'UNRESOLVABLE_REFERENCE') {
-        const reference = error.params[0] as string;
-        if (res.indexOf(reference) === -1) {
-          res.push(reference);
+  getMissingReferences(err: ValidateError): string[] {
+    if (!err) return [];
+    const details = err.details || [];
+    const missingRefs: string[] = [];
+    function collect(details: SchemaErrorDetail[]) {
+      for (const detail of details) {
+        if (detail.code === 'UNRESOLVABLE_REFERENCE' || detail.code === 'SCHEMA_NOT_REACHABLE') {
+          missingRefs.push(detail.params[0] as string);
+        }
+        if (detail.inner) {
+          collect(detail.inner);
         }
       }
-      if (error.inner) {
-        res = res.concat(this.getMissingReferences(error.inner));
-      }
     }
-    return res.sort();
+    collect(details);
+    return missingRefs;
   }
 
-  getMissingRemoteReferences() {
-    const missingReferences = this.getMissingReferences();
+  getMissingRemoteReferences(err: ValidateError) {
+    const missingReferences = this.getMissingReferences(err);
     const missingRemoteReferences = [];
     let idx = missingReferences.length;
     while (idx--) {
@@ -450,20 +448,17 @@ class ZSchemaImpl {
     return missingRemoteReferences;
   }
 
-  getResolvedSchema(schema: JsonSchema): JsonSchema {
+  getResolvedSchema(schemaId: string): JsonSchema | undefined {
     const report = new Report(this.options);
-    schema = this.scache.getSchema(report, schema)!;
+    const schema = this.scache.getSchemaByUri(report, schemaId);
+    if (!schema) return undefined;
 
-    // clone before making any modifications
-    schema = deepClone(schema);
+    const clonedSchema = deepClone(schema);
 
-    const visited: JsonSchemaInternalCleanup[] = [];
+    const visited: any[] = [];
 
     // clean-up the schema and resolve references
-    interface JsonSchemaInternalCleanup extends JsonSchemaInternal {
-      ___$visited?: boolean;
-    }
-    const cleanup = function (schema: JsonSchemaInternalCleanup) {
+    const cleanup = function (schema: any) {
       let key;
       const typeOf = whatIs(schema);
       if (typeOf !== 'object' && typeOf !== 'array') {
@@ -497,17 +492,12 @@ class ZSchemaImpl {
       }
     };
 
-    cleanup(schema);
+    cleanup(clonedSchema);
     visited.forEach(function (s) {
       delete s.___$visited;
     });
 
-    this.lastReport = report;
-    if (report.isValid()) {
-      return schema;
-    } else {
-      throw this.getLastError();
-    }
+    return clonedSchema;
   }
 }
 

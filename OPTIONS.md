@@ -351,13 +351,17 @@ var data = {
   amount: 50,
 };
 
-validator.validate(data, schema);
-console.log(validator.getLastErrors());
-//[ { code: 'NON_UNIQUE_PROPERTY_VALUE',
-//    params: [ 'toId', 1034834346 ],
-//    message: 'Property "toId" has non-unique value: 1034834346',
-//    path: '#/',
-//    schemaId: undefined } ]
+try {
+  validator.validate(data, schema);
+  console.log('Validation passed');
+} catch (error) {
+  console.log(error.details);
+  //[ { code: 'NON_UNIQUE_PROPERTY_VALUE',
+  //    params: [ 'toId', 1034834346 ],
+  //    message: 'Property "toId" has non-unique value: 1034834346',
+  //    path: '#/',
+  //    schemaId: undefined } ]
+}
 ```
 
 **Note:** before creating your own keywords you should consider all compatibility issues.

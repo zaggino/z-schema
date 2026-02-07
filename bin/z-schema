@@ -90,11 +90,12 @@ function validateWithAutomaticDownloads(filePath, data, schema, callback) {
       lastResult = result.valid;
       lastErrors = result.valid ? null : result.err.details;
     } else {
-      lastResult = validator.validateSchema(schema);
-      lastErrors = lastResult ? null : validator.lastReport.errors;
+      var result = validator.validateSchemaSafe(schema);
+      lastResult = result.valid;
+      lastErrors = result.valid ? null : result.err.details;
     }
 
-    var missingReferences = validator.getMissingRemoteReferences();
+    var missingReferences = validator.getMissingRemoteReferences(result.err);
     if (missingReferences.length > 0) {
       var finished = 0;
       missingReferences.forEach(function (url) {
