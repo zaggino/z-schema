@@ -20,11 +20,7 @@ const VERSION_FOLDER_MAPPING: Record<JsonSchemaVersion, JSONSchemaTestSuiteTestF
 };
 
 const excludedDirs: string[] = ['draft4/optional'];
-const excludedFiles: string[] = [
-  'draft4/optional/format/ipv6.json',
-  'draft4/optional/format/unknown.json',
-  'draft4/optional/format/uri.json',
-];
+const excludedFiles: string[] = ['draft4/optional/format/unknown.json', 'draft4/optional/format/uri.json'];
 const excludedTests: string[] = [];
 
 export async function runTests({ reader }: { reader: <T>(testFilePath: string) => Promise<T> }) {

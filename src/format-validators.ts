@@ -161,6 +161,9 @@ const ipv6Validator: FormatValidatorFn = (ipv6: unknown) => {
   if (typeof ipv6 !== 'string') {
     return true;
   }
+  if (ipv6.includes('%')) {
+    return false;
+  }
   return isIPModule.default(ipv6, 6);
 };
 
