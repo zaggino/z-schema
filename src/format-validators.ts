@@ -182,9 +182,21 @@ const regexValidator: FormatValidatorFn = (input: unknown) => {
 const strictUriValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string' || isURLModule.default(uri);
 
 const uriValidator: FormatValidatorFn = function (uri: unknown) {
-  // https://github.com/zaggino/z-schema/issues/18
-  // RegExp from http://tools.ietf.org/html/rfc3986#appendix-B
-  return typeof uri !== 'string' || RegExp('^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?').test(uri);
+  if (typeof uri !== 'string') return true;
+  // eslint-disable-next-line no-control-regex
+  if (/[^\x00-\x7F]/.test(uri)) return false;
+  const match = uri.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):\/\/([^/]*)/);
+  if (match) {
+    const authority = match[2];
+    const atIndex = authority.indexOf('@');
+    if (atIndex > 0) {
+      const userinfo = authority.substring(0, atIndex);
+      if (userinfo.includes('[') || userinfo.includes(']')) {
+        return false;
+      }
+    }
+  }
+  return /^[a-zA-Z][a-zA-Z0-9+.-]*:[^"\\<>^{}^`| ]*$/.test(uri);
 };
 
 export interface FormatValidatorsOptions {
