@@ -29,20 +29,64 @@ const dateTimeValidator: FormatValidatorFn = (dateTime: unknown) => {
   }
   // date-time from http://tools.ietf.org/html/rfc3339#section-5.6
   const s = dateTime.toLowerCase().split('t');
-  if (!dateValidator(s[0])) {
+  if (s.length !== 2) {
     return false;
   }
-  const matches = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]+)?(z|([+-][0-9]{2}:[0-9]{2}))$/.exec(s[1]);
-  if (matches === null) {
+  const datePart = s[0];
+  const timePart = s[1];
+  // Check date
+  const dateMatches = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(datePart);
+  if (dateMatches === null) {
     return false;
   }
-  // var hour = matches[1];
-  // var minute = matches[2];
-  // var second = matches[3];
-  // var fraction = matches[4];
-  // var timezone = matches[5];
-  if (matches[1] > '23' || matches[2] > '59' || matches[3] > '59') {
+  const year = parseInt(dateMatches[1], 10);
+  const month = parseInt(dateMatches[2], 10);
+  const day = parseInt(dateMatches[3], 10);
+  if (month < 1 || month > 12 || day < 1 || day > 31) {
     return false;
+  }
+  // Check if date is valid
+  const date = new Date(year, month - 1, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return false;
+  }
+  // Check time
+  const timeMatches = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]+)?(z|([+-][0-9]{2}:[0-9]{2}))$/.exec(timePart);
+  if (timeMatches === null) {
+    return false;
+  }
+  const hour = parseInt(timeMatches[1], 10);
+  const minute = parseInt(timeMatches[2], 10);
+  const second = parseInt(timeMatches[3], 10);
+  if (hour > 23 || minute > 59 || second > 60) {
+    return false;
+  }
+  // Check offset
+  let utcHour = hour;
+  if (timeMatches[5] !== 'z') {
+    const offset = timeMatches[5];
+    const offsetMatches = /^([+-])([0-9]{2}):([0-9]{2})$/.exec(offset);
+    if (offsetMatches === null) {
+      return false;
+    }
+    const offsetSign = offsetMatches[1];
+    const offsetHour = parseInt(offsetMatches[2], 10);
+    const offsetMinute = parseInt(offsetMatches[3], 10);
+    if (offsetHour > 23 || offsetMinute > 59) {
+      return false;
+    }
+    if (offsetSign === '+') {
+      utcHour = hour - offsetHour;
+    } else {
+      utcHour = hour + offsetHour;
+    }
+    utcHour = ((utcHour % 24) + 24) % 24;
+  }
+  // Leap second only at 23:59:60 UTC
+  if (second === 60) {
+    if (utcHour !== 23 || minute !== 59) {
+      return false;
+    }
   }
   return true;
 };
