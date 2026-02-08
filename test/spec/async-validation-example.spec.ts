@@ -89,11 +89,7 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(validPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(validPayload, personSchema);
 
       expect(result.valid).toBe(true);
       expect(result.err).toBeUndefined();
@@ -110,15 +106,11 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(invalidPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(invalidPayload, personSchema);
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
-      expect(result.err.details[0].path).toBe('#/personId');
+      expect(result.err!.details?.[0].path).toBe('#/personId');
     });
   });
 
@@ -134,11 +126,7 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(validPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(validPayload, personSchema);
 
       expect(result.valid).toBe(true);
       expect(result.err).toBeUndefined();
@@ -155,15 +143,11 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(invalidPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(invalidPayload, personSchema);
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
-      expect(result.err.details[0].path).toBe('#/address/postcode');
+      expect(result.err!.details?.[0].path).toBe('#/address/postcode');
     });
   });
 
@@ -179,11 +163,7 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(validPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(validPayload, personSchema);
 
       expect(result.valid).toBe(true);
       expect(result.err).toBeUndefined();
@@ -200,15 +180,11 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(invalidPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(invalidPayload, personSchema);
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
-      expect(result.err.details[0].path).toBe('#/address/phone');
+      expect(result.err!.details?.[0].path).toBe('#/address/phone');
     });
   });
 
@@ -224,11 +200,7 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(validPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(validPayload, personSchema);
 
       expect(result.valid).toBe(true);
       expect(result.err).toBeUndefined();
@@ -245,15 +217,11 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(invalidPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(invalidPayload, personSchema);
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
-      expect(result.err.details.length).toBeGreaterThan(1);
+      expect(result.err!.details?.length).toBeGreaterThan(1);
     });
   });
 
@@ -284,11 +252,7 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(payload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(payload, personSchema);
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
@@ -302,11 +266,7 @@ describe('Async Validation Example', () => {
         address: 'not-an-object',
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(malformedPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(malformedPayload, personSchema);
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
@@ -334,11 +294,7 @@ describe('Async Validation Example', () => {
           },
         };
 
-        const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-          validator.validate(payload, personSchema, (err, valid) => {
-            resolve({ err, valid });
-          });
-        });
+        const result = await validator.validateAsyncSafe(payload, personSchema);
 
         expect(result.valid).toBe(testCase.expected);
       }

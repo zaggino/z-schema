@@ -159,7 +159,7 @@ export type ValidateCallback = (err: ValidateResponse['err'], valid: ValidateRes
 // a sync function that loads schemas for future use, for example from schemas directory, during server startup
 export type SchemaReader = (uri: string) => JsonSchema;
 
-class ZSchemaImpl {
+export class ZSchemaBase {
   scache: SchemaCache;
   sc: SchemaCompiler;
   sv: SchemaValidator;
@@ -167,6 +167,11 @@ class ZSchemaImpl {
   options: ZSchemaOptions;
 
   constructor(options?: ZSchemaOptions) {
+    if (!(options as any)?.__called_from_factory__) {
+      throw new Error('do not use new ZSchema(), use ZSchema.create() instead');
+    }
+    delete (options as any).__called_from_factory__;
+
     this.scache = new SchemaCache(this);
     this.sc = new SchemaCompiler(this);
     this.sv = new SchemaValidator(this);
@@ -179,11 +184,11 @@ class ZSchemaImpl {
       : VERSION_SCHEMA_URL_MAPPING[defaultOptions.version as JsonSchemaVersion];
   }
 
-  validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions, callback: ValidateCallback): void;
-  validate(json: unknown, schema: JsonSchema | string, callback: ValidateCallback): void;
-  validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions): true;
-  validate(json: unknown, schema: JsonSchema | string): true;
-  validate(
+  _validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions, callback: ValidateCallback): void;
+  _validate(json: unknown, schema: JsonSchema | string, callback: ValidateCallback): void;
+  _validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions): true;
+  _validate(json: unknown, schema: JsonSchema | string): true;
+  _validate(
     json: unknown,
     schema: JsonSchema | string,
     options?: ValidateOptions | ValidateCallback,
@@ -294,7 +299,7 @@ class ZSchemaImpl {
    */
   validateSafe(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): ValidateResponse {
     try {
-      this.validate(json, schema, options ?? {});
+      this._validate(json, schema, options ?? {});
       return { valid: true };
     } catch (err) {
       return { valid: false, err: err as ValidateError };
@@ -305,7 +310,7 @@ class ZSchemaImpl {
   validateAsync(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): Promise<true> {
     return new Promise((resolve, reject) => {
       try {
-        this.validate(json, schema, options || {}, (err, valid) =>
+        this._validate(json, schema, options || {}, (err, valid) =>
           err || valid !== true ? reject(err) : resolve(valid)
         );
       } catch (err) {
@@ -318,7 +323,7 @@ class ZSchemaImpl {
   validateAsyncSafe(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): Promise<ValidateResponse> {
     return new Promise((resolve) => {
       try {
-        this.validate(json, schema, options || {}, (err, valid) => {
+        this._validate(json, schema, options || {}, (err, valid) => {
           resolve({ valid, err });
         });
       } catch (err) {
@@ -511,7 +516,7 @@ class ZSchemaImpl {
   }
 }
 
-export class ZSchema extends ZSchemaImpl {
+export class ZSchema extends ZSchemaBase {
   // ----- static methods start -----
 
   // class scoped format functions
@@ -588,24 +593,15 @@ export class ZSchema extends ZSchemaImpl {
     return new ZSchema(options);
   }
 
-  constructor(options?: ZSchemaOptions) {
-    if (!(options as any)?.__called_from_factory__) {
-      throw new Error('do not use new ZSchema(), use ZSchema.create() instead');
-    }
-    delete (options as any).__called_from_factory__;
-    super(options);
+  validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): true {
+    return this._validate(json, schema, options);
   }
 }
 
-export class ZSchemaSafe extends ZSchema {
-  constructor(options?: ZSchemaOptions) {
-    super(options);
-  }
-
-  // @ts-expect-error: we need to replace original validate signature here
+export class ZSchemaSafe extends ZSchemaBase {
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): ValidateResponse {
     try {
-      super.validate(json, schema, options);
+      this._validate(json, schema, options);
       return { valid: true };
     } catch (err) {
       return { valid: false, err: err as ValidateError };
@@ -613,16 +609,11 @@ export class ZSchemaSafe extends ZSchema {
   }
 }
 
-export class ZSchemaAsync extends ZSchema {
-  constructor(options?: ZSchemaOptions) {
-    super(options);
-  }
-
-  // @ts-expect-error: we need to replace original validate signature here
+export class ZSchemaAsync extends ZSchemaBase {
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<true> {
     return new Promise((resolve, reject) => {
       try {
-        super.validate(json, schema, options, (err, valid) => (err || valid !== true ? reject(err) : resolve(valid)));
+        this._validate(json, schema, options, (err, valid) => (err || valid !== true ? reject(err) : resolve(valid)));
       } catch (err) {
         reject(err);
       }
@@ -630,16 +621,11 @@ export class ZSchemaAsync extends ZSchema {
   }
 }
 
-export class ZSchemaAsyncSafe extends ZSchema {
-  constructor(options?: ZSchemaOptions) {
-    super(options);
-  }
-
-  // @ts-expect-error: we need to replace original validate signature here
+export class ZSchemaAsyncSafe extends ZSchemaBase {
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<ValidateResponse> {
     return new Promise((resolve) => {
       try {
-        super.validate(json, schema, options, (err, valid) => {
+        this._validate(json, schema, options, (err, valid) => {
           resolve({ valid, err });
         });
       } catch (err) {

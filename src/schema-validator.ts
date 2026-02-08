@@ -1,4 +1,4 @@
-import type { ZSchema } from './z-schema.js';
+import type { ZSchemaBase } from './z-schema.js';
 import { validate } from './json-validation.js';
 import { Report } from './report.js';
 import { isObject, whatIs } from './utils/what-is.js';
@@ -553,7 +553,7 @@ const SchemaValidators = {
 } as const;
 
 export class SchemaValidator {
-  constructor(private validator: ZSchema) {}
+  constructor(private validator: ZSchemaBase) {}
 
   get options() {
     return this.validator.options;

@@ -6,7 +6,7 @@ import { areEqual } from './utils/json.js';
 import { shallowClone } from './utils/clone.js';
 import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
-import type { ValidateOptions, ZSchema } from './z-schema.js';
+import type { ValidateOptions, ZSchemaBase } from './z-schema.js';
 import { getFormatValidators } from './format-validators.js';
 import { hasOwn } from './utils/properties.js';
 
@@ -21,7 +21,7 @@ const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
   );
 };
 
-type JsonValidatorFn = (this: ZSchema, report: Report, schema: JsonSchema, json: unknown) => void;
+type JsonValidatorFn = (this: ZSchemaBase, report: Report, schema: JsonSchema, json: unknown) => void;
 
 export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
   id: () => {},
@@ -30,7 +30,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
   title: () => {},
   description: () => {},
   default: () => {},
-  multipleOf: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  multipleOf: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.1.2
     if (shouldSkipValidate(this.validateOptions, ['MULTIPLE_OF'])) {
       return;
@@ -45,7 +45,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       report.addError('MULTIPLE_OF', [json, schema.multipleOf!], undefined, schema, 'multipleOf');
     }
   },
-  maximum: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  maximum: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.2.2
     if (shouldSkipValidate(this.validateOptions, ['MAXIMUM', 'MAXIMUM_EXCLUSIVE'])) {
       return;
@@ -66,7 +66,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
   exclusiveMaximum: function () {
     // covered in maximum
   },
-  minimum: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  minimum: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.2
     if (shouldSkipValidate(this.validateOptions, ['MINIMUM', 'MINIMUM_EXCLUSIVE'])) {
       return;
@@ -87,7 +87,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
   exclusiveMinimum: function () {
     // covered in minimum
   },
-  maxLength: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  maxLength: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.1.2
     if (shouldSkipValidate(this.validateOptions, ['MAX_LENGTH'])) {
       return;
@@ -99,7 +99,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       report.addError('MAX_LENGTH', [json.length, schema.maxLength!], undefined, schema, 'maxLength');
     }
   },
-  minLength: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  minLength: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.2.2
     if (shouldSkipValidate(this.validateOptions, ['MIN_LENGTH'])) {
       return;
@@ -111,7 +111,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       report.addError('MIN_LENGTH', [json.length, schema.minLength!], undefined, schema, 'minLength');
     }
   },
-  pattern: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  pattern: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.3.2
     if (shouldSkipValidate(this.validateOptions, ['PATTERN'])) {
       return;
@@ -129,7 +129,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       report.addError('PATTERN', [schema.pattern!, json], undefined, schema, 'pattern');
     }
   },
-  additionalItems: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  additionalItems: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.2
     if (shouldSkipValidate(this.validateOptions, ['ARRAY_ADDITIONAL_ITEMS'])) {
       return;
@@ -149,7 +149,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     /*report: Report, schema: JsonSchemaInternal, json: unknown*/
     // covered in additionalItems
   },
-  maxItems: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  maxItems: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.2.2
     if (shouldSkipValidate(this.validateOptions, ['ARRAY_LENGTH_LONG'])) {
       return;
@@ -161,7 +161,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       report.addError('ARRAY_LENGTH_LONG', [json.length, schema.maxItems!], undefined, schema, 'maxItems');
     }
   },
-  minItems: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  minItems: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.3.2
     if (shouldSkipValidate(this.validateOptions, ['ARRAY_LENGTH_SHORT'])) {
       return;
@@ -173,7 +173,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       report.addError('ARRAY_LENGTH_SHORT', [json.length, schema.minItems!], undefined, schema, 'minItems');
     }
   },
-  uniqueItems: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  uniqueItems: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.4.2
     if (shouldSkipValidate(this.validateOptions, ['ARRAY_UNIQUE'])) {
       return;
@@ -188,7 +188,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       }
     }
   },
-  maxProperties: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  maxProperties: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.1.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_PROPERTIES_MAXIMUM'])) {
       return;
@@ -207,7 +207,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       );
     }
   },
-  minProperties: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  minProperties: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.2.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_PROPERTIES_MINIMUM'])) {
       return;
@@ -226,7 +226,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       );
     }
   },
-  required: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  required: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.3.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_MISSING_REQUIRED_PROPERTY'])) {
       return;
@@ -242,19 +242,19 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       }
     }
   },
-  additionalProperties: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  additionalProperties: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // covered in properties and patternProperties
     if (schema.properties === undefined && schema.patternProperties === undefined) {
       return JsonValidators.properties.call(this, report, schema, json);
     }
   },
-  patternProperties: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  patternProperties: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // covered in properties
     if (schema.properties === undefined) {
       return JsonValidators.properties.call(this, report, schema, json);
     }
   },
-  properties: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  properties: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_ADDITIONAL_PROPERTIES'])) {
       return;
@@ -307,7 +307,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       }
     }
   },
-  dependencies: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  dependencies: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.5.2
     if (shouldSkipValidate(this.validateOptions, ['OBJECT_DEPENDENCY_KEY'])) {
       return;
@@ -347,7 +347,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       }
     }
   },
-  enum: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  enum: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.1.2
     if (shouldSkipValidate(this.validateOptions, ['ENUM_CASE_MISMATCH', 'ENUM_MISMATCH'])) {
       return;
@@ -370,7 +370,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       report.addError(error, [JSON.stringify(json)], undefined, schema, 'enum');
     }
   },
-  type: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  type: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.2
     if (shouldSkipValidate(this.validateOptions, ['INVALID_TYPE'])) {
       return;
@@ -386,7 +386,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       }
     }
   },
-  allOf: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  allOf: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
     let idx = schema.allOf!.length;
     while (idx--) {
@@ -396,7 +396,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       }
     }
   },
-  anyOf: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  anyOf: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.2
     const subReports: Report[] = [];
     let idx = schema.anyOf!.length;
@@ -456,7 +456,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       }
     }
   },
-  oneOf: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  oneOf: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.2
     const subReports: Report[] = [];
     let idx = schema.oneOf!.length;
@@ -519,7 +519,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       }
     }
   },
-  not: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  not: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
     const subReport = new Report(report);
     if (validate.call(this, subReport, schema.not!, json) === true) {
@@ -531,7 +531,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.2
     // nothing to do here
   },
-  format: function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  format: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
     const formatValidators = getFormatValidators(this.options);
     const formatValidatorFn = formatValidators[schema.format!];
@@ -598,7 +598,7 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
   },
 };
 
-const recurseArray = function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: Array<unknown>) {
+const recurseArray = function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Array<unknown>) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.2
 
   let idx = json.length;
@@ -634,7 +634,7 @@ const recurseArray = function (this: ZSchema, report: Report, schema: JsonSchema
   }
 };
 
-const recurseObject = function (this: ZSchema, report: Report, schema: JsonSchemaInternal, json: Record<any, any>) {
+const recurseObject = function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Record<any, any>) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.3
 
   // If "additionalProperties" is absent, it is considered present with an empty schema as a value.
@@ -694,7 +694,7 @@ const recurseObject = function (this: ZSchema, report: Report, schema: JsonSchem
   }
 };
 
-export function validate(this: ZSchema, report: Report, schema: JsonSchemaInternal, json: unknown): boolean {
+export function validate(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown): boolean {
   report.commonErrorMessage = 'JSON_OBJECT_VALIDATION_FAILED';
 
   // check if schema is an object

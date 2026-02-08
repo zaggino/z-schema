@@ -199,39 +199,27 @@ describe('ZSchemaTestSuite', function () {
       if (async) {
         it(
           testSuite.description + ', ' + test.description,
-          function () {
-            return new Promise<void>((done, reject) => {
-              const validator = ZSchema.create(options);
-              if (setup) {
-                setup(validator, ZSchema);
-              }
+          async function () {
+            const validator = ZSchema.create(options);
+            if (setup) {
+              setup(validator, ZSchema);
+            }
 
-              // see http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony
-              let zalgo = false;
+            if (Array.isArray(schema)) {
+              schema = schema[schemaIndex];
+            }
 
-              const result = validator.validate(data, schema as any, function (err, valid) {
-                try {
-                  // make sure callback wasn't called synchronously
-                  expect(zalgo).toBe(true /*, 'callback was fired in synchronous way'*/);
-                  expect(typeof valid).toBe('boolean' /*, 'returned response is not a boolean'*/);
-                  expect(valid).toBe(test.valid /*, "test result doesn't match expected test result"*/);
-                  if (test.valid === true) {
-                    expect(err).toBe(undefined /*, 'errors are not undefined when test is valid'*/);
-                  }
-                  if (after) {
-                    after(err?.details ?? err ?? undefined, valid, data, validator);
-                  }
+            const response = await validator.validateAsyncSafe(data, schema as any, validateOptions as any);
+            const { valid, err } = response;
 
-                  done();
-                } catch (err) {
-                  reject(err);
-                }
-              });
-
-              // never return anything when callback is specified
-              expect(result).toBe(undefined /*, 'validator returned something else than undefined in callback mode'*/);
-              zalgo = true;
-            });
+            expect(typeof valid).toBe('boolean' /*, 'returned response is not a boolean'*/);
+            expect(valid).toBe(test.valid /*, "test result doesn't match expected test result"*/);
+            if (test.valid === true) {
+              expect(err).toBe(undefined /*, 'errors are not undefined when test is valid'*/);
+            }
+            if (after) {
+              after(err?.details ?? err ?? undefined, valid, data, validator);
+            }
           },
           1000
         );

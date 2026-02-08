@@ -5,7 +5,16 @@ export type { FormatValidatorFn, FormatValidatorsOptions } from './format-valida
 export type { ErrorCode, ErrorParam, Errors } from './errors.js';
 export type { JsonSchema, JsonSchemaType } from './json-schema.js';
 export type { Report, SchemaErrorDetail } from './report.js';
-export type { ValidateResponse, ZSchemaOptions, SchemaReader, ValidateOptions, ValidateCallback } from './z-schema.js';
+export type {
+  ZSchema,
+  ZSchemaSafe,
+  ZSchemaAsync,
+  ZSchemaAsyncSafe,
+  ZSchemaOptions,
+  ValidateOptions,
+  ValidateResponse,
+  SchemaReader,
+} from './z-schema.js';
 export {
   getFormatValidators,
   getRegisteredFormats,

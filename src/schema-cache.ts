@@ -1,4 +1,4 @@
-import type { ZSchema } from './z-schema.js';
+import type { ZSchemaBase } from './z-schema.js';
 import isequal from 'lodash.isequal';
 import { Report } from './report.js';
 import { findId, JsonSchema, JsonSchemaInternal } from './json-schema.js';
@@ -14,7 +14,7 @@ export class SchemaCache {
   cache: SchemaCacheStorage = {};
   referenceCache: ReferenceSchemaCacheStorage = [];
 
-  constructor(private validator: ZSchema) {}
+  constructor(private validator: ZSchemaBase) {}
 
   static cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
     const remotePath = getRemotePath(uri);
