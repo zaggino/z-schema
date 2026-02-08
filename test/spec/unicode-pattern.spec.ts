@@ -1,4 +1,5 @@
 import ZSchema from '../../src/index.ts';
+import { ucs2decode } from '../../src/utils/unicode.ts';
 
 // Runtime check for Unicode property escape support (must actually match ASCII letters)
 function supportsUnicodePropertyEscapes() {
@@ -40,5 +41,22 @@ describe('Unicode property escapes in pattern keyword', () => {
     expect(result.err).toBeDefined();
     expect(result.err!.details?.[0].code).toBe('KEYWORD_PATTERN');
     expect(result.err!.details?.[0].params[1]).toBe('^\\p{INVALID}+$');
+  });
+});
+
+describe('ucs2decode', () => {
+  it('should handle unmatched low surrogate', () => {
+    const result = ucs2decode('\udc00');
+    expect(result).toEqual([0xdc00]);
+  });
+
+  it('should handle high surrogate at end of string', () => {
+    const result = ucs2decode('\ud800');
+    expect(result).toEqual([0xd800]);
+  });
+
+  it('should handle unmatched high surrogate', () => {
+    const result = ucs2decode('\ud800a');
+    expect(result).toEqual([0xd800, 97]);
   });
 });

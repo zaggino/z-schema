@@ -1,5 +1,11 @@
 import { Report, SchemaErrorDetail } from './report.js';
-import { FormatValidatorFn, getRegisteredFormats, registerFormat, unregisterFormat } from './format-validators.js';
+import {
+  FormatValidatorFn,
+  getRegisteredFormats,
+  getSupportedFormats,
+  registerFormat,
+  unregisterFormat,
+} from './format-validators.js';
 import { validate as validateJson } from './json-validation.js';
 import { SchemaCache } from './schema-cache.js';
 import { SchemaCompiler } from './schema-compiler.js';
@@ -398,7 +404,11 @@ class ZSchemaImpl {
   }
 
   public getRegisteredFormats(): string[] {
-    return sortedKeys(this.options.customFormats || {});
+    return sortedKeys(this.options.customFormats || {}).filter((key) => this.options.customFormats?.[key] != null);
+  }
+
+  public getSupportedFormats(): string[] {
+    return getSupportedFormats(this.options.customFormats);
   }
 
   setRemoteReference(uri: string, schema: string | JsonSchema, validationOptions?: ZSchemaOptions) {

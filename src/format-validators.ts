@@ -236,22 +236,19 @@ export function unregisterFormat(name: string) {
   delete customValidators[name];
 }
 
-export function getSupportedFormats() {
-  return sortedKeys({
+export function getSupportedFormats(customFormats?: Record<string, FormatValidatorFn | null>) {
+  const merged = {
     ...inbuiltValidators,
     ...customValidators,
-  });
+    ...customFormats,
+  };
+  const keys = sortedKeys(merged);
+  return keys.filter((key) => merged[key] != null);
 }
 
-export function isFormatSupported(
-  name: string,
-  options?: { customFormats?: Record<string, FormatValidatorFn | null> }
-): boolean {
-  return !!(
-    inbuiltValidators[name] != null ||
-    customValidators[name] != null ||
-    (options?.customFormats && options.customFormats[name] != null)
-  );
+export function isFormatSupported(name: string, customFormats?: Record<string, FormatValidatorFn | null>): boolean {
+  const supported = getSupportedFormats(customFormats);
+  return supported.includes(name);
 }
 
 export function getRegisteredFormats() {

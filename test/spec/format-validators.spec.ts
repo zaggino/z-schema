@@ -65,4 +65,47 @@ describe('Format Validators', () => {
       expect(result.err!.details![0].code).toBe('ASYNC_TIMEOUT');
     });
   });
+  describe('Format Registration and Unregistration', () => {
+    it('should unregister a format validator', () => {
+      const validator = ZSchema.create();
+
+      validator.registerFormat('test-format', (input) => typeof input === 'string');
+
+      let registered = validator.getRegisteredFormats();
+      expect(registered).toContain('test-format');
+
+      validator.unregisterFormat('test-format');
+
+      registered = validator.getRegisteredFormats();
+      expect(registered).not.toContain('test-format');
+    });
+
+    it('should unregister a inbuilt format validator', () => {
+      const validator = ZSchema.create();
+      const before = validator.getSupportedFormats();
+      expect(before).toContain('ipv4');
+      expect(before).toContain('ipv6');
+      validator.unregisterFormat('ipv4');
+      validator.unregisterFormat('ipv6');
+      const after = validator.getSupportedFormats();
+      expect(after).not.toContain('ipv4');
+      expect(after).not.toContain('ipv6');
+    });
+
+    it('should get supported formats', () => {
+      const validator = ZSchema.create();
+
+      const supported = validator.getSupportedFormats();
+      expect(supported).toContain('email');
+      expect(supported).toContain('uri');
+      expect(Array.isArray(supported)).toBe(true);
+    });
+
+    it('should get default options', () => {
+      const options = ZSchema.getDefaultOptions();
+      expect(options).toBeDefined();
+      expect(options.version).toBe('draft-04');
+      expect(options.asyncTimeout).toBe(2000);
+    });
+  });
 });
