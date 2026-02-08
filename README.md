@@ -164,18 +164,20 @@ const payload = {
 
 // Validate asynchronously
 try {
-  await validator.validateAsync(payload, personSchema);
+  const validator = ZSchema.create({ async: true });
+  await validator.validate(payload, personSchema);
   console.log('✅ Validation successful!');
 } catch (err) {
   console.log('❌ Validation failed:', err);
 }
 
 // or validate without try-catch
-const res = await validator.validateAsyncSafe(payload, personSchema);
+const validator = ZSchema.create({ async: true, safe: true });
+const res = await validator.validate(payload, personSchema);
 if (res.valid) {
   console.log('✅ Validation successful!');
 } else {
-  console.log('❌ Validation failed:', res.errs);
+  console.log('❌ Validation failed:', res.err);
 }
 ```
 

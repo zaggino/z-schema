@@ -1,4 +1,5 @@
 import ZSchema from '../../src/index.ts';
+import { ZSchemaAsync, ZSchemaAsyncSafe, ZSchemaSafe } from '../../src/z-schema.ts';
 
 describe('Initialization and usage', function () {
   it('Should not allow to use new', function () {
@@ -27,6 +28,32 @@ describe('Initialization and usage', function () {
     await expect(validator.validateAsyncSafe(1, { type: 'number' })).resolves.toEqual({ valid: true });
     // validateAsyncSafe - should return false for invalid
     await expect(validator.validateAsyncSafe('not-a-number', { type: 'number' })).resolves.toMatchObject({
+      valid: false,
+    });
+  });
+
+  it('Should create a safe validator from factory', async function () {
+    const validator: ZSchemaSafe = ZSchema.create({ safe: true, version: 'none' });
+    // validate - should return true for valid
+    expect(validator.validate(1, { type: 'number' }).valid).toBe(true);
+    // validate - should return false for invalid
+    expect(validator.validate('not-a-number', { type: 'number' }).valid).toBe(false);
+  });
+
+  it('Should create an async validator from factory', async function () {
+    const validator: ZSchemaAsync = ZSchema.create({ async: true, version: 'none' });
+    // validate - should return true for valid
+    await expect(validator.validate(1, { type: 'number' })).resolves.toBe(true);
+    // validate - should throw for invalid
+    await expect(validator.validate('not-a-number', { type: 'number' })).rejects.toThrow();
+  });
+
+  it('Should create an async-safe validator from factory', async function () {
+    const validator: ZSchemaAsyncSafe = ZSchema.create({ async: true, safe: true, version: 'none' });
+    // validate - should return true for valid
+    await expect(validator.validate(1, { type: 'number' })).resolves.toEqual({ valid: true });
+    // validate - should return false for invalid
+    await expect(validator.validate('not-a-number', { type: 'number' })).resolves.toMatchObject({
       valid: false,
     });
   });

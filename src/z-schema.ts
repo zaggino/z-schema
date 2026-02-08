@@ -564,8 +564,27 @@ export class ZSchema extends ZSchemaImpl {
 
   // ----- static methods end -----
 
-  public static create(options: ZSchemaOptions = {}): ZSchema {
+  public static create(options: ZSchemaOptions & { async: true; safe: true }): ZSchemaAsyncSafe;
+  public static create(options: ZSchemaOptions & { async: true }): ZSchemaAsync;
+  public static create(options: ZSchemaOptions & { safe: true }): ZSchemaSafe;
+  public static create(options?: ZSchemaOptions): ZSchema;
+  public static create(
+    options: ZSchemaOptions & { async?: true; safe?: true } = {}
+  ): ZSchema | ZSchemaSafe | ZSchemaAsync | ZSchemaAsyncSafe {
+    const isAsync = options.async;
+    const isSafe = options.safe;
+    delete options.async;
+    delete options.safe;
     (options as any).__called_from_factory__ = true;
+    if (isAsync && isSafe) {
+      return new ZSchemaAsyncSafe(options);
+    }
+    if (isAsync) {
+      return new ZSchemaAsync(options);
+    }
+    if (isSafe) {
+      return new ZSchemaSafe(options);
+    }
     return new ZSchema(options);
   }
 
@@ -575,6 +594,58 @@ export class ZSchema extends ZSchemaImpl {
     }
     delete (options as any).__called_from_factory__;
     super(options);
+  }
+}
+
+export class ZSchemaSafe extends ZSchema {
+  constructor(options?: ZSchemaOptions) {
+    super(options);
+  }
+
+  // @ts-expect-error: we need to replace original validate signature here
+  validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): ValidateResponse {
+    try {
+      super.validate(json, schema, options);
+      return { valid: true };
+    } catch (err) {
+      return { valid: false, err: err as ValidateError };
+    }
+  }
+}
+
+export class ZSchemaAsync extends ZSchema {
+  constructor(options?: ZSchemaOptions) {
+    super(options);
+  }
+
+  // @ts-expect-error: we need to replace original validate signature here
+  validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<true> {
+    return new Promise((resolve, reject) => {
+      try {
+        super.validate(json, schema, options, (err, valid) => (err || valid !== true ? reject(err) : resolve(valid)));
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+}
+
+export class ZSchemaAsyncSafe extends ZSchema {
+  constructor(options?: ZSchemaOptions) {
+    super(options);
+  }
+
+  // @ts-expect-error: we need to replace original validate signature here
+  validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<ValidateResponse> {
+    return new Promise((resolve) => {
+      try {
+        super.validate(json, schema, options, (err, valid) => {
+          resolve({ valid, err });
+        });
+      } catch (err) {
+        resolve({ valid: false, err: err as ValidateError });
+      }
+    });
   }
 }
 

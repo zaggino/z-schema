@@ -15,9 +15,9 @@ describe('Async Validation Example', () => {
 
   const phoneRegex = /^\+?[1-9]\d{1,14}$/;
 
-  const createValidator = () => {
-    const validator = ZSchema.create();
-
+  const registerFormats = (validator: {
+    registerFormat: (name: string, validatorFunction: (input: unknown) => boolean | Promise<boolean>) => void;
+  }) => {
     validator.registerFormat('user-exists', async (input: unknown): Promise<boolean> => {
       if (typeof input !== 'string') return false;
       return await mockDatabaseCheck(input);
@@ -32,7 +32,23 @@ describe('Async Validation Example', () => {
       if (typeof input !== 'string') return false;
       return phoneRegex.test(input);
     });
+  };
 
+  const createValidator = () => {
+    const validator = ZSchema.create();
+    registerFormats(validator);
+    return validator;
+  };
+
+  const createAsyncValidator = () => {
+    const validator = ZSchema.create({ async: true });
+    registerFormats(validator);
+    return validator;
+  };
+
+  const createAsyncSafeValidator = () => {
+    const validator = ZSchema.create({ async: true, safe: true });
+    registerFormats(validator);
     return validator;
   };
 
@@ -329,9 +345,9 @@ describe('Async Validation Example', () => {
     });
   });
 
-  describe('validateAsync method', () => {
+  describe('validate method (async validator)', () => {
     it('should validate successfully with valid payload using Promise API', async () => {
-      const validator = createValidator();
+      const validator = createAsyncValidator();
 
       const validPayload = {
         personId: 'user123',
@@ -341,13 +357,13 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await validator.validateAsync(validPayload, personSchema);
+      const result = await validator.validate(validPayload, personSchema);
 
       expect(result).toBe(true);
     });
 
     it('should fail validation with invalid payload using Promise API', async () => {
-      const validator = createValidator();
+      const validator = createAsyncValidator();
 
       const invalidPayload = {
         personId: 'invalid-user',
@@ -357,11 +373,11 @@ describe('Async Validation Example', () => {
         },
       };
 
-      await expect(validator.validateAsync(invalidPayload, personSchema)).rejects.toThrow();
+      await expect(validator.validate(invalidPayload, personSchema)).rejects.toThrow();
     });
 
     it('should handle async validation with Promise API', async () => {
-      const validator = createValidator();
+      const validator = createAsyncValidator();
 
       const payload = {
         personId: 'user123',
@@ -371,15 +387,15 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await validator.validateAsync(payload, personSchema);
+      const result = await validator.validate(payload, personSchema);
 
       expect(result).toBe(true);
     });
   });
 
-  describe('validateAsyncSafe method', () => {
+  describe('validate method (async-safe validator)', () => {
     it('should validate successfully with valid payload using Promise API', async () => {
-      const validator = createValidator();
+      const validator = createAsyncSafeValidator();
 
       const validPayload = {
         personId: 'user123',
@@ -389,14 +405,14 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await validator.validateAsyncSafe(validPayload, personSchema);
+      const result = await validator.validate(validPayload, personSchema);
 
       expect(result.valid).toBe(true);
       expect(result.err).toBeUndefined();
     });
 
     it('should fail validation with invalid payload using Promise API', async () => {
-      const validator = createValidator();
+      const validator = createAsyncSafeValidator();
 
       const invalidPayload = {
         personId: 'invalid-user',
@@ -406,7 +422,7 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await validator.validateAsyncSafe(invalidPayload, personSchema);
+      const result = await validator.validate(invalidPayload, personSchema);
 
       expect(result.valid).toBe(false);
       // Note: For async validation, errs may be empty

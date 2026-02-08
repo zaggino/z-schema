@@ -24,17 +24,17 @@ describe('Thread Safety', () => {
   });
 
   it('should handle concurrent async validations across multiple instances without interference', async () => {
-    const validator1 = ZSchema.create();
-    const validator2 = ZSchema.create();
+    const validator1 = ZSchema.create({ async: true, safe: true });
+    const validator2 = ZSchema.create({ async: true, safe: true });
     const stringSchema = { type: 'string' };
 
     // Prepare four async validations:
     // validator1: invalid data (fail), valid data (pass)
     // validator2: valid data (pass), invalid data (fail)
-    const promise1 = validator1.validateAsyncSafe(123, stringSchema); // should fail
-    const promise2 = validator1.validateAsyncSafe('hello', stringSchema); // should pass
-    const promise3 = validator2.validateAsyncSafe('world', stringSchema); // should pass
-    const promise4 = validator2.validateAsyncSafe(456, stringSchema); // should fail
+    const promise1 = validator1.validate(123, stringSchema); // should fail
+    const promise2 = validator1.validate('hello', stringSchema); // should pass
+    const promise3 = validator2.validate('world', stringSchema); // should pass
+    const promise4 = validator2.validate(456, stringSchema); // should fail
 
     // Run all concurrently
     const [result1, result2, result3, result4] = await Promise.all([promise1, promise2, promise3, promise4]);
@@ -56,8 +56,8 @@ describe('Thread Safety', () => {
   });
 
   it('should handle concurrent async format validations without interference', async () => {
-    const validator1 = ZSchema.create();
-    const validator2 = ZSchema.create();
+    const validator1 = ZSchema.create({ async: true, safe: true });
+    const validator2 = ZSchema.create({ async: true, safe: true });
 
     // Register async format that waits random 0-100ms then checks if string
     const asyncStringFormat = async (input: unknown): Promise<boolean> => {
@@ -74,10 +74,10 @@ describe('Thread Safety', () => {
     // Prepare four async validations with format:
     // validator1: invalid data (fail), valid data (pass)
     // validator2: valid data (pass), invalid data (fail)
-    const promise1 = validator1.validateAsyncSafe(123, asyncStringSchema); // should fail
-    const promise2 = validator1.validateAsyncSafe('hello', asyncStringSchema); // should pass
-    const promise3 = validator2.validateAsyncSafe('world', asyncStringSchema); // should pass
-    const promise4 = validator2.validateAsyncSafe(456, asyncStringSchema); // should fail
+    const promise1 = validator1.validate(123, asyncStringSchema); // should fail
+    const promise2 = validator1.validate('hello', asyncStringSchema); // should pass
+    const promise3 = validator2.validate('world', asyncStringSchema); // should pass
+    const promise4 = validator2.validate(456, asyncStringSchema); // should fail
 
     // Run all concurrently
     const [result1, result2, result3, result4] = await Promise.all([promise1, promise2, promise3, promise4]);
