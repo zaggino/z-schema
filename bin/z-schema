@@ -44,10 +44,11 @@ program
 
 var options = {};
 var defaultOptions = ZSchema.getDefaultOptions();
+var programOptions = program._optionValues; // { breakOnFirstError: true }
 
 for (var key in defaultOptions) {
-  if (program[key]) {
-    options[key] = program[key];
+  if (programOptions[key] != null) {
+    options[key] = programOptions[key];
   }
 }
 
