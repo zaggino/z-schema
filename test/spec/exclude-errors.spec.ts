@@ -1,4 +1,4 @@
-import ZSchema from '../../src/index.ts';
+import { ZSchema } from '../../src/z-schema.ts';
 
 describe('JSON Validation excludeErrors integration', function () {
   it('should exclude multiple error codes correctly', function () {

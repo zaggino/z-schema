@@ -1,4 +1,5 @@
-import ZSchema, { ValidateError } from '../../src/index.ts';
+import { ValidateError } from '../../src/errors.ts';
+import { ZSchema } from '../../src/z-schema.ts';
 
 describe('Error objects include `keyword` field', function () {
   it('JSON validation errors include the keyword that caused the error', function () {

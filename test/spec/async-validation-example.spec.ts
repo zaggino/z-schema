@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import ZSchema from '../../src/index.ts';
+import { ZSchema } from '../../src/z-schema.ts';
 
 describe('Async Validation Example', () => {
   // Mock functions for testing

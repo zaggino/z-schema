@@ -1,7 +1,7 @@
 // Test for https://github.com/zaggino/z-schema/issues/224
 // Not getting all schema errors from optional parent object
 
-import ZSchema from '../../src/index.ts';
+import { ZSchema } from '../../src/z-schema.ts';
 
 describe('Issue #214: Custom formats are module-scoped', function () {
   it('should allow custom formats instance scoped', function () {

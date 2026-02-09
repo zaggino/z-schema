@@ -1,5 +1,5 @@
-import ZSchema from '../../src/index.ts';
 import { ucs2decode } from '../../src/utils/unicode.ts';
+import { ZSchema } from '../../src/z-schema.ts';
 
 // Runtime check for Unicode property escape support (must actually match ASCII letters)
 function supportsUnicodePropertyEscapes() {

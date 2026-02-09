@@ -1,4 +1,4 @@
-import ZSchema from '../../src/index.ts';
+import { ZSchema } from '../../src/z-schema.ts';
 
 const isBrowser = typeof window !== 'undefined';
 
