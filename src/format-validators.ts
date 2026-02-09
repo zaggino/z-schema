@@ -200,6 +200,42 @@ const uriValidator: FormatValidatorFn = function (uri: unknown) {
   return /^[a-zA-Z][a-zA-Z0-9+.-]*:[^"\\<>^{}^`| ]*$/.test(uri);
 };
 
+const uriReferenceValidator: FormatValidatorFn = (uri: unknown) => {
+  if (typeof uri !== 'string') return true;
+  // URI-reference allows relative URIs
+  return /^([a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/.test(uri);
+};
+
+const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => {
+  if (typeof uri !== 'string') return true;
+  // URI template has { }
+  return /\{[^}]*\}/.test(uri) && uriReferenceValidator(uri);
+};
+
+const jsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
+  if (typeof pointer !== 'string') return true;
+  // JSON Pointer: empty or starts with /
+  return pointer === '' || pointer.startsWith('/');
+};
+
+const relativeJsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
+  if (typeof pointer !== 'string') return true;
+  // Relative JSON Pointer: number#path or empty
+  return /^\d+(#.*)?$/.test(pointer) || pointer === '';
+};
+
+const timeValidator: FormatValidatorFn = (time: unknown) => {
+  if (typeof time !== 'string') return true;
+  // time: hh:mm:ss[.fraction]
+  return /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(\.\d+)?$/.test(time);
+};
+
+const idnEmailValidator: FormatValidatorFn = (email: unknown) => {
+  if (typeof email !== 'string') return true;
+  // Simple email check, allowing international chars
+  return /^[^\s@]+@[^\s@]+$/.test(email);
+};
+
 export interface FormatValidatorsOptions {
   strictUris?: boolean;
   customFormats?: Record<string, FormatValidatorFn | null>;
@@ -216,6 +252,12 @@ const inbuiltValidators: Record<string, FormatValidatorFn> = {
   regex: regexValidator,
   uri: uriValidator,
   'strict-uri': strictUriValidator,
+  'uri-reference': uriReferenceValidator,
+  'uri-template': uriTemplateValidator,
+  'json-pointer': jsonPointerValidator,
+  'relative-json-pointer': relativeJsonPointerValidator,
+  time: timeValidator,
+  'idn-email': idnEmailValidator,
 } as const;
 
 const customValidators: Record<string, FormatValidatorFn> = {};

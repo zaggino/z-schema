@@ -11,7 +11,10 @@ export const VERSION_SCHEMA_URL_MAPPING: Record<JsonSchemaVersion, string> = {
   'draft-06': 'http://json-schema.org/draft-06/schema#',
 };
 
-export interface JsonSchema {
+export type JsonSchema = JsonSchemaDraft4 & JsonSchemaDraft6;
+
+// common properties of all JSON Schema versions
+interface JsonSchemaCommon {
   $ref?: string;
   id?: string;
   $schema?: string;
@@ -23,12 +26,9 @@ export interface JsonSchema {
   properties?: Record<string, JsonSchema>;
   patternProperties?: Record<string, JsonSchema>;
   dependencies?: Record<string, string[]>;
-  // properties
   multipleOf?: number;
   minimum?: number;
-  exclusiveMinimum?: boolean;
   maximum?: number;
-  exclusiveMaximum?: boolean;
   minLength?: number;
   maxLength?: number;
   pattern?: string;
@@ -47,6 +47,16 @@ export interface JsonSchema {
   anyOf?: JsonSchema[];
   oneOf?: JsonSchema[];
   not?: JsonSchema;
+}
+
+export interface JsonSchemaDraft4 extends JsonSchemaCommon {
+  exclusiveMaximum?: boolean;
+  exclusiveMinimum?: boolean;
+}
+
+export interface JsonSchemaDraft6 extends JsonSchemaCommon {
+  exclusiveMaximum?: boolean | number;
+  exclusiveMinimum?: boolean | number;
 }
 
 export type JsonSchemaType = 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string';
