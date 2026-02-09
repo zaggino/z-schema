@@ -128,12 +128,34 @@ export class ZSchema extends ZSchemaBase {
       }
     });
   }
+
+  validateSchema(schemaOrArr: JsonSchema | JsonSchema[]): true {
+    return this._validateSchema(schemaOrArr);
+  }
+
+  validateSchemaSafe(schemaOrArr: JsonSchema | JsonSchema[]): ValidateResponse {
+    try {
+      this._validateSchema(schemaOrArr);
+      return { valid: true };
+    } catch (err) {
+      return { valid: false, err: err as ValidateError };
+    }
+  }
 }
 
 export class ZSchemaSafe extends ZSchemaBase {
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): ValidateResponse {
     try {
       this._validate(json, schema, options);
+      return { valid: true };
+    } catch (err) {
+      return { valid: false, err: err as ValidateError };
+    }
+  }
+
+  validateSchema(schemaOrArr: JsonSchema | JsonSchema[]): ValidateResponse {
+    try {
+      this._validateSchema(schemaOrArr);
       return { valid: true };
     } catch (err) {
       return { valid: false, err: err as ValidateError };
@@ -151,6 +173,10 @@ export class ZSchemaAsync extends ZSchemaBase {
       }
     });
   }
+
+  validateSchema(schemaOrArr: JsonSchema | JsonSchema[]): true {
+    return this._validateSchema(schemaOrArr);
+  }
 }
 
 export class ZSchemaAsyncSafe extends ZSchemaBase {
@@ -164,6 +190,15 @@ export class ZSchemaAsyncSafe extends ZSchemaBase {
         resolve({ valid: false, err: err as ValidateError });
       }
     });
+  }
+
+  validateSchema(schemaOrArr: JsonSchema | JsonSchema[]): ValidateResponse {
+    try {
+      this._validateSchema(schemaOrArr);
+      return { valid: true };
+    } catch (err) {
+      return { valid: false, err: err as ValidateError };
+    }
   }
 }
 

@@ -163,7 +163,7 @@ export class ZSchemaBase {
     return true;
   }
 
-  compileSchema(schemaOrArr: JsonSchema | JsonSchema[]): void {
+  _validateSchema(schemaOrArr: JsonSchema | JsonSchema[]): true {
     if (Array.isArray(schemaOrArr) && schemaOrArr.length === 0) {
       throw new Error('.compileSchema was called with an empty array');
     }
@@ -187,41 +187,7 @@ export class ZSchemaBase {
     if (!report.isValid()) {
       throw getValidateError({ message: report.commonErrorMessage!, details: report.errors });
     }
-  }
-
-  /**
-   * Compiles a schema and returns a result object.
-   * This method never throws and provides safe schema compilation.
-   */
-  compileSchemaSafe(schema: JsonSchema | JsonSchema[]): ValidateResponse {
-    try {
-      this.compileSchema(schema);
-      return { valid: true };
-    } catch (err) {
-      return { valid: false, err: err as ValidateError };
-    }
-  }
-
-  /**
-   * Validates a schema against the meta schema.
-   * Returns true if valid, throws ValidateError if invalid.
-   */
-  validateSchema(schema: JsonSchema | JsonSchema[]): true {
-    this.compileSchema(schema);
     return true;
-  }
-
-  /**
-   * Validates a schema and returns a result object.
-   * This method never throws and provides safe schema validation.
-   */
-  validateSchemaSafe(schemaOrArr: JsonSchema | JsonSchema[]): ValidateResponse {
-    try {
-      this.validateSchema(schemaOrArr);
-      return { valid: true };
-    } catch (err) {
-      return { valid: false, err: err as ValidateError };
-    }
   }
 
   // instance scoped format functions

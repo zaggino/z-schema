@@ -56,7 +56,7 @@ describe('collectReferences', () => {
     expect.soft(refStrs[0]).toBe('file:///c:/folder/file.json#addressId');
     expect.soft(refStrs[1]).toBe('file:///c:/folder/file.json#personId');
     const validator = ZSchema.create();
-    validator.compileSchema(schema);
+    validator.validateSchema(schema);
   });
 
   it('should collect $ref with nested ids and not/definitions', () => {
@@ -181,18 +181,18 @@ describe('collectReferences', () => {
     expect(validator.validateSafe('a', schema).valid).toBe(false);
   });
 
-  it('compileSchemaSafe returns ValidateResponse for valid schema', () => {
+  it('validateSchemaSafe returns ValidateResponse for valid schema', () => {
     const validator = ZSchema.create();
     const validSchema = { type: 'string' };
-    const result = validator.compileSchemaSafe(validSchema);
+    const result = validator.validateSchemaSafe(validSchema);
     expect(result.valid).toBe(true);
     expect(result.err).toBeUndefined();
   });
 
-  it('compileSchemaSafe returns ValidateResponse for invalid schema', () => {
+  it('validateSchemaSafe returns ValidateResponse for invalid schema', () => {
     const validator = ZSchema.create();
     const invalidSchema = { $ref: '#/nonexistent' }; // circular or invalid
-    const result = validator.compileSchemaSafe(invalidSchema);
+    const result = validator.validateSchemaSafe(invalidSchema);
     expect(result.valid).toBe(false);
     expect(result.err).toBeInstanceOf(ValidateError);
   });
