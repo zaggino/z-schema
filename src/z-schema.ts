@@ -9,13 +9,12 @@ import type { ValidateOptions, ValidateResponse } from './z-schema-base.js';
 import { ZSchemaBase } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 import { defaultOptions, normalizeOptions } from './z-schema-options.js';
+import type { SchemaReader } from './z-schema-reader.js';
+import { getSchemaReader, setSchemaReader } from './z-schema-reader.js';
 
 // import schemas so they don't have to be downloaded for validation purposes
 import _Draft4HyperSchema from './schemas/draft-04-hyper-schema.json' with { type: 'json' };
 import _Draft4Schema from './schemas/draft-04-schema.json' with { type: 'json' };
-
-// a sync function that loads schemas for future use, for example from schemas directory, during server startup
-export type SchemaReader = (uri: string) => JsonSchema;
 
 export class ZSchema extends ZSchemaBase {
   // ----- static methods start -----
@@ -54,14 +53,12 @@ export class ZSchema extends ZSchemaBase {
     SchemaCache.cacheSchemaByUri(uri, _schema);
   }
 
-  private static schemaReader: SchemaReader | undefined;
-
-  public static getSchemaReader(): SchemaReader | undefined {
-    return ZSchema.schemaReader;
+  public static getSchemaReader() {
+    return getSchemaReader();
   }
 
   public static setSchemaReader(schemaReader: SchemaReader | undefined) {
-    ZSchema.schemaReader = schemaReader;
+    return setSchemaReader(schemaReader);
   }
 
   public static schemaSymbol = schemaSymbol;

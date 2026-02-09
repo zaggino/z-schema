@@ -1,8 +1,8 @@
 import type { JsonSchemaInternal } from './json-schema.js';
 import { Report } from './report.js';
 import { isAbsoluteUri } from './utils/uri.js';
-import { ZSchema } from './z-schema.js';
 import type { ZSchemaBase } from './z-schema-base.js';
+import { getSchemaReader } from './z-schema-reader.js';
 
 interface Id {
   id: string;
@@ -273,7 +273,7 @@ export class SchemaCompiler {
 
       // we can try to use custom schemaReader if available
       if (!response) {
-        const schemaReader = ZSchema.getSchemaReader();
+        const schemaReader = getSchemaReader();
         if (schemaReader) {
           // it's supposed to return a valid schema
           const s = schemaReader(refObj.ref);
