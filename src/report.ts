@@ -30,6 +30,11 @@ export interface SchemaErrorDetail {
    */
   path: string | Array<string | number>;
   /**
+   * A JSON path indicating the location in the schema where the constraint is defined.
+   * Example: ["properties", "name", "type"]
+   */
+  schemaPath?: Array<string | number>;
+  /**
    * The schema rule description, which is included for certain errors where
    * this information is useful (e.g. to describe a constraint).
    */
@@ -68,6 +73,7 @@ export class Report {
   errors: SchemaErrorDetail[] = [];
   json?: unknown;
   path: Array<number | string> = [];
+  schemaPath: Array<number | string> = [];
   rootSchema?: JsonSchemaInternal;
 
   parentReport?: Report;
@@ -193,6 +199,15 @@ export class Report {
     return path;
   }
 
+  getSchemaPath(): Array<string | number> {
+    let schemaPath: Array<string | number> = [];
+    if (this.parentReport) {
+      schemaPath = schemaPath.concat(this.parentReport.schemaPath);
+    }
+    schemaPath = schemaPath.concat(this.schemaPath);
+    return schemaPath;
+  }
+
   getSchemaId(): string | undefined {
     if (!this.rootSchema) {
       return undefined;
@@ -296,6 +311,7 @@ export class Report {
       params: params,
       message: errorMessage,
       path: this.getPath(this.options.reportPathAsArray),
+      schemaPath: this.getSchemaPath(),
       schemaId: this.getSchemaId(),
       keyword: keyword,
     };

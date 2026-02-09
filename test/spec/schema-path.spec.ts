@@ -78,3 +78,119 @@ describe('Using path to schema as a third argument', function () {
     expect(result.err).toBeUndefined();
   });
 });
+
+describe('Schema path tracking in validation errors', function () {
+  it('should include schema path for property type validation', function () {
+    const validator = ZSchema.create({ reportPathAsArray: true });
+    const schema = {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        age: { type: 'number' },
+      },
+    };
+    const data = { name: 'John', age: 'thirty' };
+
+    try {
+      validator.validate(data, schema);
+      expect.fail('Validation should have failed');
+    } catch (err) {
+      const error = err as any;
+      expect(error.details).toHaveLength(1);
+      expect(error.details[0].path).toEqual(['age']);
+      expect(error.details[0].schemaPath).toEqual(['properties', 'age', 'type']);
+    }
+  });
+
+  it('should include schema path for array item validation', function () {
+    const validator = ZSchema.create({ reportPathAsArray: true });
+    const schema = {
+      type: 'array',
+      items: { type: 'string' },
+    };
+    const data = ['valid', 123, 'also-valid'];
+
+    try {
+      validator.validate(data, schema);
+      expect.fail('Validation should have failed');
+    } catch (err) {
+      const error = err as any;
+      expect(error.details).toHaveLength(1);
+      expect(error.details[0].path).toEqual([1]);
+      expect(error.details[0].schemaPath).toEqual(['items', 'type']);
+    }
+  });
+
+  it('should include schema path for nested object validation', function () {
+    const validator = ZSchema.create({ reportPathAsArray: true });
+    const schema = {
+      type: 'object',
+      properties: {
+        user: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            age: { type: 'number' },
+          },
+        },
+      },
+    };
+    const data = { user: { name: 'John', age: 'thirty' } };
+
+    try {
+      validator.validate(data, schema);
+      expect.fail('Validation should have failed');
+    } catch (err) {
+      const error = err as any;
+      expect(error.details).toHaveLength(1);
+      expect(error.details[0].path).toEqual(['user', 'age']);
+      expect(error.details[0].schemaPath).toEqual(['properties', 'user', 'properties', 'age', 'type']);
+    }
+  });
+
+  it('should handle root level type validation', function () {
+    const validator = ZSchema.create({ reportPathAsArray: true });
+    const schema = { type: 'string' };
+    const data = 123;
+
+    try {
+      validator.validate(data, schema);
+      expect.fail('Validation should have failed');
+    } catch (err) {
+      const error = err as any;
+      expect(error.details).toHaveLength(1);
+      expect(error.details[0].path).toEqual([]);
+      expect(error.details[0].schemaPath).toEqual(['type']);
+    }
+  });
+
+  it('should include schema path for $ref validation', function () {
+    const validator = ZSchema.create({ reportPathAsArray: true });
+    const schema = {
+      type: 'object',
+      properties: {
+        user: { $ref: '#/definitions/User' },
+      },
+      definitions: {
+        User: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            age: { type: 'number' },
+          },
+        },
+      },
+    };
+    const data = { user: { name: 'John', age: 'thirty' } };
+
+    try {
+      validator.validate(data, schema);
+      expect.fail('Validation should have failed');
+    } catch (err) {
+      const error = err as any;
+      expect(error.details).toHaveLength(1);
+      expect(error.details[0].path).toEqual(['user', 'age']);
+      expect(error.details[0].schemaPath).toEqual(['properties', 'age', 'type']);
+    }
+  });
+});

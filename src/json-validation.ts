@@ -629,7 +629,10 @@ const recurseArray = function (this: ZSchemaBase, report: Report, schema: JsonSc
     // regardless of its index, and regardless of the value of "additionalItems".
     while (idx--) {
       report.path.push(idx);
+      // Track schema path for array items validation
+      report.schemaPath.push('items');
       validate.call(this, report, schema.items, json[idx]);
+      report.schemaPath.pop();
       report.path.pop();
     }
   }
@@ -689,8 +692,21 @@ const recurseObject = function (this: ZSchemaBase, report: Report, schema: JsonS
     idx2 = s.length;
     while (idx2--) {
       report.path.push(m);
+      // Track schema path for properties validation
+      if (p.indexOf(m) !== -1) {
+        // This is a defined property
+        report.schemaPath.push('properties');
+        report.schemaPath.push(m);
+      } else {
+        // This is additionalProperties or patternProperties
+        report.schemaPath.push('additionalProperties');
+      }
       validate.call(this, report, s[idx2], propertyValue);
       report.path.pop();
+      report.schemaPath.pop();
+      if (p.indexOf(m) !== -1) {
+        report.schemaPath.pop(); // pop the property name for defined properties
+      }
     }
   }
 };
@@ -737,12 +753,16 @@ export function validate(this: ZSchemaBase, report: Report, schema: JsonSchemaIn
     if (maxRefs === 0) {
       throw new Error('Circular dependency by $ref references!');
     }
+    // Reset schema path for referenced schema - paths are relative to the referenced schema
+    report.schemaPath = [];
   }
 
   // type checking first
   if (schema.type) {
     keys.splice(keys.indexOf('type'), 1);
+    report.schemaPath.push('type');
     JsonValidators.type.call(this, report, schema, json);
+    report.schemaPath.pop();
     if (report.errors.length && this.options.breakOnFirstError) {
       return false;
     }
