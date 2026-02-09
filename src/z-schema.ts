@@ -1,4 +1,4 @@
-import { Report, SchemaErrorDetail } from './report.js';
+import { type Errors, getValidateError, ValidateError } from './errors.js';
 import {
   FormatValidatorFn,
   getRegisteredFormats,
@@ -6,21 +6,22 @@ import {
   registerFormat,
   unregisterFormat,
 } from './format-validators.js';
+// import schemas so they don't have to be downloaded for validation purposes
+import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import { validate as validateJson } from './json-validation.js';
+import { Report, SchemaErrorDetail } from './report.js';
 import { SchemaCache } from './schema-cache.js';
 import { SchemaCompiler } from './schema-compiler.js';
 import { SchemaValidator } from './schema-validator.js';
-import { shallowClone, deepClone } from './utils/clone.js';
-import { whatIs } from './utils/what-is.js';
-import { schemaSymbol, jsonSymbol } from './utils/symbols.js';
-import { getRemotePath } from './utils/uri.js';
-import { getValidateError, ValidateError, type Errors } from './errors.js';
-// import schemas so they don't have to be downloaded for validation purposes
-import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
-import _Draft4Schema from './schemas/draft-04-schema.json' with { type: 'json' };
-import _Draft4HyperSchema from './schemas/draft-04-hyper-schema.json' with { type: 'json' };
-import { sortedKeys, get } from './utils/json.js';
+import { deepClone, shallowClone } from './utils/clone.js';
+import { get, sortedKeys } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
+import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
+import { getRemotePath } from './utils/uri.js';
+import { whatIs } from './utils/what-is.js';
+
+import _Draft4HyperSchema from './schemas/draft-04-hyper-schema.json' with { type: 'json' };
+import _Draft4Schema from './schemas/draft-04-schema.json' with { type: 'json' };
 
 // TODO: currently unsupported 'draft-06', 'draft-07', '2019-09', '2020-12'
 export type JsonSchemaVersion = 'draft-04';

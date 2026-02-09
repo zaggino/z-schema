@@ -1,12 +1,43 @@
-import { defineConfig, globalIgnores } from 'eslint/config';
 import js from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import globals from 'globals';
 import json from '@eslint/json';
 import markdown from '@eslint/markdown';
 import vitest from '@vitest/eslint-plugin';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default defineConfig([
+  {
+    plugins: {
+      'simple-import-sort': simpleImportSort,
+    },
+    rules: {
+      'simple-import-sort/imports': [
+        'error',
+        {
+          groups: [
+            // Side effect imports.
+            ['^\\u0000'],
+            // Node.js builtins prefixed with `node:`.
+            ['^node:'],
+            // Packages.
+            // Things that start with a letter (or digit or underscore), or `@` followed by a letter.
+            ['^@?\\w'],
+            // Absolute imports and other imports such as Vue-style `@/foo`.
+            // Anything not matched in another group.
+            ['^'],
+            // Relative imports.
+            // Anything that starts with a dot and doesn't end with .json
+            ['^(?!.*\\.json$)\\.'],
+            // Anything that starts with a dot
+            ['^\\.'],
+          ],
+        },
+      ],
+      'simple-import-sort/exports': 'error',
+    },
+  },
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
     plugins: { js },
@@ -65,19 +96,20 @@ export default defineConfig([
     },
   },
   globalIgnores([
+    '.env*',
     '.github/',
+    '*.min.js',
     'benchmark/',
+    'build/',
     'cjs/',
     'coverage/',
     'dist/',
-    'node_modules/',
-    'build/',
     'json-schema-spec/',
+    'node_modules/',
+    'package-lock.json',
     'specs/',
+    'test/dist/',
     'test/public/json-schema-test-suite/',
     'umd/',
-    'package-lock.json',
-    '*.min.js',
-    '.env*',
   ]),
 ]);

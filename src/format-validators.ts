@@ -1,6 +1,7 @@
 import isEmailModule from 'validator/lib/isEmail.js';
 import isIPModule from 'validator/lib/isIP.js';
 import isURLModule from 'validator/lib/isURL.js';
+
 import { sortedKeys } from './utils/json.js';
 
 export type FormatValidatorFn = (input: unknown) => boolean | Promise<boolean>;

@@ -1,7 +1,7 @@
+import { ValidateError } from '../../src/errors.ts';
 import { JsonSchema } from '../../src/json-schema.ts';
 import { collectIds, collectReferences } from '../../src/schema-compiler.js';
 import { ZSchema } from '../../src/z-schema.ts';
-import { ValidateError } from '../../src/errors.ts';
 
 describe('collectReferences', () => {
   it('should collect $ref with id scope', () => {

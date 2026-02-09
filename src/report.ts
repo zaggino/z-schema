@@ -1,10 +1,10 @@
 import { ErrorCode, ErrorParam, Errors, getValidateError } from './errors.js';
-import { whatIs } from './utils/what-is.js';
-import { schemaSymbol, jsonSymbol } from './utils/symbols.js';
-import { ValidateCallback, ValidateOptions, ZSchemaOptions } from './z-schema.js';
 import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
-import { isAbsoluteUri } from './utils/uri.js';
 import { get } from './utils/json.js';
+import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
+import { isAbsoluteUri } from './utils/uri.js';
+import { whatIs } from './utils/what-is.js';
+import { ValidateCallback, ValidateOptions, ZSchemaOptions } from './z-schema.js';
 
 export interface SchemaErrorDetail {
   /**

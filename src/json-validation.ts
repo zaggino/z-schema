@@ -1,14 +1,14 @@
-import { Report } from './report.js';
-import { isObject, whatIs } from './utils/what-is.js';
-import { ucs2decode } from './utils/unicode.js';
-import { difference, isUniqueArray } from './utils/array.js';
-import { areEqual } from './utils/json.js';
-import { shallowClone } from './utils/clone.js';
-import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
-import { compileSchemaRegex } from './utils/schema-regex.js';
-import type { ValidateOptions, ZSchemaBase } from './z-schema.js';
 import { getFormatValidators } from './format-validators.js';
+import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import { Report } from './report.js';
+import { difference, isUniqueArray } from './utils/array.js';
+import { shallowClone } from './utils/clone.js';
+import { areEqual } from './utils/json.js';
 import { hasOwn } from './utils/properties.js';
+import { compileSchemaRegex } from './utils/schema-regex.js';
+import { ucs2decode } from './utils/unicode.js';
+import { isObject, whatIs } from './utils/what-is.js';
+import type { ValidateOptions, ZSchemaBase } from './z-schema.js';
 
 const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
   return (

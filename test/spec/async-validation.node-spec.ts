@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import ZSchema from '../../src/index.js';
 
 describe('Async Format Validation Integration', () => {
