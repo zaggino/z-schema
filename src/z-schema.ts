@@ -47,6 +47,10 @@ export class ZSchema extends ZSchemaBase {
       _schema = deepClone(schema);
     }
 
+    if (!_schema.id) {
+      _schema.id = uri;
+    }
+
     if (validationOptions) {
       _schema.__$validationOptions = normalizeOptions(validationOptions);
     }

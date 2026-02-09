@@ -76,6 +76,7 @@ function readJson(fileName) {
 var validator = ZSchema.create(options);
 var schemaFilePath = program.args.shift();
 var schema = readJson(schemaFilePath);
+schema.id = schemaFilePath;
 
 function validateWithAutomaticDownloads(filePath, data, schema, callback) {
   var lastResult;
