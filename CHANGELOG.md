@@ -1,5 +1,16 @@
 # Changelog
 
+## [9.0.0](https://github.com/zaggino/z-schema/compare/v8.5.0...v9.0.0) (2026-02-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* new api and new cache algorithms, see docs for changes ([#336](https://github.com/zaggino/z-schema/issues/336))
+
+### Features
+
+* new api and new cache algorithms, see docs for changes ([#336](https://github.com/zaggino/z-schema/issues/336)) ([72bf15b](https://github.com/zaggino/z-schema/commit/72bf15bf16d93802129f363086be64747a68211f))
+
 ## [8.5.0](https://github.com/zaggino/z-schema/compare/v8.4.0...v8.5.0) (2026-02-06)
 
 
