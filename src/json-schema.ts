@@ -3,11 +3,12 @@ import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { isObject } from './utils/what-is.js';
 
-// TODO: currently unsupported 'draft-06', 'draft-07', '2019-09', '2020-12'
-export type JsonSchemaVersion = 'draft-04';
+// TODO: currently unsupported 'draft-07', '2019-09', '2020-12'
+export type JsonSchemaVersion = 'draft-04' | 'draft-06';
 
 export const VERSION_SCHEMA_URL_MAPPING: Record<JsonSchemaVersion, string> = {
   'draft-04': 'http://json-schema.org/draft-04/schema#',
+  'draft-06': 'http://json-schema.org/draft-06/schema#',
 };
 
 export interface JsonSchema {
