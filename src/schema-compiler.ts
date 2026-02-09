@@ -1,7 +1,8 @@
-import { JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchemaInternal } from './json-schema.js';
 import { Report } from './report.js';
 import { isAbsoluteUri } from './utils/uri.js';
-import { ZSchema, ZSchemaBase } from './z-schema.js';
+import type { ZSchemaBase } from './z-schema.js';
+import { ZSchema } from './z-schema.js';
 
 interface Id {
   id: string;

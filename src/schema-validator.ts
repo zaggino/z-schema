@@ -1,5 +1,5 @@
 import { isFormatSupported } from './format-validators.js';
-import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import { validate } from './json-validation.js';
 import { Report } from './report.js';
 import { isUniqueArray } from './utils/array.js';

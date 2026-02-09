@@ -1,15 +1,12 @@
-import { type Errors, getValidateError, ValidateError } from './errors.js';
-import {
-  FormatValidatorFn,
-  getRegisteredFormats,
-  getSupportedFormats,
-  registerFormat,
-  unregisterFormat,
-} from './format-validators.js';
+import type { ValidateError } from './errors.js';
+import { type Errors, getValidateError } from './errors.js';
+import type { FormatValidatorFn } from './format-validators.js';
+import { getRegisteredFormats, getSupportedFormats, registerFormat, unregisterFormat } from './format-validators.js';
 // import schemas so they don't have to be downloaded for validation purposes
 import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import { validate as validateJson } from './json-validation.js';
-import { Report, SchemaErrorDetail } from './report.js';
+import type { SchemaErrorDetail } from './report.js';
+import { Report } from './report.js';
 import { SchemaCache } from './schema-cache.js';
 import { SchemaCompiler } from './schema-compiler.js';
 import { SchemaValidator } from './schema-validator.js';

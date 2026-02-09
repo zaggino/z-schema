@@ -1,5 +1,5 @@
 import ZSchema from '../../src/index.ts';
-import { ZSchemaAsync, ZSchemaAsyncSafe, ZSchemaSafe } from '../../src/z-schema.ts';
+import type { ZSchemaAsync, ZSchemaAsyncSafe, ZSchemaSafe } from '../../src/z-schema.ts';
 
 describe('Initialization and usage', function () {
   it('Should not allow to use new', function () {

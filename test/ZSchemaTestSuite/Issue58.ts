@@ -1,6 +1,6 @@
 import { ValidateError } from '../../src/errors.ts';
-import { SchemaErrorDetail } from '../../src/report.ts';
-import { ZSchema } from '../../src/z-schema.ts';
+import type { SchemaErrorDetail } from '../../src/report.ts';
+import type { ZSchema } from '../../src/z-schema.ts';
 
 export default {
   description: 'Issue #58 - getMissingReferences should return all missing references',

@@ -1,5 +1,5 @@
 import { getFormatValidators } from './format-validators.js';
-import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import { Report } from './report.js';
 import { difference, isUniqueArray } from './utils/array.js';
 import { shallowClone } from './utils/clone.js';

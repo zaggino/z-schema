@@ -1,6 +1,7 @@
 import isequal from 'lodash.isequal';
 
-import { findId, JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import { findId } from './json-schema.js';
 import { Report } from './report.js';
 import { deepClone } from './utils/clone.js';
 import { decodeJSONPointer } from './utils/json.js';

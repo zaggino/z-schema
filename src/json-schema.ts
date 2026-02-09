@@ -1,6 +1,6 @@
-import { Reference } from './schema-compiler.js';
+import type { Reference } from './schema-compiler.js';
 import { isObject } from './utils/what-is.js';
-import { ZSchemaOptions } from './z-schema.js';
+import type { ZSchemaOptions } from './z-schema.js';
 
 export interface JsonSchema {
   $ref?: string;
