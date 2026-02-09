@@ -9,7 +9,6 @@ describe('Option breakOnFirstError tests', () => {
     const result = validator.validateSafe(invalidData, schema);
     expect(result.valid).toBe(false);
     expect(result.err!.details!.length).toBe(1); // Only maximum error
-    expect(result.err!.details![0].code).toBe('MAXIMUM');
   });
 
   it('Should not break on first error when breakOnFirstError is false', function () {

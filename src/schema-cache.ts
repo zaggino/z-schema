@@ -1,8 +1,6 @@
 import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
-import isequal from 'lodash.isequal';
-
 import { findId } from './json-schema.js';
 import { Report } from './report.js';
 import { deepClone } from './utils/clone.js';
@@ -15,7 +13,6 @@ export type ReferenceSchemaCacheStorage = Array<[JsonSchemaInternal, JsonSchemaI
 export class SchemaCache {
   static global_cache: SchemaCacheStorage = {};
   cache: SchemaCacheStorage = {};
-  referenceCache: ReferenceSchemaCacheStorage = [];
 
   constructor(private validator: ZSchemaBase) {}
 
@@ -56,11 +53,8 @@ export class SchemaCache {
       // ref input
       return this.getSchemaByUri(report, refOrSchema);
     }
-    if (typeof refOrSchema === 'object') {
-      // schema obj input
-      return this.getSchemaByReference(report, refOrSchema);
-    }
-    throw new Error(`unexpected code reached`);
+    // no caching done on this, but we need to return a clone so we can mutate it
+    return deepClone(refOrSchema);
   }
 
   fromCache(path: string): JsonSchemaInternal | undefined {
@@ -139,18 +133,5 @@ export class SchemaCache {
     }
 
     return result;
-  }
-
-  getSchemaByReference(report: Report, schema: JsonSchemaInternal) {
-    let i = this.referenceCache.length;
-    while (i--) {
-      if (isequal(this.referenceCache[i][0], schema)) {
-        return this.referenceCache[i][1];
-      }
-    }
-    // not found
-    const schemaClone = deepClone(schema);
-    this.referenceCache.push([schema, schemaClone]);
-    return schemaClone;
   }
 }
