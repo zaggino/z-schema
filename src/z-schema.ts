@@ -95,6 +95,39 @@ export class ZSchema extends ZSchemaBase {
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): true {
     return this._validate(json, schema, options);
   }
+
+  validateSafe(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): ValidateResponse {
+    try {
+      this._validate(json, schema, options ?? {});
+      return { valid: true };
+    } catch (err) {
+      return { valid: false, err: err as ValidateError };
+    }
+  }
+
+  validateAsync(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): Promise<true> {
+    return new Promise((resolve, reject) => {
+      try {
+        this._validate(json, schema, options || {}, (err, valid) =>
+          err || valid !== true ? reject(err) : resolve(valid)
+        );
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  validateAsyncSafe(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): Promise<ValidateResponse> {
+    return new Promise((resolve) => {
+      try {
+        this._validate(json, schema, options || {}, (err, valid) => {
+          resolve({ valid, err });
+        });
+      } catch (err) {
+        resolve({ valid: false, err: err as ValidateError });
+      }
+    });
+  }
 }
 
 export class ZSchemaSafe extends ZSchemaBase {

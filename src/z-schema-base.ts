@@ -163,45 +163,6 @@ export class ZSchemaBase {
     return true;
   }
 
-  /**
-   * Validates JSON data against a schema and returns a result object.
-   * This method never throws and provides backward compatibility.
-   */
-  validateSafe(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): ValidateResponse {
-    try {
-      this._validate(json, schema, options ?? {});
-      return { valid: true };
-    } catch (err) {
-      return { valid: false, err: err as ValidateError };
-    }
-  }
-
-  // validateAsync always returns true, implement using try-catch
-  validateAsync(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): Promise<true> {
-    return new Promise((resolve, reject) => {
-      try {
-        this._validate(json, schema, options || {}, (err, valid) =>
-          err || valid !== true ? reject(err) : resolve(valid)
-        );
-      } catch (err) {
-        reject(err);
-      }
-    });
-  }
-
-  // validateAsyncSafe never throws, but returns complex object
-  validateAsyncSafe(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): Promise<ValidateResponse> {
-    return new Promise((resolve) => {
-      try {
-        this._validate(json, schema, options || {}, (err, valid) => {
-          resolve({ valid, err });
-        });
-      } catch (err) {
-        resolve({ valid: false, err: err as ValidateError });
-      }
-    });
-  }
-
   compileSchema(schemaOrArr: JsonSchema | JsonSchema[]): void {
     if (Array.isArray(schemaOrArr) && schemaOrArr.length === 0) {
       throw new Error('.compileSchema was called with an empty array');
