@@ -1,5 +1,16 @@
 # Changelog
 
+## [9.0.1](https://github.com/zaggino/z-schema/compare/v9.0.0...v9.0.1) (2026-02-09)
+
+
+### Bug Fixes
+
+* add optional schemaPath to errors to suggest which part of schema triggered the error, fixes [#198](https://github.com/zaggino/z-schema/issues/198) ([322aec9](https://github.com/zaggino/z-schema/commit/322aec9649056986cc131d777f1765eaa12a5c0c))
+* better handle references in SchemaReader, fixes [#157](https://github.com/zaggino/z-schema/issues/157) ([77121cb](https://github.com/zaggino/z-schema/commit/77121cb527999c0a46af440ef982ba45a1cd88d8))
+* cli issue, fixes [#184](https://github.com/zaggino/z-schema/issues/184) ([56cf942](https://github.com/zaggino/z-schema/commit/56cf94297734e0f5053f709e7d8cc676b75db384))
+* improved handling of multipleOf, fixes [#69](https://github.com/zaggino/z-schema/issues/69) ([f2dde3a](https://github.com/zaggino/z-schema/commit/f2dde3a4d1bec4f3cc9f451dfa484491d8c2b629))
+* incorrectly resolved against top-level document, fixes [#165](https://github.com/zaggino/z-schema/issues/165) ([35113e5](https://github.com/zaggino/z-schema/commit/35113e501ae9223f884ce3c7de0f41d492bea0a2))
+
 ## [9.0.0](https://github.com/zaggino/z-schema/compare/v8.5.0...v9.0.0) (2026-02-09)
 
 
