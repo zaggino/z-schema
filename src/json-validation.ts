@@ -40,9 +40,8 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       return;
     }
 
-    const stringMultipleOf = String(schema.multipleOf);
-    const scale = Math.pow(10, stringMultipleOf.length - stringMultipleOf.indexOf('.') - 1);
-    if (whatIs((json * scale) / (schema.multipleOf! * scale)) !== 'integer') {
+    const result = json / schema.multipleOf!;
+    if (!Number.isFinite(result) || Math.abs(result - Math.round(result)) >= 1e-10) {
       report.addError('MULTIPLE_OF', [json, schema.multipleOf!], undefined, schema, 'multipleOf');
     }
   },
