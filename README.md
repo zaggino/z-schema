@@ -71,7 +71,47 @@ z-schema --strictMode mySchema.json myJson.json
 
 ## Usage
 
+### Schema Validation
+
+You can pre-validate and compile schemas using the `validateSchema` method. This is useful for server startup to ensure all schemas are valid and to resolve `$ref` references between schemas.
+
+```javascript
+const schemas = [
+  {
+    id: 'personDetails',
+    type: 'object',
+    properties: {
+      firstName: { type: 'string' },
+      lastName: { type: 'string' },
+    },
+    required: ['firstName', 'lastName'],
+  },
+  {
+    id: 'addressDetails',
+    type: 'object',
+    properties: {
+      street: { type: 'string' },
+      city: { type: 'string' },
+    },
+    required: ['street', 'city'],
+  },
+  {
+    id: 'personWithAddress',
+    allOf: [{ $ref: 'personDetails' }, { $ref: 'addressDetails' }],
+  },
+];
+
+try {
+  validator.validateSchema(schemas);
+  console.log('All schemas are valid and compiled');
+} catch (error) {
+  console.log('Schema validation failed:', error.details);
+}
+```
+
 ### Sync mode:
+
+The `validate` method automatically compiles and validates the schema before validating the JSON data against it. For better performance, you can pre-compile schemas using `validateSchema` during initialization.
 
 ```javascript
 try {
