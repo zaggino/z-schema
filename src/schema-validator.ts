@@ -6,7 +6,7 @@ import { isUniqueArray } from './utils/array.js';
 import { shallowClone } from './utils/clone.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
 import { isObject, whatIs } from './utils/what-is.js';
-import type { ZSchemaBase } from './z-schema.js';
+import type { ZSchemaBase } from './z-schema-base.js';
 
 const SchemaValidators = {
   $ref: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {

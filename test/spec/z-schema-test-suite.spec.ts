@@ -1,6 +1,6 @@
-import type { ValidateError } from '../../src/index.ts';
+import type { ValidateError, ValidateOptions, ZSchemaOptions } from '../../src/index.ts';
 import ZSchema from '../../src/index.ts';
-import type { JsonSchemaVersion, ValidateOptions, ZSchemaOptions } from '../../src/z-schema.ts';
+import type { JsonSchemaVersion } from '../../src/json-schema.ts';
 
 type ZSchemaClass = new (...args: ConstructorParameters<typeof ZSchema>) => ZSchema;
 

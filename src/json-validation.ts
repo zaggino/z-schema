@@ -8,7 +8,7 @@ import { hasOwn } from './utils/properties.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
 import { ucs2decode } from './utils/unicode.js';
 import { isObject, whatIs } from './utils/what-is.js';
-import type { ValidateOptions, ZSchemaBase } from './z-schema.js';
+import type { ValidateOptions, ZSchemaBase } from './z-schema-base.js';
 
 const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
   return (

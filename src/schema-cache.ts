@@ -6,7 +6,7 @@ import { Report } from './report.js';
 import { deepClone } from './utils/clone.js';
 import { decodeJSONPointer } from './utils/json.js';
 import { getQueryPath, getRemotePath, isAbsoluteUri } from './utils/uri.js';
-import type { ZSchemaBase } from './z-schema.js';
+import type { ZSchemaBase } from './z-schema-base.js';
 
 export type SchemaCacheStorage = Record<string, JsonSchemaInternal>;
 export type ReferenceSchemaCacheStorage = Array<[JsonSchemaInternal, JsonSchemaInternal]>;

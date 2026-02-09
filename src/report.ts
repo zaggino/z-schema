@@ -5,7 +5,8 @@ import { get } from './utils/json.js';
 import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
 import { isAbsoluteUri } from './utils/uri.js';
 import { whatIs } from './utils/what-is.js';
-import type { ValidateCallback, ValidateOptions, ZSchemaOptions } from './z-schema.js';
+import type { ValidateCallback, ValidateOptions } from './z-schema-base.js';
+import type { ZSchemaOptions } from './z-schema-options.js';
 
 export interface SchemaErrorDetail {
   /**

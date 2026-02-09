@@ -1,6 +1,13 @@
 import type { Reference } from './schema-compiler.js';
 import { isObject } from './utils/what-is.js';
-import type { ZSchemaOptions } from './z-schema.js';
+import type { ZSchemaOptions } from './z-schema-options.js';
+
+// TODO: currently unsupported 'draft-06', 'draft-07', '2019-09', '2020-12'
+export type JsonSchemaVersion = 'draft-04';
+
+export const VERSION_SCHEMA_URL_MAPPING: Record<JsonSchemaVersion, string> = {
+  'draft-04': 'http://json-schema.org/draft-04/schema#',
+};
 
 export interface JsonSchema {
   $ref?: string;
