@@ -257,4 +257,31 @@ describe('collectReferences', () => {
     const result = validator.validateSchemaSafe([schema1, schema2]);
     expect(result.valid).toBe(true);
   });
+
+  it('should use setSchemaReader with base URI for references with fragments', () => {
+    const baseSchema = {
+      id: 'http://example.com/schema.json',
+      definitions: {
+        foo: { type: 'string' },
+      },
+    };
+
+    const schema = {
+      $ref: 'http://example.com/schema.json#/definitions/foo',
+    };
+
+    let calledWith: string | undefined;
+    ZSchema.setSchemaReader((uri) => {
+      calledWith = uri;
+      return baseSchema;
+    });
+
+    const validator = ZSchema.create();
+    const result = validator.validateSchemaSafe(schema);
+
+    expect(result.valid).toBe(true);
+    expect(calledWith).toBe('http://example.com/schema.json');
+
+    ZSchema.setSchemaReader(undefined);
+  });
 });

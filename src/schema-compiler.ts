@@ -2,7 +2,7 @@ import type { JsonSchemaInternal } from './json-schema.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
 import { Report } from './report.js';
-import { isAbsoluteUri } from './utils/uri.js';
+import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { getSchemaReader } from './z-schema-reader.js';
 
 interface Id {
@@ -276,11 +276,12 @@ export class SchemaCompiler {
       if (!response) {
         const schemaReader = getSchemaReader();
         if (schemaReader) {
+          const remotePath = getRemotePath(refObj.ref);
           // it's supposed to return a valid schema
-          const s = schemaReader(refObj.ref);
+          const s = schemaReader(remotePath);
           if (s) {
             // it needs to have the id
-            s.id = refObj.ref;
+            s.id = remotePath;
             // try to compile the schema
             const subreport = new Report(report);
             if (!this.compileSchema(subreport, s)) {
