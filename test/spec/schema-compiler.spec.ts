@@ -196,4 +196,65 @@ describe('collectReferences', () => {
     expect(result.valid).toBe(false);
     expect(result.err).toBeInstanceOf(ValidateError);
   });
+
+  it('should handle circular references between schemas', () => {
+    const validator = ZSchema.create();
+    const ref1 = 'http://www.example.org/schema1/#';
+    const ref2 = 'http://www.example.org/schema2/#';
+
+    const schema1 = {
+      $schema: 'http://json-schema.org/draft-04/schema#',
+      id: ref1,
+      properties: {
+        prop1: {
+          $ref: ref2,
+        },
+      },
+    };
+
+    const schema2 = {
+      $schema: 'http://json-schema.org/draft-04/schema#',
+      id: ref2,
+      properties: {
+        prop1: {
+          $ref: ref1,
+        },
+      },
+    };
+
+    validator.setRemoteReference(ref1, schema1);
+    validator.setRemoteReference(ref2, schema2);
+
+    const result = validator.validateSchemaSafe(schema1);
+    expect(result.valid).toBe(true);
+  });
+
+  it('should handle circular references between schemas in array', () => {
+    const validator = ZSchema.create();
+    const ref1 = 'http://www.example.org/schema1/#';
+    const ref2 = 'http://www.example.org/schema2/#';
+
+    const schema1 = {
+      $schema: 'http://json-schema.org/draft-04/schema#',
+      id: ref1,
+      properties: {
+        prop1: {
+          $ref: ref2,
+        },
+      },
+    };
+
+    const schema2 = {
+      $schema: 'http://json-schema.org/draft-04/schema#',
+      id: ref2,
+      properties: {
+        prop1: {
+          $ref: ref1,
+        },
+      },
+    };
+
+    const result = validator.validateSchemaSafe([schema1, schema2]);
+    expect(result.valid).toBe(true);
+  });
 });
