@@ -14,10 +14,8 @@ export const shallowClone = <T>(src: T): T => {
     }
   } else {
     res = {};
-    const keys = Object.keys(src) as Array<keyof T>;
-    idx = keys.length;
-    while (idx--) {
-      const key = keys[idx];
+    const keys = Object.keys(src).sort() as Array<keyof T>;
+    for (const key of keys) {
       copyProp(src, res, key);
     }
   }
@@ -52,10 +50,9 @@ export const deepClone = <T>(src: T): T => {
     } else {
       res = {};
       cloned.push(res);
-      const keys = Object.keys(src) as Array<keyof T>;
-      idx = keys.length;
-      while (idx--) {
-        copyProp(src, res, keys[idx], cloneDeepInner);
+      const keys = Object.keys(src).sort() as Array<keyof T>;
+      for (const key of keys) {
+        copyProp(src, res, key, cloneDeepInner);
       }
     }
     return res;

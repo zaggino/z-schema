@@ -1,4 +1,4 @@
-import ZSchema from '../../src/index.ts';
+import { ZSchema } from '../../src/z-schema.ts';
 
 const isBrowser = typeof window !== 'undefined';
 
@@ -9,15 +9,18 @@ function validateWithAutomaticDownloads(
   callback: (err: unknown, valid: boolean) => void
 ) {
   let lastResult: boolean;
+  let lastError: unknown;
 
   function finish() {
-    callback(validator.getLastErrors(), lastResult);
+    callback(lastError, lastResult);
   }
 
   function validate() {
-    lastResult = validator.validate(data, schema as any);
+    const result = validator.validateSafe(data, schema as any);
+    lastResult = result.valid;
+    lastError = result.valid ? null : result.err?.details;
 
-    const missingReferences = validator.getMissingRemoteReferences();
+    const missingReferences = result.valid ? [] : validator.getMissingRemoteReferences(result.err!);
     if (missingReferences.length > 0) {
       let finished = 0;
       missingReferences.forEach(function (url: string) {
@@ -52,7 +55,7 @@ describe('Automatic schema loading', function () {
         return;
       }
 
-      const validator = new ZSchema();
+      const validator = ZSchema.create();
       const schema = { $ref: 'http://json-schema.org/draft-04/schema#' };
       const data = { minLength: 1 };
 
@@ -73,7 +76,7 @@ describe('Automatic schema loading', function () {
         return;
       }
 
-      const validator = new ZSchema();
+      const validator = ZSchema.create();
       const schema = { $ref: 'http://json-schema.org/draft-04/schema#' };
       const data = { minLength: -1 };
 

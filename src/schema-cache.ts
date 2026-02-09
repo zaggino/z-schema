@@ -1,10 +1,11 @@
-import type { ZSchema } from './z-schema.js';
-import isequal from 'lodash.isequal';
+import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { ZSchemaBase } from './z-schema-base.js';
+
+import { findId } from './json-schema.js';
 import { Report } from './report.js';
-import { findId, JsonSchema, JsonSchemaInternal } from './json-schema.js';
-import { getQueryPath, getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { deepClone } from './utils/clone.js';
 import { decodeJSONPointer } from './utils/json.js';
+import { getQueryPath, getRemotePath, isAbsoluteUri } from './utils/uri.js';
 
 export type SchemaCacheStorage = Record<string, JsonSchemaInternal>;
 export type ReferenceSchemaCacheStorage = Array<[JsonSchemaInternal, JsonSchemaInternal]>;
@@ -12,9 +13,8 @@ export type ReferenceSchemaCacheStorage = Array<[JsonSchemaInternal, JsonSchemaI
 export class SchemaCache {
   static global_cache: SchemaCacheStorage = {};
   cache: SchemaCacheStorage = {};
-  referenceCache: ReferenceSchemaCacheStorage = [];
 
-  constructor(private validator: ZSchema) {}
+  constructor(private validator: ZSchemaBase) {}
 
   static cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
     const remotePath = getRemotePath(uri);
@@ -53,11 +53,8 @@ export class SchemaCache {
       // ref input
       return this.getSchemaByUri(report, refOrSchema);
     }
-    if (typeof refOrSchema === 'object') {
-      // schema obj input
-      return this.getSchemaByReference(report, refOrSchema);
-    }
-    throw new Error(`unexpected code reached`);
+    // no caching done on this, but we need to return a clone so we can mutate it
+    return deepClone(refOrSchema);
   }
 
   fromCache(path: string): JsonSchemaInternal | undefined {
@@ -136,18 +133,5 @@ export class SchemaCache {
     }
 
     return result;
-  }
-
-  getSchemaByReference(report: Report, schema: JsonSchemaInternal) {
-    let i = this.referenceCache.length;
-    while (i--) {
-      if (isequal(this.referenceCache[i][0], schema)) {
-        return this.referenceCache[i][1];
-      }
-    }
-    // not found
-    const schemaClone = deepClone(schema);
-    this.referenceCache.push([schema, schemaClone]);
-    return schemaClone;
   }
 }

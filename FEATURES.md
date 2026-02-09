@@ -32,7 +32,12 @@
 In case you don't want to split your schema into multiple schemas using reference for any reason, you can use option schemaPath when validating:
 
 ```javascript
-var valid = validator.validate(cars, schema, { schemaPath: 'definitions.car.definitions.cars' });
+try {
+  validator.validate(cars, schema, { schemaPath: 'definitions.car.definitions.cars' });
+  // validation passed
+} catch (error) {
+  // handle validation error
+}
 ```
 
 See more details in the [test](/test/spec/schemaPathSpec.js).
@@ -74,15 +79,19 @@ var data = {
   city: 'Sydney',
 };
 
-var validator = new ZSchema();
+var validator = ZSchema.create();
 
 // compile & validate schemas first, z-schema will automatically handle array
 var allSchemasValid = validator.validateSchema(schemas);
 // allSchemasValid === true
 
 // now validate our data against the last schema
-var valid = validator.validate(data, schemas[2]);
-// valid === true
+try {
+  validator.validate(data, schemas[2]);
+  // validation passed
+} catch (error) {
+  // handle validation error
+}
 ```
 
 ## Register a custom format
@@ -118,7 +127,7 @@ ZSchema.registerFormat('xstring', async function (str) {
 The default timeout for async format validation is 2000ms and can be configured per validator instance:
 
 ```javascript
-const validator = new ZSchema({ asyncTimeout: 5000 }); // 5 second timeout
+const validator = ZSchema.create({ asyncTimeout: 5000 }); // 5 second timeout
 ```
 
 ### Helper method to check the formats that have been registered
@@ -171,7 +180,7 @@ z-schema will automatically use the `u` (Unicode) flag for all patterns containi
 
 ### Keyword field
 
-Error objects returned by `getLastErrors()` (and included on the `details` property of `getLastError()`'s Error) include a `keyword` field indicating the schema keyword that triggered the error (for example: `"required"`, `"type"`, `"minLength"`).
+Error objects thrown by `validate()` (and included on the `details` property of the ValidateError) include a `keyword` field indicating the schema keyword that triggered the error (for example: `"required"`, `"type"`, `"minLength"`).
 
 Example error detail:
 

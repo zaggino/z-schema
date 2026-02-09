@@ -1,7 +1,9 @@
-import type { ZSchema } from './z-schema.js';
-import { JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchemaInternal } from './json-schema.js';
+import type { ZSchemaBase } from './z-schema-base.js';
+
 import { Report } from './report.js';
 import { isAbsoluteUri } from './utils/uri.js';
+import { getSchemaReader } from './z-schema-reader.js';
 
 interface Id {
   id: string;
@@ -193,7 +195,7 @@ const resolveIdScope = (base: string | undefined, id: string) => {
 };
 
 export class SchemaCompiler {
-  constructor(private validator: ZSchema) {}
+  constructor(private validator: ZSchemaBase) {}
 
   collectAndCacheIds(schema: JsonSchemaInternal) {
     const ids = collectIds(schema);
@@ -272,7 +274,7 @@ export class SchemaCompiler {
 
       // we can try to use custom schemaReader if available
       if (!response) {
-        const schemaReader = this.validator.getSchemaReader();
+        const schemaReader = getSchemaReader();
         if (schemaReader) {
           // it's supposed to return a valid schema
           const s = schemaReader(refObj.ref);

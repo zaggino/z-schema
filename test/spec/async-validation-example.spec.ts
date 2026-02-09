@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import ZSchema from '../../src/index.ts';
+import { describe, expect, it } from 'vitest';
+
+import { ZSchema } from '../../src/z-schema.ts';
 
 describe('Async Validation Example', () => {
   // Mock functions for testing
@@ -15,9 +16,9 @@ describe('Async Validation Example', () => {
 
   const phoneRegex = /^\+?[1-9]\d{1,14}$/;
 
-  const createValidator = () => {
-    const validator = new ZSchema();
-
+  const registerFormats = (validator: {
+    registerFormat: (name: string, validatorFunction: (input: unknown) => boolean | Promise<boolean>) => void;
+  }) => {
     validator.registerFormat('user-exists', async (input: unknown): Promise<boolean> => {
       if (typeof input !== 'string') return false;
       return await mockDatabaseCheck(input);
@@ -32,7 +33,23 @@ describe('Async Validation Example', () => {
       if (typeof input !== 'string') return false;
       return phoneRegex.test(input);
     });
+  };
 
+  const createValidator = () => {
+    const validator = ZSchema.create();
+    registerFormats(validator);
+    return validator;
+  };
+
+  const createAsyncValidator = () => {
+    const validator = ZSchema.create({ async: true });
+    registerFormats(validator);
+    return validator;
+  };
+
+  const createAsyncSafeValidator = () => {
+    const validator = ZSchema.create({ async: true, safe: true });
+    registerFormats(validator);
     return validator;
   };
 
@@ -73,14 +90,10 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(validPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(validPayload, personSchema);
 
       expect(result.valid).toBe(true);
-      expect(result.err).toBe(null);
+      expect(result.err).toBeUndefined();
     });
 
     it('should fail validation with invalid user ID', async () => {
@@ -94,15 +107,11 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(invalidPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(invalidPayload, personSchema);
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
-      expect(result.err[0].path).toBe('#/personId');
+      expect(result.err!.details?.[0].path).toBe('#/personId');
     });
   });
 
@@ -118,14 +127,10 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(validPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(validPayload, personSchema);
 
       expect(result.valid).toBe(true);
-      expect(result.err).toBe(null);
+      expect(result.err).toBeUndefined();
     });
 
     it('should fail validation with invalid postcode', async () => {
@@ -139,15 +144,11 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(invalidPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(invalidPayload, personSchema);
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
-      expect(result.err[0].path).toBe('#/address/postcode');
+      expect(result.err!.details?.[0].path).toBe('#/address/postcode');
     });
   });
 
@@ -163,14 +164,10 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(validPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(validPayload, personSchema);
 
       expect(result.valid).toBe(true);
-      expect(result.err).toBe(null);
+      expect(result.err).toBeUndefined();
     });
 
     it('should fail validation with invalid phone number', async () => {
@@ -184,15 +181,11 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(invalidPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(invalidPayload, personSchema);
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
-      expect(result.err[0].path).toBe('#/address/phone');
+      expect(result.err!.details?.[0].path).toBe('#/address/phone');
     });
   });
 
@@ -208,14 +201,10 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(validPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(validPayload, personSchema);
 
       expect(result.valid).toBe(true);
-      expect(result.err).toBe(null);
+      expect(result.err).toBeUndefined();
     });
 
     it('should fail validation with multiple invalid fields', async () => {
@@ -229,22 +218,18 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(invalidPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(invalidPayload, personSchema);
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
-      expect(result.err.length).toBeGreaterThan(1);
+      expect(result.err!.details?.length).toBeGreaterThan(1);
     });
   });
 
   describe('Edge Cases', () => {
     it('should handle database unavailability simulation', async () => {
       // For this test, we can mock a failing database check
-      const validator = new ZSchema();
+      const validator = ZSchema.create();
 
       validator.registerFormat('user-exists', async (): Promise<boolean> => {
         throw new Error('Database unavailable');
@@ -268,11 +253,7 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(payload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(payload, personSchema);
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
@@ -286,11 +267,7 @@ describe('Async Validation Example', () => {
         address: 'not-an-object',
       };
 
-      const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-        validator.validate(malformedPayload, personSchema, (err, valid) => {
-          resolve({ err, valid });
-        });
-      });
+      const result = await validator.validateAsyncSafe(malformedPayload, personSchema);
 
       expect(result.valid).toBe(false);
       expect(result.err).toBeDefined();
@@ -318,20 +295,16 @@ describe('Async Validation Example', () => {
           },
         };
 
-        const result = await new Promise<{ err: any; valid: boolean }>((resolve) => {
-          validator.validate(payload, personSchema, (err, valid) => {
-            resolve({ err, valid });
-          });
-        });
+        const result = await validator.validateAsyncSafe(payload, personSchema);
 
         expect(result.valid).toBe(testCase.expected);
       }
     });
   });
 
-  describe('validateAsync method', () => {
+  describe('validate method (async validator)', () => {
     it('should validate successfully with valid payload using Promise API', async () => {
-      const validator = createValidator();
+      const validator = createAsyncValidator();
 
       const validPayload = {
         personId: 'user123',
@@ -341,15 +314,13 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await validator.validateAsync(validPayload, personSchema);
+      const result = await validator.validate(validPayload, personSchema);
 
       expect(result).toBe(true);
-      const errors = validator.getLastErrors();
-      expect(errors).toBeNull();
     });
 
     it('should fail validation with invalid payload using Promise API', async () => {
-      const validator = createValidator();
+      const validator = createAsyncValidator();
 
       const invalidPayload = {
         personId: 'invalid-user',
@@ -359,11 +330,11 @@ describe('Async Validation Example', () => {
         },
       };
 
-      await expect(validator.validateAsync(invalidPayload, personSchema)).rejects.toThrow();
+      await expect(validator.validate(invalidPayload, personSchema)).rejects.toThrow();
     });
 
     it('should handle async validation with Promise API', async () => {
-      const validator = createValidator();
+      const validator = createAsyncValidator();
 
       const payload = {
         personId: 'user123',
@@ -373,17 +344,15 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await validator.validateAsync(payload, personSchema);
+      const result = await validator.validate(payload, personSchema);
 
       expect(result).toBe(true);
-      const errors = validator.getLastErrors();
-      expect(errors).toBeNull();
     });
   });
 
-  describe('validateAsyncSafe method', () => {
+  describe('validate method (async-safe validator)', () => {
     it('should validate successfully with valid payload using Promise API', async () => {
-      const validator = createValidator();
+      const validator = createAsyncSafeValidator();
 
       const validPayload = {
         personId: 'user123',
@@ -393,14 +362,14 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await validator.validateAsyncSafe(validPayload, personSchema);
+      const result = await validator.validate(validPayload, personSchema);
 
       expect(result.valid).toBe(true);
-      expect(result.errs).toBeUndefined();
+      expect(result.err).toBeUndefined();
     });
 
     it('should fail validation with invalid payload using Promise API', async () => {
-      const validator = createValidator();
+      const validator = createAsyncSafeValidator();
 
       const invalidPayload = {
         personId: 'invalid-user',
@@ -410,7 +379,7 @@ describe('Async Validation Example', () => {
         },
       };
 
-      const result = await validator.validateAsyncSafe(invalidPayload, personSchema);
+      const result = await validator.validate(invalidPayload, personSchema);
 
       expect(result.valid).toBe(false);
       // Note: For async validation, errs may be empty

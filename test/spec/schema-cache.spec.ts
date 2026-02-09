@@ -11,7 +11,7 @@ describe('SchemaCache remote $ref', () => {
   });
 
   it('verifies schema is present in both static and local cache', () => {
-    const validator = new ZSchema();
+    const validator = ZSchema.create();
     // Static/global cache
     const staticCache = SchemaCache.global_cache;
     expect(staticCache[remoteSchemaUrl]).toBeDefined();
@@ -26,19 +26,18 @@ describe('SchemaCache remote $ref', () => {
 
   it('validates data using remote $ref (valid case)', () => {
     const schema = { $ref: remoteSchemaUrl };
-    const validator = new ZSchema();
-    const valid = validator.validate(1, schema);
-    expect(valid).toBe(true);
-    expect(validator.getLastErrors()).toBeNull();
+    const validator = ZSchema.create();
+    const result = validator.validateSafe(1, schema);
+    expect(result.valid).toBe(true);
+    expect(result.err).toBeUndefined();
   });
 
   it('validates data using remote $ref (invalid case)', () => {
     const schema = { $ref: remoteSchemaUrl };
-    const validator = new ZSchema();
-    const valid = validator.validate('a', schema);
-    expect(valid).toBe(false);
-    const errors = validator.getLastErrors();
-    expect(errors).not.toBeNull();
-    expect(errors && errors[0].code).toBe('INVALID_TYPE');
+    const validator = ZSchema.create();
+    const result = validator.validateSafe('a', schema);
+    expect(result.valid).toBe(false);
+    expect(result.err).toBeDefined();
+    expect(result.err!.details?.[0].code).toBe('INVALID_TYPE');
   });
 });

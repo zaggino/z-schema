@@ -1,4 +1,4 @@
-import ZSchema from '../../src/index.ts';
+import { ZSchema } from '../../src/z-schema.ts';
 
 const schema = {
   type: ['object'],
@@ -66,15 +66,15 @@ const schema = {
 
 describe('Using path to schema as a third argument', function () {
   it('Should pass the test', function () {
-    const validator = new ZSchema();
+    const validator = ZSchema.create();
     const cars = [
       {
         brand: 'Lexus',
         engine: 'big',
       },
     ];
-    const valid = validator.validate(cars, schema, { schemaPath: 'definitions.car.definitions.cars' });
-    expect(valid).toBe(true);
-    expect(validator.getLastError()).toBe(null);
+    const result = validator.validateSafe(cars, schema, { schemaPath: 'definitions.car.definitions.cars' });
+    expect(result.valid).toBe(true);
+    expect(result.err).toBeUndefined();
   });
 });

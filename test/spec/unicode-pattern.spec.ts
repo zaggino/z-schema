@@ -1,4 +1,5 @@
-import ZSchema from '../../src/index.ts';
+import { ucs2decode } from '../../src/utils/unicode.ts';
+import { ZSchema } from '../../src/z-schema.ts';
 
 // Runtime check for Unicode property escape support (must actually match ASCII letters)
 function supportsUnicodePropertyEscapes() {
@@ -22,22 +23,40 @@ describe('Unicode property escapes in pattern keyword', () => {
       expect(true).toBe(true); // Mark as passed
       return;
     }
-    const validator = new ZSchema();
+    const validator = ZSchema.create();
     const schema = { type: 'string', pattern: '^\\p{L}+$' };
     // Valid: only letters
-    expect(validator.validate('abc', schema)).toBe(true);
+    expect(validator.validateSafe('abc', schema).valid).toBe(true);
     // Invalid: contains a digit
-    expect(validator.validate('abc1', schema)).toBe(false);
+    expect(validator.validateSafe('abc1', schema).valid).toBe(false);
     // Invalid: contains a symbol
-    expect(validator.validate('abc!', schema)).toBe(false);
+    expect(validator.validateSafe('abc!', schema).valid).toBe(false);
   });
 
   it('should fail schema validation for invalid Unicode property escape', () => {
-    const validator = new ZSchema();
+    const validator = ZSchema.create();
     const schema = { type: 'string', pattern: '^\\p{INVALID}+$' };
-    expect(validator.validateSchema(schema)).toBe(false);
-    const errors = validator.getLastErrors();
-    expect(errors && errors[0].code).toBe('KEYWORD_PATTERN');
-    expect(errors && errors[0].params[1]).toBe('^\\p{INVALID}+$');
+    const result = validator.validateSafe('test', schema);
+    expect(result.valid).toBe(false);
+    expect(result.err).toBeDefined();
+    expect(result.err!.details?.[0].code).toBe('KEYWORD_PATTERN');
+    expect(result.err!.details?.[0].params[1]).toBe('^\\p{INVALID}+$');
+  });
+});
+
+describe('ucs2decode', () => {
+  it('should handle unmatched low surrogate', () => {
+    const result = ucs2decode('\udc00');
+    expect(result).toEqual([0xdc00]);
+  });
+
+  it('should handle high surrogate at end of string', () => {
+    const result = ucs2decode('\ud800');
+    expect(result).toEqual([0xd800]);
+  });
+
+  it('should handle unmatched high surrogate', () => {
+    const result = ucs2decode('\ud800a');
+    expect(result).toEqual([0xd800, 97]);
   });
 });

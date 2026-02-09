@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import ZSchema from '../../src/index.js';
-import type { SchemaErrorDetail } from '../../src/report.js';
+import { describe, expect, it } from 'vitest';
+
+import { ZSchema } from '../../src/z-schema.ts';
 
 describe('Format Validators', () => {
   describe('Async Format Validator Registration', () => {
     it('should register an async format validator', () => {
-      const validator = new ZSchema();
+      const validator = ZSchema.create();
 
       const asyncValidator = async (input: unknown): Promise<boolean> => {
         return typeof input === 'string' && input.length > 3;
@@ -20,7 +20,7 @@ describe('Format Validators', () => {
 
   describe('Sync Format Validators Regression', () => {
     it('should validate with built-in sync format validators', () => {
-      const validator = new ZSchema();
+      const validator = ZSchema.create();
 
       const schema = {
         type: 'string',
@@ -32,21 +32,21 @@ describe('Format Validators', () => {
     });
 
     it('should fail validation with built-in sync format validators', () => {
-      const validator = new ZSchema();
+      const validator = ZSchema.create();
 
       const schema = {
         type: 'string',
         format: 'email',
       };
 
-      const result = validator.validate('invalid-email', schema);
-      expect(result).toBe(false);
+      const result = validator.validateSafe('invalid-email', schema);
+      expect(result.valid).toBe(false);
     });
   });
 
   describe('Async Timeout Handling', () => {
     it('should timeout async format validation', async () => {
-      const validator = new ZSchema({ asyncTimeout: 10 }); // 10ms timeout
+      const validator = ZSchema.create({ async: true, safe: true, asyncTimeout: 10 }); // 10ms timeout
 
       const slowValidator = async (): Promise<boolean> => {
         await new Promise((resolve) => setTimeout(resolve, 50)); // 50ms delay
@@ -60,15 +60,53 @@ describe('Format Validators', () => {
         format: 'slow-async',
       };
 
-      const result = await new Promise<{ err: SchemaErrorDetail[] | null; valid: boolean }>((resolve) => {
-        validator.validate('test', schema, (err, valid) => {
-          resolve({ err: err as SchemaErrorDetail[] | null, valid });
-        });
-      });
-
+      const result = await validator.validate('test', schema);
       expect(result.valid).toBe(false);
-      expect(result.err).toHaveLength(1);
-      expect(result.err![0].code).toBe('ASYNC_TIMEOUT');
+      expect(result.err!.details).toHaveLength(1);
+      expect(result.err!.details![0].code).toBe('ASYNC_TIMEOUT');
+    });
+  });
+  describe('Format Registration and Unregistration', () => {
+    it('should unregister a format validator', () => {
+      const validator = ZSchema.create();
+
+      validator.registerFormat('test-format', (input) => typeof input === 'string');
+
+      let registered = validator.getRegisteredFormats();
+      expect(registered).toContain('test-format');
+
+      validator.unregisterFormat('test-format');
+
+      registered = validator.getRegisteredFormats();
+      expect(registered).not.toContain('test-format');
+    });
+
+    it('should unregister a inbuilt format validator', () => {
+      const validator = ZSchema.create();
+      const before = validator.getSupportedFormats();
+      expect(before).toContain('ipv4');
+      expect(before).toContain('ipv6');
+      validator.unregisterFormat('ipv4');
+      validator.unregisterFormat('ipv6');
+      const after = validator.getSupportedFormats();
+      expect(after).not.toContain('ipv4');
+      expect(after).not.toContain('ipv6');
+    });
+
+    it('should get supported formats', () => {
+      const validator = ZSchema.create();
+
+      const supported = validator.getSupportedFormats();
+      expect(supported).toContain('email');
+      expect(supported).toContain('uri');
+      expect(Array.isArray(supported)).toBe(true);
+    });
+
+    it('should get default options', () => {
+      const options = ZSchema.getDefaultOptions();
+      expect(options).toBeDefined();
+      expect(options.version).toBe('draft-04');
+      expect(options.asyncTimeout).toBe(2000);
     });
   });
 });

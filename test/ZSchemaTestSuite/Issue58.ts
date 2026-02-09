@@ -1,4 +1,7 @@
-import { ZSchema } from '../../src/z-schema.ts';
+import type { SchemaErrorDetail } from '../../src/report.ts';
+import type { ZSchema } from '../../src/z-schema.ts';
+
+import { ValidateError } from '../../src/errors.ts';
 
 export default {
   description: 'Issue #58 - getMissingReferences should return all missing references',
@@ -54,7 +57,9 @@ export default {
       validateSchemaOnly: true,
       valid: false,
       after: function (err: Error, valid: boolean, data: unknown, validator: ZSchema) {
-        const missingReferences = validator.getMissingReferences();
+        const missingReferences = validator.getMissingReferences(
+          new ValidateError('', err as unknown as SchemaErrorDetail[])
+        );
         expect(missingReferences.length).toBe(2);
         expect(missingReferences[0]).toBe('root.json#/yy');
         expect(missingReferences[1]).toBe('root.json#xx');

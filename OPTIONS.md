@@ -6,7 +6,7 @@ Defines a time limit, which should be used when waiting for async tasks like asy
 before the validation fails with an `ASYNC_TIMEOUT` error.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   asyncTimeout: 2000,
 });
 ```
@@ -16,11 +16,17 @@ var validator = new ZSchema({
 An array of error codes to exclude from validation reports. When specified, any errors with matching codes will be filtered out from the report, allowing you to suppress specific validation errors while keeping others.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   excludeErrors: ['MIN_LENGTH', 'MINIMUM'],
 });
 
-var report = validator.validate(data, schema, { excludeErrors: ['MAX_LENGTH'] });
+try {
+  validator.validate(data, schema, { excludeErrors: ['MAX_LENGTH'] });
+  // validation passed or only non-excluded errors occurred
+} catch (error) {
+  // error.details will contain only non-excluded errors
+  console.log(error.details);
+}
 ```
 
 ### noEmptyArrays
@@ -28,7 +34,7 @@ var report = validator.validate(data, schema, { excludeErrors: ['MAX_LENGTH'] })
 When true, validator will assume that minimum count of items in any `array` is 1, except when `minItems: 0` is explicitly defined.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   noEmptyArrays: true,
 });
 ```
@@ -38,7 +44,7 @@ var validator = new ZSchema({
 When true, validator will assume that minimum length of any string to pass type `string` validation is 1, except when `minLength: 0` is explicitly defined.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   noEmptyStrings: true,
 });
 ```
@@ -48,7 +54,7 @@ var validator = new ZSchema({
 When true, validator will fail validation for schemas that don't specify a `type` of object that they expect.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   noTypeless: true,
 });
 ```
@@ -58,7 +64,7 @@ var validator = new ZSchema({
 When true, validator will fail for schemas that use keywords not defined in JSON Schema specification and doesn't provide a parent schema in `$schema` property to validate the schema.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   noExtraKeywords: true,
 });
 ```
@@ -68,7 +74,7 @@ var validator = new ZSchema({
 When true, validator assumes that additionalItems/additionalProperties are defined as false so you don't have to manually fix all your schemas.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   assumeAdditional: true,
 });
 ```
@@ -76,7 +82,7 @@ var validator = new ZSchema({
 When an array, validator assumes that additionalItems/additionalProperties are defined as false, but allows some properties to pass.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   assumeAdditional: ['$ref'],
 });
 ```
@@ -86,7 +92,7 @@ var validator = new ZSchema({
 When true, validator doesn't validate schemas where additionalItems/additionalProperties should be defined to either true or false.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   forceAdditional: true,
 });
 ```
@@ -97,7 +103,7 @@ When true, validator doesn't validate schemas where `items` are not defined for 
 This is to avoid passing anything through an array definition.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   forceItems: true,
 });
 ```
@@ -108,7 +114,7 @@ When true, validator doesn't validate schemas where `minItems` is not defined fo
 This is to avoid passing zero-length arrays which application doesn't expect to handle.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   forceMinItems: true,
 });
 ```
@@ -119,7 +125,7 @@ When true, validator doesn't validate schemas where `maxItems` is not defined fo
 This is to avoid passing arrays with unlimited count of elements which application doesn't expect to handle.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   forceMaxItems: true,
 });
 ```
@@ -130,7 +136,7 @@ When true, validator doesn't validate schemas where `minLength` is not defined f
 This is to avoid passing zero-length strings which application doesn't expect to handle.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   forceMinLength: true,
 });
 ```
@@ -141,7 +147,7 @@ When true, validator doesn't validate schemas where `maxLength` is not defined f
 This is to avoid passing extremly large strings which application doesn't expect to handle.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   forceMaxLength: true,
 });
 ```
@@ -152,7 +158,7 @@ When true, validator doesn't validate schemas where `properties` or `patternProp
 This is to avoid having objects with unexpected properties in application.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   forceProperties: true,
 });
 ```
@@ -162,7 +168,7 @@ var validator = new ZSchema({
 When true, validator doesn't end with error when a remote reference is unreachable. **This setting is not recommended in production outside of testing.**
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   ignoreUnresolvableReferences: true,
 });
 ```
@@ -172,7 +178,7 @@ var validator = new ZSchema({
 When true, validator will return a `ENUM_CASE_MISMATCH` when the enum values mismatch only in case.
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   enumCaseInsensitiveComparison: true,
 });
 ```
@@ -182,7 +188,7 @@ var validator = new ZSchema({
 When true, all strings of format `uri` must be an absolute URIs and not only URI references. See more details in [this issue](https://github.com/zaggino/z-schema/issues/18).
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   strictUris: true,
 });
 ```
@@ -205,7 +211,7 @@ if (this.options.strictMode === true) {
 ```
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   strictMode: true,
 });
 ```
@@ -216,7 +222,7 @@ default: `false`<br />
 When true, will stop validation after the first error is found:
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   breakOnFirstError: true,
 });
 ```
@@ -226,7 +232,7 @@ var validator = new ZSchema({
 Report error paths as an array of path segments instead of a string:
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   reportPathAsArray: true,
 });
 ```
@@ -240,7 +246,7 @@ implementations _"they SHOULD offer an option to disable validation"_ for `forma
 option to `true` will disable treating unknown formats as errlrs
 
 ```javascript
-var validator = new ZSchema({
+var validator = ZSchema.create({
   ignoreUnknownFormats: true,
 });
 ```
@@ -250,7 +256,7 @@ var validator = new ZSchema({
 By default, z-schema reports all errors. If interested only in a subset of the errors, passing the option `includeErrors` to `validate` will perform validations only for those errors.
 
 ```javascript
-var validator = new ZSchema();
+var validator = ZSchema.create();
 // will only execute validation for "INVALID_TYPE" error.
 validator.validate(json, schema, { includeErrors: ['INVALID_TYPE'] });
 ```
@@ -330,7 +336,7 @@ function customValidatorFn(report, schema, json) {
   }
 }
 
-var validator = new ZSchema({
+var validator = ZSchema.create({
   // register our custom validator inside z-schema
   customValidator: customValidatorFn,
 });
@@ -345,13 +351,17 @@ var data = {
   amount: 50,
 };
 
-validator.validate(data, schema);
-console.log(validator.getLastErrors());
-//[ { code: 'NON_UNIQUE_PROPERTY_VALUE',
-//    params: [ 'toId', 1034834346 ],
-//    message: 'Property "toId" has non-unique value: 1034834346',
-//    path: '#/',
-//    schemaId: undefined } ]
+try {
+  validator.validate(data, schema);
+  console.log('Validation passed');
+} catch (error) {
+  console.log(error.details);
+  //[ { code: 'NON_UNIQUE_PROPERTY_VALUE',
+  //    params: [ 'toId', 1034834346 ],
+  //    message: 'Property "toId" has non-unique value: 1034834346',
+  //    path: '#/',
+  //    schemaId: undefined } ]
+}
 ```
 
 **Note:** before creating your own keywords you should consider all compatibility issues.

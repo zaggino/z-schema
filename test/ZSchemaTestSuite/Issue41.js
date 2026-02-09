@@ -105,5 +105,14 @@ export default {
       validateSchemaOnly: true,
       valid: false,
     },
+    {
+      description: 'should fail schema validation for exclusiveMaximum without maximum',
+      schema: {
+        type: 'number',
+        exclusiveMaximum: true,
+      },
+      validateSchemaOnly: true,
+      valid: false,
+    },
   ],
 };

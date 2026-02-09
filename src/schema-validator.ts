@@ -1,12 +1,13 @@
-import type { ZSchema } from './z-schema.js';
+import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { ZSchemaBase } from './z-schema-base.js';
+
+import { isFormatSupported } from './format-validators.js';
 import { validate } from './json-validation.js';
 import { Report } from './report.js';
-import { isObject, whatIs } from './utils/what-is.js';
-import { shallowClone } from './utils/clone.js';
-import { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import { isUniqueArray } from './utils/array.js';
-import { isFormatSupported } from './format-validators.js';
+import { shallowClone } from './utils/clone.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
+import { isObject, whatIs } from './utils/what-is.js';
 
 const SchemaValidators = {
   $ref: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -523,7 +524,7 @@ const SchemaValidators = {
     if (typeof schema.format !== 'string') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['format', 'string'], undefined, schema, 'format');
     } else {
-      if (!isFormatSupported(schema.format, this.options) && this.options.ignoreUnknownFormats !== true) {
+      if (!isFormatSupported(schema.format, this.options.customFormats) && this.options.ignoreUnknownFormats !== true) {
         report.addError('UNKNOWN_FORMAT', [schema.format], undefined, schema, 'format');
       }
     }
@@ -553,7 +554,7 @@ const SchemaValidators = {
 } as const;
 
 export class SchemaValidator {
-  constructor(private validator: ZSchema) {}
+  constructor(private validator: ZSchemaBase) {}
 
   get options() {
     return this.validator.options;

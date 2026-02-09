@@ -1,5 +1,6 @@
-import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { runTests } from './json-schema-test-suite.common.ts';
 
 await runTests({

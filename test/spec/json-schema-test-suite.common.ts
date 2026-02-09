@@ -1,7 +1,8 @@
 /* eslint-disable vitest/valid-title */
 
-import { JsonSchema } from '../../src/json-schema.ts';
-import { JsonSchemaVersion, ZSchema } from '../../src/z-schema.ts';
+import type { JsonSchema, JsonSchemaVersion } from '../../src/json-schema.ts';
+
+import { ZSchema } from '../../src/z-schema.ts';
 
 interface TestSuite {
   description: string;
@@ -19,8 +20,8 @@ const VERSION_FOLDER_MAPPING: Record<JsonSchemaVersion, JSONSchemaTestSuiteTestF
   'draft-04': 'draft4',
 };
 
-const excludedDirs: string[] = ['draft4/optional', 'draft4/optional/format'];
-const excludedFiles: string[] = [];
+const excludedDirs: string[] = ['draft4/optional'];
+const excludedFiles: string[] = ['draft4/optional/format/unknown.json'];
 const excludedTests: string[] = [];
 
 export async function runTests({ reader }: { reader: <T>(testFilePath: string) => Promise<T> }) {
@@ -67,13 +68,12 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
                 return;
               }
               it([testSuite.description, test.description].join(' '), function () {
-                const validator = new ZSchema({ version });
-                const valid = validator.validate(test.data, schema);
+                const validator = ZSchema.create({ version });
+                const { valid, err } = validator.validateSafe(test.data, schema);
                 expect.soft(valid).toBe(test.valid);
                 if (valid !== test.valid) {
                   if (!valid) {
-                    const errors = validator.getLastErrors();
-                    expect(errors).toBe(null);
+                    expect(err!.details).toBe(null);
                   }
                 }
               });

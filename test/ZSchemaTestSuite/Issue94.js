@@ -1,3 +1,5 @@
+import isequal from 'lodash.isequal';
+
 var schema1 = {
   id: 'long-string',
   type: 'string',
@@ -34,7 +36,7 @@ export default {
       valid: true,
       after: function (err, valid, data, validator) {
         var newSch = validator.getResolvedSchema('person-object');
-        expect(JSON.stringify(newSch)).toBe(JSON.stringify(expectedResult));
+        expect(isequal(newSch, expectedResult)).toBe(true);
       },
     },
   ],
