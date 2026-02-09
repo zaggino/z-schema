@@ -17,6 +17,8 @@ export default defineConfig([
         'error',
         {
           groups: [
+            // Type only imports.
+            ['\\u0000$'],
             // Side effect imports.
             ['^\\u0000'],
             // Node.js builtins prefixed with `node:`.

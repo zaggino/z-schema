@@ -1,5 +1,6 @@
-import { ValidateError } from '../../src/errors.ts';
 import type { JsonSchema } from '../../src/json-schema.ts';
+
+import { ValidateError } from '../../src/errors.ts';
 import { collectIds, collectReferences } from '../../src/schema-compiler.js';
 import { ZSchema } from '../../src/z-schema.ts';
 

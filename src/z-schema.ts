@@ -1,15 +1,16 @@
 import type { ValidateError } from './errors.js';
 import type { FormatValidatorFn } from './format-validators.js';
-import { getRegisteredFormats, registerFormat, unregisterFormat } from './format-validators.js';
 import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { ValidateOptions, ValidateResponse } from './z-schema-base.js';
+import type { ZSchemaOptions } from './z-schema-options.js';
+import type { SchemaReader } from './z-schema-reader.js';
+
+import { getRegisteredFormats, registerFormat, unregisterFormat } from './format-validators.js';
 import { SchemaCache } from './schema-cache.js';
 import { deepClone } from './utils/clone.js';
 import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
-import type { ValidateOptions, ValidateResponse } from './z-schema-base.js';
 import { ZSchemaBase } from './z-schema-base.js';
-import type { ZSchemaOptions } from './z-schema-options.js';
 import { defaultOptions, normalizeOptions } from './z-schema-options.js';
-import type { SchemaReader } from './z-schema-reader.js';
 import { getSchemaReader, setSchemaReader } from './z-schema-reader.js';
 
 // import schemas so they don't have to be downloaded for validation purposes

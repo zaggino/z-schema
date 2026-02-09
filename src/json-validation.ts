@@ -1,5 +1,7 @@
-import { getFormatValidators } from './format-validators.js';
 import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { ValidateOptions, ZSchemaBase } from './z-schema-base.js';
+
+import { getFormatValidators } from './format-validators.js';
 import { Report } from './report.js';
 import { difference, isUniqueArray } from './utils/array.js';
 import { shallowClone } from './utils/clone.js';
@@ -8,7 +10,6 @@ import { hasOwn } from './utils/properties.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
 import { ucs2decode } from './utils/unicode.js';
 import { isObject, whatIs } from './utils/what-is.js';
-import type { ValidateOptions, ZSchemaBase } from './z-schema-base.js';
 
 const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
   return (

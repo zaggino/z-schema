@@ -1,6 +1,7 @@
 /* eslint-disable vitest/valid-title */
 
 import type { JsonSchema, JsonSchemaVersion } from '../../src/json-schema.ts';
+
 import { ZSchema } from '../../src/z-schema.ts';
 
 interface TestSuite {

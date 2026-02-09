@@ -15,8 +15,9 @@ export {
 } from './format-validators.js';
 export type { JsonSchema, JsonSchemaType } from './json-schema.js';
 export type { Report, SchemaErrorDetail } from './report.js';
-export type { SchemaReader, ZSchema, ZSchemaAsync, ZSchemaAsyncSafe, ZSchemaSafe } from './z-schema.js';
+export type { ZSchema, ZSchemaAsync, ZSchemaAsyncSafe, ZSchemaSafe } from './z-schema.js';
 export { ValidateOptions, ValidateResponse } from './z-schema-base.js';
 export { ZSchemaOptions } from './z-schema-options.js';
+export { SchemaReader } from './z-schema-reader.js';
 
 export default ZSchema;

@@ -1,12 +1,13 @@
-import { isFormatSupported } from './format-validators.js';
 import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { ZSchemaBase } from './z-schema-base.js';
+
+import { isFormatSupported } from './format-validators.js';
 import { validate } from './json-validation.js';
 import { Report } from './report.js';
 import { isUniqueArray } from './utils/array.js';
 import { shallowClone } from './utils/clone.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
 import { isObject, whatIs } from './utils/what-is.js';
-import type { ZSchemaBase } from './z-schema-base.js';
 
 const SchemaValidators = {
   $ref: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {

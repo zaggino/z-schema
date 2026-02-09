@@ -1,6 +1,7 @@
 import type { FormatValidatorFn } from './format-validators.js';
 import type { JsonSchemaVersion } from './json-schema.js';
 import type { Report } from './report.js';
+
 import { shallowClone } from './utils/clone.js';
 
 export interface ZSchemaOptions {

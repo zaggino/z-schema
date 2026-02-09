@@ -1,11 +1,13 @@
 import type { ValidateError } from './errors.js';
-import { type Errors, getValidateError } from './errors.js';
 import type { FormatValidatorFn } from './format-validators.js';
-import { getSupportedFormats } from './format-validators.js';
 import type { JsonSchemaVersion } from './json-schema.js';
+import type { SchemaErrorDetail } from './report.js';
+import type { ZSchemaOptions } from './z-schema-options.js';
+
+import { type Errors, getValidateError } from './errors.js';
+import { getSupportedFormats } from './format-validators.js';
 import { type JsonSchema, type JsonSchemaInternal, VERSION_SCHEMA_URL_MAPPING } from './json-schema.js';
 import { validate as validateJson } from './json-validation.js';
-import type { SchemaErrorDetail } from './report.js';
 import { Report } from './report.js';
 import { SchemaCache } from './schema-cache.js';
 import { SchemaCompiler } from './schema-compiler.js';
@@ -15,7 +17,6 @@ import { get, sortedKeys } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
 import { getRemotePath } from './utils/uri.js';
 import { whatIs } from './utils/what-is.js';
-import type { ZSchemaOptions } from './z-schema-options.js';
 import { defaultOptions, normalizeOptions } from './z-schema-options.js';
 
 export interface ValidateOptions {
