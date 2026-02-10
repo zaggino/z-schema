@@ -21,6 +21,11 @@ import _Draft6Links from './schemas/draft-06-links.json' with { type: 'json' };
 import _Draft6Schema from './schemas/draft-06-schema.json' with { type: 'json' };
 
 export class ZSchema extends ZSchemaBase {
+  /** @deprecated Use ZSchema.create() instead. */
+  private constructor(options?: ZSchemaOptions) {
+    super(options);
+  }
+
   // ----- static methods start -----
 
   // class scoped format functions
@@ -88,14 +93,18 @@ export class ZSchema extends ZSchemaBase {
     delete options.safe;
     (options as any).__called_from_factory__ = true;
     if (isAsync && isSafe) {
+      // @ts-expect-error Factory can use private/deprecated constructor
       return new ZSchemaAsyncSafe(options);
     }
     if (isAsync) {
+      // @ts-expect-error Factory can use private/deprecated constructor
       return new ZSchemaAsync(options);
     }
     if (isSafe) {
+      // @ts-expect-error Factory can use private/deprecated constructor
       return new ZSchemaSafe(options);
     }
+    // Factory can use private/deprecated constructor
     return new ZSchema(options);
   }
 
@@ -151,6 +160,11 @@ export class ZSchema extends ZSchemaBase {
 }
 
 export class ZSchemaSafe extends ZSchemaBase {
+  /** @deprecated Use ZSchema.create() instead. */
+  private constructor(options?: ZSchemaOptions) {
+    super(options);
+  }
+
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): ValidateResponse {
     try {
       this._validate(json, schema, options);
@@ -171,6 +185,11 @@ export class ZSchemaSafe extends ZSchemaBase {
 }
 
 export class ZSchemaAsync extends ZSchemaBase {
+  /** @deprecated Use ZSchema.create() instead. */
+  private constructor(options?: ZSchemaOptions) {
+    super(options);
+  }
+
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<true> {
     return new Promise((resolve, reject) => {
       try {
@@ -187,6 +206,11 @@ export class ZSchemaAsync extends ZSchemaBase {
 }
 
 export class ZSchemaAsyncSafe extends ZSchemaBase {
+  /** @deprecated Use ZSchema.create() instead. */
+  private constructor(options?: ZSchemaOptions) {
+    super(options);
+  }
+
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<ValidateResponse> {
     return new Promise((resolve) => {
       try {
