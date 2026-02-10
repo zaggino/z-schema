@@ -11,12 +11,13 @@ export const VERSION_SCHEMA_URL_MAPPING: Record<JsonSchemaVersion, string> = {
   'draft-06': 'http://json-schema.org/draft-06/schema#',
 };
 
-export type JsonSchema = JsonSchemaDraft4 & JsonSchemaDraft6;
+export type JsonSchema = JsonSchemaDraft4 | JsonSchemaDraft6;
+
+export type JsonSchemaJoint = JsonSchemaDraft4 & JsonSchemaDraft6;
 
 // common properties of all JSON Schema versions
 interface JsonSchemaCommon {
   $ref?: string;
-  id?: string;
   $schema?: string;
   title?: string;
   description?: string;
@@ -25,7 +26,6 @@ interface JsonSchemaCommon {
   type?: string | string[];
   properties?: Record<string, JsonSchema>;
   patternProperties?: Record<string, JsonSchema>;
-  dependencies?: Record<string, string[]>;
   multipleOf?: number;
   minimum?: number;
   maximum?: number;
@@ -50,13 +50,21 @@ interface JsonSchemaCommon {
 }
 
 export interface JsonSchemaDraft4 extends JsonSchemaCommon {
+  id?: string;
+  dependencies?: Record<string, string[]>;
   exclusiveMaximum?: boolean;
   exclusiveMinimum?: boolean;
 }
 
 export interface JsonSchemaDraft6 extends JsonSchemaCommon {
-  exclusiveMaximum?: boolean | number;
-  exclusiveMinimum?: boolean | number;
+  $id?: string;
+  examples?: unknown[];
+  const?: unknown;
+  contains?: JsonSchema;
+  propertyNames?: JsonSchema;
+  dependencies?: Record<string, string[] | JsonSchema>;
+  exclusiveMaximum?: number;
+  exclusiveMinimum?: number;
 }
 
 export type JsonSchemaType = 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string';
@@ -71,7 +79,7 @@ export interface ZSchemaInternalProperties {
   __$visited?: boolean;
 }
 
-export interface JsonSchemaInternal extends JsonSchema, ZSchemaInternalProperties {}
+export interface JsonSchemaInternal extends JsonSchemaJoint, ZSchemaInternalProperties {}
 
 export const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaInternal | undefined => {
   // process only arrays and objects

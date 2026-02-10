@@ -16,9 +16,8 @@ interface TestSuite {
 
 type JSONSchemaTestSuiteTestFolder = 'draft4' | 'draft6' | 'draft7' | 'draft2019-09' | 'draft2020-12';
 
-const VERSION_FOLDER_MAPPING: Record<JsonSchemaVersion, JSONSchemaTestSuiteTestFolder> = {
+const VERSION_FOLDER_MAPPING: Partial<Record<JsonSchemaVersion, JSONSchemaTestSuiteTestFolder>> = {
   'draft-04': 'draft4',
-  'draft-06': 'draft6',
 };
 
 const excludedDirs: string[] = ['draft4/optional'];
