@@ -12,8 +12,7 @@ export const VERSION_SCHEMA_URL_MAPPING: Record<JsonSchemaVersion, string> = {
 };
 
 export type JsonSchema = JsonSchemaDraft4 | JsonSchemaDraft6;
-
-export type JsonSchemaJoint = JsonSchemaDraft4 & JsonSchemaDraft6;
+export type JsonSchemaAll = JsonSchemaDraft4 & JsonSchemaDraft6;
 
 // common properties of all JSON Schema versions
 interface JsonSchemaCommon {
@@ -79,7 +78,20 @@ export interface ZSchemaInternalProperties {
   __$visited?: boolean;
 }
 
-export interface JsonSchemaInternal extends JsonSchemaJoint, ZSchemaInternalProperties {}
+export type JsonSchemaInternal = JsonSchema & ZSchemaInternalProperties;
+export type JsonSchemaInternalAll = JsonSchemaAll & ZSchemaInternalProperties;
+export type JsonSchemaInternalD6 = JsonSchemaDraft6 & ZSchemaInternalProperties;
+export type JsonSchemaInternalD4 = JsonSchemaDraft4 & ZSchemaInternalProperties;
+
+export const getId = (schema: JsonSchemaInternal) => {
+  if ((schema as JsonSchemaInternalD6).$id) {
+    return (schema as JsonSchemaInternalD6).$id;
+  }
+  if ((schema as JsonSchemaInternalD4).id) {
+    return (schema as JsonSchemaInternalD4).id;
+  }
+  return undefined;
+};
 
 export const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaInternal | undefined => {
   // process only arrays and objects
@@ -92,8 +104,9 @@ export const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaIntern
     return schema;
   }
 
-  if (schema.id) {
-    if (schema.id === id || (schema.id[0] === '#' && schema.id.substring(1) === id)) {
+  const schemaId = getId(schema);
+  if (schemaId) {
+    if (schemaId === id || (schemaId[0] === '#' && schemaId.substring(1) === id)) {
       return schema;
     }
   }

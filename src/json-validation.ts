@@ -1,4 +1,4 @@
-import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal } from './json-schema.js';
 import type { ValidateOptions, ZSchemaBase } from './z-schema-base.js';
 
 import { getFormatValidators } from './format-validators.js';
@@ -24,7 +24,7 @@ const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
 
 type JsonValidatorFn = (this: ZSchemaBase, report: Report, schema: JsonSchema, json: unknown) => void;
 
-export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
+export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   id: () => {},
   $ref: () => {},
   $schema: () => {},
@@ -595,6 +595,22 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
     } else if (this.options.ignoreUnknownFormats !== true) {
       report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
     }
+  },
+  // draft-06 additions
+  $id: () => {
+    // TODO: implement
+  },
+  const: () => {
+    // TODO: implement
+  },
+  contains: () => {
+    // TODO: implement
+  },
+  examples: () => {
+    // TODO: implement
+  },
+  propertyNames: () => {
+    // TODO: implement
   },
 };
 
