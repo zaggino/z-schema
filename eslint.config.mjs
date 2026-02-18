@@ -80,6 +80,7 @@ export default defineConfig([
     language: 'markdown/gfm',
     extends: ['markdown/recommended'],
     rules: {
+      'markdown/fenced-code-language': 'off',
       'markdown/no-missing-label-refs': 'off',
       'markdown/no-multiple-h1': 'off',
     },

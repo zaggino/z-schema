@@ -52,11 +52,29 @@ const SchemaValidators = {
     }
   },
   exclusiveMinimum: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
-    // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.1
-    if (typeof schema.exclusiveMinimum !== 'boolean') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['exclusiveMinimum', 'boolean'], undefined, schema, 'exclusiveMinimum');
-    } else if (schema.minimum === undefined) {
-      report.addError('KEYWORD_DEPENDENCY', ['exclusiveMinimum', 'minimum'], undefined, schema, 'exclusiveMinimum');
+    if (report.options.version === 'draft-04') {
+      // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.1
+      if (typeof schema.exclusiveMinimum !== 'boolean') {
+        report.addError(
+          'KEYWORD_TYPE_EXPECTED',
+          ['exclusiveMinimum', 'boolean'],
+          undefined,
+          schema,
+          'exclusiveMinimum'
+        );
+      } else if (schema.minimum === undefined) {
+        report.addError('KEYWORD_DEPENDENCY', ['exclusiveMinimum', 'minimum'], undefined, schema, 'exclusiveMinimum');
+      }
+    } else {
+      if (typeof schema.exclusiveMinimum !== 'boolean' && typeof schema.exclusiveMinimum !== 'number') {
+        report.addError(
+          'KEYWORD_TYPE_EXPECTED',
+          ['exclusiveMinimum', ['boolean', 'number']],
+          undefined,
+          schema,
+          'exclusiveMinimum'
+        );
+      }
     }
   },
   maxLength: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
