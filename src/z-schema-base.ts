@@ -16,7 +16,7 @@ import { deepClone } from './utils/clone.js';
 import { get, sortedKeys } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
 import { getRemotePath } from './utils/uri.js';
-import { whatIs } from './utils/what-is.js';
+import { isObject, whatIs } from './utils/what-is.js';
 import { defaultOptions, normalizeOptions } from './z-schema-options.js';
 
 export interface ValidateOptions {
@@ -74,10 +74,9 @@ export class ZSchemaBase {
 
     this.validateOptions = options;
 
-    const schemaType = whatIs(schema);
-    if (schemaType !== 'string' && schemaType !== 'object') {
+    if (typeof schema !== 'string' && !isObject(schema)) {
       const e = new Error(
-        'Invalid .validate call - schema must be a string or object but ' + schemaType + ' was passed!'
+        'Invalid .validate call - schema must be a string or object but ' + whatIs(schema) + ' was passed!'
       );
       if (callback) {
         setTimeout(function () {

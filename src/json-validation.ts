@@ -754,9 +754,8 @@ export function validate(this: ZSchemaBase, report: Report, schema: JsonSchemaIn
   report.commonErrorMessage = 'JSON_OBJECT_VALIDATION_FAILED';
 
   // check if schema is an object
-  const to = whatIs(schema);
-  if (to !== 'object') {
-    report.addError('SCHEMA_NOT_AN_OBJECT', [to], undefined, schema);
+  if (!isObject(schema)) {
+    report.addError('SCHEMA_NOT_AN_OBJECT', [whatIs(schema)], undefined, schema);
     return false;
   }
 

@@ -7,7 +7,7 @@ import { Errors, getValidateError } from './errors.js';
 import { get } from './utils/json.js';
 import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
 import { isAbsoluteUri } from './utils/uri.js';
-import { whatIs } from './utils/what-is.js';
+import { isObject } from './utils/what-is.js';
 
 export interface SchemaErrorDetail {
   /**
@@ -301,8 +301,7 @@ export class Report {
 
     let idx = params.length;
     while (idx--) {
-      const paramType = whatIs(params[idx]);
-      const param = paramType === 'object' || paramType === 'null' ? JSON.stringify(params[idx]) : params[idx];
+      const param = params[idx] === null || isObject(params[idx]) ? JSON.stringify(params[idx]) : params[idx];
       errorMessage = errorMessage.replace('{' + idx + '}', param.toString());
     }
 
