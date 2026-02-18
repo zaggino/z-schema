@@ -23,67 +23,36 @@ const VERSION_FOLDER_MAPPING: Partial<Record<JsonSchemaVersion, JSONSchemaTestSu
 
 const excludedDirs: string[] = [];
 const excludedFiles: string[] = [
-  'draft4/optional/ecmascript-regex.json',
-  'draft4/optional/float-overflow.json',
-  'draft4/optional/format/unknown.json',
-  'draft4/optional/id.json',
-  'draft4/optional/non-bmp-regex.json',
-  'draft4/optional/zeroTerminatedFloats.json',
-  'draft6/additionalItems.json',
-  'draft6/additionalProperties.json',
-  'draft6/allOf.json',
-  'draft6/anyOf.json',
-  'draft6/boolean_schema.json',
-  'draft6/const.json',
-  'draft6/contains.json',
-  'draft6/default.json',
-  'draft6/definitions.json',
-  'draft6/dependencies.json',
-  'draft6/detached-ref.json',
-  'draft6/enum.json',
-  'draft6/format.json',
-  'draft6/infinite-loop-detection.json',
-  'draft6/items.json',
-  'draft6/locationIndependentIdentifier.json',
-  'draft6/maximum.json',
-  'draft6/maxItems.json',
-  'draft6/maxLength.json',
-  'draft6/maxProperties.json',
-  'draft6/minimum.json',
-  'draft6/minItems.json',
-  'draft6/minLength.json',
-  'draft6/minProperties.json',
-  'draft6/multipleOf.json',
-  'draft6/name.json',
-  'draft6/not.json',
-  'draft6/oneOf.json',
-  'draft6/optional/bignum.json',
-  'draft6/optional/ecmascript-regex.json',
-  'draft6/optional/float-overflow.json',
-  'draft6/optional/format/date-time.json',
-  'draft6/optional/format/email.json',
-  'draft6/optional/format/hostname.json',
-  'draft6/optional/format/ipv4.json',
-  'draft6/optional/format/ipv6.json',
-  'draft6/optional/format/json-pointer.json',
-  'draft6/optional/format/unknown.json',
-  'draft6/optional/format/uri-reference.json',
-  'draft6/optional/format/uri-template.json',
-  'draft6/optional/format/uri.json',
-  'draft6/optional/id.json',
-  'draft6/optional/non-bmp-regex.json',
-  'draft6/optional/unknownKeyword.json',
-  'draft6/pattern.json',
-  'draft6/patternProperties.json',
-  'draft6/properties.json',
-  'draft6/propertyNames.json',
-  'draft6/ref-and-definitions.json',
-  'draft6/ref.json',
-  'draft6/refRemote.json',
-  'draft6/required.json',
-  'draft6/subSchemas.json',
-  'draft6/type.json',
-  'draft6/uniqueItems.json',
+  'draft4/optional/ecmascript-regex.json', // FAIL: 69 out of 74 tests pass
+  'draft4/optional/float-overflow.json', // FAIL: 0 out of 1 tests pass
+  'draft4/optional/format/unknown.json', // FAIL: 0 out of 7 tests pass
+  'draft4/optional/id.json', // FAIL: 2 out of 3 tests pass
+  'draft4/optional/non-bmp-regex.json', // FAIL: 9 out of 12 tests pass
+  'draft4/optional/zeroTerminatedFloats.json', // FAIL: 0 out of 1 tests pass
+  'draft6/allOf.json', // FAIL: 29 out of 30 tests pass
+  'draft6/anyOf.json', // FAIL: 16 out of 18 tests pass
+  'draft6/boolean_schema.json', // FAIL: 0 out of 1 tests pass
+  'draft6/const.json', // FAIL: 22 out of 54 tests pass
+  'draft6/contains.json', // FAIL: 12 out of 19 tests pass
+  'draft6/dependencies.json', // FAIL: 31 out of 36 tests pass
+  'draft6/items.json', // FAIL: 23 out of 28 tests pass
+  'draft6/not.json', // FAIL: 29 out of 38 tests pass
+  'draft6/oneOf.json', // FAIL: 24 out of 27 tests pass
+  'draft6/optional/ecmascript-regex.json', // FAIL: 66 out of 74 tests pass
+  'draft6/optional/float-overflow.json', // FAIL: 0 out of 1 tests pass
+  'draft6/optional/format/json-pointer.json', // FAIL: 32 out of 38 tests pass
+  'draft6/optional/format/unknown.json', // FAIL: 0 out of 7 tests pass
+  'draft6/optional/format/uri-reference.json', // FAIL: 14 out of 15 tests pass
+  'draft6/optional/format/uri-template.json', // FAIL: 7 out of 10 tests pass
+  'draft6/optional/id.json', // FAIL: 3 out of 7 tests pass
+  'draft6/optional/non-bmp-regex.json', // FAIL: 9 out of 12 tests pass
+  'draft6/optional/unknownKeyword.json', // FAIL: 2 out of 3 tests pass
+  'draft6/patternProperties.json', // FAIL: 21 out of 23 tests pass
+  'draft6/properties.json', // FAIL: 26 out of 28 tests pass
+  'draft6/propertyNames.json', // FAIL: 15 out of 20 tests pass
+  'draft6/ref.json', // FAIL: 59 out of 70 tests pass
+  'draft6/refRemote.json', // FAIL: 16 out of 23 tests pass
+  'draft6/required.json', // FAIL: 17 out of 18 tests pass
 ];
 const excludedTests: string[] = [];
 
