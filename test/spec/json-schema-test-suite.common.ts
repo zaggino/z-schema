@@ -41,7 +41,6 @@ const excludedFiles: string[] = [
   'draft6/dependencies.json',
   'draft6/detached-ref.json',
   'draft6/enum.json',
-  'draft6/exclusiveMaximum.json',
   'draft6/format.json',
   'draft6/infinite-loop-detection.json',
   'draft6/items.json',

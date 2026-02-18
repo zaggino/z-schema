@@ -2,6 +2,7 @@ import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
 import { isFormatSupported } from './format-validators.js';
+import { getId } from './json-schema.js';
 import { validate } from './json-validation.js';
 import { Report } from './report.js';
 import { isUniqueArray } from './utils/array.js';
@@ -39,10 +40,28 @@ const SchemaValidators = {
   },
   exclusiveMaximum: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.2.1
-    if (typeof schema.exclusiveMaximum !== 'boolean') {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['exclusiveMaximum', 'boolean'], undefined, schema, 'exclusiveMaximum');
-    } else if (schema.maximum === undefined) {
-      report.addError('KEYWORD_DEPENDENCY', ['exclusiveMaximum', 'maximum'], undefined, schema, 'exclusiveMaximum');
+    if (report.options.version === 'draft-04') {
+      if (typeof schema.exclusiveMaximum !== 'boolean') {
+        report.addError(
+          'KEYWORD_TYPE_EXPECTED',
+          ['exclusiveMaximum', 'boolean'],
+          undefined,
+          schema,
+          'exclusiveMaximum'
+        );
+      } else if (schema.maximum === undefined) {
+        report.addError('KEYWORD_DEPENDENCY', ['exclusiveMaximum', 'maximum'], undefined, schema, 'exclusiveMaximum');
+      }
+    } else {
+      if (typeof schema.exclusiveMaximum !== 'boolean' && typeof schema.exclusiveMaximum !== 'number') {
+        report.addError(
+          'KEYWORD_TYPE_EXPECTED',
+          ['exclusiveMaximum', ['boolean', 'number']],
+          undefined,
+          schema,
+          'exclusiveMaximum'
+        );
+      }
     }
   },
   minimum: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -600,7 +619,7 @@ export class SchemaValidator {
     }
 
     // if $schema is present, this schema should validate against that $schema
-    const hasParentSchema = schema.$schema && schema.id !== schema.$schema;
+    const hasParentSchema = schema.$schema && getId(schema) !== schema.$schema;
     if (hasParentSchema) {
       if (schema.__$schemaResolved && schema.__$schemaResolved !== schema) {
         const subReport = new Report(report);

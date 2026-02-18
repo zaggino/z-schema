@@ -63,8 +63,20 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       }
     }
   },
-  exclusiveMaximum: function () {
-    // covered in maximum
+  exclusiveMaximum: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    // In draft-06+, exclusiveMaximum is a standalone number
+    if (typeof schema.exclusiveMaximum === 'number') {
+      if (shouldSkipValidate(this.validateOptions, ['MAXIMUM_EXCLUSIVE'])) {
+        return;
+      }
+      if (typeof json !== 'number') {
+        return;
+      }
+      if (json >= schema.exclusiveMaximum) {
+        report.addError('MAXIMUM_EXCLUSIVE', [json, schema.exclusiveMaximum], undefined, schema, 'exclusiveMaximum');
+      }
+    }
+    // In draft-04, exclusiveMaximum is a boolean handled inside the `maximum` validator
   },
   minimum: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.2
@@ -84,8 +96,20 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       }
     }
   },
-  exclusiveMinimum: function () {
-    // covered in minimum
+  exclusiveMinimum: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    // In draft-06+, exclusiveMinimum is a standalone number
+    if (typeof schema.exclusiveMinimum === 'number') {
+      if (shouldSkipValidate(this.validateOptions, ['MINIMUM_EXCLUSIVE'])) {
+        return;
+      }
+      if (typeof json !== 'number') {
+        return;
+      }
+      if (json <= schema.exclusiveMinimum) {
+        report.addError('MINIMUM_EXCLUSIVE', [json, schema.exclusiveMinimum], undefined, schema, 'exclusiveMinimum');
+      }
+    }
+    // In draft-04, exclusiveMinimum is a boolean handled inside the `minimum` validator
   },
   maxLength: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.1.2
