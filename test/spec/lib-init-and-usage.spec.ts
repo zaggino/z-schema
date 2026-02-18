@@ -4,6 +4,7 @@ import { ZSchema } from '../../src/z-schema.ts';
 
 describe('Initialization and usage', function () {
   it('Should not allow to use new', function () {
+    // @ts-expect-error: intentionally testing that private constructor throws at runtime
     expect(() => new ZSchema()).toThrow();
   });
 

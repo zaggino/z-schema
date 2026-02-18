@@ -353,16 +353,17 @@ const SchemaValidators = {
           report.path.pop();
           report.path.pop();
         } else if (type === 'array') {
-          let idx2 = schemaDependency.length;
+          const depArray = schemaDependency as string[];
+          let idx2 = depArray.length;
           if (idx2 === 0) {
             report.addError('KEYWORD_MUST_BE', ['dependencies', 'not empty array'], undefined, schema, 'dependencies');
           }
           while (idx2--) {
-            if (typeof schemaDependency[idx2] !== 'string') {
+            if (typeof depArray[idx2] !== 'string') {
               report.addError('KEYWORD_VALUE_TYPE', ['dependencies', 'string'], undefined, schema, 'dependencies');
             }
           }
-          if (isUniqueArray(schemaDependency) === false) {
+          if (isUniqueArray(depArray) === false) {
             report.addError(
               'KEYWORD_MUST_BE',
               ['dependencies', 'an array with unique items'],

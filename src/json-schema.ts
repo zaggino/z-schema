@@ -18,6 +18,7 @@ export type JsonSchemaAll = JsonSchemaDraft4 & JsonSchemaDraft6;
 interface JsonSchemaCommon {
   $ref?: string;
   $schema?: string;
+  id?: string;
   title?: string;
   description?: string;
   default?: unknown;
@@ -40,6 +41,7 @@ interface JsonSchemaCommon {
   maxProperties?: number;
   required?: string[];
   additionalProperties?: boolean | JsonSchema;
+  dependencies?: Record<string, string[] | JsonSchema>;
   enum?: Array<unknown>;
   format?: string;
   allOf?: JsonSchema[];
@@ -49,8 +51,6 @@ interface JsonSchemaCommon {
 }
 
 export interface JsonSchemaDraft4 extends JsonSchemaCommon {
-  id?: string;
-  dependencies?: Record<string, string[]>;
   exclusiveMaximum?: boolean;
   exclusiveMinimum?: boolean;
 }
@@ -61,7 +61,6 @@ export interface JsonSchemaDraft6 extends JsonSchemaCommon {
   const?: unknown;
   contains?: JsonSchema;
   propertyNames?: JsonSchema;
-  dependencies?: Record<string, string[] | JsonSchema>;
   exclusiveMaximum?: number;
   exclusiveMinimum?: number;
 }

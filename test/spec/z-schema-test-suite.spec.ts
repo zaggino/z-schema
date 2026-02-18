@@ -5,7 +5,7 @@ import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 
 import { ZSchema } from '../../src/z-schema.ts';
 
-type ZSchemaClass = new (...args: ConstructorParameters<typeof ZSchema>) => ZSchema;
+type ZSchemaClass = typeof ZSchema;
 
 interface TestCommon {
   version?: JsonSchemaVersion;
