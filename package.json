@@ -92,7 +92,7 @@
     "@vitest/coverage-v8": "^4.0.18",
     "@vitest/eslint-plugin": "^1.6.6",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "eslint": "^9.39.2",
+    "eslint": "^10.0.1",
     "globals": "^17.3.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
