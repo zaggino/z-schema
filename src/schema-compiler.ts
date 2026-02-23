@@ -227,6 +227,8 @@ export class SchemaCompiler {
         schema.forEach((s) => this.collectAndCacheIds(s));
       }
       return this.compileArrayOfSchemas(report, schema);
+    } else if (typeof schema === 'boolean') {
+      return true;
     } else {
       if (!options?.noCache) {
         this.collectAndCacheIds(schema);

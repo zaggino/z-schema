@@ -750,8 +750,22 @@ const recurseObject = function (this: ZSchemaBase, report: Report, schema: JsonS
   }
 };
 
-export function validate(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown): boolean {
+export function validate(
+  this: ZSchemaBase,
+  report: Report,
+  schema: boolean | JsonSchemaInternal,
+  json: unknown
+): boolean {
   report.commonErrorMessage = 'JSON_OBJECT_VALIDATION_FAILED';
+
+  if (schema === true) {
+    return true;
+  }
+
+  if (schema === false) {
+    report.addError('SCHEMA_IS_FALSE', [], undefined, schema);
+    return false;
+  }
 
   // check if schema is an object
   if (!isObject(schema)) {

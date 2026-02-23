@@ -74,7 +74,7 @@ export class ZSchemaBase {
 
     this.validateOptions = options;
 
-    if (typeof schema !== 'string' && !isObject(schema)) {
+    if (typeof schema !== 'string' && typeof schema !== 'boolean' && !isObject(schema)) {
       const e = new Error(
         'Invalid .validate call - schema must be a string or object but ' + whatIs(schema) + ' was passed!'
       );

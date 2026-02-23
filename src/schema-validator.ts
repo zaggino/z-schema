@@ -610,6 +610,10 @@ export class SchemaValidator {
       return this.validateArrayOfSchemas(report, schema);
     }
 
+    if (typeof schema === 'boolean') {
+      return true;
+    }
+
     // do not revalidate schema that has already been validated once
     if (schema.__$validated) {
       return true;

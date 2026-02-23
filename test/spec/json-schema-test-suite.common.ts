@@ -31,7 +31,6 @@ const excludedFiles: string[] = [
   'draft4/optional/zeroTerminatedFloats.json', // FAIL: 0 out of 1 tests pass
   'draft6/allOf.json', // FAIL: 29 out of 30 tests pass
   'draft6/anyOf.json', // FAIL: 16 out of 18 tests pass
-  'draft6/boolean_schema.json', // FAIL: 0 out of 1 tests pass
   'draft6/const.json', // FAIL: 22 out of 54 tests pass
   'draft6/contains.json', // FAIL: 12 out of 19 tests pass
   'draft6/dependencies.json', // FAIL: 31 out of 36 tests pass
@@ -94,7 +93,7 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
           const testSuites = await reader<TestSuite[]>(testFilePath);
           testSuites.forEach((testSuite) => {
             const schema = testSuite.schema;
-            if (!schema.$schema) {
+            if (typeof schema !== 'boolean' && !schema.$schema) {
               if (draftPath.endsWith('/draft4')) {
                 schema.$schema = 'http://json-schema.org/draft-04/schema#';
               } else if (draftPath.endsWith('/draft6')) {

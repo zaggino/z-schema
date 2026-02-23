@@ -261,7 +261,7 @@ export class Report {
     errCode: ErrorCode,
     errParams?: ErrorParam[],
     subReports?: Report | Report[],
-    schema?: JsonSchema,
+    schema?: JsonSchema | boolean,
     keyword?: keyof JsonSchema
   ) {
     if (!errCode) {
@@ -286,7 +286,7 @@ export class Report {
     errorMessage: string,
     params?: ErrorParam[],
     subReports?: Report | Report[],
-    schema?: JsonSchema,
+    schema?: JsonSchema | boolean,
     keyword?: keyof JsonSchema
   ) {
     if (typeof this.reportOptions.maxErrors === 'number' && this.errors.length >= this.reportOptions.maxErrors) {

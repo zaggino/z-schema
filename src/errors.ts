@@ -61,6 +61,7 @@ export const Errors = {
   REMOTE_NOT_VALID: "Remote reference didn't compile successfully: {0}",
 
   // Draft-06 errors
+  SCHEMA_IS_FALSE: 'Boolean schema "false" is always invalid.',
   CONST: 'Value does not match const: {0}',
   CONTAINS: 'Array does not contain an item matching the schema',
   PROPERTY_NAMES: 'Property name {0} does not match the propertyNames schema',
