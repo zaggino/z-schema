@@ -630,8 +630,65 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       report.addError('CONST', [JSON.stringify(constValue)], undefined, schema, undefined);
     }
   },
-  contains: () => {
-    // TODO: implement
+  contains: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (shouldSkipValidate(this.validateOptions, ['CONTAINS'])) {
+      return;
+    }
+
+    if (!Array.isArray(json)) {
+      return;
+    }
+
+    const containsSchema = (schema as JsonSchemaAll).contains;
+    if (containsSchema === undefined) {
+      return;
+    }
+
+    const subReports: Report[] = [];
+    let idx = json.length;
+    while (idx--) {
+      const subReport = new Report(report);
+      subReports.push(subReport);
+      validate.call(this, subReport, containsSchema as any, json[idx]);
+    }
+
+    const asyncTasksBefore = report.asyncTasks.length;
+    for (const subReport of subReports) {
+      report.asyncTasks.push(...subReport.asyncTasks);
+    }
+    const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
+
+    const addContainsErrorIfNeeded = () => {
+      let hasValidItem = false;
+      for (const subReport of subReports) {
+        if (subReport.errors.length === 0) {
+          hasValidItem = true;
+          break;
+        }
+      }
+      if (!hasValidItem) {
+        report.addError('CONTAINS', undefined, subReports, schema, undefined);
+      }
+    };
+
+    if (hasAsyncTasks) {
+      const pathBeforeAsync = shallowClone(report.path);
+      report.addAsyncTask(
+        (callback) => {
+          setTimeout(() => callback(null), 0);
+        },
+        [] as any,
+        () => {
+          const backup = report.path;
+          report.path = pathBeforeAsync;
+          addContainsErrorIfNeeded();
+          report.path = backup;
+        }
+      );
+      return;
+    }
+
+    addContainsErrorIfNeeded();
   },
   examples: () => {
     // TODO: implement
