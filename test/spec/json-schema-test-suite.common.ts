@@ -31,8 +31,6 @@ const excludedFiles: string[] = [
   'draft4/optional/zeroTerminatedFloats.json', // FAIL: 0 out of 1 tests pass
   'draft6/allOf.json', // FAIL: 29 out of 30 tests pass
   'draft6/anyOf.json', // FAIL: 16 out of 18 tests pass
-  'draft6/dependencies.json', // FAIL: 31 out of 36 tests pass
-  'draft6/items.json', // FAIL: 23 out of 28 tests pass
   'draft6/optional/ecmascript-regex.json', // FAIL: 66 out of 74 tests pass
   'draft6/optional/float-overflow.json', // FAIL: 0 out of 1 tests pass
   'draft6/optional/format/json-pointer.json', // FAIL: 32 out of 38 tests pass

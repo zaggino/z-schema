@@ -158,12 +158,18 @@ const SchemaValidators = {
         report.path.pop();
         report.path.pop();
       }
-    } else if (isObject(schema.items)) {
+    } else if (isObject(schema.items) || (report.options.version !== 'draft-04' && typeof schema.items === 'boolean')) {
       report.path.push('items');
-      this.validateSchema(report, schema.items);
+      this.validateSchema(report, schema.items as JsonSchemaInternal);
       report.path.pop();
     } else {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['items', ['array', 'object']], undefined, schema, 'items');
+      report.addError(
+        'KEYWORD_TYPE_EXPECTED',
+        ['items', report.options.version === 'draft-04' ? ['array', 'object'] : ['array', 'object', 'boolean']],
+        undefined,
+        schema,
+        'items'
+      );
     }
 
     // custom - strict mode
@@ -341,17 +347,21 @@ const SchemaValidators = {
       let idx = keys.length;
       while (idx--) {
         const schemaKey = keys[idx];
-        const schemaDependency = schema.dependencies[schemaKey];
-        if (isObject(schemaDependency)) {
+        const schemaDependency = (schema.dependencies as Record<string, unknown>)[schemaKey];
+        const isSchemaDependency =
+          isObject(schemaDependency) ||
+          (report.options.version !== 'draft-04' && typeof schemaDependency === 'boolean');
+
+        if (isSchemaDependency) {
           report.path.push('dependencies');
           report.path.push(schemaKey);
-          this.validateSchema(report, schemaDependency as any);
+          this.validateSchema(report, schemaDependency as JsonSchemaInternal);
           report.path.pop();
           report.path.pop();
         } else if (Array.isArray(schemaDependency)) {
           const depArray = schemaDependency as string[];
           let idx2 = depArray.length;
-          if (idx2 === 0) {
+          if (report.options.version === 'draft-04' && idx2 === 0) {
             report.addError('KEYWORD_MUST_BE', ['dependencies', 'not empty array'], undefined, schema, 'dependencies');
           }
           while (idx2--) {
@@ -369,7 +379,13 @@ const SchemaValidators = {
             );
           }
         } else {
-          report.addError('KEYWORD_VALUE_TYPE', ['dependencies', 'object or array'], undefined, schema, 'dependencies');
+          report.addError(
+            'KEYWORD_VALUE_TYPE',
+            ['dependencies', report.options.version === 'draft-04' ? 'object or array' : 'boolean, object or array'],
+            undefined,
+            schema,
+            'dependencies'
+          );
         }
       }
     }

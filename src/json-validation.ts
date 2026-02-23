@@ -775,7 +775,7 @@ const recurseArray = function (this: ZSchemaBase, report: Report, schema: JsonSc
         }
       }
     }
-  } else if (typeof schema.items === 'object') {
+  } else if (typeof schema.items === 'object' || typeof schema.items === 'boolean') {
     // If items is a schema, then the child instance must be valid against this schema,
     // regardless of its index, and regardless of the value of "additionalItems".
     while (idx--) {
