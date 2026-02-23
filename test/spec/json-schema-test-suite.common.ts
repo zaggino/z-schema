@@ -33,8 +33,6 @@ const excludedFiles: string[] = [
   'draft6/anyOf.json', // FAIL: 16 out of 18 tests pass
   'draft6/dependencies.json', // FAIL: 31 out of 36 tests pass
   'draft6/items.json', // FAIL: 23 out of 28 tests pass
-  'draft6/not.json', // FAIL: 29 out of 38 tests pass
-  'draft6/oneOf.json', // FAIL: 24 out of 27 tests pass
   'draft6/optional/ecmascript-regex.json', // FAIL: 66 out of 74 tests pass
   'draft6/optional/float-overflow.json', // FAIL: 0 out of 1 tests pass
   'draft6/optional/format/json-pointer.json', // FAIL: 32 out of 38 tests pass
@@ -44,11 +42,8 @@ const excludedFiles: string[] = [
   'draft6/optional/id.json', // FAIL: 3 out of 7 tests pass
   'draft6/optional/non-bmp-regex.json', // FAIL: 9 out of 12 tests pass
   'draft6/optional/unknownKeyword.json', // FAIL: 2 out of 3 tests pass
-  'draft6/patternProperties.json', // FAIL: 21 out of 23 tests pass
-  'draft6/properties.json', // FAIL: 26 out of 28 tests pass
   'draft6/ref.json', // FAIL: 59 out of 70 tests pass
   'draft6/refRemote.json', // FAIL: 16 out of 23 tests pass
-  'draft6/required.json', // FAIL: 17 out of 18 tests pass
 ];
 const excludedTests: string[] = [];
 

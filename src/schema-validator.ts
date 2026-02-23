@@ -229,7 +229,7 @@ const SchemaValidators = {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.3.1
     if (!Array.isArray(schema.required)) {
       report.addError('KEYWORD_TYPE_EXPECTED', ['required', 'array'], undefined, schema, 'required');
-    } else if (schema.required.length === 0) {
+    } else if (report.options.version === 'draft-04' && schema.required.length === 0) {
       report.addError(
         'KEYWORD_MUST_BE',
         ['required', 'an array with at least one element'],
@@ -528,11 +528,23 @@ const SchemaValidators = {
   },
   not: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.1
-    if (!isObject(schema.not)) {
-      report.addError('KEYWORD_TYPE_EXPECTED', ['not', 'object'], undefined, schema, 'not');
+    const notSchema = schema.not;
+    const isValidNotSchema =
+      report.options.version === 'draft-04'
+        ? isObject(notSchema)
+        : typeof notSchema === 'boolean' || isObject(notSchema);
+
+    if (!isValidNotSchema) {
+      report.addError(
+        'KEYWORD_TYPE_EXPECTED',
+        ['not', report.options.version === 'draft-04' ? 'object' : ['boolean', 'object']],
+        undefined,
+        schema,
+        'not'
+      );
     } else {
       report.path.push('not');
-      this.validateSchema(report, schema.not);
+      this.validateSchema(report, notSchema as JsonSchemaInternal);
       report.path.pop();
     }
   },
