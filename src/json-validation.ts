@@ -624,8 +624,11 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   $id: () => {
     // TODO: implement
   },
-  const: () => {
-    // TODO: implement
+  const: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    const constValue = (schema as JsonSchemaAll).const;
+    if (areEqual(json, constValue) === false) {
+      report.addError('CONST', [JSON.stringify(constValue)], undefined, schema, undefined);
+    }
   },
   contains: () => {
     // TODO: implement
