@@ -693,8 +693,60 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   examples: () => {
     // TODO: implement
   },
-  propertyNames: () => {
-    // TODO: implement
+  propertyNames: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (shouldSkipValidate(this.validateOptions, ['PROPERTY_NAMES'])) {
+      return;
+    }
+
+    if (!isObject(json)) {
+      return;
+    }
+
+    const propertyNamesSchema = (schema as JsonSchemaAll).propertyNames;
+    if (propertyNamesSchema === undefined) {
+      return;
+    }
+
+    const keys = Object.keys(json);
+    const subReports: Report[] = [];
+    for (const key of keys) {
+      const subReport = new Report(report);
+      subReports.push(subReport);
+      validate.call(this, subReport, propertyNamesSchema as any, key);
+    }
+
+    const asyncTasksBefore = report.asyncTasks.length;
+    for (const subReport of subReports) {
+      report.asyncTasks.push(...subReport.asyncTasks);
+    }
+    const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
+
+    const addPropertyNameErrors = () => {
+      for (let idx = 0; idx < keys.length; idx++) {
+        if (subReports[idx].errors.length > 0) {
+          report.addError('PROPERTY_NAMES', [keys[idx]], subReports[idx], schema, undefined);
+        }
+      }
+    };
+
+    if (hasAsyncTasks) {
+      const pathBeforeAsync = shallowClone(report.path);
+      report.addAsyncTask(
+        (callback) => {
+          setTimeout(() => callback(null), 0);
+        },
+        [] as any,
+        () => {
+          const backup = report.path;
+          report.path = pathBeforeAsync;
+          addPropertyNameErrors();
+          report.path = backup;
+        }
+      );
+      return;
+    }
+
+    addPropertyNameErrors();
   },
 };
 

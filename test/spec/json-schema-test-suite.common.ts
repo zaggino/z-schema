@@ -46,7 +46,6 @@ const excludedFiles: string[] = [
   'draft6/optional/unknownKeyword.json', // FAIL: 2 out of 3 tests pass
   'draft6/patternProperties.json', // FAIL: 21 out of 23 tests pass
   'draft6/properties.json', // FAIL: 26 out of 28 tests pass
-  'draft6/propertyNames.json', // FAIL: 15 out of 20 tests pass
   'draft6/ref.json', // FAIL: 59 out of 70 tests pass
   'draft6/refRemote.json', // FAIL: 16 out of 23 tests pass
   'draft6/required.json', // FAIL: 17 out of 18 tests pass
