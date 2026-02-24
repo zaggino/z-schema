@@ -1,5 +1,5 @@
 import type { ValidateError } from '../../src/errors.ts';
-import type { JsonSchemaVersion } from '../../src/json-schema.ts';
+import type { JsonSchemaVersion } from '../../src/json-schema-versions.ts';
 import type { ValidateOptions } from '../../src/z-schema-base.ts';
 import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 

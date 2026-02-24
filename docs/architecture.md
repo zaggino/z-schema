@@ -5,6 +5,7 @@
 ```
 index.ts (public API)
   └─ z-schema.ts (ZSchema, ZSchemaSafe, ZSchemaAsync, ZSchemaAsyncSafe)
+       ├─ z-schema-versions.ts (register bundled draft-04/draft-06 meta-schemas)
        └─ z-schema-base.ts (ZSchemaBase — core validation orchestration)
             ├─ schema-compiler.ts (compile schemas, resolve $ref, collect ids)
             ├─ schema-validator.ts (validate schemas against meta-schemas)
@@ -13,7 +14,8 @@ index.ts (public API)
             ├─ report.ts (accumulate validation errors)
             ├─ errors.ts (error codes, ValidateError)
             ├─ format-validators.ts (built-in + custom format validation)
-            ├─ json-schema.ts (type definitions, version mappings)
+            ├─ json-schema.ts (shared/common schema definitions + helpers)
+            ├─ json-schema-versions.ts (draft-specific schema type unions + version mappings)
             ├─ z-schema-options.ts (options type + defaults)
             └─ utils/
                  ├─ array.ts (array helpers)

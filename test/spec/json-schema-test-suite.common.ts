@@ -1,6 +1,6 @@
 /* eslint-disable vitest/valid-title */
 
-import type { JsonSchema, JsonSchemaVersion } from '../../src/json-schema.ts';
+import type { JsonSchema, JsonSchemaVersion } from '../../src/json-schema-versions.ts';
 
 import { ZSchema } from '../../src/z-schema.ts';
 

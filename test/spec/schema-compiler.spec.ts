@@ -1,4 +1,4 @@
-import type { JsonSchema } from '../../src/json-schema.ts';
+import type { JsonSchema } from '../../src/json-schema-versions.ts';
 
 import { ValidateError } from '../../src/errors.ts';
 import { collectIds, collectReferences } from '../../src/schema-compiler.js';

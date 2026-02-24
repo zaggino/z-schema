@@ -1,4 +1,4 @@
-import type { JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchemaInternal } from './json-schema-versions.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
 import { getId } from './json-schema.js';

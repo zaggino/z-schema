@@ -38,7 +38,9 @@ src/                  # Library source (TypeScript, ESM)
   errors.ts           # Error codes (Errors enum) and ValidateError class
   format-validators.ts# Built-in & custom format validators
   report.ts           # Validation report (error accumulation, SchemaErrorDetail)
-  json-schema.ts      # TypeScript types for JSON Schema (draft-04, draft-06)
+  json-schema.ts      # Shared/common JSON Schema definitions + helpers
+  json-schema-versions.ts # Draft-specific schema unions and version mappings
+  z-schema-versions.ts # Registers bundled draft meta-schemas into global cache
   utils/              # Pure utility functions
     array.ts          # Array helpers
     clone.ts          # Deep/shallow clone

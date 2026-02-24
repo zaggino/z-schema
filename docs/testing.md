@@ -43,7 +43,7 @@ Tests import source directly from `../../src/*.ts` using `.ts` extensions (enabl
 
 ```typescript
 import { ZSchema } from '../../src/z-schema.ts';
-import type { JsonSchema } from '../../src/json-schema.ts';
+import type { JsonSchema } from '../../src/json-schema-versions.ts';
 ```
 
 When using vitest globals that need explicit import (e.g., in files that also run in browser context), import from `vitest`:

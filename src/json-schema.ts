@@ -1,21 +1,16 @@
+import type {
+  JsonSchema,
+  JsonSchemaInternal,
+  JsonSchemaInternalD4,
+  JsonSchemaInternalD6,
+} from './json-schema-versions.js';
 import type { Reference } from './schema-compiler.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { isObject } from './utils/what-is.js';
 
-// TODO: currently unsupported 'draft-07', '2019-09', '2020-12'
-export type JsonSchemaVersion = 'draft-04' | 'draft-06';
-
-export const VERSION_SCHEMA_URL_MAPPING: Record<JsonSchemaVersion, string> = {
-  'draft-04': 'http://json-schema.org/draft-04/schema#',
-  'draft-06': 'http://json-schema.org/draft-06/schema#',
-};
-
-export type JsonSchema = JsonSchemaDraft4 | JsonSchemaDraft6;
-export type JsonSchemaAll = JsonSchemaDraft4 & JsonSchemaDraft6;
-
 // common properties of all JSON Schema versions
-interface JsonSchemaCommon {
+export interface JsonSchemaCommon {
   $ref?: string;
   $schema?: string;
   id?: string;
@@ -50,21 +45,6 @@ interface JsonSchemaCommon {
   not?: JsonSchema;
 }
 
-export interface JsonSchemaDraft4 extends JsonSchemaCommon {
-  exclusiveMaximum?: boolean;
-  exclusiveMinimum?: boolean;
-}
-
-export interface JsonSchemaDraft6 extends JsonSchemaCommon {
-  $id?: string;
-  examples?: unknown[];
-  const?: unknown;
-  contains?: JsonSchema;
-  propertyNames?: JsonSchema;
-  exclusiveMaximum?: number;
-  exclusiveMinimum?: number;
-}
-
 export type JsonSchemaType = 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string';
 
 export interface ZSchemaInternalProperties {
@@ -76,11 +56,6 @@ export interface ZSchemaInternalProperties {
   __$validationOptions?: ZSchemaOptions;
   __$visited?: boolean;
 }
-
-export type JsonSchemaInternal = JsonSchema & ZSchemaInternalProperties;
-export type JsonSchemaInternalAll = JsonSchemaAll & ZSchemaInternalProperties;
-export type JsonSchemaInternalD6 = JsonSchemaDraft6 & ZSchemaInternalProperties;
-export type JsonSchemaInternalD4 = JsonSchemaDraft4 & ZSchemaInternalProperties;
 
 export const getId = (schema: JsonSchemaInternal) => {
   if ((schema as JsonSchemaInternalD6).$id) {

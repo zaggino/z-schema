@@ -1,9 +1,11 @@
 import type { ValidateError } from './errors.js';
 import type { FormatValidatorFn } from './format-validators.js';
-import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ValidateOptions, ValidateResponse } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 import type { SchemaReader } from './z-schema-reader.js';
+
+import './z-schema-versions.js';
 
 import { getRegisteredFormats, registerFormat, unregisterFormat } from './format-validators.js';
 import { SchemaCache } from './schema-cache.js';
@@ -12,13 +14,6 @@ import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
 import { ZSchemaBase } from './z-schema-base.js';
 import { defaultOptions, normalizeOptions } from './z-schema-options.js';
 import { getSchemaReader, setSchemaReader } from './z-schema-reader.js';
-
-// import schemas so they don't have to be downloaded for validation purposes
-import _Draft4HyperSchema from './schemas/draft-04-hyper-schema.json' with { type: 'json' };
-import _Draft4Schema from './schemas/draft-04-schema.json' with { type: 'json' };
-import _Draft6HyperSchema from './schemas/draft-06-hyper-schema.json' with { type: 'json' };
-import _Draft6Links from './schemas/draft-06-links.json' with { type: 'json' };
-import _Draft6Schema from './schemas/draft-06-schema.json' with { type: 'json' };
 
 export class ZSchema extends ZSchemaBase {
   /** @deprecated Use ZSchema.create() instead. */
@@ -232,15 +227,3 @@ export class ZSchemaAsyncSafe extends ZSchemaBase {
     }
   }
 }
-
-const Draft4Schema: JsonSchema = _Draft4Schema;
-const Draft4HyperSchema: JsonSchema = _Draft4HyperSchema;
-const Draft6Schema: JsonSchema = _Draft6Schema;
-const Draft6HyperSchema: JsonSchema = _Draft6HyperSchema;
-const Draft6Links: JsonSchema = _Draft6Links;
-
-ZSchema.setRemoteReference('http://json-schema.org/draft-04/schema', Draft4Schema, { version: 'none' });
-ZSchema.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', Draft4HyperSchema, { version: 'none' });
-ZSchema.setRemoteReference('http://json-schema.org/draft-06/schema', Draft6Schema, { version: 'none' });
-ZSchema.setRemoteReference('http://json-schema.org/draft-06/hyper-schema', Draft6HyperSchema, { version: 'none' });
-ZSchema.setRemoteReference('http://json-schema.org/draft-06/links', Draft6Links, { version: 'none' });

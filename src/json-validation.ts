@@ -1,4 +1,4 @@
-import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ValidateOptions, ZSchemaBase } from './z-schema-base.js';
 
 import { getFormatValidators } from './format-validators.js';
