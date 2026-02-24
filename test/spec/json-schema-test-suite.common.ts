@@ -32,9 +32,6 @@ const excludedFiles: string[] = [
   'draft6/optional/float-overflow.json',
   'draft4/optional/zeroTerminatedFloats.json',
   // FAILING
-  'draft4/optional/id.json', // FAIL: 2 out of 3 tests pass
-  'draft6/optional/id.json', // FAIL: 3 out of 7 tests pass
-  'draft6/optional/unknownKeyword.json', // FAIL: 2 out of 3 tests pass
 ];
 const excludedTests: string[] = [];
 

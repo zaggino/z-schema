@@ -16,6 +16,7 @@ interface Id {
 
 export const collectIds = (obj: JsonSchemaInternal) => {
   const ids: Id[] = [];
+  const doNotCollectIdsFrom = ['enum', 'const', 'default', 'examples'];
   function walk(node: any, scope: Id[]) {
     if (typeof node !== 'object' || node == null) return;
 
@@ -56,7 +57,7 @@ export const collectIds = (obj: JsonSchemaInternal) => {
       }
     } else {
       for (const key of Object.keys(node)) {
-        if (key.indexOf('__$') === 0) continue;
+        if (key.indexOf('__$') === 0 || doNotCollectIdsFrom.includes(key)) continue;
         walk(node[key], scope);
       }
     }
@@ -76,7 +77,7 @@ export interface Reference {
   path: Array<string | number>;
 }
 
-const doNotCollectReferencesFrom = ['enum'];
+const doNotCollectReferencesFrom = ['enum', 'const', 'default', 'examples'];
 
 export const collectReferences = (
   obj: JsonSchemaInternal,
