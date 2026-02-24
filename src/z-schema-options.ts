@@ -32,7 +32,8 @@ export interface ZSchemaOptions {
 }
 
 export const defaultOptions: ZSchemaOptions = {
-  version: 'draft-04',
+  // default version to validate against
+  version: 'draft-06',
   // default timeout for all async tasks
   asyncTimeout: 2000,
   // force additionalProperties and additionalItems to be defined on "object" and "array" types

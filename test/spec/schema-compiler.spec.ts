@@ -84,7 +84,7 @@ describe('collectReferences', () => {
     const ids = collectIds(schema);
     expect(ids).toHaveLength(3);
 
-    const validator = ZSchema.create();
+    const validator = ZSchema.create({ version: 'draft-04' });
     const isValid = validator.validateSchema(schema);
     expect(Object.keys(validator.scache.cache).sort()).toEqual(
       [
@@ -142,7 +142,7 @@ describe('collectReferences', () => {
         },
       },
     ];
-    const validator = ZSchema.create();
+    const validator = ZSchema.create({ version: 'draft-04' });
     const isValid = validator.validateSchema(schemas);
     expect(Object.keys(validator.scache.cache).sort()).toEqual(
       ['http://json-schema.org/draft-04/schema', 'id', 'user', 'post'].sort()
