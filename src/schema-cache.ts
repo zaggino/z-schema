@@ -1,7 +1,7 @@
-import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
-import { findId } from './json-schema.js';
+import { findId, getId } from './json-schema.js';
 import { Report } from './report.js';
 import { deepClone } from './utils/clone.js';
 import { decodeJSONPointer } from './utils/json.js';
@@ -63,7 +63,9 @@ export class SchemaCache {
       return this.cache[path];
     }
     const asClone = (s: JsonSchema) => {
-      s.id ??= path;
+      if (!s.id || (!isAbsoluteUri(s.id) && isAbsoluteUri(path))) {
+        s.id = path;
+      }
       return deepClone(s);
     };
     found = SchemaCache.global_cache[path];
@@ -74,9 +76,29 @@ export class SchemaCache {
   }
 
   getSchemaByUri(report: Report, uri: string, root?: JsonSchemaInternal) {
+    if (root && !isAbsoluteUri(uri)) {
+      let rootId = getId(root);
+      if ((!rootId || !isAbsoluteUri(rootId)) && typeof root.id === 'string' && isAbsoluteUri(root.id)) {
+        rootId = root.id;
+      }
+      if (rootId && isAbsoluteUri(rootId)) {
+        const hashIndex = rootId.indexOf('#');
+        const rootBase = hashIndex === -1 ? rootId : rootId.slice(0, hashIndex);
+        try {
+          uri = new URL(uri, rootBase).toString();
+        } catch {
+          // keep original uri when URL construction fails
+        }
+      }
+    }
+
     const remotePath = getRemotePath(uri);
     const queryPath = getQueryPath(uri);
     let result = remotePath ? this.fromCache(remotePath) : root;
+
+    if (result && remotePath && isAbsoluteUri(remotePath) && (!result.id || !isAbsoluteUri(result.id))) {
+      result.id = remotePath;
+    }
 
     if (result && remotePath) {
       // we need to avoid compiling schemas in a recursive loop

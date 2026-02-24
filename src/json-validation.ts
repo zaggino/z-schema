@@ -1,4 +1,4 @@
-import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ValidateOptions, ZSchemaBase } from './z-schema-base.js';
 
 import { getFormatValidators } from './format-validators.js';
@@ -24,7 +24,7 @@ const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
 
 type JsonValidatorFn = (this: ZSchemaBase, report: Report, schema: JsonSchema, json: unknown) => void;
 
-export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
+export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   id: () => {},
   $ref: () => {},
   $schema: () => {},
@@ -63,8 +63,20 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       }
     }
   },
-  exclusiveMaximum: function () {
-    // covered in maximum
+  exclusiveMaximum: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    // In draft-06+, exclusiveMaximum is a standalone number
+    if (typeof schema.exclusiveMaximum === 'number') {
+      if (shouldSkipValidate(this.validateOptions, ['MAXIMUM_EXCLUSIVE'])) {
+        return;
+      }
+      if (typeof json !== 'number') {
+        return;
+      }
+      if (json >= schema.exclusiveMaximum) {
+        report.addError('MAXIMUM_EXCLUSIVE', [json, schema.exclusiveMaximum], undefined, schema, 'exclusiveMaximum');
+      }
+    }
+    // In draft-04, exclusiveMaximum is a boolean handled inside the `maximum` validator
   },
   minimum: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.2
@@ -84,8 +96,20 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       }
     }
   },
-  exclusiveMinimum: function () {
-    // covered in minimum
+  exclusiveMinimum: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    // In draft-06+, exclusiveMinimum is a standalone number
+    if (typeof schema.exclusiveMinimum === 'number') {
+      if (shouldSkipValidate(this.validateOptions, ['MINIMUM_EXCLUSIVE'])) {
+        return;
+      }
+      if (typeof json !== 'number') {
+        return;
+      }
+      if (json <= schema.exclusiveMinimum) {
+        report.addError('MINIMUM_EXCLUSIVE', [json, schema.exclusiveMinimum], undefined, schema, 'exclusiveMinimum');
+      }
+    }
+    // In draft-04, exclusiveMinimum is a boolean handled inside the `minimum` validator
   },
   maxLength: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.1.2
@@ -276,7 +300,11 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       // for each regex in "pp", remove all elements of "s" which this regex matches.
       let idx = pp.length;
       while (idx--) {
-        const regExp = RegExp(pp[idx]);
+        const result = compileSchemaRegex(pp[idx]);
+        if (!result.ok) {
+          continue;
+        }
+        const regExp = result.value;
         let idx2 = s.length;
         while (idx2--) {
           if (regExp.test(s[idx2]) === true) {
@@ -596,6 +624,134 @@ export const JsonValidators: Record<keyof JsonSchema, JsonValidatorFn> = {
       report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
     }
   },
+  // draft-06 additions
+  $id: () => {
+    // TODO: implement
+  },
+  const: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    const constValue = (schema as JsonSchemaAll).const;
+    if (areEqual(json, constValue) === false) {
+      report.addError('CONST', [JSON.stringify(constValue)], undefined, schema, undefined);
+    }
+  },
+  contains: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (shouldSkipValidate(this.validateOptions, ['CONTAINS'])) {
+      return;
+    }
+
+    if (!Array.isArray(json)) {
+      return;
+    }
+
+    const containsSchema = (schema as JsonSchemaAll).contains;
+    if (containsSchema === undefined) {
+      return;
+    }
+
+    const subReports: Report[] = [];
+    let idx = json.length;
+    while (idx--) {
+      const subReport = new Report(report);
+      subReports.push(subReport);
+      validate.call(this, subReport, containsSchema as any, json[idx]);
+    }
+
+    const asyncTasksBefore = report.asyncTasks.length;
+    for (const subReport of subReports) {
+      report.asyncTasks.push(...subReport.asyncTasks);
+    }
+    const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
+
+    const addContainsErrorIfNeeded = () => {
+      let hasValidItem = false;
+      for (const subReport of subReports) {
+        if (subReport.errors.length === 0) {
+          hasValidItem = true;
+          break;
+        }
+      }
+      if (!hasValidItem) {
+        report.addError('CONTAINS', undefined, subReports, schema, undefined);
+      }
+    };
+
+    if (hasAsyncTasks) {
+      const pathBeforeAsync = shallowClone(report.path);
+      report.addAsyncTask(
+        (callback) => {
+          setTimeout(() => callback(null), 0);
+        },
+        [] as any,
+        () => {
+          const backup = report.path;
+          report.path = pathBeforeAsync;
+          addContainsErrorIfNeeded();
+          report.path = backup;
+        }
+      );
+      return;
+    }
+
+    addContainsErrorIfNeeded();
+  },
+  examples: () => {
+    // TODO: implement
+  },
+  propertyNames: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (shouldSkipValidate(this.validateOptions, ['PROPERTY_NAMES'])) {
+      return;
+    }
+
+    if (!isObject(json)) {
+      return;
+    }
+
+    const propertyNamesSchema = (schema as JsonSchemaAll).propertyNames;
+    if (propertyNamesSchema === undefined) {
+      return;
+    }
+
+    const keys = Object.keys(json);
+    const subReports: Report[] = [];
+    for (const key of keys) {
+      const subReport = new Report(report);
+      subReports.push(subReport);
+      validate.call(this, subReport, propertyNamesSchema as any, key);
+    }
+
+    const asyncTasksBefore = report.asyncTasks.length;
+    for (const subReport of subReports) {
+      report.asyncTasks.push(...subReport.asyncTasks);
+    }
+    const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
+
+    const addPropertyNameErrors = () => {
+      for (let idx = 0; idx < keys.length; idx++) {
+        if (subReports[idx].errors.length > 0) {
+          report.addError('PROPERTY_NAMES', [keys[idx]], subReports[idx], schema, undefined);
+        }
+      }
+    };
+
+    if (hasAsyncTasks) {
+      const pathBeforeAsync = shallowClone(report.path);
+      report.addAsyncTask(
+        (callback) => {
+          setTimeout(() => callback(null), 0);
+        },
+        [] as any,
+        () => {
+          const backup = report.path;
+          report.path = pathBeforeAsync;
+          addPropertyNameErrors();
+          report.path = backup;
+        }
+      );
+      return;
+    }
+
+    addPropertyNameErrors();
+  },
 };
 
 const recurseArray = function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Array<unknown>) {
@@ -623,7 +779,7 @@ const recurseArray = function (this: ZSchemaBase, report: Report, schema: JsonSc
         }
       }
     }
-  } else if (typeof schema.items === 'object') {
+  } else if (typeof schema.items === 'object' || typeof schema.items === 'boolean') {
     // If items is a schema, then the child instance must be valid against this schema,
     // regardless of its index, and regardless of the value of "additionalItems".
     while (idx--) {
@@ -673,7 +829,8 @@ const recurseObject = function (this: ZSchemaBase, report: Report, schema: JsonS
     let idx2 = pp.length;
     while (idx2--) {
       const regexString = pp[idx2];
-      if (RegExp(regexString).test(m) === true) {
+      const result = compileSchemaRegex(regexString);
+      if (result.ok && result.value.test(m) === true) {
         s.push(schema.patternProperties![regexString]);
       }
     }
@@ -710,13 +867,26 @@ const recurseObject = function (this: ZSchemaBase, report: Report, schema: JsonS
   }
 };
 
-export function validate(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown): boolean {
+export function validate(
+  this: ZSchemaBase,
+  report: Report,
+  schema: boolean | JsonSchemaInternal,
+  json: unknown
+): boolean {
   report.commonErrorMessage = 'JSON_OBJECT_VALIDATION_FAILED';
 
+  if (schema === true) {
+    return true;
+  }
+
+  if (schema === false) {
+    report.addError('SCHEMA_IS_FALSE', [], undefined, schema);
+    return false;
+  }
+
   // check if schema is an object
-  const to = whatIs(schema);
-  if (to !== 'object') {
-    report.addError('SCHEMA_NOT_AN_OBJECT', [to], undefined, schema);
+  if (!isObject(schema)) {
+    report.addError('SCHEMA_NOT_AN_OBJECT', [whatIs(schema)], undefined, schema);
     return false;
   }
 

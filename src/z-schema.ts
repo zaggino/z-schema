@@ -1,9 +1,11 @@
 import type { ValidateError } from './errors.js';
 import type { FormatValidatorFn } from './format-validators.js';
-import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ValidateOptions, ValidateResponse } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 import type { SchemaReader } from './z-schema-reader.js';
+
+import './z-schema-versions.js';
 
 import { getRegisteredFormats, registerFormat, unregisterFormat } from './format-validators.js';
 import { SchemaCache } from './schema-cache.js';
@@ -13,11 +15,12 @@ import { ZSchemaBase } from './z-schema-base.js';
 import { defaultOptions, normalizeOptions } from './z-schema-options.js';
 import { getSchemaReader, setSchemaReader } from './z-schema-reader.js';
 
-// import schemas so they don't have to be downloaded for validation purposes
-import _Draft4HyperSchema from './schemas/draft-04-hyper-schema.json' with { type: 'json' };
-import _Draft4Schema from './schemas/draft-04-schema.json' with { type: 'json' };
-
 export class ZSchema extends ZSchemaBase {
+  /** @deprecated Use ZSchema.create() instead. */
+  private constructor(options?: ZSchemaOptions) {
+    super(options);
+  }
+
   // ----- static methods start -----
 
   // class scoped format functions
@@ -85,14 +88,18 @@ export class ZSchema extends ZSchemaBase {
     delete options.safe;
     (options as any).__called_from_factory__ = true;
     if (isAsync && isSafe) {
+      // @ts-expect-error Factory can use private/deprecated constructor
       return new ZSchemaAsyncSafe(options);
     }
     if (isAsync) {
+      // @ts-expect-error Factory can use private/deprecated constructor
       return new ZSchemaAsync(options);
     }
     if (isSafe) {
+      // @ts-expect-error Factory can use private/deprecated constructor
       return new ZSchemaSafe(options);
     }
+    // Factory can use private/deprecated constructor
     return new ZSchema(options);
   }
 
@@ -148,6 +155,11 @@ export class ZSchema extends ZSchemaBase {
 }
 
 export class ZSchemaSafe extends ZSchemaBase {
+  /** @deprecated Use ZSchema.create() instead. */
+  private constructor(options?: ZSchemaOptions) {
+    super(options);
+  }
+
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): ValidateResponse {
     try {
       this._validate(json, schema, options);
@@ -168,6 +180,11 @@ export class ZSchemaSafe extends ZSchemaBase {
 }
 
 export class ZSchemaAsync extends ZSchemaBase {
+  /** @deprecated Use ZSchema.create() instead. */
+  private constructor(options?: ZSchemaOptions) {
+    super(options);
+  }
+
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<true> {
     return new Promise((resolve, reject) => {
       try {
@@ -184,6 +201,11 @@ export class ZSchemaAsync extends ZSchemaBase {
 }
 
 export class ZSchemaAsyncSafe extends ZSchemaBase {
+  /** @deprecated Use ZSchema.create() instead. */
+  private constructor(options?: ZSchemaOptions) {
+    super(options);
+  }
+
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<ValidateResponse> {
     return new Promise((resolve) => {
       try {
@@ -205,9 +227,3 @@ export class ZSchemaAsyncSafe extends ZSchemaBase {
     }
   }
 }
-
-const Draft4Schema: JsonSchema = _Draft4Schema;
-const Draft4HyperSchema: JsonSchema = _Draft4HyperSchema;
-
-ZSchema.setRemoteReference('http://json-schema.org/draft-04/schema', Draft4Schema, { version: 'none' });
-ZSchema.setRemoteReference('http://json-schema.org/draft-04/hyper-schema', Draft4HyperSchema, { version: 'none' });

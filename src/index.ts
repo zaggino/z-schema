@@ -13,7 +13,8 @@ export {
   registerFormat,
   unregisterFormat,
 } from './format-validators.js';
-export type { JsonSchema, JsonSchemaType } from './json-schema.js';
+export type { JsonSchemaType } from './json-schema.js';
+export type { JsonSchema } from './json-schema-versions.js';
 export type { Report, SchemaErrorDetail } from './report.js';
 export type { ZSchema, ZSchemaAsync, ZSchemaAsyncSafe, ZSchemaSafe } from './z-schema.js';
 export { ValidateOptions, ValidateResponse } from './z-schema-base.js';

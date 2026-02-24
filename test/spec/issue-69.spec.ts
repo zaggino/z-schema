@@ -1,4 +1,4 @@
-import type { JsonSchema } from '../../src/json-schema.ts';
+import type { JsonSchema } from '../../src/json-schema-versions.ts';
 
 import { ZSchema } from '../../src/z-schema.js';
 

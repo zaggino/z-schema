@@ -105,7 +105,6 @@ describe('Format Validators', () => {
     it('should get default options', () => {
       const options = ZSchema.getDefaultOptions();
       expect(options).toBeDefined();
-      expect(options.version).toBe('draft-04');
       expect(options.asyncTimeout).toBe(2000);
     });
   });

@@ -1,6 +1,6 @@
 /* eslint-disable vitest/valid-title */
 
-import type { JsonSchema, JsonSchemaVersion } from '../../src/json-schema.ts';
+import type { JsonSchema, JsonSchemaVersion } from '../../src/json-schema-versions.ts';
 
 import { ZSchema } from '../../src/z-schema.ts';
 
@@ -16,12 +16,23 @@ interface TestSuite {
 
 type JSONSchemaTestSuiteTestFolder = 'draft4' | 'draft6' | 'draft7' | 'draft2019-09' | 'draft2020-12';
 
-const VERSION_FOLDER_MAPPING: Record<JsonSchemaVersion, JSONSchemaTestSuiteTestFolder> = {
+const VERSION_FOLDER_MAPPING: Partial<Record<JsonSchemaVersion, JSONSchemaTestSuiteTestFolder>> = {
   'draft-04': 'draft4',
+  'draft-06': 'draft6',
 };
 
-const excludedDirs: string[] = ['draft4/optional'];
-const excludedFiles: string[] = ['draft4/optional/format/unknown.json'];
+const excludedDirs: string[] = [];
+const excludedFiles: string[] = [
+  // unknown formats are reported as an error by default
+  // there's ignoreUnknownFormats option that can change this
+  'draft4/optional/format/unknown.json',
+  'draft6/optional/format/unknown.json',
+  // as far as I'm aware, this can't be fixed without custom json parser
+  'draft4/optional/float-overflow.json',
+  'draft6/optional/float-overflow.json',
+  'draft4/optional/zeroTerminatedFloats.json',
+  // FAILING
+];
 const excludedTests: string[] = [];
 
 export async function runTests({ reader }: { reader: <T>(testFilePath: string) => Promise<T> }) {
@@ -62,6 +73,15 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
           const testSuites = await reader<TestSuite[]>(testFilePath);
           testSuites.forEach((testSuite) => {
             const schema = testSuite.schema;
+            if (typeof schema !== 'boolean' && !schema.$schema) {
+              if (draftPath.endsWith('/draft4')) {
+                schema.$schema = 'http://json-schema.org/draft-04/schema#';
+              } else if (draftPath.endsWith('/draft6')) {
+                schema.$schema = 'http://json-schema.org/draft-06/schema#';
+              } else {
+                throw new Error(`no $schema for draft: ${draftPath}`);
+              }
+            }
             testSuite.tests.forEach((test) => {
               if (excludedTests.some((t) => t === test.description)) {
                 console.warn(`excluded by test description: ${test.description}`);

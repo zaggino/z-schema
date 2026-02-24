@@ -1,5 +1,5 @@
 import type { ErrorCode, ErrorParam } from './errors.js';
-import type { JsonSchema, JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ValidateCallback, ValidateOptions } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
@@ -7,7 +7,7 @@ import { Errors, getValidateError } from './errors.js';
 import { get } from './utils/json.js';
 import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
 import { isAbsoluteUri } from './utils/uri.js';
-import { whatIs } from './utils/what-is.js';
+import { isObject } from './utils/what-is.js';
 
 export interface SchemaErrorDetail {
   /**
@@ -261,7 +261,7 @@ export class Report {
     errCode: ErrorCode,
     errParams?: ErrorParam[],
     subReports?: Report | Report[],
-    schema?: JsonSchema,
+    schema?: JsonSchema | boolean,
     keyword?: keyof JsonSchema
   ) {
     if (!errCode) {
@@ -286,7 +286,7 @@ export class Report {
     errorMessage: string,
     params?: ErrorParam[],
     subReports?: Report | Report[],
-    schema?: JsonSchema,
+    schema?: JsonSchema | boolean,
     keyword?: keyof JsonSchema
   ) {
     if (typeof this.reportOptions.maxErrors === 'number' && this.errors.length >= this.reportOptions.maxErrors) {
@@ -301,8 +301,7 @@ export class Report {
 
     let idx = params.length;
     while (idx--) {
-      const paramType = whatIs(params[idx]);
-      const param = paramType === 'object' || paramType === 'null' ? JSON.stringify(params[idx]) : params[idx];
+      const param = params[idx] === null || isObject(params[idx]) ? JSON.stringify(params[idx]) : params[idx];
       errorMessage = errorMessage.replace('{' + idx + '}', param.toString());
     }
 

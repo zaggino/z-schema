@@ -1,7 +1,7 @@
 import type { FormatValidatorFn } from './format-validators.js';
-import type { JsonSchemaVersion } from './json-schema.js';
 import type { Report } from './report.js';
 
+import { CURRENT_DEFAULT_SCHEMA_VERSION, type JsonSchemaVersion } from './json-schema-versions.js';
 import { shallowClone } from './utils/clone.js';
 
 export interface ZSchemaOptions {
@@ -32,7 +32,8 @@ export interface ZSchemaOptions {
 }
 
 export const defaultOptions: ZSchemaOptions = {
-  version: 'draft-04',
+  // default version to validate against
+  version: CURRENT_DEFAULT_SCHEMA_VERSION,
   // default timeout for all async tasks
   asyncTimeout: 2000,
   // force additionalProperties and additionalItems to be defined on "object" and "array" types

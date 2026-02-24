@@ -1,11 +1,11 @@
 import type { ValidateError } from '../../src/errors.ts';
-import type { JsonSchemaVersion } from '../../src/json-schema.ts';
+import type { JsonSchemaVersion } from '../../src/json-schema-versions.ts';
 import type { ValidateOptions } from '../../src/z-schema-base.ts';
 import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 
 import { ZSchema } from '../../src/z-schema.ts';
 
-type ZSchemaClass = new (...args: ConstructorParameters<typeof ZSchema>) => ZSchema;
+type ZSchemaClass = typeof ZSchema;
 
 interface TestCommon {
   version?: JsonSchemaVersion;

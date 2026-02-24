@@ -67,7 +67,7 @@
     "test:coverage": "vitest run --coverage",
     "test:node": "vitest run --project node --silent=false",
     "test:browser": "vitest run --project browser --silent=false",
-    "test:sample": "npx vitest run --silent=false --hideSkippedTests --project node -t \"invalid definition\""
+    "test:sample": "npx vitest run --silent=false --hideSkippedTests --project node -t \"draft6/exclusiveMinimum.json\""
   },
   "dependencies": {
     "validator": "^13.15.26"

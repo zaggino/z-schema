@@ -1,6 +1,7 @@
-import type { JsonSchemaInternal } from './json-schema.js';
+import type { JsonSchemaInternal } from './json-schema-versions.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
+import { getId } from './json-schema.js';
 import { Report } from './report.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { getSchemaReader } from './z-schema-reader.js';
@@ -15,29 +16,34 @@ interface Id {
 
 export const collectIds = (obj: JsonSchemaInternal) => {
   const ids: Id[] = [];
+  const doNotCollectIdsFrom = ['enum', 'const', 'default', 'examples'];
   function walk(node: any, scope: Id[]) {
     if (typeof node !== 'object' || node == null) return;
 
     let addedScope = false;
 
-    if (node.id && typeof node.id === 'string') {
-      let type: Id['type'] = isAbsoluteUri(node.id) ? 'absolute' : 'relative';
+    const nodeId = getId(node as JsonSchemaInternal);
+    if (typeof nodeId === 'string') {
+      let type: Id['type'] = isAbsoluteUri(nodeId) ? 'absolute' : 'relative';
       if (scope.length === 0) {
         type = 'root';
       }
       const id: Id = {
-        id: node.id,
+        id: nodeId,
         type,
         obj: node,
       };
-      if (type === 'absolute' || (type === 'root' && isAbsoluteUri(node.id))) {
-        id.absoluteUri = node.id;
+      if (type === 'absolute' || (type === 'root' && isAbsoluteUri(nodeId))) {
+        id.absoluteUri = nodeId;
+      } else if (type === 'root' && typeof node.id === 'string' && isAbsoluteUri(node.id) && node.id !== nodeId) {
+        id.absoluteUri = resolveIdScope(node.id, nodeId);
       } else if (type === 'relative') {
         id.absoluteParent = scope
           .filter((x) => x.type === 'absolute' || (x.type === 'root' && x.absoluteUri))
           .slice(-1)[0];
         if (id.absoluteParent) {
-          id.absoluteUri = id.absoluteParent.id.split('/').slice(0, -1).concat(id.id).join('/');
+          const parentUri = id.absoluteParent.absoluteUri || id.absoluteParent.id;
+          id.absoluteUri = parentUri.split('/').slice(0, -1).concat(id.id).join('/');
         }
       }
       ids.push(id);
@@ -51,7 +57,7 @@ export const collectIds = (obj: JsonSchemaInternal) => {
       }
     } else {
       for (const key of Object.keys(node)) {
-        if (key.indexOf('__$') === 0) continue;
+        if (key.indexOf('__$') === 0 || doNotCollectIdsFrom.includes(key)) continue;
         walk(node[key], scope);
       }
     }
@@ -71,7 +77,7 @@ export interface Reference {
   path: Array<string | number>;
 }
 
-const doNotCollectReferencesFrom = ['enum'];
+const doNotCollectReferencesFrom = ['enum', 'const', 'default', 'examples'];
 
 export const collectReferences = (
   obj: JsonSchemaInternal,
@@ -90,9 +96,15 @@ export const collectReferences = (
   const hasRef = typeof obj.$ref === 'string' && typeof obj.__$refResolved === 'undefined';
   let addedScope = false;
   const isRootScope = scope.length === 0;
-  if (typeof obj.id === 'string' && (isRootScope || !hasRef)) {
+  const objId = getId(obj);
+  let scopeId = objId;
+  if (typeof obj.id === 'string' && isAbsoluteUri(obj.id) && (!scopeId || !isAbsoluteUri(scopeId))) {
+    scopeId = obj.id;
+  }
+
+  if (typeof scopeId === 'string' && (isRootScope || !hasRef)) {
     const base = scope.length > 0 ? scope[scope.length - 1] : undefined;
-    scope.push(resolveIdScope(base, obj.id));
+    scope.push(resolveIdScope(base, scopeId));
     addedScope = true;
   }
 
@@ -227,6 +239,8 @@ export class SchemaCompiler {
         schema.forEach((s) => this.collectAndCacheIds(s));
       }
       return this.compileArrayOfSchemas(report, schema);
+    } else if (typeof schema === 'boolean') {
+      return true;
     } else {
       if (!options?.noCache) {
         this.collectAndCacheIds(schema);

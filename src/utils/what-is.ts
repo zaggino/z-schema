@@ -42,5 +42,9 @@ export const whatIs = (what: unknown): WHAT_IS => {
 };
 
 export function isObject(value: unknown): value is Record<any, any> {
-  return whatIs(value) === 'object';
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+export function isInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value % 1 === 0;
 }

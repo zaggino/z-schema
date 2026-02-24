@@ -1,19 +1,19 @@
+import type {
+  JsonSchema,
+  JsonSchemaInternal,
+  JsonSchemaInternalD4,
+  JsonSchemaInternalD6,
+} from './json-schema-versions.js';
 import type { Reference } from './schema-compiler.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { isObject } from './utils/what-is.js';
 
-// TODO: currently unsupported 'draft-06', 'draft-07', '2019-09', '2020-12'
-export type JsonSchemaVersion = 'draft-04';
-
-export const VERSION_SCHEMA_URL_MAPPING: Record<JsonSchemaVersion, string> = {
-  'draft-04': 'http://json-schema.org/draft-04/schema#',
-};
-
-export interface JsonSchema {
+// common properties of all JSON Schema versions
+export interface JsonSchemaCommon {
   $ref?: string;
-  id?: string;
   $schema?: string;
+  id?: string;
   title?: string;
   description?: string;
   default?: unknown;
@@ -21,13 +21,9 @@ export interface JsonSchema {
   type?: string | string[];
   properties?: Record<string, JsonSchema>;
   patternProperties?: Record<string, JsonSchema>;
-  dependencies?: Record<string, string[]>;
-  // properties
   multipleOf?: number;
   minimum?: number;
-  exclusiveMinimum?: boolean;
   maximum?: number;
-  exclusiveMaximum?: boolean;
   minLength?: number;
   maxLength?: number;
   pattern?: string;
@@ -40,6 +36,7 @@ export interface JsonSchema {
   maxProperties?: number;
   required?: string[];
   additionalProperties?: boolean | JsonSchema;
+  dependencies?: Record<string, string[] | JsonSchema>;
   enum?: Array<unknown>;
   format?: string;
   allOf?: JsonSchema[];
@@ -60,7 +57,15 @@ export interface ZSchemaInternalProperties {
   __$visited?: boolean;
 }
 
-export interface JsonSchemaInternal extends JsonSchema, ZSchemaInternalProperties {}
+export const getId = (schema: JsonSchemaInternal) => {
+  if ((schema as JsonSchemaInternalD6).$id) {
+    return (schema as JsonSchemaInternalD6).$id;
+  }
+  if ((schema as JsonSchemaInternalD4).id) {
+    return (schema as JsonSchemaInternalD4).id;
+  }
+  return undefined;
+};
 
 export const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaInternal | undefined => {
   // process only arrays and objects
@@ -73,8 +78,9 @@ export const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaIntern
     return schema;
   }
 
-  if (schema.id) {
-    if (schema.id === id || (schema.id[0] === '#' && schema.id.substring(1) === id)) {
+  const schemaId = getId(schema);
+  if (schemaId) {
+    if (schemaId === id || (schemaId[0] === '#' && schemaId.substring(1) === id)) {
       return schema;
     }
   }
