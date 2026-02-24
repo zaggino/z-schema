@@ -32,6 +32,9 @@ npx vitest run --silent=false --project node -t "draft4/type.json"
 
 # Type-check test files (no execution)
 npm run build:tests
+
+# Coverage report
+npm run test:coverage
 ```
 
 ## Test Imports
@@ -56,6 +59,10 @@ The official [JSON Schema Test Suite](https://github.com/json-schema-org/JSON-Sc
 - Known-failing or unsupported tests are listed in `excludedFiles` and `excludedTests` arrays in `json-schema-test-suite.common.ts`.
 - When implementing a new draft feature, remove the corresponding entries from these exclusion lists and ensure the tests pass.
 
+## Legacy Z-Schema Test Suite
+
+`test/ZSchemaTestSuite/` contains legacy test files (mostly `.js`) that test z-schema-specific features, options, and edge cases. These are loaded and run by `test/spec/z-schema-test-suite.spec.ts`.
+
 ## Test Setup
 
 `test/vitest.setup.ts` runs `createManifest()` from `test/lib/create-manifest.ts` as a global setup — this generates a manifest of available test suite files before tests run.
@@ -75,14 +82,37 @@ describe('Feature Name', () => {
     expect(result).toBe(true);
   });
 
-  it('should reject invalid data', () => {
+  it('should reject invalid data (safe mode)', () => {
     const validator = ZSchema.create();
     const schema = { type: 'number' };
     const { valid, err } = validator.validateSafe('not a number', schema);
     expect(valid).toBe(false);
-    expect(err?.errors[0]?.code).toBe('INVALID_TYPE');
+    expect(err?.details?.[0]?.code).toBe('INVALID_TYPE');
+  });
+
+  it('should reject invalid data (throw mode)', () => {
+    const validator = ZSchema.create();
+    const schema = { type: 'number' };
+    expect(() => validator.validate('not a number', schema)).toThrow();
   });
 });
+```
+
+### Error Inspection
+
+`ValidateError` has a `.details` property (array of `SchemaErrorDetail`):
+
+```typescript
+interface SchemaErrorDetail {
+  message: string; // Human-readable error message
+  code: string; // Error code (e.g., 'INVALID_TYPE')
+  params: ErrorParam[]; // Parameters used in the error template
+  path: string | Array<string | number>; // JSON path to the failing value
+  schemaPath?: Array<string | number>; // Path in the schema to the constraint
+  title?: string; // Schema title (if present)
+  description?: string; // Schema description (if present)
+  inner?: SchemaErrorDetail[]; // Sub-errors (e.g., for oneOf/anyOf)
+}
 ```
 
 ## Coverage

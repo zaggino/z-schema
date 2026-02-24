@@ -1,281 +1,213 @@
-# z-schema - a JSON Schema validator
+# z-schema
+
+JSON Schema validator for Node.js and browsers. Supports **draft-04** and **draft-06** (default).
 
 [![NPM](https://nodei.co/npm/z-schema.png?downloads=true&downloadRank=true)](https://www.npmjs.com/package/z-schema)
 
 [![Coverage Status](https://coveralls.io/repos/github/zaggino/z-schema/badge.svg?branch=main)](https://coveralls.io/github/zaggino/z-schema?branch=main)
 
-## Topics
+## Install
 
-- [What](#what)
-- [Versions](#versions)
-- [Getting started](#getting-started)
-- [Usage](#usage)
-- [Features](#features)
-- [Options](#options)
-- [Contributing](#contributing)
-- [Contributors](#contributors)
+```bash
+npm install z-schema
+```
 
-## What
+Requires **Node.js 22** or later.
 
-What is a JSON Schema? Find here: [https://json-schema.org/](https://json-schema.org/)
+## Quick Start
 
-## Versions
-
-- v6 - old version which has been around a long time, supports JSON Schema draft-04
-- v7 - modernized version (to ESM module with Typescript) which passes all tests from JSON Schema Test Suite for draft-04
-- v8 - by default assumes all schemas without $schema tag are draft-04, the old behaviour from v7 can be explicitly turned on by specifying `validator = ZSchema.create({ version: 'none' });`
-- v9 - new api, `new ZSchema()` replaced by `ZSchema.create()` for initialization
-
-## Getting started
-
-Validator will try to perform sync validation when possible for speed, but supports async callbacks when they are necessary.
-
-### ESM and Typescript:
+### ESM / TypeScript
 
 ```typescript
 import ZSchema from 'z-schema';
+
 const validator = ZSchema.create();
+
+try {
+  validator.validate({ name: 'Alice' }, { type: 'object', properties: { name: { type: 'string' } } });
+  console.log('Valid');
+} catch (error) {
+  console.log('Invalid:', error.details);
+}
 ```
 
-### CommonJs:
+### CommonJS
 
 ```javascript
 const ZSchema = require('z-schema');
 const validator = ZSchema.create();
 ```
 
-### Browser:
+### Browser (UMD)
 
 ```html
-<script type="text/javascript" src="z-schema/umd/ZSchema.min.js"></script>
-<script type="text/javascript">
-  var validator = ZSchema.create();
+<script src="z-schema/umd/ZSchema.min.js"></script>
+<script>
+  const validator = ZSchema.create();
   try {
-    validator.validate('string', { type: 'string' });
-    console.log('Validation passed');
+    validator.validate('hello', { type: 'string' });
   } catch (error) {
-    console.log('Validation failed:', error.details);
+    console.log(error.details);
   }
 </script>
 ```
 
-### CLI:
+### CLI
 
 ```bash
 npm install --global z-schema
-z-schema --help
 z-schema mySchema.json
-z-schema mySchema.json myJson.json
-z-schema --strictMode mySchema.json myJson.json
+z-schema mySchema.json myData.json
+z-schema --strictMode mySchema.json myData.json
 ```
 
 ## Usage
 
-### Schema Validation
+### Sync Validation (Throw Mode)
 
-You can pre-validate and compile schemas using the `validateSchema` method. This is useful for server startup to ensure all schemas are valid and to resolve `$ref` references between schemas.
+By default, `validate` throws a `ValidateError` on failure. The error has a `details` array with structured error info.
 
-```javascript
+```typescript
+const validator = ZSchema.create();
+
+try {
+  validator.validate(json, schema);
+} catch (error) {
+  console.log(error.name); // 'z-schema validation error'
+  console.log(error.message); // summary message
+  console.log(error.details); // array of { code, message, path, ... }
+}
+```
+
+### Sync Validation (Safe Mode)
+
+Use `ZSchema.create({ safe: true })` to get a result object instead of exceptions.
+
+```typescript
+const validator = ZSchema.create({ safe: true });
+
+const result = validator.validate(json, schema);
+if (!result.valid) {
+  console.log(result.err); // ValidateError with .details
+}
+```
+
+### Async Validation
+
+Pass `{ async: true }` to support async format validators. The `validate` method returns a Promise.
+
+```typescript
+const validator = ZSchema.create({ async: true });
+
+try {
+  await validator.validate(json, schema);
+} catch (error) {
+  console.log(error.details);
+}
+
+// Or combine with safe mode:
+const safeValidator = ZSchema.create({ async: true, safe: true });
+const result = await safeValidator.validate(json, schema);
+if (!result.valid) {
+  console.log(result.err);
+}
+```
+
+### Schema Compilation
+
+Pre-compile schemas at startup to validate `$ref` references and cache compiled schemas.
+
+```typescript
+const validator = ZSchema.create();
+
 const schemas = [
-  {
-    id: 'personDetails',
-    type: 'object',
-    properties: {
-      firstName: { type: 'string' },
-      lastName: { type: 'string' },
-    },
-    required: ['firstName', 'lastName'],
-  },
-  {
-    id: 'addressDetails',
-    type: 'object',
-    properties: {
-      street: { type: 'string' },
-      city: { type: 'string' },
-    },
-    required: ['street', 'city'],
-  },
-  {
-    id: 'personWithAddress',
-    allOf: [{ $ref: 'personDetails' }, { $ref: 'addressDetails' }],
-  },
+  { id: 'person', type: 'object', properties: { name: { type: 'string' } }, required: ['name'] },
+  { id: 'team', type: 'object', properties: { lead: { $ref: 'person' } } },
 ];
 
 try {
   validator.validateSchema(schemas);
-  console.log('All schemas are valid and compiled');
 } catch (error) {
-  console.log('Schema validation failed:', error.details);
+  console.log('Schema errors:', error.details);
 }
 ```
 
-### Sync mode:
+### Custom Format Validators
 
-The `validate` method automatically compiles and validates the schema before validating the JSON data against it. For better performance, you can pre-compile schemas using `validateSchema` during initialization.
-
-```javascript
-try {
-  validator.validate(json, schema);
-  // validation passed
-} catch (error) {
-  // this will return a native error object with name and message
-  console.log(error.name); // 'z-schema validation error'
-  console.log(error.message); // common error message
-  // this will return an array of validation errors encountered
-  console.log(error.details); // array of detailed errors
-}
-
-// Or use validateSafe for object-based result
-const result = validator.validateSafe(json, schema);
-if (!result.valid) {
-  console.log(result.errs); // array of error objects
-}
-
-...
-```
-
-### Async validation:
-
-ZSchema supports custom format validators that can perform both synchronous and asynchronous validation. This example shows how to validate a person payload with:
-
-- **Async validation**: User ID against a database
-- **Async validation**: Postcode against an external service
-- **Sync validation**: Phone number format
+Register custom format validators for sync or async checks.
 
 ```typescript
-import ZSchema from 'z-schema';
-import db from './db';
-
-// Initialize ZSchema
 const validator = ZSchema.create();
 
-// Register async and sync format validators
-validator.registerFormat('user-exists', async (input: unknown): Promise<boolean> => {
-  if (typeof input !== 'number') return false;
-  const user = await db.getUserById(input);
+// Sync format
+validator.registerFormat('uppercase', (value: unknown): boolean => {
+  return typeof value === 'string' && value === value.toUpperCase();
+});
+
+// Async format
+validator.registerFormat('user-exists', async (value: unknown): Promise<boolean> => {
+  if (typeof value !== 'number') return false;
+  const user = await db.getUserById(value);
   return user != null;
 });
-validator.registerFormat('valid-postcode', async (input: unknown): Promise<boolean> => {
-  if (typeof input !== 'string') return false;
-  const postcode = await db.getPostcode(input);
-  return postcode != null;
-});
-validator.registerFormat('phone-number', (input: unknown): boolean => {
-  if (typeof input !== 'string') return false;
-  const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-  return phoneRegex.test(input);
-});
-
-// Define the JSON Schema
-const personSchema = {
-  $schema: 'http://json-schema.org/draft-04/schema#',
-  type: 'object',
-  required: ['personId', 'address'],
-  properties: {
-    personId: {
-      type: 'number',
-      format: 'user-exists',
-    },
-    address: {
-      type: 'object',
-      required: ['postcode', 'phone'],
-      properties: {
-        postcode: {
-          type: 'string',
-          format: 'valid-postcode',
-        },
-        phone: {
-          type: 'string',
-          format: 'phone-number',
-        },
-      },
-    },
-  },
-};
-
-// Example payload
-const payload = {
-  personId: 'user123',
-  address: {
-    postcode: 'SW1A 1AA',
-    phone: '+441234567890',
-  },
-};
-
-// Validate asynchronously
-try {
-  const validator = ZSchema.create({ async: true });
-  await validator.validate(payload, personSchema);
-  console.log('✅ Validation successful!');
-} catch (err) {
-  console.log('❌ Validation failed:', err);
-}
-
-// or validate without try-catch
-const validator = ZSchema.create({ async: true, safe: true });
-const res = await validator.validate(payload, personSchema);
-if (res.valid) {
-  console.log('✅ Validation successful!');
-} else {
-  console.log('❌ Validation failed:', res.err);
-}
 ```
 
-### Remote references and schemas:
+### Remote References
 
-In case you have some remote references in your schemas, you have to download those schemas before using validator.
-Otherwise you'll get `UNRESOLVABLE_REFERENCE` error when trying to compile a schema.
+If your schemas reference remote URIs, register them before validation.
 
-```javascript
-var validator = ZSchema.create();
-var json = {};
-var schema = { "$ref": "http://json-schema.org/draft-04/schema#" };
+```typescript
+const validator = ZSchema.create();
 
-try {
-  validator.validate(json, schema);
-  // This won't reach here due to unresolvable reference
-} catch (error) {
-  // error.details will contain the validation errors
-  console.log(error.details[0].code); // "UNRESOLVABLE_REFERENCE"
-}
+// Register a remote schema manually
+validator.setRemoteReference('http://example.com/person.json', personSchema);
 
-var requiredUrl = "http://json-schema.org/draft-04/schema";
-request(requiredUrl, function (error, response, body) {
-
-    validator.setRemoteReference(requiredUrl, JSON.parse(body));
-
-    try {
-      validator.validate(json, schema);
-      // validation passed
-    } catch (error) {
-      // shouldn't happen after setting remote reference
-    }
-
-}
-```
-
-If you're able to load schemas synchronously, you can use `ZSchema.setSchemaReader` feature:
-
-```javascript
-ZSchema.setSchemaReader(function (uri) {
-  var someFilename = path.resolve(__dirname, '..', 'schemas', uri + '.json');
-  return JSON.parse(fs.readFileSync(someFilename, 'utf8'));
+// Or set a schema reader to load them automatically
+ZSchema.setSchemaReader((uri: string) => {
+  const filePath = path.resolve(__dirname, 'schemas', uri + '.json');
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 });
 ```
+
+## Version History
+
+| Version | Changes                                                                                           |
+| ------- | ------------------------------------------------------------------------------------------------- |
+| **v10** | Default version is **draft-06**. Implemented draft-06 tests from JSON Schema Test suite.          |
+| **v9**  | New factory API: `ZSchema.create()` replaces `new ZSchema()`. Default draft is **draft-06**.      |
+| **v8**  | Schemas without `$schema` default to draft-04. Use `{ version: 'none' }` for the old v7 behavior. |
+| **v7**  | Rewritten in TypeScript/ESM. Passes all JSON Schema Test Suite tests for draft-04.                |
+| **v6**  | Legacy version. Draft-04 support.                                                                 |
 
 ## Features
 
-See [FEATURES.md](FEATURES.md) for a full list of features.
+See [docs/features.md](docs/features.md) for the full feature list.
 
 ## Options
 
-See [OPTIONS.md](OPTIONS.md) for all available options and their descriptions.
+See [docs/options.md](docs/options.md) for all constructor and per-call options.
+
+## Documentation
+
+| Document                                     | Description                                                                           |
+| -------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [docs/usage.md](docs/usage.md)               | Detailed usage guide with all validation modes, error handling, and advanced features |
+| [docs/options.md](docs/options.md)           | Constructor options and per-call validation options                                   |
+| [docs/features.md](docs/features.md)         | Feature catalog with examples                                                         |
+| [docs/architecture.md](docs/architecture.md) | Internal architecture, module structure, and public API reference                     |
+| [docs/conventions.md](docs/conventions.md)   | Code style, naming, and formatting conventions                                        |
+| [docs/testing.md](docs/testing.md)           | Test framework, running tests, and writing new tests                                  |
+| [docs/contributing.md](docs/contributing.md) | PR workflow and contribution guidelines                                               |
 
 ## Contributing
 
-These repository has several submodules and should be cloned as follows:
+This repository uses submodules. Clone with:
 
-> git clone **--recursive** https://github.com/zaggino/z-schema.git
+```bash
+git clone --recursive https://github.com/zaggino/z-schema.git
+```
+
+See [docs/contributing.md](docs/contributing.md) for the full contribution guide.
 
 ## Contributors
 
