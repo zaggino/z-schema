@@ -19,6 +19,7 @@ type JSONSchemaTestSuiteTestFolder = 'draft4' | 'draft6' | 'draft7' | 'draft2019
 const VERSION_FOLDER_MAPPING: Partial<Record<JsonSchemaVersion, JSONSchemaTestSuiteTestFolder>> = {
   'draft-04': 'draft4',
   'draft-06': 'draft6',
+  'draft-07': 'draft7',
 };
 
 const excludedDirs: string[] = [];
@@ -32,6 +33,21 @@ const excludedFiles: string[] = [
   'draft6/optional/float-overflow.json',
   'draft4/optional/zeroTerminatedFloats.json',
   // FAILING
+  'draft7/format.json', // FAIL: 78 out of 102 tests are passing
+  'draft7/if-then-else.json', // FAIL: 20 out of 30 tests are passing
+  'draft7/optional/content.json', // FAIL: 6 out of 10 tests are passing
+  'draft7/optional/cross-draft.json', // FAIL: 1 out of 2 tests are passing
+  'draft7/optional/float-overflow.json', // FAIL: 0 out of 1 tests are passing
+  'draft7/optional/format/date.json', // FAIL: 40 out of 48 tests are passing
+  'draft7/optional/format/hostname.json', // FAIL: 37 out of 61 tests are passing
+  'draft7/optional/format/idn-hostname.json', // FAIL: 42 out of 76 tests are passing
+  'draft7/optional/format/iri-reference.json', // FAIL: 2 out of 13 tests are passing
+  'draft7/optional/format/iri.json', // FAIL: 4 out of 15 tests are passing
+  'draft7/optional/format/regex.json', // FAIL: 2 out of 8 tests are passing
+  'draft7/optional/format/relative-json-pointer.json', // FAIL: 12 out of 18 tests are passing
+  'draft7/optional/format/time.json', // FAIL: 32 out of 46 tests are passing
+  'draft7/optional/format/unknown.json', // FAIL: 0 out of 7 tests are passing
+  'draft7/optional/id.json', // FAIL: 5 out of 7 tests are passing
 ];
 const excludedTests: string[] = [];
 
@@ -78,6 +94,8 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
                 schema.$schema = 'http://json-schema.org/draft-04/schema#';
               } else if (draftPath.endsWith('/draft6')) {
                 schema.$schema = 'http://json-schema.org/draft-06/schema#';
+              } else if (draftPath.endsWith('/draft7')) {
+                schema.$schema = 'http://json-schema.org/draft-07/schema#';
               } else {
                 throw new Error(`no $schema for draft: ${draftPath}`);
               }
