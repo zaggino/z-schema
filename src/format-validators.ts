@@ -170,7 +170,7 @@ const ipv6Validator: FormatValidatorFn = (ipv6: unknown) => {
 
 const regexValidator: FormatValidatorFn = (input: unknown) => {
   if (typeof input !== 'string') {
-    return false;
+    return true;
   }
   try {
     RegExp(input);
@@ -259,6 +259,27 @@ const idnEmailValidator: FormatValidatorFn = (email: unknown) => {
   return /^[^\s@]+@[^\s@]+$/.test(email);
 };
 
+const idnHostnameValidator: FormatValidatorFn = (hostname: unknown) => {
+  if (typeof hostname !== 'string') return true;
+  if (hostname.length === 0 || hostname.length > 255) return false;
+  const normalizedHostname = hostname.endsWith('.') ? hostname.slice(0, -1) : hostname;
+  const labels = normalizedHostname.split('.');
+  if (labels.some((label) => label.length === 0 || label.length > 63)) {
+    return false;
+  }
+  return labels.every((label) => /^[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?$/u.test(label));
+};
+
+const iriValidator: FormatValidatorFn = (iri: unknown) => {
+  if (typeof iri !== 'string') return true;
+  return /^[a-zA-Z][a-zA-Z0-9+.-]*:[^"\\<>^{}^`| ]*$/u.test(iri);
+};
+
+const iriReferenceValidator: FormatValidatorFn = (iriReference: unknown) => {
+  if (typeof iriReference !== 'string') return true;
+  return /^([a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/u.test(iriReference);
+};
+
 export interface FormatValidatorsOptions {
   strictUris?: boolean;
   customFormats?: Record<string, FormatValidatorFn | null>;
@@ -281,6 +302,9 @@ const inbuiltValidators: Record<string, FormatValidatorFn> = {
   'relative-json-pointer': relativeJsonPointerValidator,
   time: timeValidator,
   'idn-email': idnEmailValidator,
+  'idn-hostname': idnHostnameValidator,
+  iri: iriValidator,
+  'iri-reference': iriReferenceValidator,
 } as const;
 
 const customValidators: Record<string, FormatValidatorFn> = {};

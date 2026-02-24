@@ -33,7 +33,6 @@ const excludedFiles: string[] = [
   'draft6/optional/float-overflow.json',
   'draft4/optional/zeroTerminatedFloats.json',
   // FAILING
-  'draft7/format.json', // FAIL: 78 out of 102 tests are passing
   'draft7/if-then-else.json', // FAIL: 20 out of 30 tests are passing
   'draft7/optional/content.json', // FAIL: 6 out of 10 tests are passing
   'draft7/optional/cross-draft.json', // FAIL: 1 out of 2 tests are passing
