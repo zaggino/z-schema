@@ -622,7 +622,7 @@ export class SchemaValidator {
     return this.validator.options;
   }
 
-  validateArrayOfSchemas(report: Report, arr: JsonSchemaInternal[]) {
+  validateArrayOfSchemas(report: Report, arr: Array<JsonSchemaInternal | boolean>) {
     let idx = arr.length;
     while (idx--) {
       this.validateSchema(report, arr[idx]);
@@ -630,7 +630,7 @@ export class SchemaValidator {
     return report.isValid();
   }
 
-  validateSchema(report: Report, schema: JsonSchemaInternal | JsonSchemaInternal[]) {
+  validateSchema(report: Report, schema: JsonSchemaInternal | boolean | Array<JsonSchemaInternal | boolean>) {
     report.commonErrorMessage = 'SCHEMA_VALIDATION_FAILED';
 
     // if schema is an array, assume it's an array of schemas
