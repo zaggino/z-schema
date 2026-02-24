@@ -23,18 +23,20 @@ const VERSION_FOLDER_MAPPING: Partial<Record<JsonSchemaVersion, JSONSchemaTestSu
 
 const excludedDirs: string[] = [];
 const excludedFiles: string[] = [
-  'draft4/optional/float-overflow.json', // FAIL: 0 out of 1 tests pass
-  'draft4/optional/format/unknown.json', // FAIL: 0 out of 7 tests pass
+  // unknown formats are reported as an error by default
+  // there's ignoreUnknownFormats option that can change this
+  'draft4/optional/format/unknown.json',
+  'draft6/optional/format/unknown.json',
+  // as far as I'm aware, this can't be fixed without custom json parser
+  'draft4/optional/float-overflow.json',
+  'draft6/optional/float-overflow.json',
+  'draft4/optional/zeroTerminatedFloats.json',
+  // FAILING
   'draft4/optional/id.json', // FAIL: 2 out of 3 tests pass
-  'draft4/optional/non-bmp-regex.json', // FAIL: 9 out of 12 tests pass
-  'draft4/optional/zeroTerminatedFloats.json', // FAIL: 0 out of 1 tests pass
-  'draft6/optional/float-overflow.json', // FAIL: 0 out of 1 tests pass
   'draft6/optional/format/json-pointer.json', // FAIL: 32 out of 38 tests pass
-  'draft6/optional/format/unknown.json', // FAIL: 0 out of 7 tests pass
   'draft6/optional/format/uri-reference.json', // FAIL: 14 out of 15 tests pass
   'draft6/optional/format/uri-template.json', // FAIL: 7 out of 10 tests pass
   'draft6/optional/id.json', // FAIL: 3 out of 7 tests pass
-  'draft6/optional/non-bmp-regex.json', // FAIL: 9 out of 12 tests pass
   'draft6/optional/unknownKeyword.json', // FAIL: 2 out of 3 tests pass
 ];
 const excludedTests: string[] = [];
