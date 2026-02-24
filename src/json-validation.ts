@@ -300,7 +300,11 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       // for each regex in "pp", remove all elements of "s" which this regex matches.
       let idx = pp.length;
       while (idx--) {
-        const regExp = RegExp(pp[idx]);
+        const result = compileSchemaRegex(pp[idx]);
+        if (!result.ok) {
+          continue;
+        }
+        const regExp = result.value;
         let idx2 = s.length;
         while (idx2--) {
           if (regExp.test(s[idx2]) === true) {
@@ -825,7 +829,8 @@ const recurseObject = function (this: ZSchemaBase, report: Report, schema: JsonS
     let idx2 = pp.length;
     while (idx2--) {
       const regexString = pp[idx2];
-      if (RegExp(regexString).test(m) === true) {
+      const result = compileSchemaRegex(regexString);
+      if (result.ok && result.value.test(m) === true) {
         s.push(schema.patternProperties![regexString]);
       }
     }

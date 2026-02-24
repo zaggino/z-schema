@@ -23,13 +23,11 @@ const VERSION_FOLDER_MAPPING: Partial<Record<JsonSchemaVersion, JSONSchemaTestSu
 
 const excludedDirs: string[] = [];
 const excludedFiles: string[] = [
-  'draft4/optional/ecmascript-regex.json', // FAIL: 69 out of 74 tests pass
   'draft4/optional/float-overflow.json', // FAIL: 0 out of 1 tests pass
   'draft4/optional/format/unknown.json', // FAIL: 0 out of 7 tests pass
   'draft4/optional/id.json', // FAIL: 2 out of 3 tests pass
   'draft4/optional/non-bmp-regex.json', // FAIL: 9 out of 12 tests pass
   'draft4/optional/zeroTerminatedFloats.json', // FAIL: 0 out of 1 tests pass
-  'draft6/optional/ecmascript-regex.json', // FAIL: 66 out of 74 tests pass
   'draft6/optional/float-overflow.json', // FAIL: 0 out of 1 tests pass
   'draft6/optional/format/json-pointer.json', // FAIL: 32 out of 38 tests pass
   'draft6/optional/format/unknown.json', // FAIL: 0 out of 7 tests pass
