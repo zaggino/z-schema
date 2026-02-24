@@ -40,7 +40,6 @@ const excludedFiles: string[] = [
   'draft6/optional/id.json', // FAIL: 3 out of 7 tests pass
   'draft6/optional/non-bmp-regex.json', // FAIL: 9 out of 12 tests pass
   'draft6/optional/unknownKeyword.json', // FAIL: 2 out of 3 tests pass
-  'draft6/ref.json', // FAIL: 59 out of 70 tests pass
   'draft6/refRemote.json', // FAIL: 16 out of 23 tests pass
 ];
 const excludedTests: string[] = [];
