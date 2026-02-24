@@ -1,5 +1,16 @@
 # Changelog
 
+## [10.0.0](https://github.com/zaggino/z-schema/compare/v9.0.1...v10.0.0) (2026-02-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* implement draft-06, draft-06 version is the new default
+
+### Features
+
+* implement draft-06, draft-06 version is the new default ([30c37ad](https://github.com/zaggino/z-schema/commit/30c37adf251a4e6dc1a52b0790a43c9b7fb6d3e8))
+
 ## [9.0.1](https://github.com/zaggino/z-schema/compare/v9.0.0...v9.0.1) (2026-02-09)
 
 
