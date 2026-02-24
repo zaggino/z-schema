@@ -33,8 +33,6 @@ const excludedFiles: string[] = [
   'draft4/optional/zeroTerminatedFloats.json',
   // FAILING
   'draft4/optional/id.json', // FAIL: 2 out of 3 tests pass
-  'draft6/optional/format/uri-reference.json', // FAIL: 14 out of 15 tests pass
-  'draft6/optional/format/uri-template.json', // FAIL: 7 out of 10 tests pass
   'draft6/optional/id.json', // FAIL: 3 out of 7 tests pass
   'draft6/optional/unknownKeyword.json', // FAIL: 2 out of 3 tests pass
 ];

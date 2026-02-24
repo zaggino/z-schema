@@ -202,14 +202,36 @@ const uriValidator: FormatValidatorFn = function (uri: unknown) {
 
 const uriReferenceValidator: FormatValidatorFn = (uri: unknown) => {
   if (typeof uri !== 'string') return true;
+  // eslint-disable-next-line no-control-regex
+  if (/[^\x00-\x7F]/.test(uri)) return false;
   // URI-reference allows relative URIs
   return /^([a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/.test(uri);
 };
 
 const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => {
   if (typeof uri !== 'string') return true;
-  // URI template has { }
-  return /\{[^}]*\}/.test(uri) && uriReferenceValidator(uri);
+  // URI template allows braces for expressions.
+  if (!/^([a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^`| ]*$/.test(uri)) {
+    return false;
+  }
+
+  let inExpression = false;
+  for (let idx = 0; idx < uri.length; idx++) {
+    const ch = uri[idx];
+    if (ch === '{') {
+      if (inExpression) {
+        return false;
+      }
+      inExpression = true;
+    } else if (ch === '}') {
+      if (!inExpression) {
+        return false;
+      }
+      inExpression = false;
+    }
+  }
+
+  return !inExpression;
 };
 
 const jsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
