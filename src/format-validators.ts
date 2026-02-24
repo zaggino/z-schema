@@ -214,8 +214,9 @@ const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => {
 
 const jsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   if (typeof pointer !== 'string') return true;
-  // JSON Pointer: empty or starts with /
-  return pointer === '' || pointer.startsWith('/');
+  // JSON Pointer: empty, or a sequence of '/'-prefixed reference tokens.
+  // In each token, '~' must be escaped as '~0' or '~1'.
+  return pointer === '' || /^(?:\/(?:[^~]|~0|~1)*)+$/.test(pointer);
 };
 
 const relativeJsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
