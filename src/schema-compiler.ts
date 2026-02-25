@@ -72,7 +72,7 @@ export const collectIds = (obj: JsonSchemaInternal) => {
 
 export interface Reference {
   ref: string;
-  key: '$ref' | '$schema';
+  key: '$ref' | '$schema' | '$recursiveRef';
   obj: JsonSchemaInternal;
   path: Array<string | number>;
 }
@@ -114,6 +114,14 @@ export const collectReferences = (
     results.push({
       ref: resolveReference(scope[scope.length - 1], obj.$ref!),
       key: '$ref',
+      obj: obj,
+      path: path.slice(0),
+    });
+  }
+  if (typeof obj.$recursiveRef === 'string' && typeof (obj as any).__$recursiveRefResolved === 'undefined') {
+    results.push({
+      ref: resolveReference(scope[scope.length - 1], obj.$recursiveRef),
+      key: '$recursiveRef',
       obj: obj,
       path: path.slice(0),
     });

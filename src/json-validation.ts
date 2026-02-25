@@ -1154,6 +1154,13 @@ export function validate(
     isRoot = true;
   }
 
+  const recursiveAnchorStack = (((report as any).__$recursiveAnchorStack as JsonSchemaInternal[] | undefined) ??= []);
+  let pushedRecursiveAnchor = false;
+  if (schema.$recursiveAnchor === true) {
+    recursiveAnchorStack.push(schema);
+    pushedRecursiveAnchor = true;
+  }
+
   // follow schema.$ref keys
   if (schema.$ref !== undefined) {
     const applySiblingKeywordsWithRef =
@@ -1189,6 +1196,33 @@ export function validate(
     }
   }
 
+  // follow schema.$recursiveRef keys
+  if (schema.$recursiveRef !== undefined) {
+    const applySiblingKeywordsWithRecursiveRef =
+      this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+
+    if (applySiblingKeywordsWithRecursiveRef) {
+      let recursiveRefTarget = (schema as any).__$recursiveRefResolved as JsonSchemaInternal | undefined;
+      if (
+        recursiveRefTarget &&
+        typeof recursiveRefTarget === 'object' &&
+        (recursiveRefTarget as JsonSchemaInternal).$recursiveAnchor === true
+      ) {
+        const dynamicRecursiveTarget = recursiveAnchorStack[0];
+        if (dynamicRecursiveTarget) {
+          recursiveRefTarget = dynamicRecursiveTarget;
+        }
+      }
+
+      if (!recursiveRefTarget) {
+        report.addError('REF_UNRESOLVED', [schema.$recursiveRef], undefined, schema);
+      } else {
+        validate.call(this, report, recursiveRefTarget, json);
+      }
+      keys = keys.filter((key) => key !== '$recursiveRef');
+    }
+  }
+
   // type checking first
   if (schema.type) {
     keys.splice(keys.indexOf('type'), 1);
@@ -1196,6 +1230,9 @@ export function validate(
     JsonValidators.type.call(this, report, schema, json);
     report.schemaPath.pop();
     if (report.errors.length && this.options.breakOnFirstError) {
+      if (pushedRecursiveAnchor) {
+        recursiveAnchorStack.pop();
+      }
       return false;
     }
   }
@@ -1222,6 +1259,10 @@ export function validate(
 
   if (typeof this.options.customValidator === 'function') {
     this.options.customValidator.call(this, report, schema, json);
+  }
+
+  if (pushedRecursiveAnchor) {
+    recursiveAnchorStack.pop();
   }
 
   // we don't need the root pointer anymore

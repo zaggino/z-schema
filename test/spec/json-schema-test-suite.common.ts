@@ -46,24 +46,20 @@ const excludedFiles: string[] = [
   'draft2019-09/maxContains.json', // FAIL: 8 out of 12 tests passes
   'draft2019-09/minContains.json', // FAIL: 16 out of 28 tests passes
   'draft2019-09/optional/anchor.json', // FAIL: 3 out of 4 tests passes
-  'draft2019-09/optional/cross-draft.json', // FAIL: 2 out of 3 tests passes
   'draft2019-09/optional/float-overflow.json', // FAIL: 0 out of 1 tests passes
   'draft2019-09/optional/format/duration.json', // FAIL: 11 out of 26 tests passes
   'draft2019-09/optional/format/unknown.json', // FAIL: 0 out of 7 tests passes
   'draft2019-09/optional/format/uuid.json', // FAIL: 8 out of 22 tests passes
-  'draft2019-09/recursiveRef.json', // FAIL: 23 out of 34 tests passes
   'draft2019-09/unevaluatedItems.json', // FAIL: 38 out of 56 tests passes
-  'draft2019-09/unevaluatedProperties.json', // FAIL: 89 out of 125 tests passes
+  'draft2019-09/unevaluatedProperties.json', // FAIL: 106 out of 125 tests passes
   'draft2019-09/vocabulary.json', // FAIL: 4 out of 5 tests passes
   'draft2020-12/defs.json', // FAIL: 1 out of 2 tests passes
   'draft2020-12/dependentRequired.json', // FAIL: 14 out of 20 tests passes
   'draft2020-12/dependentSchemas.json', // FAIL: 10 out of 20 tests passes
   'draft2020-12/dynamicRef.json', // FAIL: 26 out of 44 tests passes
   'draft2020-12/format.json', // FAIL: 102 out of 133 tests passes
-  'draft2020-12/items.json', // FAIL: 22 out of 29 tests passes
   'draft2020-12/maxContains.json', // FAIL: 8 out of 12 tests passes
   'draft2020-12/minContains.json', // FAIL: 16 out of 28 tests passes
-  'draft2020-12/not.json', // FAIL: 39 out of 40 tests passes
   'draft2020-12/optional/anchor.json', // FAIL: 3 out of 4 tests passes
   'draft2020-12/optional/dynamicRef.json', // FAIL: 1 out of 2 tests passes
   'draft2020-12/optional/format/ecmascript-regex.json', // FAIL: 0 out of 1 tests passes
@@ -72,10 +68,8 @@ const excludedFiles: string[] = [
   'draft2020-12/optional/format/email.json', // FAIL: 22 out of 24 tests passes
   'draft2020-12/optional/format/unknown.json', // FAIL: 0 out of 7 tests passes
   'draft2020-12/optional/format/uuid.json', // FAIL: 8 out of 22 tests passes
-  'draft2020-12/prefixItems.json', // FAIL: 9 out of 11 tests passes
   'draft2020-12/unevaluatedItems.json', // FAIL: 44 out of 71 tests passes
-  'draft2020-12/unevaluatedProperties.json', // FAIL: 89 out of 125 tests passes
-  'draft2020-12/uniqueItems.json', // FAIL: 63 out of 69 tests passes
+  'draft2020-12/unevaluatedProperties.json', // FAIL: 106 out of 125 tests passes
   'draft2020-12/vocabulary.json', // FAIL: 4 out of 5 tests passes
 ];
 const excludedTests: string[] = [];

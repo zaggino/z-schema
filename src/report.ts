@@ -95,10 +95,14 @@ export class Report {
       // subreport
       this.reportOptions = (reportOptionsOrValidate as ReportOptions) || {};
       this.validateOptions = validateOptions || parentOrOptions.validateOptions;
+      (this as any).__$recursiveAnchorStack = Array.isArray((parentOrOptions as any).__$recursiveAnchorStack)
+        ? [...(parentOrOptions as any).__$recursiveAnchorStack]
+        : [];
     } else {
       // primary
       this.reportOptions = {};
       this.validateOptions = (reportOptionsOrValidate as ValidateOptions) || {};
+      (this as any).__$recursiveAnchorStack = [];
     }
   }
 
