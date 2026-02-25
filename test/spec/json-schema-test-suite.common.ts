@@ -37,11 +37,6 @@ const excludedFiles: string[] = [
   // decided to not support this for now, using unsupported drafts should fail
   'draft7/optional/cross-draft.json',
   // FAILING
-  'draft7/optional/format/iri-reference.json', // FAIL: 2 out of 13 tests are passing
-  'draft7/optional/format/iri.json', // FAIL: 4 out of 15 tests are passing
-  'draft7/optional/format/regex.json', // FAIL: 2 out of 8 tests are passing
-  'draft7/optional/format/relative-json-pointer.json', // FAIL: 12 out of 18 tests are passing
-  'draft7/optional/format/time.json', // FAIL: 32 out of 46 tests are passing
 ];
 const excludedTests: string[] = [];
 

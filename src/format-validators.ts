@@ -5,6 +5,7 @@ import isURLModule from 'validator/lib/isURL.js';
 import { isValidRfc3339Date } from './utils/date.js';
 import { isValidHostname, isValidIdnHostname } from './utils/hostname.js';
 import { sortedKeys } from './utils/json.js';
+import { parseRfc3339Time } from './utils/time.js';
 
 export type FormatValidatorFn = (input: unknown) => boolean | Promise<boolean>;
 
@@ -45,45 +46,8 @@ const dateTimeValidator: FormatValidatorFn = (dateTime: unknown) => {
   if (!isValidRfc3339Date(year, month, day)) {
     return false;
   }
-  // Check time
-  const timeMatches = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]+)?(z|([+-][0-9]{2}:[0-9]{2}))$/.exec(timePart);
-  if (timeMatches === null) {
-    return false;
-  }
-  const hour = parseInt(timeMatches[1], 10);
-  const minute = parseInt(timeMatches[2], 10);
-  const second = parseInt(timeMatches[3], 10);
-  if (hour > 23 || minute > 59 || second > 60) {
-    return false;
-  }
-  // Check offset
-  let utcHour = hour;
-  if (timeMatches[5] !== 'z') {
-    const offset = timeMatches[5];
-    const offsetMatches = /^([+-])([0-9]{2}):([0-9]{2})$/.exec(offset);
-    if (offsetMatches === null) {
-      return false;
-    }
-    const offsetSign = offsetMatches[1];
-    const offsetHour = parseInt(offsetMatches[2], 10);
-    const offsetMinute = parseInt(offsetMatches[3], 10);
-    if (offsetHour > 23 || offsetMinute > 59) {
-      return false;
-    }
-    if (offsetSign === '+') {
-      utcHour = hour - offsetHour;
-    } else {
-      utcHour = hour + offsetHour;
-    }
-    utcHour = ((utcHour % 24) + 24) % 24;
-  }
-  // Leap second only at 23:59:60 UTC
-  if (second === 60) {
-    if (utcHour !== 23 || minute !== 59) {
-      return false;
-    }
-  }
-  return true;
+
+  return parseRfc3339Time(timePart) !== null;
 };
 
 const emailValidator: FormatValidatorFn = (email: unknown) => {
@@ -192,14 +156,14 @@ const jsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
 
 const relativeJsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   if (typeof pointer !== 'string') return true;
-  // Relative JSON Pointer: number#path or empty
-  return /^\d+(#.*)?$/.test(pointer) || pointer === '';
+  // Relative JSON Pointer: non-negative integer prefix (no leading zeros unless zero),
+  // followed by either '#', a JSON Pointer, or nothing.
+  return /^(?:0|[1-9]\d*)(?:#|(?:\/(?:[^~]|~0|~1)*)+)?$/.test(pointer);
 };
 
 const timeValidator: FormatValidatorFn = (time: unknown) => {
   if (typeof time !== 'string') return true;
-  // time: hh:mm:ss[.fraction]
-  return /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(\.\d+)?$/.test(time);
+  return parseRfc3339Time(time) !== null;
 };
 
 const idnEmailValidator: FormatValidatorFn = (email: unknown) => {
@@ -215,7 +179,15 @@ const idnHostnameValidator: FormatValidatorFn = (hostname: unknown) => {
 
 const iriValidator: FormatValidatorFn = (iri: unknown) => {
   if (typeof iri !== 'string') return true;
-  return /^[a-zA-Z][a-zA-Z0-9+.-]*:[^"\\<>^{}^`| ]*$/u.test(iri);
+  if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:[^"\\<>^{}^`| ]*$/u.test(iri)) {
+    return false;
+  }
+  try {
+    new URL(iri);
+    return true;
+  } catch (_e) {
+    return false;
+  }
 };
 
 const iriReferenceValidator: FormatValidatorFn = (iriReference: unknown) => {
