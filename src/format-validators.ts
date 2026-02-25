@@ -2,6 +2,8 @@ import isEmailModule from 'validator/lib/isEmail.js';
 import isIPModule from 'validator/lib/isIP.js';
 import isURLModule from 'validator/lib/isURL.js';
 
+import { isValidRfc3339Date } from './utils/date.js';
+import { isValidHostname, isValidIdnHostname } from './utils/hostname.js';
 import { sortedKeys } from './utils/json.js';
 
 export type FormatValidatorFn = (input: unknown) => boolean | Promise<boolean>;
@@ -15,13 +17,10 @@ const dateValidator: FormatValidatorFn = (date: unknown) => {
   if (matches === null) {
     return false;
   }
-  // var year = matches[1];
-  // var month = matches[2];
-  // var day = matches[3];
-  if (matches[2] < '01' || matches[2] > '12' || matches[3] < '01' || matches[3] > '31') {
-    return false;
-  }
-  return true;
+  const year = parseInt(matches[1], 10);
+  const month = parseInt(matches[2], 10);
+  const day = parseInt(matches[3], 10);
+  return isValidRfc3339Date(year, month, day);
 };
 
 const dateTimeValidator: FormatValidatorFn = (dateTime: unknown) => {
@@ -43,12 +42,7 @@ const dateTimeValidator: FormatValidatorFn = (dateTime: unknown) => {
   const year = parseInt(dateMatches[1], 10);
   const month = parseInt(dateMatches[2], 10);
   const day = parseInt(dateMatches[3], 10);
-  if (month < 1 || month > 12 || day < 1 || day > 31) {
-    return false;
-  }
-  // Check if date is valid
-  const date = new Date(year, month - 1, day);
-  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+  if (!isValidRfc3339Date(year, month, day)) {
     return false;
   }
   // Check time
@@ -103,52 +97,7 @@ const hostnameValidator: FormatValidatorFn = (hostname: unknown) => {
   if (typeof hostname !== 'string') {
     return true;
   }
-  /*
-          http://json-schema.org/latest/json-schema-validation.html#anchor114
-          A string instance is valid against this attribute if it is a valid
-          representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
-
-          http://tools.ietf.org/html/rfc1034#section-3.5
-
-          <digit> ::= any one of the ten digits 0 through 9
-          var digit = /[0-9]/;
-
-          <letter> ::= any one of the 52 alphabetic characters A through Z in upper case and a through z in lower case
-          var letter = /[a-zA-Z]/;
-
-          <let-dig> ::= <letter> | <digit>
-          var letDig = /[0-9a-zA-Z]/;
-
-          <let-dig-hyp> ::= <let-dig> | "-"
-          var letDigHyp = /[-0-9a-zA-Z]/;
-
-          <ldh-str> ::= <let-dig-hyp> | <let-dig-hyp> <ldh-str>
-          var ldhStr = /[-0-9a-zA-Z]+/;
-
-          <label> ::= <letter> [ [ <ldh-str> ] <let-dig> ]
-          var label = /[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?/;
-
-          <subdomain> ::= <label> | <subdomain> "." <label>
-          var subdomain = /^[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?(\.[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?)*$/;
-
-          <domain> ::= <subdomain> | " "
-          var domain = null;
-      */
-  const valid = /^[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?(\.[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?)*$/.test(hostname);
-  if (valid) {
-    // the sum of all label octets and label lengths is limited to 255.
-    if (hostname.length > 255) {
-      return false;
-    }
-    // Each node has a label, which is zero to 63 octets in length
-    const labels = hostname.split('.');
-    for (let i = 0; i < labels.length; i++) {
-      if (labels[i].length > 63) {
-        return false;
-      }
-    }
-  }
-  return valid;
+  return isValidHostname(hostname);
 };
 
 const ipv4Validator: FormatValidatorFn = (ipv4: unknown) => {
@@ -261,13 +210,7 @@ const idnEmailValidator: FormatValidatorFn = (email: unknown) => {
 
 const idnHostnameValidator: FormatValidatorFn = (hostname: unknown) => {
   if (typeof hostname !== 'string') return true;
-  if (hostname.length === 0 || hostname.length > 255) return false;
-  const normalizedHostname = hostname.endsWith('.') ? hostname.slice(0, -1) : hostname;
-  const labels = normalizedHostname.split('.');
-  if (labels.some((label) => label.length === 0 || label.length > 63)) {
-    return false;
-  }
-  return labels.every((label) => /^[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?$/u.test(label));
+  return isValidIdnHostname(hostname);
 };
 
 const iriValidator: FormatValidatorFn = (iri: unknown) => {

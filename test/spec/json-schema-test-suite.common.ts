@@ -34,11 +34,9 @@ const excludedFiles: string[] = [
   'draft6/optional/float-overflow.json',
   'draft7/optional/float-overflow.json',
   'draft4/optional/zeroTerminatedFloats.json',
+  // decided to not support this for now, using unsupported drafts should fail
+  'draft7/optional/cross-draft.json',
   // FAILING
-  'draft7/optional/cross-draft.json', // FAIL: 1 out of 2 tests are passing
-  'draft7/optional/format/date.json', // FAIL: 40 out of 48 tests are passing
-  'draft7/optional/format/hostname.json', // FAIL: 37 out of 61 tests are passing
-  'draft7/optional/format/idn-hostname.json', // FAIL: 42 out of 76 tests are passing
   'draft7/optional/format/iri-reference.json', // FAIL: 2 out of 13 tests are passing
   'draft7/optional/format/iri.json', // FAIL: 4 out of 15 tests are passing
   'draft7/optional/format/regex.json', // FAIL: 2 out of 8 tests are passing
