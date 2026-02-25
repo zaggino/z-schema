@@ -112,6 +112,8 @@ interface SchemaErrorDetail {
   title?: string; // Schema title (if present)
   description?: string; // Schema description (if present)
   inner?: SchemaErrorDetail[]; // Sub-errors (e.g., for oneOf/anyOf)
+  schemaId?: string; // Schema id (if present)
+  keyword?: string; // Schema keyword that caused the error (e.g., "required", "type")
 }
 ```
 

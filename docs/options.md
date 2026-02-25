@@ -2,6 +2,41 @@
 
 All options are passed to `ZSchema.create(options)`. Default values are shown where applicable.
 
+## async
+
+When true, `ZSchema.create()` returns an async validator (`ZSchemaAsync` or `ZSchemaAsyncSafe`). The `validate()` method returns a `Promise` instead of a synchronous result. Required when using async format validators.
+
+This is a factory-only option — it is consumed by `ZSchema.create()` and not stored in the validator instance.
+
+Default: `false`
+
+```javascript
+const validator = ZSchema.create({ async: true });
+await validator.validate(data, schema); // returns Promise<true>
+```
+
+## safe
+
+When true, `ZSchema.create()` returns a safe validator (`ZSchemaSafe` or `ZSchemaAsyncSafe`). The `validate()` method returns a result object `{ valid, err? }` instead of throwing on error.
+
+This is a factory-only option — it is consumed by `ZSchema.create()` and not stored in the validator instance.
+
+Default: `false`
+
+```javascript
+const validator = ZSchema.create({ safe: true });
+const result = validator.validate(data, schema);
+// result: { valid: boolean, err?: ValidateError }
+```
+
+Combine both for async + safe:
+
+```javascript
+const validator = ZSchema.create({ async: true, safe: true });
+const result = await validator.validate(data, schema);
+// result: { valid: boolean, err?: ValidateError }
+```
+
 ## version
 
 Sets the JSON Schema draft version to validate against.

@@ -173,8 +173,9 @@ ZSchema.setSchemaReader((uri: string) => {
 
 | Version | Changes                                                                                           |
 | ------- | ------------------------------------------------------------------------------------------------- |
+| **v11** | Default version is **draft-07**. Implemented draft-07 tests from JSON Schema Test suite.          |
 | **v10** | Default version is **draft-06**. Implemented draft-06 tests from JSON Schema Test suite.          |
-| **v9**  | New factory API: `ZSchema.create()` replaces `new ZSchema()`. Default draft is **draft-06**.      |
+| **v9**  | New factory API: `ZSchema.create()` replaces `new ZSchema()`. New cache algorithms.               |
 | **v8**  | Schemas without `$schema` default to draft-04. Use `{ version: 'none' }` for the old v7 behavior. |
 | **v7**  | Rewritten in TypeScript/ESM. Passes all JSON Schema Test Suite tests for draft-04.                |
 | **v6**  | Legacy version. Draft-04 support.                                                                 |

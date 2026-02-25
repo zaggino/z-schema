@@ -163,6 +163,8 @@ interface SchemaErrorDetail {
   title?: string; // schema title if present
   description?: string; // schema description if present
   inner?: SchemaErrorDetail[]; // sub-errors for anyOf/oneOf/not
+  schemaId?: string; // schema id if present
+  keyword?: string; // schema keyword that caused the error (e.g. "required", "type")
 }
 ```
 

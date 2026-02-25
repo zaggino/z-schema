@@ -18,9 +18,9 @@ git submodule update --init --recursive
 
 ## Branch & PR Workflow
 
-1. Create a feature branch from `v10` (the active development branch):
+1. Create a feature branch from `main` (the active development branch):
    ```bash
-   git checkout -b feature/my-change v10
+   git checkout -b feature/my-change main
    ```
 2. Make your changes following the [code conventions](conventions.md).
 3. Run the full check suite before pushing:
@@ -31,7 +31,7 @@ git submodule update --init --recursive
    npm run build:tests
    npm test
    ```
-4. Push and open a PR against the `v10` branch.
+4. Push and open a PR against the `main` branch.
 
 ## Making Changes
 
