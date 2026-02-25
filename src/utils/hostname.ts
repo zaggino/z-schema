@@ -1,4 +1,4 @@
-import punycode from 'punycode/';
+import punycode from 'punycode/punycode.js';
 import isIPModule from 'validator/lib/isIP.js';
 
 const IDN_SEPARATOR_REGEX = /[\u3002\uff0e\uff61]/g;
