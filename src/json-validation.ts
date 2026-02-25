@@ -2,6 +2,7 @@ import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal } from './json-schem
 import type { ValidateOptions, ZSchemaBase } from './z-schema-base.js';
 
 import { getFormatValidators } from './format-validators.js';
+import { findId, getId } from './json-schema.js';
 import { Report } from './report.js';
 import { difference, isUniqueArray } from './utils/array.js';
 import { decodeBase64, isValidBase64 } from './utils/base64.js';
@@ -10,6 +11,7 @@ import { areEqual } from './utils/json.js';
 import { hasOwn } from './utils/properties.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
 import { ucs2decode } from './utils/unicode.js';
+import { getRemotePath } from './utils/uri.js';
 import { isObject, whatIs } from './utils/what-is.js';
 
 const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
@@ -24,6 +26,28 @@ const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
 };
 
 type JsonValidatorFn = (this: ZSchemaBase, report: Report, schema: JsonSchema, json: unknown) => void;
+
+const getDynamicRefAnchorName = (dynamicRef: string) => {
+  const hashIdx = dynamicRef.indexOf('#');
+  if (hashIdx === -1) {
+    return undefined;
+  }
+  const fragment = dynamicRef.slice(hashIdx + 1);
+  if (!fragment || fragment[0] === '/') {
+    return undefined;
+  }
+  return fragment;
+};
+
+const findDynamicAnchorInScope = (scopeSchema: JsonSchemaInternal, anchorName: string) => {
+  const scopeId = getId(scopeSchema);
+  const scopeBaseUri = scopeId ? getRemotePath(scopeId) : undefined;
+  const found = findId(scopeSchema, anchorName, scopeBaseUri, scopeBaseUri);
+  if (found && found.$dynamicAnchor === anchorName) {
+    return found;
+  }
+  return undefined;
+};
 
 export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   id: () => {},
@@ -1167,8 +1191,17 @@ export function validate(
     isRoot = true;
   }
 
-  const recursiveAnchorStack = (((report as any).__$recursiveAnchorStack as JsonSchemaInternal[] | undefined) ??= []);
+  const recursiveAnchorStack = report.__$recursiveAnchorStack;
+  const dynamicScopeStack = report.__$dynamicScopeStack;
   let pushedRecursiveAnchor = false;
+  let pushedDynamicScope = false;
+  const schemaId = getId(schema);
+  const schemaResourceRoot = (schema as JsonSchemaInternal).__$resourceRoot;
+  const dynamicScopeEntry = schemaResourceRoot || (isRoot || typeof schemaId === 'string' ? schema : undefined);
+  if (dynamicScopeEntry && dynamicScopeStack[dynamicScopeStack.length - 1] !== dynamicScopeEntry) {
+    dynamicScopeStack.push(dynamicScopeEntry);
+    pushedDynamicScope = true;
+  }
   if (schema.$recursiveAnchor === true) {
     recursiveAnchorStack.push(schema);
     pushedRecursiveAnchor = true;
@@ -1236,6 +1269,39 @@ export function validate(
     }
   }
 
+  // follow schema.$dynamicRef keys
+  if (schema.$dynamicRef !== undefined) {
+    const applySiblingKeywordsWithDynamicRef = this.options.version === 'draft2020-12';
+
+    if (applySiblingKeywordsWithDynamicRef) {
+      let dynamicRefTarget = schema.__$dynamicRefResolved as JsonSchemaInternal | boolean | undefined;
+
+      const anchorName = getDynamicRefAnchorName(schema.$dynamicRef);
+      if (
+        anchorName &&
+        dynamicRefTarget &&
+        typeof dynamicRefTarget === 'object' &&
+        dynamicRefTarget.$dynamicAnchor === anchorName
+      ) {
+        for (let scopeIdx = 0; scopeIdx < dynamicScopeStack.length; scopeIdx++) {
+          const scopeSchema = dynamicScopeStack[scopeIdx];
+          const scopedTarget = findDynamicAnchorInScope(scopeSchema, anchorName);
+          if (scopedTarget) {
+            dynamicRefTarget = scopedTarget;
+            break;
+          }
+        }
+      }
+
+      if (typeof dynamicRefTarget === 'undefined') {
+        report.addError('REF_UNRESOLVED', [schema.$dynamicRef], undefined, schema);
+      } else {
+        validate.call(this, report, dynamicRefTarget, json);
+      }
+      keys = keys.filter((key) => key !== '$dynamicRef');
+    }
+  }
+
   // type checking first
   if (schema.type) {
     keys.splice(keys.indexOf('type'), 1);
@@ -1245,6 +1311,9 @@ export function validate(
     if (report.errors.length && this.options.breakOnFirstError) {
       if (pushedRecursiveAnchor) {
         recursiveAnchorStack.pop();
+      }
+      if (pushedDynamicScope) {
+        dynamicScopeStack.pop();
       }
       return false;
     }
@@ -1276,6 +1345,9 @@ export function validate(
 
   if (pushedRecursiveAnchor) {
     recursiveAnchorStack.pop();
+  }
+  if (pushedDynamicScope) {
+    dynamicScopeStack.pop();
   }
 
   // we don't need the root pointer anymore

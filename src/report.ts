@@ -70,6 +70,8 @@ type AsyncTask = [TaskFn, TaskFnArgs, TaskProcessFn];
 export class Report {
   asyncTasks: AsyncTask[] = [];
   commonErrorMessage?: string;
+  __$recursiveAnchorStack: JsonSchemaInternal[] = [];
+  __$dynamicScopeStack: JsonSchemaInternal[] = [];
   errors: SchemaErrorDetail[] = [];
   json?: unknown;
   path: Array<number | string> = [];
@@ -95,14 +97,14 @@ export class Report {
       // subreport
       this.reportOptions = (reportOptionsOrValidate as ReportOptions) || {};
       this.validateOptions = validateOptions || parentOrOptions.validateOptions;
-      (this as any).__$recursiveAnchorStack = Array.isArray((parentOrOptions as any).__$recursiveAnchorStack)
-        ? [...(parentOrOptions as any).__$recursiveAnchorStack]
-        : [];
+      this.__$recursiveAnchorStack = [...parentOrOptions.__$recursiveAnchorStack];
+      this.__$dynamicScopeStack = [...parentOrOptions.__$dynamicScopeStack];
     } else {
       // primary
       this.reportOptions = {};
       this.validateOptions = (reportOptionsOrValidate as ValidateOptions) || {};
-      (this as any).__$recursiveAnchorStack = [];
+      this.__$recursiveAnchorStack = [];
+      this.__$dynamicScopeStack = [];
     }
   }
 

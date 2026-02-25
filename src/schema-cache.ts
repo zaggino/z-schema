@@ -177,6 +177,8 @@ export class SchemaCache {
       }
     }
 
+    const resourceRoot = result;
+
     if (result && queryPath) {
       const parts = queryPath.split('/');
       for (let idx = 0, lim = parts.length; result && idx < lim; idx++) {
@@ -189,6 +191,10 @@ export class SchemaCache {
           result = result[key as keyof typeof result] as JsonSchemaInternal | undefined;
         }
       }
+    }
+
+    if (result && typeof result === 'object' && resourceRoot && typeof resourceRoot === 'object') {
+      result.__$resourceRoot = resourceRoot;
     }
 
     return result;

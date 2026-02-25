@@ -36,14 +36,14 @@ export const collectIds = (obj: JsonSchemaInternal) => {
       if (type === 'absolute' || (type === 'root' && isAbsoluteUri(nodeId))) {
         id.absoluteUri = nodeId;
       } else if (type === 'root' && typeof node.id === 'string' && isAbsoluteUri(node.id) && node.id !== nodeId) {
-        id.absoluteUri = resolveIdScope(node.id, nodeId);
+        id.absoluteUri = resolveSchemaScopeId(node.id, node as JsonSchemaInternal, nodeId);
       } else if (type === 'relative') {
         id.absoluteParent = scope
           .filter((x) => x.type === 'absolute' || (x.type === 'root' && x.absoluteUri))
           .slice(-1)[0];
         if (id.absoluteParent) {
           const parentUri = id.absoluteParent.absoluteUri || id.absoluteParent.id;
-          id.absoluteUri = resolveIdScope(parentUri, id.id);
+          id.absoluteUri = resolveSchemaScopeId(parentUri, node as JsonSchemaInternal, id.id);
         }
       }
       ids.push(id);
@@ -72,7 +72,7 @@ export const collectIds = (obj: JsonSchemaInternal) => {
 
 export interface Reference {
   ref: string;
-  key: '$ref' | '$schema' | '$recursiveRef';
+  key: '$ref' | '$schema' | '$recursiveRef' | '$dynamicRef';
   obj: JsonSchemaInternal;
   path: Array<string | number>;
 }
@@ -106,7 +106,7 @@ export const collectReferences = (
 
   if (typeof scopeId === 'string' && (isRootScope || !hasRef || options.useRefObjectScope === true)) {
     const base = scope.length > 0 ? scope[scope.length - 1] : undefined;
-    scope.push(resolveIdScope(base, scopeId));
+    scope.push(resolveSchemaScopeId(base, obj, scopeId));
     addedScope = true;
   }
 
@@ -122,6 +122,14 @@ export const collectReferences = (
     results.push({
       ref: resolveReference(scope[scope.length - 1], obj.$recursiveRef),
       key: '$recursiveRef',
+      obj: obj,
+      path: path.slice(0),
+    });
+  }
+  if (typeof obj.$dynamicRef === 'string' && typeof (obj as any).__$dynamicRefResolved === 'undefined') {
+    results.push({
+      ref: resolveReference(scope[scope.length - 1], obj.$dynamicRef),
+      key: '$dynamicRef',
       obj: obj,
       path: path.slice(0),
     });
@@ -218,6 +226,13 @@ const resolveIdScope = (base: string | undefined, id: string) => {
   return resolveReference(base, id);
 };
 
+const resolveSchemaScopeId = (base: string | undefined, schema: JsonSchemaInternal, id: string) => {
+  if (typeof schema.$id === 'string') {
+    return resolveReference(base, id);
+  }
+  return resolveIdScope(base, id);
+};
+
 export class SchemaCompiler {
   constructor(private validator: ZSchemaBase) {}
 
@@ -244,7 +259,7 @@ export class SchemaCompiler {
     // if schema is a string, assume it's a uri
     if (typeof schema === 'string') {
       const loadedSchema = this.validator.scache.getSchemaByUri(report, schema);
-      if (!loadedSchema) {
+      if (typeof loadedSchema === 'undefined') {
         report.addError('SCHEMA_NOT_REACHABLE', [schema]);
         return false;
       }
@@ -307,7 +322,7 @@ export class SchemaCompiler {
       let response = this.validator.scache.getSchemaByUri(report, refObj.ref, schema);
 
       // we can try to use custom schemaReader if available
-      if (!response) {
+      if (typeof response === 'undefined') {
         const schemaReader = getSchemaReader();
         if (schemaReader) {
           const remotePath = getRemotePath(refObj.ref);
@@ -328,7 +343,7 @@ export class SchemaCompiler {
         }
       }
 
-      if (!response) {
+      if (typeof response === 'undefined') {
         const hasNotValid = report.hasError('REMOTE_NOT_VALID', [refObj.ref]);
         const isAbsolute = isAbsoluteUri(refObj.ref);
         let isDownloaded = false;
