@@ -42,8 +42,9 @@ jobs:
       - if: matrix.node-version == '22.x'
         name: Tests with coverage
         run: npm run test:coverage
-      - if: matrix.node-version == '22.x'
+      - if: matrix.node-version == '22.x' && secrets.GITHUB_TOKEN != ''
         name: Upload coverage to Coveralls
+        continue-on-error: true
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
