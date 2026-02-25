@@ -639,6 +639,24 @@ const SchemaValidators = {
       }
     }
   },
+  contentEncoding: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
+    if (report.options.version !== 'draft-07') {
+      return;
+    }
+
+    if (typeof schema.contentEncoding !== 'string') {
+      report.addError('KEYWORD_TYPE_EXPECTED', ['contentEncoding', 'string'], undefined, schema, 'contentEncoding');
+    }
+  },
+  contentMediaType: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
+    if (report.options.version !== 'draft-07') {
+      return;
+    }
+
+    if (typeof schema.contentMediaType !== 'string') {
+      report.addError('KEYWORD_TYPE_EXPECTED', ['contentMediaType', 'string'], undefined, schema, 'contentMediaType');
+    }
+  },
   id: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-core.html#rfc.section.7.2
     if (typeof schema.id !== 'string') {

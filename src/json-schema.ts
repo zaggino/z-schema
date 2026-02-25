@@ -45,6 +45,8 @@ export interface JsonSchemaCommon {
   anyOf?: JsonSchema[];
   oneOf?: JsonSchema[];
   not?: JsonSchema;
+  contentEncoding?: string;
+  contentMediaType?: string;
   if?: JsonSchema | boolean;
   then?: JsonSchema | boolean;
   else?: JsonSchema | boolean;

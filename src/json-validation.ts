@@ -4,6 +4,7 @@ import type { ValidateOptions, ZSchemaBase } from './z-schema-base.js';
 import { getFormatValidators } from './format-validators.js';
 import { Report } from './report.js';
 import { difference, isUniqueArray } from './utils/array.js';
+import { decodeBase64, isValidBase64 } from './utils/base64.js';
 import { shallowClone } from './utils/clone.js';
 import { areEqual } from './utils/json.js';
 import { hasOwn } from './utils/properties.js';
@@ -651,6 +652,70 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       }
     } else if (this.options.ignoreUnknownFormats !== true) {
       report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
+    }
+  },
+  contentEncoding: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (this.options.version !== 'draft-07') {
+      return;
+    }
+    if (typeof json !== 'string') {
+      return;
+    }
+
+    const contentEncoding = (schema as JsonSchemaAll).contentEncoding;
+    if (contentEncoding !== 'base64') {
+      return;
+    }
+
+    if (!isValidBase64(json)) {
+      report.addError(
+        'INVALID_FORMAT',
+        ['contentEncoding:base64', JSON.stringify(json)],
+        undefined,
+        schema,
+        'contentEncoding'
+      );
+    }
+  },
+  contentMediaType: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (this.options.version !== 'draft-07') {
+      return;
+    }
+    if (typeof json !== 'string') {
+      return;
+    }
+
+    const contentMediaType = (schema as JsonSchemaAll).contentMediaType;
+    if (contentMediaType !== 'application/json') {
+      return;
+    }
+
+    let payload = json;
+    if ((schema as JsonSchemaAll).contentEncoding === 'base64') {
+      const decoded = decodeBase64(json);
+      if (decoded === undefined) {
+        report.addError(
+          'INVALID_FORMAT',
+          ['contentEncoding:base64', JSON.stringify(json)],
+          undefined,
+          schema,
+          'contentEncoding'
+        );
+        return;
+      }
+      payload = decoded;
+    }
+
+    try {
+      JSON.parse(payload);
+    } catch {
+      report.addError(
+        'INVALID_FORMAT',
+        ['contentMediaType:application/json', JSON.stringify(json)],
+        undefined,
+        schema,
+        'contentMediaType'
+      );
     }
   },
   // draft-06 additions
