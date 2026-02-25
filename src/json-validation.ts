@@ -554,6 +554,35 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       report.addError('NOT_PASSED', undefined, undefined, schema, 'not');
     }
   },
+  if: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (this.options.version !== 'draft-07') {
+      return;
+    }
+
+    const conditionSchema = (schema as JsonSchemaAll).if;
+    const thenSchema = (schema as JsonSchemaAll).then;
+    const elseSchema = (schema as JsonSchemaAll).else;
+
+    if (conditionSchema === undefined || (thenSchema === undefined && elseSchema === undefined)) {
+      return;
+    }
+
+    const conditionReport = new Report(report);
+    validate.call(this, conditionReport, conditionSchema as any, json);
+
+    const branchSchema = conditionReport.errors.length === 0 ? thenSchema : elseSchema;
+    if (branchSchema === undefined) {
+      return;
+    }
+
+    validate.call(this, report, branchSchema as any, json);
+  },
+  then: function () {
+    // handled by if
+  },
+  else: function () {
+    // handled by if
+  },
   definitions: function () {
     /*report: Report, schema: JsonSchemaInternal, json: unknown*/
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.2

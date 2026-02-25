@@ -45,6 +45,9 @@ export interface JsonSchemaCommon {
   anyOf?: JsonSchema[];
   oneOf?: JsonSchema[];
   not?: JsonSchema;
+  if?: JsonSchema | boolean;
+  then?: JsonSchema | boolean;
+  else?: JsonSchema | boolean;
 }
 
 export type JsonSchemaType = 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string';

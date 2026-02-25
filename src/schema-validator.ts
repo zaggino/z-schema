@@ -564,6 +564,54 @@ const SchemaValidators = {
       report.path.pop();
     }
   },
+  if: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
+    if (report.options.version !== 'draft-07') {
+      return;
+    }
+
+    const ifSchema = schema.if;
+    const isValidIfSchema = typeof ifSchema === 'boolean' || isObject(ifSchema);
+    if (!isValidIfSchema) {
+      report.addError('KEYWORD_TYPE_EXPECTED', ['if', ['boolean', 'object']], undefined, schema, 'if');
+      return;
+    }
+
+    report.path.push('if');
+    this.validateSchema(report, ifSchema as JsonSchemaInternal);
+    report.path.pop();
+  },
+  then: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
+    if (report.options.version !== 'draft-07') {
+      return;
+    }
+
+    const thenSchema = schema.then;
+    const isValidThenSchema = typeof thenSchema === 'boolean' || isObject(thenSchema);
+    if (!isValidThenSchema) {
+      report.addError('KEYWORD_TYPE_EXPECTED', ['then', ['boolean', 'object']], undefined, schema, 'then');
+      return;
+    }
+
+    report.path.push('then');
+    this.validateSchema(report, thenSchema as JsonSchemaInternal);
+    report.path.pop();
+  },
+  else: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
+    if (report.options.version !== 'draft-07') {
+      return;
+    }
+
+    const elseSchema = schema.else;
+    const isValidElseSchema = typeof elseSchema === 'boolean' || isObject(elseSchema);
+    if (!isValidElseSchema) {
+      report.addError('KEYWORD_TYPE_EXPECTED', ['else', ['boolean', 'object']], undefined, schema, 'else');
+      return;
+    }
+
+    report.path.push('else');
+    this.validateSchema(report, elseSchema as JsonSchemaInternal);
+    report.path.pop();
+  },
   definitions: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.1
     if (!isObject(schema.definitions)) {
