@@ -893,14 +893,27 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
 
     const addContainsErrorIfNeeded = () => {
-      let hasValidItem = false;
+      let matchingItems = 0;
       for (const subReport of subReports) {
         if (subReport.errors.length === 0) {
-          hasValidItem = true;
-          break;
+          matchingItems += 1;
         }
       }
-      if (!hasValidItem) {
+
+      const supportsContainsBounds = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+      const minContains: number =
+        supportsContainsBounds && typeof (schema as JsonSchemaAll).minContains === 'number'
+          ? ((schema as JsonSchemaAll).minContains ?? 1)
+          : 1;
+      const maxContains =
+        supportsContainsBounds && typeof (schema as JsonSchemaAll).maxContains === 'number'
+          ? (schema as JsonSchemaAll).maxContains
+          : undefined;
+
+      const hasEnoughMatches = matchingItems >= minContains;
+      const notTooManyMatches = maxContains === undefined || matchingItems <= maxContains;
+
+      if (!hasEnoughMatches || !notTooManyMatches) {
         report.addError('CONTAINS', undefined, subReports, schema, undefined);
       }
     };
