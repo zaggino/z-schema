@@ -1,5 +1,12 @@
 # Changelog
 
+## [11.0.1](https://github.com/zaggino/z-schema/compare/v11.0.0...v11.0.1) (2026-02-25)
+
+
+### Bug Fixes
+
+* refresh docs ([4f6a30f](https://github.com/zaggino/z-schema/commit/4f6a30fc6ca54893043e6626cdca82ed337e898f))
+
 ## [11.0.0](https://github.com/zaggino/z-schema/compare/v10.0.0...v11.0.0) (2026-02-25)
 
 
