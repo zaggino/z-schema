@@ -183,6 +183,9 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     /*report: Report, schema: JsonSchemaInternal, json: unknown*/
     // covered in additionalItems
   },
+  prefixItems: function () {
+    // handled in recurseArray
+  },
   maxItems: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.2.2
     if (shouldSkipValidate(this.validateOptions, ['ARRAY_LENGTH_LONG'])) {
@@ -565,13 +568,13 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     }
   },
   if: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
-    if (this.options.version !== 'draft-07') {
+    if (this.options.version === 'draft-04' || this.options.version === 'draft-06') {
       return;
     }
 
-    const conditionSchema = (schema as JsonSchemaAll).if;
-    const thenSchema = (schema as JsonSchemaAll).then;
-    const elseSchema = (schema as JsonSchemaAll).else;
+    const conditionSchema = schema.if;
+    const thenSchema = schema.then;
+    const elseSchema = schema.else;
 
     if (conditionSchema === undefined || (thenSchema === undefined && elseSchema === undefined)) {
       return;
@@ -627,18 +630,80 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       ? (schema.patternProperties as Record<string, unknown>)
       : {};
 
-    const patternRegexes = Object.keys(patternProperties).reduce<RegExp[]>((acc, pattern) => {
-      try {
-        acc.push(new RegExp(pattern));
-      } catch {
-        // skip invalid patterns
+    const patternRegexes = Object.keys(patternProperties).flatMap((pattern) => {
+      const result = compileSchemaRegex(pattern);
+      return result.ok ? [result.value] : [];
+    });
+
+    const collectEvaluatedProperties = (
+      currentSchema: JsonSchemaInternal | boolean | undefined,
+      depth = 0
+    ): Set<string> => {
+      const evaluated = new Set<string>();
+      if (!currentSchema || typeof currentSchema !== 'object' || depth > 20) {
+        return evaluated;
       }
-      return acc;
-    }, []);
+
+      if (isObject(currentSchema.properties)) {
+        for (const key of Object.keys(currentSchema.properties)) {
+          evaluated.add(key);
+        }
+      }
+
+      const merge = (other: Set<string>) => {
+        for (const key of other) {
+          evaluated.add(key);
+        }
+      };
+
+      if (Array.isArray(currentSchema.allOf)) {
+        for (const subSchema of currentSchema.allOf) {
+          merge(collectEvaluatedProperties(subSchema as JsonSchemaInternal | boolean, depth + 1));
+        }
+      }
+
+      if (Array.isArray(currentSchema.anyOf)) {
+        for (const subSchema of currentSchema.anyOf) {
+          const subReport = new Report(report);
+          validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
+          if (subReport.errors.length === 0) {
+            merge(collectEvaluatedProperties(subSchema as JsonSchemaInternal | boolean, depth + 1));
+          }
+        }
+      }
+
+      if (Array.isArray(currentSchema.oneOf)) {
+        for (const subSchema of currentSchema.oneOf) {
+          const subReport = new Report(report);
+          validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
+          if (subReport.errors.length === 0) {
+            merge(collectEvaluatedProperties(subSchema as JsonSchemaInternal | boolean, depth + 1));
+          }
+        }
+      }
+
+      if (currentSchema.if !== undefined) {
+        const condReport = new Report(report);
+        validate.call(this, condReport, currentSchema.if as JsonSchemaInternal | boolean, json);
+        const branch = condReport.errors.length === 0 ? currentSchema.then : currentSchema.else;
+        if (branch !== undefined) {
+          merge(collectEvaluatedProperties(branch as JsonSchemaInternal | boolean, depth + 1));
+        }
+      }
+
+      if (currentSchema.__$refResolved && currentSchema.__$refResolved !== currentSchema) {
+        merge(collectEvaluatedProperties(currentSchema.__$refResolved as JsonSchemaInternal, depth + 1));
+      }
+
+      return evaluated;
+    };
+
+    const evaluatedProperties = collectEvaluatedProperties(schema);
 
     const additionalProperties: string[] = [];
     for (const key of Object.keys(json)) {
       if (Object.prototype.hasOwnProperty.call(properties, key)) continue;
+      if (evaluatedProperties.has(key)) continue;
       if (patternRegexes.some((re) => re.test(key))) continue;
       additionalProperties.push(key);
     }
@@ -918,6 +983,30 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
 
 const recurseArray = function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Array<unknown>) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.2
+
+  const schemaUri = typeof schema.$schema === 'string' ? schema.$schema : undefined;
+  const isDraft202012Schema =
+    schemaUri === 'https://json-schema.org/draft/2020-12/schema' ||
+    (!schemaUri && this.options.version === 'draft2020-12');
+  const prefixItems = isDraft202012Schema && Array.isArray(schema.prefixItems) ? schema.prefixItems : undefined;
+
+  if (prefixItems) {
+    let idx = json.length;
+    while (idx--) {
+      if (idx < prefixItems.length) {
+        report.path.push(idx);
+        validate.call(this, report, prefixItems[idx], json[idx]);
+        report.path.pop();
+      } else if (schema.items !== undefined && !Array.isArray(schema.items)) {
+        report.path.push(idx);
+        report.schemaPath.push('items');
+        validate.call(this, report, schema.items, json[idx]);
+        report.schemaPath.pop();
+        report.path.pop();
+      }
+    }
+    return;
+  }
 
   let idx = json.length;
 

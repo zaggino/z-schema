@@ -40,6 +40,7 @@ export interface JsonSchemaCommon {
   pattern?: string;
   additionalItems?: boolean | JsonSchema;
   items?: JsonSchema | boolean | Array<JsonSchema | boolean>;
+  prefixItems?: Array<JsonSchema | boolean>;
   minItems?: number;
   maxItems?: number;
   uniqueItems?: boolean;
