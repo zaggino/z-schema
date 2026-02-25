@@ -18,6 +18,16 @@ const filesToCopy = [
     join(import.meta.dirname, '../json-schema-spec/draft-07/schema.json'),
     join(import.meta.dirname, '../src/schemas/draft-07-schema.json'),
   ],
+  // draft2019-09
+  [
+    join(import.meta.dirname, '../json-schema-spec/draft/2019-09/schema.json'),
+    join(import.meta.dirname, '../src/schemas/draft-2019-09-schema.json'),
+  ],
+  // draft2020-12
+  [
+    join(import.meta.dirname, '../json-schema-spec/draft/2020-12/schema.json'),
+    join(import.meta.dirname, '../src/schemas/draft-2020-12-schema.json'),
+  ],
 ];
 
 filesToCopy.forEach(([src, dest]) => {

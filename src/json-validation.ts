@@ -29,6 +29,12 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   id: () => {},
   $ref: () => {},
   $schema: () => {},
+  $dynamicAnchor: () => {},
+  $dynamicRef: () => {},
+  $defs: () => {},
+  $vocabulary: () => {},
+  $recursiveAnchor: () => {},
+  $recursiveRef: () => {},
   title: () => {},
   description: () => {},
   default: () => {},
@@ -584,6 +590,24 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   else: function () {
     // handled by if
   },
+  dependentSchemas: () => {
+    // TODO: implement
+  },
+  dependentRequired: () => {
+    // TODO: implement
+  },
+  unevaluatedItems: () => {
+    // TODO: implement
+  },
+  unevaluatedProperties: () => {
+    // TODO: implement
+  },
+  maxContains: () => {
+    // TODO: implement
+  },
+  minContains: () => {
+    // TODO: implement
+  },
   definitions: function () {
     /*report: Report, schema: JsonSchemaInternal, json: unknown*/
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.2
@@ -1034,8 +1058,9 @@ export function validate(
   // now iterate all the keys in schema and execute validation methods
   let idx = keys.length;
   while (idx--) {
-    if (JsonValidators[keys[idx]]) {
-      JsonValidators[keys[idx]].call(this, report, schema, json);
+    const validator = JsonValidators[keys[idx]];
+    if (validator) {
+      validator.call(this, report, schema, json);
       if (report.errors.length && this.options.breakOnFirstError) {
         break;
       }

@@ -14,6 +14,13 @@ export interface JsonSchemaCommon {
   $ref?: string;
   $schema?: string;
   id?: string;
+  $id?: string;
+  $dynamicAnchor?: string;
+  $dynamicRef?: string;
+  $defs?: Record<string, JsonSchema>;
+  $vocabulary?: Record<string, boolean>;
+  $recursiveAnchor?: boolean;
+  $recursiveRef?: string;
   title?: string;
   description?: string;
   default?: unknown;
@@ -50,6 +57,16 @@ export interface JsonSchemaCommon {
   if?: JsonSchema | boolean;
   then?: JsonSchema | boolean;
   else?: JsonSchema | boolean;
+  examples?: unknown[];
+  const?: unknown;
+  contains?: JsonSchema;
+  propertyNames?: JsonSchema;
+  unevaluatedItems?: JsonSchema | boolean;
+  unevaluatedProperties?: JsonSchema | boolean;
+  dependentSchemas?: Record<string, JsonSchema>;
+  dependentRequired?: Record<string, string[]>;
+  maxContains?: number;
+  minContains?: number;
 }
 
 export type JsonSchemaType = 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string';
