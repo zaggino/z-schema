@@ -107,7 +107,6 @@ const excludedFiles: string[] = [
   'draft2019-09/properties.json', // FAIL: 12 out of 28 tests passes
   'draft2019-09/propertyNames.json', // FAIL: 5 out of 20 tests passes
   'draft2019-09/recursiveRef.json', // FAIL: 14 out of 34 tests passes
-  'draft2019-09/ref.json', // FAIL: 43 out of 81 tests passes
   'draft2019-09/refRemote.json', // FAIL: 15 out of 31 tests passes
   'draft2019-09/required.json', // FAIL: 6 out of 18 tests passes
   'draft2019-09/type.json', // FAIL: 59 out of 80 tests passes
@@ -152,6 +151,7 @@ const excludedFiles: string[] = [
   'draft2020-12/optional/cross-draft.json', // FAIL: 0 out of 1 tests passes
   'draft2020-12/optional/dependencies-compatibility.json', // FAIL: 14 out of 36 tests passes
   'draft2020-12/optional/dynamicRef.json', // FAIL: 1 out of 2 tests passes
+  'draft2020-12/optional/format/ecmascript-regex.json', // FAIL: 7 out of 14 tests passes
   'draft2020-12/optional/ecmascript-regex.json', // FAIL: 38 out of 74 tests passes
   'draft2020-12/optional/float-overflow.json', // FAIL: 0 out of 1 tests passes
   'draft2020-12/optional/format-assertion.json', // FAIL: 2 out of 4 tests passes

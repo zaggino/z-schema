@@ -7,6 +7,7 @@ import type {
 import type { Reference } from './schema-compiler.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
+import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { isObject } from './utils/what-is.js';
 
 // common properties of all JSON Schema versions
@@ -15,6 +16,7 @@ export interface JsonSchemaCommon {
   $schema?: string;
   id?: string;
   $id?: string;
+  $anchor?: string;
   $dynamicAnchor?: string;
   $dynamicRef?: string;
   $defs?: Record<string, JsonSchema>;
@@ -91,7 +93,12 @@ export const getId = (schema: JsonSchemaInternal) => {
   return undefined;
 };
 
-export const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaInternal | undefined => {
+export const findId = (
+  schema: JsonSchemaInternal,
+  id: string,
+  targetBaseUri?: string,
+  currentBaseUri?: string
+): JsonSchemaInternal | undefined => {
   // process only arrays and objects
   if (typeof schema !== 'object' || schema === null) {
     return;
@@ -102,9 +109,30 @@ export const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaIntern
     return schema;
   }
 
+  const baseUri = currentBaseUri ?? targetBaseUri;
+
   const schemaId = getId(schema);
+  let nextBaseUri = baseUri;
+
   if (schemaId) {
-    if (schemaId === id || (schemaId[0] === '#' && schemaId.substring(1) === id)) {
+    if (isAbsoluteUri(schemaId)) {
+      nextBaseUri = getRemotePath(schemaId);
+    } else if (baseUri && isAbsoluteUri(baseUri)) {
+      try {
+        nextBaseUri = getRemotePath(new URL(schemaId, baseUri).toString());
+      } catch {
+        // keep existing scope when URL resolution fails
+      }
+    }
+  }
+
+  const inTargetBase = !targetBaseUri || nextBaseUri === targetBaseUri;
+
+  if (inTargetBase) {
+    if (schemaId && (schemaId === id || (schemaId[0] === '#' && schemaId.substring(1) === id))) {
+      return schema;
+    }
+    if (schema.$anchor === id || schema.$dynamicAnchor === id) {
       return schema;
     }
   }
@@ -113,7 +141,7 @@ export const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaIntern
   if (Array.isArray(schema)) {
     idx = schema.length;
     while (idx--) {
-      result = findId(schema[idx], id);
+      result = findId(schema[idx], id, targetBaseUri, nextBaseUri);
       if (result) {
         return result;
       }
@@ -127,7 +155,7 @@ export const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaIntern
       if (k.indexOf('__$') === 0) {
         continue;
       }
-      result = findId(schema[k] as JsonSchemaInternal, id);
+      result = findId(schema[k] as JsonSchemaInternal, id, targetBaseUri, nextBaseUri);
       if (result) {
         return result;
       }

@@ -43,7 +43,7 @@ export const collectIds = (obj: JsonSchemaInternal) => {
           .slice(-1)[0];
         if (id.absoluteParent) {
           const parentUri = id.absoluteParent.absoluteUri || id.absoluteParent.id;
-          id.absoluteUri = parentUri.split('/').slice(0, -1).concat(id.id).join('/');
+          id.absoluteUri = resolveIdScope(parentUri, id.id);
         }
       }
       ids.push(id);
@@ -83,11 +83,13 @@ export const collectReferences = (
   obj: JsonSchemaInternal,
   results?: Reference[],
   scope?: string[],
-  path?: Reference['path']
+  path?: Reference['path'],
+  options?: { useRefObjectScope?: boolean }
 ) => {
   results = results || [];
   scope = scope || [];
   path = path || [];
+  options = options || {};
 
   if (typeof obj !== 'object' || obj === null) {
     return results;
@@ -102,7 +104,7 @@ export const collectReferences = (
     scopeId = obj.id;
   }
 
-  if (typeof scopeId === 'string' && (isRootScope || !hasRef)) {
+  if (typeof scopeId === 'string' && (isRootScope || !hasRef || options.useRefObjectScope === true)) {
     const base = scope.length > 0 ? scope[scope.length - 1] : undefined;
     scope.push(resolveIdScope(base, scopeId));
     addedScope = true;
@@ -130,7 +132,7 @@ export const collectReferences = (
     idx = obj.length;
     while (idx--) {
       path.push(idx);
-      collectReferences(obj[idx], results, scope, path);
+      collectReferences(obj[idx], results, scope, path, options);
       path.pop();
     }
   } else {
@@ -142,7 +144,7 @@ export const collectReferences = (
         continue;
       }
       path.push(keys[idx]);
-      collectReferences((obj as any)[keys[idx]], results, scope, path);
+      collectReferences((obj as any)[keys[idx]], results, scope, path, options);
       path.pop();
     }
   }
@@ -189,6 +191,8 @@ const resolveReference = (base: string | undefined, ref: string) => {
   return baseDir + ref;
 };
 
+const isSimpleIdentifier = (id: string) => id[0] !== '#' && !id.includes('/') && !id.includes('.') && !id.includes('#');
+
 const resolveIdScope = (base: string | undefined, id: string) => {
   if (isAbsoluteUri(id)) {
     return id;
@@ -197,7 +201,7 @@ const resolveIdScope = (base: string | undefined, id: string) => {
   const baseStr = base ?? '';
 
   // Treat simple identifiers (no '/', '.', or '#') as same-document fragment ids
-  if (id[0] !== '#' && !id.includes('/') && !id.includes('.') && !id.includes('#')) {
+  if (isSimpleIdentifier(id)) {
     const hashIndex = baseStr.indexOf('#');
     const baseNoFrag = hashIndex === -1 ? baseStr : baseStr.slice(0, hashIndex);
     return baseNoFrag + '#' + id;
@@ -214,6 +218,12 @@ export class SchemaCompiler {
     for (const item of ids) {
       if (item.absoluteUri) {
         this.validator.scache.cacheSchemaByUri(item.absoluteUri, item.obj);
+
+        if (item.type === 'relative' && item.absoluteParent && isSimpleIdentifier(item.id)) {
+          const parentUri = item.absoluteParent.absoluteUri || item.absoluteParent.id;
+          const altAbsoluteUri = resolveReference(parentUri, item.id);
+          this.validator.scache.cacheSchemaByUri(altAbsoluteUri, item.obj);
+        }
       } else if (item.type === 'root') {
         this.validator.scache.cacheSchemaByUri(item.id, item.obj);
       }
@@ -279,7 +289,9 @@ export class SchemaCompiler {
     delete schema.__$missingReferences;
 
     // collect all references that need to be resolved - $ref and $schema
-    const refs = collectReferences(schema);
+    const useRefObjectScope =
+      this.validator.options.version === 'draft2019-09' || this.validator.options.version === 'draft2020-12';
+    const refs = collectReferences(schema, undefined, undefined, undefined, { useRefObjectScope });
     let idx = refs.length;
     while (idx--) {
       // resolve all the collected references into __xxxResolved pointer

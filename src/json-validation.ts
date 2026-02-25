@@ -27,14 +27,17 @@ type JsonValidatorFn = (this: ZSchemaBase, report: Report, schema: JsonSchema, j
 
 export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   id: () => {},
+  $id: () => {},
   $ref: () => {},
   $schema: () => {},
   $dynamicAnchor: () => {},
   $dynamicRef: () => {},
+  $anchor: () => {},
   $defs: () => {},
   $vocabulary: () => {},
   $recursiveAnchor: () => {},
   $recursiveRef: () => {},
+  examples: () => {},
   title: () => {},
   description: () => {},
   default: () => {},
@@ -596,11 +599,59 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   dependentRequired: () => {
     // TODO: implement
   },
-  unevaluatedItems: () => {
-    // TODO: implement
+  unevaluatedItems: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (schema.unevaluatedItems !== false || !Array.isArray(json)) {
+      return;
+    }
+
+    const getTupleLength = (sch: JsonSchemaInternal | undefined, depth = 0): number | undefined => {
+      if (!sch || depth >= 20) return undefined;
+      if (Array.isArray(sch.items)) return sch.items.length;
+      const resolved = sch.__$refResolved;
+      if (!resolved || resolved === sch || typeof resolved !== 'object') return undefined;
+      return getTupleLength(resolved as JsonSchemaInternal, depth + 1);
+    };
+
+    const tupleLength = getTupleLength(schema);
+    if (typeof tupleLength === 'number' && json.length > tupleLength) {
+      report.addError('ARRAY_ADDITIONAL_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
+    }
   },
-  unevaluatedProperties: () => {
-    // TODO: implement
+  unevaluatedProperties: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (schema.unevaluatedProperties !== false || !isObject(json)) {
+      return;
+    }
+
+    const properties = isObject(schema.properties) ? (schema.properties as Record<string, unknown>) : {};
+    const patternProperties = isObject(schema.patternProperties)
+      ? (schema.patternProperties as Record<string, unknown>)
+      : {};
+
+    const patternRegexes = Object.keys(patternProperties).reduce<RegExp[]>((acc, pattern) => {
+      try {
+        acc.push(new RegExp(pattern));
+      } catch {
+        // skip invalid patterns
+      }
+      return acc;
+    }, []);
+
+    const additionalProperties: string[] = [];
+    for (const key of Object.keys(json)) {
+      if (Object.prototype.hasOwnProperty.call(properties, key)) continue;
+      if (patternRegexes.some((re) => re.test(key))) continue;
+      additionalProperties.push(key);
+    }
+
+    if (additionalProperties.length > 0) {
+      report.addError(
+        'OBJECT_ADDITIONAL_PROPERTIES',
+        [additionalProperties.join(', ')],
+        undefined,
+        schema,
+        'unevaluatedProperties'
+      );
+    }
   },
   maxContains: () => {
     // TODO: implement
@@ -742,10 +793,6 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       );
     }
   },
-  // draft-06 additions
-  $id: () => {
-    // TODO: implement
-  },
   const: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     const constValue = (schema as JsonSchemaAll).const;
     if (areEqual(json, constValue) === false) {
@@ -811,9 +858,6 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     }
 
     addContainsErrorIfNeeded();
-  },
-  examples: () => {
-    // TODO: implement
   },
   propertyNames: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     if (shouldSkipValidate(this.validateOptions, ['PROPERTY_NAMES'])) {
@@ -1023,25 +1067,37 @@ export function validate(
 
   // follow schema.$ref keys
   if (schema.$ref !== undefined) {
-    // avoid infinite loop with maxRefs
-    let maxRefs = 99;
-    while (schema.$ref && maxRefs > 0) {
+    const applySiblingKeywordsWithRef =
+      this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+
+    if (applySiblingKeywordsWithRef) {
       if (!schema.__$refResolved) {
         report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
-        break;
-      } else if (schema.__$refResolved === schema) {
-        break;
       } else {
-        schema = schema.__$refResolved;
-        keys = Object.keys(schema) as Array<keyof JsonSchema>;
+        validate.call(this, report, schema.__$refResolved as JsonSchemaInternal, json);
       }
-      maxRefs--;
+      keys = keys.filter((key) => key !== '$ref');
+    } else {
+      // avoid infinite loop with maxRefs
+      let maxRefs = 99;
+      while (schema.$ref && maxRefs > 0) {
+        if (!schema.__$refResolved) {
+          report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
+          break;
+        } else if (schema.__$refResolved === schema) {
+          break;
+        } else {
+          schema = schema.__$refResolved;
+          keys = Object.keys(schema) as Array<keyof JsonSchema>;
+        }
+        maxRefs--;
+      }
+      if (maxRefs === 0) {
+        throw new Error('Circular dependency by $ref references!');
+      }
+      // Reset schema path for referenced schema - paths are relative to the referenced schema
+      report.schemaPath = [];
     }
-    if (maxRefs === 0) {
-      throw new Error('Circular dependency by $ref references!');
-    }
-    // Reset schema path for referenced schema - paths are relative to the referenced schema
-    report.schemaPath = [];
   }
 
   // type checking first
