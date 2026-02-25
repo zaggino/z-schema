@@ -7,12 +7,12 @@ const filesToCopy = [
   [
     join(import.meta.dirname, '../json-schema-spec/draft-04/schema.json'),
     join(import.meta.dirname, '../src/schemas/draft-04-schema.json'),
-  ],  
+  ],
   // draft-06
   [
     join(import.meta.dirname, '../json-schema-spec/draft-06/schema.json'),
     join(import.meta.dirname, '../src/schemas/draft-06-schema.json'),
-  ],  
+  ],
   // draft-07
   [
     join(import.meta.dirname, '../json-schema-spec/draft-07/schema.json'),

@@ -1,5 +1,5 @@
 const lintStagedConfig = {
-  '*.(ts|tsx|js|jsx|mjs|json|css|md|yml)': ['eslint --fix --no-warn-ignored', 'prettier --write'],
+  '*.(ts|tsx|mts|cts|js|jsx|mjs|cjs|json|css|md|yml)': ['eslint --fix --no-warn-ignored', 'prettier --write'],
 };
 
 export default lintStagedConfig;
