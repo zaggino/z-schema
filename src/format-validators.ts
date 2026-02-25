@@ -2,7 +2,10 @@ import isEmailModule from 'validator/lib/isEmail.js';
 import isIPModule from 'validator/lib/isIP.js';
 import isURLModule from 'validator/lib/isURL.js';
 
+import { isValidRfc3339Date } from './utils/date.js';
+import { isValidHostname, isValidIdnHostname } from './utils/hostname.js';
 import { sortedKeys } from './utils/json.js';
+import { parseRfc3339Time } from './utils/time.js';
 
 export type FormatValidatorFn = (input: unknown) => boolean | Promise<boolean>;
 
@@ -15,13 +18,10 @@ const dateValidator: FormatValidatorFn = (date: unknown) => {
   if (matches === null) {
     return false;
   }
-  // var year = matches[1];
-  // var month = matches[2];
-  // var day = matches[3];
-  if (matches[2] < '01' || matches[2] > '12' || matches[3] < '01' || matches[3] > '31') {
-    return false;
-  }
-  return true;
+  const year = parseInt(matches[1], 10);
+  const month = parseInt(matches[2], 10);
+  const day = parseInt(matches[3], 10);
+  return isValidRfc3339Date(year, month, day);
 };
 
 const dateTimeValidator: FormatValidatorFn = (dateTime: unknown) => {
@@ -43,53 +43,11 @@ const dateTimeValidator: FormatValidatorFn = (dateTime: unknown) => {
   const year = parseInt(dateMatches[1], 10);
   const month = parseInt(dateMatches[2], 10);
   const day = parseInt(dateMatches[3], 10);
-  if (month < 1 || month > 12 || day < 1 || day > 31) {
+  if (!isValidRfc3339Date(year, month, day)) {
     return false;
   }
-  // Check if date is valid
-  const date = new Date(year, month - 1, day);
-  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
-    return false;
-  }
-  // Check time
-  const timeMatches = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]+)?(z|([+-][0-9]{2}:[0-9]{2}))$/.exec(timePart);
-  if (timeMatches === null) {
-    return false;
-  }
-  const hour = parseInt(timeMatches[1], 10);
-  const minute = parseInt(timeMatches[2], 10);
-  const second = parseInt(timeMatches[3], 10);
-  if (hour > 23 || minute > 59 || second > 60) {
-    return false;
-  }
-  // Check offset
-  let utcHour = hour;
-  if (timeMatches[5] !== 'z') {
-    const offset = timeMatches[5];
-    const offsetMatches = /^([+-])([0-9]{2}):([0-9]{2})$/.exec(offset);
-    if (offsetMatches === null) {
-      return false;
-    }
-    const offsetSign = offsetMatches[1];
-    const offsetHour = parseInt(offsetMatches[2], 10);
-    const offsetMinute = parseInt(offsetMatches[3], 10);
-    if (offsetHour > 23 || offsetMinute > 59) {
-      return false;
-    }
-    if (offsetSign === '+') {
-      utcHour = hour - offsetHour;
-    } else {
-      utcHour = hour + offsetHour;
-    }
-    utcHour = ((utcHour % 24) + 24) % 24;
-  }
-  // Leap second only at 23:59:60 UTC
-  if (second === 60) {
-    if (utcHour !== 23 || minute !== 59) {
-      return false;
-    }
-  }
-  return true;
+
+  return parseRfc3339Time(timePart) !== null;
 };
 
 const emailValidator: FormatValidatorFn = (email: unknown) => {
@@ -103,52 +61,7 @@ const hostnameValidator: FormatValidatorFn = (hostname: unknown) => {
   if (typeof hostname !== 'string') {
     return true;
   }
-  /*
-          http://json-schema.org/latest/json-schema-validation.html#anchor114
-          A string instance is valid against this attribute if it is a valid
-          representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
-
-          http://tools.ietf.org/html/rfc1034#section-3.5
-
-          <digit> ::= any one of the ten digits 0 through 9
-          var digit = /[0-9]/;
-
-          <letter> ::= any one of the 52 alphabetic characters A through Z in upper case and a through z in lower case
-          var letter = /[a-zA-Z]/;
-
-          <let-dig> ::= <letter> | <digit>
-          var letDig = /[0-9a-zA-Z]/;
-
-          <let-dig-hyp> ::= <let-dig> | "-"
-          var letDigHyp = /[-0-9a-zA-Z]/;
-
-          <ldh-str> ::= <let-dig-hyp> | <let-dig-hyp> <ldh-str>
-          var ldhStr = /[-0-9a-zA-Z]+/;
-
-          <label> ::= <letter> [ [ <ldh-str> ] <let-dig> ]
-          var label = /[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?/;
-
-          <subdomain> ::= <label> | <subdomain> "." <label>
-          var subdomain = /^[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?(\.[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?)*$/;
-
-          <domain> ::= <subdomain> | " "
-          var domain = null;
-      */
-  const valid = /^[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?(\.[a-zA-Z](([-0-9a-zA-Z]+)?[0-9a-zA-Z])?)*$/.test(hostname);
-  if (valid) {
-    // the sum of all label octets and label lengths is limited to 255.
-    if (hostname.length > 255) {
-      return false;
-    }
-    // Each node has a label, which is zero to 63 octets in length
-    const labels = hostname.split('.');
-    for (let i = 0; i < labels.length; i++) {
-      if (labels[i].length > 63) {
-        return false;
-      }
-    }
-  }
-  return valid;
+  return isValidHostname(hostname);
 };
 
 const ipv4Validator: FormatValidatorFn = (ipv4: unknown) => {
@@ -170,7 +83,7 @@ const ipv6Validator: FormatValidatorFn = (ipv6: unknown) => {
 
 const regexValidator: FormatValidatorFn = (input: unknown) => {
   if (typeof input !== 'string') {
-    return false;
+    return true;
   }
   try {
     RegExp(input);
@@ -243,20 +156,43 @@ const jsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
 
 const relativeJsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   if (typeof pointer !== 'string') return true;
-  // Relative JSON Pointer: number#path or empty
-  return /^\d+(#.*)?$/.test(pointer) || pointer === '';
+  // Relative JSON Pointer: non-negative integer prefix (no leading zeros unless zero),
+  // followed by either '#', a JSON Pointer, or nothing.
+  return /^(?:0|[1-9]\d*)(?:#|(?:\/(?:[^~]|~0|~1)*)+)?$/.test(pointer);
 };
 
 const timeValidator: FormatValidatorFn = (time: unknown) => {
   if (typeof time !== 'string') return true;
-  // time: hh:mm:ss[.fraction]
-  return /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(\.\d+)?$/.test(time);
+  return parseRfc3339Time(time) !== null;
 };
 
 const idnEmailValidator: FormatValidatorFn = (email: unknown) => {
   if (typeof email !== 'string') return true;
   // Simple email check, allowing international chars
   return /^[^\s@]+@[^\s@]+$/.test(email);
+};
+
+const idnHostnameValidator: FormatValidatorFn = (hostname: unknown) => {
+  if (typeof hostname !== 'string') return true;
+  return isValidIdnHostname(hostname);
+};
+
+const iriValidator: FormatValidatorFn = (iri: unknown) => {
+  if (typeof iri !== 'string') return true;
+  if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:[^"\\<>^{}^`| ]*$/u.test(iri)) {
+    return false;
+  }
+  try {
+    new URL(iri);
+    return true;
+  } catch (_e) {
+    return false;
+  }
+};
+
+const iriReferenceValidator: FormatValidatorFn = (iriReference: unknown) => {
+  if (typeof iriReference !== 'string') return true;
+  return /^([a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/u.test(iriReference);
 };
 
 export interface FormatValidatorsOptions {
@@ -281,6 +217,9 @@ const inbuiltValidators: Record<string, FormatValidatorFn> = {
   'relative-json-pointer': relativeJsonPointerValidator,
   time: timeValidator,
   'idn-email': idnEmailValidator,
+  'idn-hostname': idnHostnameValidator,
+  iri: iriValidator,
+  'iri-reference': iriReferenceValidator,
 } as const;
 
 const customValidators: Record<string, FormatValidatorFn> = {};

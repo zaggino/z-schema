@@ -19,16 +19,18 @@ export interface JsonSchemaCommon {
   default?: unknown;
   definitions?: Record<string, JsonSchema>;
   type?: string | string[];
-  properties?: Record<string, JsonSchema>;
+  properties?: Record<string, JsonSchema | boolean>;
   patternProperties?: Record<string, JsonSchema>;
   multipleOf?: number;
   minimum?: number;
+  exclusiveMinimum?: boolean | number;
   maximum?: number;
+  exclusiveMaximum?: boolean | number;
   minLength?: number;
   maxLength?: number;
   pattern?: string;
   additionalItems?: boolean | JsonSchema;
-  items?: JsonSchema | JsonSchema[];
+  items?: JsonSchema | boolean | Array<JsonSchema | boolean>;
   minItems?: number;
   maxItems?: number;
   uniqueItems?: boolean;
@@ -43,6 +45,11 @@ export interface JsonSchemaCommon {
   anyOf?: JsonSchema[];
   oneOf?: JsonSchema[];
   not?: JsonSchema;
+  contentEncoding?: string;
+  contentMediaType?: string;
+  if?: JsonSchema | boolean;
+  then?: JsonSchema | boolean;
+  else?: JsonSchema | boolean;
 }
 
 export type JsonSchemaType = 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string';

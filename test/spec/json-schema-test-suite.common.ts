@@ -19,6 +19,7 @@ type JSONSchemaTestSuiteTestFolder = 'draft4' | 'draft6' | 'draft7' | 'draft2019
 const VERSION_FOLDER_MAPPING: Partial<Record<JsonSchemaVersion, JSONSchemaTestSuiteTestFolder>> = {
   'draft-04': 'draft4',
   'draft-06': 'draft6',
+  'draft-07': 'draft7',
 };
 
 const excludedDirs: string[] = [];
@@ -27,10 +28,14 @@ const excludedFiles: string[] = [
   // there's ignoreUnknownFormats option that can change this
   'draft4/optional/format/unknown.json',
   'draft6/optional/format/unknown.json',
+  'draft7/optional/format/unknown.json',
   // as far as I'm aware, this can't be fixed without custom json parser
   'draft4/optional/float-overflow.json',
   'draft6/optional/float-overflow.json',
+  'draft7/optional/float-overflow.json',
   'draft4/optional/zeroTerminatedFloats.json',
+  // decided to not support this for now, using unsupported drafts should fail
+  'draft7/optional/cross-draft.json',
   // FAILING
 ];
 const excludedTests: string[] = [];
@@ -78,6 +83,8 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
                 schema.$schema = 'http://json-schema.org/draft-04/schema#';
               } else if (draftPath.endsWith('/draft6')) {
                 schema.$schema = 'http://json-schema.org/draft-06/schema#';
+              } else if (draftPath.endsWith('/draft7')) {
+                schema.$schema = 'http://json-schema.org/draft-07/schema#';
               } else {
                 throw new Error(`no $schema for draft: ${draftPath}`);
               }

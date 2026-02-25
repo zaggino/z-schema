@@ -1,5 +1,22 @@
 export default {
   description: 'Issue #16 - schemas should be validated by references in $schema property',
+  setup: (_validator, ZSchema) => {
+    ZSchema.setSchemaReader((filePath) => {
+      if (filePath === 'http://json-schema.org/draft-04/hyper-schema') {
+        return {
+          id: 'http://json-schema.org/draft-04/hyper-schema#',
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          type: 'object',
+          properties: {
+            links: {
+              type: 'array',
+            },
+          },
+        };
+      }
+      throw new Error(filePath);
+    });
+  },
   tests: [
     {
       description: 'should pass validation',

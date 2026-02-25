@@ -564,6 +564,54 @@ const SchemaValidators = {
       report.path.pop();
     }
   },
+  if: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
+    if (report.options.version !== 'draft-07') {
+      return;
+    }
+
+    const ifSchema = schema.if;
+    const isValidIfSchema = typeof ifSchema === 'boolean' || isObject(ifSchema);
+    if (!isValidIfSchema) {
+      report.addError('KEYWORD_TYPE_EXPECTED', ['if', ['boolean', 'object']], undefined, schema, 'if');
+      return;
+    }
+
+    report.path.push('if');
+    this.validateSchema(report, ifSchema as JsonSchemaInternal);
+    report.path.pop();
+  },
+  then: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
+    if (report.options.version !== 'draft-07') {
+      return;
+    }
+
+    const thenSchema = schema.then;
+    const isValidThenSchema = typeof thenSchema === 'boolean' || isObject(thenSchema);
+    if (!isValidThenSchema) {
+      report.addError('KEYWORD_TYPE_EXPECTED', ['then', ['boolean', 'object']], undefined, schema, 'then');
+      return;
+    }
+
+    report.path.push('then');
+    this.validateSchema(report, thenSchema as JsonSchemaInternal);
+    report.path.pop();
+  },
+  else: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
+    if (report.options.version !== 'draft-07') {
+      return;
+    }
+
+    const elseSchema = schema.else;
+    const isValidElseSchema = typeof elseSchema === 'boolean' || isObject(elseSchema);
+    if (!isValidElseSchema) {
+      report.addError('KEYWORD_TYPE_EXPECTED', ['else', ['boolean', 'object']], undefined, schema, 'else');
+      return;
+    }
+
+    report.path.push('else');
+    this.validateSchema(report, elseSchema as JsonSchemaInternal);
+    report.path.pop();
+  },
   definitions: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.1
     if (!isObject(schema.definitions)) {
@@ -589,6 +637,24 @@ const SchemaValidators = {
       if (!isFormatSupported(schema.format, this.options.customFormats) && this.options.ignoreUnknownFormats !== true) {
         report.addError('UNKNOWN_FORMAT', [schema.format], undefined, schema, 'format');
       }
+    }
+  },
+  contentEncoding: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
+    if (report.options.version !== 'draft-07') {
+      return;
+    }
+
+    if (typeof schema.contentEncoding !== 'string') {
+      report.addError('KEYWORD_TYPE_EXPECTED', ['contentEncoding', 'string'], undefined, schema, 'contentEncoding');
+    }
+  },
+  contentMediaType: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
+    if (report.options.version !== 'draft-07') {
+      return;
+    }
+
+    if (typeof schema.contentMediaType !== 'string') {
+      report.addError('KEYWORD_TYPE_EXPECTED', ['contentMediaType', 'string'], undefined, schema, 'contentMediaType');
     }
   },
   id: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -622,7 +688,7 @@ export class SchemaValidator {
     return this.validator.options;
   }
 
-  validateArrayOfSchemas(report: Report, arr: JsonSchemaInternal[]) {
+  validateArrayOfSchemas(report: Report, arr: Array<JsonSchemaInternal | boolean>) {
     let idx = arr.length;
     while (idx--) {
       this.validateSchema(report, arr[idx]);
@@ -630,7 +696,7 @@ export class SchemaValidator {
     return report.isValid();
   }
 
-  validateSchema(report: Report, schema: JsonSchemaInternal | JsonSchemaInternal[]) {
+  validateSchema(report: Report, schema: JsonSchemaInternal | boolean | Array<JsonSchemaInternal | boolean>) {
     report.commonErrorMessage = 'SCHEMA_VALIDATION_FAILED';
 
     // if schema is an array, assume it's an array of schemas
