@@ -319,6 +319,8 @@ const validator = ZSchema.create({
 
 When true, unknown format names (not registered and not built-in) are silently ignored instead of reported as errors. The [JSON Schema specification](http://json-schema.org/latest/json-schema-validation.html#anchor106) recommends offering an option to disable format validation.
 
+> **Note:** For draft 2019-09 and draft 2020-12, unknown formats are always silently ignored regardless of this setting, since format is annotation-only by default in these drafts.
+
 Default: `false`
 
 ```javascript
@@ -331,14 +333,26 @@ const validator = ZSchema.create({
 
 Controls whether `format` is treated as an assertion during validation.
 
-- `true` (default): enforce built-in/custom format validators and report `INVALID_FORMAT` when a value does not match.
-- `false`: treat `format` as annotation-only (no assertion failures for format checks).
+- `null` (default): legacy behavior — always assert format validation (built-in/custom format validators are enforced and report `INVALID_FORMAT` on mismatch).
+- `true`: respect the meta-schema `$vocabulary` — for draft 2019-09 and draft 2020-12, format is treated as annotation-only unless the format-assertion vocabulary is enabled in the meta-schema. For older drafts (draft-04/06/07), format is always asserted.
+- `false`: treat `format` as annotation-only (no assertion failures for format checks in any draft).
 
-Default: `true`
+Default: `null`
 
 ```javascript
+// Vocabulary-aware (recommended for draft 2019-09 / 2020-12):
+const validator = ZSchema.create({
+  formatAssertions: true,
+});
+
+// Annotation-only (never assert):
 const validator = ZSchema.create({
   formatAssertions: false,
+});
+
+// Legacy behavior (always assert, same as old default):
+const validator = ZSchema.create({
+  formatAssertions: null,
 });
 ```
 

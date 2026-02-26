@@ -35,6 +35,9 @@ const supportsDependentKeywords = (schema: JsonSchemaInternal, version: JsonSche
 const VOCAB_VALIDATION_2019_09 = 'https://json-schema.org/draft/2019-09/vocab/validation';
 const VOCAB_VALIDATION_2020_12 = 'https://json-schema.org/draft/2020-12/vocab/validation';
 
+const VOCAB_FORMAT_2019_09 = 'https://json-schema.org/draft/2019-09/vocab/format';
+const VOCAB_FORMAT_ASSERTION_2020_12 = 'https://json-schema.org/draft/2020-12/vocab/format-assertion';
+
 const VALIDATION_VOCAB_KEYWORDS = new Set<keyof JsonSchemaAll>([
   'type',
   'multipleOf',
@@ -87,6 +90,45 @@ const isValidationVocabularyEnabled = (
   }
 
   return false;
+};
+
+/**
+ * Checks whether the format-assertion vocabulary is enabled in the meta-schema.
+ * For draft 2019-09: checks if the format vocabulary is set to true.
+ * For draft 2020-12: checks if the format-assertion vocabulary is present and true.
+ * Returns true for older drafts (format was always an assertion).
+ */
+const isFormatAssertionVocabEnabled = (
+  schema: JsonSchemaInternal,
+  report: Report,
+  version: JsonSchemaVersion | 'none' | undefined
+): boolean => {
+  if (version !== 'draft2019-09' && version !== 'draft2020-12') {
+    return true; // older drafts always assert format
+  }
+
+  const currentSchemaMeta = schema.__$schemaResolved;
+  const rootSchemaMeta =
+    report.rootSchema && typeof report.rootSchema !== 'boolean' ? report.rootSchema.__$schemaResolved : undefined;
+  const metaSchema = (currentSchemaMeta || rootSchemaMeta) as JsonSchemaInternal | boolean | undefined;
+
+  if (!metaSchema || typeof metaSchema !== 'object' || !isObject(metaSchema.$vocabulary)) {
+    return false; // no vocabulary info, default to annotation-only for modern drafts
+  }
+
+  const vocabulary = metaSchema.$vocabulary as Record<string, boolean>;
+
+  // For draft 2020-12, only the format-assertion vocabulary enables format as assertion
+  if (hasOwn(vocabulary, VOCAB_FORMAT_ASSERTION_2020_12)) {
+    return vocabulary[VOCAB_FORMAT_ASSERTION_2020_12] === true;
+  }
+
+  // For draft 2019-09, check if the format vocabulary is enabled (true)
+  if (hasOwn(vocabulary, VOCAB_FORMAT_2019_09)) {
+    return vocabulary[VOCAB_FORMAT_2019_09] === true;
+  }
+
+  return false; // default to annotation-only for modern drafts
 };
 
 type JsonValidatorFn = (this: ZSchemaBase, report: Report, schema: JsonSchema, json: unknown) => void;
@@ -876,6 +918,17 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       return;
     }
 
+    // When formatAssertions is explicitly true, respect the meta-schema vocabulary:
+    // for draft 2019-09/2020-12, format is annotation-only unless the format-assertion
+    // vocabulary is enabled in the meta-schema.
+    if (this.options.formatAssertions === true) {
+      if (!isFormatAssertionVocabEnabled(schema, report, this.options.version)) {
+        return;
+      }
+    }
+
+    const isModernDraft = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+
     const formatValidators = getFormatValidators(this.options);
     const formatValidatorFn = formatValidators[schema.format!];
     if (typeof formatValidatorFn === 'function') {
@@ -935,7 +988,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
           }
         }
       }
-    } else if (this.options.ignoreUnknownFormats !== true) {
+    } else if (this.options.ignoreUnknownFormats !== true && !isModernDraft) {
       report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
     }
   },

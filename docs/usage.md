@@ -39,8 +39,8 @@ const validator = ZSchema.create({
   noEmptyArrays: true, // reject empty arrays for type 'array' (default: false)
   noTypeless: true, // require 'type' in schemas (default: false)
   strictMode: false, // enable multiple strict checks at once (default: false)
-  ignoreUnknownFormats: false, // suppress UNKNOWN_FORMAT errors (default: false)
-  formatAssertions: true, // treat format as assertion; set false for annotation-only behavior (default: true)
+  ignoreUnknownFormats: false, // suppress UNKNOWN_FORMAT errors for older drafts (default: false; modern drafts always ignore unknown formats)
+  formatAssertions: null, // null=always assert, true=respect vocabulary (annotation-only for 2019-09/2020-12), false=annotation-only (default: null)
   ignoreUnresolvableReferences: false, // skip unresolvable $ref (default: false)
 });
 ```

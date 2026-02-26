@@ -660,7 +660,12 @@ const SchemaValidators = {
     if (typeof schema.format !== 'string') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['format', 'string'], undefined, schema, 'format');
     } else {
-      if (!isFormatSupported(schema.format, this.options.customFormats) && this.options.ignoreUnknownFormats !== true) {
+      const isModernDraft = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+      if (
+        !isFormatSupported(schema.format, this.options.customFormats) &&
+        this.options.ignoreUnknownFormats !== true &&
+        !isModernDraft
+      ) {
         report.addError('UNKNOWN_FORMAT', [schema.format], undefined, schema, 'format');
       }
     }

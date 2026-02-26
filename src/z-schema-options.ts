@@ -27,7 +27,7 @@ export interface ZSchemaOptions {
   breakOnFirstError?: boolean;
   pedanticCheck?: boolean;
   ignoreUnknownFormats?: boolean;
-  formatAssertions?: boolean;
+  formatAssertions?: boolean | null;
   customValidator?: (report: Report, schema: unknown, json: unknown) => void;
   customFormats?: Record<string, FormatValidatorFn | null>;
 }
@@ -77,8 +77,12 @@ export const defaultOptions: ZSchemaOptions = {
   pedanticCheck: false,
   // ignore unknown formats (do not report them as an error)
   ignoreUnknownFormats: false,
-  // treat format as assertion (when false, format is annotation-only)
-  formatAssertions: true,
+  // control format assertion behavior:
+  //   true  - respect vocabulary: for draft 2019-09/2020-12, check meta-schema $vocabulary
+  //           to determine if format is assertion or annotation-only
+  //   false - format is always annotation-only (never asserts)
+  //   null  - legacy behavior: always assert format validation
+  formatAssertions: null,
   // function to be called on every schema
   customValidator: null as unknown as undefined,
 };
