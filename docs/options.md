@@ -41,13 +41,16 @@ const result = await validator.validate(data, schema);
 
 Sets the JSON Schema draft version to validate against.
 
-- `'draft-06'` **(default)** — JSON Schema draft-06
 - `'draft-04'` — JSON Schema draft-04
+- `'draft-06'` — JSON Schema draft-06
+- `'draft-07'` — JSON Schema draft-07
+- `'draft2019-09'` — JSON Schema draft-2019-09
+- `'draft2020-12'` **(default)** — JSON Schema draft-2020-12 (latest)
 - `'none'` — skip meta-schema version detection (schemas validate using whatever `$schema` declares)
 
 ```javascript
 const validator = ZSchema.create({
-  version: 'draft-04',
+  version: 'draft2020-12',
 });
 ```
 

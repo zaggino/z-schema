@@ -5,7 +5,7 @@
 ```
 index.ts (public API)
   └─ z-schema.ts (ZSchema, ZSchemaSafe, ZSchemaAsync, ZSchemaAsyncSafe)
-       ├─ z-schema-versions.ts (register bundled draft-04/draft-06 meta-schemas)
+       ├─ z-schema-versions.ts (register bundled draft-04/draft-06/draft-07/draft-2019-09/draft-2020-12 meta-schemas)
        └─ z-schema-base.ts (ZSchemaBase — core validation orchestration)
             ├─ schema-compiler.ts (compile schemas, resolve $ref, collect ids)
             ├─ schema-validator.ts (validate schemas against meta-schemas)
@@ -65,7 +65,7 @@ Static methods on `ZSchema`:
 ## Validation Pipeline
 
 1. **Schema compilation** (`schema-compiler.ts`): resolves `$ref`, collects `id`/`$id`, validates schema structure.
-2. **Schema validation** (`schema-validator.ts`): validates the schema against its meta-schema (draft-04 or draft-06).
+2. **Schema validation** (`schema-validator.ts`): validates the schema against its meta-schema (draft-04, draft-06, draft-07, draft-2019-09, or draft-2020-12).
 3. **JSON validation** (`json-validation.ts`): validates a JSON instance against the compiled schema (type checks, constraints, combiners like `allOf`/`anyOf`/`oneOf`/`not`).
 4. **Report** (`report.ts`): errors accumulate in a `Report` object, then get converted into a `ValidateError`.
 
@@ -83,9 +83,15 @@ interface ValidateOptions {
 
 ## JSON Schema Version Support
 
-Currently supported: `draft-04`, `draft-06`. Default is **`draft-06`**. Set via `ZSchemaOptions.version`.
+Currently supported: `draft-04`, `draft-06`, `draft-07`, `draft2019-09`, `draft2020-12`. Default is **`draft2020-12`**. Set via `ZSchemaOptions.version`.
 
 Draft-06 adds: `$id`, `const`, `contains`, `propertyNames`, `examples`, boolean schemas (`true`/`false`), numeric `exclusiveMinimum`/`exclusiveMaximum` (instead of boolean).
+
+Draft-07 adds: `if`/`then`/`else`, `readOnly`, `writeOnly`, `contentMediaType`, `contentEncoding`, `comment`.
+
+Draft-2019-09 adds: `$anchor`, `$recursiveRef`/`$recursiveAnchor`, `$defs`, `dependentRequired`, `dependentSchemas`, `maxContains`, `minContains`, `unevaluatedItems`, `unevaluatedProperties`.
+
+Draft-2020-12 adds: `$dynamicRef`/`$dynamicAnchor`, `prefixItems` (replaces array-form `items`), refined `items` (applies to remaining items).
 
 Use `version: 'none'` to skip meta-schema version detection (schemas validate using whatever `$schema` declares, or no meta-schema enforcement).
 
@@ -103,7 +109,7 @@ The `src/package.json` contains `{ "type": "module" }` and gets copied to `dist/
 
 ## Key Internal Types
 
-- `JsonSchema` — union of `JsonSchemaDraft4 | JsonSchemaDraft6`
+- `JsonSchema` — union of `JsonSchemaDraft4 | JsonSchemaDraft6 | JsonSchemaDraft7 | JsonSchemaDraft201909 | JsonSchemaDraft202012`
 - `JsonSchemaInternal` — internal schema type with compiler metadata (`__$compiled`, `__$validationOptions`, etc.)
 - `ValidateError` — error class thrown/returned on validation failure, contains `.details` array of `SchemaErrorDetail`
 - `SchemaErrorDetail` — individual error with `message`, `code`, `params`, `path`, `schemaPath`, `inner` (sub-errors for combiners)

@@ -4,16 +4,27 @@
   "engines": {
     "node": ">=22.0.0"
   },
-  "description": "JSON schema validator",
+  "description": "Fast, lightweight JSON Schema validator for Node.js and browsers — full support for draft-04, draft-06, draft-07, draft-2019-09, and draft-2020-12 (latest)",
   "homepage": "https://github.com/zaggino/z-schema",
   "authors": [
     "Martin Zagora <zaggino@gmail.com>"
   ],
   "license": "MIT",
   "keywords": [
-    "JSON",
-    "Schema",
-    "Validator"
+    "json-schema",
+    "json",
+    "schema",
+    "validator",
+    "validation",
+    "json-schema-validator",
+    "draft-04",
+    "draft-06",
+    "draft-07",
+    "draft-2019-09",
+    "draft-2020-12",
+    "jsonschema",
+    "typescript",
+    "esm"
   ],
   "repository": {
     "type": "git",

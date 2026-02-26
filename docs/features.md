@@ -1,5 +1,7 @@
 # Features
 
+z-schema provides full support for JSON Schema **draft-04**, **draft-06**, **draft-07**, **draft-2019-09**, and **draft-2020-12** (latest), with a rich set of configuration options and extensibility hooks.
+
 - [Validate against subschema](#validate-against-subschema)
 - [Compile arrays of schemas and use references between them](#compile-arrays-of-schemas-and-use-references-between-them)
 - [Register a custom format](#register-a-custom-format)
