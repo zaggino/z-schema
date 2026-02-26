@@ -36,19 +36,11 @@ const excludedFiles: string[] = [
   'draft4/optional/float-overflow.json',
   'draft6/optional/float-overflow.json',
   'draft7/optional/float-overflow.json',
+  'draft2019-09/optional/float-overflow.json',
+  'draft2020-12/optional/float-overflow.json',
   'draft4/optional/zeroTerminatedFloats.json',
   // decided to not support this for now, using unsupported drafts should fail
   'draft7/optional/cross-draft.json',
-  // FAILING
-  'draft2019-09/optional/anchor.json', // FAIL: 3 out of 4 tests passes
-  'draft2019-09/optional/float-overflow.json', // FAIL: 0 out of 1 tests passes
-  'draft2019-09/unevaluatedItems.json', // FAIL: 38 out of 56 tests passes
-  'draft2019-09/unevaluatedProperties.json', // FAIL: 106 out of 125 tests passes
-  'draft2020-12/optional/anchor.json', // FAIL: 3 out of 4 tests passes
-  'draft2020-12/optional/dynamicRef.json', // FAIL: 1 out of 2 tests passes
-  'draft2020-12/optional/float-overflow.json', // FAIL: 0 out of 1 tests passes
-  'draft2020-12/unevaluatedItems.json', // FAIL: 44 out of 71 tests passes
-  'draft2020-12/unevaluatedProperties.json', // FAIL: 106 out of 125 tests passes
 ];
 const excludedTests: string[] = [];
 

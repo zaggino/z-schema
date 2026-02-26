@@ -153,10 +153,11 @@ export const findId = (
   }
   if (isObject(schema)) {
     const keys = Object.keys(schema) as Array<keyof JsonSchemaInternal>;
+    const doNotTraverse = ['enum', 'const', 'default', 'examples'];
     idx = keys.length;
     while (idx--) {
       const k = keys[idx];
-      if (k.indexOf('__$') === 0) {
+      if (k.indexOf('__$') === 0 || doNotTraverse.includes(k)) {
         continue;
       }
       result = findId(schema[k] as JsonSchemaInternal, id, targetBaseUri, nextBaseUri);

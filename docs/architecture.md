@@ -66,7 +66,7 @@ Static methods on `ZSchema`:
 
 1. **Schema compilation** (`schema-compiler.ts`): resolves `$ref`, collects `id`/`$id`, validates schema structure.
 2. **Schema validation** (`schema-validator.ts`): validates the schema against its meta-schema (draft-04, draft-06, draft-07, draft-2019-09, or draft-2020-12).
-3. **JSON validation** (`json-validation.ts`): validates a JSON instance against the compiled schema (type checks, constraints, combiners like `allOf`/`anyOf`/`oneOf`/`not`, and `format` behavior controlled by `ZSchemaOptions.formatAssertions` — supporting vocabulary-aware annotation-only mode for draft 2019-09/2020-12).
+3. **JSON validation** (`json-validation.ts`): validates a JSON instance against the compiled schema (type checks, constraints, combiners like `allOf`/`anyOf`/`oneOf`/`not`, `unevaluatedProperties`/`unevaluatedItems` with full annotation-based evaluation tracking across applicators and dynamic references, and `format` behavior controlled by `ZSchemaOptions.formatAssertions` — supporting vocabulary-aware annotation-only mode for draft 2019-09/2020-12).
 4. **Report** (`report.ts`): errors accumulate in a `Report` object, then get converted into a `ValidateError`.
 
 ## ValidateOptions
@@ -89,9 +89,9 @@ Draft-06 adds: `$id`, `const`, `contains`, `propertyNames`, `examples`, boolean 
 
 Draft-07 adds: `if`/`then`/`else`, `readOnly`, `writeOnly`, `contentMediaType`, `contentEncoding`, `comment`.
 
-Draft-2019-09 adds: `$anchor`, `$recursiveRef`/`$recursiveAnchor`, `$defs`, `dependentRequired`, `dependentSchemas`, `maxContains`, `minContains`, `unevaluatedItems`, `unevaluatedProperties`.
+Draft-2019-09 adds: `$anchor`, `$recursiveRef`/`$recursiveAnchor`, `$defs`, `dependentRequired`, `dependentSchemas`, `maxContains`, `minContains`, `unevaluatedItems` (with annotation-aware tracking through applicators, `contains`, `$recursiveRef`), `unevaluatedProperties` (with annotation-aware tracking through applicators, `dependentSchemas`, `$recursiveRef`).
 
-Draft-2020-12 adds: `$dynamicRef`/`$dynamicAnchor`, `prefixItems` (replaces array-form `items`), refined `items` (applies to remaining items).
+Draft-2020-12 adds: `$dynamicRef`/`$dynamicAnchor`, `prefixItems` (replaces array-form `items`), refined `items` (applies to remaining items). `unevaluatedItems` and `unevaluatedProperties` support dynamic reference resolution via `$dynamicRef`.
 
 Use `version: 'none'` to skip meta-schema version detection (schemas validate using whatever `$schema` declares, or no meta-schema enforcement).
 
