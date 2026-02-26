@@ -327,6 +327,21 @@ const validator = ZSchema.create({
 });
 ```
 
+## formatAssertions
+
+Controls whether `format` is treated as an assertion during validation.
+
+- `true` (default): enforce built-in/custom format validators and report `INVALID_FORMAT` when a value does not match.
+- `false`: treat `format` as annotation-only (no assertion failures for format checks).
+
+Default: `true`
+
+```javascript
+const validator = ZSchema.create({
+  formatAssertions: false,
+});
+```
+
 ## customValidator
 
 Register a function that is called on every sub-schema during validation. Use this for custom cross-field validation logic that cannot be expressed in standard JSON Schema.

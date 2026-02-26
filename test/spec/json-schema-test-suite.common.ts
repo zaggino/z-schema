@@ -1,6 +1,7 @@
 /* eslint-disable vitest/valid-title */
 
 import type { JsonSchema, JsonSchemaVersion } from '../../src/json-schema-versions.ts';
+import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 
 import { ZSchema } from '../../src/z-schema.ts';
 
@@ -39,23 +40,13 @@ const excludedFiles: string[] = [
   // decided to not support this for now, using unsupported drafts should fail
   'draft7/optional/cross-draft.json',
   // FAILING
-  'draft2019-09/format.json', // FAIL: 102 out of 114 tests passes
   'draft2019-09/optional/anchor.json', // FAIL: 3 out of 4 tests passes
   'draft2019-09/optional/float-overflow.json', // FAIL: 0 out of 1 tests passes
-  'draft2019-09/optional/format/duration.json', // FAIL: 11 out of 26 tests passes
-  'draft2019-09/optional/format/unknown.json', // FAIL: 0 out of 7 tests passes
-  'draft2019-09/optional/format/uuid.json', // FAIL: 8 out of 22 tests passes
   'draft2019-09/unevaluatedItems.json', // FAIL: 38 out of 56 tests passes
   'draft2019-09/unevaluatedProperties.json', // FAIL: 106 out of 125 tests passes
-  'draft2020-12/format.json', // FAIL: 102 out of 133 tests passes
   'draft2020-12/optional/anchor.json', // FAIL: 3 out of 4 tests passes
   'draft2020-12/optional/dynamicRef.json', // FAIL: 1 out of 2 tests passes
-  'draft2020-12/optional/format/ecmascript-regex.json', // FAIL: 0 out of 1 tests passes
   'draft2020-12/optional/float-overflow.json', // FAIL: 0 out of 1 tests passes
-  'draft2020-12/optional/format/duration.json', // FAIL: 11 out of 26 tests passes
-  'draft2020-12/optional/format/email.json', // FAIL: 22 out of 24 tests passes
-  'draft2020-12/optional/format/unknown.json', // FAIL: 0 out of 7 tests passes
-  'draft2020-12/optional/format/uuid.json', // FAIL: 8 out of 22 tests passes
   'draft2020-12/unevaluatedItems.json', // FAIL: 44 out of 71 tests passes
   'draft2020-12/unevaluatedProperties.json', // FAIL: 106 out of 125 tests passes
 ];
@@ -96,6 +87,8 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
         }
 
         describe(file, async () => {
+          const isModernFormatSuite = file === 'draft2019-09/format.json' || file === 'draft2020-12/format.json';
+
           const testSuites = await reader<TestSuite[]>(testFilePath);
           testSuites.forEach((testSuite) => {
             const schema = testSuite.schema;
@@ -120,7 +113,11 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
                 return;
               }
               it([testSuite.description, test.description].join(' '), function () {
-                const validator = ZSchema.create({ version });
+                const validatorOptions: ZSchemaOptions = { version };
+                if (isModernFormatSuite) {
+                  validatorOptions.formatAssertions = true;
+                }
+                const validator = ZSchema.create(validatorOptions);
                 const { valid, err } = validator.validateSafe(test.data, schema);
                 expect.soft(valid).toBe(test.valid);
                 if (valid !== test.valid) {

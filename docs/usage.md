@@ -40,6 +40,7 @@ const validator = ZSchema.create({
   noTypeless: true, // require 'type' in schemas (default: false)
   strictMode: false, // enable multiple strict checks at once (default: false)
   ignoreUnknownFormats: false, // suppress UNKNOWN_FORMAT errors (default: false)
+  formatAssertions: true, // treat format as assertion; set false for annotation-only behavior (default: true)
   ignoreUnresolvableReferences: false, // skip unresolvable $ref (default: false)
 });
 ```

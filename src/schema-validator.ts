@@ -653,6 +653,10 @@ const SchemaValidators = {
     }
   },
   format: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
+    if (this.options.formatAssertions === false) {
+      return;
+    }
+
     if (typeof schema.format !== 'string') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['format', 'string'], undefined, schema, 'format');
     } else {

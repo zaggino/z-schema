@@ -66,7 +66,7 @@ Static methods on `ZSchema`:
 
 1. **Schema compilation** (`schema-compiler.ts`): resolves `$ref`, collects `id`/`$id`, validates schema structure.
 2. **Schema validation** (`schema-validator.ts`): validates the schema against its meta-schema (draft-04, draft-06, draft-07, draft-2019-09, or draft-2020-12).
-3. **JSON validation** (`json-validation.ts`): validates a JSON instance against the compiled schema (type checks, constraints, combiners like `allOf`/`anyOf`/`oneOf`/`not`).
+3. **JSON validation** (`json-validation.ts`): validates a JSON instance against the compiled schema (type checks, constraints, combiners like `allOf`/`anyOf`/`oneOf`/`not`, and `format` assertion behavior controlled by `ZSchemaOptions.formatAssertions`).
 4. **Report** (`report.ts`): errors accumulate in a `Report` object, then get converted into a `ValidateError`.
 
 ## ValidateOptions

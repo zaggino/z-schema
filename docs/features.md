@@ -24,6 +24,7 @@ z-schema provides full support for JSON Schema **draft-04**, **draft-06**, **dra
 - [Case-insensitive enum comparison](options.md#enumcaseinsensitivecomparison)
 - [Strict absolute URIs only](options.md#stricturis)
 - [Strict mode](options.md#strictmode)
+- [Format assertion toggle](options.md#formatassertions)
 - [Stop on first error](options.md#breakonfirsterror)
 - [Report paths as arrays](options.md#reportpathasarray)
 - [Unicode Property Escapes Support](#unicode-property-escapes-support)

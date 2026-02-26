@@ -872,6 +872,10 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   },
   format: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
+    if (this.options.formatAssertions === false) {
+      return;
+    }
+
     const formatValidators = getFormatValidators(this.options);
     const formatValidatorFn = formatValidators[schema.format!];
     if (typeof formatValidatorFn === 'function') {
