@@ -32,6 +32,63 @@ const supportsDependentKeywords = (schema: JsonSchemaInternal, version: JsonSche
   return !(version === 'draft-04' || version === 'draft-06' || version === 'draft-07');
 };
 
+const VOCAB_VALIDATION_2019_09 = 'https://json-schema.org/draft/2019-09/vocab/validation';
+const VOCAB_VALIDATION_2020_12 = 'https://json-schema.org/draft/2020-12/vocab/validation';
+
+const VALIDATION_VOCAB_KEYWORDS = new Set<keyof JsonSchemaAll>([
+  'type',
+  'multipleOf',
+  'maximum',
+  'exclusiveMaximum',
+  'minimum',
+  'exclusiveMinimum',
+  'maxLength',
+  'minLength',
+  'pattern',
+  'maxItems',
+  'minItems',
+  'uniqueItems',
+  'maxContains',
+  'minContains',
+  'maxProperties',
+  'minProperties',
+  'required',
+  'dependentRequired',
+  'enum',
+  'const',
+  'contentEncoding',
+  'contentMediaType',
+]);
+
+const isValidationVocabularyEnabled = (
+  schema: JsonSchemaInternal,
+  report: Report,
+  version: JsonSchemaVersion | 'none' | undefined
+) => {
+  if (version !== 'draft2019-09' && version !== 'draft2020-12') {
+    return true;
+  }
+
+  const currentSchemaMeta = schema.__$schemaResolved;
+  const rootSchemaMeta =
+    report.rootSchema && typeof report.rootSchema !== 'boolean' ? report.rootSchema.__$schemaResolved : undefined;
+  const metaSchema = (currentSchemaMeta || rootSchemaMeta) as JsonSchemaInternal | boolean | undefined;
+
+  if (!metaSchema || typeof metaSchema !== 'object' || !isObject(metaSchema.$vocabulary)) {
+    return true;
+  }
+
+  const vocabulary = metaSchema.$vocabulary as Record<string, boolean>;
+  const has2019 = hasOwn(vocabulary, VOCAB_VALIDATION_2019_09);
+  const has2020 = hasOwn(vocabulary, VOCAB_VALIDATION_2020_12);
+
+  if (has2019 || has2020) {
+    return vocabulary[VOCAB_VALIDATION_2019_09] === true || vocabulary[VOCAB_VALIDATION_2020_12] === true;
+  }
+
+  return false;
+};
+
 type JsonValidatorFn = (this: ZSchemaBase, report: Report, schema: JsonSchema, json: unknown) => void;
 
 const getDynamicRefAnchorName = (dynamicRef: string) => {
@@ -1362,8 +1419,13 @@ export function validate(
     }
   }
 
+  const validationVocabularyEnabled = isValidationVocabularyEnabled(schema, report, this.options.version);
+  if (!validationVocabularyEnabled) {
+    keys = keys.filter((key) => !VALIDATION_VOCAB_KEYWORDS.has(key));
+  }
+
   // type checking first
-  if (schema.type) {
+  if (validationVocabularyEnabled && schema.type) {
     keys.splice(keys.indexOf('type'), 1);
     report.schemaPath.push('type');
     JsonValidators.type.call(this, report, schema, json);

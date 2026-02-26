@@ -47,7 +47,6 @@ const excludedFiles: string[] = [
   'draft2019-09/optional/format/uuid.json', // FAIL: 8 out of 22 tests passes
   'draft2019-09/unevaluatedItems.json', // FAIL: 38 out of 56 tests passes
   'draft2019-09/unevaluatedProperties.json', // FAIL: 106 out of 125 tests passes
-  'draft2019-09/vocabulary.json', // FAIL: 4 out of 5 tests passes
   'draft2020-12/format.json', // FAIL: 102 out of 133 tests passes
   'draft2020-12/optional/anchor.json', // FAIL: 3 out of 4 tests passes
   'draft2020-12/optional/dynamicRef.json', // FAIL: 1 out of 2 tests passes
@@ -59,7 +58,6 @@ const excludedFiles: string[] = [
   'draft2020-12/optional/format/uuid.json', // FAIL: 8 out of 22 tests passes
   'draft2020-12/unevaluatedItems.json', // FAIL: 44 out of 71 tests passes
   'draft2020-12/unevaluatedProperties.json', // FAIL: 106 out of 125 tests passes
-  'draft2020-12/vocabulary.json', // FAIL: 4 out of 5 tests passes
 ];
 const excludedTests: string[] = [];
 
