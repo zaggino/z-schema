@@ -87,8 +87,6 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
         }
 
         describe(file, async () => {
-          const isModernFormatSuite = file === 'draft2019-09/format.json' || file === 'draft2020-12/format.json';
-
           const testSuites = await reader<TestSuite[]>(testFilePath);
           testSuites.forEach((testSuite) => {
             const schema = testSuite.schema;
@@ -114,9 +112,12 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
               }
               it([testSuite.description, test.description].join(' '), function () {
                 const validatorOptions: ZSchemaOptions = { version };
+
+                const isModernFormatSuite = file === 'draft2019-09/format.json' || file === 'draft2020-12/format.json';
                 if (isModernFormatSuite) {
                   validatorOptions.formatAssertions = true;
                 }
+
                 const validator = ZSchema.create(validatorOptions);
                 const { valid, err } = validator.validateSafe(test.data, schema);
                 expect.soft(valid).toBe(test.valid);
