@@ -55,7 +55,7 @@ export const defaultOptions: ZSchemaOptions = {
   forceMaxLength: false,
   // force properties or patternProperties to be defined on "object" types
   forceProperties: false,
-  // ignore references that cannot be resolved (remote schemas) // TODO: make sure this is only for remote schemas, not local ones
+  // ignore references that cannot be resolved (remote schemas)
   ignoreUnresolvableReferences: false,
   // disallow usage of keywords that this validator can't handle
   noExtraKeywords: false,

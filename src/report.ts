@@ -321,7 +321,6 @@ export class Report {
       keyword: keyword,
     };
 
-    // TODO v8: remove Symbol usage
     (err as any)[schemaSymbol] = schema;
     (err as any)[jsonSymbol] = this.getJson();
 

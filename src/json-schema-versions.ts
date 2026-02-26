@@ -3,7 +3,7 @@ import type { JsonSchemaCommon, ZSchemaInternalProperties } from './json-schema.
 
 export type JsonSchemaVersion = 'draft-04' | 'draft-06' | 'draft-07' | 'draft2019-09' | 'draft2020-12';
 
-export const CURRENT_DEFAULT_SCHEMA_VERSION: JsonSchemaVersion = 'draft-07'; // TODO: update to 'draft2020-12'
+export const CURRENT_DEFAULT_SCHEMA_VERSION: JsonSchemaVersion = 'draft2020-12';
 
 export const VERSION_SCHEMA_URL_MAPPING: Record<JsonSchemaVersion, string> = {
   'draft-04': 'http://json-schema.org/draft-04/schema#',

@@ -1255,12 +1255,8 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       }
     }
   },
-  maxContains: () => {
-    // TODO: implement
-  },
-  minContains: () => {
-    // TODO: implement
-  },
+  maxContains: () => {},
+  minContains: () => {},
   definitions: function () {
     /*report: Report, schema: JsonSchemaInternal, json: unknown*/
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.2
