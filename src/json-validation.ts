@@ -1,4 +1,4 @@
-import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
+import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal, JsonSchemaVersion } from './json-schema-versions.js';
 import type { ValidateOptions, ZSchemaBase } from './z-schema-base.js';
 
 import { getFormatValidators } from './format-validators.js';
@@ -23,6 +23,13 @@ const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
       return options.includeErrors!.includes(err);
     })
   );
+};
+
+const supportsDependentKeywords = (schema: JsonSchemaInternal, version: JsonSchemaVersion | 'none' | undefined) => {
+  if (typeof schema.$schema === 'string') {
+    return !/draft-04|draft-06|draft-07/.test(schema.$schema);
+  }
+  return !(version === 'draft-04' || version === 'draft-06' || version === 'draft-07');
 };
 
 type JsonValidatorFn = (this: ZSchemaBase, report: Report, schema: JsonSchema, json: unknown) => void;
@@ -620,11 +627,64 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   else: function () {
     // handled by if
   },
-  dependentSchemas: () => {
-    // TODO: implement
+  dependentSchemas: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (!supportsDependentKeywords(schema, this.options.version)) {
+      return;
+    }
+    if (!isObject(json) || !isObject(schema.dependentSchemas)) {
+      return;
+    }
+
+    const keys = Object.keys(schema.dependentSchemas);
+    let idx = keys.length;
+
+    while (idx--) {
+      const dependencyName = keys[idx];
+      if (hasOwn(json, dependencyName)) {
+        const dependencySchema = schema.dependentSchemas[dependencyName];
+        validate.call(this, report, dependencySchema, json);
+      }
+    }
   },
-  dependentRequired: () => {
-    // TODO: implement
+  dependentRequired: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (!supportsDependentKeywords(schema, this.options.version)) {
+      return;
+    }
+    if (shouldSkipValidate(this.validateOptions, ['OBJECT_DEPENDENCY_KEY'])) {
+      return;
+    }
+    if (!isObject(json) || !isObject(schema.dependentRequired)) {
+      return;
+    }
+
+    const keys = Object.keys(schema.dependentRequired);
+    let idx = keys.length;
+
+    while (idx--) {
+      const dependencyName = keys[idx];
+      if (!hasOwn(json, dependencyName)) {
+        continue;
+      }
+
+      const requiredProperties = schema.dependentRequired[dependencyName];
+      if (!Array.isArray(requiredProperties)) {
+        continue;
+      }
+
+      let idx2 = requiredProperties.length;
+      while (idx2--) {
+        const requiredPropertyName = requiredProperties[idx2];
+        if (!hasOwn(json, requiredPropertyName)) {
+          report.addError(
+            'OBJECT_DEPENDENCY_KEY',
+            [requiredPropertyName, dependencyName],
+            undefined,
+            schema,
+            'dependentRequired'
+          );
+        }
+      }
+    }
   },
   unevaluatedItems: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     if (schema.unevaluatedItems !== false || !Array.isArray(json)) {

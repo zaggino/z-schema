@@ -39,8 +39,6 @@ const excludedFiles: string[] = [
   // decided to not support this for now, using unsupported drafts should fail
   'draft7/optional/cross-draft.json',
   // FAILING
-  'draft2019-09/dependentRequired.json', // FAIL: 14 out of 20 tests passes
-  'draft2019-09/dependentSchemas.json', // FAIL: 10 out of 20 tests passes
   'draft2019-09/format.json', // FAIL: 102 out of 114 tests passes
   'draft2019-09/optional/anchor.json', // FAIL: 3 out of 4 tests passes
   'draft2019-09/optional/float-overflow.json', // FAIL: 0 out of 1 tests passes
@@ -50,8 +48,6 @@ const excludedFiles: string[] = [
   'draft2019-09/unevaluatedItems.json', // FAIL: 38 out of 56 tests passes
   'draft2019-09/unevaluatedProperties.json', // FAIL: 106 out of 125 tests passes
   'draft2019-09/vocabulary.json', // FAIL: 4 out of 5 tests passes
-  'draft2020-12/dependentRequired.json', // FAIL: 14 out of 20 tests passes
-  'draft2020-12/dependentSchemas.json', // FAIL: 10 out of 20 tests passes
   'draft2020-12/format.json', // FAIL: 102 out of 133 tests passes
   'draft2020-12/optional/anchor.json', // FAIL: 3 out of 4 tests passes
   'draft2020-12/optional/dynamicRef.json', // FAIL: 1 out of 2 tests passes

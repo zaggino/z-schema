@@ -22,6 +22,7 @@ export default [
     output: {
       file: 'cjs/index.js',
       format: 'cjs',
+      exports: 'named',
     },
   },
   {
