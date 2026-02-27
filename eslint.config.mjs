@@ -82,6 +82,7 @@ export default defineConfig([
     rules: {
       'markdown/fenced-code-language': 'off',
       'markdown/no-missing-label-refs': 'off',
+      'markdown/no-missing-link-fragments': 'off',
       'markdown/no-multiple-h1': 'off',
     },
   },
