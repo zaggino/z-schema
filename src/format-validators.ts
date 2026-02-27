@@ -348,8 +348,14 @@ export function getSupportedFormats(customFormats?: Record<string, FormatValidat
 }
 
 export function isFormatSupported(name: string, customFormats?: Record<string, FormatValidatorFn | null>): boolean {
-  const supported = getSupportedFormats(customFormats);
-  return supported.includes(name);
+  if (customFormats) {
+    const custom = customFormats[name];
+    // Explicitly null means unregistered at instance level
+    if (custom === null) return false;
+    if (custom != null) return true;
+  }
+  if (name in customValidators) return customValidators[name] != null;
+  return name in inbuiltValidators;
 }
 
 export function getRegisteredFormats() {
