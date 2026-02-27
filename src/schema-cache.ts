@@ -68,17 +68,18 @@ export class SchemaCache {
   fromCache(path: string): JsonSchemaInternal | undefined {
     let found = this.cache[path];
     if (found) {
-      return this.cache[path];
+      return found;
     }
-    const asClone = (s: JsonSchema) => {
-      if (!s.id || (!isAbsoluteUri(s.id) && isAbsoluteUri(path))) {
-        s.id = path;
-      }
-      return deepClone(s, this.validator.options.maxRecursionDepth);
-    };
     found = SchemaCache.global_cache[path];
     if (found) {
-      return asClone(found);
+      // Clone once from global cache into instance cache so subsequent lookups
+      // never deep-clone again for the same path on this instance.
+      const clone = deepClone(found, this.validator.options.maxRecursionDepth);
+      if (!clone.id || (!isAbsoluteUri(clone.id) && isAbsoluteUri(path))) {
+        clone.id = path;
+      }
+      this.cache[path] = clone;
+      return clone;
     }
     return undefined;
   }
