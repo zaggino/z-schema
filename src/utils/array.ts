@@ -61,10 +61,11 @@ export const isUniqueArray = <T>(arr: T[], indexes?: number[], maxDepth?: number
 };
 
 export const difference = (bigSet: any[], subSet: any[]) => {
+  const exclusions = new Set(subSet);
   const arr = [];
   let idx = bigSet.length;
   while (idx--) {
-    if (subSet.indexOf(bigSet[idx]) === -1) {
+    if (!exclusions.has(bigSet[idx])) {
       arr.push(bigSet[idx]);
     }
   }
