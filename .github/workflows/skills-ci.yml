@@ -19,15 +19,24 @@ jobs:
 
       - name: Install all skills (local)
         run: |
-          npx skills add . --all --copy
+          npx skills add . --skill '*' --agent github-copilot --yes --copy
           echo "✅ Successfully installed all skills locally"
+
+      - name: Debug directory structure
+        if: always()
+        run: |
+          echo "📁 Full directory listing of agent directories:"
+          for dir in .agents .claude .github/skills; do
+            if [ -d "$dir" ]; then
+              echo "=== $dir ==="
+              find "$dir" -type f | head -50
+            fi
+          done
+          echo "=== looking for any SKILL.md ==="
+          find . -name "SKILL.md" -not -path "./node_modules/*" -not -path "./skills/*" | head -50
 
       - name: Verify skills installed
         run: |
-          echo "📁 Checking installed skill files..."
-          find .agents/skills -type f -name "SKILL.md" | sort
-          echo "---"
-
           if [ ! -d ".agents/skills" ]; then
             echo "❌ .agents/skills directory not found"
             exit 1
@@ -42,7 +51,7 @@ jobs:
               count=$((count + 1))
             else
               echo "📂 Contents of $skill_name:"
-              ls -la "$skill"
+              ls -laR "$skill"
               echo "❌ $skill_name/SKILL.md not found"
               exit 1
             fi
@@ -50,7 +59,6 @@ jobs:
 
           if [ "$count" -eq 0 ]; then
             echo "❌ No skills found in .agents/skills/"
-            ls -laR .agents/ || true
             exit 1
           fi
 
@@ -64,15 +72,22 @@ jobs:
     steps:
       - name: Install all skills (remote)
         run: |
-          npx skills add zaggino/z-schema --all --copy
+          npx skills add zaggino/z-schema --skill '*' --agent github-copilot --yes --copy
           echo "✅ Successfully installed all skills from GitHub"
+
+      - name: Debug directory structure
+        if: always()
+        run: |
+          echo "📁 Full directory listing of agent directories:"
+          for dir in .agents .claude .github/skills; do
+            if [ -d "$dir" ]; then
+              echo "=== $dir ==="
+              find "$dir" -type f | head -50
+            fi
+          done
 
       - name: Verify skills installed
         run: |
-          echo "📁 Checking installed skill files..."
-          find .agents/skills -type f -name "SKILL.md" | sort
-          echo "---"
-
           if [ ! -d ".agents/skills" ]; then
             echo "❌ .agents/skills directory not found"
             exit 1
@@ -86,6 +101,8 @@ jobs:
               echo "✅ Found $skill_name/SKILL.md"
               count=$((count + 1))
             else
+              echo "📂 Contents of $skill_name:"
+              ls -laR "$skill"
               echo "❌ $skill_name/SKILL.md not found"
               exit 1
             fi
@@ -93,7 +110,6 @@ jobs:
 
           if [ "$count" -eq 0 ]; then
             echo "❌ No skills found in .agents/skills/"
-            ls -laR .agents/ || true
             exit 1
           fi
 
