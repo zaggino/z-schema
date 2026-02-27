@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/zaggino/z-schema/tree/main/docs
+    about: Check the docs for usage guides, options reference, and architecture overview.
+  - name: Questions & Discussions
+    url: https://github.com/zaggino/z-schema/issues
+    about: For general questions, search existing issues first — your question may already be answered.

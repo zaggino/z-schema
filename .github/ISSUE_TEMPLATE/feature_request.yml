@@ -1,0 +1,68 @@
+name: Feature Request
+description: Suggest a new feature or improvement for z-schema.
+title: '[Feature]: '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement! Please describe what you'd like and why it would be useful.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or motivation
+      description: What problem does this feature solve? Is it related to something that frustrates you today?
+      placeholder: I'm always frustrated when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the feature or behavior you'd like to see.
+    validations:
+      required: true
+
+  - type: textarea
+    id: api
+    attributes:
+      label: Suggested API (optional)
+      description: If you have ideas for how the API should look, show an example.
+      render: typescript
+    validations:
+      required: false
+
+  - type: dropdown
+    id: draft
+    attributes:
+      label: Related JSON Schema draft
+      description: Does this relate to a specific draft version?
+      options:
+        - All drafts
+        - draft-04
+        - draft-06
+        - draft-07
+        - draft-2019-09
+        - draft-2020-12
+        - Not applicable
+      default: 0
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Have you considered any alternative solutions or workarounds?
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Any other context — links to the spec, related libraries, screenshots, etc.
+    validations:
+      required: false

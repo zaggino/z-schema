@@ -1,0 +1,124 @@
+name: Bug Report
+description: Report a bug in z-schema (incorrect validation, crashes, type errors, etc.)
+title: '[Bug]: '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill in the details below so we can reproduce and fix the issue.
+
+  - type: input
+    id: version
+    attributes:
+      label: z-schema version
+      description: Which version of z-schema are you using?
+      placeholder: e.g. 11.0.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: draft
+    attributes:
+      label: JSON Schema draft
+      description: Which draft version are you using?
+      options:
+        - draft-04
+        - draft-06
+        - draft-07
+        - draft-2019-09
+        - draft-2020-12 (default)
+        - Not sure / N/A
+      default: 4
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Where are you running z-schema?
+      multiple: true
+      options:
+        - Node.js
+        - Browser (ESM/UMD)
+        - Bun
+        - Deno
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js / runtime version
+      description: Output of `node --version` or equivalent.
+      placeholder: e.g. v22.0.0
+    validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description
+      description: A clear and concise description of the bug.
+      placeholder: What happened? What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: schema
+    attributes:
+      label: Schema
+      description: The JSON Schema you are validating against.
+      render: json
+    validations:
+      required: true
+
+  - type: textarea
+    id: data
+    attributes:
+      label: Input data
+      description: The JSON data being validated.
+      render: json
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Code to reproduce
+      description: Minimal code that reproduces the issue.
+      render: typescript
+      placeholder: |
+        import ZSchema from 'z-schema';
+
+        const validator = ZSchema.create();
+        const result = validator.validateSafe(data, schema);
+        console.log(result);
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What z-schema actually does (include errors, output, or stack traces).
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected z-schema to do instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Any other context — links to the spec, related issues, workarounds, etc.
+    validations:
+      required: false
