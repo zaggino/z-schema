@@ -244,7 +244,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
     return new Set();
   }
 
-  if (depth > 20) {
+  if (depth > (this.options.maxRecursionDepth ?? 100)) {
     report.addError('COLLECT_EVALUATED_DEPTH_EXCEEDED', [depth]);
     return new Set();
   }
@@ -687,7 +687,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     }
     if (schema.uniqueItems === true) {
       const matches: any[] = [];
-      if (isUniqueArray(json, matches) === false) {
+      if (isUniqueArray(json, matches, this.options.maxRecursionDepth) === false) {
         report.addError('ARRAY_UNIQUE', matches, undefined, schema, 'uniqueItems');
       }
     }
@@ -864,10 +864,12 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       caseInsensitiveMatch = false,
       idx = schema.enum!.length;
     while (idx--) {
-      if (areEqual(json, schema.enum![idx])) {
+      if (areEqual(json, schema.enum![idx], { maxDepth: this.options.maxRecursionDepth })) {
         match = true;
         break;
-      } else if (areEqual(json, schema.enum![idx], { caseInsensitiveComparison: true })) {
+      } else if (
+        areEqual(json, schema.enum![idx], { caseInsensitiveComparison: true, maxDepth: this.options.maxRecursionDepth })
+      ) {
         caseInsensitiveMatch = true;
       }
     }
@@ -1394,7 +1396,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   },
   const: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     const constValue = (schema as JsonSchemaAll).const;
-    if (areEqual(json, constValue) === false) {
+    if (areEqual(json, constValue, { maxDepth: this.options.maxRecursionDepth }) === false) {
       report.addError('CONST', [JSON.stringify(constValue)], undefined, schema, undefined);
     }
   },

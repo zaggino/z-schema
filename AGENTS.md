@@ -82,3 +82,15 @@ See [docs/usage.md](docs/usage.md) for how to use z-schema as a dependency in ot
 ## Contributing / PR Guide
 
 See [docs/contributing.md](docs/contributing.md) for PR workflow and contribution guidelines.
+
+## Documentation Policy
+
+When making changes to the repository, **always update the relevant documentation files**:
+
+- **New or changed option** → update `docs/options.md` (full description + example), `docs/usage.md` (options snippet if present), and `README.md` (quick-start options snippet if present).
+- **New or changed error code** → update `docs/features.md` if it lists error codes, and ensure tests cover the new code.
+- **New public export** → update `docs/usage.md` (import examples) and `docs/architecture.md` (public API section) as needed.
+- **New or changed format validator** → update `docs/features.md` (built-in formats list).
+- **Structural changes** → update `AGENTS.md` project structure and `docs/architecture.md`.
+
+Failing to update documentation alongside code changes leads to drift that is expensive to fix later. Treat docs updates as part of the definition of done for any PR.

@@ -42,6 +42,7 @@ const validator = ZSchema.create({
   ignoreUnknownFormats: false, // suppress UNKNOWN_FORMAT errors for older drafts (default: false; modern drafts always ignore unknown formats)
   formatAssertions: null, // null=always assert, true=respect vocabulary (annotation-only for 2019-09/2020-12), false=annotation-only (default: null)
   ignoreUnresolvableReferences: false, // skip unresolvable $ref (default: false)
+  maxRecursionDepth: 100, // max depth for internal traversal (prevents stack overflow on deep schemas/data)
 });
 ```
 

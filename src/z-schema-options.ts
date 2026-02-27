@@ -4,6 +4,8 @@ import type { Report } from './report.js';
 import { CURRENT_DEFAULT_SCHEMA_VERSION, type JsonSchemaVersion } from './json-schema-versions.js';
 import { shallowClone } from './utils/clone.js';
 
+export const DEFAULT_MAX_RECURSION_DEPTH = 100;
+
 export interface ZSchemaOptions {
   version?: JsonSchemaVersion | 'none';
   asyncTimeout?: number;
@@ -30,6 +32,7 @@ export interface ZSchemaOptions {
   formatAssertions?: boolean | null;
   customValidator?: (report: Report, schema: unknown, json: unknown) => void;
   customFormats?: Record<string, FormatValidatorFn | null>;
+  maxRecursionDepth?: number;
 }
 
 export const defaultOptions: ZSchemaOptions = {
@@ -85,6 +88,8 @@ export const defaultOptions: ZSchemaOptions = {
   formatAssertions: null,
   // function to be called on every schema
   customValidator: null as unknown as undefined,
+  // maximum recursion depth for deeply nested schema/data traversal (prevents stack overflow)
+  maxRecursionDepth: DEFAULT_MAX_RECURSION_DEPTH,
 };
 
 export const normalizeOptions = (options?: ZSchemaOptions) => {

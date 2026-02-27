@@ -1,12 +1,14 @@
+import { DEFAULT_MAX_RECURSION_DEPTH } from '../z-schema-options.js';
 import { isObject } from './what-is.js';
 
 interface AreEqualOptions {
   caseInsensitiveComparison?: boolean;
+  maxDepth?: number;
 }
 
-export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptions): boolean => {
-  options = options || {};
-  const caseInsensitiveComparison = options.caseInsensitiveComparison || false;
+export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptions, _depth = 0): boolean => {
+  const caseInsensitiveComparison = options?.caseInsensitiveComparison || false;
+  const maxDepth = options?.maxDepth ?? DEFAULT_MAX_RECURSION_DEPTH;
 
   // http://json-schema.org/latest/json-schema-core.html#rfc.section.3.6
 
@@ -27,6 +29,13 @@ export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptio
     return true;
   }
 
+  if (_depth >= maxDepth) {
+    throw new Error(
+      `Maximum recursion depth (${maxDepth}) exceeded in areEqual. ` +
+        'If your data is deeply nested and valid, increase the maxRecursionDepth option.'
+    );
+  }
+
   let i, len;
 
   // both are arrays, and:
@@ -38,7 +47,7 @@ export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptio
     // items at the same index are equal according to this definition; or
     len = json1.length;
     for (i = 0; i < len; i++) {
-      if (!areEqual(json1[i], json2[i], { caseInsensitiveComparison: caseInsensitiveComparison })) {
+      if (!areEqual(json1[i], json2[i], options, _depth + 1)) {
         return false;
       }
     }
@@ -50,13 +59,13 @@ export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptio
     // have the same set of property names; and
     const keys1 = sortedKeys(json1 as Record<string, unknown>);
     const keys2 = sortedKeys(json2 as Record<string, unknown>);
-    if (!areEqual(keys1, keys2, { caseInsensitiveComparison: caseInsensitiveComparison })) {
+    if (!areEqual(keys1, keys2, options, _depth + 1)) {
       return false;
     }
     // values for a same property name are equal according to this definition.
     len = keys1.length;
     for (i = 0; i < len; i++) {
-      if (!areEqual(json1[keys1[i]], json2[keys1[i]], { caseInsensitiveComparison: caseInsensitiveComparison })) {
+      if (!areEqual(json1[keys1[i]], json2[keys1[i]], options, _depth + 1)) {
         return false;
       }
     }

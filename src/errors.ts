@@ -71,6 +71,8 @@ export const Errors = {
   // Draft-2019-09+ errors
   COLLECT_EVALUATED_DEPTH_EXCEEDED:
     'Schema nesting depth exceeded maximum ({0}) during unevaluated items/properties collection',
+  MAX_RECURSION_DEPTH_EXCEEDED:
+    'Maximum recursion depth ({0}) exceeded. If your schema or data is deeply nested and valid, increase the maxRecursionDepth option.',
 };
 
 export class ValidateError extends Error {

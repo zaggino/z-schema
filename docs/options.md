@@ -434,6 +434,18 @@ const validator = ZSchema.create({
 });
 ```
 
+## maxRecursionDepth
+
+Maximum recursion depth for internal traversal functions (`deepClone`, `areEqual`, `findId`, `collectIds`, `collectReferences`, `collectEvaluated`). Prevents stack overflows on pathologically deep or circular schemas/data. If your schemas or data are legitimately deeply nested and you encounter a "Maximum recursion depth exceeded" error, increase this value.
+
+Default: `100`
+
+```javascript
+const validator = ZSchema.create({
+  maxRecursionDepth: 200,
+});
+```
+
 ---
 
 ## Per-call Options (ValidateOptions)

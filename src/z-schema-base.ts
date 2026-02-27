@@ -218,7 +218,7 @@ export class ZSchemaBase {
     if (typeof schema === 'string') {
       _schema = JSON.parse(schema);
     } else {
-      _schema = deepClone(schema);
+      _schema = deepClone(schema, this.options.maxRecursionDepth);
     }
 
     if (!_schema.id) {
@@ -268,7 +268,7 @@ export class ZSchemaBase {
     const schema = this.scache.getSchemaByUri(report, schemaId);
     if (!schema) return undefined;
 
-    const clonedSchema = deepClone(schema);
+    const clonedSchema = deepClone(schema, this.options.maxRecursionDepth);
 
     const visited: any[] = [];
 

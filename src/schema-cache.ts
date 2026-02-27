@@ -62,7 +62,7 @@ export class SchemaCache {
       return this.getSchemaByUri(report, refOrSchema);
     }
     // no caching done on this, but we need to return a clone so we can mutate it
-    return deepClone(refOrSchema);
+    return deepClone(refOrSchema, this.validator.options.maxRecursionDepth);
   }
 
   fromCache(path: string): JsonSchemaInternal | undefined {
@@ -74,7 +74,7 @@ export class SchemaCache {
       if (!s.id || (!isAbsoluteUri(s.id) && isAbsoluteUri(path))) {
         s.id = path;
       }
-      return deepClone(s);
+      return deepClone(s, this.validator.options.maxRecursionDepth);
     };
     found = SchemaCache.global_cache[path];
     if (found) {
@@ -185,7 +185,7 @@ export class SchemaCache {
         const key = decodeJSONPointer(parts[idx]);
         if (idx === 0) {
           // it's an id
-          result = findId(result, key, remotePath, remotePath);
+          result = findId(result, key, remotePath, remotePath, this.validator.options.maxRecursionDepth);
         } else {
           // it's a path behind id
           result = result[key as keyof typeof result] as JsonSchemaInternal | undefined;

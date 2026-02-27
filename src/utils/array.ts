@@ -1,12 +1,12 @@
 import { areEqual } from './json.js';
 
-export const isUniqueArray = <T>(arr: T[], indexes?: number[]): boolean => {
+export const isUniqueArray = <T>(arr: T[], indexes?: number[], maxDepth?: number): boolean => {
   let i;
   let j;
   const l = arr.length;
   for (i = 0; i < l; i++) {
     for (j = i + 1; j < l; j++) {
-      if (areEqual(arr[i], arr[j])) {
+      if (areEqual(arr[i], arr[j], { maxDepth })) {
         if (indexes) {
           indexes.push(i, j);
         }

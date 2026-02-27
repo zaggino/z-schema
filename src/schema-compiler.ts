@@ -4,6 +4,7 @@ import type { ZSchemaBase } from './z-schema-base.js';
 import { getId } from './json-schema.js';
 import { Report } from './report.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
+import { DEFAULT_MAX_RECURSION_DEPTH } from './z-schema-options.js';
 import { getSchemaReader } from './z-schema-reader.js';
 
 interface Id {
@@ -14,11 +15,18 @@ interface Id {
   absoluteUri?: string;
 }
 
-export const collectIds = (obj: JsonSchemaInternal) => {
+export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECURSION_DEPTH) => {
   const ids: Id[] = [];
   const doNotCollectIdsFrom = ['enum', 'const', 'default', 'examples'];
-  function walk(node: any, scope: Id[]) {
+  function walk(node: any, scope: Id[], _depth = 0) {
     if (typeof node !== 'object' || node == null) return;
+
+    if (_depth >= maxDepth) {
+      throw new Error(
+        `Maximum recursion depth (${maxDepth}) exceeded in collectIds. ` +
+          'If your schema is deeply nested and valid, increase the maxRecursionDepth option.'
+      );
+    }
 
     let addedScope = false;
 
@@ -53,12 +61,12 @@ export const collectIds = (obj: JsonSchemaInternal) => {
 
     if (Array.isArray(node)) {
       for (const item of node) {
-        walk(item, scope);
+        walk(item, scope, _depth + 1);
       }
     } else {
       for (const key of Object.keys(node)) {
         if (key.indexOf('__$') === 0 || doNotCollectIdsFrom.includes(key)) continue;
-        walk(node[key], scope);
+        walk(node[key], scope, _depth + 1);
       }
     }
 
@@ -84,7 +92,9 @@ export const collectReferences = (
   results?: Reference[],
   scope?: string[],
   path?: Reference['path'],
-  options?: { useRefObjectScope?: boolean }
+  options?: { useRefObjectScope?: boolean },
+  maxDepth = DEFAULT_MAX_RECURSION_DEPTH,
+  _depth = 0
 ) => {
   results = results || [];
   scope = scope || [];
@@ -93,6 +103,13 @@ export const collectReferences = (
 
   if (typeof obj !== 'object' || obj === null) {
     return results;
+  }
+
+  if (_depth >= maxDepth) {
+    throw new Error(
+      `Maximum recursion depth (${maxDepth}) exceeded in collectReferences. ` +
+        'If your schema is deeply nested and valid, increase the maxRecursionDepth option.'
+    );
   }
 
   const hasRef = typeof obj.$ref === 'string' && typeof obj.__$refResolved === 'undefined';
@@ -148,7 +165,7 @@ export const collectReferences = (
     idx = obj.length;
     while (idx--) {
       path.push(idx);
-      collectReferences(obj[idx], results, scope, path, options);
+      collectReferences(obj[idx], results, scope, path, options, maxDepth, _depth + 1);
       path.pop();
     }
   } else {
@@ -160,7 +177,7 @@ export const collectReferences = (
         continue;
       }
       path.push(keys[idx]);
-      collectReferences((obj as any)[keys[idx]], results, scope, path, options);
+      collectReferences((obj as any)[keys[idx]], results, scope, path, options, maxDepth, _depth + 1);
       path.pop();
     }
   }
@@ -237,7 +254,7 @@ export class SchemaCompiler {
   constructor(private validator: ZSchemaBase) {}
 
   collectAndCacheIds(schema: JsonSchemaInternal) {
-    const ids = collectIds(schema);
+    const ids = collectIds(schema, this.validator.options.maxRecursionDepth);
     for (const item of ids) {
       if (item.absoluteUri) {
         this.validator.scache.cacheSchemaByUri(item.absoluteUri, item.obj);
@@ -314,7 +331,14 @@ export class SchemaCompiler {
     // collect all references that need to be resolved - $ref and $schema
     const useRefObjectScope =
       this.validator.options.version === 'draft2019-09' || this.validator.options.version === 'draft2020-12';
-    const refs = collectReferences(schema, undefined, undefined, undefined, { useRefObjectScope });
+    const refs = collectReferences(
+      schema,
+      undefined,
+      undefined,
+      undefined,
+      { useRefObjectScope },
+      this.validator.options.maxRecursionDepth
+    );
     let idx = refs.length;
     while (idx--) {
       // resolve all the collected references into __xxxResolved pointer

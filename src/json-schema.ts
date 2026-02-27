@@ -9,6 +9,7 @@ import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { isObject } from './utils/what-is.js';
+import { DEFAULT_MAX_RECURSION_DEPTH } from './z-schema-options.js';
 
 // common properties of all JSON Schema versions
 export interface JsonSchemaCommon {
@@ -101,7 +102,9 @@ export const findId = (
   schema: JsonSchemaInternal,
   id: string,
   targetBaseUri?: string,
-  currentBaseUri?: string
+  currentBaseUri?: string,
+  maxDepth = DEFAULT_MAX_RECURSION_DEPTH,
+  _depth = 0
 ): JsonSchemaInternal | undefined => {
   // process only arrays and objects
   if (typeof schema !== 'object' || schema === null) {
@@ -111,6 +114,13 @@ export const findId = (
   // no id means root so return itself
   if (!id) {
     return schema;
+  }
+
+  if (_depth >= maxDepth) {
+    throw new Error(
+      `Maximum recursion depth (${maxDepth}) exceeded in findId. ` +
+        'If your schema is deeply nested and valid, increase the maxRecursionDepth option.'
+    );
   }
 
   const baseUri = currentBaseUri ?? targetBaseUri;
@@ -145,7 +155,7 @@ export const findId = (
   if (Array.isArray(schema)) {
     idx = schema.length;
     while (idx--) {
-      result = findId(schema[idx], id, targetBaseUri, nextBaseUri);
+      result = findId(schema[idx], id, targetBaseUri, nextBaseUri, maxDepth, _depth + 1);
       if (result) {
         return result;
       }
@@ -160,7 +170,7 @@ export const findId = (
       if (k.indexOf('__$') === 0 || doNotTraverse.includes(k)) {
         continue;
       }
-      result = findId(schema[k] as JsonSchemaInternal, id, targetBaseUri, nextBaseUri);
+      result = findId(schema[k] as JsonSchemaInternal, id, targetBaseUri, nextBaseUri, maxDepth, _depth + 1);
       if (result) {
         return result;
       }
