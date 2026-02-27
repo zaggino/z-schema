@@ -219,6 +219,8 @@ validator.validate(data, schema, { schemaPath: '#/properties/address' });
 
 ## Remote References
 
+> **Important:** Static remote references (`ZSchema.setRemoteReference`) are stored in a **global cache shared across all `ZSchema` instances** in the same process. This is intentional — it allows meta-schemas and common references to be registered once and reused everywhere. However, you must not register conflicting schemas under the same URI from different parts of your application, as the last write wins silently. Instance-level references (`validator.setRemoteReference`) are scoped to that instance and take precedence over global ones.
+
 ### Manual
 
 ```typescript

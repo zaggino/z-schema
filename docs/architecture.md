@@ -97,6 +97,15 @@ Use `version: 'none'` to skip meta-schema version detection (schemas validate us
 
 Meta-schemas are bundled in `src/schemas/` (copied from `json-schema-spec/` at build time by `scripts/copy-schemas.mts`).
 
+## Schema Caching
+
+`SchemaCache` (`schema-cache.ts`) maintains two levels of cache:
+
+- **Global cache** (`SchemaCache.global_cache`) — a static object shared across all `ZSchema` instances in the process. Populated by `ZSchema.setRemoteReference()` and by bundled draft meta-schemas registered at import time. This is intentional: common references (meta-schemas, shared definitions) are registered once and available to every instance.
+- **Instance cache** (`this.cache`) — per-instance, populated by `validator.setRemoteReference()` and by schemas cloned from the global cache on first access. Instance cache entries take precedence over global ones.
+
+When a schema is looked up by URI, the instance cache is checked first. If not found, the global cache entry is deep-cloned into the instance cache (so compilation metadata doesn't leak between instances) and returned. Subsequent lookups for the same URI on the same instance hit the instance cache directly without re-cloning.
+
 ## Build Outputs
 
 | Output  | Format                         | Entry                        |
