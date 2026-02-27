@@ -160,11 +160,10 @@ export const findId = (
     }
   }
 
-  let idx, result;
+  let result;
   if (Array.isArray(schema)) {
-    idx = schema.length;
-    while (idx--) {
-      result = findId(schema[idx], id, targetBaseUri, nextBaseUri, maxDepth, _depth + 1);
+    for (let i = 0; i < schema.length; i++) {
+      result = findId(schema[i], id, targetBaseUri, nextBaseUri, maxDepth, _depth + 1);
       if (result) {
         return result;
       }
@@ -172,8 +171,7 @@ export const findId = (
   }
   if (isObject(schema)) {
     const keys = Object.keys(schema) as Array<keyof JsonSchemaInternal>;
-    idx = keys.length;
-    while (idx--) {
+    for (let idx = keys.length - 1; idx >= 0; idx--) {
       const k = keys[idx];
       if (isInternalKey(k) || NON_SCHEMA_KEYWORDS.includes(k as any)) {
         continue;

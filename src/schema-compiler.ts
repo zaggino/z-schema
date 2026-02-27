@@ -157,24 +157,21 @@ export const collectReferences = (
     });
   }
 
-  let idx;
   if (Array.isArray(obj)) {
-    idx = obj.length;
-    while (idx--) {
-      path.push(idx);
-      collectReferences(obj[idx], results, scope, path, options, maxDepth, _depth + 1);
+    for (let i = 0; i < obj.length; i++) {
+      path.push(i);
+      collectReferences(obj[i], results, scope, path, options, maxDepth, _depth + 1);
       path.pop();
     }
   } else {
     const keys = Object.keys(obj);
-    idx = keys.length;
-    while (idx--) {
+    for (const key of keys) {
       // do not recurse through resolved references and other z-schema props
-      if (isInternalKey(keys[idx]) || NON_SCHEMA_KEYWORDS.includes(keys[idx] as any)) {
+      if (isInternalKey(key) || NON_SCHEMA_KEYWORDS.includes(key as any)) {
         continue;
       }
-      path.push(keys[idx]);
-      collectReferences((obj as any)[keys[idx]], results, scope, path, options, maxDepth, _depth + 1);
+      path.push(key);
+      collectReferences((obj as any)[key], results, scope, path, options, maxDepth, _depth + 1);
       path.pop();
     }
   }
@@ -336,10 +333,8 @@ export class SchemaCompiler {
       { useRefObjectScope },
       this.validator.options.maxRecursionDepth
     );
-    let idx = refs.length;
-    while (idx--) {
+    for (const refObj of refs) {
       // resolve all the collected references into __xxxResolved pointer
-      const refObj = refs[idx];
       let response = this.validator.scache.getSchemaByUri(report, refObj.ref, schema);
 
       // we can try to use custom schemaReader if available
@@ -424,12 +419,7 @@ export class SchemaCompiler {
 
     do {
       // remove all UNRESOLVABLE_REFERENCE errors before compiling array again
-      let idx = report.errors.length;
-      while (idx--) {
-        if (report.errors[idx].code === 'UNRESOLVABLE_REFERENCE') {
-          report.errors.splice(idx, 1);
-        }
-      }
+      report.errors = report.errors.filter((e) => e.code !== 'UNRESOLVABLE_REFERENCE');
 
       // remember how many were compiled in the last loop
       lastLoopCompiled = compiled;
@@ -438,12 +428,9 @@ export class SchemaCompiler {
       compiled = this.compileArrayOfSchemasLoop(report, arr);
 
       // fix __$missingReferences if possible
-      idx = arr.length;
-      while (idx--) {
-        const sch = arr[idx];
+      for (const sch of arr) {
         if (sch.__$missingReferences) {
-          let idx2 = sch.__$missingReferences.length;
-          while (idx2--) {
+          for (let idx2 = sch.__$missingReferences.length - 1; idx2 >= 0; idx2--) {
             const refObj = sch.__$missingReferences[idx2];
             const response = arr.find((x) => x.id === refObj.ref);
             if (response) {
@@ -466,13 +453,12 @@ export class SchemaCompiler {
   }
 
   compileArrayOfSchemasLoop(mainReport: Report, arr: JsonSchemaInternal[]) {
-    let idx = arr.length,
-      compiledCount = 0;
+    let compiledCount = 0;
 
-    while (idx--) {
+    for (const schema of arr) {
       // try to compile each schema separately
       const report = new Report(mainReport);
-      const isValid = this.compileSchema(report, arr[idx]);
+      const isValid = this.compileSchema(report, schema);
       if (isValid) {
         compiledCount++;
       }

@@ -6,12 +6,10 @@ export const shallowClone = <T>(src: T): T => {
     return src;
   }
   let res: any;
-  let idx;
   if (Array.isArray(src)) {
     res = [];
-    idx = src.length;
-    while (idx--) {
-      res[idx] = src[idx];
+    for (let i = 0; i < src.length; i++) {
+      res[i] = src[i];
     }
   } else {
     res = {};
@@ -40,7 +38,6 @@ export const deepClone = <T>(src: T, maxDepth = DEFAULT_MAX_RECURSION_DEPTH): T 
     }
 
     let res: any;
-    let idx;
     const cidx = visited.get(src);
 
     if (cidx !== undefined) {
@@ -51,9 +48,8 @@ export const deepClone = <T>(src: T, maxDepth = DEFAULT_MAX_RECURSION_DEPTH): T 
     if (Array.isArray(src)) {
       res = [];
       cloned.push(res);
-      idx = src.length;
-      while (idx--) {
-        res[idx] = cloneDeepInner(src[idx], _depth + 1);
+      for (let i = 0; i < src.length; i++) {
+        res[i] = cloneDeepInner(src[i], _depth + 1);
       }
     } else {
       res = {};

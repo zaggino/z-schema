@@ -139,7 +139,6 @@ export class Report {
   processAsyncTasks(timeout: number | undefined, callback: ValidateCallback) {
     const validationTimeout = timeout || 2000;
     let tasksCount = this.asyncTasks.length;
-    let idx = tasksCount;
     let timedOut = false;
 
     const finish = () => {
@@ -166,8 +165,8 @@ export class Report {
       return;
     }
 
-    while (idx--) {
-      const [fn, fnArgs, processFn] = this.asyncTasks[idx];
+    for (let i = 0; i < this.asyncTasks.length; i++) {
+      const [fn, fnArgs, processFn] = this.asyncTasks[i];
       const respondCallback = respond(processFn);
       fn(...fnArgs, respondCallback);
     }
@@ -243,15 +242,13 @@ export class Report {
   }
 
   hasError(errCode: string, errParams: Array<any>) {
-    let idx = this.errors.length;
-    while (idx--) {
+    for (let idx = 0; idx < this.errors.length; idx++) {
       if (this.errors[idx].code === errCode) {
         // assume match
         let match = true;
 
         // check the params too
-        let idx2 = this.errors[idx].params.length;
-        while (idx2--) {
+        for (let idx2 = 0; idx2 < this.errors[idx].params.length; idx2++) {
           if (this.errors[idx].params[idx2] !== errParams[idx2]) {
             match = false;
           }
@@ -308,8 +305,7 @@ export class Report {
 
     params = params || [];
 
-    let idx = params.length;
-    while (idx--) {
+    for (let idx = 0; idx < params.length; idx++) {
       const param = params[idx] === null || isObject(params[idx]) ? JSON.stringify(params[idx]) : params[idx];
       errorMessage = errorMessage.replace('{' + idx + '}', param.toString());
     }
@@ -343,12 +339,10 @@ export class Report {
         subReports = [subReports];
       }
       err.inner = [];
-      idx = subReports.length;
-      while (idx--) {
-        const subReport = subReports[idx];
-        let idx2 = subReport.errors.length;
-        while (idx2--) {
-          err.inner.push(subReport.errors[idx2]);
+      for (let si = subReports.length - 1; si >= 0; si--) {
+        const subReport = subReports[si];
+        for (let ei = subReport.errors.length - 1; ei >= 0; ei--) {
+          err.inner.push(subReport.errors[ei]);
         }
       }
       if (err.inner.length === 0) {

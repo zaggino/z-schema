@@ -8,9 +8,8 @@ import { difference, isUniqueArray } from './utils/array.js';
 import { decodeBase64, isValidBase64 } from './utils/base64.js';
 import { shallowClone } from './utils/clone.js';
 import { areEqual } from './utils/json.js';
-import { hasOwn } from './utils/properties.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
-import { ucs2decode } from './utils/unicode.js';
+import { unicodeLength } from './utils/unicode.js';
 import { getRemotePath } from './utils/uri.js';
 import { isObject, whatIs } from './utils/what-is.js';
 
@@ -82,8 +81,8 @@ const isValidationVocabularyEnabled = (
   }
 
   const vocabulary = metaSchema.$vocabulary as Record<string, boolean>;
-  const has2019 = hasOwn(vocabulary, VOCAB_VALIDATION_2019_09);
-  const has2020 = hasOwn(vocabulary, VOCAB_VALIDATION_2020_12);
+  const has2019 = Object.hasOwn(vocabulary, VOCAB_VALIDATION_2019_09);
+  const has2020 = Object.hasOwn(vocabulary, VOCAB_VALIDATION_2020_12);
 
   if (has2019 || has2020) {
     return vocabulary[VOCAB_VALIDATION_2019_09] === true || vocabulary[VOCAB_VALIDATION_2020_12] === true;
@@ -119,12 +118,12 @@ const isFormatAssertionVocabEnabled = (
   const vocabulary = metaSchema.$vocabulary as Record<string, boolean>;
 
   // For draft 2020-12, only the format-assertion vocabulary enables format as assertion
-  if (hasOwn(vocabulary, VOCAB_FORMAT_ASSERTION_2020_12)) {
+  if (Object.hasOwn(vocabulary, VOCAB_FORMAT_ASSERTION_2020_12)) {
     return vocabulary[VOCAB_FORMAT_ASSERTION_2020_12] === true;
   }
 
   // For draft 2019-09, check if the format vocabulary is enabled (true)
-  if (hasOwn(vocabulary, VOCAB_FORMAT_2019_09)) {
+  if (Object.hasOwn(vocabulary, VOCAB_FORMAT_2019_09)) {
     return vocabulary[VOCAB_FORMAT_2019_09] === true;
   }
 
@@ -373,7 +372,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
     // properties
     if (isObject(currentSchema.properties)) {
       for (const key of Object.keys(currentSchema.properties)) {
-        if (hasOwn(jsonData, key)) {
+        if (Object.hasOwn(jsonData, key)) {
           evaluated.add(key);
         }
       }
@@ -415,7 +414,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
     // dependentSchemas - only applies when the dependency key is present in the data
     if (isObject(currentSchema.dependentSchemas)) {
       for (const [depKey, depSchema] of Object.entries(currentSchema.dependentSchemas as Record<string, unknown>)) {
-        if (hasOwn(jsonData, depKey)) {
+        if (Object.hasOwn(jsonData, depKey)) {
           if (merge(recurse(depSchema as JsonSchemaInternal | boolean))) {
             return 'all';
           }
@@ -630,7 +629,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     if (typeof json !== 'string') {
       return;
     }
-    if (ucs2decode(json).length > schema.maxLength!) {
+    if (unicodeLength(json) > schema.maxLength!) {
       report.addError('MAX_LENGTH', [json.length, schema.maxLength!], undefined, schema, 'maxLength');
     }
   },
@@ -642,7 +641,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     if (typeof json !== 'string') {
       return;
     }
-    if (ucs2decode(json).length < schema.minLength!) {
+    if (unicodeLength(json) < schema.minLength!) {
       report.addError('MIN_LENGTH', [json.length, schema.minLength!], undefined, schema, 'minLength');
     }
   },
@@ -772,10 +771,10 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     if (!isObject(json)) {
       return;
     }
-    let idx = schema.required!.length;
-    while (idx--) {
-      const requiredPropertyName = schema.required![idx];
-      if (!hasOwn(json, requiredPropertyName)) {
+    const idx = schema.required!.length;
+    for (let i = 0; i < idx; i++) {
+      const requiredPropertyName = schema.required![i];
+      if (!Object.hasOwn(json, requiredPropertyName)) {
         report.addError('OBJECT_MISSING_REQUIRED_PROPERTY', [requiredPropertyName], undefined, schema, 'required');
       }
     }
@@ -812,15 +811,13 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       // remove from "s" all elements of "p", if any;
       s = difference(s, p);
       // for each regex in "pp", remove all elements of "s" which this regex matches.
-      let idx = pp.length;
-      while (idx--) {
-        const result = compileSchemaRegex(pp[idx]);
+      for (const ppKey of pp) {
+        const result = compileSchemaRegex(ppKey);
         if (!result.ok) {
           continue;
         }
         const regExp = result.value;
-        let idx2 = s.length;
-        while (idx2--) {
+        for (let idx2 = s.length - 1; idx2 >= 0; idx2--) {
           if (regExp.test(s[idx2]) === true) {
             s.splice(idx2, 1);
           }
@@ -830,20 +827,16 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       if (s.length > 0) {
         // assumeAdditional can be an array of allowed properties
         if (Array.isArray(this.options.assumeAdditional)) {
-          let idx3 = this.options.assumeAdditional.length;
-          if (idx3) {
-            while (idx3--) {
-              const io = s.indexOf(this.options.assumeAdditional[idx3]);
-              if (io !== -1) {
-                s.splice(io, 1);
-              }
+          for (const allowed of this.options.assumeAdditional) {
+            const io = s.indexOf(allowed);
+            if (io !== -1) {
+              s.splice(io, 1);
             }
           }
         }
-        let idx4 = s.length;
-        if (idx4) {
-          while (idx4--) {
-            report.addError('OBJECT_ADDITIONAL_PROPERTIES', [s[idx4]], undefined, schema, 'properties');
+        if (s.length > 0) {
+          for (let si = s.length - 1; si >= 0; si--) {
+            report.addError('OBJECT_ADDITIONAL_PROPERTIES', [s[si]], undefined, schema, 'properties');
           }
         }
       }
@@ -859,20 +852,16 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     }
 
     const keys = Object.keys(schema.dependencies!);
-    let idx = keys.length;
 
-    while (idx--) {
+    for (const dependencyName of keys) {
       // iterate all dependencies
-      const dependencyName = keys[idx];
-      if (hasOwn(json, dependencyName)) {
+      if (Object.hasOwn(json, dependencyName)) {
         const dependencyDefinition = schema.dependencies![dependencyName];
         if (Array.isArray(dependencyDefinition)) {
           // Array
           // if dependency is an array, object needs to have all properties in this array
-          let idx2 = dependencyDefinition.length;
-          while (idx2--) {
-            const requiredPropertyName = dependencyDefinition[idx2];
-            if (!hasOwn(json, requiredPropertyName)) {
+          for (const requiredPropertyName of dependencyDefinition) {
+            if (!Object.hasOwn(json, requiredPropertyName)) {
               report.addError(
                 'OBJECT_DEPENDENCY_KEY',
                 [requiredPropertyName, dependencyName],
@@ -895,14 +884,13 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       return;
     }
     let match = false,
-      caseInsensitiveMatch = false,
-      idx = schema.enum!.length;
-    while (idx--) {
-      if (areEqual(json, schema.enum![idx], { maxDepth: this.options.maxRecursionDepth })) {
+      caseInsensitiveMatch = false;
+    for (const enumVal of schema.enum!) {
+      if (areEqual(json, enumVal, { maxDepth: this.options.maxRecursionDepth })) {
         match = true;
         break;
       } else if (
-        areEqual(json, schema.enum![idx], { caseInsensitiveComparison: true, maxDepth: this.options.maxRecursionDepth })
+        areEqual(json, enumVal, { caseInsensitiveComparison: true, maxDepth: this.options.maxRecursionDepth })
       ) {
         caseInsensitiveMatch = true;
       }
@@ -925,16 +913,15 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
         report.addError('INVALID_TYPE', [schema.type, jsonType], undefined, schema, 'type');
       }
     } else {
-      if (schema.type!.indexOf(jsonType) === -1 && (jsonType !== 'integer' || schema.type!.indexOf('number') === -1)) {
+      if (!schema.type!.includes(jsonType) && (jsonType !== 'integer' || !schema.type!.includes('number'))) {
         report.addError('INVALID_TYPE', [JSON.stringify(schema.type), jsonType], undefined, schema, 'type');
       }
     }
   },
   allOf: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
-    let idx = schema.allOf!.length;
-    while (idx--) {
-      const validateResult = validate.call(this, report, schema.allOf![idx], json);
+    for (let i = schema.allOf!.length - 1; i >= 0; i--) {
+      const validateResult = validate.call(this, report, schema.allOf![i], json);
       if (this.options.breakOnFirstError && validateResult === false) {
         break;
       }
@@ -943,13 +930,12 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   anyOf: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.2
     const subReports: Report[] = [];
-    let idx = schema.anyOf!.length;
 
-    while (idx--) {
+    for (let i = schema.anyOf!.length - 1; i >= 0; i--) {
       const subReport = new Report(report);
       subReports.push(subReport);
-      validate.call(this, subReport, schema.anyOf![idx], json);
-      cacheValidationResult(report, schema.anyOf![idx], json, subReport.errors.length === 0);
+      validate.call(this, subReport, schema.anyOf![i], json);
+      cacheValidationResult(report, schema.anyOf![i], json, subReport.errors.length === 0);
     }
 
     // Aggregate async tasks and decide when ready
@@ -970,13 +956,12 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   oneOf: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.2
     const subReports: Report[] = [];
-    let idx = schema.oneOf!.length;
 
-    while (idx--) {
+    for (let i = schema.oneOf!.length - 1; i >= 0; i--) {
       const subReport = new Report(report);
       subReports.push(subReport);
-      validate.call(this, subReport, schema.oneOf![idx], json);
-      cacheValidationResult(report, schema.oneOf![idx], json, subReport.errors.length === 0);
+      validate.call(this, subReport, schema.oneOf![i], json);
+      cacheValidationResult(report, schema.oneOf![i], json, subReport.errors.length === 0);
     }
 
     // Aggregate async tasks and decide when ready
@@ -1041,11 +1026,9 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     }
 
     const keys = Object.keys(schema.dependentSchemas);
-    let idx = keys.length;
 
-    while (idx--) {
-      const dependencyName = keys[idx];
-      if (hasOwn(json, dependencyName)) {
+    for (const dependencyName of keys) {
+      if (Object.hasOwn(json, dependencyName)) {
         const dependencySchema = schema.dependentSchemas[dependencyName];
         validate.call(this, report, dependencySchema, json);
       }
@@ -1063,11 +1046,9 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     }
 
     const keys = Object.keys(schema.dependentRequired);
-    let idx = keys.length;
 
-    while (idx--) {
-      const dependencyName = keys[idx];
-      if (!hasOwn(json, dependencyName)) {
+    for (const dependencyName of keys) {
+      if (!Object.hasOwn(json, dependencyName)) {
         continue;
       }
 
@@ -1076,10 +1057,8 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
         continue;
       }
 
-      let idx2 = requiredProperties.length;
-      while (idx2--) {
-        const requiredPropertyName = requiredProperties[idx2];
-        if (!hasOwn(json, requiredPropertyName)) {
+      for (const requiredPropertyName of requiredProperties) {
+        if (!Object.hasOwn(json, requiredPropertyName)) {
           report.addError(
             'OBJECT_DEPENDENCY_KEY',
             [requiredPropertyName, dependencyName],
@@ -1379,8 +1358,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     }
 
     const subReports: Report[] = [];
-    let idx = json.length;
-    while (idx--) {
+    for (let idx = 0; idx < json.length; idx++) {
       const subReport = new Report(report);
       subReports.push(subReport);
       validate.call(this, subReport, containsSchema as any, json[idx]);
@@ -1459,8 +1437,7 @@ const recurseArray = function (this: ZSchemaBase, report: Report, schema: JsonSc
   const prefixItems = isDraft202012Schema && Array.isArray(schema.prefixItems) ? schema.prefixItems : undefined;
 
   if (prefixItems) {
-    let idx = json.length;
-    while (idx--) {
+    for (let idx = 0; idx < json.length; idx++) {
       if (idx < prefixItems.length) {
         report.path.push(idx);
         validate.call(this, report, prefixItems[idx], json[idx]);
@@ -1476,14 +1453,12 @@ const recurseArray = function (this: ZSchemaBase, report: Report, schema: JsonSc
     return;
   }
 
-  let idx = json.length;
-
   // If "items" is an array, this situation, the schema depends on the index:
   // if the index is less than, or equal to, the size of "items",
   // the child instance must be valid against the corresponding schema in the "items" array;
   // otherwise, it must be valid against the schema defined by "additionalItems".
   if (Array.isArray(schema.items)) {
-    while (idx--) {
+    for (let idx = 0; idx < json.length; idx++) {
       // equal to doesn't make sense here
       if (idx < schema.items.length) {
         report.path.push(idx);
@@ -1501,7 +1476,7 @@ const recurseArray = function (this: ZSchemaBase, report: Report, schema: JsonSc
   } else if (typeof schema.items === 'object' || typeof schema.items === 'boolean') {
     // If items is a schema, then the child instance must be valid against this schema,
     // regardless of its index, and regardless of the value of "additionalItems".
-    while (idx--) {
+    for (let idx = 0; idx < json.length; idx++) {
       report.path.push(idx);
       // Track schema path for array items validation
       report.schemaPath.push('items');
@@ -1530,24 +1505,21 @@ const recurseObject = function (this: ZSchemaBase, report: Report, schema: JsonS
 
   // m - The property name of the child.
   const keys = Object.keys(json);
-  let idx = keys.length;
 
-  while (idx--) {
-    const m = keys[idx],
-      propertyValue = json[m];
+  for (let ki = keys.length - 1; ki >= 0; ki--) {
+    const m = keys[ki];
+    const propertyValue = json[m];
 
     // s - The set of schemas for the child instance.
     const s = [];
 
     // 1. If set "p" contains value "m", then the corresponding schema in "properties" is added to "s".
-    if (p.indexOf(m) !== -1) {
+    if (p.includes(m)) {
       s.push(schema.properties![m]);
     }
 
     // 2. For each regex in "pp", if it matches "m" successfully, the corresponding schema in "patternProperties" is added to "s".
-    let idx2 = pp.length;
-    while (idx2--) {
-      const regexString = pp[idx2];
+    for (const regexString of pp) {
       const result = compileSchemaRegex(regexString);
       if (result.ok && result.value.test(m) === true) {
         s.push(schema.patternProperties![regexString]);
@@ -1564,11 +1536,10 @@ const recurseObject = function (this: ZSchemaBase, report: Report, schema: JsonS
     // report.expect(s.length !== 0, 'E001', m);
 
     // Instance property value must pass all schemas from s
-    idx2 = s.length;
-    while (idx2--) {
+    for (const schema_s of s) {
       report.path.push(m);
       // Track schema path for properties validation
-      if (p.indexOf(m) !== -1) {
+      if (p.includes(m)) {
         // This is a defined property
         report.schemaPath.push('properties');
         report.schemaPath.push(m);
@@ -1576,10 +1547,10 @@ const recurseObject = function (this: ZSchemaBase, report: Report, schema: JsonS
         // This is additionalProperties or patternProperties
         report.schemaPath.push('additionalProperties');
       }
-      validate.call(this, report, s[idx2], propertyValue);
+      validate.call(this, report, schema_s, propertyValue);
       report.path.pop();
       report.schemaPath.pop();
-      if (p.indexOf(m) !== -1) {
+      if (p.includes(m)) {
         report.schemaPath.pop(); // pop the property name for defined properties
       }
     }
@@ -1732,13 +1703,13 @@ export function validate(
   // Defer unevaluatedItems/unevaluatedProperties to run after other validators,
   // so combinator validation results are cached and available for annotation collection
   const deferredUnevaluatedKeys: Array<keyof JsonSchema> = [];
-  let idx = keys.length;
-  while (idx--) {
-    if (keys[idx] === 'unevaluatedItems' || keys[idx] === 'unevaluatedProperties') {
-      deferredUnevaluatedKeys.push(keys[idx]);
+  for (let ki = keys.length - 1; ki >= 0; ki--) {
+    const key = keys[ki];
+    if (key === 'unevaluatedItems' || key === 'unevaluatedProperties') {
+      deferredUnevaluatedKeys.push(key);
       continue;
     }
-    const validator = JsonValidators[keys[idx]];
+    const validator = JsonValidators[key];
     if (validator) {
       validator.call(this, report, schema, json);
       if (report.errors.length && this.options.breakOnFirstError) {

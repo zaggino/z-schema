@@ -1,4 +1,4 @@
-import { ucs2decode } from '../../src/utils/unicode.ts';
+import { unicodeLength } from '../../src/utils/unicode.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
 // Runtime check for Unicode property escape support (must actually match ASCII letters)
@@ -44,19 +44,29 @@ describe('Unicode property escapes in pattern keyword', () => {
   });
 });
 
-describe('ucs2decode', () => {
-  it('should handle unmatched low surrogate', () => {
-    const result = ucs2decode('\udc00');
-    expect(result).toEqual([0xdc00]);
+describe('unicodeLength', () => {
+  it('should count lone low surrogate as one character', () => {
+    expect(unicodeLength('\udc00')).toBe(1);
   });
 
-  it('should handle high surrogate at end of string', () => {
-    const result = ucs2decode('\ud800');
-    expect(result).toEqual([0xd800]);
+  it('should count lone high surrogate at end of string as one character', () => {
+    expect(unicodeLength('\ud800')).toBe(1);
   });
 
-  it('should handle unmatched high surrogate', () => {
-    const result = ucs2decode('\ud800a');
-    expect(result).toEqual([0xd800, 97]);
+  it('should count unmatched high surrogate followed by ASCII as two characters', () => {
+    expect(unicodeLength('\ud800a')).toBe(2);
+  });
+
+  it('should count surrogate pair as one character', () => {
+    // U+10000 LINEAR B SYLLABLE B008 A = surrogate pair \uD800\uDC00
+    expect(unicodeLength('\uD800\uDC00')).toBe(1);
+  });
+
+  it('should count emoji as one character', () => {
+    expect(unicodeLength('😀')).toBe(1);
+  });
+
+  it('should count ASCII string correctly', () => {
+    expect(unicodeLength('hello')).toBe(5);
   });
 });

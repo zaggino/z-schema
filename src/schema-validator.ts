@@ -150,8 +150,7 @@ const SchemaValidators = {
   items: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.1
     if (Array.isArray(schema.items)) {
-      let idx = schema.items.length;
-      while (idx--) {
+      for (let idx = 0; idx < schema.items.length; idx++) {
         report.path.push('items');
         report.path.push(idx);
         this.validateSchema(report, schema.items[idx]);
@@ -244,9 +243,8 @@ const SchemaValidators = {
         'required'
       );
     } else {
-      let idx = schema.required.length;
-      while (idx--) {
-        if (typeof schema.required[idx] !== 'string') {
+      for (const item of schema.required) {
+        if (typeof item !== 'string') {
           report.addError('KEYWORD_VALUE_TYPE', ['required', 'string'], undefined, schema, 'required');
         }
       }
@@ -279,9 +277,7 @@ const SchemaValidators = {
     }
 
     const keys = Object.keys(schema.properties);
-    let idx = keys.length;
-    while (idx--) {
-      const key = keys[idx];
+    for (const key of keys) {
       const val = schema.properties[key];
       report.path.push('properties');
       report.path.push(key);
@@ -312,10 +308,8 @@ const SchemaValidators = {
 
     // Use shared regex compilation helper
     const keys = Object.keys(schema.patternProperties);
-    let idx = keys.length;
-    while (idx--) {
-      const key = keys[idx],
-        val = schema.patternProperties[key];
+    for (const key of keys) {
+      const val = schema.patternProperties[key];
       const result = compileSchemaRegex(key);
       if (!result.ok) {
         report.addError(
@@ -344,9 +338,7 @@ const SchemaValidators = {
       report.addError('KEYWORD_TYPE_EXPECTED', ['dependencies', 'object'], undefined, schema, 'dependencies');
     } else {
       const keys = Object.keys(schema.dependencies);
-      let idx = keys.length;
-      while (idx--) {
-        const schemaKey = keys[idx];
+      for (const schemaKey of keys) {
         const schemaDependency = (schema.dependencies as Record<string, unknown>)[schemaKey];
         const isSchemaDependency =
           isObject(schemaDependency) ||
@@ -360,12 +352,11 @@ const SchemaValidators = {
           report.path.pop();
         } else if (Array.isArray(schemaDependency)) {
           const depArray = schemaDependency as string[];
-          let idx2 = depArray.length;
-          if (report.options.version === 'draft-04' && idx2 === 0) {
+          if (report.options.version === 'draft-04' && depArray.length === 0) {
             report.addError('KEYWORD_MUST_BE', ['dependencies', 'not empty array'], undefined, schema, 'dependencies');
           }
-          while (idx2--) {
-            if (typeof depArray[idx2] !== 'string') {
+          for (const dep of depArray) {
+            if (typeof dep !== 'string') {
               report.addError('KEYWORD_VALUE_TYPE', ['dependencies', 'string'], undefined, schema, 'dependencies');
             }
           }
@@ -407,9 +398,8 @@ const SchemaValidators = {
     const isArray = Array.isArray(schema.type);
 
     if (Array.isArray(schema.type)) {
-      let idx = schema.type.length;
-      while (idx--) {
-        if (primitiveTypes.indexOf(schema.type[idx]) === -1) {
+      for (const typeItem of schema.type) {
+        if (!primitiveTypes.includes(typeItem)) {
           report.addError('KEYWORD_TYPE_EXPECTED', ['type', primitiveTypeStr], undefined, schema, 'type');
         }
       }
@@ -417,7 +407,7 @@ const SchemaValidators = {
         report.addError('KEYWORD_MUST_BE', ['type', 'an object with unique properties'], undefined, schema, 'type');
       }
     } else if (typeof schema.type === 'string') {
-      if (primitiveTypes.indexOf(schema.type) === -1) {
+      if (!primitiveTypes.includes(schema.type)) {
         report.addError('KEYWORD_TYPE_EXPECTED', ['type', primitiveTypeStr], undefined, schema, 'type');
       }
     } else {
@@ -425,49 +415,49 @@ const SchemaValidators = {
     }
 
     if (this.options.noEmptyStrings === true) {
-      if (schema.type === 'string' || (isArray && schema.type!.indexOf('string') !== -1)) {
+      if (schema.type === 'string' || (isArray && schema.type!.includes('string'))) {
         if (schema.minLength === undefined && schema.enum === undefined && schema.format === undefined) {
           schema.minLength = 1;
         }
       }
     }
     if (this.options.noEmptyArrays === true) {
-      if (schema.type === 'array' || (isArray && schema.type!.indexOf('array') !== -1)) {
+      if (schema.type === 'array' || (isArray && schema.type!.includes('array'))) {
         if (schema.minItems === undefined) {
           schema.minItems = 1;
         }
       }
     }
     if (this.options.forceProperties === true) {
-      if (schema.type === 'object' || (isArray && schema.type!.indexOf('object') !== -1)) {
+      if (schema.type === 'object' || (isArray && schema.type!.includes('object'))) {
         if (schema.properties === undefined && schema.patternProperties === undefined) {
           report.addError('KEYWORD_UNDEFINED_STRICT', ['properties'], undefined, schema, 'properties');
         }
       }
     }
     if (this.options.forceItems === true) {
-      if (schema.type === 'array' || (isArray && schema.type!.indexOf('array') !== -1)) {
+      if (schema.type === 'array' || (isArray && schema.type!.includes('array'))) {
         if (schema.items === undefined) {
           report.addError('KEYWORD_UNDEFINED_STRICT', ['items'], undefined, schema, 'items');
         }
       }
     }
     if (this.options.forceMinItems === true) {
-      if (schema.type === 'array' || (isArray && schema.type!.indexOf('array') !== -1)) {
+      if (schema.type === 'array' || (isArray && schema.type!.includes('array'))) {
         if (schema.minItems === undefined) {
           report.addError('KEYWORD_UNDEFINED_STRICT', ['minItems'], undefined, schema, 'minItems');
         }
       }
     }
     if (this.options.forceMaxItems === true) {
-      if (schema.type === 'array' || (isArray && schema.type!.indexOf('array') !== -1)) {
+      if (schema.type === 'array' || (isArray && schema.type!.includes('array'))) {
         if (schema.maxItems === undefined) {
           report.addError('KEYWORD_UNDEFINED_STRICT', ['maxItems'], undefined, schema, 'maxItems');
         }
       }
     }
     if (this.options.forceMinLength === true) {
-      if (schema.type === 'string' || (isArray && schema.type!.indexOf('string') !== -1)) {
+      if (schema.type === 'string' || (isArray && schema.type!.includes('string'))) {
         if (
           schema.minLength === undefined &&
           schema.format === undefined &&
@@ -479,7 +469,7 @@ const SchemaValidators = {
       }
     }
     if (this.options.forceMaxLength === true) {
-      if (schema.type === 'string' || (isArray && schema.type!.indexOf('string') !== -1)) {
+      if (schema.type === 'string' || (isArray && schema.type!.includes('string'))) {
         if (
           schema.maxLength === undefined &&
           schema.format === undefined &&
@@ -498,8 +488,7 @@ const SchemaValidators = {
     } else if (schema.allOf.length === 0) {
       report.addError('KEYWORD_MUST_BE', ['allOf', 'an array with at least one element'], undefined, schema, 'allOf');
     } else {
-      let idx = schema.allOf.length;
-      while (idx--) {
+      for (let idx = 0; idx < schema.allOf.length; idx++) {
         report.path.push('allOf');
         report.path.push(idx);
         this.validateSchema(report, schema.allOf[idx]);
@@ -515,8 +504,7 @@ const SchemaValidators = {
     } else if (schema.anyOf.length === 0) {
       report.addError('KEYWORD_MUST_BE', ['anyOf', 'an array with at least one element'], undefined, schema, 'anyOf');
     } else {
-      let idx = schema.anyOf.length;
-      while (idx--) {
+      for (let idx = 0; idx < schema.anyOf.length; idx++) {
         report.path.push('anyOf');
         report.path.push(idx);
         this.validateSchema(report, schema.anyOf[idx]);
@@ -532,8 +520,7 @@ const SchemaValidators = {
     } else if (schema.oneOf.length === 0) {
       report.addError('KEYWORD_MUST_BE', ['oneOf', 'an array with at least one element'], undefined, schema, 'oneOf');
     } else {
-      let idx = schema.oneOf.length;
-      while (idx--) {
+      for (let idx = 0; idx < schema.oneOf.length; idx++) {
         report.path.push('oneOf');
         report.path.push(idx);
         this.validateSchema(report, schema.oneOf[idx]);
@@ -618,10 +605,8 @@ const SchemaValidators = {
       report.addError('KEYWORD_TYPE_EXPECTED', ['definitions', 'object'], undefined, schema, 'definitions');
     } else {
       const keys = Object.keys(schema.definitions);
-      let idx = keys.length;
-      while (idx--) {
-        const key = keys[idx],
-          val = schema.definitions[key];
+      for (const key of keys) {
+        const val = schema.definitions[key];
         report.path.push('definitions');
         report.path.push(key);
         this.validateSchema(report, val);
@@ -641,9 +626,7 @@ const SchemaValidators = {
     }
 
     const keys = Object.keys(schema.$defs);
-    let idx = keys.length;
-    while (idx--) {
-      const key = keys[idx];
+    for (const key of keys) {
       const val = schema.$defs[key];
       report.path.push('$defs');
       report.path.push(key);
@@ -720,9 +703,8 @@ export class SchemaValidator {
   }
 
   validateArrayOfSchemas(report: Report, arr: Array<JsonSchemaInternal | boolean>) {
-    let idx = arr.length;
-    while (idx--) {
-      this.validateSchema(report, arr[idx]);
+    for (const schema of arr) {
+      this.validateSchema(report, schema);
     }
     return report.isValid();
   }
@@ -793,13 +775,11 @@ export class SchemaValidator {
     }
 
     const keys = Object.keys(schema);
-    let idx = keys.length;
-    while (idx--) {
-      const key = keys[idx];
-      if (key.indexOf('__') === 0) {
+    for (const key of keys) {
+      if (key.startsWith('__')) {
         continue;
       }
-      if (Object.prototype.hasOwnProperty.call(SchemaValidators, key)) {
+      if (Object.hasOwn(SchemaValidators, key)) {
         SchemaValidators[key as keyof typeof SchemaValidators].call(this, report, schema);
       } else if (!hasParentSchema) {
         if (this.validator.options.noExtraKeywords === true) {
@@ -816,8 +796,7 @@ export class SchemaValidator {
         delete tmpSchema.default;
 
         report.path.push('enum');
-        idx = schema.enum.length;
-        while (idx--) {
+        for (let idx = 0; idx < schema.enum.length; idx++) {
           report.path.push(idx);
           validate.call(this.validator, report, tmpSchema, schema.enum[idx]);
           report.path.pop();

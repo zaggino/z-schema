@@ -98,12 +98,9 @@ export const normalizeOptions = (options?: ZSchemaOptions) => {
   // options
   if (typeof options === 'object') {
     let keys = Object.keys(options) as Array<keyof ZSchemaOptions>;
-    let idx = keys.length;
-    let key;
 
     // check that the options are correctly configured
-    while (idx--) {
-      key = keys[idx];
+    for (const key of keys) {
       if (defaultOptions[key] === undefined) {
         throw new Error('Unexpected option passed to constructor: ' + key);
       }
@@ -111,9 +108,7 @@ export const normalizeOptions = (options?: ZSchemaOptions) => {
 
     // copy the default options into passed options
     keys = Object.keys(defaultOptions) as Array<keyof ZSchemaOptions>;
-    idx = keys.length;
-    while (idx--) {
-      key = keys[idx];
+    for (const key of keys) {
       if (options[key] === undefined) {
         (options as any)[key] = shallowClone(defaultOptions[key]);
       }

@@ -238,11 +238,10 @@ export class ZSchemaBase {
 
   getMissingRemoteReferences(err: ValidateError) {
     const missingReferences = this.getMissingReferences(err);
-    const missingRemoteReferences = [];
-    let idx = missingReferences.length;
-    while (idx--) {
-      const remoteReference = getRemotePath(missingReferences[idx]);
-      if (remoteReference && missingRemoteReferences.indexOf(remoteReference) === -1) {
+    const missingRemoteReferences: string[] = [];
+    for (const ref of missingReferences) {
+      const remoteReference = getRemotePath(ref);
+      if (remoteReference && !missingRemoteReferences.includes(remoteReference)) {
         missingRemoteReferences.push(remoteReference);
       }
     }
@@ -283,7 +282,7 @@ export class ZSchemaBase {
         }
       }
       for (key in schema) {
-        if (Object.prototype.hasOwnProperty.call(schema, key)) {
+        if (Object.hasOwn(schema, key)) {
           if (isInternalKey(key)) {
             delete (schema as any)[key];
           } else {
