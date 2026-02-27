@@ -19,18 +19,27 @@ jobs:
 
       - name: Install all skills (local)
         run: |
-          npx skills add . --yes --copy
+          npx skills add . --all --copy
           echo "✅ Successfully installed all skills locally"
 
       - name: Verify skills installed
         run: |
           echo "📁 Checking installed skill files..."
-          ls -la .agents/skills/
+          find .agents/skills -type f -name "SKILL.md" | sort
+          echo "---"
 
+          if [ ! -d ".agents/skills" ]; then
+            echo "❌ .agents/skills directory not found"
+            exit 1
+          fi
+
+          count=0
           for skill in .agents/skills/*/; do
+            [ -d "$skill" ] || continue
             skill_name=$(basename "$skill")
             if [ -f "$skill/SKILL.md" ]; then
               echo "✅ Found $skill_name/SKILL.md"
+              count=$((count + 1))
             else
               echo "📂 Contents of $skill_name:"
               ls -la "$skill"
@@ -38,7 +47,14 @@ jobs:
               exit 1
             fi
           done
-          echo "✅ All skills successfully installed"
+
+          if [ "$count" -eq 0 ]; then
+            echo "❌ No skills found in .agents/skills/"
+            ls -laR .agents/ || true
+            exit 1
+          fi
+
+          echo "✅ All $count skills successfully installed"
 
   test-remote:
     runs-on: ubuntu-latest
@@ -48,21 +64,37 @@ jobs:
     steps:
       - name: Install all skills (remote)
         run: |
-          npx skills add zaggino/z-schema --yes --copy
+          npx skills add zaggino/z-schema --all --copy
           echo "✅ Successfully installed all skills from GitHub"
 
       - name: Verify skills installed
         run: |
           echo "📁 Checking installed skill files..."
-          ls -la .agents/skills/
+          find .agents/skills -type f -name "SKILL.md" | sort
+          echo "---"
 
+          if [ ! -d ".agents/skills" ]; then
+            echo "❌ .agents/skills directory not found"
+            exit 1
+          fi
+
+          count=0
           for skill in .agents/skills/*/; do
+            [ -d "$skill" ] || continue
             skill_name=$(basename "$skill")
             if [ -f "$skill/SKILL.md" ]; then
               echo "✅ Found $skill_name/SKILL.md"
+              count=$((count + 1))
             else
               echo "❌ $skill_name/SKILL.md not found"
               exit 1
             fi
           done
-          echo "✅ All skills successfully installed"
+
+          if [ "$count" -eq 0 ]; then
+            echo "❌ No skills found in .agents/skills/"
+            ls -laR .agents/ || true
+            exit 1
+          fi
+
+          echo "✅ All $count skills successfully installed"
