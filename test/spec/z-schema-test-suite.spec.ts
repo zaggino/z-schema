@@ -138,7 +138,7 @@ describe('ZSchemaTestSuite', function () {
       const after = test.after || testSuite.after;
       const validateSchemaOnly = test.validateSchemaOnly || testSuite.validateSchemaOnly;
       const failWithException = test.failWithException || testSuite.failWithException;
-      const version = test.version || testSuite.version;
+      const version = test.version || testSuite.version || 'draft-04';
       if (version) {
         options.version = version;
       }
