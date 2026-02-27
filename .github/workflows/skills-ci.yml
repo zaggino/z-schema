@@ -32,6 +32,8 @@ jobs:
             if [ -f "$skill/SKILL.md" ]; then
               echo "✅ Found $skill_name/SKILL.md"
             else
+              echo "📂 Contents of $skill_name:"
+              ls -la "$skill_name"
               echo "❌ $skill_name/SKILL.md not found"
               exit 1
             fi
