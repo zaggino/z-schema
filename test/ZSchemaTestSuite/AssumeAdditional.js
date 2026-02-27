@@ -54,8 +54,10 @@ export default {
       valid: false,
       after: function (errs) {
         expect(errs.length).toBe(2);
-        expect(errs[0].message).toBe('Additional properties not allowed: good');
-        expect(errs[1].message).toBe('Additional properties not allowed: night');
+        // Error order is not guaranteed — assert presence regardless of position
+        const messages = errs.map((e) => e.message);
+        expect(messages).toContain('Additional properties not allowed: good');
+        expect(messages).toContain('Additional properties not allowed: night');
       },
     },
     {

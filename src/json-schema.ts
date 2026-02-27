@@ -171,8 +171,10 @@ export const findId = (
   }
   if (isObject(schema)) {
     const keys = Object.keys(schema) as Array<keyof JsonSchemaInternal>;
-    for (let idx = keys.length - 1; idx >= 0; idx--) {
-      const k = keys[idx];
+    // Reverse iteration: traversal order determines which $dynamicAnchor wins
+    // when siblings share the same anchor name — required for $dynamicRef correctness
+    for (let i = keys.length - 1; i >= 0; i--) {
+      const k = keys[i];
       if (isInternalKey(k) || NON_SCHEMA_KEYWORDS.includes(k as any)) {
         continue;
       }

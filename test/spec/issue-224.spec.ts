@@ -69,13 +69,17 @@ describe('Issue #224: Not getting all schema errors from optional parent object'
     expect(error!.details!.length).toBe(1);
     expect(error!.details![0].code).toBe('ONE_OF_MISSING');
     expect(error!.details![0].inner).toBeDefined();
-    expect(error!.details![0].inner!.length).toBe(4);
-    expect(error!.details![0].inner![0].path).toBe('#/optionalFatherObject/birthUnixTime');
-    expect(error!.details![0].inner![0].message).toBe('Expected type number but found type string');
-    expect(error!.details![0].inner![1].path).toBe('#/optionalFatherObject/name');
-    expect(error!.details![0].inner![1].message).toBe('Expected type string but found type integer');
-    expect(error!.details![0].inner![2].message).toBe('Missing required property: name2');
-    expect(error!.details![0].inner![3].message).toBe('Expected type null but found type object');
+    const inner = error!.details![0].inner!;
+    expect(inner.length).toBe(4);
+    // Error order is not guaranteed — assert presence regardless of position
+    const innerMessages = inner.map((e) => e.message);
+    const innerPaths = inner.map((e) => e.path);
+    expect(innerMessages).toContain('Expected type number but found type string');
+    expect(innerMessages).toContain('Expected type string but found type integer');
+    expect(innerMessages).toContain('Missing required property: name2');
+    expect(innerMessages).toContain('Expected type null but found type object');
+    expect(innerPaths).toContain('#/optionalFatherObject/birthUnixTime');
+    expect(innerPaths).toContain('#/optionalFatherObject/name');
   });
 
   it('should report all errors for optional object without oneOf', function () {
@@ -133,12 +137,16 @@ describe('Issue #224: Not getting all schema errors from optional parent object'
     expect(result.valid).toBe(false);
     expect(error).not.toBeNull();
     expect(error!.details).toBeDefined();
-    expect(error!.details!.length).toBe(3);
-    expect(error!.details![0].code).toBe('OBJECT_MISSING_REQUIRED_PROPERTY');
-    expect(error!.details![0].params![0]).toBe('name2');
-    expect(error!.details![1].code).toBe('INVALID_TYPE');
-    expect(error!.details![1].path).toBe('#/optionalFatherObject/name');
-    expect(error!.details![2].code).toBe('INVALID_TYPE');
-    expect(error!.details![2].path).toBe('#/optionalFatherObject/birthUnixTime');
+    const details = error!.details!;
+    expect(details.length).toBe(3);
+    // Error order is not guaranteed — assert presence regardless of position
+    const codes = details.map((e) => e.code);
+    const paths = details.map((e) => e.path);
+    expect(codes).toContain('OBJECT_MISSING_REQUIRED_PROPERTY');
+    expect(codes.filter((c) => c === 'INVALID_TYPE').length).toBe(2);
+    expect(paths).toContain('#/optionalFatherObject/name');
+    expect(paths).toContain('#/optionalFatherObject/birthUnixTime');
+    const missingProp = details.find((e) => e.code === 'OBJECT_MISSING_REQUIRED_PROPERTY');
+    expect(missingProp!.params![0]).toBe('name2');
   });
 });

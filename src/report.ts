@@ -339,10 +339,9 @@ export class Report {
         subReports = [subReports];
       }
       err.inner = [];
-      for (let si = subReports.length - 1; si >= 0; si--) {
-        const subReport = subReports[si];
-        for (let ei = subReport.errors.length - 1; ei >= 0; ei--) {
-          err.inner.push(subReport.errors[ei]);
+      for (const subReport of subReports) {
+        for (const error of subReport.errors) {
+          err.inner.push(error);
         }
       }
       if (err.inner.length === 0) {

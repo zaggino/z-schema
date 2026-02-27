@@ -835,8 +835,8 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
           }
         }
         if (s.length > 0) {
-          for (let si = s.length - 1; si >= 0; si--) {
-            report.addError('OBJECT_ADDITIONAL_PROPERTIES', [s[si]], undefined, schema, 'properties');
+          for (const extra of s) {
+            report.addError('OBJECT_ADDITIONAL_PROPERTIES', [extra], undefined, schema, 'properties');
           }
         }
       }
@@ -920,7 +920,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   },
   allOf: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
-    for (let i = schema.allOf!.length - 1; i >= 0; i--) {
+    for (let i = 0; i < schema.allOf!.length; i++) {
       const validateResult = validate.call(this, report, schema.allOf![i], json);
       if (this.options.breakOnFirstError && validateResult === false) {
         break;
@@ -931,7 +931,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.2
     const subReports: Report[] = [];
 
-    for (let i = schema.anyOf!.length - 1; i >= 0; i--) {
+    for (let i = 0; i < schema.anyOf!.length; i++) {
       const subReport = new Report(report);
       subReports.push(subReport);
       validate.call(this, subReport, schema.anyOf![i], json);
@@ -957,7 +957,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.2
     const subReports: Report[] = [];
 
-    for (let i = schema.oneOf!.length - 1; i >= 0; i--) {
+    for (let i = 0; i < schema.oneOf!.length; i++) {
       const subReport = new Report(report);
       subReports.push(subReport);
       validate.call(this, subReport, schema.oneOf![i], json);
@@ -1506,8 +1506,7 @@ const recurseObject = function (this: ZSchemaBase, report: Report, schema: JsonS
   // m - The property name of the child.
   const keys = Object.keys(json);
 
-  for (let ki = keys.length - 1; ki >= 0; ki--) {
-    const m = keys[ki];
+  for (const m of keys) {
     const propertyValue = json[m];
 
     // s - The set of schemas for the child instance.
@@ -1703,8 +1702,7 @@ export function validate(
   // Defer unevaluatedItems/unevaluatedProperties to run after other validators,
   // so combinator validation results are cached and available for annotation collection
   const deferredUnevaluatedKeys: Array<keyof JsonSchema> = [];
-  for (let ki = keys.length - 1; ki >= 0; ki--) {
-    const key = keys[ki];
+  for (const key of keys) {
     if (key === 'unevaluatedItems' || key === 'unevaluatedProperties') {
       deferredUnevaluatedKeys.push(key);
       continue;
