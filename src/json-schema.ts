@@ -8,6 +8,15 @@ import type { Reference } from './schema-compiler.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
+
+/**
+ * Keywords whose values are not JSON Schema sub-schemas and must not be
+ * traversed during schema walking (id collection, reference collection, etc.).
+ */
+export const NON_SCHEMA_KEYWORDS = ['enum', 'const', 'default', 'examples'] as const;
+
+/** Returns true if the key is an internal z-schema property (prefixed with `__$`). */
+export const isInternalKey = (key: string): boolean => key.startsWith('__$');
 import { isObject } from './utils/what-is.js';
 import { DEFAULT_MAX_RECURSION_DEPTH } from './z-schema-options.js';
 
@@ -163,11 +172,10 @@ export const findId = (
   }
   if (isObject(schema)) {
     const keys = Object.keys(schema) as Array<keyof JsonSchemaInternal>;
-    const doNotTraverse = ['enum', 'const', 'default', 'examples'];
     idx = keys.length;
     while (idx--) {
       const k = keys[idx];
-      if (k.indexOf('__$') === 0 || doNotTraverse.includes(k)) {
+      if (isInternalKey(k) || NON_SCHEMA_KEYWORDS.includes(k as any)) {
         continue;
       }
       result = findId(schema[k] as JsonSchemaInternal, id, targetBaseUri, nextBaseUri, maxDepth, _depth + 1);

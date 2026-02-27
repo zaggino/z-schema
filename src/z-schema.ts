@@ -1,6 +1,6 @@
 import type { ValidateError } from './errors.js';
 import type { FormatValidatorFn } from './format-validators.js';
-import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
+import type { JsonSchema } from './json-schema-versions.js';
 import type { ValidateOptions, ValidateResponse } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 import type { SchemaReader } from './z-schema-reader.js';
@@ -8,11 +8,11 @@ import type { SchemaReader } from './z-schema-reader.js';
 import './z-schema-versions.js';
 
 import { getRegisteredFormats, registerFormat, unregisterFormat } from './format-validators.js';
-import { SchemaCache } from './schema-cache.js';
+import { prepareRemoteSchema, SchemaCache } from './schema-cache.js';
 import { deepClone } from './utils/clone.js';
 import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
 import { ZSchemaBase } from './z-schema-base.js';
-import { defaultOptions, normalizeOptions } from './z-schema-options.js';
+import { defaultOptions } from './z-schema-options.js';
 import { getSchemaReader, setSchemaReader } from './z-schema-reader.js';
 
 export class ZSchema extends ZSchemaBase {
@@ -42,22 +42,7 @@ export class ZSchema extends ZSchemaBase {
   }
 
   public static setRemoteReference(uri: string, schema: string | JsonSchema, validationOptions?: ZSchemaOptions) {
-    let _schema: JsonSchemaInternal;
-
-    if (typeof schema === 'string') {
-      _schema = JSON.parse(schema);
-    } else {
-      _schema = deepClone(schema);
-    }
-
-    if (!_schema.id) {
-      _schema.id = uri;
-    }
-
-    if (validationOptions) {
-      _schema.__$validationOptions = normalizeOptions(validationOptions);
-    }
-
+    const _schema = prepareRemoteSchema(schema, uri, validationOptions);
     SchemaCache.cacheSchemaByUri(uri, _schema);
   }
 

@@ -1,11 +1,13 @@
 import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ZSchemaBase } from './z-schema-base.js';
+import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { findId, getId } from './json-schema.js';
 import { Report } from './report.js';
 import { deepClone } from './utils/clone.js';
 import { decodeJSONPointer } from './utils/json.js';
 import { getQueryPath, getRemotePath, isAbsoluteUri } from './utils/uri.js';
+import { normalizeOptions } from './z-schema-options.js';
 
 export type SchemaCacheStorage = Record<string, JsonSchemaInternal>;
 export type ReferenceSchemaCacheStorage = Array<[JsonSchemaInternal, JsonSchemaInternal]>;
@@ -17,6 +19,36 @@ const getEffectiveId = (schema: JsonSchemaInternal): string | undefined => {
   }
   return id;
 };
+
+/**
+ * Shared logic for registering a remote reference schema.
+ * Used by both the static `ZSchema.setRemoteReference()` (global cache) and
+ * the instance `validator.setRemoteReference()` (instance cache).
+ */
+export function prepareRemoteSchema(
+  schema: string | JsonSchema,
+  uri: string,
+  validationOptions?: ZSchemaOptions,
+  maxCloneDepth?: number
+): JsonSchemaInternal {
+  let _schema: JsonSchemaInternal;
+
+  if (typeof schema === 'string') {
+    _schema = JSON.parse(schema);
+  } else {
+    _schema = deepClone(schema, maxCloneDepth);
+  }
+
+  if (!_schema.id) {
+    _schema.id = uri;
+  }
+
+  if (validationOptions) {
+    _schema.__$validationOptions = normalizeOptions(validationOptions);
+  }
+
+  return _schema;
+}
 
 export class SchemaCache {
   static global_cache: SchemaCacheStorage = {};

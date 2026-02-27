@@ -146,6 +146,40 @@ function getCachedValidationResult(report: Report, schema: unknown, json: unknow
   return report.__validationResultCache.get(schema)?.get(json);
 }
 
+/**
+ * Shared async-task aggregation pattern.
+ *
+ * 1. Collects async tasks from `subReports` into `report`.
+ * 2. If new async tasks were added, defers `decisionFn` via `report.addAsyncTask`
+ *    with proper path save/restore so error paths are correct.
+ * 3. Otherwise, runs `decisionFn` synchronously.
+ */
+function deferOrRunSync(report: Report, subReports: Report[], decisionFn: () => void): void {
+  const asyncTasksBefore = report.asyncTasks.length;
+  for (const subReport of subReports) {
+    report.asyncTasks.push(...subReport.asyncTasks);
+  }
+  const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
+
+  if (hasAsyncTasks) {
+    const pathBeforeAsync = shallowClone(report.path);
+    report.addAsyncTask(
+      (callback) => {
+        setTimeout(() => callback(null), 0);
+      },
+      [] as any,
+      () => {
+        const backup = report.path;
+        report.path = pathBeforeAsync;
+        decisionFn();
+        report.path = backup;
+      }
+    );
+  } else {
+    decisionFn();
+  }
+}
+
 const getDynamicRefAnchorName = (dynamicRef: string) => {
   const hashIdx = dynamicRef.indexOf('#');
   if (hashIdx === -1) {
@@ -918,42 +952,8 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       cacheValidationResult(report, schema.anyOf![idx], json, subReport.errors.length === 0);
     }
 
-    // Aggregate async tasks from sub-reports to the main report
-    const asyncTasksBefore = report.asyncTasks.length;
-    for (const subReport of subReports) {
-      report.asyncTasks.push(...subReport.asyncTasks);
-    }
-    const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
-
-    if (hasAsyncTasks) {
-      // Defer the decision until async tasks complete
-      const pathBeforeAsync = shallowClone(report.path);
-      report.addAsyncTask(
-        (callback) => {
-          setTimeout(() => callback(null), 0);
-        },
-        [] as any,
-        () => {
-          const backup = report.path;
-          report.path = pathBeforeAsync;
-
-          let passed = false;
-          for (const subReport of subReports) {
-            if (subReport.errors.length === 0) {
-              passed = true;
-              break;
-            }
-          }
-
-          if (passed === false) {
-            report.addError('ANY_OF_MISSING', undefined, subReports, schema, 'anyOf');
-          }
-
-          report.path = backup;
-        }
-      );
-    } else {
-      // No async tasks, decide immediately
+    // Aggregate async tasks and decide when ready
+    deferOrRunSync(report, subReports, () => {
       let passed = false;
       for (const subReport of subReports) {
         if (subReport.errors.length === 0) {
@@ -965,7 +965,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       if (passed === false) {
         report.addError('ANY_OF_MISSING', undefined, subReports, schema, 'anyOf');
       }
-    }
+    });
   },
   oneOf: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.2
@@ -979,44 +979,8 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       cacheValidationResult(report, schema.oneOf![idx], json, subReport.errors.length === 0);
     }
 
-    // Aggregate async tasks from sub-reports to the main report
-    const asyncTasksBefore = report.asyncTasks.length;
-    for (const subReport of subReports) {
-      report.asyncTasks.push(...subReport.asyncTasks);
-    }
-    const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
-
-    if (hasAsyncTasks) {
-      // Defer the decision until async tasks complete
-      const pathBeforeAsync = shallowClone(report.path);
-      report.addAsyncTask(
-        (callback) => {
-          // This task runs after all async tasks, so we can check final state
-          setTimeout(() => callback(null), 0);
-        },
-        [] as any,
-        () => {
-          const backup = report.path;
-          report.path = pathBeforeAsync;
-
-          let passes = 0;
-          for (const subReport of subReports) {
-            if (subReport.errors.length === 0) {
-              passes++;
-            }
-          }
-
-          if (passes === 0) {
-            report.addError('ONE_OF_MISSING', undefined, subReports, schema, 'oneOf');
-          } else if (passes > 1) {
-            report.addError('ONE_OF_MULTIPLE', undefined, undefined, schema, 'oneOf');
-          }
-
-          report.path = backup;
-        }
-      );
-    } else {
-      // No async tasks, decide immediately
+    // Aggregate async tasks and decide when ready
+    deferOrRunSync(report, subReports, () => {
       let passes = 0;
       for (const subReport of subReports) {
         if (subReport.errors.length === 0) {
@@ -1029,7 +993,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       } else if (passes > 1) {
         report.addError('ONE_OF_MULTIPLE', undefined, undefined, schema, 'oneOf');
       }
-    }
+    });
   },
   not: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
@@ -1423,12 +1387,6 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       cacheValidationResult(report, containsSchema, json[idx], subReport.errors.length === 0);
     }
 
-    const asyncTasksBefore = report.asyncTasks.length;
-    for (const subReport of subReports) {
-      report.asyncTasks.push(...subReport.asyncTasks);
-    }
-    const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
-
     const addContainsErrorIfNeeded = () => {
       let matchingItems = 0;
       for (const subReport of subReports) {
@@ -1455,24 +1413,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       }
     };
 
-    if (hasAsyncTasks) {
-      const pathBeforeAsync = shallowClone(report.path);
-      report.addAsyncTask(
-        (callback) => {
-          setTimeout(() => callback(null), 0);
-        },
-        [] as any,
-        () => {
-          const backup = report.path;
-          report.path = pathBeforeAsync;
-          addContainsErrorIfNeeded();
-          report.path = backup;
-        }
-      );
-      return;
-    }
-
-    addContainsErrorIfNeeded();
+    deferOrRunSync(report, subReports, addContainsErrorIfNeeded);
   },
   propertyNames: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     if (shouldSkipValidate(this.validateOptions, ['PROPERTY_NAMES'])) {
@@ -1496,12 +1437,6 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       validate.call(this, subReport, propertyNamesSchema as any, key);
     }
 
-    const asyncTasksBefore = report.asyncTasks.length;
-    for (const subReport of subReports) {
-      report.asyncTasks.push(...subReport.asyncTasks);
-    }
-    const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
-
     const addPropertyNameErrors = () => {
       for (let idx = 0; idx < keys.length; idx++) {
         if (subReports[idx].errors.length > 0) {
@@ -1510,24 +1445,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       }
     };
 
-    if (hasAsyncTasks) {
-      const pathBeforeAsync = shallowClone(report.path);
-      report.addAsyncTask(
-        (callback) => {
-          setTimeout(() => callback(null), 0);
-        },
-        [] as any,
-        () => {
-          const backup = report.path;
-          report.path = pathBeforeAsync;
-          addPropertyNameErrors();
-          report.path = backup;
-        }
-      );
-      return;
-    }
-
-    addPropertyNameErrors();
+    deferOrRunSync(report, subReports, addPropertyNameErrors);
   },
 };
 

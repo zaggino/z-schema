@@ -1,7 +1,7 @@
 import type { JsonSchemaInternal } from './json-schema-versions.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
-import { getId } from './json-schema.js';
+import { getId, isInternalKey, NON_SCHEMA_KEYWORDS } from './json-schema.js';
 import { Report } from './report.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { DEFAULT_MAX_RECURSION_DEPTH } from './z-schema-options.js';
@@ -17,7 +17,6 @@ interface Id {
 
 export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECURSION_DEPTH) => {
   const ids: Id[] = [];
-  const doNotCollectIdsFrom = ['enum', 'const', 'default', 'examples'];
   function walk(node: any, scope: Id[], _depth = 0) {
     if (typeof node !== 'object' || node == null) return;
 
@@ -65,7 +64,7 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
       }
     } else {
       for (const key of Object.keys(node)) {
-        if (key.indexOf('__$') === 0 || doNotCollectIdsFrom.includes(key)) continue;
+        if (isInternalKey(key) || NON_SCHEMA_KEYWORDS.includes(key as any)) continue;
         walk(node[key], scope, _depth + 1);
       }
     }
@@ -84,8 +83,6 @@ export interface Reference {
   obj: JsonSchemaInternal;
   path: Array<string | number>;
 }
-
-const doNotCollectReferencesFrom = ['enum', 'const', 'default', 'examples'];
 
 export const collectReferences = (
   obj: JsonSchemaInternal,
@@ -173,7 +170,7 @@ export const collectReferences = (
     idx = keys.length;
     while (idx--) {
       // do not recurse through resolved references and other z-schema props
-      if (keys[idx].indexOf('__$') === 0 || doNotCollectReferencesFrom.includes(keys[idx])) {
+      if (isInternalKey(keys[idx]) || NON_SCHEMA_KEYWORDS.includes(keys[idx] as any)) {
         continue;
       }
       path.push(keys[idx]);

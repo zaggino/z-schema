@@ -6,10 +6,11 @@ import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { type Errors, getValidateError } from './errors.js';
 import { getSupportedFormats } from './format-validators.js';
+import { isInternalKey } from './json-schema.js';
 import { VERSION_SCHEMA_URL_MAPPING } from './json-schema-versions.js';
 import { validate as validateJson } from './json-validation.js';
 import { Report } from './report.js';
-import { SchemaCache } from './schema-cache.js';
+import { prepareRemoteSchema, SchemaCache } from './schema-cache.js';
 import { SchemaCompiler } from './schema-compiler.js';
 import { SchemaValidator } from './schema-validator.js';
 import { deepClone } from './utils/clone.js';
@@ -213,22 +214,7 @@ export class ZSchemaBase {
   }
 
   setRemoteReference(uri: string, schema: string | JsonSchema, validationOptions?: ZSchemaOptions) {
-    let _schema: JsonSchemaInternal;
-
-    if (typeof schema === 'string') {
-      _schema = JSON.parse(schema);
-    } else {
-      _schema = deepClone(schema, this.options.maxRecursionDepth);
-    }
-
-    if (!_schema.id) {
-      _schema.id = uri;
-    }
-
-    if (validationOptions) {
-      _schema.__$validationOptions = normalizeOptions(validationOptions);
-    }
-
+    const _schema = prepareRemoteSchema(schema, uri, validationOptions, this.options.maxRecursionDepth);
     this.scache.cacheSchemaByUri(uri, _schema);
   }
 
@@ -298,7 +284,7 @@ export class ZSchemaBase {
       }
       for (key in schema) {
         if (Object.prototype.hasOwnProperty.call(schema, key)) {
-          if (key.indexOf('__$') === 0) {
+          if (isInternalKey(key)) {
             delete (schema as any)[key];
           } else {
             cleanup((schema as any)[key]);
