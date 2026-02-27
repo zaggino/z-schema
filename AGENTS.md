@@ -83,6 +83,8 @@ See [docs/usage.md](docs/usage.md) for how to use z-schema as a dependency in ot
 
 See [docs/contributing.md](docs/contributing.md) for PR workflow and contribution guidelines.
 
+Commit messages **must** follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) (e.g. `feat: …`, `fix: …`, `refactor: …`). See the contributing guide for the full list of types and examples.
+
 ## Documentation Policy
 
 When making changes to the repository, **always update the relevant documentation files**:

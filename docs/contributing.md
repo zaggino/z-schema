@@ -16,6 +16,36 @@ If already cloned without `--recursive`:
 git submodule update --init --recursive
 ```
 
+## Commit Messages
+
+All commits must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification).
+
+Format: `<type>[optional scope]: <description>`
+
+Common types:
+
+| Type       | When to use                                             |
+| ---------- | ------------------------------------------------------- |
+| `feat`     | A new feature                                           |
+| `fix`      | A bug fix                                               |
+| `docs`     | Documentation-only changes                              |
+| `refactor` | Code change that neither fixes a bug nor adds a feature |
+| `perf`     | Performance improvement                                 |
+| `test`     | Adding or updating tests                                |
+| `chore`    | Build process, CI, tooling, dependency updates          |
+
+Examples:
+
+```
+feat: add maxRecursionDepth option
+fix: prevent global_cache mutation in fromCache
+refactor(schema-cache): cache global clone in instance cache
+docs: add conventional commits guide
+feat!: remove deprecated constructor (BREAKING CHANGE)
+```
+
+Append `!` after the type/scope for breaking changes, or include a `BREAKING CHANGE:` footer in the commit body.
+
 ## Branch & PR Workflow
 
 1. Create a feature branch from `main` (the active development branch):
