@@ -1,8 +1,8 @@
 # AGENTS.md — z-schema
 
-JSON Schema validator library (draft-04, draft-06) written in TypeScript. Runs in Node.js (>=22) and browsers.
+JSON Schema validator library (draft-04, draft-06, draft-07, draft-2019-09, draft-2020-12) written in TypeScript. Runs in Node.js (>=22) and browsers.
 
-Default schema version: **draft-06**. Configurable via `ZSchemaOptions.version`.
+Default schema version: **draft2020-12**. Configurable via `ZSchemaOptions.version`.
 
 ## Quick Reference
 

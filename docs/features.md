@@ -1,5 +1,7 @@
 # Features
 
+z-schema provides full support for JSON Schema **draft-04**, **draft-06**, **draft-07**, **draft-2019-09**, and **draft-2020-12** (latest), with a rich set of configuration options and extensibility hooks.
+
 - [Validate against subschema](#validate-against-subschema)
 - [Compile arrays of schemas and use references between them](#compile-arrays-of-schemas-and-use-references-between-them)
 - [Register a custom format](#register-a-custom-format)
@@ -22,10 +24,12 @@
 - [Case-insensitive enum comparison](options.md#enumcaseinsensitivecomparison)
 - [Strict absolute URIs only](options.md#stricturis)
 - [Strict mode](options.md#strictmode)
+- [Format assertion toggle](options.md#formatassertions)
 - [Stop on first error](options.md#breakonfirsterror)
 - [Report paths as arrays](options.md#reportpathasarray)
 - [Unicode Property Escapes Support](#unicode-property-escapes-support)
 - [Keyword field](#keyword-field)
+- [unevaluatedProperties / unevaluatedItems](#unevaluatedproperties--unevaluateditems)
 
 ## Validate against subschema
 
@@ -165,3 +169,15 @@ Error details include a `keyword` field indicating which schema keyword triggere
   "keyword": "required"
 }
 ```
+
+## unevaluatedProperties / unevaluatedItems
+
+Full annotation-based support for `unevaluatedProperties` (draft-2019-09+) and `unevaluatedItems` (draft-2019-09+), including:
+
+- **Schema-valued** `unevaluatedProperties` / `unevaluatedItems` (not just `false` — unevaluated entries are validated against the provided schema)
+- **Applicator traversal**: annotations are collected through `allOf`, `anyOf` (matching branches only), `oneOf` (matching branches only), `if`/`then`/`else` (condition-dependent), `dependentSchemas`, and `$ref`
+- **`contains` interaction** (draft-2020-12): items matching a `contains` schema are considered evaluated for `unevaluatedItems`
+- **Dynamic references**: `$recursiveRef`/`$recursiveAnchor` (draft-2019-09) and `$dynamicRef`/`$dynamicAnchor` (draft-2020-12) are resolved dynamically using scope stacks
+- **Cousin isolation**: `unevaluatedProperties`/`unevaluatedItems` inside a sub-schema (e.g., `allOf[1]`) only sees annotations from its own schema scope, not from sibling applicators
+- **Boolean schemas**: `true` as a sub-schema validates all data but does not mark any properties or items as evaluated
+- **`additionalProperties`** tracking: when present (as `true` or a schema), marks all non-`properties`/non-`patternProperties` keys as evaluated

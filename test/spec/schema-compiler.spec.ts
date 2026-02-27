@@ -55,7 +55,7 @@ describe('collectReferences', () => {
     const refStrs = refs.map((x) => x.ref).sort();
     expect.soft(refStrs[0]).toBe('file:///c:/folder/file.json#addressId');
     expect.soft(refStrs[1]).toBe('file:///c:/folder/file.json#personId');
-    const validator = ZSchema.create();
+    const validator = ZSchema.create({ version: 'draft-04' });
     validator.validateSchema(schema);
   });
 
@@ -176,7 +176,7 @@ describe('collectReferences', () => {
     const refs = collectReferences(schema as any);
     expect(refs.length).toBe(1);
     expect(refs[0].ref).toBe('http://localhost:1234/sibling_id/base/foo.json');
-    const validator = ZSchema.create();
+    const validator = ZSchema.create({ version: 'draft-04' });
     expect(validator.validateSafe(1, schema).valid).toBe(true);
     expect(validator.validateSafe('a', schema).valid).toBe(false);
   });

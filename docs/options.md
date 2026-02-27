@@ -41,13 +41,16 @@ const result = await validator.validate(data, schema);
 
 Sets the JSON Schema draft version to validate against.
 
-- `'draft-06'` **(default)** — JSON Schema draft-06
 - `'draft-04'` — JSON Schema draft-04
+- `'draft-06'` — JSON Schema draft-06
+- `'draft-07'` — JSON Schema draft-07
+- `'draft2019-09'` — JSON Schema draft-2019-09
+- `'draft2020-12'` **(default)** — JSON Schema draft-2020-12 (latest)
 - `'none'` — skip meta-schema version detection (schemas validate using whatever `$schema` declares)
 
 ```javascript
 const validator = ZSchema.create({
-  version: 'draft-04',
+  version: 'draft2020-12',
 });
 ```
 
@@ -316,11 +319,40 @@ const validator = ZSchema.create({
 
 When true, unknown format names (not registered and not built-in) are silently ignored instead of reported as errors. The [JSON Schema specification](http://json-schema.org/latest/json-schema-validation.html#anchor106) recommends offering an option to disable format validation.
 
+> **Note:** For draft 2019-09 and draft 2020-12, unknown formats are always silently ignored regardless of this setting, since format is annotation-only by default in these drafts.
+
 Default: `false`
 
 ```javascript
 const validator = ZSchema.create({
   ignoreUnknownFormats: true,
+});
+```
+
+## formatAssertions
+
+Controls whether `format` is treated as an assertion during validation.
+
+- `null` (default): legacy behavior — always assert format validation (built-in/custom format validators are enforced and report `INVALID_FORMAT` on mismatch).
+- `true`: respect the meta-schema `$vocabulary` — for draft 2019-09 and draft 2020-12, format is treated as annotation-only unless the format-assertion vocabulary is enabled in the meta-schema. For older drafts (draft-04/06/07), format is always asserted.
+- `false`: treat `format` as annotation-only (no assertion failures for format checks in any draft).
+
+Default: `null`
+
+```javascript
+// Vocabulary-aware (recommended for draft 2019-09 / 2020-12):
+const validator = ZSchema.create({
+  formatAssertions: true,
+});
+
+// Annotation-only (never assert):
+const validator = ZSchema.create({
+  formatAssertions: false,
+});
+
+// Legacy behavior (always assert, same as old default):
+const validator = ZSchema.create({
+  formatAssertions: null,
 });
 ```
 

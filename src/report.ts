@@ -70,6 +70,9 @@ type AsyncTask = [TaskFn, TaskFnArgs, TaskProcessFn];
 export class Report {
   asyncTasks: AsyncTask[] = [];
   commonErrorMessage?: string;
+  __$recursiveAnchorStack: JsonSchemaInternal[] = [];
+  __$dynamicScopeStack: JsonSchemaInternal[] = [];
+  __validationResultCache: Map<unknown, Map<unknown, boolean>> = new Map();
   errors: SchemaErrorDetail[] = [];
   json?: unknown;
   path: Array<number | string> = [];
@@ -95,10 +98,16 @@ export class Report {
       // subreport
       this.reportOptions = (reportOptionsOrValidate as ReportOptions) || {};
       this.validateOptions = validateOptions || parentOrOptions.validateOptions;
+      this.__$recursiveAnchorStack = [...parentOrOptions.__$recursiveAnchorStack];
+      this.__$dynamicScopeStack = [...parentOrOptions.__$dynamicScopeStack];
+      this.__validationResultCache = parentOrOptions.__validationResultCache;
     } else {
       // primary
       this.reportOptions = {};
       this.validateOptions = (reportOptionsOrValidate as ValidateOptions) || {};
+      this.__$recursiveAnchorStack = [];
+      this.__$dynamicScopeStack = [];
+      this.__validationResultCache = new Map();
     }
   }
 
@@ -315,7 +324,6 @@ export class Report {
       keyword: keyword,
     };
 
-    // TODO v8: remove Symbol usage
     (err as any)[schemaSymbol] = schema;
     (err as any)[jsonSymbol] = this.getJson();
 

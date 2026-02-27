@@ -1,0 +1,61 @@
+name: Skills Validate
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate-skills:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Checkout agentskills repository
+        uses: actions/checkout@v6
+        with:
+          repository: agentskills/agentskills
+          path: agentskills
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+          cache-dependency-path: 'agentskills/skills-ref/pyproject.toml'
+
+      - name: Install skills-ref
+        run: |
+          cd agentskills/skills-ref
+          pip install -e .
+
+      - name: Validate all skills
+        run: |
+          echo "🔍 Validating all skills..."
+
+          # Find all SKILL.md files and validate their parent directories
+          find skills -name "SKILL.md" | while read -r skill_file; do
+            skill_dir=$(dirname "$skill_file")
+            skill_name=$(basename "$skill_dir")
+            
+            echo ""
+            echo "Validating $skill_name..."
+            
+            if skills-ref validate "$skill_dir"; then
+              echo "✅ $skill_name is valid"
+            else
+              echo "❌ $skill_name validation failed"
+              exit 1
+            fi
+          done
+
+          echo ""
+          echo "✅ All skills validated successfully"

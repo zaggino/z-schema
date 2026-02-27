@@ -1,6 +1,7 @@
 /* eslint-disable vitest/valid-title */
 
 import type { JsonSchema, JsonSchemaVersion } from '../../src/json-schema-versions.ts';
+import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 
 import { ZSchema } from '../../src/z-schema.ts';
 
@@ -20,6 +21,8 @@ const VERSION_FOLDER_MAPPING: Partial<Record<JsonSchemaVersion, JSONSchemaTestSu
   'draft-04': 'draft4',
   'draft-06': 'draft6',
   'draft-07': 'draft7',
+  'draft2019-09': 'draft2019-09',
+  'draft2020-12': 'draft2020-12',
 };
 
 const excludedDirs: string[] = [];
@@ -33,10 +36,11 @@ const excludedFiles: string[] = [
   'draft4/optional/float-overflow.json',
   'draft6/optional/float-overflow.json',
   'draft7/optional/float-overflow.json',
+  'draft2019-09/optional/float-overflow.json',
+  'draft2020-12/optional/float-overflow.json',
   'draft4/optional/zeroTerminatedFloats.json',
   // decided to not support this for now, using unsupported drafts should fail
   'draft7/optional/cross-draft.json',
-  // FAILING
 ];
 const excludedTests: string[] = [];
 
@@ -85,6 +89,10 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
                 schema.$schema = 'http://json-schema.org/draft-06/schema#';
               } else if (draftPath.endsWith('/draft7')) {
                 schema.$schema = 'http://json-schema.org/draft-07/schema#';
+              } else if (draftPath.endsWith('/draft2019-09')) {
+                schema.$schema = 'https://json-schema.org/draft/2019-09/schema';
+              } else if (draftPath.endsWith('/draft2020-12')) {
+                schema.$schema = 'https://json-schema.org/draft/2020-12/schema';
               } else {
                 throw new Error(`no $schema for draft: ${draftPath}`);
               }
@@ -95,7 +103,14 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
                 return;
               }
               it([testSuite.description, test.description].join(' '), function () {
-                const validator = ZSchema.create({ version });
+                const validatorOptions: ZSchemaOptions = { version };
+
+                const isModernFormatSuite = file === 'draft2019-09/format.json' || file === 'draft2020-12/format.json';
+                if (isModernFormatSuite) {
+                  validatorOptions.formatAssertions = true;
+                }
+
+                const validator = ZSchema.create(validatorOptions);
                 const { valid, err } = validator.validateSafe(test.data, schema);
                 expect.soft(valid).toBe(test.valid);
                 if (valid !== test.valid) {

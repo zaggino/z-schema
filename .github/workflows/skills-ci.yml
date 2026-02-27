@@ -1,0 +1,68 @@
+name: Skills CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install all skills (local)
+        run: |
+          npx skills add . --yes --copy
+          echo "✅ Successfully installed all skills locally"
+
+      - name: Verify skills installed
+        run: |
+          echo "📁 Checking installed skill files..."
+          ls -la .agents/skills/
+
+          for skill in .agents/skills/*/; do
+            skill_name=$(basename "$skill")
+            if [ -f "$skill/SKILL.md" ]; then
+              echo "✅ Found $skill_name/SKILL.md"
+            else
+              echo "📂 Contents of $skill_name:"
+              ls -la "$skill"
+              echo "❌ $skill_name/SKILL.md not found"
+              exit 1
+            fi
+          done
+          echo "✅ All skills successfully installed"
+
+  test-remote:
+    runs-on: ubuntu-latest
+    # Run only on push to main
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Install all skills (remote)
+        run: |
+          npx skills add zaggino/z-schema --yes --copy
+          echo "✅ Successfully installed all skills from GitHub"
+
+      - name: Verify skills installed
+        run: |
+          echo "📁 Checking installed skill files..."
+          ls -la .agents/skills/
+
+          for skill in .agents/skills/*/; do
+            skill_name=$(basename "$skill")
+            if [ -f "$skill/SKILL.md" ]; then
+              echo "✅ Found $skill_name/SKILL.md"
+            else
+              echo "❌ $skill_name/SKILL.md not found"
+              exit 1
+            fi
+          done
+          echo "✅ All skills successfully installed"

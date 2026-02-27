@@ -42,6 +42,29 @@ describe('Format Validators', () => {
       const result = validator.validateSafe('invalid-email', schema);
       expect(result.valid).toBe(false);
     });
+
+    it('should skip format assertion when formatAssertions is false', () => {
+      const validator = ZSchema.create({ formatAssertions: false });
+
+      const schema = {
+        type: 'string',
+        format: 'email',
+      };
+
+      const result = validator.validateSafe('invalid-email', schema);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should ignore unknown format by default for draft2020-12', () => {
+      const validator = ZSchema.create({ version: 'draft2020-12' });
+
+      const schema = {
+        format: 'definitely-unknown-format',
+      };
+
+      const result = validator.validateSafe('value', schema);
+      expect(result.valid).toBe(true);
+    });
   });
 
   describe('Async Timeout Handling', () => {

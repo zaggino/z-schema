@@ -36,14 +36,14 @@ export const collectIds = (obj: JsonSchemaInternal) => {
       if (type === 'absolute' || (type === 'root' && isAbsoluteUri(nodeId))) {
         id.absoluteUri = nodeId;
       } else if (type === 'root' && typeof node.id === 'string' && isAbsoluteUri(node.id) && node.id !== nodeId) {
-        id.absoluteUri = resolveIdScope(node.id, nodeId);
+        id.absoluteUri = resolveSchemaScopeId(node.id, node as JsonSchemaInternal, nodeId);
       } else if (type === 'relative') {
         id.absoluteParent = scope
           .filter((x) => x.type === 'absolute' || (x.type === 'root' && x.absoluteUri))
           .slice(-1)[0];
         if (id.absoluteParent) {
           const parentUri = id.absoluteParent.absoluteUri || id.absoluteParent.id;
-          id.absoluteUri = parentUri.split('/').slice(0, -1).concat(id.id).join('/');
+          id.absoluteUri = resolveSchemaScopeId(parentUri, node as JsonSchemaInternal, id.id);
         }
       }
       ids.push(id);
@@ -72,7 +72,7 @@ export const collectIds = (obj: JsonSchemaInternal) => {
 
 export interface Reference {
   ref: string;
-  key: '$ref' | '$schema';
+  key: '$ref' | '$schema' | '$recursiveRef' | '$dynamicRef';
   obj: JsonSchemaInternal;
   path: Array<string | number>;
 }
@@ -83,11 +83,13 @@ export const collectReferences = (
   obj: JsonSchemaInternal,
   results?: Reference[],
   scope?: string[],
-  path?: Reference['path']
+  path?: Reference['path'],
+  options?: { useRefObjectScope?: boolean }
 ) => {
   results = results || [];
   scope = scope || [];
   path = path || [];
+  options = options || {};
 
   if (typeof obj !== 'object' || obj === null) {
     return results;
@@ -102,9 +104,9 @@ export const collectReferences = (
     scopeId = obj.id;
   }
 
-  if (typeof scopeId === 'string' && (isRootScope || !hasRef)) {
+  if (typeof scopeId === 'string' && (isRootScope || !hasRef || options.useRefObjectScope === true)) {
     const base = scope.length > 0 ? scope[scope.length - 1] : undefined;
-    scope.push(resolveIdScope(base, scopeId));
+    scope.push(resolveSchemaScopeId(base, obj, scopeId));
     addedScope = true;
   }
 
@@ -112,6 +114,22 @@ export const collectReferences = (
     results.push({
       ref: resolveReference(scope[scope.length - 1], obj.$ref!),
       key: '$ref',
+      obj: obj,
+      path: path.slice(0),
+    });
+  }
+  if (typeof obj.$recursiveRef === 'string' && typeof obj.__$recursiveRefResolved === 'undefined') {
+    results.push({
+      ref: resolveReference(scope[scope.length - 1], obj.$recursiveRef),
+      key: '$recursiveRef',
+      obj: obj,
+      path: path.slice(0),
+    });
+  }
+  if (typeof obj.$dynamicRef === 'string' && typeof obj.__$dynamicRefResolved === 'undefined') {
+    results.push({
+      ref: resolveReference(scope[scope.length - 1], obj.$dynamicRef),
+      key: '$dynamicRef',
       obj: obj,
       path: path.slice(0),
     });
@@ -130,7 +148,7 @@ export const collectReferences = (
     idx = obj.length;
     while (idx--) {
       path.push(idx);
-      collectReferences(obj[idx], results, scope, path);
+      collectReferences(obj[idx], results, scope, path, options);
       path.pop();
     }
   } else {
@@ -142,7 +160,7 @@ export const collectReferences = (
         continue;
       }
       path.push(keys[idx]);
-      collectReferences((obj as any)[keys[idx]], results, scope, path);
+      collectReferences((obj as any)[keys[idx]], results, scope, path, options);
       path.pop();
     }
   }
@@ -189,6 +207,8 @@ const resolveReference = (base: string | undefined, ref: string) => {
   return baseDir + ref;
 };
 
+const isSimpleIdentifier = (id: string) => id[0] !== '#' && !id.includes('/') && !id.includes('.') && !id.includes('#');
+
 const resolveIdScope = (base: string | undefined, id: string) => {
   if (isAbsoluteUri(id)) {
     return id;
@@ -197,13 +217,20 @@ const resolveIdScope = (base: string | undefined, id: string) => {
   const baseStr = base ?? '';
 
   // Treat simple identifiers (no '/', '.', or '#') as same-document fragment ids
-  if (id[0] !== '#' && !id.includes('/') && !id.includes('.') && !id.includes('#')) {
+  if (isSimpleIdentifier(id)) {
     const hashIndex = baseStr.indexOf('#');
     const baseNoFrag = hashIndex === -1 ? baseStr : baseStr.slice(0, hashIndex);
     return baseNoFrag + '#' + id;
   }
 
   return resolveReference(base, id);
+};
+
+const resolveSchemaScopeId = (base: string | undefined, schema: JsonSchemaInternal, id: string) => {
+  if (typeof schema.$id === 'string') {
+    return resolveReference(base, id);
+  }
+  return resolveIdScope(base, id);
 };
 
 export class SchemaCompiler {
@@ -214,6 +241,12 @@ export class SchemaCompiler {
     for (const item of ids) {
       if (item.absoluteUri) {
         this.validator.scache.cacheSchemaByUri(item.absoluteUri, item.obj);
+
+        if (item.type === 'relative' && item.absoluteParent && isSimpleIdentifier(item.id)) {
+          const parentUri = item.absoluteParent.absoluteUri || item.absoluteParent.id;
+          const altAbsoluteUri = resolveReference(parentUri, item.id);
+          this.validator.scache.cacheSchemaByUri(altAbsoluteUri, item.obj);
+        }
       } else if (item.type === 'root') {
         this.validator.scache.cacheSchemaByUri(item.id, item.obj);
       }
@@ -226,7 +259,7 @@ export class SchemaCompiler {
     // if schema is a string, assume it's a uri
     if (typeof schema === 'string') {
       const loadedSchema = this.validator.scache.getSchemaByUri(report, schema);
-      if (!loadedSchema) {
+      if (typeof loadedSchema === 'undefined') {
         report.addError('SCHEMA_NOT_REACHABLE', [schema]);
         return false;
       }
@@ -279,7 +312,9 @@ export class SchemaCompiler {
     delete schema.__$missingReferences;
 
     // collect all references that need to be resolved - $ref and $schema
-    const refs = collectReferences(schema);
+    const useRefObjectScope =
+      this.validator.options.version === 'draft2019-09' || this.validator.options.version === 'draft2020-12';
+    const refs = collectReferences(schema, undefined, undefined, undefined, { useRefObjectScope });
     let idx = refs.length;
     while (idx--) {
       // resolve all the collected references into __xxxResolved pointer
@@ -287,7 +322,7 @@ export class SchemaCompiler {
       let response = this.validator.scache.getSchemaByUri(report, refObj.ref, schema);
 
       // we can try to use custom schemaReader if available
-      if (!response) {
+      if (typeof response === 'undefined') {
         const schemaReader = getSchemaReader();
         if (schemaReader) {
           const remotePath = getRemotePath(refObj.ref);
@@ -308,7 +343,7 @@ export class SchemaCompiler {
         }
       }
 
-      if (!response) {
+      if (typeof response === 'undefined') {
         const hasNotValid = report.hasError('REMOTE_NOT_VALID', [refObj.ref]);
         const isAbsolute = isAbsoluteUri(refObj.ref);
         let isDownloaded = false;

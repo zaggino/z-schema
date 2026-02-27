@@ -7,6 +7,7 @@ import type {
 import type { Reference } from './schema-compiler.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
+import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { isObject } from './utils/what-is.js';
 
 // common properties of all JSON Schema versions
@@ -14,6 +15,14 @@ export interface JsonSchemaCommon {
   $ref?: string;
   $schema?: string;
   id?: string;
+  $id?: string;
+  $anchor?: string;
+  $dynamicAnchor?: string;
+  $dynamicRef?: string;
+  $defs?: Record<string, JsonSchema>;
+  $vocabulary?: Record<string, boolean>;
+  $recursiveAnchor?: boolean;
+  $recursiveRef?: string;
   title?: string;
   description?: string;
   default?: unknown;
@@ -31,6 +40,7 @@ export interface JsonSchemaCommon {
   pattern?: string;
   additionalItems?: boolean | JsonSchema;
   items?: JsonSchema | boolean | Array<JsonSchema | boolean>;
+  prefixItems?: Array<JsonSchema | boolean>;
   minItems?: number;
   maxItems?: number;
   uniqueItems?: boolean;
@@ -50,6 +60,16 @@ export interface JsonSchemaCommon {
   if?: JsonSchema | boolean;
   then?: JsonSchema | boolean;
   else?: JsonSchema | boolean;
+  examples?: unknown[];
+  const?: unknown;
+  contains?: JsonSchema;
+  propertyNames?: JsonSchema;
+  unevaluatedItems?: JsonSchema | boolean;
+  unevaluatedProperties?: JsonSchema | boolean;
+  dependentSchemas?: Record<string, JsonSchema>;
+  dependentRequired?: Record<string, string[]>;
+  maxContains?: number;
+  minContains?: number;
 }
 
 export type JsonSchemaType = 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string';
@@ -58,6 +78,9 @@ export interface ZSchemaInternalProperties {
   __$compiled?: unknown;
   __$missingReferences?: Reference[];
   __$refResolved?: JsonSchema;
+  __$dynamicRefResolved?: JsonSchema;
+  __$recursiveRefResolved?: JsonSchema;
+  __$resourceRoot?: JsonSchemaInternal;
   __$schemaResolved?: unknown;
   __$validated?: boolean;
   __$validationOptions?: ZSchemaOptions;
@@ -74,7 +97,12 @@ export const getId = (schema: JsonSchemaInternal) => {
   return undefined;
 };
 
-export const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaInternal | undefined => {
+export const findId = (
+  schema: JsonSchemaInternal,
+  id: string,
+  targetBaseUri?: string,
+  currentBaseUri?: string
+): JsonSchemaInternal | undefined => {
   // process only arrays and objects
   if (typeof schema !== 'object' || schema === null) {
     return;
@@ -85,9 +113,30 @@ export const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaIntern
     return schema;
   }
 
+  const baseUri = currentBaseUri ?? targetBaseUri;
+
   const schemaId = getId(schema);
+  let nextBaseUri = baseUri;
+
   if (schemaId) {
-    if (schemaId === id || (schemaId[0] === '#' && schemaId.substring(1) === id)) {
+    if (isAbsoluteUri(schemaId)) {
+      nextBaseUri = getRemotePath(schemaId);
+    } else if (baseUri && isAbsoluteUri(baseUri)) {
+      try {
+        nextBaseUri = getRemotePath(new URL(schemaId, baseUri).toString());
+      } catch {
+        // keep existing scope when URL resolution fails
+      }
+    }
+  }
+
+  const inTargetBase = !targetBaseUri || nextBaseUri === targetBaseUri;
+
+  if (inTargetBase) {
+    if (schemaId && (schemaId === id || (schemaId[0] === '#' && schemaId.substring(1) === id))) {
+      return schema;
+    }
+    if (schema.$anchor === id || schema.$dynamicAnchor === id) {
       return schema;
     }
   }
@@ -96,7 +145,7 @@ export const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaIntern
   if (Array.isArray(schema)) {
     idx = schema.length;
     while (idx--) {
-      result = findId(schema[idx], id);
+      result = findId(schema[idx], id, targetBaseUri, nextBaseUri);
       if (result) {
         return result;
       }
@@ -104,13 +153,14 @@ export const findId = (schema: JsonSchemaInternal, id: string): JsonSchemaIntern
   }
   if (isObject(schema)) {
     const keys = Object.keys(schema) as Array<keyof JsonSchemaInternal>;
+    const doNotTraverse = ['enum', 'const', 'default', 'examples'];
     idx = keys.length;
     while (idx--) {
       const k = keys[idx];
-      if (k.indexOf('__$') === 0) {
+      if (k.indexOf('__$') === 0 || doNotTraverse.includes(k)) {
         continue;
       }
-      result = findId(schema[k] as JsonSchemaInternal, id);
+      result = findId(schema[k] as JsonSchemaInternal, id, targetBaseUri, nextBaseUri);
       if (result) {
         return result;
       }

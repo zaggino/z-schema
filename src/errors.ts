@@ -19,6 +19,7 @@ export const Errors = {
   ARRAY_LENGTH_LONG: 'Array is too long ({0}), maximum {1}',
   ARRAY_UNIQUE: 'Array items are not unique (indexes {0} and {1})',
   ARRAY_ADDITIONAL_ITEMS: 'Additional items not allowed',
+  ARRAY_UNEVALUATED_ITEMS: 'Unevaluated items are not allowed',
 
   // Numeric errors
   MULTIPLE_OF: 'Value {0} is not a multiple of {1}',
@@ -32,6 +33,7 @@ export const Errors = {
   OBJECT_PROPERTIES_MAXIMUM: 'Too many properties defined ({0}), maximum {1}',
   OBJECT_MISSING_REQUIRED_PROPERTY: 'Missing required property: {0}',
   OBJECT_ADDITIONAL_PROPERTIES: 'Additional properties not allowed: {0}',
+  OBJECT_UNEVALUATED_PROPERTIES: 'Unevaluated properties are not allowed: {0}',
   OBJECT_DEPENDENCY_KEY: 'Dependency failed - key must exist: {0} (due to key: {1})',
 
   // String errors
@@ -65,6 +67,10 @@ export const Errors = {
   CONST: 'Value does not match const: {0}',
   CONTAINS: 'Array does not contain an item matching the schema',
   PROPERTY_NAMES: 'Property name {0} does not match the propertyNames schema',
+
+  // Draft-2019-09+ errors
+  COLLECT_EVALUATED_DEPTH_EXCEEDED:
+    'Schema nesting depth exceeded maximum ({0}) during unevaluated items/properties collection',
 };
 
 export class ValidateError extends Error {

@@ -190,7 +190,7 @@ describe('Schema path tracking in validation errors', function () {
       const error = err as any;
       expect(error.details).toHaveLength(1);
       expect(error.details[0].path).toEqual(['user', 'age']);
-      expect(error.details[0].schemaPath).toEqual(['properties', 'age', 'type']);
+      expect(error.details[0].schemaPath).toEqual(['properties', 'user', 'properties', 'age', 'type']);
     }
   });
 });

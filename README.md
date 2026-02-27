@@ -1,6 +1,6 @@
 # z-schema
 
-JSON Schema validator for Node.js and browsers. Supports **draft-04** and **draft-06** (default).
+Fast, lightweight JSON Schema validator for Node.js and browsers with **full support for the latest JSON Schema draft (2020-12)**, plus draft-2019-09, draft-07, draft-06, and draft-04.
 
 [![NPM](https://nodei.co/npm/z-schema.png?downloads=true&downloadRank=true)](https://www.npmjs.com/package/z-schema)
 
@@ -171,14 +171,15 @@ ZSchema.setSchemaReader((uri: string) => {
 
 ## Version History
 
-| Version | Changes                                                                                           |
-| ------- | ------------------------------------------------------------------------------------------------- |
-| **v11** | Default version is **draft-07**. Implemented draft-07 tests from JSON Schema Test suite.          |
-| **v10** | Default version is **draft-06**. Implemented draft-06 tests from JSON Schema Test suite.          |
-| **v9**  | New factory API: `ZSchema.create()` replaces `new ZSchema()`. New cache algorithms.               |
-| **v8**  | Schemas without `$schema` default to draft-04. Use `{ version: 'none' }` for the old v7 behavior. |
-| **v7**  | Rewritten in TypeScript/ESM. Passes all JSON Schema Test Suite tests for draft-04.                |
-| **v6**  | Legacy version. Draft-04 support.                                                                 |
+| Version | Changes                                                                                                    |
+| ------- | ---------------------------------------------------------------------------------------------------------- |
+| **v12** | Default version is **draft2020-12**. Implemented full support for **draft-2020-12** and **draft-2019-09**. |
+| **v11** | Default version is **draft-07**. Implemented draft-07 tests from JSON Schema Test Suite.                   |
+| **v10** | Default version is **draft-06**. Implemented draft-06 tests from JSON Schema Test Suite.                   |
+| **v9**  | New factory API: `ZSchema.create()` replaces `new ZSchema()`. New cache algorithms.                        |
+| **v8**  | Schemas without `$schema` default to draft-04. Use `{ version: 'none' }` for the old v7 behavior.          |
+| **v7**  | Rewritten in TypeScript/ESM. Passes all JSON Schema Test Suite tests for draft-04.                         |
+| **v6**  | Legacy version. Draft-04 support.                                                                          |
 
 ## Features
 

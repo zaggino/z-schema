@@ -10,6 +10,14 @@ import { getQueryPath, getRemotePath, isAbsoluteUri } from './utils/uri.js';
 export type SchemaCacheStorage = Record<string, JsonSchemaInternal>;
 export type ReferenceSchemaCacheStorage = Array<[JsonSchemaInternal, JsonSchemaInternal]>;
 
+const getEffectiveId = (schema: JsonSchemaInternal): string | undefined => {
+  let id = getId(schema);
+  if ((!id || !isAbsoluteUri(id)) && typeof schema.id === 'string' && isAbsoluteUri(schema.id)) {
+    id = schema.id;
+  }
+  return id;
+};
+
 export class SchemaCache {
   static global_cache: SchemaCacheStorage = {};
   cache: SchemaCacheStorage = {};
@@ -77,10 +85,7 @@ export class SchemaCache {
 
   getSchemaByUri(report: Report, uri: string, root?: JsonSchemaInternal) {
     if (root && !isAbsoluteUri(uri)) {
-      let rootId = getId(root);
-      if ((!rootId || !isAbsoluteUri(rootId)) && typeof root.id === 'string' && isAbsoluteUri(root.id)) {
-        rootId = root.id;
-      }
+      const rootId = getEffectiveId(root);
       if (rootId && isAbsoluteUri(rootId)) {
         const hashIndex = rootId.indexOf('#');
         const rootBase = hashIndex === -1 ? rootId : rootId.slice(0, hashIndex);
@@ -94,7 +99,28 @@ export class SchemaCache {
 
     const remotePath = getRemotePath(uri);
     const queryPath = getQueryPath(uri);
-    let result = remotePath ? this.fromCache(remotePath) : root;
+    let result: JsonSchemaInternal | undefined;
+    let resolvedFromAncestor = false;
+
+    if (remotePath) {
+      const ancestorReport = report.getAncestor(remotePath);
+      if (ancestorReport?.rootSchema) {
+        result = ancestorReport.rootSchema;
+        resolvedFromAncestor = true;
+      }
+    }
+
+    if (!result && root && remotePath) {
+      const rootId = getEffectiveId(root);
+      const rootRemotePath = rootId ? getRemotePath(rootId) : undefined;
+      if (rootRemotePath && rootRemotePath === remotePath) {
+        result = root;
+      }
+    }
+
+    if (!result) {
+      result = remotePath ? this.fromCache(remotePath) : root;
+    }
 
     if (result && remotePath && isAbsoluteUri(remotePath) && (!result.id || !isAbsoluteUri(result.id))) {
       result.id = remotePath;
@@ -102,16 +128,18 @@ export class SchemaCache {
 
     if (result && remotePath) {
       // we need to avoid compiling schemas in a recursive loop
-      const compileRemote = result !== root;
+      const compileRemote = result !== root && !resolvedFromAncestor;
       // now we need to compile and validate resolved schema (in case it's not already)
       if (compileRemote) {
         report.path.push(remotePath);
 
         let remoteReport;
+        let usesAncestorReport = false;
 
         const anscestorReport = result.id ? report.getAncestor(result.id) : undefined;
         if (anscestorReport) {
           remoteReport = anscestorReport;
+          usesAncestorReport = true;
         } else {
           remoteReport = new Report(report);
           const noCache = result.id && isAbsoluteUri(result.id) ? false : true;
@@ -121,13 +149,22 @@ export class SchemaCache {
               // If custom validationOptions were provided to setRemoteReference(),
               // use them instead of the default options
               this.validator.options = result.__$validationOptions || this.validator.options;
-              this.validator.sv.validateSchema(remoteReport, result);
+              const parentSchemaUri = typeof result.$schema === 'string' ? getRemotePath(result.$schema) : undefined;
+              const currentSchemaUri = report.getSchemaId();
+              const parentSchemaIsCompiling =
+                !!parentSchemaUri &&
+                parentSchemaUri.length > 0 &&
+                (currentSchemaUri === parentSchemaUri || !!report.getAncestor(parentSchemaUri));
+
+              if (!parentSchemaIsCompiling) {
+                this.validator.sv.validateSchema(remoteReport, result);
+              }
             } finally {
               this.validator.options = savedOptions;
             }
           }
         }
-        const remoteReportIsValid = remoteReport.isValid();
+        const remoteReportIsValid = usesAncestorReport ? true : remoteReport.isValid();
         if (!remoteReportIsValid) {
           report.addError('REMOTE_NOT_VALID', [uri], remoteReport);
         }
@@ -140,18 +177,24 @@ export class SchemaCache {
       }
     }
 
+    const resourceRoot = result;
+
     if (result && queryPath) {
       const parts = queryPath.split('/');
       for (let idx = 0, lim = parts.length; result && idx < lim; idx++) {
         const key = decodeJSONPointer(parts[idx]);
         if (idx === 0) {
           // it's an id
-          result = findId(result, key);
+          result = findId(result, key, remotePath, remotePath);
         } else {
           // it's a path behind id
           result = result[key as keyof typeof result] as JsonSchemaInternal | undefined;
         }
       }
+    }
+
+    if (result && typeof result === 'object' && resourceRoot && typeof resourceRoot === 'object') {
+      result.__$resourceRoot = resourceRoot;
     }
 
     return result;

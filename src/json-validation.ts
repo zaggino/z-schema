@@ -1,7 +1,8 @@
-import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
+import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal, JsonSchemaVersion } from './json-schema-versions.js';
 import type { ValidateOptions, ZSchemaBase } from './z-schema-base.js';
 
 import { getFormatValidators } from './format-validators.js';
+import { findId, getId } from './json-schema.js';
 import { Report } from './report.js';
 import { difference, isUniqueArray } from './utils/array.js';
 import { decodeBase64, isValidBase64 } from './utils/base64.js';
@@ -10,6 +11,7 @@ import { areEqual } from './utils/json.js';
 import { hasOwn } from './utils/properties.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
 import { ucs2decode } from './utils/unicode.js';
+import { getRemotePath } from './utils/uri.js';
 import { isObject, whatIs } from './utils/what-is.js';
 
 const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
@@ -23,12 +25,486 @@ const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
   );
 };
 
+const supportsDependentKeywords = (schema: JsonSchemaInternal, version: JsonSchemaVersion | 'none' | undefined) => {
+  if (typeof schema.$schema === 'string') {
+    return !/draft-04|draft-06|draft-07/.test(schema.$schema);
+  }
+  return !(version === 'draft-04' || version === 'draft-06' || version === 'draft-07');
+};
+
+const VOCAB_VALIDATION_2019_09 = 'https://json-schema.org/draft/2019-09/vocab/validation';
+const VOCAB_VALIDATION_2020_12 = 'https://json-schema.org/draft/2020-12/vocab/validation';
+
+const VOCAB_FORMAT_2019_09 = 'https://json-schema.org/draft/2019-09/vocab/format';
+const VOCAB_FORMAT_ASSERTION_2020_12 = 'https://json-schema.org/draft/2020-12/vocab/format-assertion';
+
+const VALIDATION_VOCAB_KEYWORDS = new Set<keyof JsonSchemaAll>([
+  'type',
+  'multipleOf',
+  'maximum',
+  'exclusiveMaximum',
+  'minimum',
+  'exclusiveMinimum',
+  'maxLength',
+  'minLength',
+  'pattern',
+  'maxItems',
+  'minItems',
+  'uniqueItems',
+  'maxContains',
+  'minContains',
+  'maxProperties',
+  'minProperties',
+  'required',
+  'dependentRequired',
+  'enum',
+  'const',
+  'contentEncoding',
+  'contentMediaType',
+]);
+
+const isValidationVocabularyEnabled = (
+  schema: JsonSchemaInternal,
+  report: Report,
+  version: JsonSchemaVersion | 'none' | undefined
+) => {
+  if (version !== 'draft2019-09' && version !== 'draft2020-12') {
+    return true;
+  }
+
+  const currentSchemaMeta = schema.__$schemaResolved;
+  const rootSchemaMeta =
+    report.rootSchema && typeof report.rootSchema !== 'boolean' ? report.rootSchema.__$schemaResolved : undefined;
+  const metaSchema = (currentSchemaMeta || rootSchemaMeta) as JsonSchemaInternal | boolean | undefined;
+
+  if (!metaSchema || typeof metaSchema !== 'object' || !isObject(metaSchema.$vocabulary)) {
+    return true;
+  }
+
+  const vocabulary = metaSchema.$vocabulary as Record<string, boolean>;
+  const has2019 = hasOwn(vocabulary, VOCAB_VALIDATION_2019_09);
+  const has2020 = hasOwn(vocabulary, VOCAB_VALIDATION_2020_12);
+
+  if (has2019 || has2020) {
+    return vocabulary[VOCAB_VALIDATION_2019_09] === true || vocabulary[VOCAB_VALIDATION_2020_12] === true;
+  }
+
+  return false;
+};
+
+/**
+ * Checks whether the format-assertion vocabulary is enabled in the meta-schema.
+ * For draft 2019-09: checks if the format vocabulary is set to true.
+ * For draft 2020-12: checks if the format-assertion vocabulary is present and true.
+ * Returns true for older drafts (format was always an assertion).
+ */
+const isFormatAssertionVocabEnabled = (
+  schema: JsonSchemaInternal,
+  report: Report,
+  version: JsonSchemaVersion | 'none' | undefined
+): boolean => {
+  if (version !== 'draft2019-09' && version !== 'draft2020-12') {
+    return true; // older drafts always assert format
+  }
+
+  const currentSchemaMeta = schema.__$schemaResolved;
+  const rootSchemaMeta =
+    report.rootSchema && typeof report.rootSchema !== 'boolean' ? report.rootSchema.__$schemaResolved : undefined;
+  const metaSchema = (currentSchemaMeta || rootSchemaMeta) as JsonSchemaInternal | boolean | undefined;
+
+  if (!metaSchema || typeof metaSchema !== 'object' || !isObject(metaSchema.$vocabulary)) {
+    return false; // no vocabulary info, default to annotation-only for modern drafts
+  }
+
+  const vocabulary = metaSchema.$vocabulary as Record<string, boolean>;
+
+  // For draft 2020-12, only the format-assertion vocabulary enables format as assertion
+  if (hasOwn(vocabulary, VOCAB_FORMAT_ASSERTION_2020_12)) {
+    return vocabulary[VOCAB_FORMAT_ASSERTION_2020_12] === true;
+  }
+
+  // For draft 2019-09, check if the format vocabulary is enabled (true)
+  if (hasOwn(vocabulary, VOCAB_FORMAT_2019_09)) {
+    return vocabulary[VOCAB_FORMAT_2019_09] === true;
+  }
+
+  return false; // default to annotation-only for modern drafts
+};
+
 type JsonValidatorFn = (this: ZSchemaBase, report: Report, schema: JsonSchema, json: unknown) => void;
+
+function cacheValidationResult(report: Report, schema: unknown, json: unknown, passed: boolean): void {
+  let schemaMap = report.__validationResultCache.get(schema);
+  if (!schemaMap) {
+    schemaMap = new Map();
+    report.__validationResultCache.set(schema, schemaMap);
+  }
+  schemaMap.set(json, passed);
+}
+
+function getCachedValidationResult(report: Report, schema: unknown, json: unknown): boolean | undefined {
+  return report.__validationResultCache.get(schema)?.get(json);
+}
+
+const getDynamicRefAnchorName = (dynamicRef: string) => {
+  const hashIdx = dynamicRef.indexOf('#');
+  if (hashIdx === -1) {
+    return undefined;
+  }
+  const fragment = dynamicRef.slice(hashIdx + 1);
+  if (!fragment || fragment[0] === '/') {
+    return undefined;
+  }
+  return fragment;
+};
+
+const findDynamicAnchorInScope = (scopeSchema: JsonSchemaInternal, anchorName: string) => {
+  const scopeId = getId(scopeSchema);
+  const scopeBaseUri = scopeId ? getRemotePath(scopeId) : undefined;
+  const found = findId(scopeSchema, anchorName, scopeBaseUri, scopeBaseUri);
+  if (found && found.$dynamicAnchor === anchorName) {
+    return found;
+  }
+  return undefined;
+};
+
+/**
+ * Resolves the effective target for a $recursiveRef, walking the recursive anchor stack.
+ */
+const resolveRecursiveRef = (
+  schema: JsonSchemaInternal,
+  recursiveAnchorStack: JsonSchemaInternal[]
+): JsonSchemaInternal | undefined => {
+  const resolved = schema.__$recursiveRefResolved as JsonSchemaInternal | undefined;
+  if (!resolved) {
+    return undefined;
+  }
+  let target = resolved;
+  if (typeof target === 'object' && target.$recursiveAnchor === true) {
+    const dynamicTarget = recursiveAnchorStack[0];
+    if (dynamicTarget) {
+      target = dynamicTarget;
+    }
+  }
+  return target;
+};
+
+/**
+ * Resolves the effective target for a $dynamicRef, walking the dynamic scope stack.
+ */
+const resolveDynamicRef = (
+  schema: JsonSchemaInternal,
+  dynamicScopeStack: JsonSchemaInternal[]
+): JsonSchemaInternal | boolean | undefined => {
+  const resolved = schema.__$dynamicRefResolved as JsonSchemaInternal | boolean | undefined;
+  if (typeof resolved === 'undefined' || !schema.$dynamicRef) {
+    return resolved;
+  }
+  let target = resolved;
+  const anchorName = getDynamicRefAnchorName(schema.$dynamicRef);
+  if (anchorName && typeof target === 'object' && target.$dynamicAnchor === anchorName) {
+    for (let scopeIdx = 0; scopeIdx < dynamicScopeStack.length; scopeIdx++) {
+      const scopeSchema = dynamicScopeStack[scopeIdx];
+      const scopedTarget = findDynamicAnchorInScope(scopeSchema, anchorName);
+      if (scopedTarget) {
+        target = scopedTarget;
+        break;
+      }
+    }
+  }
+  return target;
+};
+
+// --- Unified collectEvaluated traversal for unevaluatedItems / unevaluatedProperties ---
+
+type CollectEvaluatedItemsArgs = {
+  report: Report;
+  currentSchema: JsonSchemaInternal | boolean | undefined;
+  json: unknown;
+  mode: 'items';
+  jsonArr: unknown[];
+  depth: number;
+};
+
+type CollectEvaluatedPropertiesArgs = {
+  report: Report;
+  currentSchema: JsonSchemaInternal | boolean | undefined;
+  json: unknown;
+  mode: 'properties';
+  jsonData: Record<string, unknown>;
+  depth: number;
+};
+
+type CollectEvaluatedArgs = CollectEvaluatedItemsArgs | CollectEvaluatedPropertiesArgs;
+
+function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<number | string> | 'all' {
+  const { report, currentSchema, json, mode, depth } = args;
+
+  if (!currentSchema || typeof currentSchema === 'boolean') {
+    return new Set();
+  }
+
+  if (depth > 20) {
+    report.addError('COLLECT_EVALUATED_DEPTH_EXCEEDED', [depth]);
+    return new Set();
+  }
+
+  const evaluated = new Set<number | string>();
+
+  const merge = (other: Set<number | string> | 'all') => {
+    if (other === 'all') return true;
+    for (const v of other) {
+      evaluated.add(v);
+    }
+    return false;
+  };
+
+  const recurse = (subSchema: JsonSchemaInternal | boolean | undefined): Set<number | string> | 'all' => {
+    if (mode === 'items') {
+      return collectEvaluated.call(this, {
+        report,
+        currentSchema: subSchema,
+        json,
+        mode: 'items',
+        jsonArr: (args as CollectEvaluatedItemsArgs).jsonArr,
+        depth: depth + 1,
+      });
+    }
+    return collectEvaluated.call(this, {
+      report,
+      currentSchema: subSchema,
+      json,
+      mode: 'properties',
+      jsonData: (args as CollectEvaluatedPropertiesArgs).jsonData,
+      depth: depth + 1,
+    });
+  };
+
+  // --- Mode-specific leaf collection ---
+  if (mode === 'items') {
+    const jsonArr = (args as CollectEvaluatedItemsArgs).jsonArr;
+
+    // prefixItems (2020-12 tuple)
+    if (Array.isArray(currentSchema.prefixItems)) {
+      const len = Math.min(currentSchema.prefixItems.length, jsonArr.length);
+      for (let i = 0; i < len; i++) {
+        evaluated.add(i);
+      }
+    }
+
+    // items - can be array (2019-09 tuple) or schema (evaluates all)
+    if (currentSchema.items !== undefined) {
+      if (Array.isArray(currentSchema.items)) {
+        const len = Math.min(currentSchema.items.length, jsonArr.length);
+        for (let i = 0; i < len; i++) {
+          evaluated.add(i);
+        }
+      } else if (currentSchema.items !== false) {
+        return 'all';
+      }
+    }
+
+    // additionalItems (2019-09) - when items is array form and additionalItems is present and not false
+    if (
+      currentSchema.additionalItems !== undefined &&
+      currentSchema.additionalItems !== false &&
+      Array.isArray(currentSchema.items)
+    ) {
+      return 'all';
+    }
+
+    // contains - evaluates specific indices that match the schema
+    if (currentSchema.contains !== undefined) {
+      for (let i = 0; i < jsonArr.length; i++) {
+        let passed = getCachedValidationResult(report, currentSchema.contains, jsonArr[i]);
+        if (passed === undefined) {
+          const subReport = new Report(report);
+          validate.call(this, subReport, currentSchema.contains as JsonSchemaInternal | boolean, jsonArr[i]);
+          passed = subReport.errors.length === 0;
+        }
+        if (passed) {
+          evaluated.add(i);
+        }
+      }
+    }
+
+    // unevaluatedItems: true means all items evaluated
+    if (currentSchema.unevaluatedItems === true) {
+      return 'all';
+    }
+  } else {
+    // mode === 'properties'
+    const jsonData = (args as CollectEvaluatedPropertiesArgs).jsonData;
+
+    // properties
+    if (isObject(currentSchema.properties)) {
+      for (const key of Object.keys(currentSchema.properties)) {
+        if (hasOwn(jsonData, key)) {
+          evaluated.add(key);
+        }
+      }
+    }
+
+    // patternProperties
+    if (isObject(currentSchema.patternProperties)) {
+      for (const pattern of Object.keys(currentSchema.patternProperties)) {
+        const result = compileSchemaRegex(pattern);
+        if (result.ok) {
+          for (const key of Object.keys(jsonData)) {
+            if (result.value.test(key)) {
+              evaluated.add(key);
+            }
+          }
+        }
+      }
+    }
+
+    // additionalProperties - evaluates all non-properties/non-patternProperties keys
+    if (currentSchema.additionalProperties !== undefined) {
+      const propKeys = isObject(currentSchema.properties) ? Object.keys(currentSchema.properties) : [];
+      const patternRegexes: RegExp[] = [];
+      if (isObject(currentSchema.patternProperties)) {
+        for (const pattern of Object.keys(currentSchema.patternProperties)) {
+          const result = compileSchemaRegex(pattern);
+          if (result.ok) {
+            patternRegexes.push(result.value);
+          }
+        }
+      }
+      for (const key of Object.keys(jsonData)) {
+        if (propKeys.includes(key)) continue;
+        if (patternRegexes.some((re) => re.test(key))) continue;
+        evaluated.add(key);
+      }
+    }
+
+    // dependentSchemas - only applies when the dependency key is present in the data
+    if (isObject(currentSchema.dependentSchemas)) {
+      for (const [depKey, depSchema] of Object.entries(currentSchema.dependentSchemas as Record<string, unknown>)) {
+        if (hasOwn(jsonData, depKey)) {
+          if (merge(recurse(depSchema as JsonSchemaInternal | boolean))) {
+            return 'all';
+          }
+        }
+      }
+    }
+
+    // unevaluatedProperties: true in a sub-schema means all props are evaluated
+    if (currentSchema.unevaluatedProperties === true) {
+      return 'all';
+    }
+  }
+
+  // --- Shared combinator traversal ---
+
+  // allOf
+  if (Array.isArray(currentSchema.allOf)) {
+    for (const subSchema of currentSchema.allOf) {
+      if (merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
+        return 'all';
+      }
+    }
+  }
+
+  // anyOf - only matching branches contribute
+  if (Array.isArray(currentSchema.anyOf)) {
+    for (const subSchema of currentSchema.anyOf) {
+      let passed = getCachedValidationResult(report, subSchema, json);
+      if (passed === undefined) {
+        const subReport = new Report(report);
+        validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
+        passed = subReport.errors.length === 0;
+      }
+      if (passed) {
+        if (merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
+          return 'all';
+        }
+      }
+    }
+  }
+
+  // oneOf - only matching branches contribute
+  if (Array.isArray(currentSchema.oneOf)) {
+    for (const subSchema of currentSchema.oneOf) {
+      let passed = getCachedValidationResult(report, subSchema, json);
+      if (passed === undefined) {
+        const subReport = new Report(report);
+        validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
+        passed = subReport.errors.length === 0;
+      }
+      if (passed) {
+        if (merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
+          return 'all';
+        }
+      }
+    }
+  }
+
+  // if/then/else
+  if (currentSchema.if !== undefined) {
+    let condPassed = getCachedValidationResult(report, currentSchema.if, json);
+    if (condPassed === undefined) {
+      const condReport = new Report(report);
+      validate.call(this, condReport, currentSchema.if as JsonSchemaInternal | boolean, json);
+      condPassed = condReport.errors.length === 0;
+    }
+    if (condPassed) {
+      if (merge(recurse(currentSchema.if as JsonSchemaInternal | boolean))) {
+        return 'all';
+      }
+      if (currentSchema.then !== undefined) {
+        if (merge(recurse(currentSchema.then as JsonSchemaInternal | boolean))) {
+          return 'all';
+        }
+      }
+    } else {
+      if (currentSchema.else !== undefined) {
+        if (merge(recurse(currentSchema.else as JsonSchemaInternal | boolean))) {
+          return 'all';
+        }
+      }
+    }
+  }
+
+  // $ref resolved
+  if (currentSchema.__$refResolved && currentSchema.__$refResolved !== currentSchema) {
+    if (merge(recurse(currentSchema.__$refResolved as JsonSchemaInternal))) {
+      return 'all';
+    }
+  }
+
+  // $recursiveRef
+  const recursiveTarget = resolveRecursiveRef(currentSchema, report.__$recursiveAnchorStack);
+  if (recursiveTarget && recursiveTarget !== currentSchema) {
+    if (merge(recurse(recursiveTarget))) {
+      return 'all';
+    }
+  }
+
+  // $dynamicRef
+  const dynamicTarget = resolveDynamicRef(currentSchema, report.__$dynamicScopeStack);
+  if (dynamicTarget && dynamicTarget !== currentSchema) {
+    if (merge(recurse(dynamicTarget as JsonSchemaInternal))) {
+      return 'all';
+    }
+  }
+
+  return evaluated;
+}
 
 export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   id: () => {},
+  $id: () => {},
   $ref: () => {},
   $schema: () => {},
+  $dynamicAnchor: () => {},
+  $dynamicRef: () => {},
+  $anchor: () => {},
+  $defs: () => {},
+  $vocabulary: () => {},
+  $recursiveAnchor: () => {},
+  $recursiveRef: () => {},
+  examples: () => {},
   title: () => {},
   description: () => {},
   default: () => {},
@@ -173,6 +649,9 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   items: function () {
     /*report: Report, schema: JsonSchemaInternal, json: unknown*/
     // covered in additionalItems
+  },
+  prefixItems: function () {
+    // handled in recurseArray
   },
   maxItems: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.2.2
@@ -434,6 +913,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       const subReport = new Report(report);
       subReports.push(subReport);
       validate.call(this, subReport, schema.anyOf![idx], json);
+      cacheValidationResult(report, schema.anyOf![idx], json, subReport.errors.length === 0);
     }
 
     // Aggregate async tasks from sub-reports to the main report
@@ -494,6 +974,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       const subReport = new Report(report);
       subReports.push(subReport);
       validate.call(this, subReport, schema.oneOf![idx], json);
+      cacheValidationResult(report, schema.oneOf![idx], json, subReport.errors.length === 0);
     }
 
     // Aggregate async tasks from sub-reports to the main report
@@ -556,13 +1037,13 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     }
   },
   if: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
-    if (this.options.version !== 'draft-07') {
+    if (this.options.version === 'draft-04' || this.options.version === 'draft-06') {
       return;
     }
 
-    const conditionSchema = (schema as JsonSchemaAll).if;
-    const thenSchema = (schema as JsonSchemaAll).then;
-    const elseSchema = (schema as JsonSchemaAll).else;
+    const conditionSchema = schema.if;
+    const thenSchema = schema.then;
+    const elseSchema = schema.else;
 
     if (conditionSchema === undefined || (thenSchema === undefined && elseSchema === undefined)) {
       return;
@@ -570,6 +1051,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
 
     const conditionReport = new Report(report);
     validate.call(this, conditionReport, conditionSchema as any, json);
+    cacheValidationResult(report, conditionSchema, json, conditionReport.errors.length === 0);
 
     const branchSchema = conditionReport.errors.length === 0 ? thenSchema : elseSchema;
     if (branchSchema === undefined) {
@@ -584,6 +1066,183 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   else: function () {
     // handled by if
   },
+  dependentSchemas: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (!supportsDependentKeywords(schema, this.options.version)) {
+      return;
+    }
+    if (!isObject(json) || !isObject(schema.dependentSchemas)) {
+      return;
+    }
+
+    const keys = Object.keys(schema.dependentSchemas);
+    let idx = keys.length;
+
+    while (idx--) {
+      const dependencyName = keys[idx];
+      if (hasOwn(json, dependencyName)) {
+        const dependencySchema = schema.dependentSchemas[dependencyName];
+        validate.call(this, report, dependencySchema, json);
+      }
+    }
+  },
+  dependentRequired: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (!supportsDependentKeywords(schema, this.options.version)) {
+      return;
+    }
+    if (shouldSkipValidate(this.validateOptions, ['OBJECT_DEPENDENCY_KEY'])) {
+      return;
+    }
+    if (!isObject(json) || !isObject(schema.dependentRequired)) {
+      return;
+    }
+
+    const keys = Object.keys(schema.dependentRequired);
+    let idx = keys.length;
+
+    while (idx--) {
+      const dependencyName = keys[idx];
+      if (!hasOwn(json, dependencyName)) {
+        continue;
+      }
+
+      const requiredProperties = schema.dependentRequired[dependencyName];
+      if (!Array.isArray(requiredProperties)) {
+        continue;
+      }
+
+      let idx2 = requiredProperties.length;
+      while (idx2--) {
+        const requiredPropertyName = requiredProperties[idx2];
+        if (!hasOwn(json, requiredPropertyName)) {
+          report.addError(
+            'OBJECT_DEPENDENCY_KEY',
+            [requiredPropertyName, dependencyName],
+            undefined,
+            schema,
+            'dependentRequired'
+          );
+        }
+      }
+    }
+  },
+  unevaluatedItems: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (!Array.isArray(json)) {
+      return;
+    }
+
+    // unevaluatedItems: true means all items are valid
+    if (schema.unevaluatedItems === true) {
+      return;
+    }
+
+    const unevalSchema = schema.unevaluatedItems;
+    if (unevalSchema === undefined) {
+      return;
+    }
+
+    if (json.length === 0) {
+      return;
+    }
+
+    const evaluatedItems = collectEvaluated.call(this, {
+      report,
+      currentSchema: schema,
+      json,
+      mode: 'items',
+      jsonArr: json,
+      depth: 0,
+    });
+
+    if (evaluatedItems === 'all') {
+      return;
+    }
+
+    const unevaluatedIndices: number[] = [];
+    for (let i = 0; i < json.length; i++) {
+      if (!evaluatedItems.has(i)) {
+        unevaluatedIndices.push(i);
+      }
+    }
+
+    if (unevaluatedIndices.length === 0) {
+      return;
+    }
+
+    if (unevalSchema === false) {
+      report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
+    } else {
+      // unevaluatedItems as a schema — validate each unevaluated item against it
+      for (const idx of unevaluatedIndices) {
+        const subReport = new Report(report);
+        validate.call(this, subReport, unevalSchema as JsonSchemaInternal, json[idx]);
+        if (subReport.errors.length > 0) {
+          report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
+          break;
+        }
+      }
+    }
+  },
+  unevaluatedProperties: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+    if (!isObject(json)) {
+      return;
+    }
+
+    // unevaluatedProperties: true means all properties are valid
+    if (schema.unevaluatedProperties === true) {
+      return;
+    }
+
+    // unevaluatedProperties: false or unevaluatedProperties: {schema} both need evaluation
+    const unevalSchema = schema.unevaluatedProperties;
+    if (unevalSchema === undefined) {
+      return;
+    }
+
+    const allKeys = Object.keys(json);
+    if (allKeys.length === 0) {
+      return;
+    }
+
+    const evaluatedProperties = collectEvaluated.call(this, {
+      report,
+      currentSchema: schema,
+      json,
+      mode: 'properties',
+      jsonData: json as Record<string, unknown>,
+      depth: 0,
+    });
+
+    if (evaluatedProperties === 'all') {
+      return;
+    }
+
+    const unevaluatedKeys = allKeys.filter((key) => !evaluatedProperties.has(key));
+
+    if (unevaluatedKeys.length === 0) {
+      return;
+    }
+
+    if (unevalSchema === false) {
+      report.addError(
+        'OBJECT_UNEVALUATED_PROPERTIES',
+        [unevaluatedKeys.join(', ')],
+        undefined,
+        schema,
+        'unevaluatedProperties'
+      );
+    } else {
+      // unevaluatedProperties as a schema — validate each unevaluated key against it
+      for (const key of unevaluatedKeys) {
+        const subReport = new Report(report);
+        validate.call(this, subReport, unevalSchema as JsonSchemaInternal, (json as Record<string, unknown>)[key]);
+        if (subReport.errors.length > 0) {
+          report.addError('OBJECT_UNEVALUATED_PROPERTIES', [key], undefined, schema, 'unevaluatedProperties');
+        }
+      }
+    }
+  },
+  maxContains: () => {},
+  minContains: () => {},
   definitions: function () {
     /*report: Report, schema: JsonSchemaInternal, json: unknown*/
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.2
@@ -591,6 +1250,21 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   },
   format: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
+    if (this.options.formatAssertions === false) {
+      return;
+    }
+
+    // When formatAssertions is explicitly true, respect the meta-schema vocabulary:
+    // for draft 2019-09/2020-12, format is annotation-only unless the format-assertion
+    // vocabulary is enabled in the meta-schema.
+    if (this.options.formatAssertions === true) {
+      if (!isFormatAssertionVocabEnabled(schema, report, this.options.version)) {
+        return;
+      }
+    }
+
+    const isModernDraft = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+
     const formatValidators = getFormatValidators(this.options);
     const formatValidatorFn = formatValidators[schema.format!];
     if (typeof formatValidatorFn === 'function') {
@@ -650,7 +1324,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
           }
         }
       }
-    } else if (this.options.ignoreUnknownFormats !== true) {
+    } else if (this.options.ignoreUnknownFormats !== true && !isModernDraft) {
       report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
     }
   },
@@ -718,10 +1392,6 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       );
     }
   },
-  // draft-06 additions
-  $id: () => {
-    // TODO: implement
-  },
   const: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     const constValue = (schema as JsonSchemaAll).const;
     if (areEqual(json, constValue) === false) {
@@ -748,6 +1418,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       const subReport = new Report(report);
       subReports.push(subReport);
       validate.call(this, subReport, containsSchema as any, json[idx]);
+      cacheValidationResult(report, containsSchema, json[idx], subReport.errors.length === 0);
     }
 
     const asyncTasksBefore = report.asyncTasks.length;
@@ -757,14 +1428,27 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
 
     const addContainsErrorIfNeeded = () => {
-      let hasValidItem = false;
+      let matchingItems = 0;
       for (const subReport of subReports) {
         if (subReport.errors.length === 0) {
-          hasValidItem = true;
-          break;
+          matchingItems += 1;
         }
       }
-      if (!hasValidItem) {
+
+      const supportsContainsBounds = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+      const minContains: number =
+        supportsContainsBounds && typeof (schema as JsonSchemaAll).minContains === 'number'
+          ? ((schema as JsonSchemaAll).minContains ?? 1)
+          : 1;
+      const maxContains =
+        supportsContainsBounds && typeof (schema as JsonSchemaAll).maxContains === 'number'
+          ? (schema as JsonSchemaAll).maxContains
+          : undefined;
+
+      const hasEnoughMatches = matchingItems >= minContains;
+      const notTooManyMatches = maxContains === undefined || matchingItems <= maxContains;
+
+      if (!hasEnoughMatches || !notTooManyMatches) {
         report.addError('CONTAINS', undefined, subReports, schema, undefined);
       }
     };
@@ -787,9 +1471,6 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     }
 
     addContainsErrorIfNeeded();
-  },
-  examples: () => {
-    // TODO: implement
   },
   propertyNames: function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
     if (shouldSkipValidate(this.validateOptions, ['PROPERTY_NAMES'])) {
@@ -850,6 +1531,30 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
 
 const recurseArray = function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Array<unknown>) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.2
+
+  const schemaUri = typeof schema.$schema === 'string' ? schema.$schema : undefined;
+  const isDraft202012Schema =
+    schemaUri === 'https://json-schema.org/draft/2020-12/schema' ||
+    (!schemaUri && this.options.version === 'draft2020-12');
+  const prefixItems = isDraft202012Schema && Array.isArray(schema.prefixItems) ? schema.prefixItems : undefined;
+
+  if (prefixItems) {
+    let idx = json.length;
+    while (idx--) {
+      if (idx < prefixItems.length) {
+        report.path.push(idx);
+        validate.call(this, report, prefixItems[idx], json[idx]);
+        report.path.pop();
+      } else if (schema.items !== undefined && !Array.isArray(schema.items)) {
+        report.path.push(idx);
+        report.schemaPath.push('items');
+        validate.call(this, report, schema.items, json[idx]);
+        report.schemaPath.pop();
+        report.path.pop();
+      }
+    }
+    return;
+  }
 
   let idx = json.length;
 
@@ -997,47 +1702,140 @@ export function validate(
     isRoot = true;
   }
 
+  const recursiveAnchorStack = report.__$recursiveAnchorStack;
+  const dynamicScopeStack = report.__$dynamicScopeStack;
+  let pushedRecursiveAnchor = false;
+  let pushedDynamicScope = false;
+  const schemaId = getId(schema);
+  const schemaResourceRoot = (schema as JsonSchemaInternal).__$resourceRoot;
+  const dynamicScopeEntry = schemaResourceRoot || (isRoot || typeof schemaId === 'string' ? schema : undefined);
+  if (dynamicScopeEntry && dynamicScopeStack[dynamicScopeStack.length - 1] !== dynamicScopeEntry) {
+    dynamicScopeStack.push(dynamicScopeEntry);
+    pushedDynamicScope = true;
+  }
+  if (schema.$recursiveAnchor === true) {
+    recursiveAnchorStack.push(schema);
+    pushedRecursiveAnchor = true;
+  }
+
   // follow schema.$ref keys
   if (schema.$ref !== undefined) {
-    // avoid infinite loop with maxRefs
-    let maxRefs = 99;
-    while (schema.$ref && maxRefs > 0) {
+    const applySiblingKeywordsWithRef =
+      this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+
+    if (applySiblingKeywordsWithRef) {
       if (!schema.__$refResolved) {
         report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
-        break;
-      } else if (schema.__$refResolved === schema) {
-        break;
       } else {
-        schema = schema.__$refResolved;
-        keys = Object.keys(schema) as Array<keyof JsonSchema>;
+        validate.call(this, report, schema.__$refResolved as JsonSchemaInternal, json);
       }
-      maxRefs--;
+      keys = keys.filter((key) => key !== '$ref');
+    } else {
+      // avoid infinite loop with maxRefs
+      let maxRefs = 99;
+      while (schema.$ref && maxRefs > 0) {
+        if (!schema.__$refResolved) {
+          report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
+          break;
+        } else if (schema.__$refResolved === schema) {
+          break;
+        } else {
+          schema = schema.__$refResolved;
+          keys = Object.keys(schema) as Array<keyof JsonSchema>;
+        }
+        maxRefs--;
+      }
+      if (maxRefs === 0) {
+        throw new Error('Circular dependency by $ref references!');
+      }
+      // Reset schema path for referenced schema - paths are relative to the referenced schema
+      report.schemaPath = [];
     }
-    if (maxRefs === 0) {
-      throw new Error('Circular dependency by $ref references!');
+  }
+
+  // follow schema.$recursiveRef keys
+  if (schema.$recursiveRef !== undefined) {
+    const applySiblingKeywordsWithRecursiveRef =
+      this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+
+    if (applySiblingKeywordsWithRecursiveRef) {
+      const recursiveRefTarget = resolveRecursiveRef(schema, recursiveAnchorStack);
+
+      if (!recursiveRefTarget) {
+        report.addError('REF_UNRESOLVED', [schema.$recursiveRef], undefined, schema);
+      } else {
+        validate.call(this, report, recursiveRefTarget, json);
+      }
+      keys = keys.filter((key) => key !== '$recursiveRef');
     }
-    // Reset schema path for referenced schema - paths are relative to the referenced schema
-    report.schemaPath = [];
+  }
+
+  // follow schema.$dynamicRef keys
+  if (schema.$dynamicRef !== undefined) {
+    const applySiblingKeywordsWithDynamicRef = this.options.version === 'draft2020-12';
+
+    if (applySiblingKeywordsWithDynamicRef) {
+      const dynamicRefTarget = resolveDynamicRef(schema, dynamicScopeStack);
+
+      if (typeof dynamicRefTarget === 'undefined') {
+        report.addError('REF_UNRESOLVED', [schema.$dynamicRef], undefined, schema);
+      } else {
+        validate.call(this, report, dynamicRefTarget, json);
+      }
+      keys = keys.filter((key) => key !== '$dynamicRef');
+    }
+  }
+
+  const validationVocabularyEnabled = isValidationVocabularyEnabled(schema, report, this.options.version);
+  if (!validationVocabularyEnabled) {
+    keys = keys.filter((key) => !VALIDATION_VOCAB_KEYWORDS.has(key));
   }
 
   // type checking first
-  if (schema.type) {
+  if (validationVocabularyEnabled && schema.type) {
     keys.splice(keys.indexOf('type'), 1);
     report.schemaPath.push('type');
     JsonValidators.type.call(this, report, schema, json);
     report.schemaPath.pop();
     if (report.errors.length && this.options.breakOnFirstError) {
+      if (pushedRecursiveAnchor) {
+        recursiveAnchorStack.pop();
+      }
+      if (pushedDynamicScope) {
+        dynamicScopeStack.pop();
+      }
       return false;
     }
   }
 
   // now iterate all the keys in schema and execute validation methods
+  // Defer unevaluatedItems/unevaluatedProperties to run after other validators,
+  // so combinator validation results are cached and available for annotation collection
+  const deferredUnevaluatedKeys: Array<keyof JsonSchema> = [];
   let idx = keys.length;
   while (idx--) {
-    if (JsonValidators[keys[idx]]) {
-      JsonValidators[keys[idx]].call(this, report, schema, json);
+    if (keys[idx] === 'unevaluatedItems' || keys[idx] === 'unevaluatedProperties') {
+      deferredUnevaluatedKeys.push(keys[idx]);
+      continue;
+    }
+    const validator = JsonValidators[keys[idx]];
+    if (validator) {
+      validator.call(this, report, schema, json);
       if (report.errors.length && this.options.breakOnFirstError) {
         break;
+      }
+    }
+  }
+
+  // Run unevaluated* validators after all others have cached their combinator results
+  if (deferredUnevaluatedKeys.length > 0 && !(report.errors.length > 0 && this.options.breakOnFirstError)) {
+    for (const key of deferredUnevaluatedKeys) {
+      const validator = JsonValidators[key];
+      if (validator) {
+        validator.call(this, report, schema, json);
+        if (report.errors.length && this.options.breakOnFirstError) {
+          break;
+        }
       }
     }
   }
@@ -1052,6 +1850,13 @@ export function validate(
 
   if (typeof this.options.customValidator === 'function') {
     this.options.customValidator.call(this, report, schema, json);
+  }
+
+  if (pushedRecursiveAnchor) {
+    recursiveAnchorStack.pop();
+  }
+  if (pushedDynamicScope) {
+    dynamicScopeStack.pop();
   }
 
   // we don't need the root pointer anymore

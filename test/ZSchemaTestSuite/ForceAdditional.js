@@ -1,5 +1,6 @@
 export default {
   description: 'forceAdditional - Force additional properties/items in schemas',
+  version: 'draft-04',
   options: {
     forceAdditional: true,
   },

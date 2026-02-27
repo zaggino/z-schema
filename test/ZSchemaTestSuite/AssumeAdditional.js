@@ -1,5 +1,6 @@
 export default {
   description: 'assumeAdditional - Assume additional properties/items in schemas are defined to false',
+  version: 'draft-04',
   options: {
     assumeAdditional: true,
   },

@@ -27,6 +27,7 @@ export interface ZSchemaOptions {
   breakOnFirstError?: boolean;
   pedanticCheck?: boolean;
   ignoreUnknownFormats?: boolean;
+  formatAssertions?: boolean | null;
   customValidator?: (report: Report, schema: unknown, json: unknown) => void;
   customFormats?: Record<string, FormatValidatorFn | null>;
 }
@@ -54,7 +55,7 @@ export const defaultOptions: ZSchemaOptions = {
   forceMaxLength: false,
   // force properties or patternProperties to be defined on "object" types
   forceProperties: false,
-  // ignore references that cannot be resolved (remote schemas) // TODO: make sure this is only for remote schemas, not local ones
+  // ignore references that cannot be resolved (remote schemas)
   ignoreUnresolvableReferences: false,
   // disallow usage of keywords that this validator can't handle
   noExtraKeywords: false,
@@ -76,6 +77,12 @@ export const defaultOptions: ZSchemaOptions = {
   pedanticCheck: false,
   // ignore unknown formats (do not report them as an error)
   ignoreUnknownFormats: false,
+  // control format assertion behavior:
+  //   true  - respect vocabulary: for draft 2019-09/2020-12, check meta-schema $vocabulary
+  //           to determine if format is assertion or annotation-only
+  //   false - format is always annotation-only (never asserts)
+  //   null  - legacy behavior: always assert format validation
+  formatAssertions: null,
   // function to be called on every schema
   customValidator: null as unknown as undefined,
 };

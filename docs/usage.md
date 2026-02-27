@@ -1,6 +1,6 @@
 # Library Usage Guide
 
-How to use z-schema as a dependency in other projects for JSON validation.
+How to use z-schema as a dependency in other projects for JSON Schema validation. Supports JSON Schema **draft-04**, **draft-06**, **draft-07**, **draft-2019-09**, and **draft-2020-12** (latest).
 
 ## Installation
 
@@ -33,13 +33,14 @@ const validator = ZSchema.create();
 
 ```typescript
 const validator = ZSchema.create({
-  version: 'draft-06', // 'draft-04' | 'draft-06' | 'none' (default: 'draft-06')
+  version: 'draft2020-12', // 'draft-04' | 'draft-06' | 'draft-07' | 'draft2019-09' | 'draft2020-12' | 'none' (default: 'draft2020-12')
   breakOnFirstError: false, // stop at first error (default: false)
   noEmptyStrings: true, // reject empty strings for type 'string' (default: false)
   noEmptyArrays: true, // reject empty arrays for type 'array' (default: false)
   noTypeless: true, // require 'type' in schemas (default: false)
   strictMode: false, // enable multiple strict checks at once (default: false)
-  ignoreUnknownFormats: false, // suppress UNKNOWN_FORMAT errors (default: false)
+  ignoreUnknownFormats: false, // suppress UNKNOWN_FORMAT errors for older drafts (default: false; modern drafts always ignore unknown formats)
+  formatAssertions: null, // null=always assert, true=respect vocabulary (annotation-only for 2019-09/2020-12), false=annotation-only (default: null)
   ignoreUnresolvableReferences: false, // skip unresolvable $ref (default: false)
 });
 ```
@@ -172,26 +173,28 @@ interface SchemaErrorDetail {
 
 Common error codes (defined in `src/errors.ts`):
 
-| Code                               | Meaning                                          |
-| ---------------------------------- | ------------------------------------------------ |
-| `INVALID_TYPE`                     | Value type does not match schema `type`          |
-| `INVALID_FORMAT`                   | Value fails format validation                    |
-| `ENUM_MISMATCH`                    | Value not in `enum` list                         |
-| `ANY_OF_MISSING`                   | No schema in `anyOf` matched                     |
-| `ONE_OF_MISSING`                   | No schema in `oneOf` matched                     |
-| `ONE_OF_MULTIPLE`                  | Multiple schemas in `oneOf` matched              |
-| `NOT_PASSED`                       | Data matched `not` schema                        |
-| `OBJECT_MISSING_REQUIRED_PROPERTY` | Missing required property                        |
-| `OBJECT_ADDITIONAL_PROPERTIES`     | Extra property not allowed                       |
-| `ARRAY_LENGTH_SHORT`               | Array below `minItems`                           |
-| `ARRAY_LENGTH_LONG`                | Array above `maxItems`                           |
-| `MINIMUM` / `MAXIMUM`              | Number out of range                              |
-| `MIN_LENGTH` / `MAX_LENGTH`        | String length out of range                       |
-| `PATTERN`                          | String does not match `pattern`                  |
-| `UNRESOLVABLE_REFERENCE`           | `$ref` could not be resolved                     |
-| `CONST`                            | Value does not match `const` (draft-06)          |
-| `CONTAINS`                         | Array has no item matching `contains` (draft-06) |
-| `PROPERTY_NAMES`                   | Property name fails `propertyNames` (draft-06)   |
+| Code                               | Meaning                                           |
+| ---------------------------------- | ------------------------------------------------- |
+| `INVALID_TYPE`                     | Value type does not match schema `type`           |
+| `INVALID_FORMAT`                   | Value fails format validation                     |
+| `ENUM_MISMATCH`                    | Value not in `enum` list                          |
+| `ANY_OF_MISSING`                   | No schema in `anyOf` matched                      |
+| `ONE_OF_MISSING`                   | No schema in `oneOf` matched                      |
+| `ONE_OF_MULTIPLE`                  | Multiple schemas in `oneOf` matched               |
+| `NOT_PASSED`                       | Data matched `not` schema                         |
+| `OBJECT_MISSING_REQUIRED_PROPERTY` | Missing required property                         |
+| `OBJECT_ADDITIONAL_PROPERTIES`     | Extra property not allowed                        |
+| `ARRAY_LENGTH_SHORT`               | Array below `minItems`                            |
+| `ARRAY_LENGTH_LONG`                | Array above `maxItems`                            |
+| `MINIMUM` / `MAXIMUM`              | Number out of range                               |
+| `MIN_LENGTH` / `MAX_LENGTH`        | String length out of range                        |
+| `PATTERN`                          | String does not match `pattern`                   |
+| `UNRESOLVABLE_REFERENCE`           | `$ref` could not be resolved                      |
+| `CONST`                            | Value does not match `const` (draft-06+)          |
+| `CONTAINS`                         | Array has no item matching `contains` (draft-06+) |
+| `PROPERTY_NAMES`                   | Property name fails `propertyNames` (draft-06+)   |
+| `ARRAY_UNEVALUATED_ITEMS`          | Unevaluated items not allowed (draft-2019-09+)    |
+| `OBJECT_UNEVALUATED_PROPERTIES`    | Unevaluated property not allowed (draft-2019-09+) |
 
 ### Filtering Errors
 
@@ -295,23 +298,30 @@ const validator = ZSchema.create({
 });
 ```
 
-## Draft-04 vs Draft-06
+## Draft Version Comparison
 
-| Feature           | Draft-04                    | Draft-06                                   |
-| ----------------- | --------------------------- | ------------------------------------------ |
-| Schema ID         | `id`                        | `$id`                                      |
-| Exclusive min/max | `exclusiveMinimum: boolean` | `exclusiveMinimum: number`                 |
-| `const`           | N/A                         | Supported                                  |
-| `contains`        | N/A                         | Supported                                  |
-| `propertyNames`   | N/A                         | Supported                                  |
-| `examples`        | N/A                         | Supported                                  |
-| Boolean schemas   | N/A                         | `true` (accept all) / `false` (reject all) |
-| Default version   | —                           | **Default** (`version: 'draft-06'`)        |
+| Feature                 | Draft-04                    | Draft-06                                   | Draft-07                            | Draft-2019-09                      | Draft-2020-12 (latest)                  |
+| ----------------------- | --------------------------- | ------------------------------------------ | ----------------------------------- | ---------------------------------- | --------------------------------------- |
+| Schema ID               | `id`                        | `$id`                                      | `$id`                               | `$id`, `$anchor`                   | `$id`, `$anchor`                        |
+| Exclusive min/max       | `exclusiveMinimum: boolean` | `exclusiveMinimum: number`                 | `exclusiveMinimum: number`          | `exclusiveMinimum: number`         | `exclusiveMinimum: number`              |
+| `const`                 | N/A                         | Supported                                  | Supported                           | Supported                          | Supported                               |
+| `contains`              | N/A                         | Supported                                  | Supported                           | + `minContains`/`maxContains`      | + `minContains`/`maxContains`           |
+| `propertyNames`         | N/A                         | Supported                                  | Supported                           | Supported                          | Supported                               |
+| `if`/`then`/`else`      | N/A                         | N/A                                        | Supported                           | Supported                          | Supported                               |
+| `$defs`                 | N/A                         | N/A                                        | N/A                                 | Supported                          | Supported                               |
+| `dependentRequired`     | N/A                         | N/A                                        | N/A                                 | Supported                          | Supported                               |
+| `dependentSchemas`      | N/A                         | N/A                                        | N/A                                 | Supported                          | Supported                               |
+| `unevaluatedItems`      | N/A                         | N/A                                        | N/A                                 | Supported                          | Supported                               |
+| `unevaluatedProperties` | N/A                         | N/A                                        | N/A                                 | Supported                          | Supported                               |
+| `prefixItems`           | N/A                         | N/A                                        | N/A                                 | N/A                                | Supported (replaces array-form `items`) |
+| `$dynamicRef`           | N/A                         | N/A                                        | N/A                                 | `$recursiveRef`/`$recursiveAnchor` | `$dynamicRef`/`$dynamicAnchor`          |
+| Boolean schemas         | N/A                         | `true` (accept all) / `false` (reject all) | Supported                           | Supported                          | Supported                               |
+| Default version         | —                           | —                                          | **Default** (`version: 'draft-07'`) | —                                  | —                                       |
 
-To use draft-04 explicitly:
+To use a specific version:
 
 ```typescript
-const validator = ZSchema.create({ version: 'draft-04' });
+const validator = ZSchema.create({ version: 'draft2020-12' });
 ```
 
 ## Browser Usage (UMD)
@@ -349,7 +359,7 @@ All types are exported from the package:
 
 ```typescript
 import type {
-  JsonSchema, // Schema type (draft-04 | draft-06 union)
+  JsonSchema, // Schema type (all supported drafts union)
   JsonSchemaType, // 'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null'
   ZSchemaOptions, // Configuration options
   ValidateOptions, // Per-call options (schemaPath, includeErrors, excludeErrors)

@@ -54,7 +54,22 @@ const emailValidator: FormatValidatorFn = (email: unknown) => {
   if (typeof email !== 'string') {
     return true;
   }
-  return isEmailModule.default(email, { require_tld: true });
+  if (isEmailModule.default(email, { require_tld: true, allow_ip_domain: true })) {
+    return true;
+  }
+
+  const ipv6Literal = /^(.+)@\[IPv6:([^\]]+)\]$/i.exec(email);
+  if (!ipv6Literal) {
+    return false;
+  }
+
+  const localPart = ipv6Literal[1];
+  const addressPart = ipv6Literal[2];
+  if (!isIPModule.default(addressPart, 6)) {
+    return false;
+  }
+
+  return isEmailModule.default(`${localPart}@example.com`, { require_tld: true });
 };
 
 const hostnameValidator: FormatValidatorFn = (hostname: unknown) => {
@@ -85,12 +100,91 @@ const regexValidator: FormatValidatorFn = (input: unknown) => {
   if (typeof input !== 'string') {
     return true;
   }
+
+  const invalidEscapes = new Set(['a']);
+  for (let idx = 0; idx < input.length; idx++) {
+    if (input[idx] !== '\\') {
+      continue;
+    }
+
+    idx++;
+    if (idx >= input.length) {
+      return false;
+    }
+
+    const escaped = input[idx];
+    if (invalidEscapes.has(escaped)) {
+      return false;
+    }
+  }
+
   try {
     RegExp(input);
     return true;
   } catch (_e) {
     return false;
   }
+};
+
+const durationValidator: FormatValidatorFn = (input: unknown) => {
+  if (typeof input !== 'string') {
+    return true;
+  }
+
+  // eslint-disable-next-line no-control-regex
+  if (!/^P[\x00-\x7F]*$/.test(input)) {
+    return false;
+  }
+
+  if (!input.startsWith('P')) {
+    return false;
+  }
+
+  const body = input.slice(1);
+  if (body.length === 0) {
+    return false;
+  }
+
+  if (body.includes('W')) {
+    return /^\d+W$/.test(body);
+  }
+
+  const parts = body.split('T');
+  if (parts.length > 2) {
+    return false;
+  }
+
+  const datePart = parts[0];
+  const timePart = parts.length === 2 ? parts[1] : undefined;
+
+  if (!/^(?:\d+Y)?(?:\d+M)?(?:\d+D)?$/.test(datePart)) {
+    return false;
+  }
+
+  const hasDateComponent = /\d+[YMD]/.test(datePart);
+  let hasTimeComponent = false;
+
+  if (timePart !== undefined) {
+    if (timePart.length === 0) {
+      return false;
+    }
+    if (!/^(?:\d+H)?(?:\d+M)?(?:\d+S)?$/.test(timePart)) {
+      return false;
+    }
+    hasTimeComponent = /\d+[HMS]/.test(timePart);
+    if (!hasTimeComponent) {
+      return false;
+    }
+  }
+
+  return hasDateComponent || hasTimeComponent;
+};
+
+const uuidValidator: FormatValidatorFn = (input: unknown) => {
+  if (typeof input !== 'string') {
+    return true;
+  }
+  return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(input);
 };
 
 const strictUriValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string' || isURLModule.default(uri);
@@ -220,6 +314,8 @@ const inbuiltValidators: Record<string, FormatValidatorFn> = {
   'idn-hostname': idnHostnameValidator,
   iri: iriValidator,
   'iri-reference': iriReferenceValidator,
+  duration: durationValidator,
+  uuid: uuidValidator,
 } as const;
 
 const customValidators: Record<string, FormatValidatorFn> = {};

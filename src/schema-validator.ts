@@ -630,11 +630,42 @@ const SchemaValidators = {
       }
     }
   },
+  $defs: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
+    if (report.options.version !== 'draft2019-09' && report.options.version !== 'draft2020-12') {
+      return;
+    }
+
+    if (!isObject(schema.$defs)) {
+      report.addError('KEYWORD_TYPE_EXPECTED', ['$defs', 'object'], undefined, schema, '$defs');
+      return;
+    }
+
+    const keys = Object.keys(schema.$defs);
+    let idx = keys.length;
+    while (idx--) {
+      const key = keys[idx];
+      const val = schema.$defs[key];
+      report.path.push('$defs');
+      report.path.push(key);
+      this.validateSchema(report, val as JsonSchemaInternal);
+      report.path.pop();
+      report.path.pop();
+    }
+  },
   format: function (this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
+    if (this.options.formatAssertions === false) {
+      return;
+    }
+
     if (typeof schema.format !== 'string') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['format', 'string'], undefined, schema, 'format');
     } else {
-      if (!isFormatSupported(schema.format, this.options.customFormats) && this.options.ignoreUnknownFormats !== true) {
+      const isModernDraft = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+      if (
+        !isFormatSupported(schema.format, this.options.customFormats) &&
+        this.options.ignoreUnknownFormats !== true &&
+        !isModernDraft
+      ) {
         report.addError('UNKNOWN_FORMAT', [schema.format], undefined, schema, 'format');
       }
     }
