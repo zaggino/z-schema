@@ -33,7 +33,7 @@ src/                  # Library source (TypeScript, ESM)
   z-schema-reader.ts  # Remote schema reader (SchemaReader type)
   schema-compiler.ts  # Schema compilation ($ref resolution, id collection)
   schema-validator.ts # Schema-level validation
-  json-validation.ts  # JSON instance validation against compiled schemas
+  json-validation.ts  # JSON validation orchestration (validate, recurse*, collectEvaluated)
   schema-cache.ts     # Schema caching by URI/id
   errors.ts           # Error codes (Errors enum) and ValidateError class
   format-validators.ts# Built-in & custom format validators
@@ -41,6 +41,15 @@ src/                  # Library source (TypeScript, ESM)
   json-schema.ts      # Shared/common JSON Schema definitions + helpers
   json-schema-versions.ts # Draft-specific schema unions and version mappings
   z-schema-versions.ts # Registers bundled draft meta-schemas into global cache
+  validation/         # Keyword validators split by category
+    shared.ts         # Shared types (JsonValidatorFn), vocab helpers, caching utilities
+    type.ts           # type, enum, const validators
+    numeric.ts        # multipleOf, minimum, maximum, exclusiveMin/Max validators
+    string.ts         # minLength, maxLength, pattern, format, content* validators
+    array.ts          # items, prefixItems, contains, min/maxItems, uniqueItems validators
+    object.ts         # properties, patternProperties, additionalProperties, required, etc.
+    combinators.ts    # allOf, anyOf, oneOf, not, if/then/else validators
+    ref.ts            # $dynamicRef/$recursiveRef resolution helpers
   utils/              # Pure utility functions
     array.ts          # Array helpers
     clone.ts          # Deep/shallow clone
@@ -96,3 +105,7 @@ When making changes to the repository, **always update the relevant documentatio
 - **Structural changes** → update `AGENTS.md` project structure and `docs/architecture.md`.
 
 Failing to update documentation alongside code changes leads to drift that is expensive to fix later. Treat docs updates as part of the definition of done for any PR.
+
+## Commit Messages
+
+After completing a task, **always suggest an appropriate commit message** following [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification). The message should accurately summarize the work done (e.g. `perf: convert difference() to use Set for O(1) lookups`). See the contributing guide for the full list of commit types.

@@ -9,7 +9,16 @@ index.ts (public API)
        └─ z-schema-base.ts (ZSchemaBase — core validation orchestration)
             ├─ schema-compiler.ts (compile schemas, resolve $ref, collect ids)
             ├─ schema-validator.ts (validate schemas against meta-schemas)
-            ├─ json-validation.ts (validate JSON data against compiled schemas)
+            ├─ json-validation.ts (validate JSON data — orchestration, recurse*, collectEvaluated)
+            │    └─ validation/  (keyword validators split by category)
+            │         ├─ shared.ts (JsonValidatorFn type, vocab helpers, caching)
+            │         ├─ type.ts (type, enum, const)
+            │         ├─ numeric.ts (multipleOf, minimum, maximum, exclusiveMin/Max)
+            │         ├─ string.ts (minLength, maxLength, pattern, format, content*)
+            │         ├─ array.ts (items, prefixItems, contains, min/maxItems, uniqueItems)
+            │         ├─ object.ts (properties, patternProperties, additionalProperties, required, etc.)
+            │         ├─ combinators.ts (allOf, anyOf, oneOf, not, if/then/else)
+            │         └─ ref.ts ($dynamicRef/$recursiveRef resolution)
             ├─ schema-cache.ts (cache schemas by URI and id)
             ├─ report.ts (accumulate validation errors)
             ├─ errors.ts (error codes, ValidateError)
@@ -66,7 +75,7 @@ Static methods on `ZSchema`:
 
 1. **Schema compilation** (`schema-compiler.ts`): resolves `$ref`, collects `id`/`$id`, validates schema structure.
 2. **Schema validation** (`schema-validator.ts`): validates the schema against its meta-schema (draft-04, draft-06, draft-07, draft-2019-09, or draft-2020-12).
-3. **JSON validation** (`json-validation.ts`): validates a JSON instance against the compiled schema (type checks, constraints, combiners like `allOf`/`anyOf`/`oneOf`/`not`, `unevaluatedProperties`/`unevaluatedItems` with full annotation-based evaluation tracking across applicators and dynamic references, and `format` behavior controlled by `ZSchemaOptions.formatAssertions` — supporting vocabulary-aware annotation-only mode for draft 2019-09/2020-12).
+3. **JSON validation** (`json-validation.ts` + `validation/*.ts`): validates a JSON instance against the compiled schema. Keyword validators are split into category modules under `validation/` (type, numeric, string, array, object, combinators, ref). The orchestration layer in `json-validation.ts` handles the `JsonValidators` dispatch table, `validate()`, `recurseArray()`, `recurseObject()`, `collectEvaluated()`, and `unevaluatedItems`/`unevaluatedProperties`. Validator modules that need recursive validation (combinators, contains, dependencies, propertyNames) import `validate` via ESM circular import — safe because `export function validate()` is hoisted and ESM provides live bindings.
 4. **Report** (`report.ts`): errors accumulate in a `Report` object, then get converted into a `ValidateError`.
 
 ## ValidateOptions
