@@ -118,7 +118,7 @@ export const collectReferences = (
       path: path.slice(0),
     });
   }
-  if (typeof obj.$recursiveRef === 'string' && typeof (obj as any).__$recursiveRefResolved === 'undefined') {
+  if (typeof obj.$recursiveRef === 'string' && typeof obj.__$recursiveRefResolved === 'undefined') {
     results.push({
       ref: resolveReference(scope[scope.length - 1], obj.$recursiveRef),
       key: '$recursiveRef',
@@ -126,7 +126,7 @@ export const collectReferences = (
       path: path.slice(0),
     });
   }
-  if (typeof obj.$dynamicRef === 'string' && typeof (obj as any).__$dynamicRefResolved === 'undefined') {
+  if (typeof obj.$dynamicRef === 'string' && typeof obj.__$dynamicRefResolved === 'undefined') {
     results.push({
       ref: resolveReference(scope[scope.length - 1], obj.$dynamicRef),
       key: '$dynamicRef',

@@ -133,6 +133,19 @@ const isFormatAssertionVocabEnabled = (
 
 type JsonValidatorFn = (this: ZSchemaBase, report: Report, schema: JsonSchema, json: unknown) => void;
 
+function cacheValidationResult(report: Report, schema: unknown, json: unknown, passed: boolean): void {
+  let schemaMap = report.__validationResultCache.get(schema);
+  if (!schemaMap) {
+    schemaMap = new Map();
+    report.__validationResultCache.set(schema, schemaMap);
+  }
+  schemaMap.set(json, passed);
+}
+
+function getCachedValidationResult(report: Report, schema: unknown, json: unknown): boolean | undefined {
+  return report.__validationResultCache.get(schema)?.get(json);
+}
+
 const getDynamicRefAnchorName = (dynamicRef: string) => {
   const hashIdx = dynamicRef.indexOf('#');
   if (hashIdx === -1) {
@@ -154,6 +167,330 @@ const findDynamicAnchorInScope = (scopeSchema: JsonSchemaInternal, anchorName: s
   }
   return undefined;
 };
+
+/**
+ * Resolves the effective target for a $recursiveRef, walking the recursive anchor stack.
+ */
+const resolveRecursiveRef = (
+  schema: JsonSchemaInternal,
+  recursiveAnchorStack: JsonSchemaInternal[]
+): JsonSchemaInternal | undefined => {
+  const resolved = schema.__$recursiveRefResolved as JsonSchemaInternal | undefined;
+  if (!resolved) {
+    return undefined;
+  }
+  let target = resolved;
+  if (typeof target === 'object' && target.$recursiveAnchor === true) {
+    const dynamicTarget = recursiveAnchorStack[0];
+    if (dynamicTarget) {
+      target = dynamicTarget;
+    }
+  }
+  return target;
+};
+
+/**
+ * Resolves the effective target for a $dynamicRef, walking the dynamic scope stack.
+ */
+const resolveDynamicRef = (
+  schema: JsonSchemaInternal,
+  dynamicScopeStack: JsonSchemaInternal[]
+): JsonSchemaInternal | boolean | undefined => {
+  const resolved = schema.__$dynamicRefResolved as JsonSchemaInternal | boolean | undefined;
+  if (typeof resolved === 'undefined' || !schema.$dynamicRef) {
+    return resolved;
+  }
+  let target = resolved;
+  const anchorName = getDynamicRefAnchorName(schema.$dynamicRef);
+  if (anchorName && typeof target === 'object' && target.$dynamicAnchor === anchorName) {
+    for (let scopeIdx = 0; scopeIdx < dynamicScopeStack.length; scopeIdx++) {
+      const scopeSchema = dynamicScopeStack[scopeIdx];
+      const scopedTarget = findDynamicAnchorInScope(scopeSchema, anchorName);
+      if (scopedTarget) {
+        target = scopedTarget;
+        break;
+      }
+    }
+  }
+  return target;
+};
+
+// --- Unified collectEvaluated traversal for unevaluatedItems / unevaluatedProperties ---
+
+type CollectEvaluatedItemsArgs = {
+  report: Report;
+  currentSchema: JsonSchemaInternal | boolean | undefined;
+  json: unknown;
+  mode: 'items';
+  jsonArr: unknown[];
+  depth: number;
+};
+
+type CollectEvaluatedPropertiesArgs = {
+  report: Report;
+  currentSchema: JsonSchemaInternal | boolean | undefined;
+  json: unknown;
+  mode: 'properties';
+  jsonData: Record<string, unknown>;
+  depth: number;
+};
+
+type CollectEvaluatedArgs = CollectEvaluatedItemsArgs | CollectEvaluatedPropertiesArgs;
+
+function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<number | string> | 'all' {
+  const { report, currentSchema, json, mode, depth } = args;
+
+  if (!currentSchema || typeof currentSchema === 'boolean') {
+    return new Set();
+  }
+
+  if (depth > 20) {
+    report.addError('COLLECT_EVALUATED_DEPTH_EXCEEDED', [depth]);
+    return new Set();
+  }
+
+  const evaluated = new Set<number | string>();
+
+  const merge = (other: Set<number | string> | 'all') => {
+    if (other === 'all') return true;
+    for (const v of other) {
+      evaluated.add(v);
+    }
+    return false;
+  };
+
+  const recurse = (subSchema: JsonSchemaInternal | boolean | undefined): Set<number | string> | 'all' => {
+    if (mode === 'items') {
+      return collectEvaluated.call(this, {
+        report,
+        currentSchema: subSchema,
+        json,
+        mode: 'items',
+        jsonArr: (args as CollectEvaluatedItemsArgs).jsonArr,
+        depth: depth + 1,
+      });
+    }
+    return collectEvaluated.call(this, {
+      report,
+      currentSchema: subSchema,
+      json,
+      mode: 'properties',
+      jsonData: (args as CollectEvaluatedPropertiesArgs).jsonData,
+      depth: depth + 1,
+    });
+  };
+
+  // --- Mode-specific leaf collection ---
+  if (mode === 'items') {
+    const jsonArr = (args as CollectEvaluatedItemsArgs).jsonArr;
+
+    // prefixItems (2020-12 tuple)
+    if (Array.isArray(currentSchema.prefixItems)) {
+      const len = Math.min(currentSchema.prefixItems.length, jsonArr.length);
+      for (let i = 0; i < len; i++) {
+        evaluated.add(i);
+      }
+    }
+
+    // items - can be array (2019-09 tuple) or schema (evaluates all)
+    if (currentSchema.items !== undefined) {
+      if (Array.isArray(currentSchema.items)) {
+        const len = Math.min(currentSchema.items.length, jsonArr.length);
+        for (let i = 0; i < len; i++) {
+          evaluated.add(i);
+        }
+      } else if (currentSchema.items !== false) {
+        return 'all';
+      }
+    }
+
+    // additionalItems (2019-09) - when items is array form and additionalItems is present and not false
+    if (
+      currentSchema.additionalItems !== undefined &&
+      currentSchema.additionalItems !== false &&
+      Array.isArray(currentSchema.items)
+    ) {
+      return 'all';
+    }
+
+    // contains - evaluates specific indices that match the schema
+    if (currentSchema.contains !== undefined) {
+      for (let i = 0; i < jsonArr.length; i++) {
+        let passed = getCachedValidationResult(report, currentSchema.contains, jsonArr[i]);
+        if (passed === undefined) {
+          const subReport = new Report(report);
+          validate.call(this, subReport, currentSchema.contains as JsonSchemaInternal | boolean, jsonArr[i]);
+          passed = subReport.errors.length === 0;
+        }
+        if (passed) {
+          evaluated.add(i);
+        }
+      }
+    }
+
+    // unevaluatedItems: true means all items evaluated
+    if (currentSchema.unevaluatedItems === true) {
+      return 'all';
+    }
+  } else {
+    // mode === 'properties'
+    const jsonData = (args as CollectEvaluatedPropertiesArgs).jsonData;
+
+    // properties
+    if (isObject(currentSchema.properties)) {
+      for (const key of Object.keys(currentSchema.properties)) {
+        if (hasOwn(jsonData, key)) {
+          evaluated.add(key);
+        }
+      }
+    }
+
+    // patternProperties
+    if (isObject(currentSchema.patternProperties)) {
+      for (const pattern of Object.keys(currentSchema.patternProperties)) {
+        const result = compileSchemaRegex(pattern);
+        if (result.ok) {
+          for (const key of Object.keys(jsonData)) {
+            if (result.value.test(key)) {
+              evaluated.add(key);
+            }
+          }
+        }
+      }
+    }
+
+    // additionalProperties - evaluates all non-properties/non-patternProperties keys
+    if (currentSchema.additionalProperties !== undefined) {
+      const propKeys = isObject(currentSchema.properties) ? Object.keys(currentSchema.properties) : [];
+      const patternRegexes: RegExp[] = [];
+      if (isObject(currentSchema.patternProperties)) {
+        for (const pattern of Object.keys(currentSchema.patternProperties)) {
+          const result = compileSchemaRegex(pattern);
+          if (result.ok) {
+            patternRegexes.push(result.value);
+          }
+        }
+      }
+      for (const key of Object.keys(jsonData)) {
+        if (propKeys.includes(key)) continue;
+        if (patternRegexes.some((re) => re.test(key))) continue;
+        evaluated.add(key);
+      }
+    }
+
+    // dependentSchemas - only applies when the dependency key is present in the data
+    if (isObject(currentSchema.dependentSchemas)) {
+      for (const [depKey, depSchema] of Object.entries(currentSchema.dependentSchemas as Record<string, unknown>)) {
+        if (hasOwn(jsonData, depKey)) {
+          if (merge(recurse(depSchema as JsonSchemaInternal | boolean))) {
+            return 'all';
+          }
+        }
+      }
+    }
+
+    // unevaluatedProperties: true in a sub-schema means all props are evaluated
+    if (currentSchema.unevaluatedProperties === true) {
+      return 'all';
+    }
+  }
+
+  // --- Shared combinator traversal ---
+
+  // allOf
+  if (Array.isArray(currentSchema.allOf)) {
+    for (const subSchema of currentSchema.allOf) {
+      if (merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
+        return 'all';
+      }
+    }
+  }
+
+  // anyOf - only matching branches contribute
+  if (Array.isArray(currentSchema.anyOf)) {
+    for (const subSchema of currentSchema.anyOf) {
+      let passed = getCachedValidationResult(report, subSchema, json);
+      if (passed === undefined) {
+        const subReport = new Report(report);
+        validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
+        passed = subReport.errors.length === 0;
+      }
+      if (passed) {
+        if (merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
+          return 'all';
+        }
+      }
+    }
+  }
+
+  // oneOf - only matching branches contribute
+  if (Array.isArray(currentSchema.oneOf)) {
+    for (const subSchema of currentSchema.oneOf) {
+      let passed = getCachedValidationResult(report, subSchema, json);
+      if (passed === undefined) {
+        const subReport = new Report(report);
+        validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
+        passed = subReport.errors.length === 0;
+      }
+      if (passed) {
+        if (merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
+          return 'all';
+        }
+      }
+    }
+  }
+
+  // if/then/else
+  if (currentSchema.if !== undefined) {
+    let condPassed = getCachedValidationResult(report, currentSchema.if, json);
+    if (condPassed === undefined) {
+      const condReport = new Report(report);
+      validate.call(this, condReport, currentSchema.if as JsonSchemaInternal | boolean, json);
+      condPassed = condReport.errors.length === 0;
+    }
+    if (condPassed) {
+      if (merge(recurse(currentSchema.if as JsonSchemaInternal | boolean))) {
+        return 'all';
+      }
+      if (currentSchema.then !== undefined) {
+        if (merge(recurse(currentSchema.then as JsonSchemaInternal | boolean))) {
+          return 'all';
+        }
+      }
+    } else {
+      if (currentSchema.else !== undefined) {
+        if (merge(recurse(currentSchema.else as JsonSchemaInternal | boolean))) {
+          return 'all';
+        }
+      }
+    }
+  }
+
+  // $ref resolved
+  if (currentSchema.__$refResolved && currentSchema.__$refResolved !== currentSchema) {
+    if (merge(recurse(currentSchema.__$refResolved as JsonSchemaInternal))) {
+      return 'all';
+    }
+  }
+
+  // $recursiveRef
+  const recursiveTarget = resolveRecursiveRef(currentSchema, report.__$recursiveAnchorStack);
+  if (recursiveTarget && recursiveTarget !== currentSchema) {
+    if (merge(recurse(recursiveTarget))) {
+      return 'all';
+    }
+  }
+
+  // $dynamicRef
+  const dynamicTarget = resolveDynamicRef(currentSchema, report.__$dynamicScopeStack);
+  if (dynamicTarget && dynamicTarget !== currentSchema) {
+    if (merge(recurse(dynamicTarget as JsonSchemaInternal))) {
+      return 'all';
+    }
+  }
+
+  return evaluated;
+}
 
 export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   id: () => {},
@@ -576,6 +913,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       const subReport = new Report(report);
       subReports.push(subReport);
       validate.call(this, subReport, schema.anyOf![idx], json);
+      cacheValidationResult(report, schema.anyOf![idx], json, subReport.errors.length === 0);
     }
 
     // Aggregate async tasks from sub-reports to the main report
@@ -636,6 +974,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       const subReport = new Report(report);
       subReports.push(subReport);
       validate.call(this, subReport, schema.oneOf![idx], json);
+      cacheValidationResult(report, schema.oneOf![idx], json, subReport.errors.length === 0);
     }
 
     // Aggregate async tasks from sub-reports to the main report
@@ -712,6 +1051,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
 
     const conditionReport = new Report(report);
     validate.call(this, conditionReport, conditionSchema as any, json);
+    cacheValidationResult(report, conditionSchema, json, conditionReport.errors.length === 0);
 
     const branchSchema = conditionReport.errors.length === 0 ? thenSchema : elseSchema;
     if (branchSchema === undefined) {
@@ -804,181 +1144,14 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       return;
     }
 
-    // Collect all item indices that are "evaluated" by keywords in the schema tree
-    const collectEvaluatedItems = (
-      currentSchema: JsonSchemaInternal | boolean | undefined,
-      jsonArr: unknown[],
-      depth = 0
-    ): Set<number> | 'all' => {
-      const evaluated = new Set<number>();
-      if (!currentSchema || typeof currentSchema === 'boolean' || depth > 20) {
-        // boolean schemas validate but don't evaluate items
-        return evaluated;
-      }
-
-      const merge = (other: Set<number> | 'all') => {
-        if (other === 'all') return true;
-        for (const idx of other) {
-          evaluated.add(idx);
-        }
-        return false;
-      };
-
-      // prefixItems (2020-12 tuple)
-      if (Array.isArray(currentSchema.prefixItems)) {
-        const len = Math.min(currentSchema.prefixItems.length, jsonArr.length);
-        for (let i = 0; i < len; i++) {
-          evaluated.add(i);
-        }
-      }
-
-      // items - can be array (2019-09 tuple) or schema (evaluates all)
-      if (currentSchema.items !== undefined) {
-        if (Array.isArray(currentSchema.items)) {
-          // 2019-09 tuple form
-          const len = Math.min(currentSchema.items.length, jsonArr.length);
-          for (let i = 0; i < len; i++) {
-            evaluated.add(i);
-          }
-        } else if (currentSchema.items !== false) {
-          // Schema form or true - evaluates ALL items
-          return 'all';
-        }
-      }
-
-      // additionalItems (2019-09) - when items is array form and additionalItems is present and not false
-      if (
-        currentSchema.additionalItems !== undefined &&
-        currentSchema.additionalItems !== false &&
-        Array.isArray(currentSchema.items)
-      ) {
-        return 'all';
-      }
-
-      // contains - evaluates specific indices that match the schema
-      if (currentSchema.contains !== undefined) {
-        for (let i = 0; i < jsonArr.length; i++) {
-          const subReport = new Report(report);
-          validate.call(this, subReport, currentSchema.contains as JsonSchemaInternal | boolean, jsonArr[i]);
-          if (subReport.errors.length === 0) {
-            evaluated.add(i);
-          }
-        }
-      }
-
-      // allOf
-      if (Array.isArray(currentSchema.allOf)) {
-        for (const subSchema of currentSchema.allOf) {
-          if (merge(collectEvaluatedItems(subSchema as JsonSchemaInternal | boolean, jsonArr, depth + 1))) {
-            return 'all';
-          }
-        }
-      }
-
-      // anyOf - only matching branches contribute
-      if (Array.isArray(currentSchema.anyOf)) {
-        for (const subSchema of currentSchema.anyOf) {
-          const subReport = new Report(report);
-          validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
-          if (subReport.errors.length === 0) {
-            if (merge(collectEvaluatedItems(subSchema as JsonSchemaInternal | boolean, jsonArr, depth + 1))) {
-              return 'all';
-            }
-          }
-        }
-      }
-
-      // oneOf - only matching branches contribute
-      if (Array.isArray(currentSchema.oneOf)) {
-        for (const subSchema of currentSchema.oneOf) {
-          const subReport = new Report(report);
-          validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
-          if (subReport.errors.length === 0) {
-            if (merge(collectEvaluatedItems(subSchema as JsonSchemaInternal | boolean, jsonArr, depth + 1))) {
-              return 'all';
-            }
-          }
-        }
-      }
-
-      // if/then/else
-      if (currentSchema.if !== undefined) {
-        const condReport = new Report(report);
-        validate.call(this, condReport, currentSchema.if as JsonSchemaInternal | boolean, json);
-        if (condReport.errors.length === 0) {
-          // if passed - collect annotations from if subschema
-          if (merge(collectEvaluatedItems(currentSchema.if as JsonSchemaInternal | boolean, jsonArr, depth + 1))) {
-            return 'all';
-          }
-          // and from then
-          if (currentSchema.then !== undefined) {
-            if (merge(collectEvaluatedItems(currentSchema.then as JsonSchemaInternal | boolean, jsonArr, depth + 1))) {
-              return 'all';
-            }
-          }
-        } else {
-          // if failed - collect annotations from else only
-          if (currentSchema.else !== undefined) {
-            if (merge(collectEvaluatedItems(currentSchema.else as JsonSchemaInternal | boolean, jsonArr, depth + 1))) {
-              return 'all';
-            }
-          }
-        }
-      }
-
-      // unevaluatedItems: true means all items evaluated
-      if (currentSchema.unevaluatedItems === true) {
-        return 'all';
-      }
-
-      // $ref resolved
-      if (currentSchema.__$refResolved && currentSchema.__$refResolved !== currentSchema) {
-        if (merge(collectEvaluatedItems(currentSchema.__$refResolved as JsonSchemaInternal, jsonArr, depth + 1))) {
-          return 'all';
-        }
-      }
-
-      // $recursiveRef resolved (with dynamic resolution)
-      if ((currentSchema as any).__$recursiveRefResolved) {
-        let recursiveTarget = (currentSchema as any).__$recursiveRefResolved as JsonSchemaInternal;
-        if (recursiveTarget.$recursiveAnchor === true) {
-          const dynamicTarget = report.__$recursiveAnchorStack[0];
-          if (dynamicTarget) {
-            recursiveTarget = dynamicTarget;
-          }
-        }
-        if (recursiveTarget !== currentSchema) {
-          if (merge(collectEvaluatedItems(recursiveTarget, jsonArr, depth + 1))) {
-            return 'all';
-          }
-        }
-      }
-
-      // $dynamicRef resolved (with dynamic scope resolution)
-      if (currentSchema.__$dynamicRefResolved && currentSchema.$dynamicRef) {
-        let dynamicTarget = currentSchema.__$dynamicRefResolved as JsonSchemaInternal;
-        const anchorName = getDynamicRefAnchorName(currentSchema.$dynamicRef);
-        if (anchorName && typeof dynamicTarget === 'object' && dynamicTarget.$dynamicAnchor === anchorName) {
-          for (let scopeIdx = 0; scopeIdx < report.__$dynamicScopeStack.length; scopeIdx++) {
-            const scopeSchema = report.__$dynamicScopeStack[scopeIdx];
-            const scopedTarget = findDynamicAnchorInScope(scopeSchema, anchorName);
-            if (scopedTarget) {
-              dynamicTarget = scopedTarget;
-              break;
-            }
-          }
-        }
-        if (dynamicTarget !== currentSchema) {
-          if (merge(collectEvaluatedItems(dynamicTarget, jsonArr, depth + 1))) {
-            return 'all';
-          }
-        }
-      }
-
-      return evaluated;
-    };
-
-    const evaluatedItems = collectEvaluatedItems(schema, json);
+    const evaluatedItems = collectEvaluated.call(this, {
+      report,
+      currentSchema: schema,
+      json,
+      mode: 'items',
+      jsonArr: json,
+      depth: 0,
+    });
 
     if (evaluatedItems === 'all') {
       return;
@@ -996,14 +1169,14 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
     }
 
     if (unevalSchema === false) {
-      report.addError('ARRAY_ADDITIONAL_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
+      report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
     } else {
       // unevaluatedItems as a schema — validate each unevaluated item against it
       for (const idx of unevaluatedIndices) {
         const subReport = new Report(report);
         validate.call(this, subReport, unevalSchema as JsonSchemaInternal, json[idx]);
         if (subReport.errors.length > 0) {
-          report.addError('ARRAY_ADDITIONAL_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
+          report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
           break;
         }
       }
@@ -1030,201 +1203,14 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       return;
     }
 
-    // Collect all properties that are "evaluated" by keywords at the current schema level and sub-schemas
-    const collectEvaluatedProperties = (
-      currentSchema: JsonSchemaInternal | boolean | undefined,
-      jsonData: Record<string, unknown>,
-      depth = 0
-    ): Set<string> | 'all' => {
-      const evaluated = new Set<string>();
-      if (!currentSchema || typeof currentSchema === 'boolean' || depth > 20) {
-        // boolean schemas validate but don't evaluate properties
-        return evaluated;
-      }
-
-      const merge = (other: Set<string> | 'all') => {
-        if (other === 'all') return true;
-        for (const key of other) {
-          evaluated.add(key);
-        }
-        return false;
-      };
-
-      // properties
-      if (isObject(currentSchema.properties)) {
-        for (const key of Object.keys(currentSchema.properties)) {
-          if (hasOwn(jsonData, key)) {
-            evaluated.add(key);
-          }
-        }
-      }
-
-      // patternProperties
-      if (isObject(currentSchema.patternProperties)) {
-        for (const pattern of Object.keys(currentSchema.patternProperties)) {
-          const result = compileSchemaRegex(pattern);
-          if (result.ok) {
-            for (const key of Object.keys(jsonData)) {
-              if (result.value.test(key)) {
-                evaluated.add(key);
-              }
-            }
-          }
-        }
-      }
-
-      // additionalProperties (bool or schema) - evaluates all non-properties/non-patternProperties keys
-      if (currentSchema.additionalProperties !== undefined) {
-        const propKeys = isObject(currentSchema.properties) ? Object.keys(currentSchema.properties) : [];
-        const patternRegexes: RegExp[] = [];
-        if (isObject(currentSchema.patternProperties)) {
-          for (const pattern of Object.keys(currentSchema.patternProperties)) {
-            const result = compileSchemaRegex(pattern);
-            if (result.ok) {
-              patternRegexes.push(result.value);
-            }
-          }
-        }
-        for (const key of Object.keys(jsonData)) {
-          if (propKeys.includes(key)) continue;
-          if (patternRegexes.some((re) => re.test(key))) continue;
-          // additionalProperties covers this key
-          evaluated.add(key);
-        }
-      }
-
-      // allOf
-      if (Array.isArray(currentSchema.allOf)) {
-        for (const subSchema of currentSchema.allOf) {
-          if (merge(collectEvaluatedProperties(subSchema as JsonSchemaInternal | boolean, jsonData, depth + 1))) {
-            return 'all';
-          }
-        }
-      }
-
-      // anyOf - only matching branches contribute
-      if (Array.isArray(currentSchema.anyOf)) {
-        for (const subSchema of currentSchema.anyOf) {
-          const subReport = new Report(report);
-          validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
-          if (subReport.errors.length === 0) {
-            if (merge(collectEvaluatedProperties(subSchema as JsonSchemaInternal | boolean, jsonData, depth + 1))) {
-              return 'all';
-            }
-          }
-        }
-      }
-
-      // oneOf - only matching branches contribute
-      if (Array.isArray(currentSchema.oneOf)) {
-        for (const subSchema of currentSchema.oneOf) {
-          const subReport = new Report(report);
-          validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
-          if (subReport.errors.length === 0) {
-            if (merge(collectEvaluatedProperties(subSchema as JsonSchemaInternal | boolean, jsonData, depth + 1))) {
-              return 'all';
-            }
-          }
-        }
-      }
-
-      // if/then/else
-      if (currentSchema.if !== undefined) {
-        const condReport = new Report(report);
-        validate.call(this, condReport, currentSchema.if as JsonSchemaInternal | boolean, json);
-        if (condReport.errors.length === 0) {
-          // if passed - collect annotations from if subschema
-          if (
-            merge(collectEvaluatedProperties(currentSchema.if as JsonSchemaInternal | boolean, jsonData, depth + 1))
-          ) {
-            return 'all';
-          }
-          // and from then
-          if (currentSchema.then !== undefined) {
-            if (
-              merge(collectEvaluatedProperties(currentSchema.then as JsonSchemaInternal | boolean, jsonData, depth + 1))
-            ) {
-              return 'all';
-            }
-          }
-        } else {
-          // if failed - collect annotations from else only
-          if (currentSchema.else !== undefined) {
-            if (
-              merge(collectEvaluatedProperties(currentSchema.else as JsonSchemaInternal | boolean, jsonData, depth + 1))
-            ) {
-              return 'all';
-            }
-          }
-        }
-      }
-
-      // dependentSchemas - only applies when the dependency key is present in the data
-      if (isObject(currentSchema.dependentSchemas)) {
-        for (const [depKey, depSchema] of Object.entries(currentSchema.dependentSchemas as Record<string, unknown>)) {
-          if (hasOwn(jsonData, depKey)) {
-            if (merge(collectEvaluatedProperties(depSchema as JsonSchemaInternal | boolean, jsonData, depth + 1))) {
-              return 'all';
-            }
-          }
-        }
-      }
-
-      // unevaluatedProperties: true in a sub-schema means all props are evaluated
-      if (currentSchema.unevaluatedProperties === true) {
-        return 'all';
-      }
-
-      // $ref resolved
-      if (currentSchema.__$refResolved && currentSchema.__$refResolved !== currentSchema) {
-        if (
-          merge(collectEvaluatedProperties(currentSchema.__$refResolved as JsonSchemaInternal, jsonData, depth + 1))
-        ) {
-          return 'all';
-        }
-      }
-
-      // $recursiveRef resolved (with dynamic resolution)
-      if ((currentSchema as any).__$recursiveRefResolved) {
-        let recursiveTarget = (currentSchema as any).__$recursiveRefResolved as JsonSchemaInternal;
-        if (recursiveTarget.$recursiveAnchor === true) {
-          const dynamicTarget = report.__$recursiveAnchorStack[0];
-          if (dynamicTarget) {
-            recursiveTarget = dynamicTarget;
-          }
-        }
-        if (recursiveTarget !== currentSchema) {
-          if (merge(collectEvaluatedProperties(recursiveTarget, jsonData, depth + 1))) {
-            return 'all';
-          }
-        }
-      }
-
-      // $dynamicRef resolved (with dynamic scope resolution)
-      if (currentSchema.__$dynamicRefResolved && currentSchema.$dynamicRef) {
-        let dynamicTarget = currentSchema.__$dynamicRefResolved as JsonSchemaInternal;
-        const anchorName = getDynamicRefAnchorName(currentSchema.$dynamicRef);
-        if (anchorName && typeof dynamicTarget === 'object' && dynamicTarget.$dynamicAnchor === anchorName) {
-          for (let scopeIdx = 0; scopeIdx < report.__$dynamicScopeStack.length; scopeIdx++) {
-            const scopeSchema = report.__$dynamicScopeStack[scopeIdx];
-            const scopedTarget = findDynamicAnchorInScope(scopeSchema, anchorName);
-            if (scopedTarget) {
-              dynamicTarget = scopedTarget;
-              break;
-            }
-          }
-        }
-        if (dynamicTarget !== currentSchema) {
-          if (merge(collectEvaluatedProperties(dynamicTarget, jsonData, depth + 1))) {
-            return 'all';
-          }
-        }
-      }
-
-      return evaluated;
-    };
-
-    const evaluatedProperties = collectEvaluatedProperties(schema, json as Record<string, unknown>);
+    const evaluatedProperties = collectEvaluated.call(this, {
+      report,
+      currentSchema: schema,
+      json,
+      mode: 'properties',
+      jsonData: json as Record<string, unknown>,
+      depth: 0,
+    });
 
     if (evaluatedProperties === 'all') {
       return;
@@ -1238,7 +1224,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
 
     if (unevalSchema === false) {
       report.addError(
-        'OBJECT_ADDITIONAL_PROPERTIES',
+        'OBJECT_UNEVALUATED_PROPERTIES',
         [unevaluatedKeys.join(', ')],
         undefined,
         schema,
@@ -1250,7 +1236,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
         const subReport = new Report(report);
         validate.call(this, subReport, unevalSchema as JsonSchemaInternal, (json as Record<string, unknown>)[key]);
         if (subReport.errors.length > 0) {
-          report.addError('OBJECT_ADDITIONAL_PROPERTIES', [key], undefined, schema, 'unevaluatedProperties');
+          report.addError('OBJECT_UNEVALUATED_PROPERTIES', [key], undefined, schema, 'unevaluatedProperties');
         }
       }
     }
@@ -1432,6 +1418,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
       const subReport = new Report(report);
       subReports.push(subReport);
       validate.call(this, subReport, containsSchema as any, json[idx]);
+      cacheValidationResult(report, containsSchema, json[idx], subReport.errors.length === 0);
     }
 
     const asyncTasksBefore = report.asyncTasks.length;
@@ -1772,17 +1759,7 @@ export function validate(
       this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
 
     if (applySiblingKeywordsWithRecursiveRef) {
-      let recursiveRefTarget = (schema as any).__$recursiveRefResolved as JsonSchemaInternal | undefined;
-      if (
-        recursiveRefTarget &&
-        typeof recursiveRefTarget === 'object' &&
-        (recursiveRefTarget as JsonSchemaInternal).$recursiveAnchor === true
-      ) {
-        const dynamicRecursiveTarget = recursiveAnchorStack[0];
-        if (dynamicRecursiveTarget) {
-          recursiveRefTarget = dynamicRecursiveTarget;
-        }
-      }
+      const recursiveRefTarget = resolveRecursiveRef(schema, recursiveAnchorStack);
 
       if (!recursiveRefTarget) {
         report.addError('REF_UNRESOLVED', [schema.$recursiveRef], undefined, schema);
@@ -1798,24 +1775,7 @@ export function validate(
     const applySiblingKeywordsWithDynamicRef = this.options.version === 'draft2020-12';
 
     if (applySiblingKeywordsWithDynamicRef) {
-      let dynamicRefTarget = schema.__$dynamicRefResolved as JsonSchemaInternal | boolean | undefined;
-
-      const anchorName = getDynamicRefAnchorName(schema.$dynamicRef);
-      if (
-        anchorName &&
-        dynamicRefTarget &&
-        typeof dynamicRefTarget === 'object' &&
-        dynamicRefTarget.$dynamicAnchor === anchorName
-      ) {
-        for (let scopeIdx = 0; scopeIdx < dynamicScopeStack.length; scopeIdx++) {
-          const scopeSchema = dynamicScopeStack[scopeIdx];
-          const scopedTarget = findDynamicAnchorInScope(scopeSchema, anchorName);
-          if (scopedTarget) {
-            dynamicRefTarget = scopedTarget;
-            break;
-          }
-        }
-      }
+      const dynamicRefTarget = resolveDynamicRef(schema, dynamicScopeStack);
 
       if (typeof dynamicRefTarget === 'undefined') {
         report.addError('REF_UNRESOLVED', [schema.$dynamicRef], undefined, schema);
@@ -1849,13 +1809,33 @@ export function validate(
   }
 
   // now iterate all the keys in schema and execute validation methods
+  // Defer unevaluatedItems/unevaluatedProperties to run after other validators,
+  // so combinator validation results are cached and available for annotation collection
+  const deferredUnevaluatedKeys: Array<keyof JsonSchema> = [];
   let idx = keys.length;
   while (idx--) {
+    if (keys[idx] === 'unevaluatedItems' || keys[idx] === 'unevaluatedProperties') {
+      deferredUnevaluatedKeys.push(keys[idx]);
+      continue;
+    }
     const validator = JsonValidators[keys[idx]];
     if (validator) {
       validator.call(this, report, schema, json);
       if (report.errors.length && this.options.breakOnFirstError) {
         break;
+      }
+    }
+  }
+
+  // Run unevaluated* validators after all others have cached their combinator results
+  if (deferredUnevaluatedKeys.length > 0 && !(report.errors.length > 0 && this.options.breakOnFirstError)) {
+    for (const key of deferredUnevaluatedKeys) {
+      const validator = JsonValidators[key];
+      if (validator) {
+        validator.call(this, report, schema, json);
+        if (report.errors.length && this.options.breakOnFirstError) {
+          break;
+        }
       }
     }
   }

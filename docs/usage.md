@@ -193,6 +193,8 @@ Common error codes (defined in `src/errors.ts`):
 | `CONST`                            | Value does not match `const` (draft-06+)          |
 | `CONTAINS`                         | Array has no item matching `contains` (draft-06+) |
 | `PROPERTY_NAMES`                   | Property name fails `propertyNames` (draft-06+)   |
+| `ARRAY_UNEVALUATED_ITEMS`          | Unevaluated items not allowed (draft-2019-09+)    |
+| `OBJECT_UNEVALUATED_PROPERTIES`    | Unevaluated property not allowed (draft-2019-09+) |
 
 ### Filtering Errors
 

@@ -33,7 +33,7 @@ jobs:
               echo "✅ Found $skill_name/SKILL.md"
             else
               echo "📂 Contents of $skill_name:"
-              ls -la "$skill_name"
+              ls -la "$skill"
               echo "❌ $skill_name/SKILL.md not found"
               exit 1
             fi

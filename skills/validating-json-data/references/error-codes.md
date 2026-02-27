@@ -44,12 +44,13 @@ These errors produce nested sub-errors in `detail.inner`.
 
 ## Array errors
 
-| Code                     | Message template                                 | Trigger                                   |
-| ------------------------ | ------------------------------------------------ | ----------------------------------------- |
-| `ARRAY_LENGTH_SHORT`     | Array is too short ({0}), minimum {1}            | Array length below `minItems`             |
-| `ARRAY_LENGTH_LONG`      | Array is too long ({0}), maximum {1}             | Array length above `maxItems`             |
-| `ARRAY_UNIQUE`           | Array items are not unique (indexes {0} and {1}) | `uniqueItems: true` violated              |
-| `ARRAY_ADDITIONAL_ITEMS` | Additional items not allowed                     | Extra items when `additionalItems: false` |
+| Code                      | Message template                                 | Trigger                                                               |
+| ------------------------- | ------------------------------------------------ | --------------------------------------------------------------------- |
+| `ARRAY_LENGTH_SHORT`      | Array is too short ({0}), minimum {1}            | Array length below `minItems`                                         |
+| `ARRAY_LENGTH_LONG`       | Array is too long ({0}), maximum {1}             | Array length above `maxItems`                                         |
+| `ARRAY_UNIQUE`            | Array items are not unique (indexes {0} and {1}) | `uniqueItems: true` violated                                          |
+| `ARRAY_ADDITIONAL_ITEMS`  | Additional items not allowed                     | Extra items when `additionalItems: false`                             |
+| `ARRAY_UNEVALUATED_ITEMS` | Unevaluated items are not allowed                | Extra items when `unevaluatedItems: false` or schema (draft-2019-09+) |
 
 ## Numeric errors
 
@@ -63,13 +64,14 @@ These errors produce nested sub-errors in `detail.inner`.
 
 ## Object errors
 
-| Code                               | Message template                                          | Trigger                                           |
-| ---------------------------------- | --------------------------------------------------------- | ------------------------------------------------- |
-| `OBJECT_PROPERTIES_MINIMUM`        | Too few properties defined ({0}), minimum {1}             | Below `minProperties`                             |
-| `OBJECT_PROPERTIES_MAXIMUM`        | Too many properties defined ({0}), maximum {1}            | Above `maxProperties`                             |
-| `OBJECT_MISSING_REQUIRED_PROPERTY` | Missing required property: {0}                            | Missing `required` property                       |
-| `OBJECT_ADDITIONAL_PROPERTIES`     | Additional properties not allowed: {0}                    | Extra property with `additionalProperties: false` |
-| `OBJECT_DEPENDENCY_KEY`            | Dependency failed - key must exist: {0} (due to key: {1}) | `dependencies` key requirement not met            |
+| Code                               | Message template                                          | Trigger                                                                       |
+| ---------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `OBJECT_PROPERTIES_MINIMUM`        | Too few properties defined ({0}), minimum {1}             | Below `minProperties`                                                         |
+| `OBJECT_PROPERTIES_MAXIMUM`        | Too many properties defined ({0}), maximum {1}            | Above `maxProperties`                                                         |
+| `OBJECT_MISSING_REQUIRED_PROPERTY` | Missing required property: {0}                            | Missing `required` property                                                   |
+| `OBJECT_ADDITIONAL_PROPERTIES`     | Additional properties not allowed: {0}                    | Extra property with `additionalProperties: false`                             |
+| `OBJECT_UNEVALUATED_PROPERTIES`    | Unevaluated properties are not allowed: {0}               | Extra property with `unevaluatedProperties: false` or schema (draft-2019-09+) |
+| `OBJECT_DEPENDENCY_KEY`            | Dependency failed - key must exist: {0} (due to key: {1}) | `dependencies` key requirement not met                                        |
 
 ## String errors
 
@@ -116,3 +118,11 @@ These are reported during `validateSchema()`, not during data validation.
 | `CONST`           | Value does not match const: {0}                           | `const` mismatch (draft-06+)                  |
 | `CONTAINS`        | Array does not contain an item matching the schema        | `contains` not satisfied (draft-06+)          |
 | `PROPERTY_NAMES`  | Property name {0} does not match the propertyNames schema | `propertyNames` validation failed (draft-06+) |
+
+## Draft-2019-09+ errors
+
+| Code                               | Message template                                                                           | Trigger                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| `ARRAY_UNEVALUATED_ITEMS`          | Unevaluated items are not allowed                                                          | `unevaluatedItems` violated (draft-2019-09+)             |
+| `OBJECT_UNEVALUATED_PROPERTIES`    | Unevaluated properties are not allowed: {0}                                                | `unevaluatedProperties` violated (draft-2019-09+)        |
+| `COLLECT_EVALUATED_DEPTH_EXCEEDED` | Schema nesting depth exceeded maximum ({0}) during unevaluated items/properties collection | Recursion depth exceeded during `unevaluated*` traversal |

@@ -13,8 +13,17 @@ export const VERSION_SCHEMA_URL_MAPPING: Record<JsonSchemaVersion, string> = {
   'draft2020-12': 'https://json-schema.org/draft/2020-12/schema',
 };
 
-export type JsonSchema = JsonSchemaDraft4 | JsonSchemaDraft6 | JsonSchemaDraft7 | JsonSchemaDraft201909;
-export type JsonSchemaAll = JsonSchemaDraft4 & JsonSchemaDraft6 & JsonSchemaDraft7 & JsonSchemaDraft201909;
+export type JsonSchema =
+  | JsonSchemaDraft4
+  | JsonSchemaDraft6
+  | JsonSchemaDraft7
+  | JsonSchemaDraft201909
+  | JsonSchemaDraft202012;
+export type JsonSchemaAll = JsonSchemaDraft4 &
+  JsonSchemaDraft6 &
+  JsonSchemaDraft7 &
+  JsonSchemaDraft201909 &
+  JsonSchemaDraft202012;
 
 export type JsonSchemaInternal = JsonSchema & ZSchemaInternalProperties;
 export type JsonSchemaInternalAll = JsonSchemaAll & ZSchemaInternalProperties;
