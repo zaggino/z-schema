@@ -1,5 +1,6 @@
 export default {
   description: 'registerFormat - Custom formats support',
+  version: 'draft-04',
   setup: function (validator, Class) {
     Class.registerFormat('xstring', function (str) {
       return str === 'xxx';
