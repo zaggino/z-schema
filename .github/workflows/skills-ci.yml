@@ -19,7 +19,7 @@ jobs:
 
       - name: Install all skills (local)
         run: |
-          npx skills add . --yes
+          npx skills add . --yes --copy
           echo "✅ Successfully installed all skills locally"
 
       - name: Verify skills installed
@@ -48,7 +48,7 @@ jobs:
     steps:
       - name: Install all skills (remote)
         run: |
-          npx skills add zaggino/z-schema --yes
+          npx skills add zaggino/z-schema --yes --copy
           echo "✅ Successfully installed all skills from GitHub"
 
       - name: Verify skills installed

@@ -5,8 +5,11 @@
 *.tmp
 /.agents/
 /.claude/
+/.github/agents/
+/.github/prompts/
 /.grunt/
 /.idea/
+/.specify/
 /.vs/
 /.vscode
 /benchmark/node_modules/
@@ -16,6 +19,7 @@
 /dist
 /node_modules/
 /npm-debug.log
+/specs/
 /src/schemas/*
 /test/dist
 /test/node_modules/
