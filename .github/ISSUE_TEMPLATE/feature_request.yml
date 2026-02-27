@@ -15,7 +15,7 @@ body:
       description: What problem does this feature solve? Is it related to something that frustrates you today?
       placeholder: I'm always frustrated when...
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: solution
@@ -23,7 +23,7 @@ body:
       label: Proposed solution
       description: Describe the feature or behavior you'd like to see.
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: api
