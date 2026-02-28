@@ -1,4 +1,5 @@
 import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal, JsonSchemaVersion } from '../json-schema-versions.js';
+// JsonSchemaAll is retained for the VALIDATION_VOCAB_KEYWORDS Set key type.
 import type { Report } from '../report.js';
 import type { ValidateOptions, ZSchemaBase } from '../z-schema-base.js';
 

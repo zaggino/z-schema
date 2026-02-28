@@ -1,4 +1,4 @@
-import type { JsonSchemaAll, JsonSchemaInternal } from '../json-schema-versions.js';
+import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 
@@ -111,7 +111,7 @@ export function containsValidator(this: ZSchemaBase, report: Report, schema: Jso
     return;
   }
 
-  const containsSchema = (schema as JsonSchemaAll).contains;
+  const containsSchema = schema.contains;
   if (containsSchema === undefined) {
     return;
   }
@@ -135,13 +135,9 @@ export function containsValidator(this: ZSchemaBase, report: Report, schema: Jso
 
     const supportsContainsBounds = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
     const minContains: number =
-      supportsContainsBounds && typeof (schema as JsonSchemaAll).minContains === 'number'
-        ? ((schema as JsonSchemaAll).minContains ?? 1)
-        : 1;
+      supportsContainsBounds && typeof schema.minContains === 'number' ? (schema.minContains ?? 1) : 1;
     const maxContains =
-      supportsContainsBounds && typeof (schema as JsonSchemaAll).maxContains === 'number'
-        ? (schema as JsonSchemaAll).maxContains
-        : undefined;
+      supportsContainsBounds && typeof schema.maxContains === 'number' ? schema.maxContains : undefined;
 
     const hasEnoughMatches = matchingItems >= minContains;
     const notTooManyMatches = maxContains === undefined || matchingItems <= maxContains;

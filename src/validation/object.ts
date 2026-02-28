@@ -1,4 +1,4 @@
-import type { JsonSchemaAll, JsonSchemaInternal } from '../json-schema-versions.js';
+import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 
@@ -292,7 +292,7 @@ export function propertyNamesValidator(this: ZSchemaBase, report: Report, schema
     return;
   }
 
-  const propertyNamesSchema = (schema as JsonSchemaAll).propertyNames;
+  const propertyNamesSchema = schema.propertyNames;
   if (propertyNamesSchema === undefined) {
     return;
   }

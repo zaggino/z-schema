@@ -14,7 +14,16 @@ export {
   unregisterFormat,
 } from './format-validators.js';
 export type { JsonSchemaType } from './json-schema.js';
-export type { JsonSchema } from './json-schema-versions.js';
+export type { JsonSchemaCommon } from './json-schema.js';
+export type {
+  JsonSchema,
+  JsonSchemaDraft4,
+  JsonSchemaDraft6,
+  JsonSchemaDraft7,
+  JsonSchemaDraft201909,
+  JsonSchemaDraft202012,
+  JsonSchemaVersion,
+} from './json-schema-versions.js';
 export type { Report, SchemaErrorDetail } from './report.js';
 export type { ZSchema, ZSchemaAsync, ZSchemaAsyncSafe, ZSchemaSafe } from './z-schema.js';
 export { ValidateOptions, ValidateResponse } from './z-schema-base.js';

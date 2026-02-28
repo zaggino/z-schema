@@ -345,8 +345,9 @@ export class SchemaCompiler {
           // it's supposed to return a valid schema
           const s = schemaReader(remotePath);
           if (s) {
-            // it needs to have the id
-            s.id = remotePath;
+            // it needs to have the id (cast: schemaReader returns JsonSchema, but
+            // at this pre-compilation stage we treat it as an internal object)
+            (s as JsonSchemaInternal).id = remotePath;
             // try to compile the schema
             const subreport = new Report(report);
             if (!this.compileSchema(subreport, s)) {

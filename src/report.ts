@@ -1,5 +1,5 @@
 import type { ErrorCode, ErrorParam } from './errors.js';
-import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
+import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ValidateCallback, ValidateOptions } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
@@ -54,7 +54,7 @@ export interface SchemaErrorDetail {
    * The schema keyword that caused this validation error.
    * Example: "required", "type", "minLength"
    */
-  keyword?: keyof JsonSchema;
+  keyword?: keyof JsonSchemaAll;
 }
 
 export interface ReportOptions {
@@ -268,7 +268,7 @@ export class Report {
     errParams?: ErrorParam[],
     subReports?: Report | Report[],
     schema?: JsonSchema | boolean,
-    keyword?: keyof JsonSchema
+    keyword?: keyof JsonSchemaAll
   ) {
     if (!errCode) {
       throw new Error('No errorCode passed into addError()');
@@ -293,7 +293,7 @@ export class Report {
     params?: ErrorParam[],
     subReports?: Report | Report[],
     schema?: JsonSchema | boolean,
-    keyword?: keyof JsonSchema
+    keyword?: keyof JsonSchemaAll
   ) {
     if (typeof this.reportOptions.maxErrors === 'number' && this.errors.length >= this.reportOptions.maxErrors) {
       return;

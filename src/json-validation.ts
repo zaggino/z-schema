@@ -1,4 +1,4 @@
-import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
+import type { JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
 import { getId } from './json-schema.js';
@@ -721,7 +721,7 @@ export function validate(
   }
 
   // check if schema is empty, everything is valid against empty schema
-  let keys = Object.keys(schema) as Array<keyof JsonSchema>;
+  let keys = Object.keys(schema) as Array<keyof JsonSchemaAll>;
   if (keys.length === 0) {
     return true;
   }
@@ -772,7 +772,7 @@ export function validate(
           break;
         } else {
           schema = schema.__$refResolved;
-          keys = Object.keys(schema) as Array<keyof JsonSchema>;
+          keys = Object.keys(schema) as Array<keyof JsonSchemaAll>;
         }
         maxRefs--;
       }
@@ -842,7 +842,7 @@ export function validate(
   // now iterate all the keys in schema and execute validation methods
   // Defer unevaluatedItems/unevaluatedProperties to run after other validators,
   // so combinator validation results are cached and available for annotation collection
-  const deferredUnevaluatedKeys: Array<keyof JsonSchema> = [];
+  const deferredUnevaluatedKeys: Array<keyof JsonSchemaAll> = [];
   for (const key of keys) {
     if (key === 'unevaluatedItems' || key === 'unevaluatedProperties') {
       deferredUnevaluatedKeys.push(key);

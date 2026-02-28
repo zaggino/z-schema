@@ -1,4 +1,4 @@
-import type { JsonSchemaAll, JsonSchemaInternal } from '../json-schema-versions.js';
+import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 
@@ -164,7 +164,7 @@ export function contentEncodingValidator(this: ZSchemaBase, report: Report, sche
     return;
   }
 
-  const contentEncoding = (schema as JsonSchemaAll).contentEncoding;
+  const contentEncoding = schema.contentEncoding;
   if (contentEncoding !== 'base64') {
     return;
   }
@@ -197,13 +197,13 @@ export function contentMediaTypeValidator(
     return;
   }
 
-  const contentMediaType = (schema as JsonSchemaAll).contentMediaType;
+  const contentMediaType = schema.contentMediaType;
   if (contentMediaType !== 'application/json') {
     return;
   }
 
   let payload = json;
-  if ((schema as JsonSchemaAll).contentEncoding === 'base64') {
+  if (schema.contentEncoding === 'base64') {
     const decoded = decodeBase64(json);
     if (decoded === undefined) {
       report.addError(

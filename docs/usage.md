@@ -363,6 +363,13 @@ All types are exported from the package:
 ```typescript
 import type {
   JsonSchema, // Schema type (all supported drafts union)
+  JsonSchemaCommon, // Properties common to all drafts
+  JsonSchemaDraft4, // Draft-04 specific (id, boolean exclusiveMin/Max)
+  JsonSchemaDraft6, // Draft-06 specific ($id, const, contains, propertyNames, examples)
+  JsonSchemaDraft7, // Draft-07 (extends Draft-06 + if/then/else, content*)
+  JsonSchemaDraft201909, // Draft 2019-09 (extends Draft-07 + $defs, $anchor, dependent*, unevaluated*, ...)
+  JsonSchemaDraft202012, // Draft 2020-12 (extends 2019-09 + $dynamicAnchor/Ref, prefixItems)
+  JsonSchemaVersion, // 'draft-04' | 'draft-06' | 'draft-07' | 'draft2019-09' | 'draft2020-12'
   JsonSchemaType, // 'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null'
   ZSchemaOptions, // Configuration options
   ValidateOptions, // Per-call options (schemaPath, includeErrors, excludeErrors)

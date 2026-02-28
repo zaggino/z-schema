@@ -1,4 +1,4 @@
-import type { JsonSchema } from '../../src/json-schema-versions.ts';
+import type { JsonSchema, JsonSchemaDraft4 } from '../../src/json-schema-versions.ts';
 
 import { ZSchema } from '../../src/z-schema.js';
 
@@ -20,7 +20,7 @@ describe('Issue #165: $ref resolution in nested external schemas', () => {
       },
     };
 
-    const mainSchema: JsonSchema = {
+    const mainSchema: JsonSchemaDraft4 = {
       type: 'array',
       items: {
         $ref: 'defs/items.json',
@@ -57,7 +57,7 @@ describe('Issue #165: $ref resolution in nested external schemas', () => {
       },
     };
 
-    const mainSchema: JsonSchema = {
+    const mainSchema: JsonSchemaDraft4 = {
       type: 'array',
       items: {
         $ref: 'defs/items.json',

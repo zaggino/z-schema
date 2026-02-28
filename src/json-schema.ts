@@ -1,9 +1,4 @@
-import type {
-  JsonSchema,
-  JsonSchemaInternal,
-  JsonSchemaInternalD4,
-  JsonSchemaInternalD6,
-} from './json-schema-versions.js';
+import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { Reference } from './schema-compiler.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
@@ -20,66 +15,62 @@ export const isInternalKey = (key: string): boolean => key.startsWith('__$');
 import { isObject } from './utils/what-is.js';
 import { DEFAULT_MAX_RECURSION_DEPTH } from './z-schema-options.js';
 
-// common properties of all JSON Schema versions
+/**
+ * Properties present in ALL JSON Schema drafts (04 through 2020-12) with
+ * identical types.  Draft-specific additions live on the individual draft
+ * interfaces in `json-schema-versions.ts`.
+ */
 export interface JsonSchemaCommon {
+  // ── Core ────────────────────────────────────────────────────────────────
   $ref?: string;
   $schema?: string;
-  id?: string;
-  $id?: string;
-  $anchor?: string;
-  $dynamicAnchor?: string;
-  $dynamicRef?: string;
-  $defs?: Record<string, JsonSchema>;
-  $vocabulary?: Record<string, boolean>;
-  $recursiveAnchor?: boolean;
-  $recursiveRef?: string;
   title?: string;
   description?: string;
   default?: unknown;
-  definitions?: Record<string, JsonSchema>;
+
+  // ── Type / enum ─────────────────────────────────────────────────────────
   type?: string | string[];
-  properties?: Record<string, JsonSchema | boolean>;
-  patternProperties?: Record<string, JsonSchema>;
+  enum?: Array<unknown>;
+  format?: string;
+
+  // ── Numeric ─────────────────────────────────────────────────────────────
   multipleOf?: number;
   minimum?: number;
-  exclusiveMinimum?: boolean | number;
   maximum?: number;
+  /** Draft-04: `boolean` modifier on `minimum`/`maximum`. Draft-06+: standalone `number`. */
+  exclusiveMinimum?: boolean | number;
+  /** Draft-04: `boolean` modifier on `minimum`/`maximum`. Draft-06+: standalone `number`. */
   exclusiveMaximum?: boolean | number;
+
+  // ── String ──────────────────────────────────────────────────────────────
   minLength?: number;
   maxLength?: number;
   pattern?: string;
-  additionalItems?: boolean | JsonSchema;
+
+  // ── Array ───────────────────────────────────────────────────────────────
   items?: JsonSchema | boolean | Array<JsonSchema | boolean>;
-  prefixItems?: Array<JsonSchema | boolean>;
+  additionalItems?: boolean | JsonSchema;
   minItems?: number;
   maxItems?: number;
   uniqueItems?: boolean;
+
+  // ── Object ──────────────────────────────────────────────────────────────
+  properties?: Record<string, JsonSchema | boolean>;
+  patternProperties?: Record<string, JsonSchema>;
+  additionalProperties?: boolean | JsonSchema;
+  required?: string[];
   minProperties?: number;
   maxProperties?: number;
-  required?: string[];
-  additionalProperties?: boolean | JsonSchema;
   dependencies?: Record<string, string[] | JsonSchema>;
-  enum?: Array<unknown>;
-  format?: string;
+
+  // ── Combinators ─────────────────────────────────────────────────────────
   allOf?: JsonSchema[];
   anyOf?: JsonSchema[];
   oneOf?: JsonSchema[];
   not?: JsonSchema;
-  contentEncoding?: string;
-  contentMediaType?: string;
-  if?: JsonSchema | boolean;
-  then?: JsonSchema | boolean;
-  else?: JsonSchema | boolean;
-  examples?: unknown[];
-  const?: unknown;
-  contains?: JsonSchema;
-  propertyNames?: JsonSchema;
-  unevaluatedItems?: JsonSchema | boolean;
-  unevaluatedProperties?: JsonSchema | boolean;
-  dependentSchemas?: Record<string, JsonSchema>;
-  dependentRequired?: Record<string, string[]>;
-  maxContains?: number;
-  minContains?: number;
+
+  // ── Definitions ─────────────────────────────────────────────────────────
+  definitions?: Record<string, JsonSchema>;
 }
 
 export type JsonSchemaType = 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string';
@@ -98,11 +89,11 @@ export interface ZSchemaInternalProperties {
 }
 
 export const getId = (schema: JsonSchemaInternal) => {
-  if ((schema as JsonSchemaInternalD6).$id) {
-    return (schema as JsonSchemaInternalD6).$id;
+  if (schema.$id) {
+    return schema.$id;
   }
-  if ((schema as JsonSchemaInternalD4).id) {
-    return (schema as JsonSchemaInternalD4).id;
+  if (schema.id) {
+    return schema.id;
   }
   return undefined;
 };

@@ -24,7 +24,7 @@ index.ts (public API)
             ├─ errors.ts (error codes, ValidateError)
             ├─ format-validators.ts (built-in + custom format validation)
             ├─ json-schema.ts (shared/common schema definitions + helpers)
-            ├─ json-schema-versions.ts (draft-specific schema type unions + version mappings)
+            ├─ json-schema-versions.ts (draft-specific interfaces with layered inheritance + JsonSchemaAll superset)
             ├─ z-schema-options.ts (options type + defaults)
             └─ utils/
                  ├─ array.ts (array helpers)
@@ -127,8 +127,15 @@ The `src/package.json` contains `{ "type": "module" }` and gets copied to `dist/
 
 ## Key Internal Types
 
-- `JsonSchema` — union of `JsonSchemaDraft4 | JsonSchemaDraft6 | JsonSchemaDraft7 | JsonSchemaDraft201909 | JsonSchemaDraft202012`
-- `JsonSchemaInternal` — internal schema type with compiler metadata (`__$compiled`, `__$validationOptions`, etc.)
+- `JsonSchemaCommon` — interface with properties present in **all** JSON Schema drafts (04–2020-12)
+- `JsonSchemaDraft4` — extends `JsonSchemaCommon`, adds `id`
+- `JsonSchemaDraft6` — extends `JsonSchemaCommon`, adds `$id`, `const`, `contains`, `propertyNames`, `examples`
+- `JsonSchemaDraft7` — extends `JsonSchemaDraft6`, adds `if`/`then`/`else`, `contentEncoding`/`contentMediaType`
+- `JsonSchemaDraft201909` — extends `JsonSchemaDraft7`, adds `$defs`, `$anchor`, `$vocabulary`, `$recursiveAnchor`/`$recursiveRef`, `dependentSchemas`/`dependentRequired`, `unevaluatedItems`/`unevaluatedProperties`, `maxContains`/`minContains`
+- `JsonSchemaDraft202012` — extends `JsonSchemaDraft201909`, adds `$dynamicAnchor`/`$dynamicRef`, `prefixItems`
+- `JsonSchema` — union of all draft interfaces (public API type)
+- `JsonSchemaAll` — manually defined superset interface with all draft-specific properties and `boolean | number` for `exclusiveMinimum`/`exclusiveMaximum`
+- `JsonSchemaInternal` — `JsonSchemaAll & ZSchemaInternalProperties` — internal schema type with compiler metadata (`__$compiled`, `__$validationOptions`, etc.)
 - `ValidateError` — error class thrown/returned on validation failure, contains `.details` array of `SchemaErrorDetail`
 - `SchemaErrorDetail` — individual error with `message`, `code`, `params`, `path`, `schemaPath`, `inner` (sub-errors for combiners)
 - `ValidateResponse` — `{ valid: boolean; err?: ValidateError }` (returned by safe variants)
@@ -138,7 +145,7 @@ The `src/package.json` contains `{ "type": "module" }` and gets copied to `dist/
 
 ## Public Exports (from `src/index.ts`)
 
-Types: `ErrorCode`, `ErrorParam`, `Errors`, `FormatValidatorFn`, `FormatValidatorsOptions`, `JsonSchema`, `JsonSchemaType`, `Report`, `SchemaErrorDetail`, `ZSchema`, `ZSchemaAsync`, `ZSchemaAsyncSafe`, `ZSchemaSafe`, `ValidateOptions`, `ValidateResponse`, `ZSchemaOptions`, `SchemaReader`
+Types: `ErrorCode`, `ErrorParam`, `Errors`, `FormatValidatorFn`, `FormatValidatorsOptions`, `JsonSchema`, `JsonSchemaCommon`, `JsonSchemaDraft4`, `JsonSchemaDraft6`, `JsonSchemaDraft7`, `JsonSchemaDraft201909`, `JsonSchemaDraft202012`, `JsonSchemaType`, `JsonSchemaVersion`, `Report`, `SchemaErrorDetail`, `ZSchema`, `ZSchemaAsync`, `ZSchemaAsyncSafe`, `ZSchemaSafe`, `ValidateOptions`, `ValidateResponse`, `ZSchemaOptions`, `SchemaReader`
 
 Values: `ValidateError`, `getFormatValidators`, `getRegisteredFormats`, `getSupportedFormats`, `isFormatSupported`, `registerFormat`, `unregisterFormat`
 
