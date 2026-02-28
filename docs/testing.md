@@ -61,7 +61,7 @@ The official [JSON Schema Test Suite](https://github.com/json-schema-org/JSON-Sc
 
 ## Legacy Z-Schema Test Suite
 
-`test/ZSchemaTestSuite/` contains legacy test files (mostly `.js`) that test z-schema-specific features, options, and edge cases. These are loaded and run by `test/spec/z-schema-test-suite.spec.ts`.
+`test/ZSchemaTestSuite/` contains TypeScript test fixture files (`.ts`) that test z-schema-specific features, options, and edge cases. These are loaded and run by `test/spec/z-schema-test-suite.spec.ts`.
 
 ## Test Setup
 

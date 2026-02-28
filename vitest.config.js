@@ -10,6 +10,12 @@ export default defineConfig({
       provider: 'istanbul',
       include: ['src/'],
       exclude: ['src/package.json', 'src/schemas/*.json'],
+      thresholds: {
+        lines: 90,
+        functions: 90,
+        branches: 90,
+        statements: 90,
+      },
     },
     globals: true,
     globalSetup: 'test/vitest.setup.ts',
