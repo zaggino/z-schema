@@ -175,7 +175,7 @@ const SchemaValidators = {
     if (this.options.forceAdditional === true && schema.additionalItems === undefined && Array.isArray(schema.items)) {
       report.addError('KEYWORD_UNDEFINED_STRICT', ['additionalItems'], undefined, schema, 'additionalItems');
     }
-    // custome - assume defined false mode
+    // custom - assume defined false mode
     if (this.options.assumeAdditional && schema.additionalItems === undefined && Array.isArray(schema.items)) {
       schema.additionalItems = false;
     }
@@ -290,7 +290,7 @@ const SchemaValidators = {
     if (this.options.forceAdditional === true && schema.additionalProperties === undefined) {
       report.addError('KEYWORD_UNDEFINED_STRICT', ['additionalProperties'], undefined, schema, 'additionalProperties');
     }
-    // custome - assume defined false mode
+    // custom - assume defined false mode
     if (this.options.assumeAdditional && schema.additionalProperties === undefined) {
       schema.additionalProperties = false;
     }
