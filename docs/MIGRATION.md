@@ -42,6 +42,54 @@ If you adopt the new default, some keywords have changed meaning:
 
 See [docs/migrating-schemas](../skills/migrating-json-schemas/) for detailed schema migration guidance.
 
+#### 3. Format is annotation-only by default for draft-2019-09 / draft-2020-12
+
+In these drafts, the JSON Schema specification treats `format` as annotation-only — unknown formats no longer produce `UNKNOWN_FORMAT` errors, and format validators are not enforced unless explicitly opted into. This changes validation behavior if you relied on format assertions.
+
+To restore the legacy always-assert behavior:
+
+```typescript
+const validator = ZSchema.create({ formatAssertions: null });
+```
+
+To opt into vocabulary-aware behavior (recommended):
+
+```typescript
+const validator = ZSchema.create({ formatAssertions: true });
+```
+
+See [options.md#formatassertions](options.md#formatassertions) for details.
+
+#### 4. New `maxRecursionDepth` safeguard (default: 100)
+
+A new `maxRecursionDepth` option (default: `100`) limits the depth of internal traversal functions (`deepClone`, `areEqual`, `findId`, `collectIds`, `collectReferences`, `collectEvaluated`). This prevents stack overflows on pathologically deep or circular schemas/data.
+
+If your schemas or data are legitimately deeply nested, you may see a new `MAX_RECURSION_DEPTH_EXCEEDED` error. Increase the limit:
+
+```typescript
+const validator = ZSchema.create({ maxRecursionDepth: 500 });
+```
+
+#### 5. New error codes
+
+The following error codes are new in v12 and may appear in validation results:
+
+| Code                               | When                                                                   |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| `ARRAY_UNEVALUATED_ITEMS`          | `unevaluatedItems: false` rejects unmatched array items (2019-09+)     |
+| `OBJECT_UNEVALUATED_PROPERTIES`    | `unevaluatedProperties: false` rejects unmatched properties (2019-09+) |
+| `COLLECT_EVALUATED_DEPTH_EXCEEDED` | Schema nesting too deep during unevaluated item/property collection    |
+| `MAX_RECURSION_DEPTH_EXCEEDED`     | Internal traversal exceeded `maxRecursionDepth`                        |
+
+#### 6. New TypeScript types
+
+Two new draft-specific schema interfaces are exported:
+
+- `JsonSchemaDraft201909` — extends `JsonSchemaDraft7`, adds `$defs`, `$anchor`, `$vocabulary`, `$recursiveAnchor`/`$recursiveRef`, `dependentSchemas`/`dependentRequired`, `unevaluatedItems`/`unevaluatedProperties`, `maxContains`/`minContains`
+- `JsonSchemaDraft202012` — extends `JsonSchemaDraft201909`, adds `$dynamicAnchor`/`$dynamicRef`, `prefixItems`
+
+The `JsonSchemaVersion` union type now includes `'draft2019-09'` and `'draft2020-12'`.
+
 ---
 
 ## Upgrading to v11

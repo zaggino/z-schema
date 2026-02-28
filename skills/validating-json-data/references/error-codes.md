@@ -14,6 +14,8 @@ Complete list of error codes reported by z-schema. Each error appears in `Schema
 - [Schema validation errors](#schema-validation-errors)
 - [Reference and remote errors](#reference-and-remote-errors)
 - [Draft-06+ errors](#draft-06-errors)
+- [Draft-2019-09+ errors](#draft-2019-09-errors)
+- [Runtime safeguard errors](#runtime-safeguard-errors)
 
 ---
 
@@ -126,3 +128,9 @@ These are reported during `validateSchema()`, not during data validation.
 | `ARRAY_UNEVALUATED_ITEMS`          | Unevaluated items are not allowed                                                          | `unevaluatedItems` violated (draft-2019-09+)             |
 | `OBJECT_UNEVALUATED_PROPERTIES`    | Unevaluated properties are not allowed: {0}                                                | `unevaluatedProperties` violated (draft-2019-09+)        |
 | `COLLECT_EVALUATED_DEPTH_EXCEEDED` | Schema nesting depth exceeded maximum ({0}) during unevaluated items/properties collection | Recursion depth exceeded during `unevaluated*` traversal |
+
+## Runtime safeguard errors
+
+| Code                           | Message template                                                                                                                  | Trigger                                                                                     |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `MAX_RECURSION_DEPTH_EXCEEDED` | Maximum recursion depth ({0}) exceeded. If your schema or data is deeply nested and valid, increase the maxRecursionDepth option. | General recursion depth exceeded (configurable via `maxRecursionDepth` option, default 100) |

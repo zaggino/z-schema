@@ -44,7 +44,16 @@ src/
   z-schema-base.ts      → Core validation orchestration
   schema-compiler.ts    → $ref resolution, id collection, schema compilation
   schema-validator.ts   → Schema-level validation against meta-schemas
-  json-validation.ts    → Instance validation (type, constraints, combiners)
+  json-validation.ts    → Validation orchestration (validate, recurse*, collectEvaluated)
+  validation/            → Keyword validators split by category
+    shared.ts            → Shared types (JsonValidatorFn), vocab helpers, caching utilities
+    type.ts              → type, enum, const validators
+    numeric.ts           → multipleOf, minimum, maximum, exclusiveMin/Max validators
+    string.ts            → minLength, maxLength, pattern, format, content* validators
+    array.ts             → items, prefixItems, contains, min/maxItems, uniqueItems validators
+    object.ts            → properties, patternProperties, additionalProperties, required, etc.
+    combinators.ts       → allOf, anyOf, oneOf, not, if/then/else validators
+    ref.ts               → $dynamicRef/$recursiveRef resolution helpers
   schema-cache.ts       → Schema caching by URI/id
   errors.ts             → Error codes (Errors object) + ValidateError class
   format-validators.ts  → Built-in + custom format validators
@@ -62,7 +71,7 @@ src/
 
 1. **Schema compilation** (`schema-compiler.ts`): resolves `$ref`, collects `id`/`$id`, registers in cache
 2. **Schema validation** (`schema-validator.ts`): validates schema against its meta-schema
-3. **JSON validation** (`json-validation.ts`): validates data against compiled schema — type checks, constraints, combiners (`allOf`/`anyOf`/`oneOf`/`not`), `unevaluated*` tracking, format checks
+3. **JSON validation** (`json-validation.ts` + `validation/*.ts`): validates data against compiled schema — type checks, constraints, combiners (`allOf`/`anyOf`/`oneOf`/`not`), `unevaluated*` tracking, format checks. Keyword validators are split into modules under `validation/` by category
 4. **Report** (`report.ts`): errors accumulate in a `Report`, then convert to `ValidateError`
 
 ## Common tasks
@@ -104,7 +113,7 @@ src/
 
 ### Implementing a new JSON Schema keyword
 
-1. Add validation logic in `src/json-validation.ts` (for data validation) or `src/schema-validator.ts` (for schema-level validation).
+1. Add validation logic in the appropriate `src/validation/*.ts` module (e.g., `array.ts` for array keywords, `object.ts` for object keywords, `combinators.ts` for applicators) or `src/schema-validator.ts` (for schema-level validation). The orchestration layer in `src/json-validation.ts` calls into these modules.
 2. Guard with a draft version check if the keyword is draft-specific.
 3. Remove relevant entries from `excludedFiles`/`excludedTests` in `test/spec/json-schema-test-suite.common.ts`.
 4. Run the JSON Schema Test Suite to confirm compliance:
