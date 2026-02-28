@@ -85,7 +85,6 @@ export interface ZSchemaInternalProperties {
   __$schemaResolved?: unknown;
   __$validated?: boolean;
   __$validationOptions?: ZSchemaOptions;
-  __$visited?: boolean;
 }
 
 export const getId = (schema: JsonSchemaInternal) => {

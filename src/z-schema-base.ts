@@ -255,7 +255,7 @@ export class ZSchemaBase {
 
     const clonedSchema = deepClone(schema, this.options.maxRecursionDepth);
 
-    const visited: any[] = [];
+    const visited = new WeakSet<object>();
 
     // clean-up the schema and resolve references
     const cleanup = function (schema: any) {
@@ -265,12 +265,11 @@ export class ZSchemaBase {
         return;
       }
 
-      if (schema.___$visited) {
+      if (visited.has(schema)) {
         return;
       }
 
-      schema.___$visited = true;
-      visited.push(schema);
+      visited.add(schema);
 
       if (schema.$ref && schema.__$refResolved) {
         const from = schema.__$refResolved;
@@ -293,9 +292,6 @@ export class ZSchemaBase {
     };
 
     cleanup(clonedSchema);
-    visited.forEach(function (s) {
-      delete s.___$visited;
-    });
 
     return clonedSchema;
   }
