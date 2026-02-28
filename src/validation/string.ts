@@ -4,7 +4,6 @@ import type { ZSchemaBase } from '../z-schema-base.js';
 
 import { getFormatValidators } from '../format-validators.js';
 import { decodeBase64, isValidBase64 } from '../utils/base64.js';
-import { shallowClone } from '../utils/clone.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { unicodeLength } from '../utils/unicode.js';
 import { whatIs } from '../utils/what-is.js';
@@ -98,29 +97,25 @@ export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonS
       return;
     }
     if (formatValidatorFn.length === 2) {
-      // callback-based async - need to clone the path here, because it will change by the time async function reports back
-      const pathBeforeAsync = shallowClone(report.path);
-      report.addAsyncTask(formatValidatorFn, [json], function (result) {
+      // callback-based async
+      report.addAsyncTaskWithPath(formatValidatorFn, [json], function (result) {
         if (result !== true) {
-          const backup = report.path;
-          report.path = pathBeforeAsync;
           report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
-          report.path = backup;
         }
       });
     } else {
       const result = formatValidatorFn.call(this, json);
       if (result instanceof Promise) {
         // Promise-based async
-        const pathBeforeAsync = shallowClone(report.path);
         const timeoutMs = this.options.asyncTimeout || 2000;
-        report.addAsyncTask(
+        const promiseResult = result;
+        report.addAsyncTaskWithPath(
           async (callback) => {
             try {
               const timeoutPromise = new Promise<never>((_, reject) => {
                 setTimeout(() => reject(new Error('Async timeout')), timeoutMs);
               });
-              const resolved = await Promise.race([result, timeoutPromise]);
+              const resolved = await Promise.race([promiseResult, timeoutPromise]);
               callback(resolved);
             } catch (error) {
               if ((error as Error).message === 'Async timeout') {
@@ -131,14 +126,11 @@ export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonS
             }
           },
           [] as any,
-          function (resolvedResult: boolean) {
+          function (resolvedResult) {
             if (resolvedResult !== true) {
-              const backup = report.path;
-              report.path = pathBeforeAsync;
               report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
-              report.path = backup;
             }
-          } as any
+          }
         );
       } else {
         // sync

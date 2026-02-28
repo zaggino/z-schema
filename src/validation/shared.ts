@@ -3,7 +3,6 @@ import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal, JsonSchemaVersion }
 import type { Report } from '../report.js';
 import type { ValidateOptions, ZSchemaBase } from '../z-schema-base.js';
 
-import { shallowClone } from '../utils/clone.js';
 import { isObject } from '../utils/what-is.js';
 
 // ---------------------------------------------------------------------------
@@ -177,17 +176,13 @@ export function deferOrRunSync(report: Report, subReports: Report[], decisionFn:
   const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
 
   if (hasAsyncTasks) {
-    const pathBeforeAsync = shallowClone(report.path);
-    report.addAsyncTask(
+    report.addAsyncTaskWithPath(
       (callback) => {
         setTimeout(() => callback(null), 0);
       },
       [] as any,
       () => {
-        const backup = report.path;
-        report.path = pathBeforeAsync;
         decisionFn();
-        report.path = backup;
       }
     );
   } else {

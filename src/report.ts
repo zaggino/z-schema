@@ -4,6 +4,7 @@ import type { ValidateCallback, ValidateOptions } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { Errors, getValidateError } from './errors.js';
+import { shallowClone } from './utils/clone.js';
 import { get } from './utils/json.js';
 import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
 import { isAbsoluteUri } from './utils/uri.js';
@@ -124,6 +125,26 @@ export class Report {
     asyncTaskResultProcessFn: (result: ReturnType<FN>) => void
   ) {
     this.asyncTasks.push([fn, args, asyncTaskResultProcessFn as TaskProcessFn]);
+  }
+
+  /**
+   * Like {@link addAsyncTask}, but automatically saves the current `path` and
+   * restores it around `processFn`.  This eliminates the manual
+   * path-save/restore boilerplate that every async-aware validator would
+   * otherwise need.
+   */
+  addAsyncTaskWithPath(fn: (...args: any[]) => any, args: any[], processFn: (result: any) => void) {
+    const pathBefore = shallowClone(this.path);
+    this.asyncTasks.push([
+      fn,
+      args,
+      (result: TaskResult) => {
+        const backup = this.path;
+        this.path = pathBefore;
+        processFn(result);
+        this.path = backup;
+      },
+    ]);
   }
 
   getAncestor(id: string): Report | undefined {

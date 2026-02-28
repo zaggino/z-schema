@@ -161,8 +161,10 @@ export const findId = (
   }
   if (isObject(schema)) {
     const keys = Object.keys(schema) as Array<keyof JsonSchemaInternal>;
-    // Reverse iteration: traversal order determines which $dynamicAnchor wins
-    // when siblings share the same anchor name — required for $dynamicRef correctness
+    // Reverse iteration: when sibling sub-schemas share the same $dynamicAnchor
+    // name, the LAST sibling (by key order) must win.  This is required for
+    // $dynamicRef correctness — e.g. the optional test "$dynamicRef skips over
+    // intermediate resources - pointer reference across resource boundary".
     for (let i = keys.length - 1; i >= 0; i--) {
       const k = keys[i];
       if (isInternalKey(k) || NON_SCHEMA_KEYWORDS.includes(k as any)) {
