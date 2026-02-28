@@ -40,14 +40,15 @@ Values: `'draft-04'` · `'draft-06'` · `'draft-07'` · `'draft2019-09'` · `'dr
 
 ## Data validation behavior
 
-| Option                          | Type                  | Default | Effect                                                                                         |
-| ------------------------------- | --------------------- | ------- | ---------------------------------------------------------------------------------------------- |
-| `noEmptyStrings`                | `boolean`             | `false` | Empty strings are invalid for type `string` (unless `minLength: 0`)                            |
-| `noEmptyArrays`                 | `boolean`             | `false` | Empty arrays are invalid for type `array` (unless `minItems: 0`)                               |
-| `assumeAdditional`              | `boolean \| string[]` | `false` | Treat `additionalProperties`/`additionalItems` as `false`; array form allows listed properties |
-| `enumCaseInsensitiveComparison` | `boolean`             | `false` | Report `ENUM_CASE_MISMATCH` for case-only differences                                          |
-| `strictUris`                    | `boolean`             | `false` | All `uri` format strings must be absolute URIs                                                 |
-| `asyncTimeout`                  | `number`              | `2000`  | Milliseconds before async format validators time out                                           |
+| Option                          | Type                  | Default | Effect                                                                                                                 |
+| ------------------------------- | --------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `noEmptyStrings`                | `boolean`             | `false` | Empty strings are invalid for type `string` (unless `minLength: 0`)                                                    |
+| `noEmptyArrays`                 | `boolean`             | `false` | Empty arrays are invalid for type `array` (unless `minItems: 0`)                                                       |
+| `assumeAdditional`              | `boolean \| string[]` | `false` | Treat `additionalProperties`/`additionalItems` as `false`; array form allows listed properties                         |
+| `enumCaseInsensitiveComparison` | `boolean`             | `false` | Report `ENUM_CASE_MISMATCH` for case-only differences                                                                  |
+| `strictUris`                    | `boolean`             | `false` | All `uri` format strings must be absolute URIs                                                                         |
+| `asyncTimeout`                  | `number`              | `2000`  | Milliseconds before async format validators time out                                                                   |
+| `maxRecursionDepth`             | `number`              | `100`   | Maximum recursion depth for schema traversal, deep clone, and equality checks. Increase for deeply nested schemas/data |
 
 ## Schema strictness
 

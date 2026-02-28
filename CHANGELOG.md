@@ -5,20 +5,27 @@
 
 ### ⚠ BREAKING CHANGES
 
-* implement maxRecursionDepth safeguard
+* **Default schema version changed from `draft-07` to `draft2020-12`.** If your schemas rely on draft-04/06/07 behavior, set `version` explicitly or declare `$schema` in every schema. See [MIGRATION.md](docs/MIGRATION.md#upgrading-to-v12) for details.
+* **Format is annotation-only by default for draft-2019-09 / draft-2020-12.** In these drafts, unknown formats no longer produce errors (per the specification). Set `formatAssertions: null` to restore the legacy always-assert behavior.
+* **New `maxRecursionDepth` safeguard (default: 100).** Deeply nested schemas or data that previously validated may now fail with `MAX_RECURSION_DEPTH_EXCEEDED`. Increase the value if needed.
 
 ### Features
 
+* implement draft-2019-09 and draft-2020-12 support with `draft2020-12` as the new default version ([#355](https://github.com/zaggino/z-schema/pull/355)) ([c0c3a30](https://github.com/zaggino/z-schema/commit/c0c3a308c66cc17ece0ae69f6ed8615f869fe6ad))
+  * **draft-2019-09**: `$anchor`, `$recursiveRef`/`$recursiveAnchor`, `$defs`, `$vocabulary`, `dependentRequired`, `dependentSchemas`, `maxContains`, `minContains`, `unevaluatedItems`, `unevaluatedProperties`
+  * **draft-2020-12**: `$dynamicRef`/`$dynamicAnchor`, `prefixItems`, refined `items` (applies to remaining items after `prefixItems`)
+  * Full annotation-based `unevaluatedProperties`/`unevaluatedItems` with applicator traversal through `allOf`, `anyOf`, `oneOf`, `if`/`then`/`else`, `dependentSchemas`, `contains`, `$ref`, `$recursiveRef`, `$dynamicRef`
+* add `formatAssertions` option to control format assertion behavior per draft ([c0c3a30](https://github.com/zaggino/z-schema/commit/c0c3a308c66cc17ece0ae69f6ed8615f869fe6ad))
 * implement maxRecursionDepth safeguard ([d3a2e4f](https://github.com/zaggino/z-schema/commit/d3a2e4f008fa9497e875af4adc4b8608f2cc9a5a))
+* new TypeScript types: `JsonSchemaDraft201909`, `JsonSchemaDraft202012` with layered inheritance ([ba1bd69](https://github.com/zaggino/z-schema/commit/ba1bd69674294f0b8590a2031047286b53e0095b))
+* new error codes: `ARRAY_UNEVALUATED_ITEMS`, `OBJECT_UNEVALUATED_PROPERTIES`, `COLLECT_EVALUATED_DEPTH_EXCEEDED`, `MAX_RECURSION_DEPTH_EXCEEDED`
 
 
 ### Bug Fixes
 
-* **ci:** target github-copilot agent explicitly, add debug step, remove pipefail-breaking find ([7447706](https://github.com/zaggino/z-schema/commit/7447706c4ba9026e5cc1bf569dfce0316b10b492))
-* failing workflow ([ba02b66](https://github.com/zaggino/z-schema/commit/ba02b66aaee06d2fe936fc90ca9f87c6cc8d1d09))
-* fix "custome" typo in schema-validator comments ([d5d504b](https://github.com/zaggino/z-schema/commit/d5d504b203b67327407b12d166b4d79c72b7c9f9))
 * **formats:** respect null overrides in isFormatSupported ([077cc34](https://github.com/zaggino/z-schema/commit/077cc34b2e33e8fdc425d3eb0ba8fee595555eed))
-* make getId draft-aware to return id for draft-04 and $id for newer drafts ([c7ec640](https://github.com/zaggino/z-schema/commit/c7ec64092544f645ffa040c91df0d2c1ddcd7f94))
+* make getId draft-aware to return `id` for draft-04 and `$id` for newer drafts ([c7ec640](https://github.com/zaggino/z-schema/commit/c7ec64092544f645ffa040c91df0d2c1ddcd7f94))
+* fix "custome" typo in schema-validator comments ([d5d504b](https://github.com/zaggino/z-schema/commit/d5d504b203b67327407b12d166b4d79c72b7c9f9))
 
 
 ### Performance Improvements
@@ -26,6 +33,23 @@
 * convert difference() to use Set for O(1) lookups ([da39595](https://github.com/zaggino/z-schema/commit/da3959582964a9a56a3216e5f55c29e7fbe91b80))
 * **schema-cache:** cache global_cache clone in instance cache on first access ([21e2bca](https://github.com/zaggino/z-schema/commit/21e2bcae1f42cc4897ce08c73be67b91ba22cc5a))
 * **utils:** optimize isUniqueArray with primitive fast path ([de94b36](https://github.com/zaggino/z-schema/commit/de94b36dea73371e8f428b0c40a427f7e7e21cde))
+
+
+### Refactoring
+
+* split json-validation.ts into validation/keyword modules (type, numeric, string, array, object, combinators, ref) ([121a5da](https://github.com/zaggino/z-schema/commit/121a5dafe1296e4bd26af4d882de87556fb6faef))
+* populate draft-specific TypeScript interfaces with layered inheritance ([ba1bd69](https://github.com/zaggino/z-schema/commit/ba1bd69674294f0b8590a2031047286b53e0095b))
+* replace `___$visited` schema mutation with WeakSet in getResolvedSchema ([161430c](https://github.com/zaggino/z-schema/commit/161430c1656ee7fababbf073fca80931ae5be153))
+* add Report.addAsyncTaskWithPath to encapsulate async path save/restore ([dd64322](https://github.com/zaggino/z-schema/commit/dd643222f06e5e853b72c038e6e7d8726ff58b33))
+* replace factory @ts-expect-error with module-private FACTORY_TOKEN symbol ([7364904](https://github.com/zaggino/z-schema/commit/73649047ffef3f56c767dceb7fb9e95985e69e34))
+* modernize loop patterns, indexOf, hasOwn, and unicode handling ([e2a3edb](https://github.com/zaggino/z-schema/commit/e2a3edb1cc0adde65715402f412fbf0d8f7a9c69))
+* deduplicate setRemoteReference, NON_SCHEMA_KEYWORDS, async task aggregation, and isInternalKey ([003c413](https://github.com/zaggino/z-schema/commit/003c4133360412262dc673e7da7743d09653a713))
+
+
+### Tests
+
+* migrate ZSchemaTestSuite legacy JS fixtures to TypeScript ([fc87835](https://github.com/zaggino/z-schema/commit/fc8783556aa44c813a2a84423fd3e230b6488c03))
+* make error-ordering assertions order-independent ([8f19ee4](https://github.com/zaggino/z-schema/commit/8f19ee4040075eab0bb0bf6f6f908dc1f410aee2))
 
 ## [11.0.1](https://github.com/zaggino/z-schema/compare/v11.0.0...v11.0.1) (2026-02-25)
 

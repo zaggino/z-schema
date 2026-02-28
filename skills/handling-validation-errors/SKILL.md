@@ -190,6 +190,10 @@ const friendlyMessages: Record<string, (detail: SchemaErrorDetail) => string> = 
   PATTERN: (d) => `${pathToFieldName(d.path)} has an invalid format`,
   ENUM_MISMATCH: (d) => `${pathToFieldName(d.path)} must be one of the allowed values`,
   INVALID_FORMAT: (d) => `${pathToFieldName(d.path)} is not a valid ${d.params[0]}`,
+  ARRAY_UNEVALUATED_ITEMS: () => `Array contains items not covered by any schema`,
+  OBJECT_UNEVALUATED_PROPERTIES: (d) => `${d.params[0]} is not allowed by the schema`,
+  COLLECT_EVALUATED_DEPTH_EXCEEDED: (d) => `Schema nesting too deep (max ${d.params[0]})`,
+  MAX_RECURSION_DEPTH_EXCEEDED: (d) => `Recursion depth exceeded (max ${d.params[0]})`,
 };
 
 function toFriendlyMessage(detail: SchemaErrorDetail): string {

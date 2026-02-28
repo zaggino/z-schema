@@ -303,23 +303,23 @@ const validator = ZSchema.create({
 
 ## Draft Version Comparison
 
-| Feature                 | Draft-04                    | Draft-06                                   | Draft-07                            | Draft-2019-09                      | Draft-2020-12 (latest)                  |
-| ----------------------- | --------------------------- | ------------------------------------------ | ----------------------------------- | ---------------------------------- | --------------------------------------- |
-| Schema ID               | `id`                        | `$id`                                      | `$id`                               | `$id`, `$anchor`                   | `$id`, `$anchor`                        |
-| Exclusive min/max       | `exclusiveMinimum: boolean` | `exclusiveMinimum: number`                 | `exclusiveMinimum: number`          | `exclusiveMinimum: number`         | `exclusiveMinimum: number`              |
-| `const`                 | N/A                         | Supported                                  | Supported                           | Supported                          | Supported                               |
-| `contains`              | N/A                         | Supported                                  | Supported                           | + `minContains`/`maxContains`      | + `minContains`/`maxContains`           |
-| `propertyNames`         | N/A                         | Supported                                  | Supported                           | Supported                          | Supported                               |
-| `if`/`then`/`else`      | N/A                         | N/A                                        | Supported                           | Supported                          | Supported                               |
-| `$defs`                 | N/A                         | N/A                                        | N/A                                 | Supported                          | Supported                               |
-| `dependentRequired`     | N/A                         | N/A                                        | N/A                                 | Supported                          | Supported                               |
-| `dependentSchemas`      | N/A                         | N/A                                        | N/A                                 | Supported                          | Supported                               |
-| `unevaluatedItems`      | N/A                         | N/A                                        | N/A                                 | Supported                          | Supported                               |
-| `unevaluatedProperties` | N/A                         | N/A                                        | N/A                                 | Supported                          | Supported                               |
-| `prefixItems`           | N/A                         | N/A                                        | N/A                                 | N/A                                | Supported (replaces array-form `items`) |
-| `$dynamicRef`           | N/A                         | N/A                                        | N/A                                 | `$recursiveRef`/`$recursiveAnchor` | `$dynamicRef`/`$dynamicAnchor`          |
-| Boolean schemas         | N/A                         | `true` (accept all) / `false` (reject all) | Supported                           | Supported                          | Supported                               |
-| Default version         | —                           | —                                          | **Default** (`version: 'draft-07'`) | —                                  | —                                       |
+| Feature                 | Draft-04                    | Draft-06                                   | Draft-07                   | Draft-2019-09                      | Draft-2020-12 (latest)                  |
+| ----------------------- | --------------------------- | ------------------------------------------ | -------------------------- | ---------------------------------- | --------------------------------------- |
+| Schema ID               | `id`                        | `$id`                                      | `$id`                      | `$id`, `$anchor`                   | `$id`, `$anchor`                        |
+| Exclusive min/max       | `exclusiveMinimum: boolean` | `exclusiveMinimum: number`                 | `exclusiveMinimum: number` | `exclusiveMinimum: number`         | `exclusiveMinimum: number`              |
+| `const`                 | N/A                         | Supported                                  | Supported                  | Supported                          | Supported                               |
+| `contains`              | N/A                         | Supported                                  | Supported                  | + `minContains`/`maxContains`      | + `minContains`/`maxContains`           |
+| `propertyNames`         | N/A                         | Supported                                  | Supported                  | Supported                          | Supported                               |
+| `if`/`then`/`else`      | N/A                         | N/A                                        | Supported                  | Supported                          | Supported                               |
+| `$defs`                 | N/A                         | N/A                                        | N/A                        | Supported                          | Supported                               |
+| `dependentRequired`     | N/A                         | N/A                                        | N/A                        | Supported                          | Supported                               |
+| `dependentSchemas`      | N/A                         | N/A                                        | N/A                        | Supported                          | Supported                               |
+| `unevaluatedItems`      | N/A                         | N/A                                        | N/A                        | Supported                          | Supported                               |
+| `unevaluatedProperties` | N/A                         | N/A                                        | N/A                        | Supported                          | Supported                               |
+| `prefixItems`           | N/A                         | N/A                                        | N/A                        | N/A                                | Supported (replaces array-form `items`) |
+| `$dynamicRef`           | N/A                         | N/A                                        | N/A                        | `$recursiveRef`/`$recursiveAnchor` | `$dynamicRef`/`$dynamicAnchor`          |
+| Boolean schemas         | N/A                         | `true` (accept all) / `false` (reject all) | Supported                  | Supported                          | Supported                               |
+| Default version         | —                           | —                                          | —                          | —                                  | **Default** (`version: 'draft2020-12'`) |
 
 To use a specific version:
 
