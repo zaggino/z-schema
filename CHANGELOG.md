@@ -1,5 +1,32 @@
 # Changelog
 
+## [12.0.0](https://github.com/zaggino/z-schema/compare/v11.0.1...v12.0.0) (2026-02-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* implement maxRecursionDepth safeguard
+
+### Features
+
+* implement maxRecursionDepth safeguard ([d3a2e4f](https://github.com/zaggino/z-schema/commit/d3a2e4f008fa9497e875af4adc4b8608f2cc9a5a))
+
+
+### Bug Fixes
+
+* **ci:** target github-copilot agent explicitly, add debug step, remove pipefail-breaking find ([7447706](https://github.com/zaggino/z-schema/commit/7447706c4ba9026e5cc1bf569dfce0316b10b492))
+* failing workflow ([ba02b66](https://github.com/zaggino/z-schema/commit/ba02b66aaee06d2fe936fc90ca9f87c6cc8d1d09))
+* fix "custome" typo in schema-validator comments ([d5d504b](https://github.com/zaggino/z-schema/commit/d5d504b203b67327407b12d166b4d79c72b7c9f9))
+* **formats:** respect null overrides in isFormatSupported ([077cc34](https://github.com/zaggino/z-schema/commit/077cc34b2e33e8fdc425d3eb0ba8fee595555eed))
+* make getId draft-aware to return id for draft-04 and $id for newer drafts ([c7ec640](https://github.com/zaggino/z-schema/commit/c7ec64092544f645ffa040c91df0d2c1ddcd7f94))
+
+
+### Performance Improvements
+
+* convert difference() to use Set for O(1) lookups ([da39595](https://github.com/zaggino/z-schema/commit/da3959582964a9a56a3216e5f55c29e7fbe91b80))
+* **schema-cache:** cache global_cache clone in instance cache on first access ([21e2bca](https://github.com/zaggino/z-schema/commit/21e2bcae1f42cc4897ce08c73be67b91ba22cc5a))
+* **utils:** optimize isUniqueArray with primitive fast path ([de94b36](https://github.com/zaggino/z-schema/commit/de94b36dea73371e8f428b0c40a427f7e7e21cde))
+
 ## [11.0.1](https://github.com/zaggino/z-schema/compare/v11.0.0...v11.0.1) (2026-02-25)
 
 
