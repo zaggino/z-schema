@@ -87,14 +87,14 @@ export interface ZSchemaInternalProperties {
   __$validationOptions?: ZSchemaOptions;
 }
 
-export const getId = (schema: JsonSchemaInternal) => {
-  if (schema.$id) {
-    return schema.$id;
-  }
-  if (schema.id) {
+export const getId = (schema: JsonSchemaInternal): string | undefined => {
+  // Draft-04 uses `id` exclusively — never return `$id` for a draft-04 schema
+  if (typeof schema.$schema === 'string' && schema.$schema.includes('draft-04')) {
     return schema.id;
   }
-  return undefined;
+  // Draft-06+ uses `$id`; fall back to `id` for backward compatibility
+  // with schemas that haven't migrated to `$id` yet.
+  return schema.$id ?? schema.id;
 };
 
 export const findId = (
