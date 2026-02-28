@@ -44,6 +44,38 @@ See [docs/migrating-schemas](../skills/migrating-json-schemas/) for detailed sch
 
 ---
 
+## Upgrading to v11
+
+v11 changed the default JSON Schema version to **draft-07**.
+
+### Breaking Changes
+
+#### 1. Default schema version is now `draft-07`
+
+Previously the default was `draft-06` (v10). If your schemas rely on draft-04/06 behavior, set the version explicitly:
+
+```typescript
+const validator = ZSchema.create({ version: 'draft-06' });
+```
+
+---
+
+## Upgrading to v10
+
+v10 changed the default JSON Schema version to **draft-06**.
+
+### Breaking Changes
+
+#### 1. Default schema version is now `draft-06`
+
+Previously the default was `draft-04` (v8/v9). If your schemas rely on draft-04 behavior, set the version explicitly:
+
+```typescript
+const validator = ZSchema.create({ version: 'draft-04' });
+```
+
+---
+
 ## Upgrading to v9
 
 v9 introduced the factory API and removed direct constructor access.
@@ -102,6 +134,42 @@ These methods no longer exist. Errors are now returned directly from `validate()
 
 Use `validate()` directly. In safe mode, check `result.valid`.
 
+#### 6. `compileSchema()`, `getMissingReferences()`, `getMissingRemoteReferences()`, `getResolvedSchema()` removed
+
+These utility methods were removed from the public API.
+
+#### 7. `setRemoteReference()` is now static only
+
+The instance method was removed. Use `ZSchema.setRemoteReference()` instead.
+
+#### 8. `validateAsyncSafe()` return type changed
+
+The return type changed from `{ valid, errs? }` to `{ valid, err? }` (singular `err` of type `ValidateError`).
+
+---
+
+## Upgrading to v8
+
+v8 introduced automatic JSON Schema draft version detection.
+
+### Breaking Changes
+
+#### 1. Schemas without `$schema` are treated as draft-04
+
+Previously, schemas missing `$schema` were validated without strict draft semantics. In v8+, `$schema` is automatically set to `http://json-schema.org/draft-04/schema#`. Set `{ version: 'none' }` to opt out:
+
+```typescript
+const validator = ZSchema.create({ version: 'none' });
+```
+
+#### 2. New `version` option
+
+A new `version` option was added to `ZSchemaOptions`, defaulting to `'draft-04'`. This controls which draft meta-schema is injected when `$schema` is absent.
+
+#### 3. Meta-schemas registered globally
+
+Draft-04 meta-schemas are now registered via `ZSchema.setRemoteReference()` at module load time instead of per-instance in the constructor.
+
 ---
 
 ## Upgrading to v7
@@ -118,6 +186,105 @@ The library source is now TypeScript compiled to ES modules. A CJS bundle is ava
 
 The `engines` field requires Node.js 22 or later. Older Node.js versions are not supported.
 
-#### 3. Default schema version is `draft-04`
+#### 3. New entry point
 
-Schemas without a `$schema` property default to draft-04 validation. Use `{ version: 'none' }` to opt out of automatic version detection.
+The `main` field was replaced by an `exports` map. Import `z-schema` (ESM), `z-schema/cjs` (CJS), or `z-schema/umd/ZSchema.js` (UMD). Direct deep imports like `z-schema/src/ZSchema` no longer work.
+
+#### 4. Source file renames
+
+All source files were renamed from PascalCase (`ZSchema.js`, `FormatValidators.js`) to kebab-case (`z-schema.ts`, `format-validators.ts`). Any direct submodule imports will break.
+
+---
+
+## Upgrading to v6
+
+v6 dropped support for older Node.js runtimes.
+
+### Breaking Changes
+
+#### 1. Node.js < 16 no longer supported
+
+CI now tests on Node.js 16 and 18 only. Node.js 14 and earlier are no longer tested or supported. If you need Node.js 14 support, pin to `z-schema@5`.
+
+---
+
+## Upgrading to v5
+
+v5 changed a default option value, which may alter validation behavior in existing code.
+
+### Breaking Changes
+
+#### 1. `breakOnFirstError` defaults to `false`
+
+Previously, `breakOnFirstError` defaulted to `true`, meaning validation stopped after the first error. In v5+, all errors are collected by default. If your code depends on only the first error being reported, set the option explicitly:
+
+```javascript
+var ZSchema = require('z-schema');
+var validator = new ZSchema({ breakOnFirstError: true });
+```
+
+#### 2. `validator` dependency downgraded
+
+The `validator` npm package was downgraded from `^13.6.0` to `^12.0.0`. This may affect format validation results for edge-case inputs. The dependency was later bumped back to 13.x in v5.0.1.
+
+---
+
+## Upgrading to v4
+
+v4 dropped support for very old Node.js runtimes.
+
+### Breaking Changes
+
+#### 1. Node.js < 10 no longer supported
+
+CI now tests on Node.js 10, 12, and 14. Node.js 8 and earlier are no longer tested or supported. If you need Node.js 8 support, pin to `z-schema@3`.
+
+---
+
+## Upgrading to v3
+
+v3 was a complete rewrite of z-schema with a new options API and many new features.
+
+### Breaking Changes
+
+#### 1. New options API
+
+The constructor accepts an options object with new strict-mode properties. Previous v2 usage patterns are not compatible.
+
+```javascript
+var ZSchema = require('z-schema');
+var validator = new ZSchema({
+  noEmptyStrings: true,
+  noTypeless: true,
+  forceItems: true,
+  forceProperties: true,
+  forceMaxLength: true,
+});
+```
+
+#### 2. New strict-mode options
+
+The following options were added and default to `false`:
+
+| Option                         | Description                                             |
+| ------------------------------ | ------------------------------------------------------- |
+| `noEmptyStrings`               | Strings must have `minLength >= 1`                      |
+| `noTypeless`                   | Every schema must declare a `type`                      |
+| `forceItems`                   | Arrays must define `items`                              |
+| `forceProperties`              | Objects must define `properties` or `patternProperties` |
+| `forceMaxLength`               | Strings must define `maxLength`                         |
+| `noExtraKeywords`              | Reject unrecognized schema keywords                     |
+| `noEmptyArrays`                | Arrays must have `minItems >= 1`                        |
+| `ignoreUnresolvableReferences` | Suppress `UNRESOLVABLE_REFERENCE` errors                |
+
+### New Features
+
+- Support for multiple linked schemas
+- Remote schema downloading
+- `breakOnFirstError` option (added in v3.3.0)
+- `reportPathAsArray` option for array-based error paths (added in v3.1.0)
+- `setSchemaReader()` for pluggable remote schema loading (added in v3.10.0)
+- `pedanticCheck` option for strict schema best-practice checks (added in v3.11.0)
+- `ignoreUnknownFormats` option (added in v3.13.0)
+- `customValidator` option for user-defined validation logic (added in v3.17.0)
+- Bundled JSON Schema meta-schemas (added in v3.9.0)
