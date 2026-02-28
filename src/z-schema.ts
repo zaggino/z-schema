@@ -11,14 +11,14 @@ import { getRegisteredFormats, registerFormat, unregisterFormat } from './format
 import { prepareRemoteSchema, SchemaCache } from './schema-cache.js';
 import { deepClone } from './utils/clone.js';
 import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
-import { ZSchemaBase } from './z-schema-base.js';
+import { FACTORY_TOKEN, ZSchemaBase } from './z-schema-base.js';
 import { defaultOptions } from './z-schema-options.js';
 import { getSchemaReader, setSchemaReader } from './z-schema-reader.js';
 
 export class ZSchema extends ZSchemaBase {
-  /** @deprecated Use ZSchema.create() instead. */
-  private constructor(options?: ZSchemaOptions) {
-    super(options);
+  /** @internal Use ZSchema.create() instead. */
+  constructor(options: ZSchemaOptions | undefined, token: symbol) {
+    super(options, token);
   }
 
   // ----- static methods start -----
@@ -71,21 +71,16 @@ export class ZSchema extends ZSchemaBase {
     const isSafe = options.safe;
     delete options.async;
     delete options.safe;
-    (options as any).__called_from_factory__ = true;
     if (isAsync && isSafe) {
-      // @ts-expect-error Factory can use private/deprecated constructor
-      return new ZSchemaAsyncSafe(options);
+      return new ZSchemaAsyncSafe(options, FACTORY_TOKEN);
     }
     if (isAsync) {
-      // @ts-expect-error Factory can use private/deprecated constructor
-      return new ZSchemaAsync(options);
+      return new ZSchemaAsync(options, FACTORY_TOKEN);
     }
     if (isSafe) {
-      // @ts-expect-error Factory can use private/deprecated constructor
-      return new ZSchemaSafe(options);
+      return new ZSchemaSafe(options, FACTORY_TOKEN);
     }
-    // Factory can use private/deprecated constructor
-    return new ZSchema(options);
+    return new ZSchema(options, FACTORY_TOKEN);
   }
 
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): true {
@@ -140,9 +135,9 @@ export class ZSchema extends ZSchemaBase {
 }
 
 export class ZSchemaSafe extends ZSchemaBase {
-  /** @deprecated Use ZSchema.create() instead. */
-  private constructor(options?: ZSchemaOptions) {
-    super(options);
+  /** @internal Use ZSchema.create() instead. */
+  constructor(options: ZSchemaOptions | undefined, token: symbol) {
+    super(options, token);
   }
 
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): ValidateResponse {
@@ -165,9 +160,9 @@ export class ZSchemaSafe extends ZSchemaBase {
 }
 
 export class ZSchemaAsync extends ZSchemaBase {
-  /** @deprecated Use ZSchema.create() instead. */
-  private constructor(options?: ZSchemaOptions) {
-    super(options);
+  /** @internal Use ZSchema.create() instead. */
+  constructor(options: ZSchemaOptions | undefined, token: symbol) {
+    super(options, token);
   }
 
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<true> {
@@ -186,9 +181,9 @@ export class ZSchemaAsync extends ZSchemaBase {
 }
 
 export class ZSchemaAsyncSafe extends ZSchemaBase {
-  /** @deprecated Use ZSchema.create() instead. */
-  private constructor(options?: ZSchemaOptions) {
-    super(options);
+  /** @internal Use ZSchema.create() instead. */
+  constructor(options: ZSchemaOptions | undefined, token: symbol) {
+    super(options, token);
   }
 
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<ValidateResponse> {

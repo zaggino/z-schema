@@ -30,6 +30,12 @@ export type ValidateResponse = { valid: boolean; err?: ValidateError };
 
 export type ValidateCallback = (err: ValidateResponse['err'], valid: ValidateResponse['valid']) => void;
 
+/**
+ * Module-private symbol used by `ZSchema.create()` to authorise construction.
+ * Not exported — external code cannot instantiate ZSchema variants directly.
+ */
+export const FACTORY_TOKEN = Symbol('ZSchema.factory');
+
 export class ZSchemaBase {
   scache: SchemaCache;
   sc: SchemaCompiler;
@@ -37,11 +43,10 @@ export class ZSchemaBase {
   validateOptions: ValidateOptions = {};
   options: ZSchemaOptions;
 
-  constructor(options?: ZSchemaOptions) {
-    if (!(options as any)?.__called_from_factory__) {
+  constructor(options: ZSchemaOptions | undefined, token: symbol) {
+    if (token !== FACTORY_TOKEN) {
       throw new Error('do not use new ZSchema(), use ZSchema.create() instead');
     }
-    delete (options as any).__called_from_factory__;
 
     this.scache = new SchemaCache(this);
     this.sc = new SchemaCompiler(this);
