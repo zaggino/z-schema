@@ -195,7 +195,11 @@ export class ZSchemaBase {
     return true;
   }
 
-  // instance scoped format functions
+  /**
+   * Register a format validator on this instance only (does not affect other instances or the global registry).
+   * @param name - The format name.
+   * @param validatorFunction - A sync or async function `(value: unknown) => boolean | Promise<boolean>`.
+   */
   public registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
     if (!this.options.customFormats) {
       this.options.customFormats = {};
@@ -203,6 +207,10 @@ export class ZSchemaBase {
     this.options.customFormats[name] = validatorFunction;
   }
 
+  /**
+   * Unregister an instance-scoped format validator.
+   * @param name - The format name to unregister.
+   */
   public unregisterFormat(name: string): void {
     if (!this.options.customFormats) {
       this.options.customFormats = {};
@@ -210,19 +218,32 @@ export class ZSchemaBase {
     this.options.customFormats[name] = null;
   }
 
+  /** Returns the names of format validators registered on this instance. */
   public getRegisteredFormats(): string[] {
     return sortedKeys(this.options.customFormats || {}).filter((key) => this.options.customFormats?.[key] != null);
   }
 
+  /** Returns all supported format names (global + instance-registered). */
   public getSupportedFormats(): string[] {
     return getSupportedFormats(this.options.customFormats);
   }
 
+  /**
+   * Register a remote schema in this instance's cache so `$ref` can resolve to it.
+   * @param uri - The URI the schema will be known by.
+   * @param schema - The schema object or JSON string.
+   * @param validationOptions - Optional options used for schema preparation.
+   */
   setRemoteReference(uri: string, schema: string | JsonSchema, validationOptions?: ZSchemaOptions) {
     const _schema = prepareRemoteSchema(schema, uri, validationOptions, this.options.maxRecursionDepth);
     this.scache.cacheSchemaByUri(uri, _schema);
   }
 
+  /**
+   * Extract unresolvable `$ref` URIs from a validation error.
+   * @param err - A `ValidateError` from a failed validation.
+   * @returns An array of unresolvable reference URIs.
+   */
   getMissingReferences(err: ValidateError): string[] {
     if (!err) return [];
     const details = err.details || [];
@@ -241,6 +262,11 @@ export class ZSchemaBase {
     return missingRefs;
   }
 
+  /**
+   * Extract unresolvable **remote** `$ref` URIs from a validation error (local fragment-only refs are excluded).
+   * @param err - A `ValidateError` from a failed validation.
+   * @returns An array of remote reference base URIs.
+   */
   getMissingRemoteReferences(err: ValidateError) {
     const missingReferences = this.getMissingReferences(err);
     const missingRemoteReferences: string[] = [];
@@ -253,6 +279,12 @@ export class ZSchemaBase {
     return missingRemoteReferences;
   }
 
+  /**
+   * Resolve a previously compiled schema by its `$id` / `id`, cleaning up internal bookkeeping properties
+   * and inlining resolved `$ref` targets.
+   * @param schemaId - The schema identifier to look up.
+   * @returns A clean, resolved copy of the schema, or `undefined` if not found.
+   */
   getResolvedSchema(schemaId: string): JsonSchema | undefined {
     const report = new Report(this.options);
     const schema = this.scache.getSchemaByUri(report, schemaId);

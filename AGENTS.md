@@ -80,6 +80,8 @@ See [docs/architecture.md](docs/architecture.md) for details.
 
 See [docs/conventions.md](docs/conventions.md) for details.
 
+All public methods and classes **must** have [TSDoc](https://tsdoc.org/) comments. When adding or modifying public API surface, update TSDoc accordingly. Do not use JSDoc-style type annotations — rely on TypeScript for types. See the conventions doc for the full TSDoc style guide.
+
 ## Testing Guide
 
 See [docs/testing.md](docs/testing.md) for details.

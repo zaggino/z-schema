@@ -58,6 +58,8 @@ const validator = ZSchema.create({
 
 Defines a time limit in milliseconds for async tasks (such as async format validators) before validation fails with an `ASYNC_TIMEOUT` error.
 
+> **Performance:** Set this to the lowest value that accommodates your slowest async format validator. A tight timeout prevents validation from hanging on unresponsive external services.
+
 Default: `2000`
 
 ```javascript
@@ -116,6 +118,8 @@ const validator = ZSchema.create({
 
 ## assumeAdditional
 
+> **Performance:** When enabled (especially as `true`), the validator must check every property in every object against `properties`/`patternProperties` even when the schema doesn't declare `additionalProperties`. This adds overhead proportional to the number of object properties in the input data.
+
 When `true`, the validator assumes `additionalItems` and `additionalProperties` are `false` in all schemas, so you do not need to set it manually.
 
 When an array of strings, the validator assumes `additionalItems`/`additionalProperties` are `false` but allows the listed properties to pass.
@@ -149,6 +153,8 @@ const validator = ZSchema.create({
 ## forceItems
 
 When true, the validator rejects schemas where `items` is not defined for `array` type schemas.
+
+> **Performance:** This is a schema-level check that runs during compilation, not during data validation. The overhead is negligible.
 
 Default: `false`
 
@@ -222,6 +228,8 @@ const validator = ZSchema.create({
 
 When true, the validator does not report an error when a remote `$ref` cannot be resolved. Not recommended for production.
 
+> **Performance:** This option does not skip `$ref` resolution — it only suppresses the error. The resolver still attempts to look up each reference. Use `setRemoteReference()` or a schema reader to register remote schemas ahead of time for best performance.
+
 Default: `false`
 
 ```javascript
@@ -256,7 +264,11 @@ const validator = ZSchema.create({
 
 ## strictMode
 
-Enables multiple strict checks at once. Setting `strictMode: true` is equivalent to:
+Enables multiple strict checks at once. This adds schema-level validation overhead for every schema processed.
+
+> **Performance:** Each sub-option enabled by `strictMode` adds a check during schema validation. For large schemas with many sub-schemas, this increases validation time. Consider enabling only the specific checks you need rather than the full `strictMode` bundle.
+
+Setting `strictMode: true` is equivalent to:
 
 ```javascript
 {
@@ -283,6 +295,8 @@ const validator = ZSchema.create({
 
 When true, validation stops after the first error is found.
 
+> **Performance:** Enabling this option can significantly speed up validation of invalid data by short-circuiting as soon as the first error is found, rather than collecting all errors. Recommended for production use when you only need to know whether data is valid.
+
 Default: `false`
 
 ```javascript
@@ -306,6 +320,8 @@ const validator = ZSchema.create({
 ## pedanticCheck
 
 When true, the validator checks whether schemas follow best practices and common conventions.
+
+> **Performance:** Adds extra checks during schema validation. Consider enabling only during development or CI, and disabling in production where schema quality is already assured.
 
 Default: `false`
 
@@ -359,6 +375,8 @@ const validator = ZSchema.create({
 ## customValidator
 
 Register a function that is called on every sub-schema during validation. Use this for custom cross-field validation logic that cannot be expressed in standard JSON Schema.
+
+> **Performance:** The custom validator function is invoked for **every** sub-schema during JSON validation. Keep the function fast and avoid expensive operations (network calls, heavy computation) inside it. For field-level checks, prefer [custom formats](features.md#register-a-custom-format) which only run when the `format` keyword is present.
 
 > Consider using [custom formats](features.md#register-a-custom-format) before using this option.
 

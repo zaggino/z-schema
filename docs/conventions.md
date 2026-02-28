@@ -41,6 +41,15 @@
 - All public API must be exported through `src/index.ts`.
 - Keep internal types (e.g., `JsonSchemaInternal`, compiler metadata) unexported.
 
+## Documentation Comments (TSDoc)
+
+- All public methods and classes must have **TSDoc** comments (`/** ... */`).
+- Use `@param name - Description`, `@returns Description`, `@throws Description`, `@example`.
+- Do **not** use JSDoc-style type annotations in tags (e.g., `@param {string} name` or `@throws {Error}`) — TypeScript provides the types.
+- Use `{@link SymbolName}` for inline cross-references (e.g., `@throws {@link ValidateError} if validation fails`).
+- Mark internal-only members with `/** @internal */`.
+- Keep descriptions concise — one sentence for simple getters, a short paragraph for complex methods.
+
 ## Dependencies
 
 - **Runtime**: `validator` (format validation: email, IP, URL). One dependency only — minimize additions.

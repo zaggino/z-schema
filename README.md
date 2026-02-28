@@ -63,15 +63,24 @@ z-schema --strictMode mySchema.json myData.json
 
 ## Usage
 
+`ZSchema.create()` returns one of four validator variants based on the `async` and `safe` options:
+
+| Options                       | Class              | `validate()` returns       |
+| ----------------------------- | ------------------ | -------------------------- |
+| `{}`                          | `ZSchema`          | `true` (throws on error)   |
+| `{ safe: true }`              | `ZSchemaSafe`      | `{ valid, err? }`          |
+| `{ async: true }`             | `ZSchemaAsync`     | `Promise<true>` (rejects)  |
+| `{ async: true, safe: true }` | `ZSchemaAsyncSafe` | `Promise<{ valid, err? }>` |
+
 ### Sync Validation (Throw Mode)
 
 By default, `validate` throws a `ValidateError` on failure. The error has a `details` array with structured error info.
 
 ```typescript
-const validator = ZSchema.create();
+const validator = ZSchema.create(); // returns ZSchema
 
 try {
-  validator.validate(json, schema);
+  validator.validate(json, schema); // returns true
 } catch (error) {
   console.log(error.name); // 'z-schema validation error'
   console.log(error.message); // summary message
@@ -81,35 +90,41 @@ try {
 
 ### Sync Validation (Safe Mode)
 
-Use `ZSchema.create({ safe: true })` to get a result object instead of exceptions.
+Use `{ safe: true }` to get a `ZSchemaSafe` instance whose `validate()` returns a result object instead of throwing.
 
 ```typescript
-const validator = ZSchema.create({ safe: true });
+const validator = ZSchema.create({ safe: true }); // returns ZSchemaSafe
 
-const result = validator.validate(json, schema);
+const result = validator.validate(json, schema); // { valid: boolean, err?: ValidateError }
 if (!result.valid) {
-  console.log(result.err); // ValidateError with .details
+  console.log(result.err!.details);
 }
 ```
 
-### Async Validation
+### Async Validation (Throw Mode)
 
-Pass `{ async: true }` to support async format validators. The `validate` method returns a Promise.
+Pass `{ async: true }` to support async format validators. Returns a `ZSchemaAsync` instance whose `validate()` returns a `Promise`.
 
 ```typescript
-const validator = ZSchema.create({ async: true });
+const validator = ZSchema.create({ async: true }); // returns ZSchemaAsync
 
 try {
-  await validator.validate(json, schema);
+  await validator.validate(json, schema); // Promise<true>
 } catch (error) {
   console.log(error.details);
 }
+```
 
-// Or combine with safe mode:
-const safeValidator = ZSchema.create({ async: true, safe: true });
-const result = await safeValidator.validate(json, schema);
+### Async Validation (Safe Mode)
+
+Combine both options to get a `ZSchemaAsyncSafe` instance — the promise always resolves (never rejects) with a result object.
+
+```typescript
+const validator = ZSchema.create({ async: true, safe: true }); // returns ZSchemaAsyncSafe
+
+const result = await validator.validate(json, schema); // Promise<{ valid, err? }>
 if (!result.valid) {
-  console.log(result.err);
+  console.log(result.err!.details);
 }
 ```
 
@@ -171,15 +186,15 @@ ZSchema.setSchemaReader((uri: string) => {
 
 ## Version History
 
-| Version | Changes                                                                                                    |
-| ------- | ---------------------------------------------------------------------------------------------------------- |
-| **v12** | Default version is **draft2020-12**. Implemented full support for **draft-2020-12** and **draft-2019-09**. |
-| **v11** | Default version is **draft-07**. Implemented draft-07 tests from JSON Schema Test Suite.                   |
-| **v10** | Default version is **draft-06**. Implemented draft-06 tests from JSON Schema Test Suite.                   |
-| **v9**  | New factory API: `ZSchema.create()` replaces `new ZSchema()`. New cache algorithms.                        |
-| **v8**  | Schemas without `$schema` default to draft-04. Use `{ version: 'none' }` for the old v7 behavior.          |
-| **v7**  | Rewritten in TypeScript/ESM. Passes all JSON Schema Test Suite tests for draft-04.                         |
-| **v6**  | Legacy version. Draft-04 support.                                                                          |
+| Version | Changes                                                                                           |
+| ------- | ------------------------------------------------------------------------------------------------- |
+| **v12** | Default version is **draft2020-12**. Full support for **draft-2020-12** and **draft-2019-09**.    |
+| **v11** | Default version is **draft-07**. Implemented draft-07 tests from JSON Schema Test Suite.          |
+| **v10** | Default version is **draft-06**. Implemented draft-06 tests from JSON Schema Test Suite.          |
+| **v9**  | New factory API: `ZSchema.create()` replaces `new ZSchema()`. New cache algorithms.               |
+| **v8**  | Schemas without `$schema` default to draft-04. Use `{ version: 'none' }` for the old v7 behavior. |
+| **v7**  | Rewritten in TypeScript/ESM. Passes all JSON Schema Test Suite tests for draft-04.                |
+| **v6**  | Legacy version. Draft-04 support.                                                                 |
 
 ## Features
 
@@ -196,6 +211,7 @@ See [docs/options.md](docs/options.md) for all constructor and per-call options.
 | [docs/usage.md](docs/usage.md)               | Detailed usage guide with all validation modes, error handling, and advanced features |
 | [docs/options.md](docs/options.md)           | Constructor options and per-call validation options                                   |
 | [docs/features.md](docs/features.md)         | Feature catalog with examples                                                         |
+| [docs/MIGRATION.md](docs/MIGRATION.md)       | Migration guide for upgrading between major versions                                  |
 | [docs/architecture.md](docs/architecture.md) | Internal architecture, module structure, and public API reference                     |
 | [docs/conventions.md](docs/conventions.md)   | Code style, naming, and formatting conventions                                        |
 | [docs/testing.md](docs/testing.md)           | Test framework, running tests, and writing new tests                                  |
