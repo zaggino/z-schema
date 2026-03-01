@@ -76,17 +76,21 @@ jobs:
           cp /tmp/test-coverage.md docs/test-coverage.md
           cp /tmp/README.md README.md
 
-          # Compare working tree against HEAD (bypasses any stale index
-          # left by the prior checkout with clean: false).
+          # Run the same formatters that the pre-commit hook (lint-staged)
+          # would run, so the diff check sees the final file content.
+          npx prettier --write docs/test-coverage.md README.md
+
+          # Now compare against HEAD — if prettier normalised the files
+          # back to what the branch already has, there is nothing to commit.
           if git diff --quiet HEAD -- docs/test-coverage.md README.md; then
-            echo "Coverage artifacts unchanged against PR branch. Skipping commit."
+            echo "Coverage artifacts unchanged after formatting. Skipping commit."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/test-coverage.md README.md
-          git commit -m "chore(ci): update coverage artifacts"
+          git commit --no-verify -m "chore(ci): update coverage artifacts"
           git push origin HEAD:${{ github.event.pull_request.head.ref }} || {
             echo "Coverage update reason: push_rejected"
             echo "Coverage artifact push rejected."
