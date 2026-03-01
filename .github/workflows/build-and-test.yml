@@ -51,39 +51,34 @@ jobs:
         name: Generate coverage artifacts
         run: npm run coverage:artifacts
       - if: matrix.node-version == '22.x' && github.event_name == 'pull_request'
-        id: coverage-decision
-        name: Evaluate coverage artifact commit decision
-        run: node ./scripts/coverage-update-utils.mts >> $GITHUB_OUTPUT
-      - if: matrix.node-version == '22.x' && github.event_name == 'pull_request'
-        name: Coverage commit decision log
-        run: |
-          echo "Coverage update reason: ${{ steps.coverage-decision.outputs.reason }}"
-          echo "Tracked coverage files changed: ${{ steps.coverage-decision.outputs.changed_files }}"
-      - if: matrix.node-version == '22.x' && github.event_name == 'pull_request' && steps.coverage-decision.outputs.should_commit == 'true'
-        name: Preserve coverage artifacts
-        run: |
-          cp docs/test-coverage.md /tmp/test-coverage.md
-          cp README.md /tmp/README.md
-      - if: matrix.node-version == '22.x' && github.event_name == 'pull_request' && steps.coverage-decision.outputs.should_commit == 'true'
-        name: Checkout PR branch for coverage commit
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          clean: false
-      - if: matrix.node-version == '22.x' && github.event_name == 'pull_request' && steps.coverage-decision.outputs.should_commit == 'true'
         name: Commit coverage artifacts to PR branch
         run: |
+          # Skip for fork PRs (no push permission) and bot actors (avoid loops)
+          if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "Fork PR — skipping coverage commit."
+            exit 0
+          fi
+          if [ "${{ github.actor }}" = "github-actions[bot]" ]; then
+            echo "Bot actor — skipping coverage commit."
+            exit 0
+          fi
+
+          # Save artifacts generated on the merge commit
+          cp docs/test-coverage.md /tmp/test-coverage.md
+          cp README.md /tmp/README.md
+
+          # Switch to the actual PR branch (force to discard dirty working tree)
+          git fetch origin ${{ github.event.pull_request.head.ref }}
+          git checkout -f ${{ github.event.pull_request.head.ref }}
+
+          # Restore and format (same as pre-commit hook would)
           cp /tmp/test-coverage.md docs/test-coverage.md
           cp /tmp/README.md README.md
-
-          # Run the same formatters that the pre-commit hook (lint-staged)
-          # would run, so the diff check sees the final file content.
           npx prettier --write docs/test-coverage.md README.md
 
-          # Now compare against HEAD — if prettier normalised the files
-          # back to what the branch already has, there is nothing to commit.
+          # Only commit if there are real changes against the branch HEAD
           if git diff --quiet HEAD -- docs/test-coverage.md README.md; then
-            echo "Coverage artifacts unchanged after formatting. Skipping commit."
+            echo "Coverage artifacts unchanged. Skipping commit."
             exit 0
           fi
 
@@ -91,8 +86,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/test-coverage.md README.md
           git commit --no-verify -m "chore(ci): update coverage artifacts"
-          git push origin HEAD:${{ github.event.pull_request.head.ref }} || {
-            echo "Coverage update reason: push_rejected"
-            echo "Coverage artifact push rejected."
-            exit 1
-          }
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}

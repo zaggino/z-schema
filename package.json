@@ -61,7 +61,7 @@
   ],
   "scripts": {
     "prepare": "husky",
-    "pre-commit": "npx lint-staged --allow-empty",
+    "pre-commit": "npx lint-staged",
     "pre-push": "npm run build && npm run build:tests",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
