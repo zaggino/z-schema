@@ -6,12 +6,11 @@ on:
   pull_request:
     branches: [main]
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     concurrency:
       group: build-and-test-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref }}-${{ matrix.node-version }}
       cancel-in-progress: true

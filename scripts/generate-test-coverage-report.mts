@@ -114,8 +114,7 @@ function formatPercent(value: number): string {
 }
 
 export function renderCoverageReportMarkdown(summary: ParsedCoverageSummary): string {
-  const roundedLinePct = roundCoveragePercentage(summary.totals.linePct);
-  const badgeStatus = getCoverageBadgeStatus(roundedLinePct);
+  const badgeStatus = getCoverageBadgeStatus(summary.totals.linePct);
 
   const fileRows = summary.files.map((fileCoverage) => {
     return `| ${fileCoverage.path} | ${formatPercent(fileCoverage.linePct)} | ${formatPercent(fileCoverage.statementPct)} | ${formatPercent(fileCoverage.functionPct)} | ${formatPercent(fileCoverage.branchPct)} |`;
@@ -131,7 +130,7 @@ export function renderCoverageReportMarkdown(summary: ParsedCoverageSummary): st
     '| File | Line % | Statement % | Function % | Branch % |',
     '| --- | ---: | ---: | ---: | ---: |',
     ...fileRows,
-    `| **Total** | **${formatPercent(roundedLinePct)}** | **${formatPercent(summary.totals.statementPct)}** | **${formatPercent(summary.totals.functionPct)}** | **${formatPercent(summary.totals.branchPct)}** |`,
+    `| **Total** | **${formatPercent(summary.totals.linePct)}** | **${formatPercent(summary.totals.statementPct)}** | **${formatPercent(summary.totals.functionPct)}** | **${formatPercent(summary.totals.branchPct)}** |`,
     '',
   ].join('\n');
 }
@@ -175,14 +174,14 @@ export function generateCoverageArtifacts(options?: {
   const summary = readCoverageSummary(coverageDir, repoRoot);
   const reportContent = renderCoverageReportMarkdown(summary);
   const reportChanged = writeFileIfChanged(reportPath, reportContent);
+  const readmeChanged = updateReadmeCoverageBadgeFile(readmePath, summary.totals.linePct);
+  const badgeStatus = getCoverageBadgeStatus(summary.totals.linePct);
   const roundedCoverage = {
     branchPct: roundCoveragePercentage(summary.totals.branchPct),
     functionPct: roundCoveragePercentage(summary.totals.functionPct),
     linePct: roundCoveragePercentage(summary.totals.linePct),
     statementPct: roundCoveragePercentage(summary.totals.statementPct),
   };
-  const readmeChanged = updateReadmeCoverageBadgeFile(readmePath, roundedCoverage.linePct);
-  const badgeStatus = getCoverageBadgeStatus(roundedCoverage.linePct);
 
   return {
     badgeStatus,
