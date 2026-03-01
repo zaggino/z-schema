@@ -3,8 +3,8 @@ import type { ZSchemaBase } from './z-schema-base.js';
 
 import { getId, isInternalKey, NON_SCHEMA_KEYWORDS } from './json-schema.js';
 import { Report } from './report.js';
+import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
-import { DEFAULT_MAX_RECURSION_DEPTH } from './z-schema-options.js';
 import { getSchemaReader } from './z-schema-reader.js';
 
 interface Id {

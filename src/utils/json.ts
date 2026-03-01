@@ -1,4 +1,4 @@
-import { DEFAULT_MAX_RECURSION_DEPTH } from '../z-schema-options.js';
+import { DEFAULT_MAX_RECURSION_DEPTH } from './constants.js';
 import { isObject } from './what-is.js';
 
 interface AreEqualOptions {

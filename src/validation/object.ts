@@ -2,11 +2,10 @@ import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 
-import { validate } from '../json-validation.js';
 import { difference } from '../utils/array.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { isObject } from '../utils/what-is.js';
-import { deferOrRunSync, shouldSkipValidate, supportsDependentKeywords } from './shared.js';
+import { deferOrRunSync, getValidateFn, shouldSkipValidate, supportsDependentKeywords } from './shared.js';
 
 // ---------------------------------------------------------------------------
 // maxProperties
@@ -200,7 +199,7 @@ export function dependenciesValidator(this: ZSchemaBase, report: Report, schema:
         }
       } else {
         // if dependency is a schema, validate against this schema
-        validate.call(this, report, dependencyDefinition, json);
+        getValidateFn().call(this, report, dependencyDefinition, json);
       }
     }
   }
@@ -228,7 +227,7 @@ export function dependentSchemasValidator(
   for (const dependencyName of keys) {
     if (Object.hasOwn(json, dependencyName)) {
       const dependencySchema = schema.dependentSchemas[dependencyName];
-      validate.call(this, report, dependencySchema, json);
+      getValidateFn().call(this, report, dependencySchema, json);
     }
   }
 }
@@ -297,6 +296,7 @@ export function propertyNamesValidator(this: ZSchemaBase, report: Report, schema
     return;
   }
 
+  const validate = getValidateFn();
   const Report_ = report.constructor as typeof Report;
   const keys = Object.keys(json);
   const subReports: Report[] = [];

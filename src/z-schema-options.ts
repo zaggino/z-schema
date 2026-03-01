@@ -3,8 +3,9 @@ import type { Report } from './report.js';
 
 import { CURRENT_DEFAULT_SCHEMA_VERSION, type JsonSchemaVersion } from './json-schema-versions.js';
 import { shallowClone } from './utils/clone.js';
+import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
 
-export const DEFAULT_MAX_RECURSION_DEPTH = 100;
+export { DEFAULT_MAX_RECURSION_DEPTH };
 
 export interface ZSchemaOptions {
   version?: JsonSchemaVersion | 'none';

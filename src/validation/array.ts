@@ -2,9 +2,8 @@ import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 
-import { validate } from '../json-validation.js';
 import { isUniqueArray } from '../utils/array.js';
-import { cacheValidationResult, deferOrRunSync, shouldSkipValidate } from './shared.js';
+import { cacheValidationResult, deferOrRunSync, getValidateFn, shouldSkipValidate } from './shared.js';
 
 // ---------------------------------------------------------------------------
 // additionalItems
@@ -116,6 +115,7 @@ export function containsValidator(this: ZSchemaBase, report: Report, schema: Jso
     return;
   }
 
+  const validate = getValidateFn();
   const Report_ = report.constructor as typeof Report;
   const subReports: Report[] = [];
   for (let idx = 0; idx < json.length; idx++) {

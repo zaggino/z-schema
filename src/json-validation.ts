@@ -49,6 +49,7 @@ import {
   getCachedValidationResult,
   isValidationVocabularyEnabled,
   type JsonValidatorFn,
+  registerValidateFn,
   VALIDATION_VOCAB_KEYWORDS,
 } from './validation/shared.js';
 import {
@@ -897,3 +898,7 @@ export function validate(
   // return valid just to be able to break at some code points
   return report.errors.length === 0;
 }
+
+// Register `validate` so sub-validator modules can access it without a
+// direct import (which would create a circular dependency).
+registerValidateFn(validate);
