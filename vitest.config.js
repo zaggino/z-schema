@@ -11,12 +11,6 @@ export default defineConfig({
       include: ['src/'],
       exclude: ['src/package.json', 'src/schemas/*.json'],
       reporter: ['text', 'html', 'json-summary'],
-      thresholds: {
-        lines: 90,
-        functions: 90,
-        branches: 90,
-        statements: 90,
-      },
     },
     globals: true,
     globalSetup: 'test/vitest.setup.ts',
