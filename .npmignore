@@ -4,6 +4,8 @@
 /test/
 /benchmark/
 /coverage/
+/dist/
+/build/
 /node_modules/
 *.log
 .env*

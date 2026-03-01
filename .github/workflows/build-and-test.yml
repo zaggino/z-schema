@@ -9,6 +9,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: build-and-test-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref }}-${{ matrix.node-version }}
+      cancel-in-progress: true
     container:
       image: mcr.microsoft.com/playwright:v1.58.0-noble
       options: --user 1001
@@ -43,8 +48,42 @@ jobs:
         name: Tests with coverage
         run: npm run test:coverage
       - if: matrix.node-version == '22.x'
-        name: Upload coverage to Coveralls
-        continue-on-error: true
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        name: Generate coverage artifacts
+        run: npm run coverage:artifacts
+      - if: matrix.node-version == '22.x' && github.event_name == 'pull_request'
+        name: Commit coverage artifacts to PR branch
+        run: |
+          # Skip for fork PRs (no push permission) and bot actors (avoid loops)
+          if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "Fork PR — skipping coverage commit."
+            exit 0
+          fi
+          if [ "${{ github.actor }}" = "github-actions[bot]" ]; then
+            echo "Bot actor — skipping coverage commit."
+            exit 0
+          fi
+
+          # Save artifacts generated on the merge commit
+          cp docs/test-coverage.md /tmp/test-coverage.md
+          cp README.md /tmp/README.md
+
+          # Switch to the actual PR branch (force to discard dirty working tree)
+          git fetch origin ${{ github.event.pull_request.head.ref }}
+          git checkout -f ${{ github.event.pull_request.head.ref }}
+
+          # Restore and format (same as pre-commit hook would)
+          cp /tmp/test-coverage.md docs/test-coverage.md
+          cp /tmp/README.md README.md
+          npx prettier --write docs/test-coverage.md README.md
+
+          # Only commit if there are real changes against the branch HEAD
+          if git diff --quiet HEAD -- docs/test-coverage.md README.md; then
+            echo "Coverage artifacts unchanged. Skipping commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/test-coverage.md README.md
+          git commit --no-verify -m "chore(ci): update coverage artifacts"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
