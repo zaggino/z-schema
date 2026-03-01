@@ -60,8 +60,21 @@ jobs:
           echo "Coverage update reason: ${{ steps.coverage-decision.outputs.reason }}"
           echo "Tracked coverage files changed: ${{ steps.coverage-decision.outputs.changed_files }}"
       - if: matrix.node-version == '22.x' && github.event_name == 'pull_request' && steps.coverage-decision.outputs.should_commit == 'true'
+        name: Preserve coverage artifacts
+        run: |
+          cp docs/test-coverage.md /tmp/test-coverage.md
+          cp README.md /tmp/README.md
+      - if: matrix.node-version == '22.x' && github.event_name == 'pull_request' && steps.coverage-decision.outputs.should_commit == 'true'
+        name: Checkout PR branch for coverage commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          clean: false
+      - if: matrix.node-version == '22.x' && github.event_name == 'pull_request' && steps.coverage-decision.outputs.should_commit == 'true'
         name: Commit coverage artifacts to PR branch
         run: |
+          cp /tmp/test-coverage.md docs/test-coverage.md
+          cp /tmp/README.md README.md
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/test-coverage.md README.md
