@@ -6,9 +6,15 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    concurrency:
+      group: build-and-test-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref }}-${{ matrix.node-version }}
+      cancel-in-progress: true
     container:
       image: mcr.microsoft.com/playwright:v1.58.0-noble
       options: --user 1001
@@ -43,8 +49,30 @@ jobs:
         name: Tests with coverage
         run: npm run test:coverage
       - if: matrix.node-version == '22.x'
-        name: Upload coverage to Coveralls
-        continue-on-error: true
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        name: Generate coverage artifacts
+        run: npm run coverage:artifacts
+      - if: matrix.node-version == '22.x' && github.event_name == 'pull_request'
+        id: coverage-decision
+        name: Evaluate coverage artifact commit decision
+        run: node ./scripts/coverage-update-utils.mts >> $GITHUB_OUTPUT
+      - if: matrix.node-version == '22.x' && github.event_name == 'pull_request'
+        name: Coverage commit decision log
+        run: |
+          echo "Coverage update reason: ${{ steps.coverage-decision.outputs.reason }}"
+          echo "Tracked coverage files changed: ${{ steps.coverage-decision.outputs.changed_files }}"
+      - if: matrix.node-version == '22.x' && github.event_name == 'pull_request' && steps.coverage-decision.outputs.should_commit == 'true'
+        name: Commit coverage artifacts to PR branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/test-coverage.md README.md
+          if git diff --cached --quiet; then
+            echo "No staged coverage artifact changes. Skipping commit."
+            exit 0
+          fi
+          git commit -m "chore(ci): update coverage artifacts"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }} || {
+            echo "Coverage update reason: push_rejected"
+            echo "Coverage artifact push rejected."
+            exit 1
+          }

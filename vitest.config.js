@@ -10,6 +10,7 @@ export default defineConfig({
       provider: 'istanbul',
       include: ['src/'],
       exclude: ['src/package.json', 'src/schemas/*.json'],
+      reporter: ['text', 'html', 'json-summary'],
       thresholds: {
         lines: 90,
         functions: 90,

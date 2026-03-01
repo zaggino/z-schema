@@ -35,6 +35,7 @@ npm run build:tests
 
 # Coverage report
 npm run test:coverage
+npm run coverage:artifacts
 ```
 
 ## Test Imports
@@ -124,3 +125,18 @@ npm run test:coverage
 ```
 
 Coverage provider: Istanbul. Covers `src/` only, excluding `src/package.json` and `src/schemas/*.json`.
+
+Generated coverage artifacts:
+
+- `docs/test-coverage.md` (deterministic markdown coverage summary with rounded whole percentages)
+  - Per-file table columns: `File`, `Line %`, `Statement %`, `Function %`, `Branch %`
+  - Final `Total` row across all listed files
+- `README.md` coverage badge (derived from rounded total line coverage)
+
+Badge mapping:
+
+- `high` (`>= 90`): `brightgreen`
+- `medium` (`>= 80` and `< 90`): `yellow`
+- `low` (`< 80`): `red`
+
+Threshold evaluation uses rounded whole-percent line coverage.

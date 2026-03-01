@@ -74,6 +74,8 @@
     "build:tests": "tsc --noEmit --project test/tsconfig.json",
     "copy:module-json": "node -e \"fs.copyFileSync('./src/package.json', './dist/package.json')\"",
     "copy:schemas": "node ./scripts/copy-schemas.mts",
+    "coverage:artifacts": "node ./scripts/generate-test-coverage-report.mts",
+    "coverage:update-badge": "node ./scripts/update-readme-coverage-badge.mts",
     "prepublishOnly": "npm run clean && npm run build && npm test",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
