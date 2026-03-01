@@ -75,13 +75,17 @@ jobs:
         run: |
           cp /tmp/test-coverage.md docs/test-coverage.md
           cp /tmp/README.md README.md
+
+          # Compare working tree against HEAD (bypasses any stale index
+          # left by the prior checkout with clean: false).
+          if git diff --quiet HEAD -- docs/test-coverage.md README.md; then
+            echo "Coverage artifacts unchanged against PR branch. Skipping commit."
+            exit 0
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/test-coverage.md README.md
-          if git diff --cached --quiet; then
-            echo "No staged coverage artifact changes. Skipping commit."
-            exit 0
-          fi
           git commit -m "chore(ci): update coverage artifacts"
           git push origin HEAD:${{ github.event.pull_request.head.ref }} || {
             echo "Coverage update reason: push_rejected"
