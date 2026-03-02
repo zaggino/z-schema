@@ -54,6 +54,17 @@ export class ZSchemaBase {
     this.options = normalizeOptions(options);
   }
 
+  /**
+   * Internal recursive JSON validation — delegates to the `validate` function
+   * in `json-validation.ts`. Exposed as a method so that per-keyword validator
+   * modules (array, combinators, object) can call back into the core validator
+   * via `this` without importing `json-validation.ts` directly (which would
+   * create a circular dependency).
+   */
+  _jsonValidate(report: Report, schema: boolean | JsonSchemaInternal, json: unknown): boolean {
+    return validateJson.call(this, report, schema, json);
+  }
+
   getDefaultSchemaId(): string {
     return this.options.version && this.options.version !== 'none'
       ? VERSION_SCHEMA_URL_MAPPING[this.options.version]

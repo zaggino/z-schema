@@ -2,7 +2,6 @@ import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 
-import { validate } from '../json-validation.js';
 import { difference } from '../utils/array.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { isObject } from '../utils/what-is.js';
@@ -200,7 +199,7 @@ export function dependenciesValidator(this: ZSchemaBase, report: Report, schema:
         }
       } else {
         // if dependency is a schema, validate against this schema
-        validate.call(this, report, dependencyDefinition, json);
+        this._jsonValidate(report, dependencyDefinition, json);
       }
     }
   }
@@ -228,7 +227,7 @@ export function dependentSchemasValidator(
   for (const dependencyName of keys) {
     if (Object.hasOwn(json, dependencyName)) {
       const dependencySchema = schema.dependentSchemas[dependencyName];
-      validate.call(this, report, dependencySchema, json);
+      this._jsonValidate(report, dependencySchema, json);
     }
   }
 }
@@ -303,7 +302,7 @@ export function propertyNamesValidator(this: ZSchemaBase, report: Report, schema
   for (const key of keys) {
     const subReport = new Report_(report);
     subReports.push(subReport);
-    validate.call(this, subReport, propertyNamesSchema as any, key);
+    this._jsonValidate(subReport, propertyNamesSchema as any, key);
   }
 
   const addPropertyNameErrors = () => {
