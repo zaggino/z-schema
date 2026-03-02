@@ -3,7 +3,7 @@ import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 
 import { isUniqueArray } from '../utils/array.js';
-import { cacheValidationResult, deferOrRunSync, getValidateFn, shouldSkipValidate } from './shared.js';
+import { cacheValidationResult, deferOrRunSync, shouldSkipValidate } from './shared.js';
 
 // ---------------------------------------------------------------------------
 // additionalItems
@@ -115,13 +115,12 @@ export function containsValidator(this: ZSchemaBase, report: Report, schema: Jso
     return;
   }
 
-  const validate = getValidateFn();
   const Report_ = report.constructor as typeof Report;
   const subReports: Report[] = [];
   for (let idx = 0; idx < json.length; idx++) {
     const subReport = new Report_(report);
     subReports.push(subReport);
-    validate.call(this, subReport, containsSchema as any, json[idx]);
+    this._jsonValidate(subReport, containsSchema as any, json[idx]);
     cacheValidationResult(report, containsSchema, json[idx], subReport.errors.length === 0);
   }
 

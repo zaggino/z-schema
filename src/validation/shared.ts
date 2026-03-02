@@ -12,41 +12,6 @@ import { isObject } from '../utils/what-is.js';
 export type JsonValidatorFn = (this: ZSchemaBase, report: Report, schema: JsonSchema, json: unknown) => void;
 
 // ---------------------------------------------------------------------------
-// Validate function registry — breaks circular dependency between
-// json-validation.ts and the per-keyword validator modules.
-// ---------------------------------------------------------------------------
-
-/** Signature of the core `validate` function from json-validation. */
-export type ValidateFn = (
-  this: ZSchemaBase,
-  report: Report,
-  schema: boolean | JsonSchemaInternal,
-  json: unknown
-) => boolean;
-
-let _validateFn: ValidateFn | undefined;
-
-/**
- * Called once by `json-validation.ts` to register the core `validate` function
- * so that sub-validator modules can access it without a direct import.
- */
-export function registerValidateFn(fn: ValidateFn): void {
-  _validateFn = fn;
-}
-
-/**
- * Returns the registered `validate` function.
- * @throws if called before `registerValidateFn` has been invoked.
- */
-export function getValidateFn(): ValidateFn {
-  /* istanbul ignore next -- safety net; should never fire at runtime */
-  if (!_validateFn) {
-    throw new Error('validate function has not been registered yet');
-  }
-  return _validateFn;
-}
-
-// ---------------------------------------------------------------------------
 // Draft / vocabulary helpers
 // ---------------------------------------------------------------------------
 
