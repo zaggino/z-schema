@@ -30,11 +30,11 @@ Line coverage status: **high**
 | src/utils/uri.ts              |     90% |         91% |        75% |     100% |
 | src/utils/what-is.ts          |     83% |         83% |       100% |      85% |
 | src/validation/array.ts       |     93% |         93% |       100% |      91% |
-| src/validation/combinators.ts |     96% |         97% |       100% |      93% |
+| src/validation/combinators.ts |     96% |         96% |       100% |      93% |
 | src/validation/numeric.ts     |     87% |         87% |       100% |      89% |
 | src/validation/object.ts      |     88% |         88% |       100% |      84% |
 | src/validation/ref.ts         |     97% |         98% |       100% |      94% |
-| src/validation/shared.ts      |     92% |         92% |       100% |      82% |
+| src/validation/shared.ts      |     93% |         93% |       100% |      83% |
 | src/validation/string.ts      |     90% |         91% |       100% |      87% |
 | src/validation/type.ts        |    100% |        100% |       100% |      96% |
 | src/z-schema-base.ts          |     87% |         86% |        89% |      81% |
