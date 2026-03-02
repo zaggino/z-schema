@@ -184,6 +184,26 @@ ZSchema.setSchemaReader((uri: string) => {
 });
 ```
 
+### Compile-to-function API
+
+Pre-compile a schema and get a reusable validation function (Ajv-style):
+
+```typescript
+import { ZSchemaCompiler } from 'z-schema';
+
+const compiler = new ZSchemaCompiler();
+const validate = compiler.compile({ type: 'object', required: ['name'] });
+
+try {
+  validate({ name: 'Alice' }); // true
+  validate({}); // throws
+} catch (err) {
+  console.log(err.details);
+}
+```
+
+The return type of `compile()` is automatically inferred from `async` and `safe` options — no type casting needed. See [docs/features.md](docs/features.md#compile-to-function-api) for details.
+
 ## Version History
 
 | Version | Changes                                                                                           |

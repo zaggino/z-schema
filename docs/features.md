@@ -4,6 +4,7 @@ z-schema provides full support for JSON Schema **draft-04**, **draft-06**, **dra
 
 - [Validate against subschema](#validate-against-subschema)
 - [Compile arrays of schemas and use references between them](#compile-arrays-of-schemas-and-use-references-between-them)
+- [Compile-to-function API](#compile-to-function-api)
 - [Register a custom format](#register-a-custom-format)
 - [Automatic downloading of remote schemas](#automatic-downloading-of-remote-schemas)
 - [Prefill default values to object using format](#prefill-default-values-to-object-using-format)
@@ -88,6 +89,36 @@ validator.validateSchema(schemas);
 
 // now validate data against the compiled schema
 validator.validate(data, schemas[2]);
+```
+
+## Compile-to-function API
+
+z-schema includes `ZSchemaCompiler` for compile-to-function workflows:
+
+```typescript
+import { ZSchemaCompiler } from 'z-schema';
+
+const compiler = new ZSchemaCompiler();
+const validate = compiler.compile({ type: 'object', required: ['name'] });
+
+try {
+  validate({}); // throws on error by default, doesn't throw when safe:true is set
+} catch (err) {
+  console.log(err); // error object
+}
+```
+
+### Combined async + safe
+
+Both options can be combined. The return type of `compile()` is automatically inferred — no type casting needed:
+
+```typescript
+import { ZSchemaCompiler } from 'z-schema';
+
+const compiler = new ZSchemaCompiler({ async: true, safe: true });
+const validate = compiler.compile({ type: 'object', required: ['name'] });
+//    ^? AsyncSafeValidateFunction — inferred from { async: true, safe: true }
+const result = await validate(data); // { valid: boolean, err?: ValidateError }
 ```
 
 ## Register a custom format

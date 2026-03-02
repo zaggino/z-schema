@@ -4,6 +4,7 @@
 
 ```
 index.ts (public API)
+  ├─ z-schema-compiler.ts (ZSchemaCompiler)
   └─ z-schema.ts (ZSchema, ZSchemaSafe, ZSchemaAsync, ZSchemaAsyncSafe)
        ├─ z-schema-versions.ts (register bundled draft-04/draft-06/draft-07/draft-2019-09/draft-2020-12 meta-schemas)
        └─ z-schema-base.ts (ZSchemaBase — core validation orchestration)
@@ -147,6 +148,11 @@ The package is ESM-first (`"type": "module"`), so all outputs are produced by [t
 
 Types: `ErrorCode`, `ErrorParam`, `Errors`, `FormatValidatorFn`, `FormatValidatorsOptions`, `JsonSchema`, `JsonSchemaCommon`, `JsonSchemaDraft4`, `JsonSchemaDraft6`, `JsonSchemaDraft7`, `JsonSchemaDraft201909`, `JsonSchemaDraft202012`, `JsonSchemaType`, `JsonSchemaVersion`, `Report`, `SchemaErrorDetail`, `ZSchema`, `ZSchemaAsync`, `ZSchemaAsyncSafe`, `ZSchemaSafe`, `ValidateOptions`, `ValidateResponse`, `ZSchemaOptions`, `SchemaReader`
 
-Values: `ValidateError`, `getFormatValidators`, `getRegisteredFormats`, `getSupportedFormats`, `isFormatSupported`, `registerFormat`, `unregisterFormat`
+Values: `ValidateError`, `getFormatValidators`, `getRegisteredFormats`, `getSupportedFormats`, `isFormatSupported`, `registerFormat`, `unregisterFormat`, `ZSchemaCompiler`
+
+Additional public API for Compiler usage:
+
+- `ZSchemaCompiler` (named export from `z-schema`)
+- Types: `ValidateFunction`, `SafeValidateFunction`, `AsyncValidateFunction`, `AsyncSafeValidateFunction`, `CompiledValidateFunction`, `InferValidateFunction`
 
 Default export: `ZSchema`

@@ -9,6 +9,11 @@ import { DEFAULT_MAX_RECURSION_DEPTH, MAX_ASYNC_TIMEOUT } from './utils/constant
 export { DEFAULT_MAX_RECURSION_DEPTH, MAX_ASYNC_TIMEOUT };
 
 export interface ZSchemaOptions {
+  // async mode - in async mode validate returns a Promise
+  async?: boolean;
+  // safe mode - in safe mode validate doesn't throw an error
+  safe?: boolean;
+
   version?: JsonSchemaVersion | 'none';
   asyncTimeout?: number;
   forceAdditional?: boolean;
@@ -37,7 +42,9 @@ export interface ZSchemaOptions {
   maxRecursionDepth?: number;
 }
 
-export const defaultOptions: ZSchemaOptions = {
+export const defaultOptions: Required<ZSchemaOptions> = {
+  async: false,
+  safe: false,
   // default version to validate against
   version: CURRENT_DEFAULT_SCHEMA_VERSION,
   // default timeout for all async tasks
@@ -89,7 +96,9 @@ export const defaultOptions: ZSchemaOptions = {
   //   null  - legacy behavior: always assert format validation
   formatAssertions: null,
   // function to be called on every schema
-  customValidator: null as unknown as undefined,
+  customValidator: null!,
+  // custom format validators passed via options (keyed by format name)
+  customFormats: null!,
   // maximum recursion depth for deeply nested schema/data traversal (prevents stack overflow)
   maxRecursionDepth: DEFAULT_MAX_RECURSION_DEPTH,
 };

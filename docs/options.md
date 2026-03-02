@@ -6,7 +6,7 @@ All options are passed to `ZSchema.create(options)`. Default values are shown wh
 
 When true, `ZSchema.create()` returns an async validator (`ZSchemaAsync` or `ZSchemaAsyncSafe`). The `validate()` method returns a `Promise` instead of a synchronous result. Required when using async format validators.
 
-This is a factory-only option — it is consumed by `ZSchema.create()` and not stored in the validator instance.
+Also used by `ZSchemaCompiler` to determine whether `compile()` returns an async validation function.
 
 Default: `false`
 
@@ -19,7 +19,7 @@ await validator.validate(data, schema); // returns Promise<true>
 
 When true, `ZSchema.create()` returns a safe validator (`ZSchemaSafe` or `ZSchemaAsyncSafe`). The `validate()` method returns a result object `{ valid, err? }` instead of throwing on error.
 
-This is a factory-only option — it is consumed by `ZSchema.create()` and not stored in the validator instance.
+Also used by `ZSchemaCompiler` to determine whether `compile()` returns a safe validation function.
 
 Default: `false`
 

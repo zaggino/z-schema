@@ -356,6 +356,63 @@ z-schema mySchema.json myData.json
 z-schema --strictMode mySchema.json myData.json
 ```
 
+## Compile-to-function API
+
+`ZSchemaCompiler` provides an Ajv-style compile-to-function workflow. Pre-compile a schema once and get a reusable validation function:
+
+```typescript
+import { ZSchemaCompiler } from 'z-schema';
+
+const compiler = new ZSchemaCompiler();
+const validate = compiler.compile({ type: 'object', required: ['name'] });
+
+try {
+  validate({ name: 'Alice' }); // returns true
+  validate({}); // throws ValidateError
+} catch (err) {
+  console.log(err.details);
+}
+```
+
+The returned function type is **automatically inferred** from the `async` and `safe` constructor options — no type casting is needed:
+
+| Options                       | Inferred return type        | Behaviour                         |
+| ----------------------------- | --------------------------- | --------------------------------- |
+| `{}` (default)                | `ValidateFunction`          | returns `true`, throws on error   |
+| `{ safe: true }`              | `SafeValidateFunction`      | returns `{ valid, err? }`         |
+| `{ async: true }`             | `AsyncValidateFunction`     | resolves `true`, rejects on error |
+| `{ async: true, safe: true }` | `AsyncSafeValidateFunction` | resolves `{ valid, err? }`        |
+
+This works because `ZSchemaCompiler` is generic: `ZSchemaCompiler<T extends ZSchemaOptions>`. The `InferValidateFunction<T>` conditional type maps your options to the correct function type at compile time.
+
+### Safe mode
+
+```typescript
+const compiler = new ZSchemaCompiler({ safe: true });
+const validate = compiler.compile({ type: 'string' });
+
+const result = validate(42); // { valid: false, err: ValidateError }
+```
+
+### Async + safe mode
+
+```typescript
+const compiler = new ZSchemaCompiler({ async: true, safe: true });
+const validate = compiler.compile({ type: 'string' });
+
+const result = await validate(42); // { valid: false, err: ValidateError }
+```
+
+### Boolean schemas
+
+```typescript
+const compiler = new ZSchemaCompiler();
+const acceptAll = compiler.compile(true); // accepts any data
+const rejectAll = compiler.compile(false); // rejects all data
+```
+
+All other `ZSchemaOptions` (e.g., `version`, `breakOnFirstError`) are forwarded to the internal validator.
+
 ## TypeScript Types
 
 All types are exported from the package:
@@ -380,5 +437,14 @@ import type {
   SchemaReader, // (uri: string) => JsonSchema
 } from 'z-schema';
 
-import { ValidateError } from 'z-schema';
+import { ValidateError, ZSchemaCompiler } from 'z-schema';
+
+import type {
+  ValidateFunction,
+  SafeValidateFunction,
+  AsyncValidateFunction,
+  AsyncSafeValidateFunction,
+  CompiledValidateFunction,
+  InferValidateFunction,
+} from 'z-schema';
 ```

@@ -101,20 +101,14 @@ export class ZSchema extends ZSchemaBase {
   public static create(options: ZSchemaOptions & { async: true }): ZSchemaAsync;
   public static create(options: ZSchemaOptions & { safe: true }): ZSchemaSafe;
   public static create(options?: ZSchemaOptions): ZSchema;
-  public static create(
-    options: ZSchemaOptions & { async?: true; safe?: true } = {}
-  ): ZSchema | ZSchemaSafe | ZSchemaAsync | ZSchemaAsyncSafe {
-    const isAsync = options.async;
-    const isSafe = options.safe;
-    delete options.async;
-    delete options.safe;
-    if (isAsync && isSafe) {
+  public static create(options: ZSchemaOptions = {}): ZSchema | ZSchemaSafe | ZSchemaAsync | ZSchemaAsyncSafe {
+    if (options.async && options.safe) {
       return new ZSchemaAsyncSafe(options, FACTORY_TOKEN);
     }
-    if (isAsync) {
+    if (options.async) {
       return new ZSchemaAsync(options, FACTORY_TOKEN);
     }
-    if (isSafe) {
+    if (options.safe) {
       return new ZSchemaSafe(options, FACTORY_TOKEN);
     }
     return new ZSchema(options, FACTORY_TOKEN);
