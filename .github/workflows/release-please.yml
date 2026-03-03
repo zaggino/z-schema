@@ -1,4 +1,6 @@
 name: Release Please
+concurrency: release_please
+
 on:
   push:
     branches:

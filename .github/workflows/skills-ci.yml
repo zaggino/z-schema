@@ -1,4 +1,5 @@
 name: Skills CI
+concurrency: skills_ci
 
 on:
   pull_request:
