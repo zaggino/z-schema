@@ -241,18 +241,47 @@ const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => {
   return !inExpression;
 };
 
+const hasValidTildeEscapes = (segment: string): boolean => {
+  for (let i = 0; i < segment.length; i++) {
+    if (segment[i] === '~') {
+      const next = segment[i + 1];
+      if (next !== '0' && next !== '1') {
+        return false;
+      }
+      i++; // skip the escape character
+    }
+  }
+  return true;
+};
+
 const jsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   if (typeof pointer !== 'string') return true;
   // JSON Pointer: empty, or a sequence of '/'-prefixed reference tokens.
   // In each token, '~' must be escaped as '~0' or '~1'.
-  return pointer === '' || /^(?:\/(?:[^~]+|~[01])*)+$/.test(pointer);
+  if (pointer === '') return true;
+  if (!/^(?:\/[^/]*)+$/.test(pointer)) return false;
+  const tokens = pointer.split('/').slice(1); // first element is empty before leading '/'
+  for (const token of tokens) {
+    if (!hasValidTildeEscapes(token)) return false;
+  }
+  return true;
 };
 
 const relativeJsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   if (typeof pointer !== 'string') return true;
   // Relative JSON Pointer: non-negative integer prefix (no leading zeros unless zero),
   // followed by either '#', a JSON Pointer, or nothing.
-  return /^(?:0|[1-9]\d*)(?:#|(?:\/(?:[^~]+|~[01])*)+)?$/.test(pointer);
+  const match = pointer.match(/^(0|[1-9]\d*)(.*)$/);
+  if (!match) return false;
+  const suffix = match[2];
+  if (suffix === '' || suffix === '#') return true;
+  if (!suffix.startsWith('/')) return false;
+  if (!/^(?:\/[^/]*)+$/.test(suffix)) return false;
+  const tokens = suffix.split('/').slice(1);
+  for (const token of tokens) {
+    if (!hasValidTildeEscapes(token)) return false;
+  }
+  return true;
 };
 
 const timeValidator: FormatValidatorFn = (time: unknown) => {
