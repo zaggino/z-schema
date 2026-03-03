@@ -1,4 +1,5 @@
 name: Maintain contributors
+concurrency: maintain_contributors
 
 on:
   push:
