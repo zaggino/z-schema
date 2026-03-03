@@ -4,6 +4,7 @@ import type { ZSchemaBase } from '../z-schema-base.js';
 
 import { getFormatValidators } from '../format-validators.js';
 import { decodeBase64, isValidBase64 } from '../utils/base64.js';
+import { MAX_ASYNC_TIMEOUT } from '../utils/constants.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { unicodeLength } from '../utils/unicode.js';
 import { whatIs } from '../utils/what-is.js';
@@ -107,7 +108,7 @@ export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonS
       const result = formatValidatorFn.call(this, json);
       if (result instanceof Promise) {
         // Promise-based async
-        const timeoutMs = this.options.asyncTimeout || 2000;
+        const timeoutMs = Math.min(Math.max(this.options.asyncTimeout || 2000, 0), MAX_ASYNC_TIMEOUT);
         const promiseResult = result;
         report.addAsyncTaskWithPath(
           async (callback) => {
