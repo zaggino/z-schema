@@ -5,6 +5,7 @@ import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { Errors, getValidateError } from './errors.js';
 import { shallowClone } from './utils/clone.js';
+import { MAX_ASYNC_TIMEOUT } from './utils/constants.js';
 import { get } from './utils/json.js';
 import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
 import { isAbsoluteUri } from './utils/uri.js';
@@ -158,7 +159,7 @@ export class Report {
   }
 
   processAsyncTasks(timeout: number | undefined, callback: ValidateCallback) {
-    const validationTimeout = timeout || 2000;
+    const validationTimeout = Math.min(Math.max(timeout || 2000, 0), MAX_ASYNC_TIMEOUT);
     let tasksCount = this.asyncTasks.length;
     let timedOut = false;
 
