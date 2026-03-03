@@ -1,5 +1,18 @@
 import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+
+/**
+ * Resolve `inputPath` relative to `baseDir` and verify it stays within that directory.
+ * Throws if the resolved path escapes the base directory (CWE-22).
+ */
+function safePath(inputPath: string, baseDir: string): string {
+  const resolved = resolve(baseDir, inputPath);
+  if (!resolved.startsWith(baseDir)) {
+    throw new Error(`Path traversal detected: ${inputPath} resolves outside ${baseDir}`);
+  }
+  return resolved;
+}
 
 export type CoverageBadgeStatus = 'high' | 'medium' | 'low';
 
@@ -62,14 +75,15 @@ export function updateReadmeCoverageBadge(readmeContent: string, linePct: number
 }
 
 export function updateReadmeCoverageBadgeFile(readmePath: string, linePct: number): boolean {
-  const original = readFileSync(readmePath, 'utf8');
+  const safeReadmePath = safePath(readmePath, process.cwd());
+  const original = readFileSync(safeReadmePath, 'utf8');
   const updated = updateReadmeCoverageBadge(original, linePct);
 
   if (updated === original) {
     return false;
   }
 
-  writeFileSync(readmePath, updated, 'utf8');
+  writeFileSync(safeReadmePath, updated, 'utf8');
   return true;
 }
 
