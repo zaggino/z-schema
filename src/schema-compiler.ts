@@ -7,15 +7,12 @@ import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { getSchemaReader } from './z-schema-reader.js';
 
-/** Reject property names that could pollute Object.prototype (CWE-1321). */
-const UNSAFE_PROPERTY_NAMES = new Set(['__proto__', 'constructor', 'prototype']);
-
 /** Safely assign a property on `obj`, refusing prototype-polluting keys. */
 function safeSetProperty(obj: Record<string, unknown>, key: string, value: unknown): void {
-  if (UNSAFE_PROPERTY_NAMES.has(key)) {
-    return;
+  /** Reject property names that could pollute Object.prototype (CWE-1321). */
+  if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
+    obj[key] = value;
   }
-  obj[key] = value;
 }
 
 interface Id {
