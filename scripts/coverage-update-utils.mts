@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export type CoverageUpdateReason = 'changed' | 'no_changes' | 'fork_pr' | 'bot_actor' | 'push_rejected';
@@ -70,12 +71,25 @@ interface PullRequestPayload {
   };
 }
 
+/**
+ * Resolve `inputPath` and verify it stays within the allowed `baseDir`.
+ * Throws if the resolved path escapes the base directory (CWE-22).
+ */
+function safePath(inputPath: string, baseDir: string): string {
+  const resolved = resolve(baseDir, inputPath);
+  if (!resolved.startsWith(baseDir)) {
+    throw new Error(`Path traversal detected: ${inputPath} resolves outside ${baseDir}`);
+  }
+  return resolved;
+}
+
 export function isForkPullRequest(githubEventPath: string | undefined, repository: string | undefined): boolean {
   if (!githubEventPath || !repository) {
     return false;
   }
 
-  const payload = JSON.parse(readFileSync(githubEventPath, 'utf8')) as PullRequestPayload;
+  const safeEventPath = safePath(githubEventPath, resolve('/'));
+  const payload = JSON.parse(readFileSync(safeEventPath, 'utf8')) as PullRequestPayload;
   const headRepo = payload.pull_request?.head?.repo?.full_name;
 
   if (!headRepo) {
