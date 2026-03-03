@@ -213,7 +213,8 @@ const resolveReference = (base: string | undefined, ref: string) => {
 
   let baseDir = baseNoFrag;
   if (!baseDir.endsWith('/')) {
-    baseDir = baseDir.replace(/[^/]*$/, '');
+    const lastSlash = baseDir.lastIndexOf('/');
+    baseDir = lastSlash === -1 ? '' : baseDir.slice(0, lastSlash + 1);
   }
   return baseDir + ref;
 };
