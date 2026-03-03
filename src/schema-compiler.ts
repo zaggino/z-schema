@@ -7,6 +7,17 @@ import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { getSchemaReader } from './z-schema-reader.js';
 
+/** Reject property names that could pollute Object.prototype (CWE-1321). */
+const UNSAFE_PROPERTY_NAMES = new Set(['__proto__', 'constructor', 'prototype']);
+
+/** Safely assign a property on `obj`, refusing prototype-polluting keys. */
+function safeSetProperty(obj: Record<string, unknown>, key: string, value: unknown): void {
+  if (UNSAFE_PROPERTY_NAMES.has(key)) {
+    return;
+  }
+  obj[key] = value;
+}
+
 interface Id {
   id: string;
   type: 'absolute' | 'relative' | 'root';
@@ -392,7 +403,7 @@ export class SchemaCompiler {
         }
       }
       // this might create circular references
-      refObj.obj[`__${refObj.key}Resolved`] = response;
+      safeSetProperty(refObj.obj as unknown as Record<string, unknown>, `__${refObj.key}Resolved`, response);
     }
 
     const isValid = report.isValid();
@@ -437,7 +448,7 @@ export class SchemaCompiler {
             const response = arr.find((x) => x.id === refObj.ref);
             if (response) {
               // this might create circular references
-              refObj.obj[`__${refObj.key}Resolved`] = response;
+              safeSetProperty(refObj.obj as unknown as Record<string, unknown>, `__${refObj.key}Resolved`, response);
               // it's resolved now so delete it
               sch.__$missingReferences.splice(idx2, 1);
             }
