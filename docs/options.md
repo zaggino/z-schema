@@ -58,6 +58,8 @@ const validator = ZSchema.create({
 
 Defines a time limit in milliseconds for async tasks (such as async format validators) before validation fails with an `ASYNC_TIMEOUT` error.
 
+Values are clamped to the range `[0, 60 000]` during option normalization to prevent resource exhaustion (CWE-400). Any value above `60 000` is silently reduced to `60 000`.
+
 > **Performance:** Set this to the lowest value that accommodates your slowest async format validator. A tight timeout prevents validation from hanging on unresponsive external services.
 
 Default: `2000`
