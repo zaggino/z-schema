@@ -245,14 +245,14 @@ const jsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   if (typeof pointer !== 'string') return true;
   // JSON Pointer: empty, or a sequence of '/'-prefixed reference tokens.
   // In each token, '~' must be escaped as '~0' or '~1'.
-  return pointer === '' || /^(?:\/(?:[^~]|~0|~1)*)+$/.test(pointer);
+  return pointer === '' || /^(?:\/(?:[^~]+|~[01])*)+$/.test(pointer);
 };
 
 const relativeJsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   if (typeof pointer !== 'string') return true;
   // Relative JSON Pointer: non-negative integer prefix (no leading zeros unless zero),
   // followed by either '#', a JSON Pointer, or nothing.
-  return /^(?:0|[1-9]\d*)(?:#|(?:\/(?:[^~]|~[01])*)+)?$/.test(pointer);
+  return /^(?:0|[1-9]\d*)(?:#|(?:\/(?:[^~]+|~[01])*)+)?$/.test(pointer);
 };
 
 const timeValidator: FormatValidatorFn = (time: unknown) => {
