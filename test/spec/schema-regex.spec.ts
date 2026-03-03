@@ -1,3 +1,4 @@
+import { MAX_SCHEMA_REGEX_LENGTH } from '../../src/utils/constants.ts';
 import { compileSchemaRegex } from '../../src/utils/schema-regex.ts';
 
 describe('compileSchemaRegex', () => {
@@ -37,5 +38,20 @@ describe('compileSchemaRegex', () => {
       expect(typeof result.error.message).toBe('string');
       expect(result.error.message.length).toBeGreaterThan(0);
     }
+  });
+
+  it('rejects patterns exceeding MAX_SCHEMA_REGEX_LENGTH', () => {
+    const longPattern = 'a'.repeat(MAX_SCHEMA_REGEX_LENGTH + 1);
+    const result = compileSchemaRegex(longPattern);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.message).toContain('exceeds maximum allowed length');
+    }
+  });
+
+  it('accepts patterns at exactly MAX_SCHEMA_REGEX_LENGTH', () => {
+    const exactPattern = 'a'.repeat(MAX_SCHEMA_REGEX_LENGTH);
+    const result = compileSchemaRegex(exactPattern);
+    expect(result.ok).toBe(true);
   });
 });
