@@ -1,5 +1,6 @@
 name: Skills Validate
 concurrency: skills_validate
+
 on:
   pull_request:
     branches:
