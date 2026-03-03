@@ -1,5 +1,20 @@
 # Changelog
 
+## [12.0.1](https://github.com/zaggino/z-schema/compare/v12.0.0...v12.0.1) (2026-03-03)
+
+
+### Bug Fixes
+
+* clamp asyncTimeout to prevent resource exhaustion (CWE-400) ([#370](https://github.com/zaggino/z-schema/issues/370)) ([ffd31ed](https://github.com/zaggino/z-schema/commit/ffd31ed10c558e3f9670f938ef002a58e7deea60))
+* code scanning alert no. 15: Inefficient regular expression ([#368](https://github.com/zaggino/z-schema/issues/368)) ([4d54149](https://github.com/zaggino/z-schema/commit/4d541498c5494da63b10f84b6878c63e9bfebf5f))
+* enforce max pattern length in compileSchemaRegex to mitigate regex injection (CWE-95) ([c6e1be4](https://github.com/zaggino/z-schema/commit/c6e1be428a4547bf1a47a7c1cb632cf37ee8d23b))
+* js/path-injection alerts ([#372](https://github.com/zaggino/z-schema/issues/372)) ([6a3c774](https://github.com/zaggino/z-schema/commit/6a3c7748b10efd841a87c0bb19e74a409b991259))
+* js/resource-exhaustion, CWE-400 ([2801b49](https://github.com/zaggino/z-schema/commit/2801b49b33fc17a9ef6c0ad568edfad627a52317))
+* polynomial regular expression used on uncontrolled data ([#371](https://github.com/zaggino/z-schema/issues/371)) ([007cf85](https://github.com/zaggino/z-schema/commit/007cf857ceb9f3e72a8f1870d9a090b4b32b89a1))
+* prevent prototype-polluting assignments in schema compiler (CWE-1321) ([f4f2735](https://github.com/zaggino/z-schema/commit/f4f273596341eb433863fd7081dc70f430156642))
+* validate URLs before fetching remote schemas in CLI to prevent SSRF (CWE-918) ([75c161e](https://github.com/zaggino/z-schema/commit/75c161e137046efee9900c08c942bf1333b2052f))
+* workflow permissions ([cd85523](https://github.com/zaggino/z-schema/commit/cd85523b161804b536b75ce73a9b4bf3ef575246))
+
 ## [12.0.0](https://github.com/zaggino/z-schema/compare/v11.0.1...v12.0.0) (2026-02-28)
 
 
