@@ -130,5 +130,20 @@ describe('Format Validators', () => {
       expect(options).toBeDefined();
       expect(options.asyncTimeout).toBe(2000);
     });
+
+    it('should clamp asyncTimeout to MAX_ASYNC_TIMEOUT (60 000 ms)', () => {
+      const validator = ZSchema.create({ asyncTimeout: 999_999_999 });
+      expect(validator.options.asyncTimeout).toBe(60_000);
+    });
+
+    it('should clamp negative asyncTimeout to 0', () => {
+      const validator = ZSchema.create({ asyncTimeout: -500 });
+      expect(validator.options.asyncTimeout).toBe(0);
+    });
+
+    it('should keep asyncTimeout when within allowed range', () => {
+      const validator = ZSchema.create({ asyncTimeout: 5000 });
+      expect(validator.options.asyncTimeout).toBe(5000);
+    });
   });
 });
