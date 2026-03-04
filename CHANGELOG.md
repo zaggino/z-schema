@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.0.2](https://github.com/zaggino/z-schema/compare/v12.0.1...v12.0.2) (2026-03-04)
+
+
+### Bug Fixes
+
+* address CodeQL security alerts (CWE-1321, CWE-95, CWE-400) ([#374](https://github.com/zaggino/z-schema/issues/374)) ([a0b1272](https://github.com/zaggino/z-schema/commit/a0b12722408a8c9c5e93b5b5a9aa041419fdc778))
+
 ## [12.0.1](https://github.com/zaggino/z-schema/compare/v12.0.0...v12.0.1) (2026-03-03)
 
 
