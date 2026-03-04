@@ -11,6 +11,8 @@ import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
 import { isAbsoluteUri } from './utils/uri.js';
 import { isObject } from './utils/what-is.js';
 
+const ASYNC_TIMEOUT_POLL_MS = 10;
+
 export interface SchemaErrorDetail {
   /**
    * Example: "Expected type string but found type array"
@@ -160,6 +162,7 @@ export class Report {
 
   processAsyncTasks(timeout: number | undefined, callback: ValidateCallback) {
     const validationTimeout = Math.min(Math.max(timeout || 2000, 0), MAX_ASYNC_TIMEOUT);
+    const timeoutAt = Date.now() + validationTimeout;
     let tasksCount = this.asyncTasks.length;
     let timedOut = false;
 
@@ -193,13 +196,19 @@ export class Report {
       fn(...fnArgs, respondCallback);
     }
 
-    setTimeout(() => {
-      if (tasksCount > 0) {
+    const checkTimeout = () => {
+      if (timedOut || tasksCount <= 0) {
+        return;
+      }
+      if (Date.now() >= timeoutAt) {
         timedOut = true;
         this.addError('ASYNC_TIMEOUT', [tasksCount, validationTimeout]);
         callback(getValidateError({ details: this.errors }), false);
+        return;
       }
-    }, validationTimeout);
+      setTimeout(checkTimeout, ASYNC_TIMEOUT_POLL_MS);
+    };
+    setTimeout(checkTimeout, ASYNC_TIMEOUT_POLL_MS);
   }
 
   getPath(returnPathAsString?: boolean) {
