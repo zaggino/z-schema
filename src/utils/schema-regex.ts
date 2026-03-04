@@ -25,6 +25,7 @@ export function compileSchemaRegex(
   if (needsUnicode) {
     // Try compiling with 'u' flag only
     try {
+      // lgtm[js/regex-injection] JSON Schema `pattern` is intentionally regex syntax and constrained by MAX_SCHEMA_REGEX_LENGTH.
       const re = new RegExp(pattern, 'u');
       return { ok: true, value: re };
     } catch (e: any) {
@@ -38,6 +39,7 @@ export function compileSchemaRegex(
     }
   } else {
     try {
+      // lgtm[js/regex-injection] JSON Schema `pattern` is intentionally regex syntax and constrained by MAX_SCHEMA_REGEX_LENGTH.
       const re = new RegExp(pattern);
       return { ok: true, value: re };
     } catch (e: any) {

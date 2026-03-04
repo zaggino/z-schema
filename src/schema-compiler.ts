@@ -9,6 +9,14 @@ import { getSchemaReader } from './z-schema-reader.js';
 
 /** Safely assign a property on `obj`, refusing prototype-polluting keys. */
 function safeSetProperty(obj: Record<string, unknown>, key: string, value: unknown): void {
+  const unsafeTargets = [
+    Object.prototype as unknown as Record<string, unknown>,
+    Function.prototype as unknown as Record<string, unknown>,
+    Array.prototype as unknown as Record<string, unknown>,
+  ];
+  if (unsafeTargets.includes(obj)) {
+    return;
+  }
   /** Reject property names that could pollute Object.prototype (CWE-1321). */
   if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
     obj[key] = value;
@@ -300,8 +308,18 @@ export class SchemaCompiler {
       }
     }
 
+    const canMutateSchemaObject =
+      schema !== (Object.prototype as unknown as JsonSchemaInternal) &&
+      schema !== (Function.prototype as unknown as JsonSchemaInternal) &&
+      schema !== (Array.prototype as unknown as JsonSchemaInternal);
+
     // if we have an id than it should be cached already (if this instance has compiled it)
-    if (schema.__$compiled && schema.id && this.validator.scache.checkCacheForUri(schema.id) === false) {
+    if (
+      canMutateSchemaObject &&
+      schema.__$compiled &&
+      schema.id &&
+      this.validator.scache.checkCacheForUri(schema.id) === false
+    ) {
       schema.__$compiled = undefined;
     }
 
@@ -311,7 +329,7 @@ export class SchemaCompiler {
     }
 
     // v8 - if $schema is not present, set $schema to default
-    if (!schema.$schema && this.validator.options.version !== 'none') {
+    if (canMutateSchemaObject && !schema.$schema && this.validator.options.version !== 'none') {
       schema.$schema = this.validator.getDefaultSchemaId();
     }
 
@@ -329,7 +347,9 @@ export class SchemaCompiler {
 
     // delete all __$missingReferences from previous compilation attempts
     const isValidExceptReferences = report.isValid();
-    delete schema.__$missingReferences;
+    if (canMutateSchemaObject) {
+      delete schema.__$missingReferences;
+    }
 
     // collect all references that need to be resolved - $ref and $schema
     const useRefObjectScope =
@@ -393,7 +413,7 @@ export class SchemaCompiler {
           report.path = report.path.slice(0, -refObj.path.length);
 
           // pusblish unresolved references out
-          if (isValidExceptReferences) {
+          if (isValidExceptReferences && canMutateSchemaObject) {
             schema.__$missingReferences = schema.__$missingReferences || [];
             schema.__$missingReferences.push(refObj);
           }
@@ -404,7 +424,7 @@ export class SchemaCompiler {
     }
 
     const isValid = report.isValid();
-    if (isValid) {
+    if (isValid && canMutateSchemaObject) {
       schema.__$compiled = true;
     }
     // else {
