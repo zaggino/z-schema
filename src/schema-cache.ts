@@ -12,6 +12,18 @@ import { normalizeOptions } from './z-schema-options.js';
 export type SchemaCacheStorage = Record<string, JsonSchemaInternal>;
 export type ReferenceSchemaCacheStorage = Array<[JsonSchemaInternal, JsonSchemaInternal]>;
 
+// Normalize a URI into a cache key, rejecting keys that could pollute Object.prototype.
+function getSafeRemotePath(uri: string): string | undefined {
+  const remotePath = getRemotePath(uri);
+  if (!remotePath) {
+    return undefined;
+  }
+  if (remotePath === '__proto__' || remotePath === 'constructor' || remotePath === 'prototype') {
+    return undefined;
+  }
+  return remotePath;
+}
+
 const getEffectiveId = (schema: JsonSchemaInternal): string | undefined => {
   let id = getId(schema);
   if ((!id || !isAbsoluteUri(id)) && typeof schema.id === 'string' && isAbsoluteUri(schema.id)) {
@@ -51,34 +63,34 @@ export function prepareRemoteSchema(
 }
 
 export class SchemaCache {
-  static global_cache: SchemaCacheStorage = {};
-  cache: SchemaCacheStorage = {};
+  static global_cache: SchemaCacheStorage = Object.create(null);
+  cache: SchemaCacheStorage = Object.create(null);
 
   constructor(private validator: ZSchemaBase) {}
 
   static cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
-    const remotePath = getRemotePath(uri);
+    const remotePath = getSafeRemotePath(uri);
     if (remotePath) {
       this.global_cache[remotePath] = schema;
     }
   }
 
   cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
-    const remotePath = getRemotePath(uri);
+    const remotePath = getSafeRemotePath(uri);
     if (remotePath) {
       this.cache[remotePath] = schema;
     }
   }
 
   removeFromCacheByUri(uri: string) {
-    const remotePath = getRemotePath(uri);
+    const remotePath = getSafeRemotePath(uri);
     if (remotePath) {
       delete this.cache[remotePath];
     }
   }
 
   checkCacheForUri(uri: string) {
-    const remotePath = getRemotePath(uri);
+    const remotePath = getSafeRemotePath(uri);
     return remotePath ? this.cache[remotePath] != null : false;
   }
 
@@ -98,6 +110,9 @@ export class SchemaCache {
   }
 
   fromCache(path: string): JsonSchemaInternal | undefined {
+    if (path === '__proto__' || path === 'constructor' || path === 'prototype') {
+      return undefined;
+    }
     let found = this.cache[path];
     if (found) {
       return found;
@@ -130,7 +145,7 @@ export class SchemaCache {
       }
     }
 
-    const remotePath = getRemotePath(uri);
+    const remotePath = getSafeRemotePath(uri);
     const queryPath = getQueryPath(uri);
     let result: JsonSchemaInternal | undefined;
     let resolvedFromAncestor = false;
