@@ -14,7 +14,7 @@ Line coverage status: **high**
 | src/report.ts                 |     94% |         95% |        95% |      88% |
 | src/schema-cache.ts           |     89% |         90% |        92% |      89% |
 | src/schema-compiler.ts        |     94% |         94% |       100% |      91% |
-| src/schema-validator.ts       |     81% |         81% |       100% |      76% |
+| src/schema-validator.ts       |     81% |         82% |       100% |      76% |
 | src/utils/array.ts            |    100% |        100% |       100% |     100% |
 | src/utils/base64.ts           |     65% |         65% |       100% |      63% |
 | src/utils/clone.ts            |     97% |         98% |       100% |      94% |
