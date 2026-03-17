@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.0.3](https://github.com/zaggino/z-schema/compare/v12.0.2...v12.0.3) (2026-03-17)
+
+
+### Bug Fixes
+
+* update 'uri' and 'duration' format validators to comply with json-schema-test-suite ([0d85bf0](https://github.com/zaggino/z-schema/commit/0d85bf01024fd935ddf6c42259580287ad667a0e))
+
 ## [12.0.2](https://github.com/zaggino/z-schema/compare/v12.0.1...v12.0.2) (2026-03-04)
 
 
