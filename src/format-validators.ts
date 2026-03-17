@@ -157,7 +157,9 @@ const durationValidator: FormatValidatorFn = (input: unknown) => {
   const datePart = parts[0];
   const timePart = parts.length === 2 ? parts[1] : undefined;
 
-  if (!/^(?:\d+Y)?(?:\d+M)?(?:\d+D)?$/.test(datePart)) {
+  // RFC 3339 Appendix A ABNF: dur-year = 1*DIGIT "Y" [dur-month], dur-month = 1*DIGIT "M" [dur-day]
+  // Y can only be followed by M (not D directly), so P1Y2D is invalid
+  if (datePart.length > 0 && !/^(?:\d+Y(?:\d+M(?:\d+D)?)?|\d+M(?:\d+D)?|\d+D)$/.test(datePart)) {
     return false;
   }
 
@@ -168,7 +170,9 @@ const durationValidator: FormatValidatorFn = (input: unknown) => {
     if (timePart.length === 0) {
       return false;
     }
-    if (!/^(?:\d+H)?(?:\d+M)?(?:\d+S)?$/.test(timePart)) {
+    // RFC 3339 Appendix A ABNF: dur-hour = 1*DIGIT "H" [dur-minute], dur-minute = 1*DIGIT "M" [dur-second]
+    // H can only be followed by M (not S directly), so PT1H2S is invalid
+    if (!/^(?:\d+H(?:\d+M(?:\d+S)?)?|\d+M(?:\d+S)?|\d+S)$/.test(timePart)) {
       return false;
     }
     hasTimeComponent = /\d+[HMS]/.test(timePart);
@@ -189,17 +193,44 @@ const uuidValidator: FormatValidatorFn = (input: unknown) => {
 
 const strictUriValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string' || isURLModule.default(uri);
 
+const hasValidPercentEncoding = (str: string): boolean => {
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '%') {
+      if (i + 2 >= str.length || !/[0-9a-fA-F]/.test(str[i + 1]) || !/[0-9a-fA-F]/.test(str[i + 2])) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
+
 const uriValidator: FormatValidatorFn = function (uri: unknown) {
   if (typeof uri !== 'string') return true;
   // eslint-disable-next-line no-control-regex
   if (/[^\x00-\x7F]/.test(uri)) return false;
-  const match = uri.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):\/\/([^/]*)/);
+  if (!hasValidPercentEncoding(uri)) return false;
+  const match = uri.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):\/\/([^/?#]*)/);
   if (match) {
     const authority = match[2];
     const atIndex = authority.indexOf('@');
     if (atIndex > 0) {
       const userinfo = authority.substring(0, atIndex);
       if (userinfo.includes('[') || userinfo.includes(']')) {
+        return false;
+      }
+    }
+    // Validate port: must be numeric
+    let hostPort = atIndex >= 0 ? authority.substring(atIndex + 1) : authority;
+    if (hostPort.startsWith('[')) {
+      const bracketEnd = hostPort.indexOf(']');
+      if (bracketEnd >= 0) {
+        hostPort = hostPort.substring(bracketEnd + 1);
+      }
+    }
+    const colonIndex = hostPort.lastIndexOf(':');
+    if (colonIndex >= 0) {
+      const port = hostPort.substring(colonIndex + 1);
+      if (port.length > 0 && !/^\d+$/.test(port)) {
         return false;
       }
     }
