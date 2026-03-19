@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.0.4](https://github.com/zaggino/z-schema/compare/v12.0.3...v12.0.4) (2026-03-19)
+
+
+### Bug Fixes
+
+* correctly set sideEffects for file that needs it ([#381](https://github.com/zaggino/z-schema/issues/381)) ([29d05bb](https://github.com/zaggino/z-schema/commit/29d05bb65a137538624ce063b41105e1f61e78af))
+
 ## [12.0.3](https://github.com/zaggino/z-schema/compare/v12.0.2...v12.0.3) (2026-03-17)
 
 
