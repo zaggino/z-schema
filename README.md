@@ -280,17 +280,17 @@ Big thanks to:
 		</tr>
 		<tr>
             <td align="center">
-                <a href="https://github.com/epoberezkin">
-                    <img src="https://avatars.githubusercontent.com/u/2769109?v=4" width="100;" alt="epoberezkin"/>
-                    <br />
-                    <sub><b>Evgeny</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/toofishes">
                     <img src="https://avatars.githubusercontent.com/u/265817?v=4" width="100;" alt="toofishes"/>
                     <br />
                     <sub><b>Dan McGee</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/epoberezkin">
+                    <img src="https://avatars.githubusercontent.com/u/2769109?v=4" width="100;" alt="epoberezkin"/>
+                    <br />
+                    <sub><b>Evgeny</b></sub>
                 </a>
             </td>
             <td align="center">
