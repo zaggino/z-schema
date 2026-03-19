@@ -4,7 +4,9 @@
   "engines": {
     "node": ">=22.0.0"
   },
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/z-schema-versions.js"
+  ],
   "description": "Fast, lightweight JSON Schema validator for Node.js and browsers — full support for draft-04, draft-06, draft-07, draft-2019-09, and draft-2020-12 (latest)",
   "homepage": "https://github.com/zaggino/z-schema",
   "authors": [
