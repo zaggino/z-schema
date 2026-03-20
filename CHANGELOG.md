@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.0.5](https://github.com/zaggino/z-schema/compare/v12.0.4...v12.0.5) (2026-03-20)
+
+
+### Bug Fixes
+
+* add safe-regex2 ReDoS guard and strengthen prototype pollution protection ([09de63a](https://github.com/zaggino/z-schema/commit/09de63a3bce65c009a68871842318544e063859d))
+
 ## [12.0.4](https://github.com/zaggino/z-schema/compare/v12.0.3...v12.0.4) (2026-03-19)
 
 
