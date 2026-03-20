@@ -131,7 +131,12 @@ function validateWithAutomaticDownloads(filePath, data, schema, callback) {
             console.error('Requests to private/internal addresses are not allowed: ' + url);
             process.exit(1);
           }
-          request(parsedUrl, function (response) {
+          request(parsedUrl, { maxRedirects: 0 }, function (response) {
+            // Reject redirects to prevent SSRF via open redirect (CWE-918)
+            if (response.statusCode >= 300 && response.statusCode < 400) {
+              console.error('Redirects are not followed for security reasons: ' + url);
+              process.exit(1);
+            }
             var body = '';
             response.on('data', function (chunk) {
               body += chunk;
