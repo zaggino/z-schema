@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.1.0](https://github.com/zaggino/z-schema/compare/v12.0.5...v12.1.0) (2026-03-20)
+
+
+### Features
+
+* switch bundler from rollup to tsdown ([a9245fd](https://github.com/zaggino/z-schema/commit/a9245fd827155a0223f353105b7996166a5a0a48))
+
 ## [12.0.5](https://github.com/zaggino/z-schema/compare/v12.0.4...v12.0.5) (2026-03-20)
 
 
