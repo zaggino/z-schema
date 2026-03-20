@@ -7,6 +7,8 @@
 
 * switch bundler from rollup to tsdown ([a9245fd](https://github.com/zaggino/z-schema/commit/a9245fd827155a0223f353105b7996166a5a0a48))
 
+  WARNING: minor breaking change if you imported files from /dist folder directly, they now have correct .mjs extension instead of .js
+
 ## [12.0.5](https://github.com/zaggino/z-schema/compare/v12.0.4...v12.0.5) (2026-03-20)
 
 
