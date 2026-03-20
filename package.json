@@ -5,7 +5,7 @@
     "node": ">=22.0.0"
   },
   "sideEffects": [
-    "./dist/z-schema-versions.js"
+    "./dist/z-schema-versions.mjs"
   ],
   "description": "Fast, lightweight JSON Schema validator for Node.js and browsers — full support for draft-04, draft-06, draft-07, draft-2019-09, and draft-2020-12 (latest)",
   "homepage": "https://github.com/zaggino/z-schema",
@@ -39,14 +39,14 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/types/index.d.ts",
-        "default": "./dist/index.js"
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
       },
       "require": {
         "types": "./cjs/index.d.ts",
         "default": "./cjs/index.js"
       },
-      "default": "./dist/index.js"
+      "default": "./dist/index.mjs"
     }
   },
   "bin": {
@@ -70,11 +70,9 @@
     "lint": "eslint --fix",
     "lint:check": "eslint",
     "clean": "rimraf ./cjs && rimraf ./dist && rimraf ./umd && rimraf --glob \"./src/schemas/*.json\"",
-    "build": "npm run copy:schemas && tsc && npm run copy:module-json && rollup -c",
-    "build:browser": "rollup -c --environment BROWSER",
-    "build:watch": "rollup -c -w",
+    "build": "npm run copy:schemas && tsdown",
+    "build:watch": "npm run copy:schemas && tsdown --watch",
     "build:tests": "tsc --noEmit --project test/tsconfig.json",
-    "copy:module-json": "node -e \"fs.copyFileSync('./src/package.json', './dist/package.json')\"",
     "copy:schemas": "node ./scripts/copy-schemas.mts",
     "coverage:artifacts": "node ./scripts/generate-test-coverage-report.mts",
     "coverage:update-badge": "node ./scripts/update-readme-coverage-badge.mts",
@@ -97,11 +95,6 @@
     "@eslint/js": "^9.39.2",
     "@eslint/json": "^1.0.0",
     "@eslint/markdown": "^7.5.1",
-    "@rollup/plugin-commonjs": "^29.0.0",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-terser": "^1.0.0",
-    "@rollup/plugin-typescript": "^12.3.0",
     "@types/lodash.isequal": "^4.5.8",
     "@types/node": "^25.2.0",
     "@types/punycode": "^2.1.4",
@@ -118,9 +111,7 @@
     "lodash.isequal": "^4.5.0",
     "prettier": "^3.8.1",
     "rimraf": "^6.1.2",
-    "rollup": "^4.59.0",
-    "rollup-plugin-dts": "^6.3.0",
-    "tslib": "^2.8.1",
+    "tsdown": "^0.21.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0",
     "vitest": "^4.0.18"

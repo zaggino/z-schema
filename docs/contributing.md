@@ -105,7 +105,7 @@ Append `!` after the type/scope for breaking changes, or include a `BREAKING CHA
 | --------------- | ----------------------- | --------------------------------------------- |
 | Lint            | `npm run lint:check`    | ESLint with TS rules + import sort            |
 | Format          | `npm run format:check`  | Prettier (120 cols, single quotes, semi, es5) |
-| Build           | `npm run build`         | TypeScript compilation + Rollup bundling      |
+| Build           | `npm run build`         | tsdown bundling (ESM + CJS + UMD + types)     |
 | Test type-check | `npm run build:tests`   | Type-check test files without running them    |
 | Tests (all)     | `npm test`              | Vitest — node + browser projects              |
 | Tests (node)    | `npm run test:node`     | Node-only tests with output                   |

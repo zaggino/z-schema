@@ -117,13 +117,13 @@ When a schema is looked up by URI, the instance cache is checked first. If not f
 
 ## Build Outputs
 
-| Output  | Format                         | Entry                        |
-| ------- | ------------------------------ | ---------------------------- |
-| `dist/` | ESM + types                    | `src/index.ts` via `tsc`     |
-| `cjs/`  | CommonJS                       | `src/index.ts` via Rollup    |
-| `umd/`  | UMD (browser global `ZSchema`) | `src/z-schema.ts` via Rollup |
+| Output  | Format                          | Entry                        |
+| ------- | ------------------------------- | ---------------------------- |
+| `dist/` | ESM (`.mjs`) + types (`.d.mts`) | `src/index.ts` via tsdown    |
+| `cjs/`  | CommonJS                        | `src/index.ts` via tsdown    |
+| `umd/`  | UMD (browser global `ZSchema`)  | `src/z-schema.ts` via tsdown |
 
-The `src/package.json` contains `{ "type": "module" }` and gets copied to `dist/` to mark ESM output.
+All outputs are produced by [tsdown](https://tsdown.dev/) (powered by Rolldown). ESM output uses `.mjs` extensions; the `package.json` exports map uses conditional `import`/`require` to route consumers to the correct format.
 
 ## Key Internal Types
 
