@@ -101,20 +101,20 @@ Append `!` after the type/scope for breaking changes, or include a `BREAKING CHA
 
 ## Code Quality Checks
 
-| Check           | Command                 | Notes                                         |
-| --------------- | ----------------------- | --------------------------------------------- |
-| Lint            | `npm run lint:check`    | ESLint with TS rules + import sort            |
-| Format          | `npm run format:check`  | Prettier (120 cols, single quotes, semi, es5) |
-| Build           | `npm run build`         | tsdown bundling (ESM + CJS + UMD + types)     |
-| Test type-check | `npm run build:tests`   | Type-check test files without running them    |
-| Tests (all)     | `npm test`              | Vitest — node + browser projects              |
-| Tests (node)    | `npm run test:node`     | Node-only tests with output                   |
-| Tests (browser) | `npm run test:browser`  | Browser tests (Chromium, Firefox, WebKit)     |
-| Coverage        | `npm run test:coverage` | Istanbul coverage for `src/`                  |
+| Check           | Command                 | Notes                                      |
+| --------------- | ----------------------- | ------------------------------------------ |
+| Lint            | `npm run lint:check`    | oxlint with TS + vitest plugins            |
+| Format          | `npm run format:check`  | oxfmt (120 cols, single quotes, semi, es5) |
+| Build           | `npm run build`         | tsdown bundling (ESM + CJS + UMD + types)  |
+| Test type-check | `npm run build:tests`   | Type-check test files without running them |
+| Tests (all)     | `npm test`              | Vitest — node + browser projects           |
+| Tests (node)    | `npm run test:node`     | Node-only tests with output                |
+| Tests (browser) | `npm run test:browser`  | Browser tests (Chromium, Firefox, WebKit)  |
+| Coverage        | `npm run test:coverage` | Istanbul coverage for `src/`               |
 
 ## Pre-commit & Pre-push Hooks
 
-- **Pre-commit** (via Husky + lint-staged): auto-runs ESLint fix + Prettier on staged files.
+- **Pre-commit** (via Husky + lint-staged): auto-runs oxlint fix + oxfmt on staged files.
 - **Pre-push**: runs `npm run build && npm run build:tests` to catch build/type errors.
 
 ## File Organization Rules

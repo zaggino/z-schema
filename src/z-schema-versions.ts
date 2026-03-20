@@ -11,8 +11,6 @@ import type {
 import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { SchemaCache } from './schema-cache.js';
-import { normalizeOptions } from './z-schema-options.js';
-
 // draft-04
 import _Draft4Schema from './schemas/draft-04-schema.json' with { type: 'json' };
 // draft-06
@@ -37,6 +35,7 @@ import _Draft202012MetaMetaData from './schemas/draft-2020-12-meta-meta-data.jso
 import _Draft202012MetaUnevaluated from './schemas/draft-2020-12-meta-unevaluated.json' with { type: 'json' };
 import _Draft202012MetaValidation from './schemas/draft-2020-12-meta-validation.json' with { type: 'json' };
 import _Draft202012Schema from './schemas/draft-2020-12-schema.json' with { type: 'json' };
+import { normalizeOptions } from './z-schema-options.js';
 
 // draft-04
 const Draft4Schema: JsonSchemaDraft4 = _Draft4Schema;

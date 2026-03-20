@@ -1,0 +1,47 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "vitest"],
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "rules": {
+    "@typescript-eslint/consistent-type-imports": "error",
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-unused-vars": [
+      "error",
+      {
+        "args": "after-used",
+        "argsIgnorePattern": "^_",
+        "caughtErrors": "all",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["test/**"],
+      "rules": {
+        "vitest/no-conditional-expect": "off",
+        "vitest/no-standalone-expect": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    ".env*",
+    ".github/",
+    "*.min.js",
+    "benchmark/",
+    "build/",
+    "cjs/",
+    "coverage/",
+    "dist/",
+    "json-schema-spec/",
+    "node_modules/",
+    "package-lock.json",
+    "specs/",
+    "test/dist/",
+    "test/public/json-schema-test-suite/",
+    "umd/"
+  ]
+}

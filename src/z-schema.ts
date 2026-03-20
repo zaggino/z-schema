@@ -6,7 +6,6 @@ import type { ZSchemaOptions } from './z-schema-options.js';
 import type { SchemaReader } from './z-schema-reader.js';
 
 import './z-schema-versions.js';
-
 import { getRegisteredFormats, registerFormat, unregisterFormat } from './format-validators.js';
 import { prepareRemoteSchema, SchemaCache } from './schema-cache.js';
 import { deepClone } from './utils/clone.js';

@@ -689,7 +689,7 @@ const SchemaValidators = {
       report.addError('KEYWORD_TYPE_EXPECTED', ['description', 'string'], undefined, schema, 'description');
     }
   },
-  default: function (this: SchemaValidator /* report, schema */) {
+  default: function (this: SchemaValidator) /* report, schema */ {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.6.2
     // There are no restrictions placed on the value of this keyword.
   },
