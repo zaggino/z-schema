@@ -26,8 +26,8 @@ export type {
 } from './json-schema-versions.js';
 export type { Report, SchemaErrorDetail } from './report.js';
 export type { ZSchema, ZSchemaAsync, ZSchemaAsyncSafe, ZSchemaSafe } from './z-schema.js';
-export { ValidateOptions, ValidateResponse } from './z-schema-base.js';
-export { ZSchemaOptions } from './z-schema-options.js';
-export { SchemaReader } from './z-schema-reader.js';
+export type { ValidateOptions, ValidateResponse } from './z-schema-base.js';
+export type { ZSchemaOptions } from './z-schema-options.js';
+export type { SchemaReader } from './z-schema-reader.js';
 
 export default ZSchema;
