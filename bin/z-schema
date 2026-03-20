@@ -131,7 +131,6 @@ function validateWithAutomaticDownloads(filePath, data, schema, callback) {
             console.error('Requests to private/internal addresses are not allowed: ' + url);
             process.exit(1);
           }
-          // codeql[js/request-forgery] CLI intentionally fetches user-provided schema URLs; guarded by HTTPS-only + private IP blocklist above.
           request(parsedUrl, { maxRedirects: 0 }, function (response) {
             // Reject redirects to prevent SSRF via open redirect (CWE-918)
             if (response.statusCode >= 300 && response.statusCode < 400) {

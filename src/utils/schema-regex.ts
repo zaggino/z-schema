@@ -1,6 +1,8 @@
 // Shared regex compilation helper for JSON Schema patterns
 // Returns { ok: true, value: RegExp } or { ok: false, error: { pattern, message } }
 
+import isSafeRegex from 'safe-regex2';
+
 import { MAX_SCHEMA_REGEX_LENGTH } from './constants.js';
 
 export function compileSchemaRegex(
@@ -16,6 +18,17 @@ export function compileSchemaRegex(
     };
   }
 
+  // Reject patterns vulnerable to catastrophic backtracking (ReDoS) before compiling
+  if (!isSafeRegex(pattern)) {
+    return {
+      ok: false,
+      error: {
+        pattern,
+        message: 'Pattern rejected as potentially unsafe (ReDoS)',
+      },
+    };
+  }
+
   const unicodePropertyEscape = /\\[pP]{/;
   const nonBmpCharacter = /[\u{10000}-\u{10FFFF}]/u;
   const surrogatePairEscape = /\\uD[89AB][0-9A-Fa-f]{2}\\uD[CDEF][0-9A-Fa-f]{2}/;
@@ -25,9 +38,7 @@ export function compileSchemaRegex(
   if (needsUnicode) {
     // Try compiling with 'u' flag only
     try {
-      // lgtm[js/regex-injection] codeql[js/regex-injection]
-      // JSON Schema `pattern` is intentionally regex syntax and constrained by MAX_SCHEMA_REGEX_LENGTH.
-      const re = new RegExp(pattern, 'u'); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp
+      const re = new RegExp(pattern, 'u');
       return { ok: true, value: re };
     } catch (e: any) {
       return {
@@ -40,9 +51,7 @@ export function compileSchemaRegex(
     }
   } else {
     try {
-      // lgtm[js/regex-injection] codeql[js/regex-injection]
-      // JSON Schema `pattern` is intentionally regex syntax and constrained by MAX_SCHEMA_REGEX_LENGTH.
-      const re = new RegExp(pattern); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp
+      const re = new RegExp(pattern);
       return { ok: true, value: re };
     } catch (e: any) {
       return {

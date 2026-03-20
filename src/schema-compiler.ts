@@ -34,7 +34,9 @@ function safeDeleteProperty(obj: Record<string, unknown>, key: string): void {
   if (isUnsafeTarget(obj)) {
     return;
   }
-  delete obj[key];
+  if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
+    delete obj[key];
+  }
 }
 
 interface Id {

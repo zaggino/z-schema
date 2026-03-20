@@ -54,4 +54,23 @@ describe('compileSchemaRegex', () => {
     const result = compileSchemaRegex(exactPattern);
     expect(result.ok).toBe(true);
   });
+
+  it('rejects patterns vulnerable to catastrophic backtracking (ReDoS)', () => {
+    const redosPatterns = ['(a+)+', '(a+){2,}'];
+    for (const pattern of redosPatterns) {
+      const result = compileSchemaRegex(pattern);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.message).toContain('ReDoS');
+      }
+    }
+  });
+
+  it('accepts safe patterns that are not ReDoS-vulnerable', () => {
+    const safePatterns = ['^[a-z]+$', '\\d{1,3}\\.\\d{1,3}', '^foo|bar$', '[A-Za-z0-9_-]+'];
+    for (const pattern of safePatterns) {
+      const result = compileSchemaRegex(pattern);
+      expect(result.ok).toBe(true);
+    }
+  });
 });
