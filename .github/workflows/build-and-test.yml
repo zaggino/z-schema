@@ -35,9 +35,9 @@ jobs:
         run: git submodule update --init
       - name: Install dependencies
         run: npm ci
-      - name: ESLint
+      - name: Lint
         run: npm run lint:check
-      - name: Prettier
+      - name: Format
         run: npm run format:check
       - name: Build
         run: npm run build
@@ -74,7 +74,7 @@ jobs:
           # Restore and format (same as pre-commit hook would)
           cp /tmp/test-coverage.md docs/test-coverage.md
           cp /tmp/README.md README.md
-          npx prettier --write docs/test-coverage.md README.md
+          npx oxfmt --write docs/test-coverage.md README.md
 
           # Only commit if there are real changes against the branch HEAD
           if git diff --quiet HEAD -- docs/test-coverage.md README.md; then

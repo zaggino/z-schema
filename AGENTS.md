@@ -68,6 +68,8 @@ test/
   public/             # Browser test assets (served by Vitest browser)
   ZSchemaTestSuite/   # Legacy z-schema-specific test suite (JS files)
 json-schema-spec/     # Git submodule — official JSON Schema specifications
+.oxlintrc.json        # oxlint configuration (TS + vitest plugins)
+.oxfmtrc.json         # oxfmt configuration (formatting, import sorting, package.json sorting)
 tsdown.config.ts      # tsdown build configuration (ESM + CJS + UMD)
 scripts/              # Build scripts (copy-schemas.mts)
 bin/                  # CLI entry point (z-schema command)

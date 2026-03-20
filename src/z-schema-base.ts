@@ -6,8 +6,8 @@ import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { type Errors, getValidateError } from './errors.js';
 import { getSupportedFormats } from './format-validators.js';
-import { isInternalKey } from './json-schema.js';
 import { VERSION_SCHEMA_URL_MAPPING } from './json-schema-versions.js';
+import { isInternalKey } from './json-schema.js';
 import { validate as validateJson } from './json-validation.js';
 import { Report } from './report.js';
 import { prepareRemoteSchema, SchemaCache } from './schema-cache.js';

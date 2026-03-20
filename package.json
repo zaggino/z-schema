@@ -1,53 +1,31 @@
 {
   "name": "z-schema",
   "version": "12.0.5",
-  "engines": {
-    "node": ">=22.0.0"
-  },
-  "sideEffects": [
-    "./dist/z-schema-versions.mjs"
-  ],
   "description": "Fast, lightweight JSON Schema validator for Node.js and browsers — full support for draft-04, draft-06, draft-07, draft-2019-09, and draft-2020-12 (latest)",
-  "homepage": "https://github.com/zaggino/z-schema",
-  "authors": [
-    "Martin Zagora <zaggino@gmail.com>"
-  ],
-  "license": "MIT",
   "keywords": [
-    "json-schema",
-    "json",
-    "schema",
-    "validator",
-    "validation",
-    "json-schema-validator",
     "draft-04",
     "draft-06",
     "draft-07",
     "draft-2019-09",
     "draft-2020-12",
+    "esm",
+    "json",
+    "json-schema",
+    "json-schema-validator",
     "jsonschema",
+    "schema",
     "typescript",
-    "esm"
+    "validation",
+    "validator"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/zaggino/z-schema.git"
-  },
+  "homepage": "https://github.com/zaggino/z-schema",
   "bugs": {
     "url": "https://github.com/zaggino/z-schema/issues"
   },
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
-      },
-      "require": {
-        "types": "./cjs/index.d.ts",
-        "default": "./cjs/index.js"
-      },
-      "default": "./dist/index.mjs"
-    }
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zaggino/z-schema.git"
   },
   "bin": {
     "z-schema": "bin/z-schema"
@@ -61,14 +39,30 @@
     "LICENSE",
     "README.md"
   ],
+  "sideEffects": [
+    "./dist/z-schema-versions.mjs"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./cjs/index.d.ts",
+        "default": "./cjs/index.js"
+      },
+      "default": "./dist/index.mjs"
+    }
+  },
   "scripts": {
     "prepare": "husky",
     "pre-commit": "npx lint-staged",
     "pre-push": "npm run build && npm run build:tests",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "lint": "eslint --fix",
-    "lint:check": "eslint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "lint": "oxlint --fix",
+    "lint:check": "oxlint",
     "clean": "rimraf ./cjs && rimraf ./dist && rimraf ./umd && rimraf --glob \"./src/schemas/*.json\"",
     "build": "npm run copy:schemas && tsdown",
     "build:watch": "npm run copy:schemas && tsdown --watch",
@@ -88,13 +82,7 @@
     "safe-regex2": "^5.1.0",
     "validator": "^13.15.26"
   },
-  "optionalDependencies": {
-    "commander": "^14.0.3"
-  },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
-    "@eslint/json": "^1.0.0",
-    "@eslint/markdown": "^7.5.1",
     "@types/lodash.isequal": "^4.5.8",
     "@types/node": "^25.2.0",
     "@types/punycode": "^2.1.4",
@@ -102,18 +90,23 @@
     "@vitest/browser-playwright": "^4.0.18",
     "@vitest/coverage-istanbul": "^4.0.18",
     "@vitest/coverage-v8": "^4.0.18",
-    "@vitest/eslint-plugin": "^1.6.6",
-    "eslint": "^9.39.2",
-    "eslint-plugin-simple-import-sort": "^12.1.1",
-    "globals": "^17.3.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "lodash.isequal": "^4.5.0",
-    "prettier": "^3.8.1",
+    "oxfmt": "^0.41.0",
+    "oxlint": "^1.56.0",
     "rimraf": "^6.1.2",
     "tsdown": "^0.21.4",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.54.0",
     "vitest": "^4.0.18"
-  }
+  },
+  "optionalDependencies": {
+    "commander": "^14.0.3"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "authors": [
+    "Martin Zagora <zaggino@gmail.com>"
+  ]
 }

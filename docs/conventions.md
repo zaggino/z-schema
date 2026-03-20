@@ -4,20 +4,13 @@
 
 - **TypeScript** with `strict: true`, target `esnext`, module `nodenext`.
 - Source is **ESM** (`"type": "module"` in `src/package.json`). All internal imports use `.js` extensions (Node ESM resolution).
-- Imports: use `import type { ... }` for type-only imports (enforced by `@typescript-eslint/consistent-type-imports`).
-- Import order is enforced by `eslint-plugin-simple-import-sort`:
-  1. Type-only imports
-  2. Side-effect imports
-  3. `node:` builtins
-  4. Packages (`@scope/...` or bare)
-  5. Absolute/alias imports
-  6. Relative non-JSON imports
-  7. Relative JSON imports
+- Imports: use `import type { ... }` for type-only imports (enforced by `@typescript-eslint/consistent-type-imports` via oxlint).
+- Import order is enforced by oxfmt `sortImports`: builtins, external packages, internal/subpath, relative imports.
 
 ## Formatting
 
-- **Prettier**: 120 char line width, single quotes, trailing commas (`es5`), semicolons.
-- **Lint-staged**: on commit, files are auto-fixed with ESLint + Prettier (configured in `lint-staged.config.mjs`).
+- **oxfmt**: 120 char line width, single quotes, trailing commas (`es5`), semicolons. Also handles import sorting and `package.json` key sorting.
+- **Lint-staged**: on commit, files are auto-formatted with oxfmt and JS/TS files are auto-fixed with oxlint (configured in `lint-staged.config.mjs`).
 - Run `npm run format` to format all files, `npm run format:check` to check without modifying.
 - Run `npm run lint` to lint + fix, `npm run lint:check` to lint without fixing.
 
