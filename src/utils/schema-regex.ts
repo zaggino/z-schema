@@ -25,8 +25,9 @@ export function compileSchemaRegex(
   if (needsUnicode) {
     // Try compiling with 'u' flag only
     try {
-      // lgtm[js/regex-injection] JSON Schema `pattern` is intentionally regex syntax and constrained by MAX_SCHEMA_REGEX_LENGTH.
-      const re = new RegExp(pattern, 'u');
+      // lgtm[js/regex-injection] codeql[js/regex-injection]
+      // JSON Schema `pattern` is intentionally regex syntax and constrained by MAX_SCHEMA_REGEX_LENGTH.
+      const re = new RegExp(pattern, 'u'); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp
       return { ok: true, value: re };
     } catch (e: any) {
       return {
@@ -39,8 +40,9 @@ export function compileSchemaRegex(
     }
   } else {
     try {
-      // lgtm[js/regex-injection] JSON Schema `pattern` is intentionally regex syntax and constrained by MAX_SCHEMA_REGEX_LENGTH.
-      const re = new RegExp(pattern);
+      // lgtm[js/regex-injection] codeql[js/regex-injection]
+      // JSON Schema `pattern` is intentionally regex syntax and constrained by MAX_SCHEMA_REGEX_LENGTH.
+      const re = new RegExp(pattern); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp
       return { ok: true, value: re };
     } catch (e: any) {
       return {

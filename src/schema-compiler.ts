@@ -7,20 +7,34 @@ import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { getSchemaReader } from './z-schema-reader.js';
 
+const UNSAFE_TARGETS = [
+  Object.prototype as unknown as Record<string, unknown>,
+  Function.prototype as unknown as Record<string, unknown>,
+  Array.prototype as unknown as Record<string, unknown>,
+];
+
+/** Returns true if `obj` is a built-in prototype that must not be mutated. */
+function isUnsafeTarget(obj: Record<string, unknown>): boolean {
+  return UNSAFE_TARGETS.includes(obj);
+}
+
 /** Safely assign a property on `obj`, refusing prototype-polluting keys. */
 function safeSetProperty(obj: Record<string, unknown>, key: string, value: unknown): void {
-  const unsafeTargets = [
-    Object.prototype as unknown as Record<string, unknown>,
-    Function.prototype as unknown as Record<string, unknown>,
-    Array.prototype as unknown as Record<string, unknown>,
-  ];
-  if (unsafeTargets.includes(obj)) {
+  if (isUnsafeTarget(obj)) {
     return;
   }
   /** Reject property names that could pollute Object.prototype (CWE-1321). */
   if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
     obj[key] = value;
   }
+}
+
+/** Safely delete a property from `obj`, refusing to mutate built-in prototypes (CWE-1321). */
+function safeDeleteProperty(obj: Record<string, unknown>, key: string): void {
+  if (isUnsafeTarget(obj)) {
+    return;
+  }
+  delete obj[key];
 }
 
 interface Id {
@@ -348,7 +362,7 @@ export class SchemaCompiler {
     // delete all __$missingReferences from previous compilation attempts
     const isValidExceptReferences = report.isValid();
     if (canMutateSchemaObject) {
-      delete schema.__$missingReferences;
+      safeDeleteProperty(schema as unknown as Record<string, unknown>, '__$missingReferences');
     }
 
     // collect all references that need to be resolved - $ref and $schema
@@ -412,8 +426,12 @@ export class SchemaCompiler {
           report.addError('UNRESOLVABLE_REFERENCE', [refObj.ref]);
           report.path = report.path.slice(0, -refObj.path.length);
 
-          // pusblish unresolved references out
-          if (isValidExceptReferences && canMutateSchemaObject) {
+          // publish unresolved references out
+          if (
+            isValidExceptReferences &&
+            canMutateSchemaObject &&
+            !isUnsafeTarget(schema as unknown as Record<string, unknown>)
+          ) {
             schema.__$missingReferences = schema.__$missingReferences || [];
             schema.__$missingReferences.push(refObj);
           }
@@ -471,7 +489,7 @@ export class SchemaCompiler {
             }
           }
           if (sch.__$missingReferences.length === 0) {
-            delete sch.__$missingReferences;
+            safeDeleteProperty(sch as unknown as Record<string, unknown>, '__$missingReferences');
           }
         }
       }
