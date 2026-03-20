@@ -23,10 +23,11 @@ function safeSetProperty(obj: Record<string, unknown>, key: string, value: unkno
   if (isUnsafeTarget(obj)) {
     return;
   }
-  /** Reject property names that could pollute Object.prototype (CWE-1321). */
-  if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
-    obj[key] = value;
+  // Reject property names that could pollute Object.prototype (CWE-1321).
+  if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+    return;
   }
+  obj[key] = value;
 }
 
 /** Safely delete a property from `obj`, refusing to mutate built-in prototypes (CWE-1321). */
@@ -34,9 +35,10 @@ function safeDeleteProperty(obj: Record<string, unknown>, key: string): void {
   if (isUnsafeTarget(obj)) {
     return;
   }
-  if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
-    delete obj[key];
+  if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+    return;
   }
+  delete obj[key];
 }
 
 interface Id {
