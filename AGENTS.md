@@ -8,6 +8,7 @@ Default schema version: **draft2020-12**. Configurable via `ZSchemaOptions.versi
 
 | Action              | Command                                                              |
 | ------------------- | -------------------------------------------------------------------- |
+| Update submodules   | `git submodule update --init --recursive`                            |
 | Install             | `npm install`                                                        |
 | Build               | `npm run build`                                                      |
 | Clean + Build       | `npm run clean && npm run build`                                     |
@@ -21,6 +22,8 @@ Default schema version: **draft2020-12**. Configurable via `ZSchemaOptions.versi
 | Format              | `npm run format`                                                     |
 | Format (check)      | `npm run format:check`                                               |
 | Type-check tests    | `npm run build:tests`                                                |
+
+**Important:** After merging or pulling changes that update git submodules, always run `git submodule update --init --recursive` to ensure local submodule checkouts match the committed references.
 
 ## Project Structure
 

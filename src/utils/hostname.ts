@@ -147,9 +147,12 @@ export const isValidHostname = (hostname: string): boolean => {
       return false;
     }
 
-    const unicodeLabel = toUnicodeLabel(label);
-    if (unicodeLabel === null || !isValidIdnUnicodeLabel(unicodeLabel)) {
-      return false;
+    // Punycode (A-label) hostnames encode IDN labels, so validate the decoded Unicode form
+    if (/^xn--/i.test(label)) {
+      const unicodeLabel = toUnicodeLabel(label);
+      if (unicodeLabel === null || !isValidIdnUnicodeLabel(unicodeLabel)) {
+        return false;
+      }
     }
   }
 
