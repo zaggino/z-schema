@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.1.1](https://github.com/zaggino/z-schema/compare/v12.1.0...v12.1.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* allow consecutive hyphens in ASCII hostname labels per RFC 1123 ([#391](https://github.com/zaggino/z-schema/issues/391)) ([baae254](https://github.com/zaggino/z-schema/commit/baae254d1910803ef18807504eb0220bc6dba8e3))
+
 ## [12.1.0](https://github.com/zaggino/z-schema/compare/v12.0.5...v12.1.0) (2026-03-20)
 
 
