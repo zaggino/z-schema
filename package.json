@@ -103,6 +103,9 @@
   "optionalDependencies": {
     "commander": "^14.0.3"
   },
+  "overrides": {
+    "vite": ">=7.3.2"
+  },
   "engines": {
     "node": ">=22.0.0"
   },
