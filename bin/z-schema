@@ -174,23 +174,21 @@ function validateWithAutomaticDownloads(filePath, data, schema, callback) {
   validate();
 }
 
-var i = 0;
 function validateJsons() {
   if (program.args.length === 0) {
     process.exit(process.exitCode);
     return;
   }
-  i++;
 
   var filePath = program.args.shift();
   var json = readJson(filePath);
   validateWithAutomaticDownloads(filePath, json, schema, function (errs, isValid) {
     if (!isValid) {
       console.log(JSON.stringify(errs, null, 4));
-      console.log('json #' + i + ' validation failed');
+      console.log(filePath + ' validation failed');
       process.exitCode = 1;
     } else {
-      console.log('json #' + i + ' validation passed');
+      console.log(filePath + ' validation passed');
     }
     validateJsons();
   });

@@ -10,4 +10,15 @@ describe('CLI smoke', function () {
     expect(res.status).toBe(0);
     expect(res.stdout || res.stderr).toMatch(/validation passed/i);
   });
+
+  it('prints the JSON filename in validation output', function () {
+    const res = child.spawnSync(
+      process.execPath,
+      ['bin/z-schema', 'test/fixtures/sample-schema.json', 'test/fixtures/sample-valid.json'],
+      { encoding: 'utf8' }
+    );
+    expect(res.status).toBe(0);
+    expect(res.stdout).toMatch(/sample-valid\.json validation passed/);
+    expect(res.stdout).not.toMatch(/json #/);
+  });
 });
