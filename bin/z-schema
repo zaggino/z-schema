@@ -181,14 +181,15 @@ function validateJsons() {
   }
 
   var filePath = program.args.shift();
+  var displayPath = path.relative(process.cwd(), path.resolve(filePath));
   var json = readJson(filePath);
   validateWithAutomaticDownloads(filePath, json, schema, function (errs, isValid) {
     if (!isValid) {
       console.log(JSON.stringify(errs, null, 4));
-      console.log(filePath + ' validation failed');
+      console.log(displayPath + ' validation failed');
       process.exitCode = 1;
     } else {
-      console.log(filePath + ' validation passed');
+      console.log(displayPath + ' validation passed');
     }
     validateJsons();
   });
