@@ -1,5 +1,17 @@
 # Changelog
 
+## [12.2.0](https://github.com/zaggino/z-schema/compare/v12.1.1...v12.2.0) (2026-04-27)
+
+
+### Features
+
+* **cli:** show JSON filename in output instead of "json #N" ([#400](https://github.com/zaggino/z-schema/issues/400)) ([0150595](https://github.com/zaggino/z-schema/commit/0150595ff92091707a7faf25dc1b35354af95530))
+
+
+### Bug Fixes
+
+* **deps:** bump vite to &gt;=7.3.2 to address GHSA-p9ff-h696-f583 ([#393](https://github.com/zaggino/z-schema/issues/393)) ([7fad0aa](https://github.com/zaggino/z-schema/commit/7fad0aa5ba89ffbfc55fdc25ce4ca6b1e537dd03))
+
 ## [12.1.1](https://github.com/zaggino/z-schema/compare/v12.1.0...v12.1.1) (2026-04-02)
 
 
