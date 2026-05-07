@@ -19,7 +19,7 @@ Line coverage status: **high**
 | src/utils/base64.ts           |     65% |         65% |       100% |      63% |
 | src/utils/clone.ts            |     97% |         98% |       100% |      94% |
 | src/utils/constants.ts        |    100% |        100% |       100% |     100% |
-| src/utils/date.ts             |    100% |        100% |       100% |      94% |
+| src/utils/date.ts             |    100% |        100% |       100% |     100% |
 | src/utils/hostname.ts         |    100% |        100% |       100% |     100% |
 | src/utils/json.ts             |     97% |         97% |       100% |      97% |
 | src/utils/properties.ts       |    100% |        100% |       100% |      75% |
