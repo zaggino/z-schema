@@ -1,11 +1,12 @@
 import type { ZSchemaAsync, ZSchemaAsyncSafe, ZSchemaSafe } from '../../src/z-schema.ts';
 
+import { ValidateError } from '../../src/index.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
 describe('Initialization and usage', function () {
   it('Should not allow to use new', function () {
     // @ts-expect-error: intentionally testing that private constructor throws at runtime
-    expect(() => new ZSchema()).toThrow();
+    expect(() => new ZSchema()).toThrow('do not use new ZSchema()');
   });
 
   it('Should construct validator from factory', async function () {
@@ -14,7 +15,7 @@ describe('Initialization and usage', function () {
     // validate - should return true for valid
     expect(validator.validate(1, { type: 'number' })).toBe(true);
     // validate - should throw for invalid
-    expect(() => validator.validate('not-a-number', { type: 'number' })).toThrow();
+    expect(() => validator.validate('not-a-number', { type: 'number' })).toThrow('JSON_OBJECT_VALIDATION_FAILED');
 
     // validateSafe - should return true for valid
     expect(validator.validateSafe(1, { type: 'number' }).valid).toBe(true);
@@ -24,7 +25,7 @@ describe('Initialization and usage', function () {
     // validateAsync - should return true for valid
     await expect(validator.validateAsync(1, { type: 'number' })).resolves.toBe(true);
     // validateAsync - should throw for invalid
-    await expect(validator.validateAsync('not-a-number', { type: 'number' })).rejects.toThrow();
+    await expect(validator.validateAsync('not-a-number', { type: 'number' })).rejects.toThrow(ValidateError);
 
     // validateAsyncSafe - should return true for valid
     await expect(validator.validateAsyncSafe(1, { type: 'number' })).resolves.toEqual({ valid: true });
@@ -47,7 +48,7 @@ describe('Initialization and usage', function () {
     // validate - should return true for valid
     await expect(validator.validate(1, { type: 'number' })).resolves.toBe(true);
     // validate - should throw for invalid
-    await expect(validator.validate('not-a-number', { type: 'number' })).rejects.toThrow();
+    await expect(validator.validate('not-a-number', { type: 'number' })).rejects.toThrow(ValidateError);
   });
 
   it('Should create an async-safe validator from factory', async function () {

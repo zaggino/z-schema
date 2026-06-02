@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { ValidateError } from '../../src/index.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
 describe('Async Validation Example', () => {
@@ -330,7 +331,7 @@ describe('Async Validation Example', () => {
         },
       };
 
-      await expect(validator.validate(invalidPayload, personSchema)).rejects.toThrow();
+      await expect(validator.validate(invalidPayload, personSchema)).rejects.toThrow(ValidateError);
     });
 
     it('should handle async validation with Promise API', async () => {

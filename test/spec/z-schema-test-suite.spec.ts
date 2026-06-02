@@ -143,67 +143,10 @@ describe('ZSchemaTestSuite', function () {
         options.version = version;
       }
 
-      if (!async) {
-        it(
-          testSuite.description + ', ' + test.description,
-          function () {
-            ZSchema.setSchemaReader(undefined);
-
-            const validator = ZSchema.create(options);
-            let caughtErr;
-
-            if (setup) {
-              setup(validator, ZSchema);
-            }
-
-            let valid;
-            try {
-              validator.validateSchema(schema as any);
-              valid = true;
-            } catch (err) {
-              if (!failWithException) {
-                valid = false;
-              }
-              caughtErr = err;
-            }
-
-            if (valid && !validateSchemaOnly) {
-              if (Array.isArray(schema)) {
-                schema = schema[schemaIndex];
-              }
-              try {
-                valid = validator.validate(data, schema as any, validateOptions as any);
-              } catch (err) {
-                valid = false;
-                caughtErr = err;
-              }
-            }
-
-            const err = caughtErr as ValidateError | undefined;
-
-            if (failWithException) {
-              expect(caughtErr).toBeTruthy();
-            } else {
-              expect(typeof valid).toBe('boolean' /*, 'returned response is not a boolean'*/);
-              expect.soft(valid).toBe(test.valid /*, "test result doesn't match expected test result"*/);
-            }
-
-            if (test.valid === true) {
-              expect(err).toBeFalsy(/*, 'errors are not undefined when test is valid'*/);
-            }
-
-            if (after) {
-              after(err?.details ?? err ?? undefined, valid as boolean, data, validator);
-            }
-          },
-          1000
-        );
-      }
-
-      if (async) {
-        it(
-          testSuite.description + ', ' + test.description,
-          async function () {
+      it(
+        testSuite.description + ', ' + test.description,
+        async function () {
+          if (async) {
             const validator = ZSchema.create(options);
             if (setup) {
               setup(validator, ZSchema);
@@ -224,10 +167,60 @@ describe('ZSchemaTestSuite', function () {
             if (after) {
               after(err?.details ?? err ?? undefined, valid, data, validator);
             }
-          },
-          1000
-        );
-      }
+            return;
+          }
+
+          ZSchema.setSchemaReader(undefined);
+
+          const validator = ZSchema.create(options);
+          let caughtErr;
+
+          if (setup) {
+            setup(validator, ZSchema);
+          }
+
+          let valid;
+          try {
+            validator.validateSchema(schema as any);
+            valid = true;
+          } catch (err) {
+            if (!failWithException) {
+              valid = false;
+            }
+            caughtErr = err;
+          }
+
+          if (valid && !validateSchemaOnly) {
+            if (Array.isArray(schema)) {
+              schema = schema[schemaIndex];
+            }
+            try {
+              valid = validator.validate(data, schema as any, validateOptions as any);
+            } catch (err) {
+              valid = false;
+              caughtErr = err;
+            }
+          }
+
+          const err = caughtErr as ValidateError | undefined;
+
+          if (failWithException) {
+            expect(caughtErr).toBeTruthy();
+          } else {
+            expect(typeof valid).toBe('boolean' /*, 'returned response is not a boolean'*/);
+            expect.soft(valid).toBe(test.valid /*, "test result doesn't match expected test result"*/);
+          }
+
+          if (test.valid === true) {
+            expect(err).toBeFalsy(/*, 'errors are not undefined when test is valid'*/);
+          }
+
+          if (after) {
+            after(err?.details ?? err ?? undefined, valid as boolean, data, validator);
+          }
+        },
+        1000
+      );
     });
   });
 });
