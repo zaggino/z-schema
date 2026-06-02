@@ -15,7 +15,7 @@ jobs:
       group: build-and-test-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref }}-${{ matrix.node-version }}
       cancel-in-progress: true
     container:
-      image: mcr.microsoft.com/playwright:v1.58.0-noble
+      image: mcr.microsoft.com/playwright:v1.60.0-noble
       options: --user 1001
 
     strategy:
