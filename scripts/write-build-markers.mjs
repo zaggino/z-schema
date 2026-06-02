@@ -8,7 +8,11 @@
 // `umd/package.json` with `{"type":"commonjs"}` keeps the UMD bundles CommonJS
 // for Node consumers (browser `<script>` usage is unaffected either way).
 //
-// This runs after tsdown, which cleans `umd/` on each build.
+// This runs after tsdown, which cleans `umd/` on each build. Authored as plain
+// `.mjs` (no TypeScript syntax) so it runs on any supported Node version.
 import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-writeFileSync('umd/package.json', `${JSON.stringify({ type: 'commonjs' }, null, 2)}\n`);
+const umdPackageJson = join(import.meta.dirname, '..', 'umd', 'package.json');
+
+writeFileSync(umdPackageJson, `${JSON.stringify({ type: 'commonjs' }, null, 2)}\n`);
