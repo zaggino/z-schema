@@ -500,10 +500,13 @@ export class SchemaCompiler {
       compiled = this.compileArrayOfSchemasLoop(report, arr);
 
       // fix __$missingReferences if possible
+      // Keep the FIRST schema per id to match the prior `arr.find(x => x.id === ref)`
+      // semantics (first match wins) when an array contains duplicate ids.
       const idMap = new Map<string, JsonSchemaInternal>();
       for (let i = 0; i < arr.length; i++) {
-        if (arr[i].id) {
-          idMap.set(arr[i].id!, arr[i]);
+        const schemaId = arr[i].id;
+        if (schemaId && !idMap.has(schemaId)) {
+          idMap.set(schemaId, arr[i]);
         }
       }
       for (const sch of arr) {
