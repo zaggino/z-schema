@@ -39,20 +39,21 @@
     "LICENSE",
     "README.md"
   ],
+  "type": "module",
   "sideEffects": [
-    "./dist/z-schema-versions.mjs"
+    "./dist/z-schema-versions.js"
   ],
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       },
       "require": {
-        "types": "./cjs/index.d.ts",
-        "default": "./cjs/index.js"
+        "types": "./cjs/index.d.cts",
+        "default": "./cjs/index.cjs"
       },
-      "default": "./dist/index.mjs"
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
@@ -63,7 +64,7 @@
     "lint": "oxlint -c oxlint.config.mjs --fix",
     "lint:check": "oxlint -c oxlint.config.mjs",
     "clean": "rimraf ./cjs && rimraf ./dist && rimraf ./umd && rimraf --glob \"./src/schemas/*.json\"",
-    "build": "npm run copy:schemas && tsdown",
+    "build": "npm run copy:schemas && tsdown && node ./scripts/write-build-markers.mts",
     "build:watch": "npm run copy:schemas && tsdown --watch",
     "build:tests": "tsc --noEmit --project test/tsconfig.json",
     "copy:schemas": "node ./scripts/copy-schemas.mts",
