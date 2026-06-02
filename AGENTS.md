@@ -71,8 +71,9 @@ test/
   public/             # Browser test assets (served by Vitest browser)
   ZSchemaTestSuite/   # Legacy z-schema-specific test suite (JS files)
 json-schema-spec/     # Git submodule — official JSON Schema specifications
-.oxlintrc.json        # oxlint configuration (TS + vitest plugins)
-.oxfmtrc.json         # oxfmt configuration (formatting, import sorting, package.json sorting)
+oxlint.config.mjs     # oxlint config — extends the ultracite preset, type-aware enabled (TS + vitest plugins)
+oxfmt.config.mjs      # oxfmt config — extends the ultracite preset, overridden to the project style
+lefthook.yml          # Git hooks (pre-commit lint/format, pre-push build) — replaces husky + lint-staged
 tsdown.config.ts      # tsdown build configuration (ESM + CJS + UMD)
 scripts/              # Build scripts (copy-schemas.mts)
 bin/                  # CLI entry point (z-schema command)

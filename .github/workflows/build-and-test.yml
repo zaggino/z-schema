@@ -74,7 +74,7 @@ jobs:
           # Restore and format (same as pre-commit hook would)
           cp /tmp/test-coverage.md docs/test-coverage.md
           cp /tmp/README.md README.md
-          npx oxfmt --write docs/test-coverage.md README.md
+          npx oxfmt -c oxfmt.config.mjs --write docs/test-coverage.md README.md
 
           # Only commit if there are real changes against the branch HEAD
           if git diff --quiet HEAD -- docs/test-coverage.md README.md; then
