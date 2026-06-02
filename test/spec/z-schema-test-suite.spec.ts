@@ -121,12 +121,12 @@ describe('ZSchemaTestSuite', function () {
   testSuiteFiles.forEach(function (testSuite) {
     testSuite.tests.forEach(function (test) {
       let data = test.data;
-      if (typeof data === 'undefined') {
+      if (data === undefined) {
         data = testSuite.data;
       }
 
       let validateOptions = test.validateOptions;
-      if (typeof validateOptions === 'undefined') {
+      if (validateOptions === undefined) {
         validateOptions = testSuite.validateOptions;
       }
 

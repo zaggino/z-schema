@@ -256,7 +256,9 @@ export class ZSchemaBase {
    * @returns An array of unresolvable reference URIs.
    */
   getMissingReferences(err: ValidateError): string[] {
-    if (!err) return [];
+    if (!err) {
+      return [];
+    }
     const details = err.details || [];
     const missingRefs: string[] = [];
     function collect(details: SchemaErrorDetail[]) {
@@ -299,7 +301,9 @@ export class ZSchemaBase {
   getResolvedSchema(schemaId: string): JsonSchema | undefined {
     const report = new Report(this.options);
     const schema = this.scache.getSchemaByUri(report, schemaId);
-    if (!schema) return undefined;
+    if (!schema) {
+      return undefined;
+    }
 
     const clonedSchema = deepClone(schema, this.options.maxRecursionDepth);
 

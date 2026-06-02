@@ -113,10 +113,8 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
                 const validator = ZSchema.create(validatorOptions);
                 const { valid, err } = validator.validateSafe(test.data, schema);
                 expect.soft(valid).toBe(test.valid);
-                if (valid !== test.valid) {
-                  if (!valid) {
-                    expect(err!.details).toBe(null);
-                  }
+                if (valid !== test.valid && !valid) {
+                  expect(err!.details).toBe(null);
                 }
               });
             });

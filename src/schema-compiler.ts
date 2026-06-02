@@ -50,7 +50,9 @@ interface Id {
 export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECURSION_DEPTH) => {
   const ids: Id[] = [];
   function walk(node: any, scope: Id[], _depth = 0) {
-    if (typeof node !== 'object' || node == null) return;
+    if (typeof node !== 'object' || node == null) {
+      return;
+    }
 
     if (_depth >= maxDepth) {
       throw new Error(
@@ -96,7 +98,9 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
       }
     } else {
       for (const key of Object.keys(node)) {
-        if (isInternalKey(key) || NON_SCHEMA_KEYWORDS.includes(key as any)) continue;
+        if (isInternalKey(key) || NON_SCHEMA_KEYWORDS.includes(key as any)) {
+          continue;
+        }
         walk(node[key], scope, _depth + 1);
       }
     }
@@ -125,10 +129,10 @@ export const collectReferences = (
   maxDepth = DEFAULT_MAX_RECURSION_DEPTH,
   _depth = 0
 ) => {
-  results = results || [];
-  scope = scope || [];
-  path = path || [];
-  options = options || {};
+  results ||= [];
+  scope ||= [];
+  path ||= [];
+  options ||= {};
 
   if (typeof obj !== 'object' || obj === null) {
     return results;
@@ -141,7 +145,7 @@ export const collectReferences = (
     );
   }
 
-  const hasRef = typeof obj.$ref === 'string' && typeof obj.__$refResolved === 'undefined';
+  const hasRef = typeof obj.$ref === 'string' && obj.__$refResolved === undefined;
   let addedScope = false;
   const isRootScope = scope.length === 0;
   const objId = getId(obj);
@@ -164,7 +168,7 @@ export const collectReferences = (
       path: path.slice(0),
     });
   }
-  if (typeof obj.$recursiveRef === 'string' && typeof obj.__$recursiveRefResolved === 'undefined') {
+  if (typeof obj.$recursiveRef === 'string' && obj.__$recursiveRefResolved === undefined) {
     results.push({
       ref: resolveReference(scope.at(-1), obj.$recursiveRef),
       key: '$recursiveRef',
@@ -172,7 +176,7 @@ export const collectReferences = (
       path: path.slice(0),
     });
   }
-  if (typeof obj.$dynamicRef === 'string' && typeof obj.__$dynamicRefResolved === 'undefined') {
+  if (typeof obj.$dynamicRef === 'string' && obj.__$dynamicRefResolved === undefined) {
     results.push({
       ref: resolveReference(scope.at(-1), obj.$dynamicRef),
       key: '$dynamicRef',
@@ -180,7 +184,7 @@ export const collectReferences = (
       path: path.slice(0),
     });
   }
-  if (typeof obj.$schema === 'string' && typeof obj.__$schemaResolved === 'undefined') {
+  if (typeof obj.$schema === 'string' && obj.__$schemaResolved === undefined) {
     results.push({
       ref: resolveReference(scope.at(-1), obj.$schema),
       key: '$schema',
@@ -303,7 +307,7 @@ export class SchemaCompiler {
     // if schema is a string, assume it's a uri
     if (typeof schema === 'string') {
       const loadedSchema = this.validator.scache.getSchemaByUri(report, schema);
-      if (typeof loadedSchema === 'undefined') {
+      if (loadedSchema === undefined) {
         report.addError('SCHEMA_NOT_REACHABLE', [schema]);
         return false;
       }
@@ -383,7 +387,7 @@ export class SchemaCompiler {
       let response = this.validator.scache.getSchemaByUri(report, refObj.ref, schema);
 
       // we can try to use custom schemaReader if available
-      if (typeof response === 'undefined') {
+      if (response === undefined) {
         const schemaReader = getSchemaReader();
         if (schemaReader) {
           const remotePath = getRemotePath(refObj.ref);
@@ -405,7 +409,7 @@ export class SchemaCompiler {
         }
       }
 
-      if (typeof response === 'undefined') {
+      if (response === undefined) {
         const hasNotValid = report.hasError('REMOTE_NOT_VALID', [refObj.ref]);
         const isAbsolute = isAbsoluteUri(refObj.ref);
         let isDownloaded = false;
@@ -434,7 +438,7 @@ export class SchemaCompiler {
             canMutateSchemaObject &&
             !isUnsafeTarget(schema as unknown as Record<string, unknown>)
           ) {
-            schema.__$missingReferences = schema.__$missingReferences || [];
+            schema.__$missingReferences ||= [];
             schema.__$missingReferences.push(refObj);
           }
         }

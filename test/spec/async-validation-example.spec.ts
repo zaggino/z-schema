@@ -21,17 +21,23 @@ describe('Async Validation Example', () => {
     registerFormat: (name: string, validatorFunction: (input: unknown) => boolean | Promise<boolean>) => void;
   }) => {
     validator.registerFormat('user-exists', async (input: unknown): Promise<boolean> => {
-      if (typeof input !== 'string') return false;
+      if (typeof input !== 'string') {
+        return false;
+      }
       return await mockDatabaseCheck(input);
     });
 
     validator.registerFormat('valid-postcode', async (input: unknown): Promise<boolean> => {
-      if (typeof input !== 'string') return false;
+      if (typeof input !== 'string') {
+        return false;
+      }
       return await mockPostcodeCheck(input);
     });
 
     validator.registerFormat('phone-number', (input: unknown): boolean => {
-      if (typeof input !== 'string') return false;
+      if (typeof input !== 'string') {
+        return false;
+      }
       return phoneRegex.test(input);
     });
   };
@@ -237,12 +243,16 @@ describe('Async Validation Example', () => {
       });
 
       validator.registerFormat('valid-postcode', async (input: unknown): Promise<boolean> => {
-        if (typeof input !== 'string') return false;
+        if (typeof input !== 'string') {
+          return false;
+        }
         return await mockPostcodeCheck(input);
       });
 
       validator.registerFormat('phone-number', (input: unknown): boolean => {
-        if (typeof input !== 'string') return false;
+        if (typeof input !== 'string') {
+          return false;
+        }
         return phoneRegex.test(input);
       });
 

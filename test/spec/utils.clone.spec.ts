@@ -5,6 +5,7 @@ import { deepClone, shallowClone } from '../../src/utils/clone.ts';
 describe('shallowClone', () => {
   it('should return primitive values unchanged', () => {
     expect(shallowClone(null)).toBe(null);
+    // eslint-disable-next-line unicorn/no-useless-undefined -- explicitly testing the undefined input
     expect(shallowClone(undefined)).toBe(undefined);
     expect(shallowClone(42)).toBe(42);
     expect(shallowClone('hello')).toBe('hello');
@@ -48,6 +49,7 @@ describe('shallowClone', () => {
 describe('deepClone', () => {
   it('should return primitive values unchanged', () => {
     expect(deepClone(null)).toBe(null);
+    // eslint-disable-next-line unicorn/no-useless-undefined -- explicitly testing the undefined input
     expect(deepClone(undefined)).toBe(undefined);
     expect(deepClone(42)).toBe(42);
     expect(deepClone('hello')).toBe('hello');

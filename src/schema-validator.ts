@@ -52,16 +52,14 @@ const SchemaValidators = {
       } else if (schema.maximum === undefined) {
         report.addError('KEYWORD_DEPENDENCY', ['exclusiveMaximum', 'maximum'], undefined, schema, 'exclusiveMaximum');
       }
-    } else {
-      if (typeof schema.exclusiveMaximum !== 'boolean' && typeof schema.exclusiveMaximum !== 'number') {
-        report.addError(
-          'KEYWORD_TYPE_EXPECTED',
-          ['exclusiveMaximum', ['boolean', 'number']],
-          undefined,
-          schema,
-          'exclusiveMaximum'
-        );
-      }
+    } else if (typeof schema.exclusiveMaximum !== 'boolean' && typeof schema.exclusiveMaximum !== 'number') {
+      report.addError(
+        'KEYWORD_TYPE_EXPECTED',
+        ['exclusiveMaximum', ['boolean', 'number']],
+        undefined,
+        schema,
+        'exclusiveMaximum'
+      );
     }
   },
   minimum(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -84,16 +82,14 @@ const SchemaValidators = {
       } else if (schema.minimum === undefined) {
         report.addError('KEYWORD_DEPENDENCY', ['exclusiveMinimum', 'minimum'], undefined, schema, 'exclusiveMinimum');
       }
-    } else {
-      if (typeof schema.exclusiveMinimum !== 'boolean' && typeof schema.exclusiveMinimum !== 'number') {
-        report.addError(
-          'KEYWORD_TYPE_EXPECTED',
-          ['exclusiveMinimum', ['boolean', 'number']],
-          undefined,
-          schema,
-          'exclusiveMinimum'
-        );
-      }
+    } else if (typeof schema.exclusiveMinimum !== 'boolean' && typeof schema.exclusiveMinimum !== 'number') {
+      report.addError(
+        'KEYWORD_TYPE_EXPECTED',
+        ['exclusiveMinimum', ['boolean', 'number']],
+        undefined,
+        schema,
+        'exclusiveMinimum'
+      );
     }
   },
   maxLength(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -414,71 +410,70 @@ const SchemaValidators = {
       report.addError('KEYWORD_TYPE_EXPECTED', ['type', ['string', 'array']], undefined, schema, 'type');
     }
 
-    if (this.options.noEmptyStrings === true) {
-      if (schema.type === 'string' || (isArray && schema.type!.includes('string'))) {
-        if (schema.minLength === undefined && schema.enum === undefined && schema.format === undefined) {
-          schema.minLength = 1;
-        }
-      }
+    if (
+      this.options.noEmptyStrings === true &&
+      (schema.type === 'string' || (isArray && schema.type!.includes('string'))) &&
+      schema.minLength === undefined &&
+      schema.enum === undefined &&
+      schema.format === undefined
+    ) {
+      schema.minLength = 1;
     }
-    if (this.options.noEmptyArrays === true) {
-      if (schema.type === 'array' || (isArray && schema.type!.includes('array'))) {
-        if (schema.minItems === undefined) {
-          schema.minItems = 1;
-        }
-      }
+    if (
+      this.options.noEmptyArrays === true &&
+      (schema.type === 'array' || (isArray && schema.type!.includes('array'))) &&
+      schema.minItems === undefined
+    ) {
+      schema.minItems = 1;
     }
-    if (this.options.forceProperties === true) {
-      if (schema.type === 'object' || (isArray && schema.type!.includes('object'))) {
-        if (schema.properties === undefined && schema.patternProperties === undefined) {
-          report.addError('KEYWORD_UNDEFINED_STRICT', ['properties'], undefined, schema, 'properties');
-        }
-      }
+    if (
+      this.options.forceProperties === true &&
+      (schema.type === 'object' || (isArray && schema.type!.includes('object'))) &&
+      schema.properties === undefined &&
+      schema.patternProperties === undefined
+    ) {
+      report.addError('KEYWORD_UNDEFINED_STRICT', ['properties'], undefined, schema, 'properties');
     }
-    if (this.options.forceItems === true) {
-      if (schema.type === 'array' || (isArray && schema.type!.includes('array'))) {
-        if (schema.items === undefined) {
-          report.addError('KEYWORD_UNDEFINED_STRICT', ['items'], undefined, schema, 'items');
-        }
-      }
+    if (
+      this.options.forceItems === true &&
+      (schema.type === 'array' || (isArray && schema.type!.includes('array'))) &&
+      schema.items === undefined
+    ) {
+      report.addError('KEYWORD_UNDEFINED_STRICT', ['items'], undefined, schema, 'items');
     }
-    if (this.options.forceMinItems === true) {
-      if (schema.type === 'array' || (isArray && schema.type!.includes('array'))) {
-        if (schema.minItems === undefined) {
-          report.addError('KEYWORD_UNDEFINED_STRICT', ['minItems'], undefined, schema, 'minItems');
-        }
-      }
+    if (
+      this.options.forceMinItems === true &&
+      (schema.type === 'array' || (isArray && schema.type!.includes('array'))) &&
+      schema.minItems === undefined
+    ) {
+      report.addError('KEYWORD_UNDEFINED_STRICT', ['minItems'], undefined, schema, 'minItems');
     }
-    if (this.options.forceMaxItems === true) {
-      if (schema.type === 'array' || (isArray && schema.type!.includes('array'))) {
-        if (schema.maxItems === undefined) {
-          report.addError('KEYWORD_UNDEFINED_STRICT', ['maxItems'], undefined, schema, 'maxItems');
-        }
-      }
+    if (
+      this.options.forceMaxItems === true &&
+      (schema.type === 'array' || (isArray && schema.type!.includes('array'))) &&
+      schema.maxItems === undefined
+    ) {
+      report.addError('KEYWORD_UNDEFINED_STRICT', ['maxItems'], undefined, schema, 'maxItems');
     }
-    if (this.options.forceMinLength === true) {
-      if (schema.type === 'string' || (isArray && schema.type!.includes('string'))) {
-        if (
-          schema.minLength === undefined &&
-          schema.format === undefined &&
-          schema.enum === undefined &&
-          schema.pattern === undefined
-        ) {
-          report.addError('KEYWORD_UNDEFINED_STRICT', ['minLength'], undefined, schema, 'minLength');
-        }
-      }
+    if (
+      this.options.forceMinLength === true &&
+      (schema.type === 'string' || (isArray && schema.type!.includes('string'))) &&
+      schema.minLength === undefined &&
+      schema.format === undefined &&
+      schema.enum === undefined &&
+      schema.pattern === undefined
+    ) {
+      report.addError('KEYWORD_UNDEFINED_STRICT', ['minLength'], undefined, schema, 'minLength');
     }
-    if (this.options.forceMaxLength === true) {
-      if (schema.type === 'string' || (isArray && schema.type!.includes('string'))) {
-        if (
-          schema.maxLength === undefined &&
-          schema.format === undefined &&
-          schema.enum === undefined &&
-          schema.pattern === undefined
-        ) {
-          report.addError('KEYWORD_UNDEFINED_STRICT', ['maxLength'], undefined, schema, 'maxLength');
-        }
-      }
+    if (
+      this.options.forceMaxLength === true &&
+      (schema.type === 'string' || (isArray && schema.type!.includes('string'))) &&
+      schema.maxLength === undefined &&
+      schema.format === undefined &&
+      schema.enum === undefined &&
+      schema.pattern === undefined
+    ) {
+      report.addError('KEYWORD_UNDEFINED_STRICT', ['maxLength'], undefined, schema, 'maxLength');
     }
   },
   allOf(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -735,10 +730,8 @@ export class SchemaValidator {
         if (valid === false) {
           report.addError('PARENT_SCHEMA_VALIDATION_FAILED', undefined, subReport, schema, '$schema');
         }
-      } else {
-        if (this.validator.options.ignoreUnresolvableReferences !== true) {
-          report.addError('REF_UNRESOLVED', [schema.$schema!], undefined, schema, '$schema');
-        }
+      } else if (this.validator.options.ignoreUnresolvableReferences !== true) {
+        report.addError('REF_UNRESOLVED', [schema.$schema!], undefined, schema, '$schema');
       }
     }
 
@@ -781,10 +774,8 @@ export class SchemaValidator {
       }
       if (Object.hasOwn(SchemaValidators, key)) {
         SchemaValidators[key as keyof typeof SchemaValidators].call(this, report, schema);
-      } else if (!hasParentSchema) {
-        if (this.validator.options.noExtraKeywords === true) {
-          report.addError('KEYWORD_UNEXPECTED', [key], undefined, schema, undefined);
-        }
+      } else if (!hasParentSchema && this.validator.options.noExtraKeywords === true) {
+        report.addError('KEYWORD_UNEXPECTED', [key], undefined, schema);
       }
     }
 

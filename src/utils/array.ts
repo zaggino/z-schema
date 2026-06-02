@@ -9,7 +9,9 @@ import { areEqual } from './json.js';
  */
 export const isUniqueArray = <T>(arr: T[], indexes?: number[], maxDepth?: number): boolean => {
   const l = arr.length;
-  if (l <= 1) return true;
+  if (l <= 1) {
+    return true;
+  }
 
   // Fast path: if every element is a primitive, use a Set.
   // We distinguish types so that e.g. 1 !== '1' and 0 !== false.

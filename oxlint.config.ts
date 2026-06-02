@@ -24,6 +24,7 @@ export default defineConfig({
     'no-warning-comments': 'off',
     'require-unicode-regexp': 'off',
     'sort-keys': 'off',
+    'typescript/array-type': ['error', { default: 'array-simple' }],
     'typescript/consistent-type-imports': 'error',
     'typescript/no-explicit-any': 'off',
     'typescript/no-non-null-assertion': 'off',
@@ -73,36 +74,12 @@ export default defineConfig({
     'unicorn/filename-case': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 37
-    // complexity: trivial
-    // `if` statements without braces exist throughout; adding braces is purely mechanical.
-    // type: best-practice
-    // Requires all control-flow bodies (if/else/for/while) to be wrapped in curly braces.
-    curly: 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 33
-    // complexity: trivial
-    // `else { if (...) }` patterns can be collapsed to `else if`; purely mechanical transformation.
-    // type: style
-    // Disallows `else` blocks that contain only a single `if` statement, preferring `else if`.
-    'unicorn/no-lonely-if': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 32
     // complexity: dangerous
     // Calls are made on `any`-typed values in schema processing; fixing requires narrowing types or explicit casts.
     // type: type-safety
     // Disallows calling values typed as `any`, which bypasses TypeScript's call-signature checking.
     'typescript/no-unsafe-call': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 31
-    // complexity: trivial
-    // Arrays are typed with the `T[]` shorthand; converting to `Array<T>` (or vice-versa) is mechanical.
-    // type: style
-    // Enforces a consistent array type annotation style (`T[]` vs `Array<T>`).
-    'typescript/array-type': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 27
@@ -242,22 +219,6 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 11
-    // complexity: trivial
-    // Global numeric functions like `isNaN` are used instead of `Number.isNaN`; purely mechanical substitution.
-    // type: best-practice
-    // Requires the use of `Number.*` static methods (e.g., `Number.isNaN`) instead of legacy global numeric functions.
-    'unicorn/prefer-number-properties': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 11
-    // complexity: trivial
-    // `typeof x === 'undefined'` checks are used where `x === undefined` is preferred.
-    // type: style
-    // Disallows `typeof x === 'undefined'` comparisons, preferring direct `=== undefined` checks.
-    'unicorn/no-typeof-undefined': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 11
     // complexity: moderate
     // Functions defined inside other functions could be moved to an outer scope; refactoring requires verifying closure dependencies.
     // type: maintainability
@@ -271,14 +232,6 @@ export default defineConfig({
     // type: type-safety
     // Disallows assigning `any`-typed values to typed variables or properties.
     'typescript/no-unsafe-assignment': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 10
-    // complexity: trivial
-    // Explicit `undefined` is passed or returned where it can be omitted; mechanical cleanup.
-    // type: style
-    // Disallows redundant explicit `undefined` in places where it is the default or implicit value.
-    'unicorn/no-useless-undefined': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 10
@@ -305,14 +258,6 @@ export default defineConfig({
     'no-shadow': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 9
-    // complexity: trivial
-    // `if` inside `else` blocks can be collapsed to `else if`; purely mechanical transformation.
-    // type: style
-    // Disallows `if` statements as the sole body of an `else` block, requiring `else if` instead.
-    'no-lonely-if': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 8
     // complexity: moderate
     // `Array.prototype.sort()` is called without a comparator, which has locale-dependent behaviour; each call site needs an explicit comparator.
@@ -337,22 +282,6 @@ export default defineConfig({
     'typescript/prefer-for-of': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 6
-    // complexity: easy
-    // Assignment operators like `||=`, `&&=`, `??=` can replace `x = x || y` patterns; mechanical substitution.
-    // type: style
-    // Requires logical assignment operators (`||=`, `&&=`, `??=`) instead of their verbose equivalents.
-    'logical-assignment-operators': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 5
-    // complexity: trivial
-    // `String.prototype.substring()` / `String.prototype.substr()` are used where `.slice()` is preferred.
-    // type: best-practice
-    // Prefers `String.prototype.slice()` over `substring()` and `substr()` for substring extraction.
-    'unicorn/prefer-string-slice': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 4
     // complexity: dangerous
     // `delete obj[key]` is used with dynamic keys; replacing with explicit property removal or `Map` usage requires careful refactoring.
@@ -375,14 +304,6 @@ export default defineConfig({
     // type: style
     // Disallows constructors that do nothing beyond calling `super()` or are entirely empty.
     'no-useless-constructor': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 3
-    // complexity: trivial
-    // `switch` case clauses lack braces around their bodies; adding braces is purely mechanical.
-    // type: style
-    // Requires or disallows braces around `switch` case clause bodies to create a consistent block scope.
-    'unicorn/switch-case-braces': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 3
