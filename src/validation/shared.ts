@@ -165,8 +165,11 @@ export function getCachedValidationResult(report: Report, schema: unknown, json:
  */
 export function deferOrRunSync(report: Report, subReports: Report[], decisionFn: () => void): void {
   const asyncTasksBefore = report.asyncTasks.length;
-  for (const subReport of subReports) {
-    report.asyncTasks.push(...subReport.asyncTasks);
+  for (let i = 0; i < subReports.length; i++) {
+    const tasks = subReports[i].asyncTasks;
+    for (let j = 0; j < tasks.length; j++) {
+      report.asyncTasks.push(tasks[j]);
+    }
   }
   const hasAsyncTasks = report.asyncTasks.length > asyncTasksBefore;
 

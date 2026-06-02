@@ -10,6 +10,10 @@ import { shallowClone } from './utils/clone.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
 import { isInteger, isObject } from './utils/what-is.js';
 
+const PRIMITIVE_TYPES = ['array', 'boolean', 'integer', 'number', 'null', 'object', 'string'] as const;
+const PRIMITIVE_TYPE_STR = PRIMITIVE_TYPES.join(',');
+const PRIMITIVE_TYPES_SET = new Set<string>(PRIMITIVE_TYPES);
+
 const SchemaValidators = {
   $ref(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-07
@@ -389,22 +393,20 @@ const SchemaValidators = {
   },
   type(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.1
-    const primitiveTypes = ['array', 'boolean', 'integer', 'number', 'null', 'object', 'string'];
-    const primitiveTypeStr = primitiveTypes.join(',');
     const isArray = Array.isArray(schema.type);
 
     if (Array.isArray(schema.type)) {
       for (const typeItem of schema.type) {
-        if (!primitiveTypes.includes(typeItem)) {
-          report.addError('KEYWORD_TYPE_EXPECTED', ['type', primitiveTypeStr], undefined, schema, 'type');
+        if (!PRIMITIVE_TYPES_SET.has(typeItem)) {
+          report.addError('KEYWORD_TYPE_EXPECTED', ['type', PRIMITIVE_TYPE_STR], undefined, schema, 'type');
         }
       }
       if (!isUniqueArray(schema.type)) {
         report.addError('KEYWORD_MUST_BE', ['type', 'an object with unique properties'], undefined, schema, 'type');
       }
     } else if (typeof schema.type === 'string') {
-      if (!primitiveTypes.includes(schema.type)) {
-        report.addError('KEYWORD_TYPE_EXPECTED', ['type', primitiveTypeStr], undefined, schema, 'type');
+      if (!PRIMITIVE_TYPES_SET.has(schema.type)) {
+        report.addError('KEYWORD_TYPE_EXPECTED', ['type', PRIMITIVE_TYPE_STR], undefined, schema, 'type');
       }
     } else {
       report.addError('KEYWORD_TYPE_EXPECTED', ['type', ['string', 'array']], undefined, schema, 'type');
@@ -738,21 +740,26 @@ export class SchemaValidator {
     if (this.validator.options.noTypeless === true) {
       // issue #36 - inherit type to anyOf, oneOf, allOf if noTypeless is defined
       if (schema.type !== undefined) {
-        let schemas: JsonSchema[] = [];
-        if (Array.isArray(schema.anyOf)) {
-          schemas = schemas.concat(schema.anyOf);
-        }
-        if (Array.isArray(schema.oneOf)) {
-          schemas = schemas.concat(schema.oneOf);
-        }
-        if (Array.isArray(schema.allOf)) {
-          schemas = schemas.concat(schema.allOf);
-        }
-        schemas.forEach(function (sch) {
+        const inheritType = (sch: JsonSchema) => {
           if (!sch.type) {
             sch.type = schema.type;
           }
-        });
+        };
+        if (Array.isArray(schema.anyOf)) {
+          for (let i = 0; i < schema.anyOf.length; i++) {
+            inheritType(schema.anyOf[i]);
+          }
+        }
+        if (Array.isArray(schema.oneOf)) {
+          for (let i = 0; i < schema.oneOf.length; i++) {
+            inheritType(schema.oneOf[i]);
+          }
+        }
+        if (Array.isArray(schema.allOf)) {
+          for (let i = 0; i < schema.allOf.length; i++) {
+            inheritType(schema.allOf[i]);
+          }
+        }
       }
       // end issue #36
       if (

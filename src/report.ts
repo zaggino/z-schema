@@ -102,8 +102,8 @@ export class Report {
       // subreport
       this.reportOptions = (reportOptionsOrValidate as ReportOptions) || {};
       this.validateOptions = validateOptions || parentOrOptions.validateOptions;
-      this.__$recursiveAnchorStack = [...parentOrOptions.__$recursiveAnchorStack];
-      this.__$dynamicScopeStack = [...parentOrOptions.__$dynamicScopeStack];
+      this.__$recursiveAnchorStack = parentOrOptions.__$recursiveAnchorStack.slice();
+      this.__$dynamicScopeStack = parentOrOptions.__$dynamicScopeStack.slice();
       this.__validationResultCache = parentOrOptions.__validationResultCache;
     } else {
       // primary
@@ -212,11 +212,9 @@ export class Report {
   }
 
   getPath(returnPathAsString?: boolean) {
-    let path: Array<string | number> = [];
-    if (this.parentReport) {
-      path = path.concat(this.parentReport.path);
-    }
-    path = path.concat(this.path);
+    const path: Array<string | number> = this.parentReport
+      ? this.parentReport.path.concat(this.path)
+      : this.path.slice();
 
     if (returnPathAsString !== true) {
       // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
@@ -236,12 +234,10 @@ export class Report {
   }
 
   getSchemaPath(): Array<string | number> {
-    let schemaPath: Array<string | number> = [];
     if (this.parentReport) {
-      schemaPath = schemaPath.concat(this.parentReport.schemaPath);
+      return this.parentReport.schemaPath.concat(this.schemaPath);
     }
-    schemaPath = schemaPath.concat(this.schemaPath);
-    return schemaPath;
+    return this.schemaPath.slice();
   }
 
   getSchemaId(): string | undefined {
@@ -250,11 +246,7 @@ export class Report {
     }
 
     // get the error path as an array
-    let path: Array<string | number> = [];
-    if (this.parentReport) {
-      path = path.concat(this.parentReport.path);
-    }
-    path = path.concat(this.path);
+    const path = this.parentReport ? this.parentReport.path.concat(this.path) : this.path.slice();
 
     // try to find id in the error path
     while (path.length > 0) {
@@ -367,9 +359,10 @@ export class Report {
         subReports = [subReports];
       }
       err.inner = [];
-      for (const subReport of subReports) {
-        for (const error of subReport.errors) {
-          err.inner.push(error);
+      for (let si = 0; si < subReports.length; si++) {
+        const errs = subReports[si].errors;
+        for (let ei = 0; ei < errs.length; ei++) {
+          err.inner.push(errs[ei]);
         }
       }
       if (err.inner.length === 0) {

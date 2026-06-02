@@ -132,7 +132,8 @@ export function propertiesValidator(this: ZSchemaBase, report: Report, schema: J
     // remove from "s" all elements of "p", if any;
     s = difference(s, p);
     // for each regex in "pp", remove all elements of "s" which this regex matches.
-    for (const ppKey of pp) {
+    for (let i = 0; i < pp.length; i++) {
+      const ppKey = pp[i];
       const result = compileSchemaRegex(ppKey);
       if (!result.ok) {
         continue;

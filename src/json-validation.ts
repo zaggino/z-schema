@@ -188,7 +188,9 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
 
     // properties
     if (isObject(currentSchema.properties)) {
-      for (const key of Object.keys(currentSchema.properties)) {
+      const propKeysCE = Object.keys(currentSchema.properties);
+      for (let i = 0; i < propKeysCE.length; i++) {
+        const key = propKeysCE[i];
         if (Object.hasOwn(jsonData, key)) {
           evaluated.add(key);
         }
@@ -200,9 +202,10 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
       for (const pattern of Object.keys(currentSchema.patternProperties)) {
         const result = compileSchemaRegex(pattern);
         if (result.ok) {
-          for (const key of Object.keys(jsonData)) {
-            if (result.value.test(key)) {
-              evaluated.add(key);
+          const jdKeys = Object.keys(jsonData);
+          for (let i = 0; i < jdKeys.length; i++) {
+            if (result.value.test(jdKeys[i])) {
+              evaluated.add(jdKeys[i]);
             }
           }
         }
@@ -211,7 +214,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
 
     // additionalProperties - evaluates all non-properties/non-patternProperties keys
     if (currentSchema.additionalProperties !== undefined) {
-      const propKeys = isObject(currentSchema.properties) ? Object.keys(currentSchema.properties) : [];
+      const propKeySet = new Set(isObject(currentSchema.properties) ? Object.keys(currentSchema.properties) : []);
       const patternRegexes: RegExp[] = [];
       if (isObject(currentSchema.patternProperties)) {
         for (const pattern of Object.keys(currentSchema.patternProperties)) {
@@ -221,11 +224,20 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
           }
         }
       }
-      for (const key of Object.keys(jsonData)) {
-        if (propKeys.includes(key)) {
+      const apKeys = Object.keys(jsonData);
+      for (let i = 0; i < apKeys.length; i++) {
+        const key = apKeys[i];
+        if (propKeySet.has(key)) {
           continue;
         }
-        if (patternRegexes.some((re) => re.test(key))) {
+        let matchedPattern = false;
+        for (let pi = 0; pi < patternRegexes.length; pi++) {
+          if (patternRegexes[pi].test(key)) {
+            matchedPattern = true;
+            break;
+          }
+        }
+        if (matchedPattern) {
           continue;
         }
         evaluated.add(key);
@@ -251,8 +263,8 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
 
   // allOf
   if (Array.isArray(currentSchema.allOf)) {
-    for (const subSchema of currentSchema.allOf) {
-      if (merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
+    for (let i = 0; i < currentSchema.allOf.length; i++) {
+      if (merge(recurse(currentSchema.allOf[i] as JsonSchemaInternal | boolean))) {
         return 'all';
       }
     }
@@ -260,7 +272,8 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
 
   // anyOf - only matching branches contribute
   if (Array.isArray(currentSchema.anyOf)) {
-    for (const subSchema of currentSchema.anyOf) {
+    for (let i = 0; i < currentSchema.anyOf.length; i++) {
+      const subSchema = currentSchema.anyOf[i];
       let passed = getCachedValidationResult(report, subSchema, json);
       if (passed === undefined) {
         const subReport = new Report(report);
@@ -275,7 +288,8 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
 
   // oneOf - only matching branches contribute
   if (Array.isArray(currentSchema.oneOf)) {
-    for (const subSchema of currentSchema.oneOf) {
+    for (let i = 0; i < currentSchema.oneOf.length; i++) {
+      const subSchema = currentSchema.oneOf[i];
       let passed = getCachedValidationResult(report, subSchema, json);
       if (passed === undefined) {
         const subReport = new Report(report);
@@ -383,7 +397,8 @@ function unevaluatedItemsValidator(this: ZSchemaBase, report: Report, schema: Js
     report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
   } else {
     // unevaluatedItems as a schema — validate each unevaluated item against it
-    for (const idx of unevaluatedIndices) {
+    for (let i = 0; i < unevaluatedIndices.length; i++) {
+      const idx = unevaluatedIndices[i];
       const subReport = new Report(report);
       validate.call(this, subReport, unevalSchema as JsonSchemaInternal, json[idx]);
       if (subReport.errors.length > 0) {
@@ -432,7 +447,12 @@ function unevaluatedPropertiesValidator(this: ZSchemaBase, report: Report, schem
     return;
   }
 
-  const unevaluatedKeys = allKeys.filter((key) => !evaluatedProperties.has(key));
+  const unevaluatedKeys: string[] = [];
+  for (let i = 0; i < allKeys.length; i++) {
+    if (!evaluatedProperties.has(allKeys[i])) {
+      unevaluatedKeys.push(allKeys[i]);
+    }
+  }
 
   if (unevaluatedKeys.length === 0) {
     return;
@@ -448,7 +468,8 @@ function unevaluatedPropertiesValidator(this: ZSchemaBase, report: Report, schem
     );
   } else {
     // unevaluatedProperties as a schema — validate each unevaluated key against it
-    for (const key of unevaluatedKeys) {
+    for (let i = 0; i < unevaluatedKeys.length; i++) {
+      const key = unevaluatedKeys[i];
       const subReport = new Report(report);
       validate.call(this, subReport, unevalSchema as JsonSchemaInternal, (json as Record<string, unknown>)[key]);
       if (subReport.errors.length > 0) {
@@ -633,22 +654,33 @@ function recurseObject(this: ZSchemaBase, report: Report, schema: JsonSchemaInte
   // m - The property name of the child.
   const keys = Object.keys(json);
 
+  // Precompile patternProperties regexes once before the per-key loop
+  const ppCompiled: Array<{ key: string; re: RegExp }> = [];
+  for (let i = 0; i < pp.length; i++) {
+    const r = compileSchemaRegex(pp[i]);
+    if (r.ok) {
+      ppCompiled.push({ key: pp[i], re: r.value });
+    }
+  }
+
   for (const m of keys) {
     const propertyValue = json[m];
+
+    // Hoist membership check: compute once per key
+    const isProp = p.includes(m);
 
     // s - The set of schemas for the child instance.
     const s = [];
 
     // 1. If set "p" contains value "m", then the corresponding schema in "properties" is added to "s".
-    if (p.includes(m)) {
+    if (isProp) {
       s.push(schema.properties![m]);
     }
 
     // 2. For each regex in "pp", if it matches "m" successfully, the corresponding schema in "patternProperties" is added to "s".
-    for (const regexString of pp) {
-      const result = compileSchemaRegex(regexString);
-      if (result.ok && result.value.test(m)) {
-        s.push(schema.patternProperties![regexString]);
+    for (let i = 0; i < ppCompiled.length; i++) {
+      if (ppCompiled[i].re.test(m)) {
+        s.push(schema.patternProperties![ppCompiled[i].key]);
       }
     }
 
@@ -665,7 +697,7 @@ function recurseObject(this: ZSchemaBase, report: Report, schema: JsonSchemaInte
     for (const schema_s of s) {
       report.path.push(m);
       // Track schema path for properties validation
-      if (p.includes(m)) {
+      if (isProp) {
         // This is a defined property
         report.schemaPath.push('properties');
         report.schemaPath.push(m);
@@ -676,7 +708,7 @@ function recurseObject(this: ZSchemaBase, report: Report, schema: JsonSchemaInte
       validate.call(this, report, schema_s, propertyValue);
       report.path.pop();
       report.schemaPath.pop();
-      if (p.includes(m)) {
+      if (isProp) {
         report.schemaPath.pop(); // pop the property name for defined properties
       }
     }
@@ -750,7 +782,10 @@ export function validate(
       } else {
         validate.call(this, report, schema.__$refResolved as JsonSchemaInternal, json);
       }
-      keys = keys.filter((key) => key !== '$ref');
+      const refIdx = keys.indexOf('$ref');
+      if (refIdx !== -1) {
+        keys.splice(refIdx, 1);
+      }
     } else {
       // avoid infinite loop with maxRefs
       let maxRefs = 99;
@@ -787,7 +822,10 @@ export function validate(
       } else {
         validate.call(this, report, recursiveRefTarget, json);
       }
-      keys = keys.filter((key) => key !== '$recursiveRef');
+      const recursiveRefIdx = keys.indexOf('$recursiveRef');
+      if (recursiveRefIdx !== -1) {
+        keys.splice(recursiveRefIdx, 1);
+      }
     }
   }
 
@@ -803,13 +841,22 @@ export function validate(
       } else {
         validate.call(this, report, dynamicRefTarget, json);
       }
-      keys = keys.filter((key) => key !== '$dynamicRef');
+      const dynamicRefIdx = keys.indexOf('$dynamicRef');
+      if (dynamicRefIdx !== -1) {
+        keys.splice(dynamicRefIdx, 1);
+      }
     }
   }
 
   const validationVocabularyEnabled = isValidationVocabularyEnabled(schema, report, this.options.version);
   if (!validationVocabularyEnabled) {
-    keys = keys.filter((key) => !VALIDATION_VOCAB_KEYWORDS.has(key));
+    let wi = 0;
+    for (let ri = 0; ri < keys.length; ri++) {
+      if (!VALIDATION_VOCAB_KEYWORDS.has(keys[ri])) {
+        keys[wi++] = keys[ri];
+      }
+    }
+    keys.length = wi;
   }
 
   // type checking first
@@ -833,7 +880,8 @@ export function validate(
   // Defer unevaluatedItems/unevaluatedProperties to run after other validators,
   // so combinator validation results are cached and available for annotation collection
   const deferredUnevaluatedKeys: Array<keyof JsonSchemaAll> = [];
-  for (const key of keys) {
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
     if (key === 'unevaluatedItems' || key === 'unevaluatedProperties') {
       deferredUnevaluatedKeys.push(key);
       continue;
@@ -849,7 +897,8 @@ export function validate(
 
   // Run unevaluated* validators after all others have cached their combinator results
   if (deferredUnevaluatedKeys.length > 0 && !(report.errors.length > 0 && this.options.breakOnFirstError)) {
-    for (const key of deferredUnevaluatedKeys) {
+    for (let i = 0; i < deferredUnevaluatedKeys.length; i++) {
+      const key = deferredUnevaluatedKeys[i];
       const validator = JsonValidators[key];
       if (validator) {
         validator.call(this, report, schema, json);

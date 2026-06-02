@@ -2,7 +2,7 @@ import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 
-import { getFormatValidators } from '../format-validators.js';
+import { resolveFormatValidator } from '../format-validators.js';
 import { decodeBase64, isValidBase64 } from '../utils/base64.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { unicodeLength } from '../utils/unicode.js';
@@ -85,8 +85,7 @@ export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonS
 
   const isModernDraft = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
 
-  const formatValidators = getFormatValidators(this.options);
-  const formatValidatorFn = formatValidators[schema.format!];
+  const formatValidatorFn = resolveFormatValidator(schema.format!, this.options);
   if (typeof formatValidatorFn === 'function') {
     if (shouldSkipValidate(this.validateOptions, ['INVALID_FORMAT'])) {
       return;

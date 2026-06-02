@@ -42,6 +42,12 @@ export default defineConfig({
     // hot paths (validation/array.ts items loop, report.ts path building).
     'typescript/prefer-for-of': 'off',
 
+    // charCodeAt is the correct, faster primitive for ASCII range checks and
+    // manual surrogate-pair scanning (format-validators.ts percent-encoding,
+    // utils/unicode.ts length). codePointAt does extra surrogate work we don't
+    // need on these hot per-character paths.
+    'unicorn/prefer-code-point': 'off',
+
     // ── TODO: rules from the ultracite preset currently reporting errors ──
     // Disabled to reach a clean baseline; re-evaluate and re-enable incrementally.
 
