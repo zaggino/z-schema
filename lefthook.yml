@@ -6,10 +6,10 @@ pre-commit:
   commands:
     oxlint:
       glob: '*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}'
-      run: npx oxlint -c oxlint.config.mts --fix {staged_files}
+      run: npx oxlint -c oxlint.config.mjs --fix {staged_files}
       stage_fixed: true
     oxfmt:
-      run: npx oxfmt -c oxfmt.config.mts --write {staged_files}
+      run: npx oxfmt -c oxfmt.config.mjs --write {staged_files}
       stage_fixed: true
 
 pre-push:
