@@ -1,7 +1,7 @@
 import type { JsonSchemaInternal } from './json-schema-versions.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
-import { getId, isInternalKey, NON_SCHEMA_KEYWORDS } from './json-schema.js';
+import { getId, isInternalKey, NON_SCHEMA_KEYWORDS_SET } from './json-schema.js';
 import { Report } from './report.js';
 import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
@@ -79,9 +79,15 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
       } else if (type === 'root' && typeof node.id === 'string' && isAbsoluteUri(node.id) && node.id !== nodeId) {
         id.absoluteUri = resolveSchemaScopeId(node.id, node as JsonSchemaInternal, nodeId);
       } else if (type === 'relative') {
-        id.absoluteParent = scope
-          .filter((x) => x.type === 'absolute' || (x.type === 'root' && x.absoluteUri))
-          .slice(-1)[0];
+        let absoluteParent: Id | undefined;
+        for (let i = scope.length - 1; i >= 0; i--) {
+          const sc = scope[i];
+          if (sc.type === 'absolute' || (sc.type === 'root' && sc.absoluteUri)) {
+            absoluteParent = sc;
+            break;
+          }
+        }
+        id.absoluteParent = absoluteParent;
         if (id.absoluteParent) {
           const parentUri = id.absoluteParent.absoluteUri || id.absoluteParent.id;
           id.absoluteUri = resolveSchemaScopeId(parentUri, node as JsonSchemaInternal, id.id);
@@ -98,7 +104,7 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
       }
     } else {
       for (const key of Object.keys(node)) {
-        if (isInternalKey(key) || NON_SCHEMA_KEYWORDS.includes(key as any)) {
+        if (isInternalKey(key) || NON_SCHEMA_KEYWORDS_SET.has(key)) {
           continue;
         }
         walk(node[key], scope, _depth + 1);
@@ -203,7 +209,7 @@ export const collectReferences = (
     const keys = Object.keys(obj);
     for (const key of keys) {
       // do not recurse through resolved references and other z-schema props
-      if (isInternalKey(key) || NON_SCHEMA_KEYWORDS.includes(key as any)) {
+      if (isInternalKey(key) || NON_SCHEMA_KEYWORDS_SET.has(key)) {
         continue;
       }
       path.push(key);
@@ -317,7 +323,9 @@ export class SchemaCompiler {
     // if schema is an array, assume it's an array of schemas
     if (Array.isArray(schema)) {
       if (!options?.noCache) {
-        schema.forEach((s) => this.collectAndCacheIds(s));
+        for (let i = 0; i < schema.length; i++) {
+          this.collectAndCacheIds(schema[i]);
+        }
       }
       return this.compileArrayOfSchemas(report, schema);
     } else if (typeof schema === 'boolean') {
@@ -400,7 +408,9 @@ export class SchemaCompiler {
             const subreport = new Report(report);
             if (!this.compileSchema(subreport, s)) {
               // copy errors to report
-              report.errors = report.errors.concat(subreport.errors);
+              for (let i = 0; i < subreport.errors.length; i++) {
+                report.errors.push(subreport.errors[i]);
+              }
             } else {
               response = this.validator.scache.getSchemaByUri(report, refObj.ref, schema);
             }
@@ -427,9 +437,12 @@ export class SchemaCompiler {
         } else if (isDownloaded) {
           // remote is downloaded, so no UNRESOLVABLE_REFERENCE
         } else {
-          report.path.push(...refObj.path);
+          const pathLen = refObj.path.length;
+          for (let i = 0; i < pathLen; i++) {
+            report.path.push(refObj.path[i]);
+          }
           report.addError('UNRESOLVABLE_REFERENCE', [refObj.ref]);
-          report.path = report.path.slice(0, -refObj.path.length);
+          report.path.length -= pathLen;
 
           // publish unresolved references out
           if (
@@ -472,7 +485,13 @@ export class SchemaCompiler {
 
     do {
       // remove all UNRESOLVABLE_REFERENCE errors before compiling array again
-      report.errors = report.errors.filter((e) => e.code !== 'UNRESOLVABLE_REFERENCE');
+      let wi = 0;
+      for (let ri = 0; ri < report.errors.length; ri++) {
+        if (report.errors[ri].code !== 'UNRESOLVABLE_REFERENCE') {
+          report.errors[wi++] = report.errors[ri];
+        }
+      }
+      report.errors.length = wi;
 
       // remember how many were compiled in the last loop
       lastLoopCompiled = compiled;
@@ -481,11 +500,17 @@ export class SchemaCompiler {
       compiled = this.compileArrayOfSchemasLoop(report, arr);
 
       // fix __$missingReferences if possible
+      const idMap = new Map<string, JsonSchemaInternal>();
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].id) {
+          idMap.set(arr[i].id!, arr[i]);
+        }
+      }
       for (const sch of arr) {
         if (sch.__$missingReferences) {
           for (let idx2 = sch.__$missingReferences.length - 1; idx2 >= 0; idx2--) {
             const refObj = sch.__$missingReferences[idx2];
-            const response = arr.find((x) => x.id === refObj.ref);
+            const response = idMap.get(refObj.ref);
             if (response) {
               // this might create circular references
               safeSetProperty(refObj.obj as unknown as Record<string, unknown>, `__${refObj.key}Resolved`, response);
@@ -517,7 +542,9 @@ export class SchemaCompiler {
       }
 
       // copy errors to report
-      mainReport.errors = mainReport.errors.concat(report.errors);
+      for (let i = 0; i < report.errors.length; i++) {
+        mainReport.errors.push(report.errors[i]);
+      }
     }
 
     return compiledCount;

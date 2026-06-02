@@ -11,6 +11,7 @@ import { isObject } from './utils/what-is.js';
  * traversed during schema walking (id collection, reference collection, etc.).
  */
 export const NON_SCHEMA_KEYWORDS = ['enum', 'const', 'default', 'examples'] as const;
+export const NON_SCHEMA_KEYWORDS_SET = new Set<string>(NON_SCHEMA_KEYWORDS);
 
 /** Returns true if the key is an internal z-schema property (prefixed with `__$`). */
 export const isInternalKey = (key: string): boolean => key.startsWith('__$');
@@ -167,7 +168,7 @@ export const findId = (
     // intermediate resources - pointer reference across resource boundary".
     for (let i = keys.length - 1; i >= 0; i--) {
       const k = keys[i];
-      if (isInternalKey(k) || NON_SCHEMA_KEYWORDS.includes(k as any)) {
+      if (isInternalKey(k) || NON_SCHEMA_KEYWORDS_SET.has(k)) {
         continue;
       }
       result = findId(schema[k] as JsonSchemaInternal, id, targetBaseUri, nextBaseUri, maxDepth, _depth + 1);

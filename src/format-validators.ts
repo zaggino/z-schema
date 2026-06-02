@@ -29,12 +29,15 @@ const dateTimeValidator: FormatValidatorFn = (dateTime: unknown) => {
     return true;
   }
   // date-time from http://tools.ietf.org/html/rfc3339#section-5.6
-  const s = dateTime.toLowerCase().split('t');
-  if (s.length !== 2) {
+  let tIdx = dateTime.indexOf('T');
+  if (tIdx === -1) {
+    tIdx = dateTime.indexOf('t');
+  }
+  if (tIdx === -1) {
     return false;
   }
-  const datePart = s[0];
-  const timePart = s[1];
+  const datePart = dateTime.slice(0, tIdx);
+  const timePart = dateTime.slice(tIdx + 1);
   // Check date
   const dateMatches = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(datePart);
   if (dateMatches === null) {
@@ -96,12 +99,13 @@ const ipv6Validator: FormatValidatorFn = (ipv6: unknown) => {
   return isIPModule.default(ipv6, 6);
 };
 
+const INVALID_REGEX_ESCAPES = new Set(['a']);
+
 const regexValidator: FormatValidatorFn = (input: unknown) => {
   if (typeof input !== 'string') {
     return true;
   }
 
-  const invalidEscapes = new Set(['a']);
   for (let idx = 0; idx < input.length; idx++) {
     if (input[idx] !== '\\') {
       continue;
@@ -113,7 +117,7 @@ const regexValidator: FormatValidatorFn = (input: unknown) => {
     }
 
     const escaped = input[idx];
-    if (invalidEscapes.has(escaped)) {
+    if (INVALID_REGEX_ESCAPES.has(escaped)) {
       return false;
     }
   }
@@ -163,7 +167,7 @@ const durationValidator: FormatValidatorFn = (input: unknown) => {
     return false;
   }
 
-  const hasDateComponent = /\d+[YMD]/.test(datePart);
+  const hasDateComponent = datePart.length > 0;
   let hasTimeComponent = false;
 
   if (timePart !== undefined) {
@@ -193,9 +197,14 @@ const uuidValidator: FormatValidatorFn = (input: unknown) => {
 
 const strictUriValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string' || isURLModule.default(uri);
 
+const isHexChar = (c: number) => (c >= 48 && c <= 57) || (c >= 65 && c <= 70) || (c >= 97 && c <= 102);
+
 const hasValidPercentEncoding = (str: string): boolean => {
   for (let i = 0; i < str.length; i++) {
-    if (str[i] === '%' && (i + 2 >= str.length || !/[0-9a-fA-F]/.test(str[i + 1]) || !/[0-9a-fA-F]/.test(str[i + 2]))) {
+    if (
+      str[i] === '%' &&
+      (i + 2 >= str.length || !isHexChar(str.charCodeAt(i + 1)) || !isHexChar(str.charCodeAt(i + 2)))
+    ) {
       return false;
     }
   }
@@ -307,9 +316,9 @@ const jsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   if (!/^(?:\/[^/]*)+$/.test(pointer)) {
     return false;
   }
-  const tokens = pointer.split('/').slice(1); // first element is empty before leading '/'
-  for (const token of tokens) {
-    if (!hasValidTildeEscapes(token)) {
+  const tokens = pointer.split('/');
+  for (let i = 1; i < tokens.length; i++) {
+    if (!hasValidTildeEscapes(tokens[i])) {
       return false;
     }
   }
@@ -336,9 +345,9 @@ const relativeJsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   if (!/^(?:\/[^/]*)+$/.test(suffix)) {
     return false;
   }
-  const tokens = suffix.split('/').slice(1);
-  for (const token of tokens) {
-    if (!hasValidTildeEscapes(token)) {
+  const tokens = suffix.split('/');
+  for (let i = 1; i < tokens.length; i++) {
+    if (!hasValidTildeEscapes(tokens[i])) {
       return false;
     }
   }
@@ -427,6 +436,20 @@ export function getFormatValidators(options?: FormatValidatorsOptions): Record<s
     ...customValidators,
     ...options?.customFormats,
   };
+}
+
+export function resolveFormatValidator(name: string, options?: FormatValidatorsOptions): FormatValidatorFn | undefined {
+  const custom = options?.customFormats;
+  if (custom && Object.hasOwn(custom, name)) {
+    return custom[name] as FormatValidatorFn | undefined;
+  }
+  if (Object.hasOwn(customValidators, name)) {
+    return customValidators[name];
+  }
+  if (options?.strictUris && name === 'uri') {
+    return strictUriValidator;
+  }
+  return inbuiltValidators[name];
 }
 
 export function registerFormat(name: string, validatorFunction: FormatValidatorFn) {

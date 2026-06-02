@@ -49,9 +49,10 @@ export const isUniqueArray = <T>(arr: T[], indexes?: number[], maxDepth?: number
   }
 
   // Slow path: at least one element is an object/array — need deep comparison.
+  const eqOpts = { maxDepth };
   for (let i = 0; i < l; i++) {
     for (let j = i + 1; j < l; j++) {
-      if (areEqual(arr[i], arr[j], { maxDepth })) {
+      if (areEqual(arr[i], arr[j], eqOpts)) {
         if (indexes) {
           indexes.push(i, j);
         }

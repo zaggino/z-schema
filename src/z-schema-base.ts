@@ -286,9 +286,11 @@ export class ZSchemaBase {
   getMissingRemoteReferences(err: ValidateError) {
     const missingReferences = this.getMissingReferences(err);
     const missingRemoteReferences: string[] = [];
+    const seen = new Set<string>();
     for (const ref of missingReferences) {
       const remoteReference = getRemotePath(ref);
-      if (remoteReference && !missingRemoteReferences.includes(remoteReference)) {
+      if (remoteReference && !seen.has(remoteReference)) {
+        seen.add(remoteReference);
         missingRemoteReferences.push(remoteReference);
       }
     }

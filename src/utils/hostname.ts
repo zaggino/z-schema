@@ -12,8 +12,11 @@ const splitHostnameLabels = (hostname: string): string[] | null => {
     return null;
   }
   const labels = hostname.split('.');
-  if (labels.some((label) => label.length === 0 || label.length > 63)) {
-    return null;
+  for (let i = 0; i < labels.length; i++) {
+    const len = labels[i].length;
+    if (len === 0 || len > 63) {
+      return null;
+    }
   }
   return labels;
 };
@@ -137,7 +140,8 @@ export const isValidHostname = (hostname: string): boolean => {
     return false;
   }
 
-  for (const label of labels) {
+  for (let i = 0; i < labels.length; i++) {
+    const label = labels[i];
     if (!isAsciiHostnameLabel(label)) {
       return false;
     }
@@ -161,7 +165,8 @@ export const isValidIdnHostname = (hostname: string): boolean => {
     return false;
   }
 
-  for (const label of labels) {
+  for (let i = 0; i < labels.length; i++) {
+    const label = labels[i];
     const unicodeLabel = toUnicodeLabel(label);
     if (unicodeLabel === null || !isValidIdnUnicodeLabel(unicodeLabel)) {
       return false;

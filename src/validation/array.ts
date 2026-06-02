@@ -124,8 +124,8 @@ export function containsValidator(this: ZSchemaBase, report: Report, schema: Jso
 
   const addContainsErrorIfNeeded = () => {
     let matchingItems = 0;
-    for (const subReport of subReports) {
-      if (subReport.errors.length === 0) {
+    for (let i = 0; i < subReports.length; i++) {
+      if (subReports[i].errors.length === 0) {
         matchingItems += 1;
       }
     }

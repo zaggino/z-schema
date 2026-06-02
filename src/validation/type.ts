@@ -34,13 +34,15 @@ export function enumValidator(this: ZSchemaBase, report: Report, schema: JsonSch
   if (shouldSkipValidate(this.validateOptions, ['ENUM_CASE_MISMATCH', 'ENUM_MISMATCH'])) {
     return;
   }
+  const eqOpts = { maxDepth: this.options.maxRecursionDepth };
+  const eqOptsCI = { caseInsensitiveComparison: true, maxDepth: this.options.maxRecursionDepth };
   let caseInsensitiveMatch = false,
     match = false;
   for (const enumVal of schema.enum!) {
-    if (areEqual(json, enumVal, { maxDepth: this.options.maxRecursionDepth })) {
+    if (areEqual(json, enumVal, eqOpts)) {
       match = true;
       break;
-    } else if (areEqual(json, enumVal, { caseInsensitiveComparison: true, maxDepth: this.options.maxRecursionDepth })) {
+    } else if (areEqual(json, enumVal, eqOptsCI)) {
       caseInsensitiveMatch = true;
     }
   }
