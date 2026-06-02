@@ -7,14 +7,14 @@ Line coverage status: **high**
 | File                          |  Line % | Statement % | Function % | Branch % |
 | ----------------------------- | ------: | ----------: | ---------: | -------: |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
-| src/format-validators.ts      |     94% |         94% |        93% |      92% |
+| src/format-validators.ts      |     94% |         94% |        90% |      92% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
-| src/json-validation.ts        |     91% |         91% |        97% |      91% |
-| src/report.ts                 |     94% |         95% |        95% |      88% |
+| src/json-validation.ts        |     91% |         91% |       100% |      89% |
+| src/report.ts                 |     94% |         94% |        95% |      88% |
 | src/schema-cache.ts           |     90% |         90% |        92% |      89% |
-| src/schema-compiler.ts        |     94% |         94% |       100% |      90% |
-| src/schema-validator.ts       |     81% |         81% |       100% |      77% |
+| src/schema-compiler.ts        |     93% |         93% |       100% |      90% |
+| src/schema-validator.ts       |     80% |         80% |       100% |      77% |
 | src/utils/array.ts            |    100% |        100% |       100% |     100% |
 | src/utils/base64.ts           |     65% |         65% |       100% |      63% |
 | src/utils/clone.ts            |     97% |         98% |       100% |      94% |
@@ -42,4 +42,4 @@ Line coverage status: **high**
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
 | src/z-schema.ts               |     76% |         76% |        81% |     100% |
-| **Total**                     | **90%** |     **91%** |    **96%** |  **88%** |
+| **Total**                     | **90%** |     **91%** |    **95%** |  **88%** |
