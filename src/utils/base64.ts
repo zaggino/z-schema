@@ -22,7 +22,7 @@ export const decodeBase64 = (value: string): string | undefined => {
 
   if (typeof Buffer !== 'undefined') {
     try {
-      return Buffer.from(value, 'base64').toString('utf8');
+      return Buffer.from(value, 'base64').toString('utf-8');
     } catch {
       return undefined;
     }

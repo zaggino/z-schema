@@ -94,8 +94,7 @@ describe('Schema path tracking in validation errors', function () {
     try {
       validator.validate(data, schema);
       expect.fail('Validation should have failed');
-    } catch (err) {
-      const error = err as any;
+    } catch (error: any) {
       expect(error.details).toHaveLength(1);
       expect(error.details[0].path).toEqual(['age']);
       expect(error.details[0].schemaPath).toEqual(['properties', 'age', 'type']);
@@ -113,8 +112,7 @@ describe('Schema path tracking in validation errors', function () {
     try {
       validator.validate(data, schema);
       expect.fail('Validation should have failed');
-    } catch (err) {
-      const error = err as any;
+    } catch (error: any) {
       expect(error.details).toHaveLength(1);
       expect(error.details[0].path).toEqual([1]);
       expect(error.details[0].schemaPath).toEqual(['items', 'type']);
@@ -140,8 +138,7 @@ describe('Schema path tracking in validation errors', function () {
     try {
       validator.validate(data, schema);
       expect.fail('Validation should have failed');
-    } catch (err) {
-      const error = err as any;
+    } catch (error: any) {
       expect(error.details).toHaveLength(1);
       expect(error.details[0].path).toEqual(['user', 'age']);
       expect(error.details[0].schemaPath).toEqual(['properties', 'user', 'properties', 'age', 'type']);
@@ -156,8 +153,7 @@ describe('Schema path tracking in validation errors', function () {
     try {
       validator.validate(data, schema);
       expect.fail('Validation should have failed');
-    } catch (err) {
-      const error = err as any;
+    } catch (error: any) {
       expect(error.details).toHaveLength(1);
       expect(error.details[0].path).toEqual([]);
       expect(error.details[0].schemaPath).toEqual(['type']);
@@ -186,8 +182,7 @@ describe('Schema path tracking in validation errors', function () {
     try {
       validator.validate(data, schema);
       expect.fail('Validation should have failed');
-    } catch (err) {
-      const error = err as any;
+    } catch (error: any) {
       expect(error.details).toHaveLength(1);
       expect(error.details[0].path).toEqual(['user', 'age']);
       expect(error.details[0].schemaPath).toEqual(['properties', 'user', 'properties', 'age', 'type']);

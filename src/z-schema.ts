@@ -148,8 +148,8 @@ export class ZSchema extends ZSchemaBase {
     try {
       this._validate(json, schema, options ?? {});
       return { valid: true };
-    } catch (err) {
-      return { valid: false, err: err as ValidateError };
+    } catch (error) {
+      return { valid: false, err: error as ValidateError };
     }
   }
 
@@ -164,11 +164,9 @@ export class ZSchema extends ZSchemaBase {
   validateAsync(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): Promise<true> {
     return new Promise((resolve, reject) => {
       try {
-        this._validate(json, schema, options || {}, (err, valid) =>
-          err || valid !== true ? reject(err) : resolve(valid)
-        );
-      } catch (err) {
-        reject(err);
+        this._validate(json, schema, options || {}, (err, valid) => (err || !valid ? reject(err) : resolve(valid)));
+      } catch (error) {
+        reject(error);
       }
     });
   }
@@ -187,8 +185,8 @@ export class ZSchema extends ZSchemaBase {
         this._validate(json, schema, options || {}, (err, valid) => {
           resolve({ valid, err });
         });
-      } catch (err) {
-        resolve({ valid: false, err: err as ValidateError });
+      } catch (error) {
+        resolve({ valid: false, err: error as ValidateError });
       }
     });
   }
@@ -212,8 +210,8 @@ export class ZSchema extends ZSchemaBase {
     try {
       this._validateSchema(schemaOrArr);
       return { valid: true };
-    } catch (err) {
-      return { valid: false, err: err as ValidateError };
+    } catch (error) {
+      return { valid: false, err: error as ValidateError };
     }
   }
 }
@@ -239,8 +237,8 @@ export class ZSchemaSafe extends ZSchemaBase {
     try {
       this._validate(json, schema, options);
       return { valid: true };
-    } catch (err) {
-      return { valid: false, err: err as ValidateError };
+    } catch (error) {
+      return { valid: false, err: error as ValidateError };
     }
   }
 
@@ -253,8 +251,8 @@ export class ZSchemaSafe extends ZSchemaBase {
     try {
       this._validateSchema(schemaOrArr);
       return { valid: true };
-    } catch (err) {
-      return { valid: false, err: err as ValidateError };
+    } catch (error) {
+      return { valid: false, err: error as ValidateError };
     }
   }
 }
@@ -280,9 +278,9 @@ export class ZSchemaAsync extends ZSchemaBase {
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<true> {
     return new Promise((resolve, reject) => {
       try {
-        this._validate(json, schema, options, (err, valid) => (err || valid !== true ? reject(err) : resolve(valid)));
-      } catch (err) {
-        reject(err);
+        this._validate(json, schema, options, (err, valid) => (err || !valid ? reject(err) : resolve(valid)));
+      } catch (error) {
+        reject(error);
       }
     });
   }
@@ -322,8 +320,8 @@ export class ZSchemaAsyncSafe extends ZSchemaBase {
         this._validate(json, schema, options, (err, valid) => {
           resolve({ valid, err });
         });
-      } catch (err) {
-        resolve({ valid: false, err: err as ValidateError });
+      } catch (error) {
+        resolve({ valid: false, err: error as ValidateError });
       }
     });
   }
@@ -337,8 +335,8 @@ export class ZSchemaAsyncSafe extends ZSchemaBase {
     try {
       this._validateSchema(schemaOrArr);
       return { valid: true };
-    } catch (err) {
-      return { valid: false, err: err as ValidateError };
+    } catch (error) {
+      return { valid: false, err: error as ValidateError };
     }
   }
 }

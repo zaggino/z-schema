@@ -1,10 +1,9 @@
-import type { ValidateError } from './errors.js';
 import type { FormatValidatorFn } from './format-validators.js';
 import type { JsonSchema, JsonSchemaInternal, JsonSchemaVersion } from './json-schema-versions.js';
 import type { SchemaErrorDetail } from './report.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
-import { type Errors, getValidateError } from './errors.js';
+import { type Errors, type ValidateError, getValidateError } from './errors.js';
 import { getSupportedFormats } from './format-validators.js';
 import { VERSION_SCHEMA_URL_MAPPING } from './json-schema-versions.js';
 import { isInternalKey } from './json-schema.js';

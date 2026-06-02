@@ -45,7 +45,7 @@ export function enumValidator(this: ZSchemaBase, report: Report, schema: JsonSch
     }
   }
 
-  if (match === false) {
+  if (!match) {
     const error =
       caseInsensitiveMatch && this.options.enumCaseInsensitiveComparison ? 'ENUM_CASE_MISMATCH' : 'ENUM_MISMATCH';
     report.addError(error, [JSON.stringify(json)], undefined, schema, 'enum');
@@ -58,7 +58,7 @@ export function enumValidator(this: ZSchemaBase, report: Report, schema: JsonSch
 
 export function constValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   const constValue = schema.const;
-  if (areEqual(json, constValue, { maxDepth: this.options.maxRecursionDepth }) === false) {
+  if (!areEqual(json, constValue, { maxDepth: this.options.maxRecursionDepth })) {
     report.addError('CONST', [JSON.stringify(constValue)], undefined, schema);
   }
 }

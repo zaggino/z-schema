@@ -122,7 +122,7 @@ export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonS
             }
           }
         );
-      } else if (result !== true) {
+      } else if (!result) {
         // sync
         report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
       }

@@ -6,6 +6,6 @@ describe('default behavior', () => {
     const s = { id: 'hello' };
     expect(() => validator.validateSchema(s)).not.toThrow();
     expect(s).toEqual({ id: 'hello' });
-    expect(validator.scache.cache['hello'].$schema).toEqual(validator.getDefaultSchemaId());
+    expect(validator.scache.cache.hello.$schema).toEqual(validator.getDefaultSchemaId());
   });
 });

@@ -244,7 +244,7 @@ const SchemaValidators = {
           report.addError('KEYWORD_VALUE_TYPE', ['required', 'string'], undefined, schema, 'required');
         }
       }
-      if (isUniqueArray(schema.required) === false) {
+      if (!isUniqueArray(schema.required)) {
         report.addError('KEYWORD_MUST_BE', ['required', 'an array with unique items'], undefined, schema, 'required');
       }
     }
@@ -356,7 +356,7 @@ const SchemaValidators = {
               report.addError('KEYWORD_VALUE_TYPE', ['dependencies', 'string'], undefined, schema, 'dependencies');
             }
           }
-          if (isUniqueArray(depArray) === false) {
+          if (!isUniqueArray(depArray)) {
             report.addError(
               'KEYWORD_MUST_BE',
               ['dependencies', 'an array with unique items'],
@@ -379,11 +379,11 @@ const SchemaValidators = {
   },
   enum(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.1.1
-    if (Array.isArray(schema.enum) === false) {
+    if (!Array.isArray(schema.enum)) {
       report.addError('KEYWORD_TYPE_EXPECTED', ['enum', 'array'], undefined, schema, 'enum');
     } else if (schema.enum.length === 0) {
       report.addError('KEYWORD_MUST_BE', ['enum', 'an array with at least one element'], undefined, schema, 'enum');
-    } else if (isUniqueArray(schema.enum) === false) {
+    } else if (!isUniqueArray(schema.enum)) {
       report.addError('KEYWORD_MUST_BE', ['enum', 'an array with unique elements'], undefined, schema, 'enum');
     }
   },
@@ -399,7 +399,7 @@ const SchemaValidators = {
           report.addError('KEYWORD_TYPE_EXPECTED', ['type', primitiveTypeStr], undefined, schema, 'type');
         }
       }
-      if (isUniqueArray(schema.type) === false) {
+      if (!isUniqueArray(schema.type)) {
         report.addError('KEYWORD_MUST_BE', ['type', 'an object with unique properties'], undefined, schema, 'type');
       }
     } else if (typeof schema.type === 'string') {
@@ -478,7 +478,7 @@ const SchemaValidators = {
   },
   allOf(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.1
-    if (Array.isArray(schema.allOf) === false) {
+    if (!Array.isArray(schema.allOf)) {
       report.addError('KEYWORD_TYPE_EXPECTED', ['allOf', 'array'], undefined, schema, 'allOf');
     } else if (schema.allOf.length === 0) {
       report.addError('KEYWORD_MUST_BE', ['allOf', 'an array with at least one element'], undefined, schema, 'allOf');
@@ -494,7 +494,7 @@ const SchemaValidators = {
   },
   anyOf(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.1
-    if (Array.isArray(schema.anyOf) === false) {
+    if (!Array.isArray(schema.anyOf)) {
       report.addError('KEYWORD_TYPE_EXPECTED', ['anyOf', 'array'], undefined, schema, 'anyOf');
     } else if (schema.anyOf.length === 0) {
       report.addError('KEYWORD_MUST_BE', ['anyOf', 'an array with at least one element'], undefined, schema, 'anyOf');
@@ -510,7 +510,7 @@ const SchemaValidators = {
   },
   oneOf(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.1
-    if (Array.isArray(schema.oneOf) === false) {
+    if (!Array.isArray(schema.oneOf)) {
       report.addError('KEYWORD_TYPE_EXPECTED', ['oneOf', 'array'], undefined, schema, 'oneOf');
     } else if (schema.oneOf.length === 0) {
       report.addError('KEYWORD_MUST_BE', ['oneOf', 'an array with at least one element'], undefined, schema, 'oneOf');
@@ -727,7 +727,7 @@ export class SchemaValidator {
       if (schema.__$schemaResolved && schema.__$schemaResolved !== schema) {
         const subReport = new Report(report);
         const valid = validate.call(this.validator, subReport, schema.__$schemaResolved, schema);
-        if (valid === false) {
+        if (!valid) {
           report.addError('PARENT_SCHEMA_VALIDATION_FAILED', undefined, subReport, schema, '$schema');
         }
       } else if (this.validator.options.ignoreUnresolvableReferences !== true) {

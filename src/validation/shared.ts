@@ -89,7 +89,7 @@ export const isValidationVocabularyEnabled = (
   const has2020 = Object.hasOwn(vocabulary, VOCAB_VALIDATION_2020_12);
 
   if (has2019 || has2020) {
-    return vocabulary[VOCAB_VALIDATION_2019_09] === true || vocabulary[VOCAB_VALIDATION_2020_12] === true;
+    return vocabulary[VOCAB_VALIDATION_2019_09] || vocabulary[VOCAB_VALIDATION_2020_12];
   }
 
   return false;
@@ -123,12 +123,12 @@ export const isFormatAssertionVocabEnabled = (
 
   // For draft 2020-12, only the format-assertion vocabulary enables format as assertion
   if (Object.hasOwn(vocabulary, VOCAB_FORMAT_ASSERTION_2020_12)) {
-    return vocabulary[VOCAB_FORMAT_ASSERTION_2020_12] === true;
+    return vocabulary[VOCAB_FORMAT_ASSERTION_2020_12];
   }
 
   // For draft 2019-09, check if the format vocabulary is enabled (true)
   if (Object.hasOwn(vocabulary, VOCAB_FORMAT_2019_09)) {
-    return vocabulary[VOCAB_FORMAT_2019_09] === true;
+    return vocabulary[VOCAB_FORMAT_2019_09];
   }
 
   return false; // default to annotation-only for modern drafts

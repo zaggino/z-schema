@@ -43,13 +43,8 @@ export function prepareRemoteSchema(
   validationOptions?: ZSchemaOptions,
   maxCloneDepth?: number
 ): JsonSchemaInternal {
-  let _schema: JsonSchemaInternal;
-
-  if (typeof schema === 'string') {
-    _schema = JSON.parse(schema);
-  } else {
-    _schema = deepClone(schema, maxCloneDepth);
-  }
+  const _schema: JsonSchemaInternal =
+    typeof schema === 'string' ? JSON.parse(schema) : deepClone(schema, maxCloneDepth);
 
   if (!_schema.id) {
     _schema.id = uri;
@@ -190,7 +185,7 @@ export class SchemaCache {
           usesAncestorReport = true;
         } else {
           remoteReport = new Report(report);
-          const noCache = result.id && isAbsoluteUri(result.id) ? false : true;
+          const noCache = !(result.id && isAbsoluteUri(result.id));
           if (this.validator.sc.compileSchema(remoteReport, result, { noCache })) {
             const savedOptions = this.validator.options;
             try {
@@ -231,6 +226,7 @@ export class SchemaCache {
       const parts = queryPath.split('/');
       for (let idx = 0, lim = parts.length; result && idx < lim; idx++) {
         const key = decodeJSONPointer(parts[idx]);
+        // oxlint-disable-next-line unicorn/prefer-ternary
         if (idx === 0) {
           // it's an id
           result = findId(result, key, remotePath, remotePath, this.validator.options.maxRecursionDepth);

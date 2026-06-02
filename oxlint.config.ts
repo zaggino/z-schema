@@ -115,14 +115,6 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 18
-    // complexity: trivial
-    // Caught error variables are not named `error` or `err` as the rule requires; renaming is mechanical.
-    // type: style
-    // Requires caught error variables in `catch` clauses to follow a consistent naming convention (e.g., `error`).
-    'unicorn/catch-error-name': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 18
     // complexity: dangerous
     // Expressions are used in boolean positions without explicit comparison; fixing requires auditing each site for nullable/falsy semantics.
     // type: type-safety
@@ -208,14 +200,6 @@ export default defineConfig({
     // type: style
     // Disallows negated conditions in `if/else` statements when reordering branches would remove the negation.
     'no-negated-condition': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 11
-    // complexity: trivial
-    // String encoding identifiers like `"utf-8"` are used instead of the canonical `"utf8"` form (or vice-versa).
-    // type: style
-    // Enforces a consistent casing/form for text encoding identifier strings (e.g., `"utf8"` vs `"utf-8"`).
-    'unicorn/text-encoding-identifier-case': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 11
@@ -307,22 +291,6 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 3
-    // complexity: trivial
-    // `if/else` returning values can be collapsed into a ternary expression; mechanical transformation.
-    // type: style
-    // Prefers ternary expressions over simple `if/else` blocks that only return or assign a value.
-    'unicorn/prefer-ternary': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 3
-    // complexity: easy
-    // Index existence checks (e.g., `arr.indexOf(x) !== -1`) are written in an inconsistent form; normalising requires auditing intent.
-    // type: style
-    // Enforces a consistent style for checking whether an element exists in an array by index comparison.
-    'unicorn/consistent-existence-index-check': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 3
     // complexity: moderate
     // Functions that return a `Promise` are not marked `async`; adding `async` changes the error-handling behaviour for thrown exceptions.
     // type: best-practice
@@ -344,14 +312,6 @@ export default defineConfig({
     // type: type-safety
     // Disallows returning `any`-typed values from functions with non-`any` return type annotations.
     'typescript/no-unsafe-return': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 3
-    // complexity: trivial
-    // Comparisons like `flag === true` or `flag === false` are written where `flag` or `!flag` suffice.
-    // type: style
-    // Disallows unnecessary comparisons of boolean values to boolean literals (`=== true`, `=== false`).
-    'typescript/no-unnecessary-boolean-literal-compare': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 3
@@ -474,14 +434,6 @@ export default defineConfig({
     'no-promise-executor-return': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
-    // complexity: trivial
-    // `if/else` blocks end with a `return`, making the `else` branch redundant; removing `else` is mechanical.
-    // type: style
-    // Disallows `else` blocks after `if` blocks that always return, requiring early returns instead.
-    'no-else-return': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
     // complexity: trivial
     // An array is used for membership testing (`arr.includes(x)`) where a `Set` would have O(1) lookup.
@@ -496,14 +448,6 @@ export default defineConfig({
     // type: style
     // Prefers `Array.prototype.includes()` over `indexOf` comparisons for readability.
     'unicorn/prefer-includes': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: trivial
-    // A spread contains a fallback (`x || []`) that is unnecessary because spreading `undefined` or `null` is already safe.
-    // type: style
-    // Disallows useless fallback values in spread expressions when spreading `undefined`/`null` is already a no-op.
-    'unicorn/no-useless-fallback-in-spread': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
@@ -580,14 +524,6 @@ export default defineConfig({
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
     // complexity: trivial
-    // Bracket notation (`obj['key']`) is used where dot notation (`obj.key`) would be valid; mechanical substitution.
-    // type: style
-    // Requires dot notation for property access when the property name is a valid identifier.
-    'typescript/dot-notation': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: trivial
     // Generic constructor calls use type argument on the left side (`new Map<string, string>()`) where the right side or inference is preferred (or vice-versa).
     // type: style
     // Enforces a consistent location for type arguments in generic constructor calls (`new Foo<T>()` vs `Foo<T> = new Foo()`).
@@ -612,14 +548,6 @@ export default defineConfig({
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
     // complexity: trivial
-    // The same module is imported more than once; merging into a single import statement is mechanical.
-    // type: style
-    // Disallows duplicate `import` statements for the same module, requiring them to be consolidated.
-    'import/no-duplicates': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: trivial
     // Multiple variable declarations in a single `var`/`let`/`const` statement are not sorted alphabetically.
     // type: style
     // Requires variables declared in the same statement to be sorted alphabetically.
@@ -632,14 +560,6 @@ export default defineConfig({
     // type: style
     // Prefers regex literals over `new RegExp()` when the pattern is a static string literal.
     'prefer-regex-literals': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: trivial
-    // A ternary expression has redundant boolean operands (e.g., `x ? true : false`); simplifying to `!!x` or `x` is mechanical.
-    // type: style
-    // Disallows ternary operators where a simpler non-ternary expression would produce the same result.
-    'no-unneeded-ternary': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1

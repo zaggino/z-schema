@@ -139,7 +139,7 @@ export function propertiesValidator(this: ZSchemaBase, report: Report, schema: J
       }
       const regExp = result.value;
       for (let idx2 = s.length - 1; idx2 >= 0; idx2--) {
-        if (regExp.test(s[idx2]) === true) {
+        if (regExp.test(s[idx2])) {
           s.splice(idx2, 1);
         }
       }

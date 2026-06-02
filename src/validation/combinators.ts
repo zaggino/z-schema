@@ -12,7 +12,7 @@ export function allOfValidator(this: ZSchemaBase, report: Report, schema: JsonSc
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
   for (let i = 0; i < schema.allOf!.length; i++) {
     const validateResult = this._jsonValidate(report, schema.allOf![i], json);
-    if (this.options.breakOnFirstError && validateResult === false) {
+    if (this.options.breakOnFirstError && !validateResult) {
       break;
     }
   }
@@ -43,7 +43,7 @@ export function anyOfValidator(this: ZSchemaBase, report: Report, schema: JsonSc
       }
     }
 
-    if (passed === false) {
+    if (!passed) {
       report.addError('ANY_OF_MISSING', undefined, subReports, schema, 'anyOf');
     }
   });
@@ -88,7 +88,7 @@ export function oneOfValidator(this: ZSchemaBase, report: Report, schema: JsonSc
 export function notValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
   const subReport = new Report(report);
-  if (this._jsonValidate(subReport, schema.not!, json) === true) {
+  if (this._jsonValidate(subReport, schema.not!, json)) {
     report.addError('NOT_PASSED', undefined, undefined, schema, 'not');
   }
 }

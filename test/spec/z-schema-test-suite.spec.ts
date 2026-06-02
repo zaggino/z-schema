@@ -159,7 +159,7 @@ describe('ZSchemaTestSuite', function () {
 
           expect(typeof valid).toBe('boolean' /*, 'returned response is not a boolean'*/);
           expect(valid).toBe(test.valid /*, "test result doesn't match expected test result"*/);
-          if (test.valid === true) {
+          if (test.valid) {
             expect(err).toBe(undefined /*, 'errors are not undefined when test is valid'*/);
           }
           if (after) {
@@ -181,11 +181,11 @@ describe('ZSchemaTestSuite', function () {
         try {
           validator.validateSchema(schema as any);
           valid = true;
-        } catch (err) {
+        } catch (error) {
           if (!failWithException) {
             valid = false;
           }
-          caughtErr = err;
+          caughtErr = error;
         }
 
         if (valid && !validateSchemaOnly) {
@@ -194,9 +194,9 @@ describe('ZSchemaTestSuite', function () {
           }
           try {
             valid = validator.validate(data, schema as any, validateOptions as any);
-          } catch (err) {
+          } catch (error) {
             valid = false;
-            caughtErr = err;
+            caughtErr = error;
           }
         }
 
@@ -209,7 +209,7 @@ describe('ZSchemaTestSuite', function () {
           expect.soft(valid).toBe(test.valid /*, "test result doesn't match expected test result"*/);
         }
 
-        if (test.valid === true) {
+        if (test.valid) {
           expect(err).toBeFalsy(/*, 'errors are not undefined when test is valid'*/);
         }
 
