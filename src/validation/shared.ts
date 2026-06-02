@@ -15,16 +15,11 @@ export type JsonValidatorFn = (this: ZSchemaBase, report: Report, schema: JsonSc
 // Draft / vocabulary helpers
 // ---------------------------------------------------------------------------
 
-export const shouldSkipValidate = function (options: ValidateOptions, errors: any) {
-  return (
-    options &&
-    Array.isArray(options.includeErrors) &&
-    options.includeErrors.length > 0 &&
-    !errors.some(function (err: any) {
-      return options.includeErrors!.includes(err);
-    })
-  );
-};
+export const shouldSkipValidate = (options: ValidateOptions, errors: any) =>
+  options &&
+  Array.isArray(options.includeErrors) &&
+  options.includeErrors.length > 0 &&
+  !errors.some((err: any) => options.includeErrors!.includes(err));
 
 export const supportsDependentKeywords = (
   schema: JsonSchemaInternal,

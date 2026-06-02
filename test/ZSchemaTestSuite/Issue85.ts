@@ -9,7 +9,7 @@ const originalSchema = {
   },
 };
 
-const getKeys = function (obj: any) {
+const getKeys = (obj: any) => {
   const arr: string[] = [];
   for (const key in obj) {
     if (Object.hasOwn(obj, key)) {
