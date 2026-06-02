@@ -87,6 +87,20 @@ See [docs/conventions.md](docs/conventions.md) for details.
 
 All public methods and classes **must** have [TSDoc](https://tsdoc.org/) comments. When adding or modifying public API surface, update TSDoc accordingly. Do not use JSDoc-style type annotations — rely on TypeScript for types. See the conventions doc for the full TSDoc style guide.
 
+## Performance
+
+**Performance is a primary, non-negotiable goal of this library.** z-schema validates JSON on hot paths that run millions of times — small per-call costs compound. Correctness and readability matter, but **never trade away performance for stylistic sugar when a faster equivalent exists.**
+
+Concrete rules:
+
+- **Never replace a faster construct with a slower one for style reasons.** In particular:
+  - Prefer `Array.prototype.concat` / `Array.prototype.slice` over the spread operator (`[...a, ...b]`, `[...a]`). Spread allocates via the iterator protocol and is measurably slower in V8 hot paths.
+  - Prefer index-based `for` loops over `for…of` in validation hot paths. `for…of` adds iterator-protocol overhead versus direct indexed access.
+  - Prefer `Set`/`Map` lookups (`O(1)`) over repeated `Array.prototype.includes`/`indexOf` (`O(n)`) on frequently-queried collections.
+- Avoid unnecessary allocations (intermediate arrays/objects, closures) inside per-keyword and per-element validation loops.
+- Some lint rules that would push code toward the slower form are **intentionally kept `off`** in [oxlint.config.ts](oxlint.config.ts) under the "Intentionally kept off for performance" block (e.g. `unicorn/prefer-spread`, `typescript/prefer-for-of`). Do not re-enable them, and do not silence the resulting wins by hand-applying their fixes.
+- If a change might affect performance, benchmark it and call out the result in the PR. When in doubt, favor the faster construct.
+
 ## Testing Guide
 
 See [docs/testing.md](docs/testing.md) for details.
