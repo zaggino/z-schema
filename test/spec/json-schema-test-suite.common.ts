@@ -81,7 +81,7 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
         describe(file, async () => {
           const testSuites = await reader<TestSuite[]>(testFilePath);
           testSuites.forEach((testSuite) => {
-            const schema = testSuite.schema;
+            const { schema } = testSuite;
             if (typeof schema !== 'boolean' && !schema.$schema) {
               if (draftPath.endsWith('/draft4')) {
                 schema.$schema = 'http://json-schema.org/draft-04/schema#';

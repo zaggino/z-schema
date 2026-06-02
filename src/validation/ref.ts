@@ -13,7 +13,7 @@ export const getDynamicRefAnchorName = (dynamicRef: string) => {
     return;
   }
   const fragment = dynamicRef.slice(hashIdx + 1);
-  if (!fragment || fragment[0] === '/') {
+  if (!fragment || fragment.startsWith('/')) {
     return;
   }
   return fragment;

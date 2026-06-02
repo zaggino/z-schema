@@ -116,19 +116,19 @@ const SchemaValidators = {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.3.1
     if (typeof schema.pattern !== 'string') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['pattern', 'string'], undefined, schema, 'pattern');
-    } else {
-      // Use shared regex compilation helper
-      // Import at top of file
-      const result = compileSchemaRegex(schema.pattern);
-      if (!result.ok) {
-        report.addError(
-          'KEYWORD_PATTERN',
-          ['pattern', schema.pattern, result.error.message],
-          undefined,
-          schema,
-          'pattern'
-        );
-      }
+      return;
+    }
+    // Use shared regex compilation helper
+    // Import at top of file
+    const result = compileSchemaRegex(schema.pattern);
+    if (!result.ok) {
+      report.addError(
+        'KEYWORD_PATTERN',
+        ['pattern', schema.pattern, result.error.message],
+        undefined,
+        schema,
+        'pattern'
+      );
     }
   },
   additionalItems(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -336,48 +336,47 @@ const SchemaValidators = {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.5.1
     if (!isObject(schema.dependencies)) {
       report.addError('KEYWORD_TYPE_EXPECTED', ['dependencies', 'object'], undefined, schema, 'dependencies');
-    } else {
-      const keys = Object.keys(schema.dependencies);
-      for (const schemaKey of keys) {
-        const schemaDependency = (schema.dependencies as Record<string, unknown>)[schemaKey];
-        const isSchemaDependency =
-          isObject(schemaDependency) ||
-          (report.options.version !== 'draft-04' && typeof schemaDependency === 'boolean');
+      return;
+    }
+    const keys = Object.keys(schema.dependencies);
+    for (const schemaKey of keys) {
+      const schemaDependency = (schema.dependencies as Record<string, unknown>)[schemaKey];
+      const isSchemaDependency =
+        isObject(schemaDependency) || (report.options.version !== 'draft-04' && typeof schemaDependency === 'boolean');
 
-        if (isSchemaDependency) {
-          report.path.push('dependencies');
-          report.path.push(schemaKey);
-          this.validateSchema(report, schemaDependency as JsonSchemaInternal);
-          report.path.pop();
-          report.path.pop();
-        } else if (Array.isArray(schemaDependency)) {
-          const depArray = schemaDependency as string[];
-          if (report.options.version === 'draft-04' && depArray.length === 0) {
-            report.addError('KEYWORD_MUST_BE', ['dependencies', 'not empty array'], undefined, schema, 'dependencies');
+      if (isSchemaDependency) {
+        report.path.push('dependencies');
+        report.path.push(schemaKey);
+        this.validateSchema(report, schemaDependency as JsonSchemaInternal);
+        report.path.pop();
+        report.path.pop();
+      } else if (Array.isArray(schemaDependency)) {
+        const depArray = schemaDependency as string[];
+        if (report.options.version === 'draft-04' && depArray.length === 0) {
+          report.addError('KEYWORD_MUST_BE', ['dependencies', 'not empty array'], undefined, schema, 'dependencies');
+        }
+        for (const dep of depArray) {
+          if (typeof dep !== 'string') {
+            report.addError('KEYWORD_VALUE_TYPE', ['dependencies', 'string'], undefined, schema, 'dependencies');
           }
-          for (const dep of depArray) {
-            if (typeof dep !== 'string') {
-              report.addError('KEYWORD_VALUE_TYPE', ['dependencies', 'string'], undefined, schema, 'dependencies');
-            }
-          }
-          if (!isUniqueArray(depArray)) {
-            report.addError(
-              'KEYWORD_MUST_BE',
-              ['dependencies', 'an array with unique items'],
-              undefined,
-              schema,
-              'dependencies'
-            );
-          }
-        } else {
+        }
+        if (!isUniqueArray(depArray)) {
           report.addError(
-            'KEYWORD_VALUE_TYPE',
-            ['dependencies', report.options.version === 'draft-04' ? 'object or array' : 'boolean, object or array'],
+            'KEYWORD_MUST_BE',
+            ['dependencies', 'an array with unique items'],
             undefined,
             schema,
             'dependencies'
           );
         }
+      } else {
+        report.addError(
+          'KEYWORD_VALUE_TYPE',
+          ['dependencies', report.options.version === 'draft-04' ? 'object or array' : 'boolean, object or array'],
+          undefined,
+          schema,
+          'dependencies'
+        );
       }
     }
   },
@@ -542,11 +541,11 @@ const SchemaValidators = {
         schema,
         'not'
       );
-    } else {
-      report.path.push('not');
-      this.validateSchema(report, notSchema as JsonSchemaInternal);
-      report.path.pop();
+      return;
     }
+    report.path.push('not');
+    this.validateSchema(report, notSchema as JsonSchemaInternal);
+    report.path.pop();
   },
   if(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
     if (report.options.version !== 'draft-07') {
@@ -600,16 +599,16 @@ const SchemaValidators = {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.7.1
     if (!isObject(schema.definitions)) {
       report.addError('KEYWORD_TYPE_EXPECTED', ['definitions', 'object'], undefined, schema, 'definitions');
-    } else {
-      const keys = Object.keys(schema.definitions);
-      for (const key of keys) {
-        const val = schema.definitions[key];
-        report.path.push('definitions');
-        report.path.push(key);
-        this.validateSchema(report, val);
-        report.path.pop();
-        report.path.pop();
-      }
+      return;
+    }
+    const keys = Object.keys(schema.definitions);
+    for (const key of keys) {
+      const val = schema.definitions[key];
+      report.path.push('definitions');
+      report.path.push(key);
+      this.validateSchema(report, val);
+      report.path.pop();
+      report.path.pop();
     }
   },
   $defs(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -639,15 +638,15 @@ const SchemaValidators = {
 
     if (typeof schema.format !== 'string') {
       report.addError('KEYWORD_TYPE_EXPECTED', ['format', 'string'], undefined, schema, 'format');
-    } else {
-      const isModernDraft = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
-      if (
-        !isFormatSupported(schema.format, this.options.customFormats) &&
-        this.options.ignoreUnknownFormats !== true &&
-        !isModernDraft
-      ) {
-        report.addError('UNKNOWN_FORMAT', [schema.format], undefined, schema, 'format');
-      }
+      return;
+    }
+    const isModernDraft = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+    if (
+      !isFormatSupported(schema.format, this.options.customFormats) &&
+      this.options.ignoreUnknownFormats !== true &&
+      !isModernDraft
+    ) {
+      report.addError('UNKNOWN_FORMAT', [schema.format], undefined, schema, 'format');
     }
   },
   contentEncoding(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -693,7 +692,7 @@ const SchemaValidators = {
 } as const;
 
 export class SchemaValidator {
-  constructor(private validator: ZSchemaBase) {}
+  constructor(private readonly validator: ZSchemaBase) {}
 
   get options() {
     return this.validator.options;

@@ -4,6 +4,7 @@ import { ZSchema } from '../../src/z-schema.ts';
 // Runtime check for Unicode property escape support (must actually match ASCII letters)
 function supportsUnicodePropertyEscapes() {
   try {
+    // oxlint-disable-next-line prefer-regex-literals -- deferred compilation: a regex literal would throw at parse time on engines lacking \p{L} support, defeating this runtime feature check
     const re = new RegExp('^\\p{L}+$', 'u');
     return re.test('abc');
   } catch {

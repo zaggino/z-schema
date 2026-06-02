@@ -22,6 +22,10 @@ export default defineConfig({
       { args: 'after-used', argsIgnorePattern: '^_', caughtErrors: 'all', caughtErrorsIgnorePattern: '^_' },
     ],
     'no-warning-comments': 'off',
+    // Object destructuring only. Array destructuring goes through the iterator
+    // protocol (slower than indexed access) which the validation hot paths rely
+    // on, so it is intentionally not enforced here.
+    'prefer-destructuring': ['error', { array: false, object: true }],
     'require-unicode-regexp': 'off',
     'sort-keys': 'off',
     'typescript/array-type': ['error', { default: 'array-simple' }],
@@ -124,28 +128,12 @@ export default defineConfig({
     'typescript/no-unsafe-type-assertion': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 21
-    // complexity: easy
-    // Destructuring is not used where it could simplify property extraction from objects/arrays.
-    // type: style
-    // Requires destructuring assignment instead of accessing individual properties via member expressions.
-    'prefer-destructuring': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 18
     // complexity: dangerous
     // Expressions are used in boolean positions without explicit comparison; fixing requires auditing each site for nullable/falsy semantics.
     // type: type-safety
     // Disallows loosely-typed truthy/falsy checks, requiring explicit boolean comparisons or type guards.
     'typescript/strict-boolean-expressions': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 17
-    // complexity: easy
-    // Empty function bodies exist as stubs or no-op implementations; adding a comment or explicit body is required per rule.
-    // type: best-practice
-    // Disallows empty function bodies unless explicitly opted out with a comment explaining the intent.
-    'no-empty-function': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 15
@@ -182,14 +170,6 @@ export default defineConfig({
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 12
     // complexity: easy
-    // `if/else` blocks are written where a negated condition version is cleaner; mechanical inversion needed.
-    // type: style
-    // Disallows negated conditions in `if/else` when swapping the branches would be clearer.
-    'unicorn/no-negated-condition': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 12
-    // complexity: easy
     // `.forEach()` is used on arrays where a `for...of` loop is preferred for clarity and early-exit capability.
     // type: style
     // Disallows `Array.prototype.forEach` in favour of `for...of` loops.
@@ -202,14 +182,6 @@ export default defineConfig({
     // type: bug-prevention
     // Disallows `async` functions that contain no `await` expression, which is usually unintentional.
     'require-await': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 12
-    // complexity: easy
-    // `if/else` with a negated test is used where a positive-condition version would be more readable.
-    // type: style
-    // Disallows negated conditions in `if/else` statements when reordering branches would remove the negation.
-    'no-negated-condition': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 11
@@ -274,14 +246,6 @@ export default defineConfig({
     // type: bug-prevention
     // Disallows the `delete` operator on computed/dynamic object properties, which can cause performance issues and type unsafety.
     'typescript/no-dynamic-delete': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 4
-    // complexity: easy
-    // Constructor bodies are empty and could be removed; each site needs verification that the parent constructor call is not needed.
-    // type: style
-    // Disallows constructors that do nothing beyond calling `super()` or are entirely empty.
-    'no-useless-constructor': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 3
@@ -453,14 +417,6 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
-    // complexity: trivial
-    // Generic constructor calls use type argument on the left side (`new Map<string, string>()`) where the right side or inference is preferred (or vice-versa).
-    // type: style
-    // Enforces a consistent location for type arguments in generic constructor calls (`new Foo<T>()` vs `Foo<T> = new Foo()`).
-    'typescript/consistent-generic-constructors': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
     // complexity: moderate
     // A `.then()` chain is nested inside another `.then()`, creating a promise nesting anti-pattern; flattening requires refactoring.
     // type: best-practice
@@ -474,14 +430,6 @@ export default defineConfig({
     // type: bug-prevention
     // Disallows importing a module's default export using a named import specifier.
     'import/no-named-as-default': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: trivial
-    // A regex is constructed with `new RegExp(...)` using a string literal where a regex literal could be used directly.
-    // type: style
-    // Prefers regex literals over `new RegExp()` when the pattern is a static string literal.
-    'prefer-regex-literals': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
@@ -529,35 +477,11 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 4
-    // complexity: easy
-    // String prefix/suffix checks use indexOf/charAt/regex instead of startsWith/endsWith; mechanical rewrite.
-    // type: best-practice
-    // Prefers String#startsWith / String#endsWith over equivalent index or regex comparisons.
-    'typescript/prefer-string-starts-ends-with': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 4
     // complexity: dangerous
     // The validator intentionally rejects promises with structured validation reports, not Error instances; changing this is an API change.
     // type: bug-prevention
     // Requires Promise rejection reasons to be Error objects.
     'typescript/prefer-promise-reject-errors': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 3
-    // complexity: easy
-    // Private members that are never reassigned after construction are not marked `readonly`; mechanical fix.
-    // type: maintainability
-    // Requires private class members that are never reassigned to be declared `readonly`.
-    'typescript/prefer-readonly': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
-    // complexity: trivial
-    // String#match is used without a global flag where RegExp#exec is preferred; mechanical rewrite.
-    // type: best-practice
-    // Prefers RegExp#exec over String#match when the global flag is not needed.
-    'typescript/prefer-regexp-exec': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 2

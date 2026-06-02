@@ -120,14 +120,14 @@ describe('ZSchemaTestSuite', function () {
 
   testSuiteFiles.forEach(function (testSuite) {
     testSuite.tests.forEach(function (test) {
-      let data = test.data;
+      let { data } = test;
       if (data === undefined) {
-        data = testSuite.data;
+        ({ data } = testSuite);
       }
 
-      let validateOptions = test.validateOptions;
+      let { validateOptions } = test;
       if (validateOptions === undefined) {
-        validateOptions = testSuite.validateOptions;
+        ({ validateOptions } = testSuite);
       }
 
       const async = test.async || testSuite.async || false;

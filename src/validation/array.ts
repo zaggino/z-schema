@@ -151,5 +151,9 @@ export function containsValidator(this: ZSchemaBase, report: Report, schema: Jso
 // maxContains / minContains  (no-op — handled inside contains)
 // ---------------------------------------------------------------------------
 
-export function maxContainsValidator() {}
-export function minContainsValidator() {}
+export function maxContainsValidator() {
+  // no-op: maxContains is evaluated inside the `contains` validator
+}
+export function minContainsValidator() {
+  // no-op: minContains is evaluated inside the `contains` validator
+}

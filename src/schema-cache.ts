@@ -27,7 +27,7 @@ function getSafeRemotePath(uri: string): string | undefined {
 const getEffectiveId = (schema: JsonSchemaInternal): string | undefined => {
   let id = getId(schema);
   if ((!id || !isAbsoluteUri(id)) && typeof schema.id === 'string' && isAbsoluteUri(schema.id)) {
-    id = schema.id;
+    ({ id } = schema);
   }
   return id;
 };
@@ -61,7 +61,7 @@ export class SchemaCache {
   static global_cache: SchemaCacheStorage = Object.create(null);
   cache: SchemaCacheStorage = Object.create(null);
 
-  constructor(private validator: ZSchemaBase) {}
+  constructor(private readonly validator: ZSchemaBase) {}
 
   static cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
     const remotePath = getSafeRemotePath(uri);

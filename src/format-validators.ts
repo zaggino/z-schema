@@ -222,7 +222,7 @@ const uriValidator: FormatValidatorFn = (uri: unknown) => {
   if (!hasValidPercentEncoding(uri)) {
     return false;
   }
-  const match = uri.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):\/\/([^/?#]*)/);
+  const match = /^([a-zA-Z][a-zA-Z0-9+.-]*):\/\/([^/?#]*)/.exec(uri);
   if (match) {
     const authority = match[2];
     const atIndex = authority.indexOf('@');
@@ -233,7 +233,7 @@ const uriValidator: FormatValidatorFn = (uri: unknown) => {
       }
     }
     // Validate port: must be numeric
-    let hostPort = atIndex !== -1 ? authority.slice(atIndex + 1) : authority;
+    let hostPort = atIndex === -1 ? authority : authority.slice(atIndex + 1);
     if (hostPort.startsWith('[')) {
       const bracketEnd = hostPort.indexOf(']');
       if (bracketEnd !== -1) {
@@ -331,7 +331,7 @@ const relativeJsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   }
   // Relative JSON Pointer: non-negative integer prefix (no leading zeros unless zero),
   // followed by either '#', a JSON Pointer, or nothing.
-  const match = pointer.match(/^(0|[1-9]\d*)(.*)$/);
+  const match = /^(0|[1-9]\d*)(.*)$/.exec(pointer);
   if (!match) {
     return false;
   }

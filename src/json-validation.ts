@@ -132,7 +132,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
 
   // --- Mode-specific leaf collection ---
   if (mode === 'items') {
-    const jsonArr = args.jsonArr;
+    const { jsonArr } = args;
 
     // prefixItems (2020-12 tuple)
     if (Array.isArray(currentSchema.prefixItems)) {
@@ -184,7 +184,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
     }
   } else {
     // mode === 'properties'
-    const jsonData = args.jsonData;
+    const { jsonData } = args;
 
     // properties
     if (isObject(currentSchema.properties)) {
@@ -493,23 +493,27 @@ function definitionsValidator() {
 // JsonValidators — keyword dispatch table
 // ---------------------------------------------------------------------------
 
+const noopValidator: JsonValidatorFn = () => {
+  // intentional no-op: metadata keyword or handled elsewhere in the pipeline
+};
+
 export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
   // no-op validators (metadata / handled elsewhere)
-  id: () => {},
-  $id: () => {},
-  $ref: () => {},
-  $schema: () => {},
-  $dynamicAnchor: () => {},
-  $dynamicRef: () => {},
-  $anchor: () => {},
-  $defs: () => {},
-  $vocabulary: () => {},
-  $recursiveAnchor: () => {},
-  $recursiveRef: () => {},
-  examples: () => {},
-  title: () => {},
-  description: () => {},
-  default: () => {},
+  id: noopValidator,
+  $id: noopValidator,
+  $ref: noopValidator,
+  $schema: noopValidator,
+  $dynamicAnchor: noopValidator,
+  $dynamicRef: noopValidator,
+  $anchor: noopValidator,
+  $defs: noopValidator,
+  $vocabulary: noopValidator,
+  $recursiveAnchor: noopValidator,
+  $recursiveRef: noopValidator,
+  examples: noopValidator,
+  title: noopValidator,
+  description: noopValidator,
+  default: noopValidator,
 
   // type validators
   type: typeValidator,
@@ -640,7 +644,7 @@ function recurseObject(this: ZSchemaBase, report: Report, schema: JsonSchemaInte
 
   // If "additionalProperties" is absent, it is considered present with an empty schema as a value.
   // In addition, boolean value true is considered equivalent to an empty schema.
-  let additionalProperties = schema.additionalProperties;
+  let { additionalProperties } = schema;
   if (additionalProperties === true || additionalProperties === undefined) {
     additionalProperties = {};
   }
@@ -777,10 +781,10 @@ export function validate(
       this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
 
     if (applySiblingKeywordsWithRef) {
-      if (!schema.__$refResolved) {
-        report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
-      } else {
+      if (schema.__$refResolved) {
         validate.call(this, report, schema.__$refResolved as JsonSchemaInternal, json);
+      } else {
+        report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
       }
       const refIdx = keys.indexOf('$ref');
       if (refIdx !== -1) {
@@ -817,10 +821,10 @@ export function validate(
     if (applySiblingKeywordsWithRecursiveRef) {
       const recursiveRefTarget = resolveRecursiveRef(schema, recursiveAnchorStack);
 
-      if (!recursiveRefTarget) {
-        report.addError('REF_UNRESOLVED', [schema.$recursiveRef], undefined, schema);
-      } else {
+      if (recursiveRefTarget) {
         validate.call(this, report, recursiveRefTarget, json);
+      } else {
+        report.addError('REF_UNRESOLVED', [schema.$recursiveRef], undefined, schema);
       }
       const recursiveRefIdx = keys.indexOf('$recursiveRef');
       if (recursiveRefIdx !== -1) {
