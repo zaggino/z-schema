@@ -32,7 +32,7 @@ export default {
       valid: false,
       after(err: any, valid: any, data: any, validator: any) {
         err.forEach(function (e: any) {
-          if (e.params.indexOf(REF_NAME) !== -1) {
+          if (e.params.includes(REF_NAME)) {
             expect(e.code).not.toBe('UNRESOLVABLE_REFERENCE');
           }
         });

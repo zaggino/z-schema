@@ -1,9 +1,10 @@
+import type { Errors, ValidateError } from './errors.js';
 import type { FormatValidatorFn } from './format-validators.js';
 import type { JsonSchema, JsonSchemaInternal, JsonSchemaVersion } from './json-schema-versions.js';
 import type { SchemaErrorDetail } from './report.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
-import { type Errors, type ValidateError, getValidateError } from './errors.js';
+import { getValidateError } from './errors.js';
 import { getSupportedFormats } from './format-validators.js';
 import { VERSION_SCHEMA_URL_MAPPING } from './json-schema-versions.js';
 import { isInternalKey } from './json-schema.js';
@@ -25,7 +26,10 @@ export interface ValidateOptions {
   excludeErrors?: Array<keyof typeof Errors>;
 }
 
-export type ValidateResponse = { valid: boolean; err?: ValidateError };
+export interface ValidateResponse {
+  valid: boolean;
+  err?: ValidateError;
+}
 
 export type ValidateCallback = (err: ValidateResponse['err'], valid: ValidateResponse['valid']) => void;
 
@@ -186,13 +190,13 @@ export class ZSchemaBase {
     const report = new Report(this.options);
 
     if (Array.isArray(schemaOrArr)) {
-      const arr = this.scache.getSchema(report, schemaOrArr)!;
+      const arr = this.scache.getSchema(report, schemaOrArr);
       const compiled = this.sc.compileSchema(report, arr);
       if (compiled) {
         this.sv.validateSchema(report, arr);
       }
     } else {
-      const schema = this.scache.getSchema(report, schemaOrArr)!;
+      const schema = this.scache.getSchema(report, schemaOrArr);
       const compiled = this.sc.compileSchema(report, schema);
       if (compiled) {
         this.sv.validateSchema(report, schema);
@@ -334,9 +338,9 @@ export class ZSchemaBase {
       for (key in schema) {
         if (Object.hasOwn(schema, key)) {
           if (isInternalKey(key)) {
-            delete (schema as any)[key];
+            delete schema[key];
           } else {
-            cleanup((schema as any)[key]);
+            cleanup(schema[key]);
           }
         }
       }

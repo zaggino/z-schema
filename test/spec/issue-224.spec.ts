@@ -147,6 +147,6 @@ describe('Issue #224: Not getting all schema errors from optional parent object'
     expect(paths).toContain('#/optionalFatherObject/name');
     expect(paths).toContain('#/optionalFatherObject/birthUnixTime');
     const missingProp = details.find((e) => e.code === 'OBJECT_MISSING_REQUIRED_PROPERTY');
-    expect(missingProp!.params![0]).toBe('name2');
+    expect(missingProp!.params[0]).toBe('name2');
   });
 });

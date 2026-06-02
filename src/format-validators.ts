@@ -119,7 +119,7 @@ const regexValidator: FormatValidatorFn = (input: unknown) => {
   }
 
   try {
-    RegExp(input);
+    new RegExp(input);
     return true;
   } catch {
     return false;

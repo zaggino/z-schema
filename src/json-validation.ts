@@ -1,4 +1,5 @@
 import type { JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
+import type { JsonValidatorFn } from './validation/shared.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
 import { getId } from './json-schema.js';
@@ -48,7 +49,6 @@ import { resolveDynamicRef, resolveRecursiveRef } from './validation/ref.js';
 import {
   getCachedValidationResult,
   isValidationVocabularyEnabled,
-  type JsonValidatorFn,
   VALIDATION_VOCAB_KEYWORDS,
 } from './validation/shared.js';
 import {
@@ -65,23 +65,23 @@ import { constValidator, enumValidator, typeValidator } from './validation/type.
 // collectEvaluated — unified traversal for unevaluatedItems / unevaluatedProperties
 // ---------------------------------------------------------------------------
 
-type CollectEvaluatedItemsArgs = {
+interface CollectEvaluatedItemsArgs {
   report: Report;
   currentSchema: JsonSchemaInternal | boolean | undefined;
   json: unknown;
   mode: 'items';
   jsonArr: unknown[];
   depth: number;
-};
+}
 
-type CollectEvaluatedPropertiesArgs = {
+interface CollectEvaluatedPropertiesArgs {
   report: Report;
   currentSchema: JsonSchemaInternal | boolean | undefined;
   json: unknown;
   mode: 'properties';
   jsonData: Record<string, unknown>;
   depth: number;
-};
+}
 
 type CollectEvaluatedArgs = CollectEvaluatedItemsArgs | CollectEvaluatedPropertiesArgs;
 
@@ -116,7 +116,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
         currentSchema: subSchema,
         json,
         mode: 'items',
-        jsonArr: (args as CollectEvaluatedItemsArgs).jsonArr,
+        jsonArr: args.jsonArr,
         depth: depth + 1,
       });
     }
@@ -125,14 +125,14 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
       currentSchema: subSchema,
       json,
       mode: 'properties',
-      jsonData: (args as CollectEvaluatedPropertiesArgs).jsonData,
+      jsonData: args.jsonData,
       depth: depth + 1,
     });
   };
 
   // --- Mode-specific leaf collection ---
   if (mode === 'items') {
-    const jsonArr = (args as CollectEvaluatedItemsArgs).jsonArr;
+    const jsonArr = args.jsonArr;
 
     // prefixItems (2020-12 tuple)
     if (Array.isArray(currentSchema.prefixItems)) {
@@ -184,7 +184,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
     }
   } else {
     // mode === 'properties'
-    const jsonData = (args as CollectEvaluatedPropertiesArgs).jsonData;
+    const jsonData = args.jsonData;
 
     // properties
     if (isObject(currentSchema.properties)) {
@@ -728,7 +728,7 @@ export function validate(
   let pushedRecursiveAnchor = false;
   let pushedDynamicScope = false;
   const schemaId = getId(schema);
-  const schemaResourceRoot = (schema as JsonSchemaInternal).__$resourceRoot;
+  const schemaResourceRoot = schema.__$resourceRoot;
   const dynamicScopeEntry = schemaResourceRoot || (isRoot || typeof schemaId === 'string' ? schema : undefined);
   if (dynamicScopeEntry && dynamicScopeStack.at(-1) !== dynamicScopeEntry) {
     dynamicScopeStack.push(dynamicScopeEntry);

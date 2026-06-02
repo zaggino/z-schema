@@ -2,7 +2,9 @@ import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { Reference } from './schema-compiler.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
+import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
+import { isObject } from './utils/what-is.js';
 
 /**
  * Keywords whose values are not JSON Schema sub-schemas and must not be
@@ -12,8 +14,6 @@ export const NON_SCHEMA_KEYWORDS = ['enum', 'const', 'default', 'examples'] as c
 
 /** Returns true if the key is an internal z-schema property (prefixed with `__$`). */
 export const isInternalKey = (key: string): boolean => key.startsWith('__$');
-import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
-import { isObject } from './utils/what-is.js';
 
 /**
  * Properties present in ALL JSON Schema drafts (04 through 2020-12) with

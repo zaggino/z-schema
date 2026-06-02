@@ -84,7 +84,7 @@ export const isValidationVocabularyEnabled = (
     return true;
   }
 
-  const vocabulary = metaSchema.$vocabulary as Record<string, boolean>;
+  const vocabulary = metaSchema.$vocabulary;
   const has2019 = Object.hasOwn(vocabulary, VOCAB_VALIDATION_2019_09);
   const has2020 = Object.hasOwn(vocabulary, VOCAB_VALIDATION_2020_12);
 
@@ -119,7 +119,7 @@ export const isFormatAssertionVocabEnabled = (
     return false; // no vocabulary info, default to annotation-only for modern drafts
   }
 
-  const vocabulary = metaSchema.$vocabulary as Record<string, boolean>;
+  const vocabulary = metaSchema.$vocabulary;
 
   // For draft 2020-12, only the format-assertion vocabulary enables format as assertion
   if (Object.hasOwn(vocabulary, VOCAB_FORMAT_ASSERTION_2020_12)) {

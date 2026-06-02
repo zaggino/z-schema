@@ -60,7 +60,7 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
 
   const versionsTested = Object.keys(VERSION_FOLDER_MAPPING) as JsonSchemaVersion[];
   for (const version of versionsTested) {
-    describe(`${version}`, () => {
+    describe(version, () => {
       const draftPath = `${testsPath}/${VERSION_FOLDER_MAPPING[version]}`;
       const testFiles = manifest.filter((f) => f.startsWith(draftPath));
       testFiles.forEach((testFilePath) => {

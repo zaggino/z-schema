@@ -1,7 +1,8 @@
 import type { FormatValidatorFn } from './format-validators.js';
+import type { JsonSchemaVersion } from './json-schema-versions.js';
 import type { Report } from './report.js';
 
-import { CURRENT_DEFAULT_SCHEMA_VERSION, type JsonSchemaVersion } from './json-schema-versions.js';
+import { CURRENT_DEFAULT_SCHEMA_VERSION } from './json-schema-versions.js';
 import { shallowClone } from './utils/clone.js';
 import { DEFAULT_MAX_RECURSION_DEPTH, MAX_ASYNC_TIMEOUT } from './utils/constants.js';
 
