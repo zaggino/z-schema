@@ -91,13 +91,13 @@
     "@vitest/coverage-istanbul": "^4.1.0",
     "@vitest/coverage-v8": "^4.1.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
+    "lint-staged": "^17.0.5",
     "lodash.isequal": "^4.5.0",
-    "oxfmt": "^0.41.0",
+    "oxfmt": "^0.51.0",
     "oxlint": "^1.56.0",
     "rimraf": "^6.1.2",
-    "tsdown": "^0.21.4",
-    "typescript": "^5.9.3",
+    "tsdown": "^0.22.0",
+    "typescript": "^6.0.3",
     "vitest": "^4.1.0"
   },
   "optionalDependencies": {
