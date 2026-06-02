@@ -34,8 +34,8 @@ export function enumValidator(this: ZSchemaBase, report: Report, schema: JsonSch
   if (shouldSkipValidate(this.validateOptions, ['ENUM_CASE_MISMATCH', 'ENUM_MISMATCH'])) {
     return;
   }
-  let match = false,
-    caseInsensitiveMatch = false;
+  let caseInsensitiveMatch = false,
+    match = false;
   for (const enumVal of schema.enum!) {
     if (areEqual(json, enumVal, { maxDepth: this.options.maxRecursionDepth })) {
       match = true;

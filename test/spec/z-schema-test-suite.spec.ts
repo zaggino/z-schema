@@ -177,7 +177,7 @@ describe('ZSchemaTestSuite', function () {
           setup(validator, ZSchema);
         }
 
-        let valid;
+        let valid: boolean | undefined;
         try {
           validator.validateSchema(schema as any);
           valid = true;
@@ -214,7 +214,7 @@ describe('ZSchemaTestSuite', function () {
         }
 
         if (after) {
-          after(err?.details ?? err ?? undefined, valid as boolean, data, validator);
+          after(err?.details ?? err ?? undefined, valid!, data, validator);
         }
       }, 1000);
     });

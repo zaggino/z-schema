@@ -31,7 +31,7 @@ describe('Error objects include `keyword` field', function () {
     } as any;
 
     try {
-      validator.validateSchema(badSchema as any);
+      validator.validateSchema(badSchema);
       expect.fail('Expected validateSchema to throw');
     } catch (error) {
       expect(error).toBeInstanceOf(ValidateError);

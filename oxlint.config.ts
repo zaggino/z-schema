@@ -30,6 +30,18 @@ export default defineConfig({
     'typescript/no-non-null-assertion': 'off',
     'unicorn/prefer-node-protocol': 'off',
 
+    // ── Intentionally kept off for performance (NOT in the TODO backlog) ──
+    // Excluded from the lint re-enable effort on performance grounds: the
+    // "fixed" form is measurably slower than the construct it replaces.
+
+    // Spread over .concat()/.slice() allocates via the iterator protocol —
+    // slower than Array#concat/#slice in hot paths (report.ts, schema-compiler.ts).
+    'unicorn/prefer-spread': 'off',
+
+    // for…of adds iterator-protocol overhead vs indexed access in validation
+    // hot paths (validation/array.ts items loop, report.ts path building).
+    'typescript/prefer-for-of': 'off',
+
     // ── TODO: rules from the ultracite preset currently reporting errors ──
     // Disabled to reach a clean baseline; re-evaluate and re-enable incrementally.
 
@@ -128,14 +140,6 @@ export default defineConfig({
     // type: best-practice
     // Disallows empty function bodies unless explicitly opted out with a comment explaining the intent.
     'no-empty-function': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 15
-    // complexity: easy
-    // Array spreading (`[...a]`) is preferred over `.concat()` / `Array.from()` by this rule; mechanical substitution.
-    // type: style
-    // Prefers the spread operator over older array-copying methods such as `.concat()` and `Array.from()`.
-    'unicorn/prefer-spread': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 15
@@ -258,28 +262,12 @@ export default defineConfig({
     'promise/avoid-new': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 6
-    // complexity: trivial
-    // `for` loops iterate over arrays/iterables where `for...of` is cleaner; mechanical conversion.
-    // type: style
-    // Prefers `for...of` loops over index-based `for` loops when the index variable is not used.
-    'typescript/prefer-for-of': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 4
     // complexity: dangerous
     // `delete obj[key]` is used with dynamic keys; replacing with explicit property removal or `Map` usage requires careful refactoring.
     // type: bug-prevention
     // Disallows the `delete` operator on computed/dynamic object properties, which can cause performance issues and type unsafety.
     'typescript/no-dynamic-delete': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 4
-    // complexity: trivial
-    // JSDoc `@returns`, `@param`, etc. tags have empty bodies; adding a description or removing the tag is mechanical.
-    // type: style
-    // Disallows JSDoc tags (e.g., `@returns`, `@param`) that are present but have no description content.
-    'jsdoc/empty-tags': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 4
@@ -315,27 +303,11 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 3
-    // complexity: trivial
-    // `type` and `interface` declarations are mixed; the rule requires one consistent form.
-    // type: style
-    // Enforces a consistent use of either `interface` or `type` for TypeScript object type definitions.
-    'typescript/consistent-type-definitions': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 3
     // complexity: moderate
     // Error-first callbacks are used but the error argument is not checked before proceeding; each site requires an explicit error guard.
     // type: bug-prevention
     // Requires error-first callback parameters to be handled (checked or re-thrown) rather than silently ignored.
     'node/handle-callback-err': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 3
-    // complexity: trivial
-    // Type-only imports mix inline `type` specifiers and top-level `import type`; normalising to one form is mechanical.
-    // type: style
-    // Enforces consistent positioning of the `type` specifier in type-only imports (`import type` vs `import { type }`).
-    'import/consistent-type-specifier-style': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 2
@@ -387,14 +359,6 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 2
-    // complexity: easy
-    // Type assertions are redundant because the value is already of the asserted type; removing them is mechanical after verification.
-    // type: type-safety
-    // Disallows type assertions (`as T`) that are unnecessary because the value is already typed correctly.
-    'typescript/no-unnecessary-type-assertion': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
     // complexity: moderate
     // A `void`-typed expression is used in a non-void context (e.g., passed as a value); restructuring is required to avoid the confusion.
     // type: type-safety
@@ -419,14 +383,6 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 2
-    // complexity: trivial
-    // Some `import` statements appear after non-import statements in a module; moving them to the top is mechanical.
-    // type: style
-    // Requires all `import` declarations to appear before other statements in a module.
-    'import/first': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
     // complexity: easy
     // `new Promise((resolve, reject) => { ... })` is returned directly from another promise chain; wrapping can be simplified.
     // type: best-practice
@@ -440,14 +396,6 @@ export default defineConfig({
     // type: best-practice
     // Prefers `Set.prototype.has()` over `Array.prototype.includes()` for membership tests on large or frequently-queried collections.
     'unicorn/prefer-set-has': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: trivial
-    // `indexOf` is used for a membership check where `Array.prototype.includes()` is clearer.
-    // type: style
-    // Prefers `Array.prototype.includes()` over `indexOf` comparisons for readability.
-    'unicorn/prefer-includes': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
@@ -475,14 +423,6 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
-    // complexity: trivial
-    // A built-in like `Array` or `Object` is called without `new`; using `new` or the literal form is required.
-    // type: bug-prevention
-    // Requires the `new` keyword when constructing built-in objects (e.g., `new Array()` instead of `Array()`).
-    'unicorn/new-for-builtins': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
     // complexity: moderate
     // A custom `Error` subclass does not follow the expected pattern (name property, correct prototype chain); refactoring requires care.
     // type: best-practice
@@ -496,22 +436,6 @@ export default defineConfig({
     // type: type-safety
     // Disallows the `+` operator when its operands have types that could produce an unintended string/number concatenation.
     'typescript/restrict-plus-operands': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: trivial
-    // A type assertion can be replaced with a non-null assertion (`!`) which is shorter and conveys the same intent.
-    // type: style
-    // Prefers the non-null assertion operator over `as NonNullable<T>` type assertions when the value is known to be non-null.
-    'typescript/non-nullable-type-assertion-style': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: trivial
-    // A template literal contains only a single expression with no surrounding text; a plain expression suffices.
-    // type: style
-    // Disallows template literals that contain only a single expression and no literal text, where a plain expression would do.
-    'typescript/no-unnecessary-template-expression': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
@@ -544,14 +468,6 @@ export default defineConfig({
     // type: bug-prevention
     // Disallows importing a module's default export using a named import specifier.
     'import/no-named-as-default': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: trivial
-    // Multiple variable declarations in a single `var`/`let`/`const` statement are not sorted alphabetically.
-    // type: style
-    // Requires variables declared in the same statement to be sorted alphabetically.
-    'sort-vars': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1

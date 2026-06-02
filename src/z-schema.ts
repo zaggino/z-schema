@@ -15,7 +15,7 @@ import { defaultOptions } from './z-schema-options.js';
 import { getSchemaReader, setSchemaReader } from './z-schema-reader.js';
 
 export class ZSchema extends ZSchemaBase {
-  /** @internal Use ZSchema.create() instead. */
+  /** Use ZSchema.create() instead. @internal */
   constructor(options: ZSchemaOptions | undefined, token: symbol) {
     super(options, token);
   }
@@ -221,7 +221,7 @@ export class ZSchema extends ZSchemaBase {
  * Created via `ZSchema.create({ safe: true })`.
  */
 export class ZSchemaSafe extends ZSchemaBase {
-  /** @internal Use ZSchema.create() instead. */
+  /** Use ZSchema.create() instead. @internal */
   constructor(options: ZSchemaOptions | undefined, token: symbol) {
     super(options, token);
   }
@@ -262,7 +262,7 @@ export class ZSchemaSafe extends ZSchemaBase {
  * Created via `ZSchema.create({ async: true })`.
  */
 export class ZSchemaAsync extends ZSchemaBase {
-  /** @internal Use ZSchema.create() instead. */
+  /** Use ZSchema.create() instead. @internal */
   constructor(options: ZSchemaOptions | undefined, token: symbol) {
     super(options, token);
   }
@@ -301,7 +301,7 @@ export class ZSchemaAsync extends ZSchemaBase {
  * Created via `ZSchema.create({ async: true, safe: true })`.
  */
 export class ZSchemaAsyncSafe extends ZSchemaBase {
-  /** @internal Use ZSchema.create() instead. */
+  /** Use ZSchema.create() instead. @internal */
   constructor(options: ZSchemaOptions | undefined, token: symbol) {
     super(options, token);
   }
