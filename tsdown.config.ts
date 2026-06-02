@@ -11,7 +11,7 @@ export default defineConfig([
     clean: true,
     platform: 'neutral',
   },
-  // 2. CJS — bundled into cjs/index.js + cjs/index.d.ts
+  // 2. CJS — bundled into cjs/index.cjs + cjs/index.d.cts
   {
     entry: ['src/index.ts'],
     format: ['cjs'],

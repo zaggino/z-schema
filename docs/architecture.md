@@ -117,13 +117,13 @@ When a schema is looked up by URI, the instance cache is checked first. If not f
 
 ## Build Outputs
 
-| Output  | Format                          | Entry                        |
-| ------- | ------------------------------- | ---------------------------- |
-| `dist/` | ESM (`.mjs`) + types (`.d.mts`) | `src/index.ts` via tsdown    |
-| `cjs/`  | CommonJS                        | `src/index.ts` via tsdown    |
-| `umd/`  | UMD (browser global `ZSchema`)  | `src/z-schema.ts` via tsdown |
+| Output  | Format                         | Entry                        |
+| ------- | ------------------------------ | ---------------------------- |
+| `dist/` | ESM (`.js`) + types (`.d.ts`)  | `src/index.ts` via tsdown    |
+| `cjs/`  | CommonJS (`.cjs` + `.d.cts`)   | `src/index.ts` via tsdown    |
+| `umd/`  | UMD (browser global `ZSchema`) | `src/z-schema.ts` via tsdown |
 
-All outputs are produced by [tsdown](https://tsdown.dev/) (powered by Rolldown). ESM output uses `.mjs` extensions; the `package.json` exports map uses conditional `import`/`require` to route consumers to the correct format.
+The package is ESM-first (`"type": "module"`), so all outputs are produced by [tsdown](https://tsdown.dev/) (powered by Rolldown) with type-appropriate extensions: ESM uses `.js`, CommonJS uses `.cjs` (with a `umd/package.json` `{"type":"commonjs"}` marker so the UMD bundles remain CommonJS for Node `require`). The `package.json` exports map uses conditional `import`/`require` to route consumers to the correct format.
 
 ## Key Internal Types
 

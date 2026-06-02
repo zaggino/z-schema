@@ -8,7 +8,7 @@ import path from 'path';
 import { program } from 'commander';
 import { request } from 'https';
 import pkg from '../package.json' with { type: 'json' };
-import ZSchema from '../dist/index.mjs';
+import ZSchema from '../dist/index.js';
 
 program
   .version(pkg.version)

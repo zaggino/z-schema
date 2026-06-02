@@ -2,13 +2,13 @@ import fs from 'fs';
 
 describe('Build artifacts', function () {
   it('creates ESM output', function () {
-    expect(fs.existsSync('dist/index.mjs')).toBe(true);
-    expect(fs.existsSync('dist/index.d.mts')).toBe(true);
+    expect(fs.existsSync('dist/index.js')).toBe(true);
+    expect(fs.existsSync('dist/index.d.ts')).toBe(true);
   });
 
   it('creates CJS bundle', function () {
-    expect(fs.existsSync('cjs/index.js')).toBe(true);
-    expect(fs.existsSync('cjs/index.d.ts')).toBe(true);
+    expect(fs.existsSync('cjs/index.cjs')).toBe(true);
+    expect(fs.existsSync('cjs/index.d.cts')).toBe(true);
   });
 
   it('creates UMD bundles', function () {
