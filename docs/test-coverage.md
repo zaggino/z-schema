@@ -13,8 +13,8 @@ Line coverage status: **high**
 | src/json-validation.ts        |     91% |         91% |       100% |      89% |
 | src/report.ts                 |     94% |         94% |        95% |      88% |
 | src/schema-cache.ts           |     90% |         90% |        92% |      89% |
-| src/schema-compiler.ts        |     93% |         93% |       100% |      90% |
-| src/schema-validator.ts       |     80% |         80% |       100% |      77% |
+| src/schema-compiler.ts        |     94% |         93% |       100% |      90% |
+| src/schema-validator.ts       |     79% |         79% |       100% |      76% |
 | src/utils/array.ts            |    100% |        100% |       100% |     100% |
 | src/utils/base64.ts           |     65% |         65% |       100% |      63% |
 | src/utils/clone.ts            |     97% |         98% |       100% |      94% |
@@ -41,5 +41,5 @@ Line coverage status: **high**
 | src/z-schema-options.ts       |     92% |         92% |       100% |      70% |
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
-| src/z-schema.ts               |     76% |         76% |        81% |     100% |
-| **Total**                     | **90%** |     **91%** |    **95%** |  **88%** |
+| src/z-schema.ts               |     74% |         75% |        79% |     100% |
+| **Total**                     | **90%** |     **90%** |    **95%** |  **88%** |
