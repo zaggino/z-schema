@@ -13,7 +13,7 @@ const getJsonFiles = async (directory: string, base: string): Promise<string[]> 
         return getJsonFiles(fullPath, base);
       }
       if (entry.isFile() && entry.name.endsWith('.json')) {
-        return '/' + [relative(base, fullPath).replace(/\\/g, '/')];
+        return `/${relative(base, fullPath).replaceAll('\\', '/')}`;
       }
       return [];
     })

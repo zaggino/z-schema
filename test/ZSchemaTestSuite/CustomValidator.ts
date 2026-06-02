@@ -40,7 +40,7 @@ export default {
         b: null,
       },
       valid: false,
-      after: function (err: any) {
+      after(err: any) {
         expect(err[0].code).toBe('INVALID_TYPE');
       },
     },
@@ -50,7 +50,7 @@ export default {
         c: null,
       },
       valid: false,
-      after: function (err: any) {
+      after(err: any) {
         expect(err[0].code).toBe('SHOULD_FAIL');
         expect(err[0].message).toBe('Forced fail');
       },

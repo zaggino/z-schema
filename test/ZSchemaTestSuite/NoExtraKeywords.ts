@@ -35,7 +35,7 @@ export default {
       description:
         'should fail schema validation, because schema is validated by $schema and number is not valid for title',
       valid: false,
-      after: function (err: any, valid: any) {
+      after(err: any, valid: any) {
         expect(valid).toBe(false);
         expect(err[0].code).toBe('PARENT_SCHEMA_VALIDATION_FAILED');
       },

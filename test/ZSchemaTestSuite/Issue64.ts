@@ -19,7 +19,7 @@ export default {
       },
       valid: false,
       validateSchemaOnly: true,
-      after: function (err: any) {
+      after(err: any) {
         expect(err[0].path).toEqual('#/properties/friends/items');
       },
     },

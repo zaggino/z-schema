@@ -1,8 +1,8 @@
 import punycode from 'punycode/punycode.js';
 import isIPModule from 'validator/lib/isIP.js';
 
-const IDN_SEPARATOR_REGEX = /[\u3002\uff0e\uff61]/g;
-const IDN_SEPARATOR_TEST_REGEX = /[\u3002\uff0e\uff61]/;
+const IDN_SEPARATOR_REGEX = /[\u3002\uFF0E\uFF61]/g;
+const IDN_SEPARATOR_TEST_REGEX = /[\u3002\uFF0E\uFF61]/;
 
 const splitHostnameLabels = (hostname: string): string[] | null => {
   if (hostname.length === 0 || hostname.length > 255) {
@@ -33,7 +33,7 @@ const toUnicodeLabel = (label: string): string | null => {
   }
   try {
     return punycode.toUnicode(label.toLowerCase());
-  } catch (_e) {
+  } catch {
     return null;
   }
 };
@@ -51,14 +51,14 @@ const isValidIdnUnicodeLabel = (label: string): boolean => {
     return false;
   }
 
-  if (/[\u302e\u302f\u0640\u07fa]/u.test(label)) {
+  if (/[\u302E\u302F\u0640\u07FA]/u.test(label)) {
     return false;
   }
 
   for (let idx = 0; idx < label.length; idx++) {
     const char = label[idx];
 
-    if (char === '\u00b7') {
+    if (char === '\u00B7') {
       if (idx === 0 || idx === label.length - 1 || label[idx - 1] !== 'l' || label[idx + 1] !== 'l') {
         return false;
       }
@@ -70,25 +70,25 @@ const isValidIdnUnicodeLabel = (label: string): boolean => {
       }
     }
 
-    if (char === '\u05f3' || char === '\u05f4') {
+    if (char === '\u05F3' || char === '\u05F4') {
       if (idx === 0 || !isHebrew(label[idx - 1])) {
         return false;
       }
     }
 
-    if (char === '\u200d') {
-      if (idx === 0 || label[idx - 1] !== '\u094d') {
+    if (char === '\u200D') {
+      if (idx === 0 || label[idx - 1] !== '\u094D') {
         return false;
       }
     }
   }
 
-  if (label.includes('\u30fb') && !hasCjkKanaOrHan(label.replace(/\u30fb/g, ''))) {
+  if (label.includes('\u30FB') && !hasCjkKanaOrHan(label.replaceAll('・', ''))) {
     return false;
   }
 
   const hasArabicIndic = /[\u0660-\u0669]/.test(label);
-  const hasExtendedArabicIndic = /[\u06f0-\u06f9]/.test(label);
+  const hasExtendedArabicIndic = /[\u06F0-\u06F9]/.test(label);
   if (hasArabicIndic && hasExtendedArabicIndic) {
     return false;
   }
@@ -129,7 +129,7 @@ const isValidIdnUnicodeLabel = (label: string): boolean => {
 */
 export const isValidHostname = (hostname: string): boolean => {
   // eslint-disable-next-line no-control-regex
-  if (IDN_SEPARATOR_TEST_REGEX.test(hostname) || /[^\x00-\x7F]/.test(hostname)) {
+  if (IDN_SEPARATOR_TEST_REGEX.test(hostname) || /[^\u0000-\u007F]/.test(hostname)) {
     return false;
   }
 

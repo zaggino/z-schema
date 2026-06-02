@@ -6,7 +6,7 @@ export default {
   options: {
     asyncTimeout: 2000,
   },
-  setup: function (validator: any, Class: any) {
+  setup(validator: any, Class: any) {
     if (testAsync) {
       // asynchronous validator
       Class.registerFormat('string-length', function (str: any, callback: any) {
@@ -37,7 +37,7 @@ export default {
       description: 'Wrong path in custom format async validator',
       data: { userId: '1' },
       valid: false,
-      after: function (err: any) {
+      after(err: any) {
         expect(err[0].path).toEqual('#/userId');
       },
     },

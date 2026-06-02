@@ -63,7 +63,7 @@ export default {
       },
       validateSchemaOnly: true,
       valid: false,
-      after: function (err: any) {
+      after(err: any) {
         expect(err[0].code).toBe('UNRESOLVABLE_REFERENCE');
       },
     },

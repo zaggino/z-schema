@@ -31,7 +31,7 @@ export default {
         },
       },
       valid: false,
-      after: function (err: any) {
+      after(err: any) {
         err.forEach(function (e: any) {
           expect(e.path).toBe('#/this~1that/t~1h~1e~1 ~1o~1t~1h~1e~1r');
         });

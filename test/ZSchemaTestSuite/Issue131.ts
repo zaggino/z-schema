@@ -27,7 +27,7 @@ export default {
       },
       data: { nested: {} },
       valid: false,
-      after: function (err: any) {
+      after(err: any) {
         expect(err.length).toBe(2);
         if (err.length === 2) {
           expect(err[0].code).toBe('OBJECT_MISSING_REQUIRED_PROPERTY');

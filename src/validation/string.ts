@@ -113,7 +113,7 @@ export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonS
             try {
               const resolved = await promiseResult;
               callback(resolved);
-            } catch (_error) {
+            } catch {
               callback(false);
             }
           },

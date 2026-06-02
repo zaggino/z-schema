@@ -740,7 +740,7 @@ export function validate(
   const schemaId = getId(schema);
   const schemaResourceRoot = (schema as JsonSchemaInternal).__$resourceRoot;
   const dynamicScopeEntry = schemaResourceRoot || (isRoot || typeof schemaId === 'string' ? schema : undefined);
-  if (dynamicScopeEntry && dynamicScopeStack[dynamicScopeStack.length - 1] !== dynamicScopeEntry) {
+  if (dynamicScopeEntry && dynamicScopeStack.at(-1) !== dynamicScopeEntry) {
     dynamicScopeStack.push(dynamicScopeEntry);
     pushedDynamicScope = true;
   }

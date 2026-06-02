@@ -51,7 +51,7 @@ describe('Issue #224: Not getting all schema errors from optional parent object'
             },
             birthUnixTime: {
               description: '',
-              default: 1415273168,
+              default: 1_415_273_168,
               type: 'number',
             },
           },
@@ -122,7 +122,7 @@ describe('Issue #224: Not getting all schema errors from optional parent object'
             },
             birthUnixTime: {
               description: '',
-              default: 1415273168,
+              default: 1_415_273_168,
               type: 'number',
             },
           },

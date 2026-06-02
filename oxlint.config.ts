@@ -60,14 +60,6 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 95
-    // complexity: trivial
-    // Object literals use longhand `{ foo: foo }` instead of shorthand `{ foo }`; purely mechanical fix.
-    // type: style
-    // Requires ES6 object shorthand notation when the property name matches the variable name.
-    'object-shorthand': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 95
     // complexity: easy
     // Function declarations are used throughout; converting to arrow/expression style is mechanical but touches many files.
     // type: style
@@ -227,14 +219,6 @@ export default defineConfig({
     'no-param-reassign': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 14
-    // complexity: trivial
-    // String escape sequences are not consistently uppercased (e.g., `\xFF` vs `\xff`); purely cosmetic fix.
-    // type: style
-    // Requires escape sequences in strings and regular expressions to use uppercase hex digits.
-    'unicorn/escape-case': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 13
     // complexity: moderate
     // Nullable values are combined with `||` where `??` is semantically more correct; each site needs auditing for falsy vs. nullish intent.
@@ -249,14 +233,6 @@ export default defineConfig({
     // type: type-safety
     // Disallows passing `any`-typed values as arguments to typed function parameters.
     'typescript/no-unsafe-argument': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 13
-    // complexity: trivial
-    // String concatenation with `+` is used where template literals would be clearer; mechanical substitution.
-    // type: style
-    // Requires template literals instead of string concatenation with the `+` operator.
-    'prefer-template': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 13
@@ -363,14 +339,6 @@ export default defineConfig({
     eqeqeq: 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 10
-    // complexity: trivial
-    // Arrow functions have unnecessary block bodies (`=> { return x; }`) where concise bodies (`=> x`) suffice.
-    // type: style
-    // Requires or disallows braces around arrow function bodies when a concise expression body is possible.
-    'arrow-body-style': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 9
     // complexity: moderate
     // Variable names shadow outer-scope variables; renaming requires confirming no semantic collision exists.
@@ -385,22 +353,6 @@ export default defineConfig({
     // type: style
     // Disallows `if` statements as the sole body of an `else` block, requiring `else if` instead.
     'no-lonely-if': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 8
-    // complexity: trivial
-    // `String.prototype.replace()` calls with global regexes can be replaced with `replaceAll()`; mechanical substitution.
-    // type: style
-    // Prefers `String.prototype.replaceAll()` over `.replace()` with a global regular expression flag.
-    'unicorn/prefer-string-replace-all': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 8
-    // complexity: trivial
-    // Hex escape sequences (`\x41`) are used where unicode escapes (`A`) are preferred.
-    // type: style
-    // Disallows hex escape sequences in strings and regular expressions, preferring unicode escapes.
-    'unicorn/no-hex-escape': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 8
@@ -419,28 +371,12 @@ export default defineConfig({
     'promise/avoid-new': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 7
-    // complexity: trivial
-    // Numeric literals lack underscore separators for readability (e.g., `1000000` → `1_000_000`).
-    // type: style
-    // Requires consistent use of numeric separators (`_`) in numeric literals for readability.
-    'unicorn/numeric-separators-style': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 6
     // complexity: trivial
     // Node.js built-in imports use bare specifiers (e.g., `'path'`) instead of the `node:` protocol prefix.
     // type: best-practice
     // Requires the `node:` protocol prefix for Node.js built-in module imports.
     'unicorn/prefer-node-protocol': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 6
-    // complexity: trivial
-    // Array/string indexing uses `arr[arr.length - 1]` instead of `arr.at(-1)`; mechanical substitution.
-    // type: style
-    // Prefers `Array.prototype.at()` and `String.prototype.at()` for negative index access over manual length arithmetic.
-    'unicorn/prefer-at': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 6
@@ -465,14 +401,6 @@ export default defineConfig({
     // type: best-practice
     // Prefers `String.prototype.slice()` over `substring()` and `substr()` for substring extraction.
     'unicorn/prefer-string-slice': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 5
-    // complexity: trivial
-    // `catch (e)` is written where the bound variable `e` is unused; using `catch` (no binding) or `catch (_e)` is preferred.
-    // type: style
-    // Prefers omitting the error binding in `catch` clauses when the caught error is not used.
-    'unicorn/prefer-optional-catch-binding': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 4
@@ -833,14 +761,6 @@ export default defineConfig({
     // type: style
     // Prefers regex literals over `new RegExp()` when the pattern is a static string literal.
     'prefer-regex-literals': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: trivial
-    // `Object.prototype.hasOwnProperty.call(obj, key)` is used where `Object.hasOwn(obj, key)` is the modern equivalent.
-    // type: best-practice
-    // Prefers `Object.hasOwn()` over the older `Object.prototype.hasOwnProperty.call()` pattern.
-    'prefer-object-has-own': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1

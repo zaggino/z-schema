@@ -27,7 +27,7 @@ export const isUniqueArray = <T>(arr: T[], indexes?: number[], maxDepth?: number
     const seen = new Set<string>();
     for (let i = 0; i < l; i++) {
       const v = arr[i];
-      const key = typeof v + ':' + String(v);
+      const key = `${typeof v}:${String(v)}`;
       if (seen.has(key)) {
         // Find the first occurrence for the indexes report.
         if (indexes) {

@@ -22,7 +22,7 @@ export default {
       },
       valid: false,
       validateSchemaOnly: false,
-      after: function (err: any) {
+      after(err: any) {
         expect(err[0].path).toEqual(['list', 0]);
       },
     },

@@ -10,7 +10,7 @@ export default {
       },
       data: '000 a',
       valid: false,
-      after: function (err: any) {
+      after(err: any) {
         expect(err[0].description).toBe('Four numbers followed by an optional space and then two letters.');
       },
     },

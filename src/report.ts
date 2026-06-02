@@ -220,20 +220,17 @@ export class Report {
 
     if (returnPathAsString !== true) {
       // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
-      return (
-        '#/' +
-        path
-          .map(function (segment) {
-            segment = segment.toString();
+      return `#/${path
+        .map(function (segment) {
+          segment = segment.toString();
 
-            if (isAbsoluteUri(segment)) {
-              return 'uri(' + segment + ')';
-            }
+          if (isAbsoluteUri(segment)) {
+            return `uri(${segment})`;
+          }
 
-            return segment.replace(/~/g, '~0').replace(/\//g, '~1');
-          })
-          .join('/')
-      );
+          return segment.replaceAll('~', '~0').replaceAll('/', '~1');
+        })
+        .join('/')}`;
     }
     return path;
   }
@@ -331,24 +328,24 @@ export class Report {
     }
 
     if (!errorMessage) {
-      throw new Error('No errorMessage known for code ' + errorCode);
+      throw new Error(`No errorMessage known for code ${errorCode}`);
     }
 
     params = params || [];
 
     for (let idx = 0; idx < params.length; idx++) {
       const param = params[idx] === null || isObject(params[idx]) ? JSON.stringify(params[idx]) : params[idx];
-      errorMessage = errorMessage.replace('{' + idx + '}', param.toString());
+      errorMessage = errorMessage.replace(`{${idx}}`, param.toString());
     }
 
     const err: SchemaErrorDetail = {
       code: errorCode,
-      params: params,
+      params,
       message: errorMessage,
       path: this.getPath(this.options.reportPathAsArray),
       schemaPath: this.getSchemaPath(),
       schemaId: this.getSchemaId(),
-      keyword: keyword,
+      keyword,
     };
 
     (err as any)[schemaSymbol] = schema;

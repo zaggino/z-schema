@@ -5,7 +5,7 @@ const json = import('./files/Issue47/sample.json');
 
 export default {
   description: 'Issue #47 - references to draft4 subschema are not working',
-  setup: function (validator: any) {
+  setup(validator: any) {
     validator.setRemoteReference('http://json-schema.orgx/draft-04/schema', draft4);
   },
   tests: [

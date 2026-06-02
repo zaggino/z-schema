@@ -121,7 +121,7 @@ const regexValidator: FormatValidatorFn = (input: unknown) => {
   try {
     RegExp(input);
     return true;
-  } catch (_e) {
+  } catch {
     return false;
   }
 };
@@ -132,7 +132,7 @@ const durationValidator: FormatValidatorFn = (input: unknown) => {
   }
 
   // eslint-disable-next-line no-control-regex
-  if (!/^P[\x00-\x7F]*$/.test(input)) {
+  if (!/^P[\u0000-\u007F]*$/.test(input)) {
     return false;
   }
 
@@ -207,7 +207,7 @@ const hasValidPercentEncoding = (str: string): boolean => {
 const uriValidator: FormatValidatorFn = function (uri: unknown) {
   if (typeof uri !== 'string') return true;
   // eslint-disable-next-line no-control-regex
-  if (/[^\x00-\x7F]/.test(uri)) return false;
+  if (/[^\u0000-\u007F]/.test(uri)) return false;
   if (!hasValidPercentEncoding(uri)) return false;
   const match = uri.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):\/\/([^/?#]*)/);
   if (match) {
@@ -241,7 +241,7 @@ const uriValidator: FormatValidatorFn = function (uri: unknown) {
 const uriReferenceValidator: FormatValidatorFn = (uri: unknown) => {
   if (typeof uri !== 'string') return true;
   // eslint-disable-next-line no-control-regex
-  if (/[^\x00-\x7F]/.test(uri)) return false;
+  if (/[^\u0000-\u007F]/.test(uri)) return false;
   // URI-reference allows relative URIs
   return /^([a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/.test(uri);
 };
@@ -339,7 +339,7 @@ const iriValidator: FormatValidatorFn = (iri: unknown) => {
   try {
     new URL(iri);
     return true;
-  } catch (_e) {
+  } catch {
     return false;
   }
 };

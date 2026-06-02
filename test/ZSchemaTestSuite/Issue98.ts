@@ -18,7 +18,7 @@ export default {
       },
       data: {},
       valid: false,
-      after: function (err: any, _valid: any, _data: any, _validator: any) {
+      after(err: any, _valid: any, _data: any, _validator: any) {
         expect(err.length).toBe(1);
         expect(err[0].code).toBe('ONE_OF_MISSING');
         expect(err[0].inner.length).toBe(4);

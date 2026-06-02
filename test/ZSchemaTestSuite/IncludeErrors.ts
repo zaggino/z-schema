@@ -59,7 +59,7 @@ export default {
       },
       description: 'should fail validation when the specified error is present only for that error',
       valid: false,
-      after: function (errs: any) {
+      after(errs: any) {
         expect(errs.length).toBe(1);
         expect(errs[0].code).toBe('INVALID_TYPE');
       },
@@ -79,7 +79,7 @@ export default {
       },
       description: 'should fail validation for all errors when no `includeErrors` array is provided.',
       valid: false,
-      after: function (errs: any) {
+      after(errs: any) {
         expect(errs.length).toBe(2);
       },
     },
@@ -101,7 +101,7 @@ export default {
       },
       description: 'should fail validation for all errors when empty array is provided.',
       valid: false,
-      after: function (errs: any) {
+      after(errs: any) {
         expect(errs.length).toBe(2);
       },
     },

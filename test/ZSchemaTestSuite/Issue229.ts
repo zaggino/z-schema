@@ -15,13 +15,13 @@ export default {
                       negativeBatch: {
                         type: 'number',
                         minimum: 0,
-                        maximum: 999999999.99,
+                        maximum: 999_999_999.99,
                         title: 'Negative Batch $',
                       },
                       amountOfCreditsInBatch: {
                         type: 'number',
                         minimum: 0,
-                        maximum: 999999999.99,
+                        maximum: 999_999_999.99,
                         title: 'Amount of Credits in a Batch $',
                       },
                       numberOfCreditsInBatch: {
@@ -41,14 +41,14 @@ export default {
       data: {
         setup: {
           excessiveCredit: {
-            amountOfCreditsInBatch: -15000.21,
-            negativeBatch: 25001,
+            amountOfCreditsInBatch: -15_000.21,
+            negativeBatch: 25_001,
             numberOfCreditsInBatch: 155,
           },
         },
       },
       valid: false,
-      after: function (err: any) {
+      after(err: any) {
         expect(err.length).toBe(1);
         expect(err[0].code).toBe('MINIMUM');
         expect(err[0].path).toBe('#/setup/excessiveCredit/amountOfCreditsInBatch');

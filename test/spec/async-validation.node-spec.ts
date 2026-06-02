@@ -6,10 +6,7 @@ describe('Async Format Validation Integration', () => {
   it('should validate successfully with async format validator', async () => {
     const validator = ZSchema.create({ async: true, safe: true });
 
-    const asyncValidator = async (input: unknown): Promise<boolean> => {
-      // Simulate async check
-      return typeof input === 'string' && input === 'valid';
-    };
+    const asyncValidator = async (input: unknown): Promise<boolean> => typeof input === 'string' && input === 'valid';
 
     validator.registerFormat('async-check', asyncValidator);
 
@@ -26,9 +23,7 @@ describe('Async Format Validation Integration', () => {
   it('should fail validation with async format validator', async () => {
     const validator = ZSchema.create({ async: true, safe: true });
 
-    const asyncValidator = async (input: unknown): Promise<boolean> => {
-      return typeof input === 'string' && input === 'valid';
-    };
+    const asyncValidator = async (input: unknown): Promise<boolean> => typeof input === 'string' && input === 'valid';
 
     validator.registerFormat('async-check', asyncValidator);
 
@@ -45,13 +40,10 @@ describe('Async Format Validation Integration', () => {
   it('should work with async format validators in oneOf', async () => {
     const validator = ZSchema.create({ async: true, safe: true });
 
-    const syncValidator = (input: unknown): boolean => {
-      return typeof input === 'string' && input === 'sync-valid';
-    };
+    const syncValidator = (input: unknown): boolean => typeof input === 'string' && input === 'sync-valid';
 
-    const asyncValidator = async (input: unknown): Promise<boolean> => {
-      return typeof input === 'string' && input === 'async-valid';
-    };
+    const asyncValidator = async (input: unknown): Promise<boolean> =>
+      typeof input === 'string' && input === 'async-valid';
 
     validator.registerFormat('sync-check', syncValidator);
     validator.registerFormat('async-check', asyncValidator);
@@ -72,9 +64,8 @@ describe('Async Format Validation Integration', () => {
   it('should work with async format validators in anyOf', async () => {
     const validator = ZSchema.create({ async: true, safe: true });
 
-    const asyncValidator = async (input: unknown): Promise<boolean> => {
-      return typeof input === 'string' && input === 'async-valid';
-    };
+    const asyncValidator = async (input: unknown): Promise<boolean> =>
+      typeof input === 'string' && input === 'async-valid';
 
     validator.registerFormat('async-check', asyncValidator);
 
@@ -91,9 +82,8 @@ describe('Async Format Validation Integration', () => {
   it('should fail validation when async format validator in oneOf fails', async () => {
     const validator = ZSchema.create({ async: true, safe: true });
 
-    const asyncValidator = async (input: unknown): Promise<boolean> => {
-      return typeof input === 'string' && input === 'async-valid';
-    };
+    const asyncValidator = async (input: unknown): Promise<boolean> =>
+      typeof input === 'string' && input === 'async-valid';
 
     validator.registerFormat('async-check', asyncValidator);
 

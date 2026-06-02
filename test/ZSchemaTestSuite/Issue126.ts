@@ -7,7 +7,7 @@ export default {
   tests: [
     {
       description: 'should fail compilation with unresolvable reference',
-      setup: function (validator: any) {
+      setup(validator: any) {
         validator.setRemoteReference(REF_NAME, {
           $schema: 'http://json-schema.org/draft-04/schema#',
           id: REF_NAME,
@@ -30,7 +30,7 @@ export default {
       },
       validateSchemaOnly: true,
       valid: false,
-      after: function (err: any, valid: any, data: any, validator: any) {
+      after(err: any, valid: any, data: any, validator: any) {
         err.forEach(function (e: any) {
           if (e.params.indexOf(REF_NAME) !== -1) {
             expect(e.code).not.toBe('UNRESOLVABLE_REFERENCE');

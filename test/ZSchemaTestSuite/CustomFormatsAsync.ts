@@ -4,7 +4,7 @@ export default {
   options: {
     asyncTimeout: 500,
   },
-  setup: function (validator: any, Class: any) {
+  setup(validator: any, Class: any) {
     Class.registerFormat('xstring', function (str: any, callback: any) {
       setTimeout(function () {
         callback(str === 'xxx');
@@ -37,7 +37,7 @@ export default {
         format: 'shouldTimeout',
       },
       valid: false,
-      after: function (err: any, valid: any) {
+      after(err: any, valid: any) {
         expect(valid).toBe(false);
         expect(err.length).toBe(1);
         expect(err[0].code).toBe('ASYNC_TIMEOUT');

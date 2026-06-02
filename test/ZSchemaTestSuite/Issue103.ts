@@ -48,7 +48,7 @@ export default {
       description: 'should fail with correct error - sync',
       validateSchemaOnly: true,
       valid: false,
-      after: function (errs: any) {
+      after(errs: any) {
         expect(errs.length).toBe(1);
       },
     },
@@ -57,7 +57,7 @@ export default {
       description: 'should fail with correct error - async',
       validateSchemaOnly: true,
       valid: false,
-      after: function (errs: any) {
+      after(errs: any) {
         expect(errs.length).toBe(1);
       },
     },

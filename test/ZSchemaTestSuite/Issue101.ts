@@ -10,7 +10,7 @@ export default {
       description: 'should fail with correct error',
       data: null,
       valid: false,
-      after: function (err: any) {
+      after(err: any) {
         expect(err.message).toBe('Invalid .validate call - schema must be a string or object but null was passed!');
       },
     },

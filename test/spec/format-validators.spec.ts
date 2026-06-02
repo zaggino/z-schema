@@ -7,9 +7,7 @@ describe('Format Validators', () => {
     it('should register an async format validator', () => {
       const validator = ZSchema.create();
 
-      const asyncValidator = async (input: unknown): Promise<boolean> => {
-        return typeof input === 'string' && input.length > 3;
-      };
+      const asyncValidator = async (input: unknown): Promise<boolean> => typeof input === 'string' && input.length > 3;
 
       validator.registerFormat('async-test', asyncValidator);
 

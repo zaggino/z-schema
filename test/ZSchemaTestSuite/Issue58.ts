@@ -56,7 +56,7 @@ export default {
       },
       validateSchemaOnly: true,
       valid: false,
-      after: function (err: Error, valid: boolean, data: unknown, validator: ZSchema) {
+      after(err: Error, valid: boolean, data: unknown, validator: ZSchema) {
         const missingReferences = validator.getMissingReferences(
           new ValidateError('', err as unknown as SchemaErrorDetail[])
         );
