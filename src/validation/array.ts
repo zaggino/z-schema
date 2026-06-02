@@ -89,7 +89,7 @@ export function uniqueItemsValidator(this: ZSchemaBase, report: Report, schema: 
   }
   if (schema.uniqueItems === true) {
     const matches: any[] = [];
-    if (isUniqueArray(json, matches, this.options.maxRecursionDepth) === false) {
+    if (!isUniqueArray(json, matches, this.options.maxRecursionDepth)) {
       report.addError('ARRAY_UNIQUE', matches, undefined, schema, 'uniqueItems');
     }
   }

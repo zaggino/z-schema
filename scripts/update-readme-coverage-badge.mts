@@ -76,14 +76,14 @@ export function updateReadmeCoverageBadge(readmeContent: string, linePct: number
 
 export function updateReadmeCoverageBadgeFile(readmePath: string, linePct: number): boolean {
   const safeReadmePath = safePath(readmePath, process.cwd());
-  const original = readFileSync(safeReadmePath, 'utf8');
+  const original = readFileSync(safeReadmePath, 'utf-8');
   const updated = updateReadmeCoverageBadge(original, linePct);
 
   if (updated === original) {
     return false;
   }
 
-  writeFileSync(safeReadmePath, updated, 'utf8');
+  writeFileSync(safeReadmePath, updated, 'utf-8');
   return true;
 }
 

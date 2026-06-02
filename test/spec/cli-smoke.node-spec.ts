@@ -6,7 +6,7 @@ describe('CLI smoke', function () {
     const res = child.spawnSync(
       process.execPath,
       ['bin/z-schema', 'test/fixtures/sample-schema.json', 'test/fixtures/sample-valid.json'],
-      { encoding: 'utf8' }
+      { encoding: 'utf-8' }
     );
     expect(res.status).toBe(0);
     expect(res.stdout || res.stderr).toMatch(/validation passed/i);
@@ -16,7 +16,7 @@ describe('CLI smoke', function () {
     const res = child.spawnSync(
       process.execPath,
       ['bin/z-schema', 'test/fixtures/sample-schema.json', 'test/fixtures/sample-valid.json'],
-      { encoding: 'utf8' }
+      { encoding: 'utf-8' }
     );
     expect(res.status).toBe(0);
     expect(res.stdout).toMatch(/sample-valid\.json validation passed/);
@@ -29,7 +29,7 @@ describe('CLI smoke', function () {
     const res = child.spawnSync(
       process.execPath,
       ['bin/z-schema', 'test/fixtures/sample-schema.json', absoluteValid, nestedValid],
-      { encoding: 'utf8' }
+      { encoding: 'utf-8' }
     );
     expect(res.status).toBe(0);
     expect(res.stdout).not.toContain(absoluteValid);

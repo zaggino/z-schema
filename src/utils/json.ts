@@ -21,7 +21,7 @@ export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptio
     return true;
   }
   if (
-    caseInsensitiveComparison === true &&
+    caseInsensitiveComparison &&
     typeof json1 === 'string' &&
     typeof json2 === 'string' &&
     json1.toUpperCase() === json2.toUpperCase()

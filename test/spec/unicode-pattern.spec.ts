@@ -5,7 +5,7 @@ import { ZSchema } from '../../src/z-schema.ts';
 function supportsUnicodePropertyEscapes() {
   try {
     const re = new RegExp('^\\p{L}+$', 'u');
-    return re.test('abc') === true;
+    return re.test('abc');
   } catch {
     return false;
   }

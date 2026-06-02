@@ -647,7 +647,7 @@ function recurseObject(this: ZSchemaBase, report: Report, schema: JsonSchemaInte
     // 2. For each regex in "pp", if it matches "m" successfully, the corresponding schema in "patternProperties" is added to "s".
     for (const regexString of pp) {
       const result = compileSchemaRegex(regexString);
-      if (result.ok && result.value.test(m) === true) {
+      if (result.ok && result.value.test(m)) {
         s.push(schema.patternProperties![regexString]);
       }
     }

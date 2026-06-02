@@ -101,7 +101,7 @@ export function parseCoverageSummary(summary: CoverageSummaryFile, repoRoot = pr
 
 export function readCoverageSummary(coverageDir = 'coverage', repoRoot = process.cwd()): ParsedCoverageSummary {
   const coverageSummaryPath = join(coverageDir, 'coverage-summary.json');
-  const raw = readFileSync(coverageSummaryPath, 'utf8');
+  const raw = readFileSync(coverageSummaryPath, 'utf-8');
   const parsed = JSON.parse(raw) as CoverageSummaryFile;
 
   return parseCoverageSummary(parsed, repoRoot);
@@ -138,7 +138,7 @@ function writeFileIfChanged(filePath: string, content: string): boolean {
   let original = '';
 
   try {
-    original = readFileSync(filePath, 'utf8');
+    original = readFileSync(filePath, 'utf-8');
   } catch {
     original = '';
   }
@@ -148,7 +148,7 @@ function writeFileIfChanged(filePath: string, content: string): boolean {
   }
 
   mkdirSync(dirname(filePath), { recursive: true });
-  writeFileSync(filePath, content, 'utf8');
+  writeFileSync(filePath, content, 'utf-8');
   return true;
 }
 

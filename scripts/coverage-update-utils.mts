@@ -22,7 +22,7 @@ const trackedCoverageFiles = ['docs/test-coverage.md', 'README.md'];
 export function getChangedTrackedFiles(cwd = process.cwd(), trackedFiles = trackedCoverageFiles): string[] {
   const output = execFileSync('git', ['status', '--porcelain', '--untracked-files=no', '--', ...trackedFiles], {
     cwd,
-    encoding: 'utf8',
+    encoding: 'utf-8',
   });
 
   const changed = new Set<string>();
@@ -88,7 +88,7 @@ export function isForkPullRequest(githubEventPath: string | undefined, repositor
   }
 
   const safeEventPath = safePath(githubEventPath);
-  const payload = JSON.parse(readFileSync(safeEventPath, 'utf8')) as PullRequestPayload;
+  const payload = JSON.parse(readFileSync(safeEventPath, 'utf-8')) as PullRequestPayload;
   const headRepo = payload.pull_request?.head?.repo?.full_name;
 
   if (!headRepo) {

@@ -26,11 +26,7 @@ export const whatIs = (what: unknown): WHAT_IS => {
 
   if (typeof what === 'number') {
     if (Number.isFinite(what)) {
-      if (what % 1 === 0) {
-        return 'integer';
-      } else {
-        return 'number';
-      }
+      return what % 1 === 0 ? 'integer' : 'number';
     }
     if (Number.isNaN(what)) {
       return 'not-a-number';

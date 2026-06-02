@@ -322,10 +322,9 @@ export class SchemaCompiler {
       return this.compileArrayOfSchemas(report, schema);
     } else if (typeof schema === 'boolean') {
       return true;
-    } else {
-      if (!options?.noCache) {
-        this.collectAndCacheIds(schema);
-      }
+    }
+    if (!options?.noCache) {
+      this.collectAndCacheIds(schema);
     }
 
     const canMutateSchemaObject =
@@ -338,7 +337,7 @@ export class SchemaCompiler {
       canMutateSchemaObject &&
       schema.__$compiled &&
       schema.id &&
-      this.validator.scache.checkCacheForUri(schema.id) === false
+      !this.validator.scache.checkCacheForUri(schema.id)
     ) {
       schema.__$compiled = undefined;
     }

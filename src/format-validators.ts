@@ -224,15 +224,15 @@ const uriValidator: FormatValidatorFn = (uri: unknown) => {
       }
     }
     // Validate port: must be numeric
-    let hostPort = atIndex >= 0 ? authority.slice(atIndex + 1) : authority;
+    let hostPort = atIndex !== -1 ? authority.slice(atIndex + 1) : authority;
     if (hostPort.startsWith('[')) {
       const bracketEnd = hostPort.indexOf(']');
-      if (bracketEnd >= 0) {
+      if (bracketEnd !== -1) {
         hostPort = hostPort.slice(bracketEnd + 1);
       }
     }
     const colonIndex = hostPort.lastIndexOf(':');
-    if (colonIndex >= 0) {
+    if (colonIndex !== -1) {
       const port = hostPort.slice(colonIndex + 1);
       if (port.length > 0 && !/^\d+$/.test(port)) {
         return false;
@@ -425,7 +425,7 @@ export function getFormatValidators(options?: FormatValidatorsOptions): Record<s
     ...inbuiltValidators,
     ...(options?.strictUris ? { uri: strictUriValidator } : {}),
     ...customValidators,
-    ...(options?.customFormats || {}),
+    ...options?.customFormats,
   };
 }
 
