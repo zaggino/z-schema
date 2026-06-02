@@ -59,10 +59,8 @@
   "scripts": {
     "prepare": "lefthook install",
     "pre-push": "npm run build && npm run build:tests",
-    "format": "oxfmt -c oxfmt.config.mjs",
-    "format:check": "oxfmt -c oxfmt.config.mjs --check",
-    "lint": "oxlint -c oxlint.config.mjs --fix",
-    "lint:check": "oxlint -c oxlint.config.mjs",
+    "check": "ultracite check",
+    "fix": "ultracite fix",
     "clean": "rimraf ./cjs && rimraf ./dist && rimraf ./umd && rimraf --glob \"./src/schemas/*.json\"",
     "build": "npm run copy:schemas && tsdown && node ./scripts/write-build-markers.mjs",
     "build:watch": "npm run copy:schemas && tsdown --watch",

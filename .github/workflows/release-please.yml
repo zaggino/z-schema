@@ -43,10 +43,7 @@ jobs:
       - run: npx playwright install --with-deps
         if: ${{ steps.release.outputs.release_created }}
 
-      - run: npm run lint:check
-        if: ${{ steps.release.outputs.release_created }}
-
-      - run: npm run format:check
+      - run: npm run check
         if: ${{ steps.release.outputs.release_created }}
 
       - run: npm publish --verbose # runs both build & tests in prepublishOnly script

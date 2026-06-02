@@ -34,8 +34,7 @@
 
 - [ ] Branch is based on `main`
 - [ ] Code follows the project's [conventions](docs/conventions.md)
-- [ ] `npm run lint:check` passes
-- [ ] `npm run format:check` passes
+- [ ] `npm run check` passes (lint + format)
 - [ ] `npm run build` passes
 - [ ] `npm run build:tests` passes (test type-check)
 - [ ] `npm test` passes (node + browser)

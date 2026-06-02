@@ -26,8 +26,7 @@ git submodule update --init --recursive
 Run all checks before pushing:
 
 ```bash
-npm run lint:check      # oxlint (ultracite preset, type-aware)
-npm run format:check    # oxfmt
+npm run check           # ultracite check (oxlint type-aware + oxfmt format check)
 npm run build           # TypeScript + Rollup
 npm run build:tests     # Type-check tests
 npm test                # Vitest (node + browser)
@@ -193,8 +192,7 @@ Official test cases loaded via `test/spec/json-schema-test-suite.common.ts`. To 
 ```
 - [ ] Branch from `main`
 - [ ] Changes follow code conventions
-- [ ] npm run lint:check passes
-- [ ] npm run format:check passes
+- [ ] npm run check passes (lint + format)
 - [ ] npm run build passes
 - [ ] npm run build:tests passes
 - [ ] npm test passes (node + browser)

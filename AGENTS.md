@@ -17,10 +17,8 @@ Default schema version: **draft2020-12**. Configurable via `ZSchemaOptions.versi
 | Test (browser only) | `npm run test:browser`                                               |
 | Test (single)       | `npx vitest run --silent=false --project node -t "draft4/type.json"` |
 | Test (coverage)     | `npm run test:coverage`                                              |
-| Lint                | `npm run lint`                                                       |
-| Lint (check)        | `npm run lint:check`                                                 |
-| Format              | `npm run format`                                                     |
-| Format (check)      | `npm run format:check`                                               |
+| Check (lint+format) | `npm run check`                                                      |
+| Fix (lint+format)   | `npm run fix`                                                        |
 | Type-check tests    | `npm run build:tests`                                                |
 
 **Important:** After merging or pulling changes that update git submodules, always run `git submodule update --init --recursive` to ensure local submodule checkouts match the committed references.
@@ -71,8 +69,8 @@ test/
   public/             # Browser test assets (served by Vitest browser)
   ZSchemaTestSuite/   # Legacy z-schema-specific test suite (JS files)
 json-schema-spec/     # Git submodule — official JSON Schema specifications
-oxlint.config.mjs     # oxlint config — extends the ultracite preset, type-aware enabled (TS + vitest plugins)
-oxfmt.config.mjs      # oxfmt config — extends the ultracite preset, overridden to the project style
+oxlint.config.ts     # oxlint config — extends the ultracite preset, type-aware enabled (TS + vitest plugins)
+oxfmt.config.ts      # oxfmt config — extends the ultracite preset, overridden to the project style
 lefthook.yml          # Git hooks (pre-commit lint/format, pre-push build) — replaces husky + lint-staged
 tsdown.config.ts      # tsdown build configuration (ESM + CJS + UMD)
 scripts/              # Build scripts (copy-schemas.mts)

@@ -55,8 +55,7 @@ Append `!` after the type/scope for breaking changes, or include a `BREAKING CHA
 2. Make your changes following the [code conventions](conventions.md).
 3. Run the full check suite before pushing:
    ```bash
-   npm run lint:check
-   npm run format:check
+   npm run check
    npm run build
    npm run build:tests
    npm test
@@ -101,16 +100,16 @@ Append `!` after the type/scope for breaking changes, or include a `BREAKING CHA
 
 ## Code Quality Checks
 
-| Check           | Command                 | Notes                                      |
-| --------------- | ----------------------- | ------------------------------------------ |
-| Lint            | `npm run lint:check`    | oxlint — ultracite preset, type-aware      |
-| Format          | `npm run format:check`  | oxfmt (120 cols, single quotes, semi, es5) |
-| Build           | `npm run build`         | tsdown bundling (ESM + CJS + UMD + types)  |
-| Test type-check | `npm run build:tests`   | Type-check test files without running them |
-| Tests (all)     | `npm test`              | Vitest — node + browser projects           |
-| Tests (node)    | `npm run test:node`     | Node-only tests with output                |
-| Tests (browser) | `npm run test:browser`  | Browser tests (Chromium, Firefox, WebKit)  |
-| Coverage        | `npm run test:coverage` | Istanbul coverage for `src/`               |
+| Check           | Command                 | Notes                                                      |
+| --------------- | ----------------------- | ---------------------------------------------------------- |
+| Check           | `npm run check`         | ultracite check — oxlint (type-aware) + oxfmt format check |
+| Fix             | `npm run fix`           | ultracite fix — oxlint `--fix` + oxfmt `--write`           |
+| Build           | `npm run build`         | tsdown bundling (ESM + CJS + UMD + types)                  |
+| Test type-check | `npm run build:tests`   | Type-check test files without running them                 |
+| Tests (all)     | `npm test`              | Vitest — node + browser projects                           |
+| Tests (node)    | `npm run test:node`     | Node-only tests with output                                |
+| Tests (browser) | `npm run test:browser`  | Browser tests (Chromium, Firefox, WebKit)                  |
+| Coverage        | `npm run test:coverage` | Istanbul coverage for `src/`                               |
 
 ## Pre-commit & Pre-push Hooks
 

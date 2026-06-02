@@ -9,11 +9,10 @@
 
 ## Formatting
 
-- **oxfmt**: 120 char line width, single quotes, trailing commas (`es5`), semicolons. Also handles import sorting and `package.json` key sorting. Config extends the ultracite preset (`oxfmt.config.mjs`).
-- **Linting**: oxlint extends the ultracite preset with type-aware linting enabled (`oxlint.config.mjs`). Preset rules that currently report on the codebase are disabled with annotated `// TODO` blocks for incremental re-enablement.
+- **oxfmt**: 120 char line width, single quotes, trailing commas (`es5`), semicolons. Also handles import sorting and `package.json` key sorting. Config extends the ultracite preset (`oxfmt.config.ts`).
+- **Linting**: oxlint extends the ultracite preset with type-aware linting enabled (`oxlint.config.ts`). Preset rules that currently report on the codebase are disabled with annotated `// TODO` blocks for incremental re-enablement.
 - **lefthook**: on commit, JS/TS files are auto-fixed with oxlint and all staged files are formatted with oxfmt (`lefthook.yml`, pre-commit); `pre-push` runs the build + test type-check. Replaces husky + lint-staged.
-- Run `npm run format` to format all files, `npm run format:check` to check without modifying.
-- Run `npm run lint` to lint + fix, `npm run lint:check` to lint without fixing.
+- Tooling is driven by [ultracite](https://ultracite.ai/) (which wraps oxlint + oxfmt). Run `npm run check` to lint + check formatting without modifying, and `npm run fix` to auto-fix lint issues and format.
 
 ## Naming
 
