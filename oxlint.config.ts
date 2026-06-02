@@ -13,26 +13,24 @@ export default defineConfig({
     node: true,
   },
   rules: {
-    // ── Intentional project rules (KEEP ENABLED) ──────────────────────
-    'typescript/consistent-type-imports': 'error',
-    'typescript/no-explicit-any': 'off',
+    // ── Intentional project rules on top of ultracite defaults
+    'func-style': ['error', 'declaration', { allowArrowFunctions: true }],
+    'no-inline-comments': 'off',
+    'no-plusplus': 'off',
     'no-unused-vars': [
       'error',
       { args: 'after-used', argsIgnorePattern: '^_', caughtErrors: 'all', caughtErrorsIgnorePattern: '^_' },
     ],
-    // Disabled intentionally: the TODO blocks below are our documented rule backlog.
     'no-warning-comments': 'off',
+    'require-unicode-regexp': 'off',
+    'sort-keys': 'off',
+    'typescript/consistent-type-imports': 'error',
+    'typescript/no-explicit-any': 'off',
+    'typescript/no-non-null-assertion': 'off',
+    'unicorn/prefer-node-protocol': 'off',
 
     // ── TODO: rules from the ultracite preset currently reporting errors ──
     // Disabled to reach a clean baseline; re-evaluate and re-enable incrementally.
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 736
-    // complexity: moderate
-    // Object keys throughout the codebase are not sorted alphabetically; enforcing would require a large mechanical rewrite.
-    // type: style
-    // Requires all keys in object literals to be sorted in alphabetical order.
-    'sort-keys': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 171
@@ -43,28 +41,12 @@ export default defineConfig({
     'func-names': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 113
-    // complexity: moderate
-    // Non-null assertions (`!`) are used pervasively where callers have guaranteed non-null values; removing them requires local refactors or explicit guards.
-    // type: type-safety
-    // Disallows the non-null assertion operator (`!`) which suppresses TypeScript's null-safety checks.
-    'typescript/no-non-null-assertion': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 105
     // complexity: dangerous
     // Member access on `any`-typed values is common in schema traversal code; fixing requires narrowing types or adding casts throughout.
     // type: type-safety
     // Disallows accessing properties on values typed as `any`, which bypasses TypeScript's type checking.
     'typescript/no-unsafe-member-access': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 95
-    // complexity: easy
-    // Function declarations are used throughout; converting to arrow/expression style is mechanical but touches many files.
-    // type: style
-    // Enforces a consistent style for function definitions (declaration vs. expression vs. arrow).
-    'func-style': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 81
@@ -89,30 +71,6 @@ export default defineConfig({
     // type: style
     // Requires filenames to follow a specified case convention (e.g., kebab-case).
     'unicorn/filename-case': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 64
-    // complexity: moderate
-    // Regex literals lack the `u` or `v` flag; adding the flag may change surrogate-pair handling and requires auditing each pattern.
-    // type: bug-prevention
-    // Requires the `u` (or `v`) flag on regular expression literals to enable full Unicode mode and stricter parsing.
-    'require-unicode-regexp': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 54
-    // complexity: trivial
-    // `++`/`--` operators are used in loops and numeric logic; replacing with `+= 1` is mechanical.
-    // type: style
-    // Disallows the unary `++` and `--` operators in favour of explicit `+= 1` / `-= 1`.
-    'no-plusplus': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 52
-    // complexity: easy
-    // Inline `// eslint-disable` and other inline directive comments are present; moving to block-level disables or fixing the underlying issues is required.
-    // type: style
-    // Disallows inline comments (comments on the same line as code).
-    'no-inline-comments': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 37
@@ -369,14 +327,6 @@ export default defineConfig({
     // type: best-practice
     // Disallows explicit `new Promise()` construction when a simpler promise-returning API is available.
     'promise/avoid-new': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 6
-    // complexity: trivial
-    // Node.js built-in imports use bare specifiers (e.g., `'path'`) instead of the `node:` protocol prefix.
-    // type: best-practice
-    // Requires the `node:` protocol prefix for Node.js built-in module imports.
-    'unicorn/prefer-node-protocol': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 6

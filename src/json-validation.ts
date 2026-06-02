@@ -560,7 +560,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
 // recurseArray
 // ---------------------------------------------------------------------------
 
-const recurseArray = function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Array<unknown>) {
+function recurseArray(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Array<unknown>) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.2
 
   const schemaUri = typeof schema.$schema === 'string' ? schema.$schema : undefined;
@@ -618,13 +618,13 @@ const recurseArray = function (this: ZSchemaBase, report: Report, schema: JsonSc
       report.path.pop();
     }
   }
-};
+}
 
 // ---------------------------------------------------------------------------
 // recurseObject
 // ---------------------------------------------------------------------------
 
-const recurseObject = function (this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Record<any, any>) {
+function recurseObject(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Record<any, any>) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.3
 
   // If "additionalProperties" is absent, it is considered present with an empty schema as a value.
@@ -691,7 +691,7 @@ const recurseObject = function (this: ZSchemaBase, report: Report, schema: JsonS
       }
     }
   }
-};
+}
 
 // ---------------------------------------------------------------------------
 // validate — main entry point

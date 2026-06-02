@@ -306,7 +306,7 @@ export class ZSchemaBase {
     const visited = new WeakSet<object>();
 
     // clean-up the schema and resolve references
-    const cleanup = function (schema: any) {
+    const cleanup = (schema: any) => {
       let key;
       const typeOf = whatIs(schema);
       if (typeOf !== 'object' && typeOf !== 'array') {

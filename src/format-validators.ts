@@ -204,7 +204,7 @@ const hasValidPercentEncoding = (str: string): boolean => {
   return true;
 };
 
-const uriValidator: FormatValidatorFn = function (uri: unknown) {
+const uriValidator: FormatValidatorFn = (uri: unknown) => {
   if (typeof uri !== 'string') return true;
   // eslint-disable-next-line no-control-regex
   if (/[^\u0000-\u007F]/.test(uri)) return false;
