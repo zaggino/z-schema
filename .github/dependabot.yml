@@ -9,9 +9,21 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
-    allow:
-      - dependency-type: 'production'
+    groups:
+      production:
+        dependency-type: 'production'
+        patterns: ['*']
+      development:
+        dependency-type: 'development'
+        patterns: ['*']
   - package-ecosystem: 'gitsubmodule'
     directory: '/'
     schedule:
       interval: 'weekly'
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    groups:
+      actions:
+        patterns: ['*']
