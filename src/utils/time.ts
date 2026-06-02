@@ -32,9 +32,9 @@ export const parseRfc3339Time = (time: string): ParsedRfc3339Time | null => {
     return null;
   }
 
-  const hour = parseInt(matches[1], 10);
-  const minute = parseInt(matches[2], 10);
-  const second = parseInt(matches[3], 10);
+  const hour = Number.parseInt(matches[1], 10);
+  const minute = Number.parseInt(matches[2], 10);
+  const second = Number.parseInt(matches[3], 10);
   if (hour > 23 || minute > 59 || second > 60) {
     return null;
   }
@@ -48,8 +48,8 @@ export const parseRfc3339Time = (time: string): ParsedRfc3339Time | null => {
     }
 
     const offsetSign = offsetMatches[1] as '+' | '-';
-    const offsetHour = parseInt(offsetMatches[2], 10);
-    const offsetMinute = parseInt(offsetMatches[3], 10);
+    const offsetHour = Number.parseInt(offsetMatches[2], 10);
+    const offsetMinute = Number.parseInt(offsetMatches[3], 10);
     if (offsetHour > 23 || offsetMinute > 59) {
       return null;
     }

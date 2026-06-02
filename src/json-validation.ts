@@ -100,7 +100,9 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
   const evaluated = new Set<number | string>();
 
   const merge = (other: Set<number | string> | 'all') => {
-    if (other === 'all') return true;
+    if (other === 'all') {
+      return true;
+    }
     for (const v of other) {
       evaluated.add(v);
     }
@@ -220,8 +222,12 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
         }
       }
       for (const key of Object.keys(jsonData)) {
-        if (propKeys.includes(key)) continue;
-        if (patternRegexes.some((re) => re.test(key))) continue;
+        if (propKeys.includes(key)) {
+          continue;
+        }
+        if (patternRegexes.some((re) => re.test(key))) {
+          continue;
+        }
         evaluated.add(key);
       }
     }
@@ -229,10 +235,8 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
     // dependentSchemas - only applies when the dependency key is present in the data
     if (isObject(currentSchema.dependentSchemas)) {
       for (const [depKey, depSchema] of Object.entries(currentSchema.dependentSchemas as Record<string, unknown>)) {
-        if (Object.hasOwn(jsonData, depKey)) {
-          if (merge(recurse(depSchema as JsonSchemaInternal | boolean))) {
-            return 'all';
-          }
+        if (Object.hasOwn(jsonData, depKey) && merge(recurse(depSchema as JsonSchemaInternal | boolean))) {
+          return 'all';
         }
       }
     }
@@ -263,10 +267,8 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
         validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
         passed = subReport.errors.length === 0;
       }
-      if (passed) {
-        if (merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
-          return 'all';
-        }
+      if (passed && merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
+        return 'all';
       }
     }
   }
@@ -280,10 +282,8 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
         validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
         passed = subReport.errors.length === 0;
       }
-      if (passed) {
-        if (merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
-          return 'all';
-        }
+      if (passed && merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
+        return 'all';
       }
     }
   }
@@ -300,41 +300,33 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
       if (merge(recurse(currentSchema.if as JsonSchemaInternal | boolean))) {
         return 'all';
       }
-      if (currentSchema.then !== undefined) {
-        if (merge(recurse(currentSchema.then as JsonSchemaInternal | boolean))) {
-          return 'all';
-        }
+      if (currentSchema.then !== undefined && merge(recurse(currentSchema.then as JsonSchemaInternal | boolean))) {
+        return 'all';
       }
-    } else {
-      if (currentSchema.else !== undefined) {
-        if (merge(recurse(currentSchema.else as JsonSchemaInternal | boolean))) {
-          return 'all';
-        }
-      }
+    } else if (currentSchema.else !== undefined && merge(recurse(currentSchema.else as JsonSchemaInternal | boolean))) {
+      return 'all';
     }
   }
 
   // $ref resolved
-  if (currentSchema.__$refResolved && currentSchema.__$refResolved !== currentSchema) {
-    if (merge(recurse(currentSchema.__$refResolved as JsonSchemaInternal))) {
-      return 'all';
-    }
+  if (
+    currentSchema.__$refResolved &&
+    currentSchema.__$refResolved !== currentSchema &&
+    merge(recurse(currentSchema.__$refResolved as JsonSchemaInternal))
+  ) {
+    return 'all';
   }
 
   // $recursiveRef
   const recursiveTarget = resolveRecursiveRef(currentSchema, report.__$recursiveAnchorStack);
-  if (recursiveTarget && recursiveTarget !== currentSchema) {
-    if (merge(recurse(recursiveTarget))) {
-      return 'all';
-    }
+  if (recursiveTarget && recursiveTarget !== currentSchema && merge(recurse(recursiveTarget))) {
+    return 'all';
   }
 
   // $dynamicRef
   const dynamicTarget = resolveDynamicRef(currentSchema, report.__$dynamicScopeStack);
-  if (dynamicTarget && dynamicTarget !== currentSchema) {
-    if (merge(recurse(dynamicTarget as JsonSchemaInternal))) {
-      return 'all';
-    }
+  if (dynamicTarget && dynamicTarget !== currentSchema && merge(recurse(dynamicTarget as JsonSchemaInternal))) {
+    return 'all';
   }
 
   return evaluated;
@@ -560,7 +552,7 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
 // recurseArray
 // ---------------------------------------------------------------------------
 
-function recurseArray(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Array<unknown>) {
+function recurseArray(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown[]) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.2
 
   const schemaUri = typeof schema.$schema === 'string' ? schema.$schema : undefined;
@@ -597,13 +589,11 @@ function recurseArray(this: ZSchemaBase, report: Report, schema: JsonSchemaInter
         report.path.push(idx);
         validate.call(this, report, schema.items[idx], json[idx]);
         report.path.pop();
-      } else {
+      } else if (typeof schema.additionalItems === 'object') {
         // might be boolean, so check that it's an object
-        if (typeof schema.additionalItems === 'object') {
-          report.path.push(idx);
-          validate.call(this, report, schema.additionalItems, json[idx]);
-          report.path.pop();
-        }
+        report.path.push(idx);
+        validate.call(this, report, schema.additionalItems, json[idx]);
+        report.path.pop();
       }
     }
   } else if (typeof schema.items === 'object' || typeof schema.items === 'boolean') {
@@ -808,7 +798,7 @@ export function validate(
     if (applySiblingKeywordsWithDynamicRef) {
       const dynamicRefTarget = resolveDynamicRef(schema, dynamicScopeStack);
 
-      if (typeof dynamicRefTarget === 'undefined') {
+      if (dynamicRefTarget === undefined) {
         report.addError('REF_UNRESOLVED', [schema.$dynamicRef], undefined, schema);
       } else {
         validate.call(this, report, dynamicRefTarget, json);

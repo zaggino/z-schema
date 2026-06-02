@@ -269,7 +269,7 @@ export class Report {
     return this.rootSchema.id;
   }
 
-  hasError(errCode: string, errParams: Array<any>) {
+  hasError(errCode: string, errParams: any[]) {
     for (let idx = 0; idx < this.errors.length; idx++) {
       if (this.errors[idx].code === errCode) {
         // assume match
@@ -331,7 +331,7 @@ export class Report {
       throw new Error(`No errorMessage known for code ${errorCode}`);
     }
 
-    params = params || [];
+    params ||= [];
 
     for (let idx = 0; idx < params.length; idx++) {
       const param = params[idx] === null || isObject(params[idx]) ? JSON.stringify(params[idx]) : params[idx];

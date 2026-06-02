@@ -20,10 +20,8 @@ export function typeValidator(this: ZSchemaBase, report: Report, schema: JsonSch
     if (jsonType !== schema.type && (jsonType !== 'integer' || schema.type !== 'number')) {
       report.addError('INVALID_TYPE', [schema.type, jsonType], undefined, schema, 'type');
     }
-  } else {
-    if (!schema.type!.includes(jsonType) && (jsonType !== 'integer' || !schema.type!.includes('number'))) {
-      report.addError('INVALID_TYPE', [JSON.stringify(schema.type), jsonType], undefined, schema, 'type');
-    }
+  } else if (!schema.type!.includes(jsonType) && (jsonType !== 'integer' || !schema.type!.includes('number'))) {
+    report.addError('INVALID_TYPE', [JSON.stringify(schema.type), jsonType], undefined, schema, 'type');
   }
 }
 
@@ -61,6 +59,6 @@ export function enumValidator(this: ZSchemaBase, report: Report, schema: JsonSch
 export function constValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   const constValue = schema.const;
   if (areEqual(json, constValue, { maxDepth: this.options.maxRecursionDepth }) === false) {
-    report.addError('CONST', [JSON.stringify(constValue)], undefined, schema, undefined);
+    report.addError('CONST', [JSON.stringify(constValue)], undefined, schema);
   }
 }

@@ -58,28 +58,23 @@ const isValidIdnUnicodeLabel = (label: string): boolean => {
   for (let idx = 0; idx < label.length; idx++) {
     const char = label[idx];
 
-    if (char === '\u00B7') {
-      if (idx === 0 || idx === label.length - 1 || label[idx - 1] !== 'l' || label[idx + 1] !== 'l') {
-        return false;
-      }
+    if (
+      char === '\u00B7' &&
+      (idx === 0 || idx === label.length - 1 || label[idx - 1] !== 'l' || label[idx + 1] !== 'l')
+    ) {
+      return false;
     }
 
-    if (char === '\u0375') {
-      if (idx === label.length - 1 || !isGreek(label[idx + 1])) {
-        return false;
-      }
+    if (char === '\u0375' && (idx === label.length - 1 || !isGreek(label[idx + 1]))) {
+      return false;
     }
 
-    if (char === '\u05F3' || char === '\u05F4') {
-      if (idx === 0 || !isHebrew(label[idx - 1])) {
-        return false;
-      }
+    if ((char === '\u05F3' || char === '\u05F4') && (idx === 0 || !isHebrew(label[idx - 1]))) {
+      return false;
     }
 
-    if (char === '\u200D') {
-      if (idx === 0 || label[idx - 1] !== '\u094D') {
-        return false;
-      }
+    if (char === '\u200D' && (idx === 0 || label[idx - 1] !== '\u094D')) {
+      return false;
     }
   }
 

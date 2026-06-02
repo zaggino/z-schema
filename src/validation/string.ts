@@ -79,10 +79,8 @@ export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonS
   // When formatAssertions is explicitly true, respect the meta-schema vocabulary:
   // for draft 2019-09/2020-12, format is annotation-only unless the format-assertion
   // vocabulary is enabled in the meta-schema.
-  if (this.options.formatAssertions === true) {
-    if (!isFormatAssertionVocabEnabled(schema, report, this.options.version)) {
-      return;
-    }
+  if (this.options.formatAssertions === true && !isFormatAssertionVocabEnabled(schema, report, this.options.version)) {
+    return;
   }
 
   const isModernDraft = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
@@ -124,11 +122,9 @@ export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonS
             }
           }
         );
-      } else {
+      } else if (result !== true) {
         // sync
-        if (result !== true) {
-          report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
-        }
+        report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
       }
     }
   } else if (this.options.ignoreUnknownFormats !== true && !isModernDraft) {

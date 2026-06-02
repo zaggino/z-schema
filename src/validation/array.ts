@@ -19,10 +19,8 @@ export function additionalItemsValidator(this: ZSchemaBase, report: Report, sche
   }
   // if the value of "additionalItems" is boolean value false and the value of "items" is an array,
   // the json is valid if its size is less than, or equal to, the size of "items".
-  if (schema.additionalItems === false && Array.isArray(schema.items)) {
-    if (json.length > schema.items.length) {
-      report.addError('ARRAY_ADDITIONAL_ITEMS', undefined, undefined, schema, 'additionalItems');
-    }
+  if (schema.additionalItems === false && Array.isArray(schema.items) && json.length > schema.items.length) {
+    report.addError('ARRAY_ADDITIONAL_ITEMS', undefined, undefined, schema, 'additionalItems');
   }
 }
 
@@ -142,7 +140,7 @@ export function containsValidator(this: ZSchemaBase, report: Report, schema: Jso
     const notTooManyMatches = maxContains === undefined || matchingItems <= maxContains;
 
     if (!hasEnoughMatches || !notTooManyMatches) {
-      report.addError('CONTAINS', undefined, subReports, schema, undefined);
+      report.addError('CONTAINS', undefined, subReports, schema);
     }
   };
 

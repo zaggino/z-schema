@@ -18,9 +18,9 @@ const dateValidator: FormatValidatorFn = (date: unknown) => {
   if (matches === null) {
     return false;
   }
-  const year = parseInt(matches[1], 10);
-  const month = parseInt(matches[2], 10);
-  const day = parseInt(matches[3], 10);
+  const year = Number.parseInt(matches[1], 10);
+  const month = Number.parseInt(matches[2], 10);
+  const day = Number.parseInt(matches[3], 10);
   return isValidRfc3339Date(year, month, day);
 };
 
@@ -40,9 +40,9 @@ const dateTimeValidator: FormatValidatorFn = (dateTime: unknown) => {
   if (dateMatches === null) {
     return false;
   }
-  const year = parseInt(dateMatches[1], 10);
-  const month = parseInt(dateMatches[2], 10);
-  const day = parseInt(dateMatches[3], 10);
+  const year = Number.parseInt(dateMatches[1], 10);
+  const month = Number.parseInt(dateMatches[2], 10);
+  const day = Number.parseInt(dateMatches[3], 10);
   if (!isValidRfc3339Date(year, month, day)) {
     return false;
   }
@@ -195,41 +195,45 @@ const strictUriValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== '
 
 const hasValidPercentEncoding = (str: string): boolean => {
   for (let i = 0; i < str.length; i++) {
-    if (str[i] === '%') {
-      if (i + 2 >= str.length || !/[0-9a-fA-F]/.test(str[i + 1]) || !/[0-9a-fA-F]/.test(str[i + 2])) {
-        return false;
-      }
+    if (str[i] === '%' && (i + 2 >= str.length || !/[0-9a-fA-F]/.test(str[i + 1]) || !/[0-9a-fA-F]/.test(str[i + 2]))) {
+      return false;
     }
   }
   return true;
 };
 
 const uriValidator: FormatValidatorFn = (uri: unknown) => {
-  if (typeof uri !== 'string') return true;
+  if (typeof uri !== 'string') {
+    return true;
+  }
   // eslint-disable-next-line no-control-regex
-  if (/[^\u0000-\u007F]/.test(uri)) return false;
-  if (!hasValidPercentEncoding(uri)) return false;
+  if (/[^\u0000-\u007F]/.test(uri)) {
+    return false;
+  }
+  if (!hasValidPercentEncoding(uri)) {
+    return false;
+  }
   const match = uri.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):\/\/([^/?#]*)/);
   if (match) {
     const authority = match[2];
     const atIndex = authority.indexOf('@');
     if (atIndex > 0) {
-      const userinfo = authority.substring(0, atIndex);
+      const userinfo = authority.slice(0, atIndex);
       if (userinfo.includes('[') || userinfo.includes(']')) {
         return false;
       }
     }
     // Validate port: must be numeric
-    let hostPort = atIndex >= 0 ? authority.substring(atIndex + 1) : authority;
+    let hostPort = atIndex >= 0 ? authority.slice(atIndex + 1) : authority;
     if (hostPort.startsWith('[')) {
       const bracketEnd = hostPort.indexOf(']');
       if (bracketEnd >= 0) {
-        hostPort = hostPort.substring(bracketEnd + 1);
+        hostPort = hostPort.slice(bracketEnd + 1);
       }
     }
     const colonIndex = hostPort.lastIndexOf(':');
     if (colonIndex >= 0) {
-      const port = hostPort.substring(colonIndex + 1);
+      const port = hostPort.slice(colonIndex + 1);
       if (port.length > 0 && !/^\d+$/.test(port)) {
         return false;
       }
@@ -239,15 +243,21 @@ const uriValidator: FormatValidatorFn = (uri: unknown) => {
 };
 
 const uriReferenceValidator: FormatValidatorFn = (uri: unknown) => {
-  if (typeof uri !== 'string') return true;
+  if (typeof uri !== 'string') {
+    return true;
+  }
   // eslint-disable-next-line no-control-regex
-  if (/[^\u0000-\u007F]/.test(uri)) return false;
+  if (/[^\u0000-\u007F]/.test(uri)) {
+    return false;
+  }
   // URI-reference allows relative URIs
   return /^([a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/.test(uri);
 };
 
 const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => {
-  if (typeof uri !== 'string') return true;
+  if (typeof uri !== 'string') {
+    return true;
+  }
   // URI template allows braces for expressions.
   if (!/^([a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^`| ]*$/.test(uri)) {
     return false;
@@ -286,53 +296,81 @@ const hasValidTildeEscapes = (segment: string): boolean => {
 };
 
 const jsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
-  if (typeof pointer !== 'string') return true;
+  if (typeof pointer !== 'string') {
+    return true;
+  }
   // JSON Pointer: empty, or a sequence of '/'-prefixed reference tokens.
   // In each token, '~' must be escaped as '~0' or '~1'.
-  if (pointer === '') return true;
-  if (!/^(?:\/[^/]*)+$/.test(pointer)) return false;
+  if (pointer === '') {
+    return true;
+  }
+  if (!/^(?:\/[^/]*)+$/.test(pointer)) {
+    return false;
+  }
   const tokens = pointer.split('/').slice(1); // first element is empty before leading '/'
   for (const token of tokens) {
-    if (!hasValidTildeEscapes(token)) return false;
+    if (!hasValidTildeEscapes(token)) {
+      return false;
+    }
   }
   return true;
 };
 
 const relativeJsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
-  if (typeof pointer !== 'string') return true;
+  if (typeof pointer !== 'string') {
+    return true;
+  }
   // Relative JSON Pointer: non-negative integer prefix (no leading zeros unless zero),
   // followed by either '#', a JSON Pointer, or nothing.
   const match = pointer.match(/^(0|[1-9]\d*)(.*)$/);
-  if (!match) return false;
+  if (!match) {
+    return false;
+  }
   const suffix = match[2];
-  if (suffix === '' || suffix === '#') return true;
-  if (!suffix.startsWith('/')) return false;
-  if (!/^(?:\/[^/]*)+$/.test(suffix)) return false;
+  if (suffix === '' || suffix === '#') {
+    return true;
+  }
+  if (!suffix.startsWith('/')) {
+    return false;
+  }
+  if (!/^(?:\/[^/]*)+$/.test(suffix)) {
+    return false;
+  }
   const tokens = suffix.split('/').slice(1);
   for (const token of tokens) {
-    if (!hasValidTildeEscapes(token)) return false;
+    if (!hasValidTildeEscapes(token)) {
+      return false;
+    }
   }
   return true;
 };
 
 const timeValidator: FormatValidatorFn = (time: unknown) => {
-  if (typeof time !== 'string') return true;
+  if (typeof time !== 'string') {
+    return true;
+  }
   return parseRfc3339Time(time) !== null;
 };
 
 const idnEmailValidator: FormatValidatorFn = (email: unknown) => {
-  if (typeof email !== 'string') return true;
+  if (typeof email !== 'string') {
+    return true;
+  }
   // Simple email check, allowing international chars
   return /^[^\s@]+@[^\s@]+$/.test(email);
 };
 
 const idnHostnameValidator: FormatValidatorFn = (hostname: unknown) => {
-  if (typeof hostname !== 'string') return true;
+  if (typeof hostname !== 'string') {
+    return true;
+  }
   return isValidIdnHostname(hostname);
 };
 
 const iriValidator: FormatValidatorFn = (iri: unknown) => {
-  if (typeof iri !== 'string') return true;
+  if (typeof iri !== 'string') {
+    return true;
+  }
   if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:[^"\\<>^{}^`| ]*$/u.test(iri)) {
     return false;
   }
@@ -345,7 +383,9 @@ const iriValidator: FormatValidatorFn = (iri: unknown) => {
 };
 
 const iriReferenceValidator: FormatValidatorFn = (iriReference: unknown) => {
-  if (typeof iriReference !== 'string') return true;
+  if (typeof iriReference !== 'string') {
+    return true;
+  }
   return /^([a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/u.test(iriReference);
 };
 
@@ -411,10 +451,16 @@ export function isFormatSupported(name: string, customFormats?: Record<string, F
   if (customFormats) {
     const custom = customFormats[name];
     // Explicitly null means unregistered at instance level
-    if (custom === null) return false;
-    if (custom != null) return true;
+    if (custom === null) {
+      return false;
+    }
+    if (custom != null) {
+      return true;
+    }
   }
-  if (name in customValidators) return customValidators[name] != null;
+  if (name in customValidators) {
+    return customValidators[name] != null;
+  }
   return name in inbuiltValidators;
 }
 

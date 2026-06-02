@@ -220,7 +220,7 @@ export class SchemaCache {
         report.path.pop();
 
         if (!remoteReportIsValid) {
-          return undefined;
+          return;
         }
       }
     }

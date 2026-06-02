@@ -30,7 +30,7 @@ export interface JsonSchemaCommon {
 
   // ── Type / enum ─────────────────────────────────────────────────────────
   type?: string | string[];
-  enum?: Array<unknown>;
+  enum?: unknown[];
   format?: string;
 
   // ── Numeric ─────────────────────────────────────────────────────────────
@@ -142,7 +142,7 @@ export const findId = (
   const inTargetBase = !targetBaseUri || nextBaseUri === targetBaseUri;
 
   if (inTargetBase) {
-    if (schemaId && (schemaId === id || (schemaId[0] === '#' && schemaId.substring(1) === id))) {
+    if (schemaId && (schemaId === id || (schemaId[0] === '#' && schemaId.slice(1) === id))) {
       return schema;
     }
     if (schema.$anchor === id || schema.$dynamicAnchor === id) {

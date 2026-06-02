@@ -39,10 +39,8 @@ export function maximumValidator(this: ZSchemaBase, report: Report, schema: Json
     if (json > schema.maximum!) {
       report.addError('MAXIMUM', [json, schema.maximum!], undefined, schema, 'maximum');
     }
-  } else {
-    if (json >= schema.maximum!) {
-      report.addError('MAXIMUM_EXCLUSIVE', [json, schema.maximum!], undefined, schema, 'maximum');
-    }
+  } else if (json >= schema.maximum!) {
+    report.addError('MAXIMUM_EXCLUSIVE', [json, schema.maximum!], undefined, schema, 'maximum');
   }
 }
 
@@ -87,10 +85,8 @@ export function minimumValidator(this: ZSchemaBase, report: Report, schema: Json
     if (json < schema.minimum!) {
       report.addError('MINIMUM', [json, schema.minimum!], undefined, schema, 'minimum');
     }
-  } else {
-    if (json <= schema.minimum!) {
-      report.addError('MINIMUM_EXCLUSIVE', [json, schema.minimum!], undefined, schema, 'minimum');
-    }
+  } else if (json <= schema.minimum!) {
+    report.addError('MINIMUM_EXCLUSIVE', [json, schema.minimum!], undefined, schema, 'minimum');
   }
 }
 

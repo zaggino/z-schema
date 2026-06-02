@@ -308,7 +308,7 @@ export function propertyNamesValidator(this: ZSchemaBase, report: Report, schema
   const addPropertyNameErrors = () => {
     for (let idx = 0; idx < keys.length; idx++) {
       if (subReports[idx].errors.length > 0) {
-        report.addError('PROPERTY_NAMES', [keys[idx]], subReports[idx], schema, undefined);
+        report.addError('PROPERTY_NAMES', [keys[idx]], subReports[idx], schema);
       }
     }
   };

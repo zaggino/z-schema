@@ -10,11 +10,11 @@ import { getRemotePath } from '../utils/uri.js';
 export const getDynamicRefAnchorName = (dynamicRef: string) => {
   const hashIdx = dynamicRef.indexOf('#');
   if (hashIdx === -1) {
-    return undefined;
+    return;
   }
   const fragment = dynamicRef.slice(hashIdx + 1);
   if (!fragment || fragment[0] === '/') {
-    return undefined;
+    return;
   }
   return fragment;
 };
@@ -26,7 +26,6 @@ export const findDynamicAnchorInScope = (scopeSchema: JsonSchemaInternal, anchor
   if (found && found.$dynamicAnchor === anchorName) {
     return found;
   }
-  return undefined;
 };
 
 // ---------------------------------------------------------------------------
@@ -66,7 +65,7 @@ export const resolveDynamicRef = (
   dynamicScopeStack: JsonSchemaInternal[]
 ): JsonSchemaInternal | boolean | undefined => {
   const resolved = schema.__$dynamicRefResolved as JsonSchemaInternal | boolean | undefined;
-  if (typeof resolved === 'undefined' || !schema.$dynamicRef) {
+  if (resolved === undefined || !schema.$dynamicRef) {
     return resolved;
   }
   let target = resolved;
