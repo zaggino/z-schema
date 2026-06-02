@@ -26,8 +26,8 @@ git submodule update --init --recursive
 Run all checks before pushing:
 
 ```bash
-npm run lint:check      # ESLint
-npm run format:check    # Prettier
+npm run lint:check      # oxlint (ultracite preset, type-aware)
+npm run format:check    # oxfmt
 npm run build           # TypeScript + Rollup
 npm run build:tests     # Type-check tests
 npm test                # Vitest (node + browser)
@@ -179,9 +179,9 @@ Official test cases loaded via `test/spec/json-schema-test-suite.common.ts`. To 
 
 - TypeScript `strict: true`, ESM with `.js` import extensions in `src/`
 - `.ts` import extensions in `test/` (via `allowImportingTsExtensions`)
-- `import type` for type-only imports (enforced by ESLint)
+- `import type` for type-only imports (enforced by oxlint)
 - Import order: type-only → side-effect → node builtins → packages → relative
-- Prettier: 120 char width, single quotes, trailing commas (es5), semicolons
+- oxfmt: 120 char width, single quotes, trailing commas (es5), semicolons
 - Classes/types: `PascalCase` — functions/variables: `camelCase` — errors: `UPPER_SNAKE_CASE`
 - All public API exported through `src/index.ts`
 - Internal types stay unexported

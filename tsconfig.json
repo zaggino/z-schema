@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
+    "rootDir": ".",
     "target": "esnext",
     "allowJs": true,
     "skipLibCheck": true,

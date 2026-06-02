@@ -103,7 +103,7 @@ Append `!` after the type/scope for breaking changes, or include a `BREAKING CHA
 
 | Check           | Command                 | Notes                                      |
 | --------------- | ----------------------- | ------------------------------------------ |
-| Lint            | `npm run lint:check`    | oxlint with TS + vitest plugins            |
+| Lint            | `npm run lint:check`    | oxlint — ultracite preset, type-aware      |
 | Format          | `npm run format:check`  | oxfmt (120 cols, single quotes, semi, es5) |
 | Build           | `npm run build`         | tsdown bundling (ESM + CJS + UMD + types)  |
 | Test type-check | `npm run build:tests`   | Type-check test files without running them |
@@ -114,7 +114,9 @@ Append `!` after the type/scope for breaking changes, or include a `BREAKING CHA
 
 ## Pre-commit & Pre-push Hooks
 
-- **Pre-commit** (via Husky + lint-staged): auto-runs oxlint fix + oxfmt on staged files.
+Git hooks are managed by [lefthook](https://lefthook.dev/) (`lefthook.yml`), installed automatically via the `prepare` npm script (`lefthook install`).
+
+- **Pre-commit**: auto-runs oxlint `--fix` on staged JS/TS files and oxfmt `--write` on all staged files, re-staging any changes.
 - **Pre-push**: runs `npm run build && npm run build:tests` to catch build/type errors.
 
 ## File Organization Rules
