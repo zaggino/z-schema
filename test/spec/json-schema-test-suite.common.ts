@@ -52,7 +52,7 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
   await Promise.all(
     remoteFiles.map(async (file) => {
       // desired serverPath example: http://localhost:1234/draft4/locationIndependentIdentifier.json
-      const serverPath = 'http://localhost:1234/' + file.slice('/json-schema-test-suite/remotes/'.length);
+      const serverPath = `http://localhost:1234/${file.slice('/json-schema-test-suite/remotes/'.length)}`;
       const schema = await reader<JsonSchema>(file);
       ZSchema.setRemoteReference(serverPath, schema);
     })

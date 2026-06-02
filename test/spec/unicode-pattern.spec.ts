@@ -6,7 +6,7 @@ function supportsUnicodePropertyEscapes() {
   try {
     const re = new RegExp('^\\p{L}+$', 'u');
     return re.test('abc') === true;
-  } catch (_e) {
+  } catch {
     return false;
   }
 }
@@ -46,15 +46,15 @@ describe('Unicode property escapes in pattern keyword', () => {
 
 describe('unicodeLength', () => {
   it('should count lone low surrogate as one character', () => {
-    expect(unicodeLength('\udc00')).toBe(1);
+    expect(unicodeLength('\uDC00')).toBe(1);
   });
 
   it('should count lone high surrogate at end of string as one character', () => {
-    expect(unicodeLength('\ud800')).toBe(1);
+    expect(unicodeLength('\uD800')).toBe(1);
   });
 
   it('should count unmatched high surrogate followed by ASCII as two characters', () => {
-    expect(unicodeLength('\ud800a')).toBe(2);
+    expect(unicodeLength('\uD800a')).toBe(2);
   });
 
   it('should count surrogate pair as one character', () => {

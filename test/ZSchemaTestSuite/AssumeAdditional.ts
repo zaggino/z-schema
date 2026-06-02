@@ -52,7 +52,7 @@ export default {
       },
       description: 'should fail validation with multiple errors when several other than defined properties are used',
       valid: false,
-      after: function (errs: any) {
+      after(errs: any) {
         expect(errs.length).toBe(2);
         // Error order is not guaranteed — assert presence regardless of position
         const messages = errs.map((e: any) => e.message);

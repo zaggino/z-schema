@@ -103,7 +103,7 @@ export const normalizeOptions = (options?: ZSchemaOptions) => {
     // check that the options are correctly configured
     for (const key of keys) {
       if (defaultOptions[key] === undefined) {
-        throw new Error('Unexpected option passed to constructor: ' + key);
+        throw new Error(`Unexpected option passed to constructor: ${key}`);
       }
     }
 

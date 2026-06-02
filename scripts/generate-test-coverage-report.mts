@@ -64,14 +64,14 @@ function parseCoverageMetrics(metrics: CoverageSummaryFile['total']): CoverageNu
 }
 
 function normalizeCoveragePath(filePath: string, repoRoot: string): string {
-  const normalizedInput = filePath.replace(/\\/g, '/');
-  const relativePath = relative(repoRoot, filePath).replace(/\\/g, '/');
+  const normalizedInput = filePath.replaceAll('\\', '/');
+  const relativePath = relative(repoRoot, filePath).replaceAll('\\', '/');
 
   if (relativePath && !relativePath.startsWith('..') && !isAbsolute(relativePath)) {
     return relativePath;
   }
 
-  const normalizedRoot = repoRoot.replace(/\\/g, '/').replace(/\/$/, '');
+  const normalizedRoot = repoRoot.replaceAll('\\', '/').replace(/\/$/, '');
   const prefix = `${normalizedRoot}/`;
 
   if (normalizedInput.startsWith(prefix)) {
@@ -87,12 +87,10 @@ export function parseCoverageSummary(summary: CoverageSummaryFile, repoRoot = pr
 
   const files = Object.entries(summary)
     .filter(([filePath]) => filePath !== 'total')
-    .map(([filePath, metrics]) => {
-      return {
-        ...parseCoverageMetrics(metrics),
-        path: normalizeCoveragePath(filePath, repoRoot),
-      };
-    })
+    .map(([filePath, metrics]) => ({
+      ...parseCoverageMetrics(metrics),
+      path: normalizeCoveragePath(filePath, repoRoot),
+    }))
     .sort((a, b) => a.path.localeCompare(b.path));
 
   return {
@@ -116,9 +114,10 @@ function formatPercent(value: number): string {
 export function renderCoverageReportMarkdown(summary: ParsedCoverageSummary): string {
   const badgeStatus = getCoverageBadgeStatus(summary.totals.linePct);
 
-  const fileRows = summary.files.map((fileCoverage) => {
-    return `| ${fileCoverage.path} | ${formatPercent(fileCoverage.linePct)} | ${formatPercent(fileCoverage.statementPct)} | ${formatPercent(fileCoverage.functionPct)} | ${formatPercent(fileCoverage.branchPct)} |`;
-  });
+  const fileRows = summary.files.map(
+    (fileCoverage) =>
+      `| ${fileCoverage.path} | ${formatPercent(fileCoverage.linePct)} | ${formatPercent(fileCoverage.statementPct)} | ${formatPercent(fileCoverage.functionPct)} | ${formatPercent(fileCoverage.branchPct)} |`
+  );
 
   return [
     '# Test Coverage',

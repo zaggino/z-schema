@@ -2,7 +2,7 @@
 
 export default {
   description: 'Issue #125 - Why process format if type validation fails',
-  setup: function (validator: any, Class: any) {
+  setup(validator: any, Class: any) {
     Class.registerFormat('test', function (item: any) {
       return typeof item === 'string';
     });
@@ -26,7 +26,7 @@ export default {
         callbacks: [true],
       },
       valid: false,
-      after: function (err: any, _valid: any, _data: any, _validator: any) {
+      after(err: any, _valid: any, _data: any, _validator: any) {
         expect(err.length).toBe(1);
         expect(err[0].code).toBe('INVALID_TYPE');
       },

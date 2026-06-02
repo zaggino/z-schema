@@ -23,7 +23,7 @@ const schema2 = {
 
 export default {
   description: 'Issue #47 - references to draft4 subschema are not working',
-  setup: function (validator: any) {
+  setup(validator: any) {
     validator.setRemoteReference(ref1, schema1);
     validator.setRemoteReference(ref2, schema2);
   },

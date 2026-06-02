@@ -20,7 +20,7 @@ export default {
 
       valid: false,
 
-      after: function (errors: any) {
+      after(errors: any) {
         expect(errors.length).toBe(2);
       },
     },
@@ -48,7 +48,7 @@ export default {
 
       valid: false,
 
-      after: function (errors: any) {
+      after(errors: any) {
         expect(errors.length).toBe(2);
       },
     },
@@ -76,7 +76,7 @@ export default {
 
       valid: false,
 
-      after: function (errors: any) {
+      after(errors: any) {
         expect(errors.length).toBeGreaterThan(1);
       },
     },
@@ -108,7 +108,7 @@ export default {
 
       valid: false,
 
-      after: function (errors: any) {
+      after(errors: any) {
         expect(errors.length).toBeGreaterThan(1);
       },
     },

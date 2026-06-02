@@ -49,7 +49,7 @@ export default {
       },
       data: 'string',
       valid: false,
-      after: function (errors: any) {
+      after(errors: any) {
         expect(errors[0].code).toBe('KEYWORD_UNDEFINED_STRICT');
       },
     },

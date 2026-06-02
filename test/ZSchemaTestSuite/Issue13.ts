@@ -160,7 +160,7 @@ export default {
         c: 'C',
       },
       valid: false,
-      after: function (err: any) {
+      after(err: any) {
         expect(err[0].code).toBe('INVALID_TYPE');
         expect(err[1].code).toBe('INVALID_TYPE');
       },

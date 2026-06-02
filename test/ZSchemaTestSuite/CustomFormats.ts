@@ -1,7 +1,7 @@
 export default {
   description: 'registerFormat - Custom formats support',
   version: 'draft-04',
-  setup: function (validator: any, Class: any) {
+  setup(validator: any, Class: any) {
     Class.registerFormat('xstring', function (str: any) {
       return str === 'xxx';
     });
@@ -54,7 +54,7 @@ export default {
         format: 'fillHello',
       },
       valid: true,
-      after: function (err: any, valid: any, obj: any) {
+      after(err: any, valid: any, obj: any) {
         expect(obj.hello).toBe('world');
       },
     },

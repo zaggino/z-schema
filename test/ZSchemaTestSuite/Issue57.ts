@@ -547,7 +547,7 @@ const apiDeclarationJson = {
 
 export default {
   description: 'Issue #57 - maximum call stack exceeded error',
-  setup: function (validator: any, Class: any) {
+  setup(validator: any, Class: any) {
     Class.registerFormat('mime-type', function () {
       return true;
     });

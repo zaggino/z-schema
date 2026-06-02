@@ -2,7 +2,7 @@
 
 export default {
   description: 'getRegisteredFormats - return an array of format names',
-  setup: function (validator: any, Class: any) {
+  setup(validator: any, Class: any) {
     Class.registerFormat('phone', function (_str: any) {
       return true;
     });

@@ -93,7 +93,7 @@ export class ZSchemaBase {
 
     if (typeof schema !== 'string' && typeof schema !== 'boolean' && !isObject(schema)) {
       const e = new Error(
-        'Invalid .validate call - schema must be a string or object but ' + whatIs(schema) + ' was passed!'
+        `Invalid .validate call - schema must be a string or object but ${whatIs(schema)} was passed!`
       );
       if (callback) {
         setTimeout(function () {
@@ -113,7 +113,7 @@ export class ZSchemaBase {
       const schemaName = schema;
       _schema = this.scache.getSchema(report, schemaName)!;
       if (!_schema) {
-        const e = new Error("Schema with id '" + schemaName + "' wasn't found in the validator cache!");
+        const e = new Error(`Schema with id '${schemaName}' wasn't found in the validator cache!`);
         if (callback) {
           setTimeout(function () {
             callback(e, false);
@@ -146,7 +146,7 @@ export class ZSchemaBase {
       report.rootSchema = _schema;
       _schema = get(_schema, options.schemaPath);
       if (!_schema) {
-        const e = new Error("Schema path '" + options.schemaPath + "' wasn't found in the schema!");
+        const e = new Error(`Schema path '${options.schemaPath}' wasn't found in the schema!`);
         if (callback) {
           setTimeout(function () {
             callback(e, false);

@@ -151,40 +151,40 @@ export const collectReferences = (
   }
 
   if (typeof scopeId === 'string' && (isRootScope || !hasRef || options.useRefObjectScope === true)) {
-    const base = scope.length > 0 ? scope[scope.length - 1] : undefined;
+    const base = scope.length > 0 ? scope.at(-1) : undefined;
     scope.push(resolveSchemaScopeId(base, obj, scopeId));
     addedScope = true;
   }
 
   if (hasRef) {
     results.push({
-      ref: resolveReference(scope[scope.length - 1], obj.$ref!),
+      ref: resolveReference(scope.at(-1), obj.$ref!),
       key: '$ref',
-      obj: obj,
+      obj,
       path: path.slice(0),
     });
   }
   if (typeof obj.$recursiveRef === 'string' && typeof obj.__$recursiveRefResolved === 'undefined') {
     results.push({
-      ref: resolveReference(scope[scope.length - 1], obj.$recursiveRef),
+      ref: resolveReference(scope.at(-1), obj.$recursiveRef),
       key: '$recursiveRef',
-      obj: obj,
+      obj,
       path: path.slice(0),
     });
   }
   if (typeof obj.$dynamicRef === 'string' && typeof obj.__$dynamicRefResolved === 'undefined') {
     results.push({
-      ref: resolveReference(scope[scope.length - 1], obj.$dynamicRef),
+      ref: resolveReference(scope.at(-1), obj.$dynamicRef),
       key: '$dynamicRef',
-      obj: obj,
+      obj,
       path: path.slice(0),
     });
   }
   if (typeof obj.$schema === 'string' && typeof obj.__$schemaResolved === 'undefined') {
     results.push({
-      ref: resolveReference(scope[scope.length - 1], obj.$schema),
+      ref: resolveReference(scope.at(-1), obj.$schema),
       key: '$schema',
-      obj: obj,
+      obj,
       path: path.slice(0),
     });
   }
@@ -264,7 +264,7 @@ const resolveIdScope = (base: string | undefined, id: string) => {
   if (isSimpleIdentifier(id)) {
     const hashIndex = baseStr.indexOf('#');
     const baseNoFrag = hashIndex === -1 ? baseStr : baseStr.slice(0, hashIndex);
-    return baseNoFrag + '#' + id;
+    return `${baseNoFrag}#${id}`;
   }
 
   return resolveReference(base, id);

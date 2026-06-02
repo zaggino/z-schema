@@ -12,7 +12,7 @@ const originalSchema = {
 const getKeys = function (obj: any) {
   const arr: string[] = [];
   for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+    if (Object.hasOwn(obj, key)) {
       arr.push(key);
     }
   }
@@ -32,7 +32,7 @@ export default {
         inner: 5,
       },
       valid: true,
-      after: function () {
+      after() {
         expect(getKeys(originalSchema).length).toBe(originalSchemaKeys.length);
         expect(getKeys(innerSchemaKeys).length).toBe(innerSchemaKeys.length);
       },

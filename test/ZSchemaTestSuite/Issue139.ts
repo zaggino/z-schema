@@ -45,7 +45,7 @@ export default {
         required: ['recType', 'roleA', 'roleB'],
       },
       valid: false,
-      after: function (err: any) {
+      after(err: any) {
         expect(err.length).toBe(3);
         err.forEach(function (e: any) {
           expect(e.code).toBe('UNRESOLVABLE_REFERENCE');

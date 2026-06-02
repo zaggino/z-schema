@@ -3,7 +3,7 @@ export default {
   tests: [
     {
       description: 'should pass validation #1',
-      setup: function (validator: any, Class: any) {
+      setup(validator: any, Class: any) {
         Class.registerFormat('not-blank', function () {
           return true;
         });

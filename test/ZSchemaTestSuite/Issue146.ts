@@ -18,7 +18,7 @@ export default {
       },
       data: { password: 'short' },
       valid: false,
-      after: function (err: any) {
+      after(err: any) {
         expect(err.length).toBe(2);
       },
     },
