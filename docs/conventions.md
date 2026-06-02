@@ -53,3 +53,50 @@
 
 - Pure utility functions go in `src/utils/`. Each file is single-purpose.
 - Current utils: `array.ts`, `clone.ts`, `json.ts`, `properties.ts`, `schema-regex.ts`, `symbols.ts`, `unicode.ts`, `uri.ts`, `what-is.ts`.
+
+## Performance
+
+Performance is a **primary, non-negotiable goal** — z-schema validates JSON on hot paths that run millions of times. Never trade a faster construct for stylistic sugar. See the Performance section in [AGENTS.md](../AGENTS.md#performance) for the authoritative rule list; the patterns below show the canonical before/after forms.
+
+**Prefer faster array/string primitives:**
+
+```ts
+// ✗ spread (iterator protocol)            ✓ concat / slice
+const a = [...x, ...y];                     const a = x.concat(y);
+const b = [...x];                           const b = x.slice();
+report.path.push(...segs);                  for (let i = 0; i < segs.length; i++) report.path.push(segs[i]);
+
+// ✗ for…of / forEach on hot arrays         ✓ indexed for
+for (const k of keys) use(k);               for (let i = 0; i < keys.length; i++) use(keys[i]);
+
+// ✗ O(n) membership in a loop              ✓ O(1) Set
+if (propKeys.includes(key)) …               const propKeySet = new Set(propKeys); … if (propKeySet.has(key)) …
+
+// ✗ codePointAt for ASCII/surrogate scan   ✓ charCodeAt
+str.codePointAt(i)                          str.charCodeAt(i)
+```
+
+**Avoid per-call / per-iteration allocations** — hoist constants, option objects, and regex compilation; mutate in place; resolve single values directly:
+
+```ts
+// ✗ option literal allocated per iteration
+for (const v of enumVals) if (areEqual(json, v, { maxDepth })) …
+// ✓ hoisted once
+const eqOpts = { maxDepth };
+for (let i = 0; i < enumVals.length; i++) if (areEqual(json, enumVals[i], eqOpts)) …
+
+// ✗ regex compiled per data key            ✓ compiled once before the loop
+for (const key of keys) { const re = compileSchemaRegex(p); … }
+const compiled = patterns.map(compileSchemaRegex); for (…) { /* reuse compiled */ }
+
+// ✗ allocating filter/concat on a hot path ✓ in-place (private local arrays only)
+keys = keys.filter((k) => k !== '$ref');    const i = keys.indexOf('$ref'); if (i !== -1) keys.splice(i, 1);
+report.errors = report.errors.concat(sub);  for (let i = 0; i < sub.length; i++) report.errors.push(sub[i]);
+
+// ✗ build a big merged object to read one key   ✓ resolve the single value directly
+const all = getFormatValidators(opts); all[name];   resolveFormatValidator(name, opts);
+```
+
+**Lint interaction:** rules that would push code back to the slower form are kept `off` in [oxlint.config.ts](../oxlint.config.ts) under the "Intentionally kept off for performance" block (`unicorn/prefer-spread`, `typescript/prefer-for-of`, `unicorn/prefer-code-point`). Do not re-enable them; if a perf change trips another enabled rule, disable that rule there rather than reverting the faster code.
+
+**Behavior preservation is mandatory:** a faster path must be identical for all inputs (lone surrogates, duplicate ids, empty collections, etc.). The full test suite is the gate; in-place mutation is only safe when the array is a private local with no caller relying on a fresh reference.

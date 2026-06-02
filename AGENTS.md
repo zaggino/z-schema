@@ -94,12 +94,20 @@ All public methods and classes **must** have [TSDoc](https://tsdoc.org/) comment
 Concrete rules:
 
 - **Never replace a faster construct with a slower one for style reasons.** In particular:
-  - Prefer `Array.prototype.concat` / `Array.prototype.slice` over the spread operator (`[...a, ...b]`, `[...a]`). Spread allocates via the iterator protocol and is measurably slower in V8 hot paths.
-  - Prefer index-based `for` loops over `for…of` in validation hot paths. `for…of` adds iterator-protocol overhead versus direct indexed access.
-  - Prefer `Set`/`Map` lookups (`O(1)`) over repeated `Array.prototype.includes`/`indexOf` (`O(n)`) on frequently-queried collections.
-- Avoid unnecessary allocations (intermediate arrays/objects, closures) inside per-keyword and per-element validation loops.
-- Some lint rules that would push code toward the slower form are **intentionally kept `off`** in [oxlint.config.ts](oxlint.config.ts) under the "Intentionally kept off for performance" block (e.g. `unicorn/prefer-spread`, `typescript/prefer-for-of`). Do not re-enable them, and do not silence the resulting wins by hand-applying their fixes.
+  - Prefer `Array.prototype.concat` / `Array.prototype.slice` over the spread operator (`[...a, ...b]`, `[...a]`, `fn(...arr)`, `arr.push(...other)`). Spread allocates via the iterator protocol and is measurably slower in V8 hot paths (and `push(...big)` can overflow the call stack).
+  - Prefer index-based `for` loops over `for…of` and `Array.prototype.forEach` in validation hot paths. `for…of`/`forEach` add iterator-protocol / callback overhead versus direct indexed access.
+  - Prefer `Set`/`Map` lookups (`O(1)`) over repeated `Array.prototype.includes`/`indexOf` (`O(n)`) and over `Array.prototype.find` in loops, on frequently-queried collections.
+  - Prefer `charCodeAt` over `codePointAt` for ASCII range checks and manual surrogate-pair scanning. `codePointAt` does extra surrogate work that is unnecessary on per-character hot paths.
+- **Avoid per-call and per-iteration allocations** inside per-keyword / per-element / per-value paths:
+  - Hoist constant `Set`s/arrays/option-object literals and **regex compilation** to module scope (or above the loop) so they are built once, not on every call or iteration.
+  - Prefer **in-place array mutation** (push in a loop, `arr.length =` truncation, write-index compaction) over `.concat()` / `.filter()` / `.slice()` that allocate a fresh array on hot paths — but only when the array is a private local and no caller relies on a fresh reference.
+  - Don't build a large merged/lookup object per call just to read one key — resolve the single value directly.
+  - Avoid closures allocated per element (e.g. `.some()` / `.filter()` / `.reduce()` callbacks) in hot loops; use an indexed loop with a flag/accumulator.
+- **Lint rules that would push code toward the slower form are intentionally kept `off`** in [oxlint.config.ts](oxlint.config.ts) under the "Intentionally kept off for performance" block (currently `unicorn/prefer-spread`, `typescript/prefer-for-of`, `unicorn/prefer-code-point`). Do not re-enable them, and do not silence the resulting wins by hand-applying their fixes. **If a performance change trips a different enabled rule, the rule yields to performance** — move it into that block (with a one-line rationale comment, following the existing pattern) rather than reverting the faster code. Pure-style rules with no runtime cost (e.g. `curly`) should simply be satisfied.
+- **Behavior preservation is mandatory.** A faster path must produce identical results — same values, order, short-circuit/early-exit semantics, and error paths — for all inputs (including edge cases such as lone surrogates, duplicate ids, empty collections). The full test suite is the gate.
 - If a change might affect performance, benchmark it and call out the result in the PR. When in doubt, favor the faster construct.
+
+See [docs/conventions.md](docs/conventions.md#performance) for worked before/after examples.
 
 ## Testing Guide
 
