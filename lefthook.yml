@@ -9,7 +9,9 @@ pre-commit:
       run: npx oxlint -c oxlint.config.mjs --fix {staged_files}
       stage_fixed: true
     oxfmt:
-      run: npx oxfmt -c oxfmt.config.mjs --write {staged_files}
+      # --no-error-on-unmatched-pattern: don't fail the commit when every staged
+      # file is excluded by ignore rules (e.g. only CHANGELOG.md was staged).
+      run: npx oxfmt -c oxfmt.config.mjs --no-error-on-unmatched-pattern --write {staged_files}
       stage_fixed: true
 
 pre-push:

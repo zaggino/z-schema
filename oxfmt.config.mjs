@@ -3,7 +3,6 @@ import ultracite from 'ultracite/oxfmt';
 
 export default defineConfig({
   ...ultracite,
-  // Preserve the project's existing formatting style (previously .oxfmtrc.json).
   printWidth: 120,
   singleQuote: true,
   trailingComma: 'es5',
@@ -14,21 +13,11 @@ export default defineConfig({
   },
   ignorePatterns: [
     ...(ultracite.ignorePatterns ?? []),
-    '.DS_Store',
-    '.idea/',
-    '.vscode/',
-    'build/',
+    // Project-specific paths not covered by .gitignore (which oxfmt honors by
+    // default) nor by the ultracite preset: a release-managed changelog, the
+    // git submodule, and vendored test fixtures.
     'CHANGELOG.md',
-    'cjs/',
-    'coverage/',
-    'dist/',
     'json-schema-spec/',
-    'node_modules/',
-    'package-lock.json',
-    'pnpm-lock.yaml',
-    'specs/',
     'test/public/json-schema-test-suite/',
-    'umd/',
-    'yarn.lock',
   ],
 });
