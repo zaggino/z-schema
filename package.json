@@ -1,6 +1,6 @@
 {
   "name": "z-schema",
-  "version": "12.2.0",
+  "version": "12.3.0",
   "description": "Fast, lightweight JSON Schema validator for Node.js and browsers — full support for draft-04, draft-06, draft-07, draft-2019-09, and draft-2020-12 (latest)",
   "keywords": [
     "draft-04",
