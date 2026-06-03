@@ -218,7 +218,7 @@ export class Report {
     if (returnPathAsString !== true) {
       // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
       return `#/${path
-        .map(function (segment) {
+        .map((segment) => {
           segment = segment.toString();
 
           if (isAbsoluteUri(segment)) {

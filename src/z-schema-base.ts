@@ -98,7 +98,7 @@ export class ZSchemaBase {
         `Invalid .validate call - schema must be a string or object but ${whatIs(schema)} was passed!`
       );
       if (callback) {
-        setTimeout(function () {
+        setTimeout(() => {
           callback(e, false);
         }, 0);
         return;
@@ -117,7 +117,7 @@ export class ZSchemaBase {
       if (!_schema) {
         const e = new Error(`Schema with id '${schemaName}' wasn't found in the validator cache!`);
         if (callback) {
-          setTimeout(function () {
+          setTimeout(() => {
             callback(e, false);
           }, 0);
           return;
@@ -150,7 +150,7 @@ export class ZSchemaBase {
       if (!_schema) {
         const e = new Error(`Schema path '${options.schemaPath}' wasn't found in the schema!`);
         if (callback) {
-          setTimeout(function () {
+          setTimeout(() => {
             callback(e, false);
           }, 0);
           return;

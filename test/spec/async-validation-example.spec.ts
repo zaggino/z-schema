@@ -3,35 +3,35 @@ import { describe, expect, it } from 'vitest';
 import { ValidateError } from '../../src/index.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
+// Mock functions for testing
+const mockDatabaseCheck = (userId: string): Promise<boolean> => {
+  const validUsers = ['user123', 'user456'];
+  return Promise.resolve(validUsers.includes(userId));
+};
+
+const mockPostcodeCheck = (postcode: string): Promise<boolean> => {
+  const validPostcodes = ['SW1A 1AA', 'B1 1AA'];
+  return Promise.resolve(validPostcodes.includes(postcode));
+};
+
 describe('Async Validation Example', () => {
-  // Mock functions for testing
-  const mockDatabaseCheck = async (userId: string): Promise<boolean> => {
-    const validUsers = ['user123', 'user456'];
-    return validUsers.includes(userId);
-  };
-
-  const mockPostcodeCheck = async (postcode: string): Promise<boolean> => {
-    const validPostcodes = ['SW1A 1AA', 'B1 1AA'];
-    return validPostcodes.includes(postcode);
-  };
-
   const phoneRegex = /^\+?[1-9]\d{1,14}$/;
 
   const registerFormats = (validator: {
     registerFormat: (name: string, validatorFunction: (input: unknown) => boolean | Promise<boolean>) => void;
   }) => {
-    validator.registerFormat('user-exists', async (input: unknown): Promise<boolean> => {
+    validator.registerFormat('user-exists', (input: unknown): Promise<boolean> => {
       if (typeof input !== 'string') {
-        return false;
+        return Promise.resolve(false);
       }
-      return await mockDatabaseCheck(input);
+      return mockDatabaseCheck(input);
     });
 
-    validator.registerFormat('valid-postcode', async (input: unknown): Promise<boolean> => {
+    validator.registerFormat('valid-postcode', (input: unknown): Promise<boolean> => {
       if (typeof input !== 'string') {
-        return false;
+        return Promise.resolve(false);
       }
-      return await mockPostcodeCheck(input);
+      return mockPostcodeCheck(input);
     });
 
     validator.registerFormat('phone-number', (input: unknown): boolean => {
@@ -238,15 +238,16 @@ describe('Async Validation Example', () => {
       // For this test, we can mock a failing database check
       const validator = ZSchema.create();
 
+      // eslint-disable-next-line require-await -- intentionally async: models an async format validator that rejects (vs. a synchronous throw)
       validator.registerFormat('user-exists', async (): Promise<boolean> => {
         throw new Error('Database unavailable');
       });
 
-      validator.registerFormat('valid-postcode', async (input: unknown): Promise<boolean> => {
+      validator.registerFormat('valid-postcode', (input: unknown): Promise<boolean> => {
         if (typeof input !== 'string') {
-          return false;
+          return Promise.resolve(false);
         }
-        return await mockPostcodeCheck(input);
+        return mockPostcodeCheck(input);
       });
 
       validator.registerFormat('phone-number', (input: unknown): boolean => {

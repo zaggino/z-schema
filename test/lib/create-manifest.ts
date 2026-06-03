@@ -10,7 +10,7 @@ const getJsonFiles = async (directory: string, base: string): Promise<string[]> 
     entries.map(async (entry: any) => {
       const fullPath = join(directory, entry.name);
       if (entry.isDirectory()) {
-        return getJsonFiles(fullPath, base);
+        return await getJsonFiles(fullPath, base);
       }
       if (entry.isFile() && entry.name.endsWith('.json')) {
         return `/${relative(base, fullPath).replaceAll('\\', '/')}`;

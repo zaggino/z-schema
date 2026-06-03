@@ -3,16 +3,12 @@
 
 import { ZSchema } from '../../src/z-schema.ts';
 
-describe('Issue #214: Custom formats are module-scoped', function () {
-  it('should allow custom formats instance scoped', function () {
+describe('Issue #214: Custom formats are module-scoped', () => {
+  it('should allow custom formats instance scoped', () => {
     const validator1 = ZSchema.create({ version: 'draft-04' });
-    validator1.registerFormat('instance1-format', function (str) {
-      return str === 'instance1';
-    });
+    validator1.registerFormat('instance1-format', (str) => str === 'instance1');
     const validator2 = ZSchema.create({ version: 'draft-04' });
-    validator2.registerFormat('instance2-format', function (str) {
-      return str === 'instance2';
-    });
+    validator2.registerFormat('instance2-format', (str) => str === 'instance2');
     // Test validator1
     const schema1 = { type: 'string', format: 'instance1-format' };
     expect(validator1.validateSafe('instance1', schema1).valid).toBe(true);

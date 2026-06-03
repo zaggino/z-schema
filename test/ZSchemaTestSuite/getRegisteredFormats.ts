@@ -1,11 +1,7 @@
-'use strict';
-
 export default {
   description: 'getRegisteredFormats - return an array of format names',
   setup(validator: any, Class: any) {
-    Class.registerFormat('phone', function (_str: any) {
-      return true;
-    });
+    Class.registerFormat('phone', (_str: any) => true);
   },
 
   tests: [

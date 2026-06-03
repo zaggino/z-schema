@@ -4,9 +4,7 @@ export default {
     {
       description: 'should pass validation #1',
       setup(validator: any, Class: any) {
-        Class.registerFormat('not-blank', function () {
-          return true;
-        });
+        Class.registerFormat('not-blank', () => true);
       },
       schema: [
         {

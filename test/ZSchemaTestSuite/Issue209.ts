@@ -9,16 +9,14 @@ export default {
   setup(validator: any, Class: any) {
     if (testAsync) {
       // asynchronous validator
-      Class.registerFormat('string-length', function (str: any, callback: any) {
-        setTimeout(function () {
+      Class.registerFormat('string-length', (str: any, callback: any) => {
+        setTimeout(() => {
           callback(str.length > 10);
         }, 1);
       });
     } else {
       // same as above but synchronous (comment out the validator above and try with this instead)
-      Class.registerFormat('string-length', function (str: any) {
-        return str.length > 10;
-      });
+      Class.registerFormat('string-length', (str: any) => str.length > 10);
     }
   },
   schema: {

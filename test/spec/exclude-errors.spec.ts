@@ -1,7 +1,7 @@
 import { ZSchema } from '../../src/z-schema.ts';
 
-describe('JSON Validation excludeErrors integration', function () {
-  it('should exclude multiple error codes correctly', function () {
+describe('JSON Validation excludeErrors integration', () => {
+  it('should exclude multiple error codes correctly', () => {
     const validator = ZSchema.create({ version: 'draft-04' });
     const schema = {
       type: 'object',

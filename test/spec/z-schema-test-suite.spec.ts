@@ -109,7 +109,7 @@ const loadedTestSuiteModules = await Promise.all([
 ]);
 const testSuiteFiles = loadedTestSuiteModules.map((m) => m.default ?? m) as TestSuiteFile[];
 
-describe('ZSchemaTestSuite', function () {
+describe('ZSchemaTestSuite', () => {
   let idx = testSuiteFiles.length;
   while (idx--) {
     if (testSuiteFiles[idx] == null) {
@@ -117,8 +117,8 @@ describe('ZSchemaTestSuite', function () {
     }
   }
 
-  testSuiteFiles.forEach(function (testSuite) {
-    testSuite.tests.forEach(function (test) {
+  testSuiteFiles.forEach((testSuite) => {
+    testSuite.tests.forEach((test) => {
       let { data } = test;
       if (data === undefined) {
         ({ data } = testSuite);
@@ -142,7 +142,7 @@ describe('ZSchemaTestSuite', function () {
         options.version = version;
       }
 
-      it(`${testSuite.description}, ${test.description}`, async function () {
+      it(`${testSuite.description}, ${test.description}`, async () => {
         if (async) {
           const validator = ZSchema.create(options);
           if (setup) {

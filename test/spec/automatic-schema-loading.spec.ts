@@ -47,9 +47,9 @@ function validateWithAutomaticDownloads(
   validate();
 }
 
-describe('Automatic schema loading', function () {
-  it('should download schemas and validate successfully', function () {
-    return new Promise<void>((resolve) => {
+describe('Automatic schema loading', () => {
+  it('should download schemas and validate successfully', () =>
+    new Promise<void>((resolve) => {
       if (isBrowser) {
         // skip this test in browsers
         expect(1).toBe(1);
@@ -61,16 +61,15 @@ describe('Automatic schema loading', function () {
       const schema = { $ref: 'http://json-schema.org/draft-04/schema#' };
       const data = { minLength: 1 };
 
-      validateWithAutomaticDownloads(validator, data, schema, function (err: unknown, valid: boolean) {
+      validateWithAutomaticDownloads(validator, data, schema, (err: unknown, valid: boolean) => {
         expect(valid).toBe(true);
         expect(err).toBe(null);
         resolve();
       });
-    });
-  });
+    }));
 
-  it('should download schemas and fail validating', function () {
-    return new Promise<void>((resolve) => {
+  it('should download schemas and fail validating', () =>
+    new Promise<void>((resolve) => {
       if (typeof window !== 'undefined') {
         // skip this test in browsers
         expect(1).toBe(1);
@@ -82,11 +81,10 @@ describe('Automatic schema loading', function () {
       const schema = { $ref: 'http://json-schema.org/draft-04/schema#' };
       const data = { minLength: -1 };
 
-      validateWithAutomaticDownloads(validator, data, schema, function (err: unknown, valid: boolean) {
+      validateWithAutomaticDownloads(validator, data, schema, (err: unknown, valid: boolean) => {
         expect(valid).toBe(false);
         expect((err as any)[0].code).toBe('MINIMUM');
         resolve();
       });
-    });
-  });
+    }));
 });

@@ -1,8 +1,8 @@
 import { ValidateError } from '../../src/errors.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
-describe('Using multiple instances of Z-Schema', function () {
-  it('Should pass all tests', function () {
+describe('Using multiple instances of Z-Schema', () => {
+  it('Should pass all tests', () => {
     const schema = {
       $schema: 'http://json-schema.org/draft-04/schema#',
       type: 'object',

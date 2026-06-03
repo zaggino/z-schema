@@ -2,13 +2,9 @@ export default {
   description: 'registerFormat - Custom formats support',
   version: 'draft-04',
   setup(validator: any, Class: any) {
-    Class.registerFormat('xstring', function (str: any) {
-      return str === 'xxx';
-    });
-    Class.registerFormat('emptystring', function (str: any) {
-      return typeof str === 'string' && str.length === 0 && str === '';
-    });
-    Class.registerFormat('fillHello', function (obj: any) {
+    Class.registerFormat('xstring', (str: any) => str === 'xxx');
+    Class.registerFormat('emptystring', (str: any) => typeof str === 'string' && str.length === 0 && str === '');
+    Class.registerFormat('fillHello', (obj: any) => {
       obj.hello = 'world';
       return true;
     });

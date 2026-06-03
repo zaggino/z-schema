@@ -2,8 +2,16 @@ import { describe, expect, it } from 'vitest';
 
 import { ZSchema } from '../../src/z-schema.js';
 
+const asyncStringFormat = async (input: unknown): Promise<boolean> => {
+  const delay = Math.random() * 100;
+  await new Promise((resolve) => {
+    setTimeout(resolve, delay);
+  });
+  return typeof input === 'string';
+};
+
 describe('Thread Safety', () => {
-  it('should not leak errors between concurrent validations', async () => {
+  it('should not leak errors between concurrent validations', () => {
     const validator = ZSchema.create();
     const invalidSchema = { type: 'string' };
     const validSchema = { type: 'string' };
@@ -61,14 +69,6 @@ describe('Thread Safety', () => {
     const validator2 = ZSchema.create({ async: true, safe: true });
 
     // Register async format that waits random 0-100ms then checks if string
-    const asyncStringFormat = async (input: unknown): Promise<boolean> => {
-      const delay = Math.random() * 100;
-      await new Promise((resolve) => {
-        setTimeout(resolve, delay);
-      });
-      return typeof input === 'string';
-    };
-
     validator1.registerFormat('async-string', asyncStringFormat);
     validator2.registerFormat('async-string', asyncStringFormat);
 

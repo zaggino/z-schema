@@ -1,7 +1,7 @@
 import { ZSchema } from '../../src/z-schema.ts';
 
 describe('Option breakOnFirstError tests', () => {
-  it('Should break on first error when breakOnFirstError is true', function () {
+  it('Should break on first error when breakOnFirstError is true', () => {
     const validator = ZSchema.create({ breakOnFirstError: true });
     const schema = { type: 'number', maximum: 5, minimum: 15 };
     const invalidData = 10; // violates maximum, would violate minimum too
@@ -11,7 +11,7 @@ describe('Option breakOnFirstError tests', () => {
     expect(result.err!.details!.length).toBe(1); // Only maximum error
   });
 
-  it('Should not break on first error when breakOnFirstError is false', function () {
+  it('Should not break on first error when breakOnFirstError is false', () => {
     const validator = ZSchema.create({ breakOnFirstError: false });
     const schema = { type: 'number', maximum: 5, minimum: 15 };
     const invalidData = 10;
