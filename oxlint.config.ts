@@ -104,14 +104,6 @@ export default defineConfig({
     // type: type-safety
     // Disallows passing `any`-typed values as arguments to typed function parameters.
     'typescript/no-unsafe-argument': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 11
-    // complexity: dangerous
-    // Values typed as `any` are assigned to typed variables; fixing requires narrowing the source types throughout the codebase.
-    // type: type-safety
-    // Disallows assigning `any`-typed values to typed variables or properties.
-    'typescript/no-unsafe-assignment': 'off',
   },
   overrides: [
     {
@@ -123,6 +115,7 @@ export default defineConfig({
         // (hooks receive arbitrary validator/error shapes); not worth retyping.
         'typescript/no-unsafe-call': 'off',
         'typescript/no-unsafe-return': 'off',
+        'typescript/no-unsafe-assignment': 'off',
       },
     },
   ],

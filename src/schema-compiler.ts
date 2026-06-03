@@ -135,7 +135,7 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
       const id: Id = {
         id: nodeId,
         type,
-        obj: node,
+        obj: node as JsonSchemaInternal,
       };
       if (type === 'absolute' || (type === 'root' && isAbsoluteUri(nodeId))) {
         id.absoluteUri = nodeId;
