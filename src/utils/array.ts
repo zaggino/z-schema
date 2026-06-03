@@ -63,9 +63,9 @@ export const isUniqueArray = (arr: unknown[], indexes?: number[], maxDepth?: num
   return true;
 };
 
-export const difference = (bigSet: any[], subSet: any[]) => {
+export const difference = <T>(bigSet: readonly T[], subSet: readonly T[]): T[] => {
   const exclusions = new Set(subSet);
-  const arr = [];
+  const arr: T[] = [];
   let idx = bigSet.length;
   while (idx--) {
     if (!exclusions.has(bigSet[idx])) {
