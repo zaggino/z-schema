@@ -14,6 +14,7 @@ export default defineConfig({
   },
   rules: {
     // ── Intentional project rules on top of ultracite defaults
+    'class-methods-use-this': 'off',
     complexity: 'off',
     eqeqeq: 'off',
     'func-style': ['error', 'declaration', { allowArrowFunctions: true }],
@@ -27,6 +28,7 @@ export default defineConfig({
       { args: 'after-used', argsIgnorePattern: '^_', caughtErrors: 'all', caughtErrorsIgnorePattern: '^_' },
     ],
     'no-warning-comments': 'off',
+    'promise/avoid-new': 'off',
     'require-unicode-regexp': 'off',
     'sort-keys': 'off',
     'typescript/array-type': ['error', { default: 'array-simple' }],
@@ -34,7 +36,9 @@ export default defineConfig({
     'typescript/no-dynamic-delete': 'off',
     'typescript/no-explicit-any': 'off',
     'typescript/no-non-null-assertion': 'off',
+    'unicorn/filename-case': 'off',
     'unicorn/no-array-for-each': 'off',
+    'unicorn/no-thenable': 'off',
     'unicorn/prefer-node-protocol': 'off',
 
     // ── Intentionally kept off for performance (NOT in the TODO backlog) ──
@@ -84,14 +88,6 @@ export default defineConfig({
     // type: bug-prevention
     // Disallows `this` inside exported standalone functions where the `this` context is unpredictable.
     'oxc/no-this-in-exported-function': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 73
-    // complexity: easy
-    // Source files do not follow the kebab-case filename convention enforced by this rule.
-    // type: style
-    // Requires filenames to follow a specified case convention (e.g., kebab-case).
-    'unicorn/filename-case': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 32
@@ -158,14 +154,6 @@ export default defineConfig({
     'typescript/no-unsafe-assignment': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 8
-    // complexity: moderate
-    // `new Promise()` constructors are used in places where an existing promise-returning API could be used directly.
-    // type: best-practice
-    // Disallows explicit `new Promise()` construction when a simpler promise-returning API is available.
-    'promise/avoid-new': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 3
     // complexity: moderate
     // Functions that return a `Promise` are not marked `async`; adding `async` changes the error-handling behaviour for thrown exceptions.
@@ -180,22 +168,6 @@ export default defineConfig({
     // type: type-safety
     // Disallows returning `any`-typed values from functions with non-`any` return type annotations.
     'typescript/no-unsafe-return': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
-    // complexity: moderate
-    // An object has a `.then()` method which makes it thenable, potentially causing confusion with promises in `await` expressions.
-    // type: bug-prevention
-    // Disallows objects that define a `.then()` method in non-promise contexts, as they are mistakenly treated as thenables.
-    'unicorn/no-thenable': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: moderate
-    // A class method does not reference `this` and could be a static method or standalone function; refactoring may change call-site API.
-    // type: maintainability
-    // Requires class methods that do not use `this` to be declared as `static`.
-    'class-methods-use-this': 'off',
   },
   overrides: [
     {
