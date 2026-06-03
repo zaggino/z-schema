@@ -36,6 +36,9 @@ export default defineConfig({
     'typescript/no-dynamic-delete': 'off',
     'typescript/no-explicit-any': 'off',
     'typescript/no-non-null-assertion': 'off',
+    'typescript/prefer-nullish-coalescing': 'off',
+    'typescript/promise-function-async': 'off',
+    'typescript/strict-boolean-expressions': 'off',
     'unicorn/filename-case': 'off',
     'unicorn/no-array-for-each': 'off',
     'unicorn/no-thenable': 'off',
@@ -122,22 +125,6 @@ export default defineConfig({
     'typescript/no-unsafe-type-assertion': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 18
-    // complexity: dangerous
-    // Expressions are used in boolean positions without explicit comparison; fixing requires auditing each site for nullable/falsy semantics.
-    // type: type-safety
-    // Disallows loosely-typed truthy/falsy checks, requiring explicit boolean comparisons or type guards.
-    'typescript/strict-boolean-expressions': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 13
-    // complexity: moderate
-    // Nullable values are combined with `||` where `??` is semantically more correct; each site needs auditing for falsy vs. nullish intent.
-    // type: type-safety
-    // Prefers the nullish coalescing operator (`??`) over `||` when the left-hand side may be `null` or `undefined`.
-    'typescript/prefer-nullish-coalescing': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 13
     // complexity: dangerous
     // Arguments typed as `any` are passed into typed parameters; fixing requires narrowing the source types or adding explicit casts.
@@ -152,14 +139,6 @@ export default defineConfig({
     // type: type-safety
     // Disallows assigning `any`-typed values to typed variables or properties.
     'typescript/no-unsafe-assignment': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 3
-    // complexity: moderate
-    // Functions that return a `Promise` are not marked `async`; adding `async` changes the error-handling behaviour for thrown exceptions.
-    // type: best-practice
-    // Requires functions that return a `Promise` to be declared with the `async` keyword.
-    'typescript/promise-function-async': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 3
