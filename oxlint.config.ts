@@ -55,6 +55,12 @@ export default defineConfig({
     // need on these hot per-character paths.
     'unicorn/prefer-code-point': 'off',
 
+    // Parameterless Array#sort over string keys uses native lexicographic
+    // comparison — faster than, and identical to, a JS comparator on the clone
+    // hot path (utils/clone.ts shallowClone/deepClone key ordering). Enabling the
+    // rule would force a per-comparison JS callback for no functional gain.
+    'unicorn/no-array-sort': 'off',
+
     // ── TODO: rules from the ultracite preset currently reporting errors ──
     // Disabled to reach a clean baseline; re-evaluate and re-enable incrementally.
 
@@ -203,22 +209,6 @@ export default defineConfig({
     'typescript/no-unsafe-assignment': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 9
-    // complexity: moderate
-    // Variable names shadow outer-scope variables; renaming requires confirming no semantic collision exists.
-    // type: bug-prevention
-    // Disallows variable declarations that shadow variables declared in outer scopes.
-    'no-shadow': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 8
-    // complexity: moderate
-    // `Array.prototype.sort()` is called without a comparator, which has locale-dependent behaviour; each call site needs an explicit comparator.
-    // type: bug-prevention
-    // Disallows calling `Array.prototype.sort()` without a comparator function to avoid non-deterministic sort order.
-    'unicorn/no-array-sort': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 8
     // complexity: moderate
     // `new Promise()` constructors are used in places where an existing promise-returning API could be used directly.
@@ -244,27 +234,11 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 3
-    // complexity: moderate
-    // TypeScript parameter properties (shorthand constructor `private x`) are used; converting to explicit properties requires structural changes.
-    // type: style
-    // Disallows TypeScript parameter property syntax in constructors, requiring explicit class property declarations.
-    'typescript/parameter-properties': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 3
     // complexity: dangerous
     // Functions return `any`-typed values where a typed return is expected; fixing requires narrowing the returned types.
     // type: type-safety
     // Disallows returning `any`-typed values from functions with non-`any` return type annotations.
     'typescript/no-unsafe-return': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 3
-    // complexity: moderate
-    // Error-first callbacks are used but the error argument is not checked before proceeding; each site requires an explicit error guard.
-    // type: bug-prevention
-    // Requires error-first callback parameters to be handled (checked or re-thrown) rather than silently ignored.
-    'node/handle-callback-err': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 2
@@ -285,26 +259,10 @@ export default defineConfig({
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 2
     // complexity: moderate
-    // Functions annotated with a `void` return type return a value in some code paths; requires auditing intent.
-    // type: type-safety
-    // Disallows returning a value from a function whose return type is `void`.
-    'typescript/strict-void-return': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
-    // complexity: moderate
     // `return await promise` is used inside `async` functions where `return promise` would be equivalent; however changing it can alter stack trace and try/catch semantics.
     // type: best-practice
     // Requires or disallows `return await` inside `async` functions; the preferred form depends on stack-trace and error-propagation needs.
     'typescript/return-await': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
-    // complexity: moderate
-    // A `void`-typed expression is used in a non-void context (e.g., passed as a value); restructuring is required to avoid the confusion.
-    // type: type-safety
-    // Disallows using expressions of type `void` in positions where a non-void value is expected.
-    'typescript/no-confusing-void-expression': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 2
@@ -316,43 +274,11 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
-    // complexity: trivial
-    // A variable is immediately mutated after declaration (e.g., `const x = []; x.push(y)`); initialise directly instead.
-    // type: style
-    // Disallows immediately mutating a variable after its initial declaration/assignment.
-    'unicorn/no-immediate-mutation': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: moderate
-    // A custom `Error` subclass does not follow the expected pattern (name property, correct prototype chain); refactoring requires care.
-    // type: best-practice
-    // Enforces that custom `Error` subclasses are defined correctly (set `name`, use `super()`, etc.).
-    'unicorn/custom-error-definition': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: moderate
-    // A `+` operation mixes string and non-string operands in a way that TypeScript considers unsafe; explicit conversion is needed.
-    // type: type-safety
-    // Disallows the `+` operator when its operands have types that could produce an unintended string/number concatenation.
-    'typescript/restrict-plus-operands': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
     // complexity: dangerous
     // A promise is created but not `await`ed or `.catch()`ed, meaning rejection errors would be silently swallowed.
     // type: bug-prevention
     // Disallows floating (unhandled) promises — promises that are neither awaited nor explicitly handled with `.catch()`.
     'typescript/no-floating-promises': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: moderate
-    // A `.then()` chain is nested inside another `.then()`, creating a promise nesting anti-pattern; flattening requires refactoring.
-    // type: best-practice
-    // Disallows nesting promise `.then()` callbacks inside other `.then()` callbacks.
-    'promise/no-nesting': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
@@ -377,7 +303,7 @@ export default defineConfig({
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 5
     // complexity: moderate
-    // Functions mix value-returning and bare `return`/fall-through paths; normalising requires auditing each branch.
+    // Conflicts with the enabled `unicorn/no-useless-undefined`: functions returning `T | undefined` cannot satisfy both (this rule wants `return undefined;`, the other forbids it). Deferred until that tension is resolved.
     // type: bug-prevention
     // Requires functions to either always or never return a value (no implicit `undefined` on some paths).
     'typescript/consistent-return': 'off',
@@ -389,14 +315,6 @@ export default defineConfig({
     // type: bug-prevention
     // Requires Promise rejection reasons to be Error objects.
     'typescript/prefer-promise-reject-errors': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
-    // complexity: moderate
-    // A generic type parameter is used only once and could be inlined; removing it changes the signature.
-    // type: maintainability
-    // Flags type parameters that appear only once and therefore add no genuine genericity.
-    'typescript/no-unnecessary-type-parameters': 'off',
   },
   overrides: [
     {

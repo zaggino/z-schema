@@ -25,9 +25,9 @@ export const deepClone = <T>(src: T, maxDepth = DEFAULT_MAX_RECURSION_DEPTH): T 
   let vidx = 0;
   const visited = new Map();
   const cloned: any[] = [];
-  const cloneDeepInner = <T>(src: T, _depth: number): T => {
-    if (typeof src !== 'object' || src === null) {
-      return src;
+  const cloneDeepInner = <U>(node: U, _depth: number): U => {
+    if (typeof node !== 'object' || node === null) {
+      return node;
     }
 
     if (_depth >= maxDepth) {
@@ -38,25 +38,25 @@ export const deepClone = <T>(src: T, maxDepth = DEFAULT_MAX_RECURSION_DEPTH): T 
     }
 
     let res: any;
-    const cidx = visited.get(src);
+    const cidx = visited.get(node);
 
     if (cidx !== undefined) {
       return cloned[cidx];
     }
 
-    visited.set(src, vidx++);
-    if (Array.isArray(src)) {
+    visited.set(node, vidx++);
+    if (Array.isArray(node)) {
       res = [];
       cloned.push(res);
-      for (let i = 0; i < src.length; i++) {
-        res[i] = cloneDeepInner(src[i], _depth + 1);
+      for (let i = 0; i < node.length; i++) {
+        res[i] = cloneDeepInner(node[i], _depth + 1);
       }
     } else {
       res = {};
       cloned.push(res);
-      const keys = Object.keys(src).sort() as Array<keyof T>;
+      const keys = Object.keys(node).sort() as Array<keyof U>;
       for (let i = 0; i < keys.length; i++) {
-        copyProp(src, res, keys[i], (v: any) => cloneDeepInner(v, _depth + 1));
+        copyProp(node, res, keys[i], (v: any) => cloneDeepInner(v, _depth + 1));
       }
     }
     return res;

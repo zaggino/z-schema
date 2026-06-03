@@ -82,7 +82,7 @@ const validator = ZSchema.create(); // returns ZSchema
 try {
   validator.validate(json, schema); // returns true
 } catch (error) {
-  console.log(error.name); // 'z-schema validation error'
+  console.log(error.name); // 'ValidateError'
   console.log(error.message); // summary message
   console.log(error.details); // array of { code, message, path, ... }
 }

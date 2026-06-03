@@ -60,8 +60,11 @@ export function prepareRemoteSchema(
 export class SchemaCache {
   static global_cache: SchemaCacheStorage = Object.create(null);
   cache: SchemaCacheStorage = Object.create(null);
+  private readonly validator: ZSchemaBase;
 
-  constructor(private readonly validator: ZSchemaBase) {}
+  constructor(validator: ZSchemaBase) {
+    this.validator = validator;
+  }
 
   static cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
     const remotePath = getSafeRemotePath(uri);

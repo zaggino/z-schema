@@ -6,7 +6,7 @@ export default {
       schema: {},
       data: {},
       valid: true,
-      after(err: any, valid: any, data: any, validator: any) {
+      after(_err: any, valid: any, data: any, validator: any) {
         validator.getResolvedSchema('http://json-schema.org/draft-04/schema#');
       },
     },
