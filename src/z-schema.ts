@@ -167,7 +167,7 @@ export class ZSchema extends ZSchemaBase {
           }
         });
       } catch (error) {
-        reject(error instanceof Error ? error : new Error(String(error)));
+        reject(error instanceof Error ? error : new Error(String(error), { cause: error }));
       }
     });
   }
@@ -277,7 +277,7 @@ export class ZSchemaAsync extends ZSchemaBase {
           }
         });
       } catch (error) {
-        reject(error instanceof Error ? error : new Error(String(error)));
+        reject(error instanceof Error ? error : new Error(String(error), { cause: error }));
       }
     });
   }
