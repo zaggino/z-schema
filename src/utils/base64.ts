@@ -20,9 +20,14 @@ export const decodeBase64 = (value: string): string | undefined => {
     }
   }
 
-  if (typeof Buffer !== 'undefined') {
+  const bufferCtor = (
+    globalThis as {
+      Buffer?: { from(data: string, encoding: string): { toString(encoding: string): string } };
+    }
+  ).Buffer;
+  if (bufferCtor !== undefined) {
     try {
-      return Buffer.from(value, 'base64').toString('utf-8');
+      return bufferCtor.from(value, 'base64').toString('utf-8');
     } catch {
       return undefined;
     }

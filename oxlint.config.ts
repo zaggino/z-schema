@@ -90,14 +90,6 @@ export default defineConfig({
     'typescript/no-unsafe-member-access': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 32
-    // complexity: dangerous
-    // Calls are made on `any`-typed values in schema processing; fixing requires narrowing types or explicit casts.
-    // type: type-safety
-    // Disallows calling values typed as `any`, which bypasses TypeScript's call-signature checking.
-    'typescript/no-unsafe-call': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 23
     // complexity: dangerous
     // Most sites assert values to `any` or narrow types; tightening requires real upstream typing work.
@@ -135,6 +127,9 @@ export default defineConfig({
       rules: {
         'vitest/no-conditional-expect': 'off',
         'vitest/no-standalone-expect': 'off',
+        // Legacy ZSchemaTestSuite fixtures are intentionally loosely typed
+        // (hooks receive arbitrary validator/error shapes); not worth retyping.
+        'typescript/no-unsafe-call': 'off',
       },
     },
   ],
