@@ -142,80 +142,90 @@ describe('ZSchemaTestSuite', () => {
         options.version = version;
       }
 
-      it(`${testSuite.description}, ${test.description}`, async () => {
-        if (async) {
+      // Async tests may intentionally block until `asyncTimeout` elapses (e.g. the
+      // ASYNC_TIMEOUT case). Under browser + coverage instrumentation that timer plus
+      // overhead can exceed a flat 1s budget, so scale the per-test timeout to the
+      // configured asyncTimeout (defaulting to 2000ms) with generous headroom.
+      const testTimeout = async ? (options.asyncTimeout ?? 2000) + 5000 : 1000;
+
+      it(
+        `${testSuite.description}, ${test.description}`,
+        async () => {
+          if (async) {
+            const validator = ZSchema.create(options);
+            if (setup) {
+              setup(validator, ZSchema);
+            }
+
+            if (Array.isArray(schema)) {
+              schema = schema[schemaIndex];
+            }
+
+            const response = await validator.validateAsyncSafe(data, schema as any, validateOptions as any);
+            const { valid, err } = response;
+
+            expect(typeof valid).toBe('boolean' /*, 'returned response is not a boolean'*/);
+            expect(valid).toBe(test.valid /*, "test result doesn't match expected test result"*/);
+            if (test.valid) {
+              expect(err).toBe(undefined /*, 'errors are not undefined when test is valid'*/);
+            }
+            if (after) {
+              after(err?.details ?? err ?? undefined, valid, data, validator);
+            }
+            return;
+          }
+
+          ZSchema.setSchemaReader(undefined);
+
           const validator = ZSchema.create(options);
+          let caughtErr;
+
           if (setup) {
             setup(validator, ZSchema);
           }
 
-          if (Array.isArray(schema)) {
-            schema = schema[schemaIndex];
-          }
-
-          const response = await validator.validateAsyncSafe(data, schema as any, validateOptions as any);
-          const { valid, err } = response;
-
-          expect(typeof valid).toBe('boolean' /*, 'returned response is not a boolean'*/);
-          expect(valid).toBe(test.valid /*, "test result doesn't match expected test result"*/);
-          if (test.valid) {
-            expect(err).toBe(undefined /*, 'errors are not undefined when test is valid'*/);
-          }
-          if (after) {
-            after(err?.details ?? err ?? undefined, valid, data, validator);
-          }
-          return;
-        }
-
-        ZSchema.setSchemaReader(undefined);
-
-        const validator = ZSchema.create(options);
-        let caughtErr;
-
-        if (setup) {
-          setup(validator, ZSchema);
-        }
-
-        let valid: boolean | undefined;
-        try {
-          validator.validateSchema(schema as any);
-          valid = true;
-        } catch (error) {
-          if (!failWithException) {
-            valid = false;
-          }
-          caughtErr = error;
-        }
-
-        if (valid && !validateSchemaOnly) {
-          if (Array.isArray(schema)) {
-            schema = schema[schemaIndex];
-          }
+          let valid: boolean | undefined;
           try {
-            valid = validator.validate(data, schema as any, validateOptions as any);
+            validator.validateSchema(schema as any);
+            valid = true;
           } catch (error) {
-            valid = false;
+            if (!failWithException) {
+              valid = false;
+            }
             caughtErr = error;
           }
-        }
 
-        const err = caughtErr as ValidateError | undefined;
+          if (valid && !validateSchemaOnly) {
+            if (Array.isArray(schema)) {
+              schema = schema[schemaIndex];
+            }
+            try {
+              valid = validator.validate(data, schema as any, validateOptions as any);
+            } catch (error) {
+              valid = false;
+              caughtErr = error;
+            }
+          }
 
-        if (failWithException) {
-          expect(caughtErr).toBeTruthy();
-        } else {
-          expect(typeof valid).toBe('boolean' /*, 'returned response is not a boolean'*/);
-          expect.soft(valid).toBe(test.valid /*, "test result doesn't match expected test result"*/);
-        }
+          const err = caughtErr as ValidateError | undefined;
 
-        if (test.valid) {
-          expect(err).toBeFalsy(/*, 'errors are not undefined when test is valid'*/);
-        }
+          if (failWithException) {
+            expect(caughtErr).toBeTruthy();
+          } else {
+            expect(typeof valid).toBe('boolean' /*, 'returned response is not a boolean'*/);
+            expect.soft(valid).toBe(test.valid /*, "test result doesn't match expected test result"*/);
+          }
 
-        if (after) {
-          after(err?.details ?? err ?? undefined, valid!, data, validator);
-        }
-      }, 1000);
+          if (test.valid) {
+            expect(err).toBeFalsy(/*, 'errors are not undefined when test is valid'*/);
+          }
+
+          if (after) {
+            after(err?.details ?? err ?? undefined, valid!, data, validator);
+          }
+        },
+        testTimeout
+      );
     });
   });
 });
