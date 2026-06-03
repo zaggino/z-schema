@@ -30,6 +30,11 @@ export default defineConfig({
     ],
     'no-warning-comments': 'off',
     'promise/avoid-new': 'off',
+    // Kept off intentionally (not a TODO): the flagged callbacks are public-API
+    // contract — the exported `ValidateCallback` `validate`/`_validate` overload,
+    // `Report.processAsyncTasks`, and the user-registered `(str, callback)` async
+    // format-validator signature. Enabling would force a breaking API change.
+    'promise/prefer-await-to-callbacks': 'off',
     'require-unicode-regexp': 'off',
     'sort-keys': 'off',
     'typescript/array-type': ['error', { default: 'array-simple' }],
@@ -100,14 +105,6 @@ export default defineConfig({
     // type: type-safety
     // Disallows calling values typed as `any`, which bypasses TypeScript's call-signature checking.
     'typescript/no-unsafe-call': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 27
-    // complexity: moderate
-    // Callbacks are passed where `async`/`await` equivalents exist; refactoring requires verifying async compatibility of each call site.
-    // type: best-practice
-    // Prefers `async`/`await` over callback-based APIs when a promise-based alternative is available.
-    'promise/prefer-await-to-callbacks': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 23
