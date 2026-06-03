@@ -106,7 +106,7 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
         // Promise-based async
         const promiseResult = result;
         report.addAsyncTaskWithPath(
-          async (callback) => {
+          async (callback: (result: unknown) => void) => {
             try {
               const resolved = await promiseResult;
               callback(resolved);

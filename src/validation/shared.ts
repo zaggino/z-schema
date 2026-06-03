@@ -1,3 +1,4 @@
+import type { ErrorCode } from '../errors.js';
 import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal, JsonSchemaVersion } from '../json-schema-versions.js';
 // JsonSchemaAll is retained for the VALIDATION_VOCAB_KEYWORDS Set key type.
 import type { Report } from '../report.js';
@@ -15,11 +16,11 @@ export type JsonValidatorFn = (ctx: ZSchemaBase, report: Report, schema: JsonSch
 // Draft / vocabulary helpers
 // ---------------------------------------------------------------------------
 
-export const shouldSkipValidate = (options: ValidateOptions, errors: any) =>
+export const shouldSkipValidate = (options: ValidateOptions, errors: readonly ErrorCode[]) =>
   options &&
   Array.isArray(options.includeErrors) &&
   options.includeErrors.length > 0 &&
-  !errors.some((err: any) => options.includeErrors!.includes(err));
+  !errors.some((err) => options.includeErrors!.includes(err));
 
 export const supportsDependentKeywords = (
   schema: JsonSchemaInternal,
@@ -175,8 +176,10 @@ export function deferOrRunSync(report: Report, subReports: Report[], decisionFn:
 
   if (hasAsyncTasks) {
     report.addAsyncTaskWithPath(
-      (callback) => {
-        setTimeout(() => callback(null), 0);
+      (callback: (result: unknown) => void) => {
+        setTimeout(() => {
+          callback(null);
+        }, 0);
       },
       [] as any,
       () => {
