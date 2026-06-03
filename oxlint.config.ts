@@ -112,14 +112,6 @@ export default defineConfig({
     // type: type-safety
     // Disallows assigning `any`-typed values to typed variables or properties.
     'typescript/no-unsafe-assignment': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 3
-    // complexity: dangerous
-    // Functions return `any`-typed values where a typed return is expected; fixing requires narrowing the returned types.
-    // type: type-safety
-    // Disallows returning `any`-typed values from functions with non-`any` return type annotations.
-    'typescript/no-unsafe-return': 'off',
   },
   overrides: [
     {
@@ -130,6 +122,7 @@ export default defineConfig({
         // Legacy ZSchemaTestSuite fixtures are intentionally loosely typed
         // (hooks receive arbitrary validator/error shapes); not worth retyping.
         'typescript/no-unsafe-call': 'off',
+        'typescript/no-unsafe-return': 'off',
       },
     },
   ],

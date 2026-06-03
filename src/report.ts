@@ -250,7 +250,7 @@ export class Report {
     // try to find id in the error path
     while (path.length > 0) {
       const obj = get(this.rootSchema, path);
-      if (obj && obj.id) {
+      if (isObject(obj) && typeof obj.id === 'string') {
         return obj.id;
       }
       path.pop();
