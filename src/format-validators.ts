@@ -390,7 +390,16 @@ const iriValidator: FormatValidatorFn = (iri: unknown) => {
   if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:[^"\\<>^{}^`| ]*$/u.test(iri)) {
     return false;
   }
-  return URL.canParse(iri);
+  try {
+    // Constructed purely to detect an unparseable IRI (throws). Avoids URL.canParse,
+    // which is unavailable in older browsers the UMD build still targets; no-new is
+    // disabled here as the construction is intentional and the result is unused.
+    // oxlint-disable-next-line no-new
+    new URL(iri);
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 const iriReferenceValidator: FormatValidatorFn = (iriReference: unknown) => {
