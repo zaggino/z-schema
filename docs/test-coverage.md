@@ -11,7 +11,7 @@ Line coverage status: **high**
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
 | src/json-validation.ts        |     91% |         91% |       100% |      89% |
-| src/report.ts                 |     93% |         94% |        95% |      87% |
+| src/report.ts                 |     94% |         94% |        95% |      88% |
 | src/schema-cache.ts           |     90% |         90% |        92% |      89% |
 | src/schema-compiler.ts        |     94% |         93% |       100% |      90% |
 | src/schema-validator.ts       |     79% |         79% |       100% |      76% |
