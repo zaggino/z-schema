@@ -20,6 +20,12 @@ export const decodeBase64 = (value: string): string | undefined => {
     }
   }
 
+  // Node fallback (reached only when `atob` is unavailable, i.e. not a browser).
+  // Read `Buffer` off `globalThis` rather than the bare global so it is typed
+  // without an untyped global reference; on Node >=22 `Buffer` is always present
+  // on `globalThis`. (A bundler polyfill injected as a module-scoped variable but
+  // not onto `globalThis` would be missed, but that path is unreachable in browsers
+  // where `atob` above is used instead.)
   const bufferCtor = (
     globalThis as {
       Buffer?: { from(data: string, encoding: string): { toString(encoding: string): string } };
