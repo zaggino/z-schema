@@ -47,11 +47,11 @@ function validateWithAutomaticDownloads(
 
 describe('Automatic schema loading', function () {
   it('should download schemas and validate successfully', function () {
-    return new Promise<void>((done) => {
+    return new Promise<void>((resolve) => {
       if (isBrowser) {
         // skip this test in browsers
         expect(1).toBe(1);
-        done();
+        resolve();
         return;
       }
 
@@ -62,17 +62,17 @@ describe('Automatic schema loading', function () {
       validateWithAutomaticDownloads(validator, data, schema, function (err: unknown, valid: boolean) {
         expect(valid).toBe(true);
         expect(err).toBe(null);
-        done();
+        resolve();
       });
     });
   });
 
   it('should download schemas and fail validating', function () {
-    return new Promise<void>((done) => {
+    return new Promise<void>((resolve) => {
       if (typeof window !== 'undefined') {
         // skip this test in browsers
         expect(1).toBe(1);
-        done();
+        resolve();
         return;
       }
 
@@ -83,7 +83,7 @@ describe('Automatic schema loading', function () {
       validateWithAutomaticDownloads(validator, data, schema, function (err: unknown, valid: boolean) {
         expect(valid).toBe(false);
         expect((err as any)[0].code).toBe('MINIMUM');
-        done();
+        resolve();
       });
     });
   });

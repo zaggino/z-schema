@@ -21,7 +21,7 @@ Line coverage status: **high**
 | src/utils/constants.ts        |    100% |        100% |       100% |     100% |
 | src/utils/date.ts             |    100% |        100% |       100% |     100% |
 | src/utils/hostname.ts         |    100% |        100% |       100% |     100% |
-| src/utils/json.ts             |     97% |         97% |       100% |      97% |
+| src/utils/json.ts             |     98% |         98% |       100% |      97% |
 | src/utils/properties.ts       |    100% |        100% |       100% |      75% |
 | src/utils/schema-regex.ts     |     94% |         94% |       100% |      71% |
 | src/utils/symbols.ts          |    100% |        100% |       100% |     100% |
@@ -37,7 +37,7 @@ Line coverage status: **high**
 | src/validation/shared.ts      |     93% |         93% |       100% |      83% |
 | src/validation/string.ts      |     90% |         90% |       100% |      89% |
 | src/validation/type.ts        |    100% |        100% |       100% |      96% |
-| src/z-schema-base.ts          |     86% |         86% |        89% |      81% |
+| src/z-schema-base.ts          |     86% |         87% |        89% |      80% |
 | src/z-schema-options.ts       |     92% |         92% |       100% |      70% |
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |

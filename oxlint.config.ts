@@ -268,14 +268,6 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 2
-    // complexity: easy
-    // Custom error classes throw `new Error(...)` instead of `new TypeError(...)` or another appropriate subclass.
-    // type: best-practice
-    // Prefers throwing type-specific `Error` subclasses (e.g., `TypeError`) over generic `Error` in error-related contexts.
-    'unicorn/prefer-type-error': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
     // complexity: moderate
     // CommonJS constructs (`require`, `module.exports`) are used; migrating to ESM requires coordinated changes and build-config updates.
     // type: best-practice
@@ -289,14 +281,6 @@ export default defineConfig({
     // type: bug-prevention
     // Disallows objects that define a `.then()` method in non-promise contexts, as they are mistakenly treated as thenables.
     'unicorn/no-thenable': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
-    // complexity: easy
-    // Two function overloads share a signature that could be merged into one using a union type.
-    // type: maintainability
-    // Flags function overloads that can be unified into a single signature with a union or optional parameter.
-    'typescript/unified-signatures': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 2
@@ -324,35 +308,11 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 2
-    // complexity: trivial
-    // Promise executor or parameter names do not follow the `resolve`/`reject` naming convention.
-    // type: style
-    // Requires the parameters of `new Promise((resolve, reject) => {})` to follow a standard naming convention.
-    'promise/param-names': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
     // complexity: moderate
     // A promise can be resolved or rejected multiple times in different branches; requires careful control-flow analysis per site.
     // type: bug-prevention
     // Disallows resolving or rejecting a promise more than once within a promise executor.
     'promise/no-multiple-resolved': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
-    // complexity: easy
-    // `new Promise((resolve, reject) => { ... })` is returned directly from another promise chain; wrapping can be simplified.
-    // type: best-practice
-    // Disallows returning a `new Promise()` inside a `.then()` handler, which indicates unnecessary promise wrapping.
-    'no-promise-executor-return': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: trivial
-    // An array is used for membership testing (`arr.includes(x)`) where a `Set` would have O(1) lookup.
-    // type: best-practice
-    // Prefers `Set.prototype.has()` over `Array.prototype.includes()` for membership tests on large or frequently-queried collections.
-    'unicorn/prefer-set-has': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
@@ -361,22 +321,6 @@ export default defineConfig({
     // type: style
     // Disallows immediately mutating a variable after its initial declaration/assignment.
     'unicorn/no-immediate-mutation': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: trivial
-    // A property is accessed on an `await` expression result inline; introducing an intermediate variable is preferred.
-    // type: style
-    // Disallows accessing a property directly on an `await` expression; requires storing the awaited value first.
-    'unicorn/no-await-expression-member': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: moderate
-    // `Array.prototype.reduce()` is used where a more readable loop or built-in method would suffice.
-    // type: style
-    // Disallows `Array.prototype.reduce()` in favour of more readable alternatives like `for...of` loops or other array methods.
-    'unicorn/no-array-reduce': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
@@ -412,35 +356,11 @@ export default defineConfig({
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
-    // complexity: trivial
-    // A default export is imported using a named import, which may resolve but is fragile and non-standard.
-    // type: bug-prevention
-    // Disallows importing a module's default export using a named import specifier.
-    'import/no-named-as-default': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: easy
-    // `new SomeSideEffect()` is called purely for its side effects without storing the result; this is a code-smell.
-    // type: best-practice
-    // Disallows `new` expressions used solely for side effects where the constructed object is not used.
-    'no-new': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
     // complexity: moderate
     // A file defines more than the allowed number of classes; splitting into separate files may require API adjustments.
     // type: maintainability
     // Enforces a maximum number of class declarations per file to encourage single-responsibility modules.
     'max-classes-per-file': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: easy
-    // A `for...in` loop body does not guard against inherited properties with `hasOwnProperty`; adding a guard is mechanical.
-    // type: bug-prevention
-    // Requires `for...in` loop bodies to filter inherited properties with an `Object.hasOwn()` or `hasOwnProperty` check.
-    'guard-for-in': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1

@@ -88,8 +88,7 @@ export class Report {
   reportOptions: ReportOptions;
   validateOptions: ValidateOptions = {};
 
-  constructor(zschemaOptions: ZSchemaOptions, validateOptions?: ValidateOptions); // primary
-  constructor(parentReport: Report, validateOptions?: ValidateOptions); // subreport
+  constructor(parentOrOptions: ZSchemaOptions | Report, validateOptions?: ValidateOptions); // primary | subreport
   constructor(parentReport: Report, reportOptions: ReportOptions, validateOptions?: ValidateOptions); // subreport with options
   constructor(
     parentOrOptions: ZSchemaOptions | Report,

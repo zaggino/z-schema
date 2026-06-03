@@ -45,7 +45,7 @@ function toFinitePercent(value: unknown, metric: string): number {
   const numberValue = Number(value);
 
   if (!Number.isFinite(numberValue)) {
-    throw new Error(`Missing or invalid coverage value for ${metric}`);
+    throw new TypeError(`Missing or invalid coverage value for ${metric}`);
   }
 
   return numberValue;

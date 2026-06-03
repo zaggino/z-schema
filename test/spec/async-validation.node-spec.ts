@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import ZSchema from '../../src/index.js';
+import { ZSchema } from '../../src/z-schema.js';
 
 describe('Async Format Validation Integration', () => {
   it('should validate successfully with async format validator', async () => {

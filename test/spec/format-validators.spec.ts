@@ -70,7 +70,9 @@ describe('Format Validators', () => {
       const validator = ZSchema.create({ async: true, safe: true, asyncTimeout: 10 }); // 10ms timeout
 
       const slowValidator = async (): Promise<boolean> => {
-        await new Promise((resolve) => setTimeout(resolve, 50)); // 50ms delay
+        await new Promise((resolve) => {
+          setTimeout(resolve, 50); // 50ms delay
+        });
         return true;
       };
 

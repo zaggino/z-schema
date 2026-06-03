@@ -76,8 +76,7 @@ export class ZSchemaBase {
 
   _validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions, callback: ValidateCallback): void;
   _validate(json: unknown, schema: JsonSchema | string, callback: ValidateCallback): void;
-  _validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions): true;
-  _validate(json: unknown, schema: JsonSchema | string): true;
+  _validate(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): true;
   _validate(
     json: unknown,
     schema: JsonSchema | string,
@@ -334,7 +333,9 @@ export class ZSchemaBase {
         delete schema.$ref;
         delete schema.__$refResolved;
         for (key in from) {
-          copyProp(from, to, key);
+          if (Object.hasOwn(from, key)) {
+            copyProp(from, to, key);
+          }
         }
       }
       for (key in schema) {
