@@ -6,6 +6,8 @@ interface AreEqualOptions {
   maxDepth?: number;
 }
 
+export const sortedKeys = (obj: Record<string, unknown>): string[] => Object.keys(obj).sort();
+
 export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptions, _depth = 0): boolean => {
   const caseInsensitiveComparison = options?.caseInsensitiveComparison || false;
   const maxDepth = options?.maxDepth ?? DEFAULT_MAX_RECURSION_DEPTH;
@@ -77,8 +79,6 @@ export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptio
 
 export const decodeJSONPointer = (str: string) =>
   decodeURIComponent(str).replaceAll(/~[0-1]/g, (x) => (x === '~1' ? '/' : '~'));
-
-export const sortedKeys = (obj: Record<string, unknown>): string[] => Object.keys(obj).sort();
 
 export const get = (obj: any, path: string | Array<string | number>): any => {
   if (typeof path === 'string') {

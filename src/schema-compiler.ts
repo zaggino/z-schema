@@ -47,6 +47,69 @@ interface Id {
   absoluteUri?: string;
 }
 
+const resolveReference = (base: string | undefined, ref: string) => {
+  if (isAbsoluteUri(ref)) {
+    return ref;
+  }
+
+  const baseStr = base ?? '';
+
+  if (ref.startsWith('#')) {
+    const hashIndex = baseStr.indexOf('#');
+    const baseNoFrag = hashIndex === -1 ? baseStr : baseStr.slice(0, hashIndex);
+    return baseNoFrag + ref;
+  }
+
+  if (!baseStr) {
+    return ref;
+  }
+
+  const hashIndex = baseStr.indexOf('#');
+  const baseNoFrag = hashIndex === -1 ? baseStr : baseStr.slice(0, hashIndex);
+
+  if (isAbsoluteUri(baseNoFrag)) {
+    try {
+      return new URL(ref, baseNoFrag).toString();
+    } catch {
+      // fall back to manual resolution below
+    }
+  }
+
+  let baseDir = baseNoFrag;
+  if (!baseDir.endsWith('/')) {
+    const lastSlash = baseDir.lastIndexOf('/');
+    baseDir = lastSlash === -1 ? '' : baseDir.slice(0, lastSlash + 1);
+  }
+  return baseDir + ref;
+};
+
+const isSimpleIdentifier = (id: string) =>
+  !id.startsWith('#') && !id.includes('/') && !id.includes('.') && !id.includes('#');
+
+const resolveIdScope = (base: string | undefined, id: string) => {
+  if (isAbsoluteUri(id)) {
+    return id;
+  }
+
+  const baseStr = base ?? '';
+
+  // Treat simple identifiers (no '/', '.', or '#') as same-document fragment ids
+  if (isSimpleIdentifier(id)) {
+    const hashIndex = baseStr.indexOf('#');
+    const baseNoFrag = hashIndex === -1 ? baseStr : baseStr.slice(0, hashIndex);
+    return `${baseNoFrag}#${id}`;
+  }
+
+  return resolveReference(base, id);
+};
+
+const resolveSchemaScopeId = (base: string | undefined, schema: JsonSchemaInternal, id: string) => {
+  if (typeof schema.$id === 'string') {
+    return resolveReference(base, id);
+  }
+  return resolveIdScope(base, id);
+};
+
 export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECURSION_DEPTH) => {
   const ids: Id[] = [];
   function walk(node: any, scope: Id[], _depth = 0) {
@@ -223,69 +286,6 @@ export const collectReferences = (
   }
 
   return results;
-};
-
-const resolveReference = (base: string | undefined, ref: string) => {
-  if (isAbsoluteUri(ref)) {
-    return ref;
-  }
-
-  const baseStr = base ?? '';
-
-  if (ref.startsWith('#')) {
-    const hashIndex = baseStr.indexOf('#');
-    const baseNoFrag = hashIndex === -1 ? baseStr : baseStr.slice(0, hashIndex);
-    return baseNoFrag + ref;
-  }
-
-  if (!baseStr) {
-    return ref;
-  }
-
-  const hashIndex = baseStr.indexOf('#');
-  const baseNoFrag = hashIndex === -1 ? baseStr : baseStr.slice(0, hashIndex);
-
-  if (isAbsoluteUri(baseNoFrag)) {
-    try {
-      return new URL(ref, baseNoFrag).toString();
-    } catch {
-      // fall back to manual resolution below
-    }
-  }
-
-  let baseDir = baseNoFrag;
-  if (!baseDir.endsWith('/')) {
-    const lastSlash = baseDir.lastIndexOf('/');
-    baseDir = lastSlash === -1 ? '' : baseDir.slice(0, lastSlash + 1);
-  }
-  return baseDir + ref;
-};
-
-const isSimpleIdentifier = (id: string) =>
-  !id.startsWith('#') && !id.includes('/') && !id.includes('.') && !id.includes('#');
-
-const resolveIdScope = (base: string | undefined, id: string) => {
-  if (isAbsoluteUri(id)) {
-    return id;
-  }
-
-  const baseStr = base ?? '';
-
-  // Treat simple identifiers (no '/', '.', or '#') as same-document fragment ids
-  if (isSimpleIdentifier(id)) {
-    const hashIndex = baseStr.indexOf('#');
-    const baseNoFrag = hashIndex === -1 ? baseStr : baseStr.slice(0, hashIndex);
-    return `${baseNoFrag}#${id}`;
-  }
-
-  return resolveReference(base, id);
-};
-
-const resolveSchemaScopeId = (base: string | undefined, schema: JsonSchemaInternal, id: string) => {
-  if (typeof schema.$id === 'string') {
-    return resolveReference(base, id);
-  }
-  return resolveIdScope(base, id);
 };
 
 export class SchemaCompiler {
