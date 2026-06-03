@@ -80,15 +80,15 @@ export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptio
 export const decodeJSONPointer = (str: string) =>
   decodeURIComponent(str).replaceAll(/~[0-1]/g, (x) => (x === '~1' ? '/' : '~'));
 
-export const get = (obj: any, path: string | Array<string | number>): any => {
+export const get = (obj: unknown, path: string | Array<string | number>): unknown => {
   if (typeof path === 'string') {
     path = path.split('.');
   }
-  let acc: any = obj;
+  let acc: unknown = obj;
   for (let i = 0; i < path.length; i++) {
     const key = path[i];
-    if (acc && acc[key] !== undefined) {
-      acc = acc[key];
+    if (acc && (acc as Record<string | number, unknown>)[key] !== undefined) {
+      acc = (acc as Record<string | number, unknown>)[key];
     } else {
       return undefined;
     }

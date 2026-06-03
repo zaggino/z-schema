@@ -22,7 +22,7 @@ export const shallowClone = <T>(src: T): T => {
 
 export const deepClone = <T>(src: T, maxDepth = DEFAULT_MAX_RECURSION_DEPTH): T => {
   let vidx = 0;
-  const visited = new Map();
+  const visited = new Map<unknown, number>();
   const cloned: unknown[] = [];
   const cloneDeepInner = <U>(node: U, _depth: number): U => {
     if (typeof node !== 'object' || node === null) {

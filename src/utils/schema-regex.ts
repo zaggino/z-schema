@@ -40,12 +40,12 @@ export function compileSchemaRegex(
     try {
       const re = new RegExp(pattern, 'u');
       return { ok: true, value: re };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         ok: false,
         error: {
           pattern,
-          message: error && error.message ? error.message : 'Invalid regular expression',
+          message: error instanceof Error ? error.message : 'Invalid regular expression',
         },
       };
     }
@@ -53,12 +53,12 @@ export function compileSchemaRegex(
     try {
       const re = new RegExp(pattern);
       return { ok: true, value: re };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         ok: false,
         error: {
           pattern,
-          message: error && error.message ? error.message : 'Invalid regular expression',
+          message: error instanceof Error ? error.message : 'Invalid regular expression',
         },
       };
     }

@@ -146,7 +146,7 @@ export class ZSchemaBase {
 
     if (options.schemaPath) {
       report.rootSchema = _schema;
-      _schema = get(_schema, options.schemaPath);
+      _schema = get(_schema, options.schemaPath) as JsonSchemaInternal;
       if (!_schema) {
         const e = new Error(`Schema path '${options.schemaPath}' wasn't found in the schema!`);
         if (callback) {
@@ -328,8 +328,8 @@ export class ZSchemaBase {
       visited.add(node);
 
       if (node.$ref && node.__$refResolved) {
-        const from = node.__$refResolved;
-        const to = node;
+        const from = node.__$refResolved as JsonSchemaInternal;
+        const to = node as JsonSchemaInternal;
         delete node.$ref;
         delete node.__$refResolved;
         for (key in from) {

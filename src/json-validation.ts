@@ -639,7 +639,7 @@ function recurseArray(ctx: ZSchemaBase, report: Report, schema: JsonSchemaIntern
 // recurseObject
 // ---------------------------------------------------------------------------
 
-function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Record<any, any>) {
+function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Record<string, unknown>) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.3
 
   // If "additionalProperties" is absent, it is considered present with an empty schema as a value.

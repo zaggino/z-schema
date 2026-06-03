@@ -43,8 +43,9 @@ export function prepareRemoteSchema(
   validationOptions?: ZSchemaOptions,
   maxCloneDepth?: number
 ): JsonSchemaInternal {
-  const _schema: JsonSchemaInternal =
-    typeof schema === 'string' ? JSON.parse(schema) : deepClone(schema, maxCloneDepth);
+  const _schema = (
+    typeof schema === 'string' ? JSON.parse(schema) : deepClone(schema, maxCloneDepth)
+  ) as JsonSchemaInternal;
 
   if (!_schema.id) {
     _schema.id = uri;
@@ -58,8 +59,8 @@ export function prepareRemoteSchema(
 }
 
 export class SchemaCache {
-  static global_cache: SchemaCacheStorage = Object.create(null);
-  cache: SchemaCacheStorage = Object.create(null);
+  static global_cache: SchemaCacheStorage = Object.create(null) as SchemaCacheStorage;
+  cache: SchemaCacheStorage = Object.create(null) as SchemaCacheStorage;
   private readonly validator: ZSchemaBase;
 
   constructor(validator: ZSchemaBase) {
