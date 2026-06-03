@@ -1,5 +1,17 @@
 # Changelog
 
+## [12.3.0](https://github.com/zaggino/z-schema/compare/v12.2.0...v12.3.0) (2026-06-03)
+
+
+### Features
+
+* make package ESM-first via "type": "module" ([#409](https://github.com/zaggino/z-schema/issues/409)) ([28b26b8](https://github.com/zaggino/z-schema/commit/28b26b83a5beb247328200cfb93e0932edf63d76))
+
+
+### Performance Improvements
+
+* replace slower constructs with faster equivalents across hot paths ([#419](https://github.com/zaggino/z-schema/issues/419)) ([5f3eeef](https://github.com/zaggino/z-schema/commit/5f3eeef0e599def338cd6d695be2b66bc9fde823))
+
 ## [12.2.0](https://github.com/zaggino/z-schema/compare/v12.1.1...v12.2.0) (2026-04-27)
 
 
