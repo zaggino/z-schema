@@ -39,7 +39,7 @@ export const resolveRecursiveRef = (
   schema: JsonSchemaInternal,
   recursiveAnchorStack: JsonSchemaInternal[]
 ): JsonSchemaInternal | undefined => {
-  const resolved = schema.__$recursiveRefResolved as JsonSchemaInternal | undefined;
+  const resolved = schema.__$recursiveRefResolved;
   if (!resolved) {
     return undefined;
   }

@@ -298,7 +298,7 @@ export function propertyNamesValidator(ctx: ZSchemaBase, report: Report, schema:
   for (const key of keys) {
     const subReport = new Report_(report);
     subReports.push(subReport);
-    ctx._jsonValidate(subReport, propertyNamesSchema as JsonSchemaInternal, key);
+    ctx._jsonValidate(subReport, propertyNamesSchema, key);
   }
 
   const addPropertyNameErrors = () => {

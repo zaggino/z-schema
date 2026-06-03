@@ -41,6 +41,15 @@ export default defineConfig({
     'typescript/no-dynamic-delete': 'off',
     'typescript/no-explicit-any': 'off',
     'typescript/no-non-null-assertion': 'off',
+    // Kept off intentionally (not a TODO): the internal schema-type view
+    // (JsonSchemaInternal re-typing every sub-schema keyword) removed the
+    // public↔internal bridge casts, but the remaining assertions are
+    // irreducible — untrusted `JSON.parse`/`Object.create(null)` results,
+    // generic deep-clone (`res as T`/`as U`), the `Object.keys(x) as (keyof X)[]`
+    // idiom, prototype-pollution guards, unknown-tree traversal, and error-path
+    // `error as ValidateError`. None have a type-guard equivalent, so the rule
+    // stays off rather than scattering ~60 inline disables across the codebase.
+    'typescript/no-unsafe-type-assertion': 'off',
     'typescript/prefer-nullish-coalescing': 'off',
     'typescript/promise-function-async': 'off',
     'typescript/strict-boolean-expressions': 'off',
@@ -77,17 +86,6 @@ export default defineConfig({
     // hot path (utils/clone.ts shallowClone/deepClone key ordering). Enabling the
     // rule would force a per-comparison JS callback for no functional gain.
     'unicorn/no-array-sort': 'off',
-
-    // ── TODO: rules from the ultracite preset currently reporting errors ──
-    // Disabled to reach a clean baseline; re-evaluate and re-enable incrementally.
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 23
-    // complexity: dangerous
-    // Most sites assert values to `any` or narrow types; tightening requires real upstream typing work.
-    // type: type-safety
-    // Flags type assertions that bypass the type checker (notably assertions to/from `any`), which can mask runtime errors.
-    'typescript/no-unsafe-type-assertion': 'off',
   },
   overrides: [
     {

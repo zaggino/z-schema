@@ -307,17 +307,17 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
     let condPassed = getCachedValidationResult(report, currentSchema.if, json);
     if (condPassed === undefined) {
       const condReport = new Report(report);
-      validate(ctx, condReport, currentSchema.if as JsonSchemaInternal | boolean, json);
+      validate(ctx, condReport, currentSchema.if, json);
       condPassed = condReport.errors.length === 0;
     }
     if (condPassed) {
-      if (merge(recurse(currentSchema.if as JsonSchemaInternal | boolean))) {
+      if (merge(recurse(currentSchema.if))) {
         return 'all';
       }
-      if (currentSchema.then !== undefined && merge(recurse(currentSchema.then as JsonSchemaInternal | boolean))) {
+      if (currentSchema.then !== undefined && merge(recurse(currentSchema.then))) {
         return 'all';
       }
-    } else if (currentSchema.else !== undefined && merge(recurse(currentSchema.else as JsonSchemaInternal | boolean))) {
+    } else if (currentSchema.else !== undefined && merge(recurse(currentSchema.else))) {
       return 'all';
     }
   }
@@ -326,7 +326,7 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
   if (
     currentSchema.__$refResolved &&
     currentSchema.__$refResolved !== currentSchema &&
-    merge(recurse(currentSchema.__$refResolved as JsonSchemaInternal))
+    merge(recurse(currentSchema.__$refResolved))
   ) {
     return 'all';
   }
@@ -400,7 +400,7 @@ function unevaluatedItemsValidator(ctx: ZSchemaBase, report: Report, schema: Jso
     for (let i = 0; i < unevaluatedIndices.length; i++) {
       const idx = unevaluatedIndices[i];
       const subReport = new Report(report);
-      validate(ctx, subReport, unevalSchema as JsonSchemaInternal, json[idx]);
+      validate(ctx, subReport, unevalSchema, json[idx]);
       if (subReport.errors.length > 0) {
         report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
         break;
@@ -471,7 +471,7 @@ function unevaluatedPropertiesValidator(ctx: ZSchemaBase, report: Report, schema
     for (let i = 0; i < unevaluatedKeys.length; i++) {
       const key = unevaluatedKeys[i];
       const subReport = new Report(report);
-      validate(ctx, subReport, unevalSchema as JsonSchemaInternal, (json as Record<string, unknown>)[key]);
+      validate(ctx, subReport, unevalSchema, (json as Record<string, unknown>)[key]);
       if (subReport.errors.length > 0) {
         report.addError('OBJECT_UNEVALUATED_PROPERTIES', [key], undefined, schema, 'unevaluatedProperties');
       }
@@ -782,7 +782,7 @@ export function validate(
 
     if (applySiblingKeywordsWithRef) {
       if (schema.__$refResolved) {
-        validate(ctx, report, schema.__$refResolved as JsonSchemaInternal, json);
+        validate(ctx, report, schema.__$refResolved, json);
       } else {
         report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
       }

@@ -76,10 +76,64 @@ export interface JsonSchemaAll extends JsonSchemaCommon {
 // ---------------------------------------------------------------------------
 
 /**
- * Internal schema type used throughout the validator. Based on `JsonSchemaAll`
- * so that validators can access any draft-specific property without narrowing.
+ * Sub-schema-valued keywords. On the internal type these point at
+ * `JsonSchemaInternal` (rather than the public `JsonSchema`) so the validator
+ * can traverse nested schemas without asserting `as JsonSchemaInternal` at
+ * every step.
  */
-export type JsonSchemaInternal = JsonSchemaAll & ZSchemaInternalProperties;
+type InternalSchemaKeys =
+  | 'items'
+  | 'additionalItems'
+  | 'properties'
+  | 'patternProperties'
+  | 'additionalProperties'
+  | 'dependencies'
+  | 'allOf'
+  | 'anyOf'
+  | 'oneOf'
+  | 'not'
+  | 'definitions'
+  | 'contains'
+  | 'propertyNames'
+  | 'if'
+  | 'then'
+  | 'else'
+  | '$defs'
+  | 'dependentSchemas'
+  | 'unevaluatedItems'
+  | 'unevaluatedProperties'
+  | 'prefixItems';
+
+/**
+ * Internal schema type used throughout the validator. Based on `JsonSchemaAll`
+ * so that validators can access any draft-specific property without narrowing,
+ * but with every sub-schema keyword re-typed to `JsonSchemaInternal` so nested
+ * traversal needs no type assertions.
+ */
+export type JsonSchemaInternal = Omit<JsonSchemaAll, InternalSchemaKeys> &
+  ZSchemaInternalProperties & {
+    items?: JsonSchemaInternal | boolean | Array<JsonSchemaInternal | boolean>;
+    additionalItems?: boolean | JsonSchemaInternal;
+    properties?: Record<string, JsonSchemaInternal | boolean>;
+    patternProperties?: Record<string, JsonSchemaInternal>;
+    additionalProperties?: boolean | JsonSchemaInternal;
+    dependencies?: Record<string, string[] | JsonSchemaInternal>;
+    allOf?: JsonSchemaInternal[];
+    anyOf?: JsonSchemaInternal[];
+    oneOf?: JsonSchemaInternal[];
+    not?: JsonSchemaInternal;
+    definitions?: Record<string, JsonSchemaInternal>;
+    contains?: JsonSchemaInternal;
+    propertyNames?: JsonSchemaInternal;
+    if?: JsonSchemaInternal | boolean;
+    then?: JsonSchemaInternal | boolean;
+    else?: JsonSchemaInternal | boolean;
+    $defs?: Record<string, JsonSchemaInternal>;
+    dependentSchemas?: Record<string, JsonSchemaInternal>;
+    unevaluatedItems?: JsonSchemaInternal | boolean;
+    unevaluatedProperties?: JsonSchemaInternal | boolean;
+    prefixItems?: Array<JsonSchemaInternal | boolean>;
+  };
 
 /** @deprecated Use `JsonSchemaInternal` — they are now equivalent. */
 export type JsonSchemaInternalAll = JsonSchemaAll & ZSchemaInternalProperties;

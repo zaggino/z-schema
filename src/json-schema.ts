@@ -79,9 +79,9 @@ export type JsonSchemaType = 'array' | 'boolean' | 'integer' | 'null' | 'number'
 export interface ZSchemaInternalProperties {
   __$compiled?: unknown;
   __$missingReferences?: Reference[];
-  __$refResolved?: JsonSchema;
-  __$dynamicRefResolved?: JsonSchema;
-  __$recursiveRefResolved?: JsonSchema;
+  __$refResolved?: JsonSchemaInternal;
+  __$dynamicRefResolved?: JsonSchemaInternal;
+  __$recursiveRefResolved?: JsonSchemaInternal;
   __$resourceRoot?: JsonSchemaInternal;
   __$schemaResolved?: unknown;
   __$validated?: boolean;

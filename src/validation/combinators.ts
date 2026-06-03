@@ -111,7 +111,7 @@ export function ifValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchema
   }
 
   const conditionReport = new Report(report);
-  ctx._jsonValidate(conditionReport, conditionSchema as JsonSchemaInternal, json);
+  ctx._jsonValidate(conditionReport, conditionSchema, json);
   cacheValidationResult(report, conditionSchema, json, conditionReport.errors.length === 0);
 
   const branchSchema = conditionReport.errors.length === 0 ? thenSchema : elseSchema;
@@ -119,7 +119,7 @@ export function ifValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchema
     return;
   }
 
-  ctx._jsonValidate(report, branchSchema as JsonSchemaInternal, json);
+  ctx._jsonValidate(report, branchSchema, json);
 }
 
 export function thenValidator() {

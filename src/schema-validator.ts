@@ -159,7 +159,7 @@ const SchemaValidators = {
       }
     } else if (isObject(schema.items) || (report.options.version !== 'draft-04' && typeof schema.items === 'boolean')) {
       report.path.push('items');
-      this.validateSchema(report, schema.items as JsonSchemaInternal);
+      this.validateSchema(report, schema.items);
       report.path.pop();
     } else {
       report.addError(
@@ -544,7 +544,7 @@ const SchemaValidators = {
       return;
     }
     report.path.push('not');
-    this.validateSchema(report, notSchema as JsonSchemaInternal);
+    this.validateSchema(report, notSchema!);
     report.path.pop();
   },
   if(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -560,7 +560,7 @@ const SchemaValidators = {
     }
 
     report.path.push('if');
-    this.validateSchema(report, ifSchema as JsonSchemaInternal);
+    this.validateSchema(report, ifSchema);
     report.path.pop();
   },
   then(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -576,7 +576,7 @@ const SchemaValidators = {
     }
 
     report.path.push('then');
-    this.validateSchema(report, thenSchema as JsonSchemaInternal);
+    this.validateSchema(report, thenSchema);
     report.path.pop();
   },
   else(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -592,7 +592,7 @@ const SchemaValidators = {
     }
 
     report.path.push('else');
-    this.validateSchema(report, elseSchema as JsonSchemaInternal);
+    this.validateSchema(report, elseSchema);
     report.path.pop();
   },
   definitions(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -626,7 +626,7 @@ const SchemaValidators = {
       const val = schema.$defs[key];
       report.path.push('$defs');
       report.path.push(key);
-      this.validateSchema(report, val as JsonSchemaInternal);
+      this.validateSchema(report, val);
       report.path.pop();
       report.path.pop();
     }

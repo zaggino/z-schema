@@ -328,7 +328,7 @@ export class ZSchemaBase {
 
       const schemaNode = node as JsonSchemaInternal;
       if (schemaNode.$ref && schemaNode.__$refResolved) {
-        const from = schemaNode.__$refResolved as JsonSchemaInternal;
+        const from = schemaNode.__$refResolved;
         const to = schemaNode;
         delete schemaNode.$ref;
         delete schemaNode.__$refResolved;
