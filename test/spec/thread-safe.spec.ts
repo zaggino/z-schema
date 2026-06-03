@@ -63,7 +63,9 @@ describe('Thread Safety', () => {
     // Register async format that waits random 0-100ms then checks if string
     const asyncStringFormat = async (input: unknown): Promise<boolean> => {
       const delay = Math.random() * 100;
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      await new Promise((resolve) => {
+        setTimeout(resolve, delay);
+      });
       return typeof input === 'string';
     };
 

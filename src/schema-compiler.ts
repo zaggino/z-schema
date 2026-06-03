@@ -7,15 +7,15 @@ import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { getSchemaReader } from './z-schema-reader.js';
 
-const UNSAFE_TARGETS = [
+const UNSAFE_TARGETS = new Set<Record<string, unknown>>([
   Object.prototype as unknown as Record<string, unknown>,
   Function.prototype as unknown as Record<string, unknown>,
   Array.prototype as unknown as Record<string, unknown>,
-];
+]);
 
 /** Returns true if `obj` is a built-in prototype that must not be mutated. */
 function isUnsafeTarget(obj: Record<string, unknown>): boolean {
-  return UNSAFE_TARGETS.includes(obj);
+  return UNSAFE_TARGETS.has(obj);
 }
 
 /** Safely assign a property on `obj`, refusing prototype-polluting keys. */

@@ -123,6 +123,10 @@ const regexValidator: FormatValidatorFn = (input: unknown) => {
   }
 
   try {
+    // Constructed purely to detect an invalid pattern (throws SyntaxError). The
+    // result is intentionally unused; `new` is required by new-for-builtins and
+    // `void`/call-form trip no-void/new-for-builtins, so no-new is disabled here.
+    // oxlint-disable-next-line no-new
     new RegExp(input);
     return true;
   } catch {
@@ -227,6 +231,9 @@ const uriValidator: FormatValidatorFn = (uri: unknown) => {
     const authority = match[2];
     const atIndex = authority.indexOf('@');
     if (atIndex > 0) {
+      // userinfo is a string; prefer-set-has misfires here — two String#includes
+      // calls are faster than building a Set or a regex for this membership check.
+      // oxlint-disable-next-line unicorn/prefer-set-has
       const userinfo = authority.slice(0, atIndex);
       if (userinfo.includes('[') || userinfo.includes(']')) {
         return false;
@@ -383,12 +390,7 @@ const iriValidator: FormatValidatorFn = (iri: unknown) => {
   if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:[^"\\<>^{}^`| ]*$/u.test(iri)) {
     return false;
   }
-  try {
-    new URL(iri);
-    return true;
-  } catch {
-    return false;
-  }
+  return URL.canParse(iri);
 };
 
 const iriReferenceValidator: FormatValidatorFn = (iriReference: unknown) => {

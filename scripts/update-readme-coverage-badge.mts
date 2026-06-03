@@ -24,7 +24,7 @@ const STATUS_COLORS: Record<CoverageBadgeStatus, string> = {
 
 export function roundCoveragePercentage(linePct: number): number {
   if (!Number.isFinite(linePct)) {
-    throw new Error(`Invalid line coverage percentage: ${linePct}`);
+    throw new TypeError(`Invalid line coverage percentage: ${linePct}`);
   }
 
   const clamped = Math.min(100, Math.max(0, linePct));

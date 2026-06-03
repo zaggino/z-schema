@@ -84,5 +84,14 @@ export const get = (obj: any, path: string | Array<string | number>): any => {
   if (typeof path === 'string') {
     path = path.split('.');
   }
-  return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj);
+  let acc: any = obj;
+  for (let i = 0; i < path.length; i++) {
+    const key = path[i];
+    if (acc && acc[key] !== undefined) {
+      acc = acc[key];
+    } else {
+      return undefined;
+    }
+  }
+  return acc;
 };
