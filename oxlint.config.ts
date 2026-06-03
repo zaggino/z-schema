@@ -14,10 +14,13 @@ export default defineConfig({
   },
   rules: {
     // ── Intentional project rules on top of ultracite defaults
+    complexity: 'off',
     eqeqeq: 'off',
     'func-style': ['error', 'declaration', { allowArrowFunctions: true }],
+    'max-classes-per-file': 'off',
     'no-eq-null': 'off',
     'no-inline-comments': 'off',
+    'no-param-reassign': 'off',
     'no-plusplus': 'off',
     'no-unused-vars': [
       'error',
@@ -28,8 +31,10 @@ export default defineConfig({
     'sort-keys': 'off',
     'typescript/array-type': ['error', { default: 'array-simple' }],
     'typescript/consistent-return': 'off',
+    'typescript/no-dynamic-delete': 'off',
     'typescript/no-explicit-any': 'off',
     'typescript/no-non-null-assertion': 'off',
+    'unicorn/no-array-for-each': 'off',
     'unicorn/prefer-node-protocol': 'off',
 
     // ── Intentionally kept off for performance (NOT in the TODO backlog) ──
@@ -129,14 +134,6 @@ export default defineConfig({
     'typescript/strict-boolean-expressions': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 15
-    // complexity: moderate
-    // Function parameters are reassigned in several places; refactoring requires introducing local variables or restructuring logic.
-    // type: bug-prevention
-    // Disallows reassignment of function parameters, which can cause unexpected mutation of caller-supplied objects.
-    'no-param-reassign': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 13
     // complexity: moderate
     // Nullable values are combined with `||` where `??` is semantically more correct; each site needs auditing for falsy vs. nullish intent.
@@ -153,22 +150,6 @@ export default defineConfig({
     'typescript/no-unsafe-argument': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 13
-    // complexity: hard
-    // Functions exceed the cyclomatic complexity threshold; reducing complexity requires logic decomposition and refactoring.
-    // type: maintainability
-    // Enforces a maximum cyclomatic complexity threshold per function to encourage simpler, more testable code.
-    complexity: 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 12
-    // complexity: easy
-    // `.forEach()` is used on arrays where a `for...of` loop is preferred for clarity and early-exit capability.
-    // type: style
-    // Disallows `Array.prototype.forEach` in favour of `for...of` loops.
-    'unicorn/no-array-for-each': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 11
     // complexity: dangerous
     // Values typed as `any` are assigned to typed variables; fixing requires narrowing the source types throughout the codebase.
@@ -183,14 +164,6 @@ export default defineConfig({
     // type: best-practice
     // Disallows explicit `new Promise()` construction when a simpler promise-returning API is available.
     'promise/avoid-new': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 4
-    // complexity: dangerous
-    // `delete obj[key]` is used with dynamic keys; replacing with explicit property removal or `Map` usage requires careful refactoring.
-    // type: bug-prevention
-    // Disallows the `delete` operator on computed/dynamic object properties, which can cause performance issues and type unsafety.
-    'typescript/no-dynamic-delete': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 3
@@ -215,14 +188,6 @@ export default defineConfig({
     // type: bug-prevention
     // Disallows objects that define a `.then()` method in non-promise contexts, as they are mistakenly treated as thenables.
     'unicorn/no-thenable': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: moderate
-    // A file defines more than the allowed number of classes; splitting into separate files may require API adjustments.
-    // type: maintainability
-    // Enforces a maximum number of class declarations per file to encourage single-responsibility modules.
-    'max-classes-per-file': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1
