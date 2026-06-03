@@ -35,6 +35,12 @@ jobs:
         run: git submodule update --init
       - name: Install dependencies
         run: npm ci
+      - name: Copy bundled schemas
+        # Generates src/schemas/*.json from the json-schema-spec submodule.
+        # Required before `check`: the type-aware lint resolves the JSON imports
+        # in z-schema-versions.ts, which are absent on a fresh checkout until the
+        # build's copy:schemas step runs.
+        run: npm run copy:schemas
       - name: Check (lint + format)
         run: npm run check
       - name: Build
