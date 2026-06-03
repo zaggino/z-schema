@@ -3,9 +3,7 @@
 export default {
   description: 'Issue #125 - Why process format if type validation fails',
   setup(validator: any, Class: any) {
-    Class.registerFormat('test', function (item: any) {
-      return typeof item === 'string';
-    });
+    Class.registerFormat('test', (item: any) => typeof item === 'string');
   },
   tests: [
     {

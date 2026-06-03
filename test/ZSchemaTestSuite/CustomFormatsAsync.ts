@@ -5,14 +5,12 @@ export default {
     asyncTimeout: 500,
   },
   setup(validator: any, Class: any) {
-    Class.registerFormat('xstring', function (str: any, callback: any) {
-      setTimeout(function () {
+    Class.registerFormat('xstring', (str: any, callback: any) => {
+      setTimeout(() => {
         callback(str === 'xxx');
       }, 1);
     });
-    Class.registerFormat('shouldTimeout', function (str: any, callback: any) {
-      return typeof callback === 'function';
-    });
+    Class.registerFormat('shouldTimeout', (str: any, callback: any) => typeof callback === 'function');
   },
   schema: {
     type: 'string',

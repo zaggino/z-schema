@@ -65,14 +65,6 @@ export default defineConfig({
     // Disabled to reach a clean baseline; re-evaluate and re-enable incrementally.
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 171
-    // complexity: trivial
-    // Many function expressions lack names; adding names aids stack traces but is purely mechanical.
-    // type: maintainability
-    // Requires function expressions to have a name (aids debugging via named stack frames).
-    'func-names': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 105
     // complexity: dangerous
     // Member access on `any`-typed values is common in schema traversal code; fixing requires narrowing types or adding casts throughout.
@@ -87,14 +79,6 @@ export default defineConfig({
     // type: bug-prevention
     // Disallows `this` inside exported standalone functions where the `this` context is unpredictable.
     'oxc/no-this-in-exported-function': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 76
-    // complexity: trivial
-    // Anonymous function expressions are passed as callbacks; converting to arrow functions is mechanical.
-    // type: style
-    // Requires arrow functions in callback positions instead of traditional function expressions.
-    'prefer-arrow-callback': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 73
@@ -185,22 +169,6 @@ export default defineConfig({
     'unicorn/no-array-for-each': 'off',
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 12
-    // complexity: dangerous
-    // `async` functions contain no `await` expression; removing `async` or adding `await` may affect error-handling semantics.
-    // type: bug-prevention
-    // Disallows `async` functions that contain no `await` expression, which is usually unintentional.
-    'require-await': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 11
-    // complexity: moderate
-    // Functions defined inside other functions could be moved to an outer scope; refactoring requires verifying closure dependencies.
-    // type: maintainability
-    // Flags functions that can be moved to a higher scope, reducing closure overhead and improving readability.
-    'unicorn/consistent-function-scoping': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 11
     // complexity: dangerous
     // Values typed as `any` are assigned to typed variables; fixing requires narrowing the source types throughout the codebase.
@@ -243,42 +211,10 @@ export default defineConfig({
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 2
     // complexity: moderate
-    // CommonJS constructs (`require`, `module.exports`) are used; migrating to ESM requires coordinated changes and build-config updates.
-    // type: best-practice
-    // Requires ECMAScript module syntax (`import`/`export`) instead of CommonJS (`require`/`module.exports`).
-    'unicorn/prefer-module': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
-    // complexity: moderate
     // An object has a `.then()` method which makes it thenable, potentially causing confusion with promises in `await` expressions.
     // type: bug-prevention
     // Disallows objects that define a `.then()` method in non-promise contexts, as they are mistakenly treated as thenables.
     'unicorn/no-thenable': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
-    // complexity: moderate
-    // `return await promise` is used inside `async` functions where `return promise` would be equivalent; however changing it can alter stack trace and try/catch semantics.
-    // type: best-practice
-    // Requires or disallows `return await` inside `async` functions; the preferred form depends on stack-trace and error-propagation needs.
-    'typescript/return-await': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 2
-    // complexity: moderate
-    // A promise can be resolved or rejected multiple times in different branches; requires careful control-flow analysis per site.
-    // type: bug-prevention
-    // Disallows resolving or rejecting a promise more than once within a promise executor.
-    'promise/no-multiple-resolved': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 1
-    // complexity: dangerous
-    // A promise is created but not `await`ed or `.catch()`ed, meaning rejection errors would be silently swallowed.
-    // type: bug-prevention
-    // Disallows floating (unhandled) promises — promises that are neither awaited nor explicitly handled with `.catch()`.
-    'typescript/no-floating-promises': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 1

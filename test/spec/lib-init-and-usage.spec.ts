@@ -3,13 +3,13 @@ import type { ZSchemaAsync, ZSchemaAsyncSafe, ZSchemaSafe } from '../../src/z-sc
 import { ValidateError } from '../../src/index.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
-describe('Initialization and usage', function () {
-  it('Should not allow to use new', function () {
+describe('Initialization and usage', () => {
+  it('Should not allow to use new', () => {
     // @ts-expect-error: intentionally testing that private constructor throws at runtime
     expect(() => new ZSchema()).toThrow('do not use new ZSchema()');
   });
 
-  it('Should construct validator from factory', async function () {
+  it('Should construct validator from factory', async () => {
     const validator: ZSchema = ZSchema.create({ version: 'none' });
 
     // validate - should return true for valid
@@ -35,7 +35,7 @@ describe('Initialization and usage', function () {
     });
   });
 
-  it('Should create a safe validator from factory', async function () {
+  it('Should create a safe validator from factory', () => {
     const validator: ZSchemaSafe = ZSchema.create({ safe: true, version: 'none' });
     // validate - should return true for valid
     expect(validator.validate(1, { type: 'number' }).valid).toBe(true);
@@ -43,7 +43,7 @@ describe('Initialization and usage', function () {
     expect(validator.validate('not-a-number', { type: 'number' }).valid).toBe(false);
   });
 
-  it('Should create an async validator from factory', async function () {
+  it('Should create an async validator from factory', async () => {
     const validator: ZSchemaAsync = ZSchema.create({ async: true, version: 'none' });
     // validate - should return true for valid
     await expect(validator.validate(1, { type: 'number' })).resolves.toBe(true);
@@ -51,7 +51,7 @@ describe('Initialization and usage', function () {
     await expect(validator.validate('not-a-number', { type: 'number' })).rejects.toThrow(ValidateError);
   });
 
-  it('Should create an async-safe validator from factory', async function () {
+  it('Should create an async-safe validator from factory', async () => {
     const validator: ZSchemaAsyncSafe = ZSchema.create({ async: true, safe: true, version: 'none' });
     // validate - should return true for valid
     await expect(validator.validate(1, { type: 'number' })).resolves.toEqual({ valid: true });

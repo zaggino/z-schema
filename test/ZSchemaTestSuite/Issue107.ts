@@ -1,11 +1,9 @@
 export default {
   description: 'Issue #107 - add Support for Controlling Remote Schema Reading',
   setup(validator: any, ZSchema: any) {
-    ZSchema.setSchemaReader(function (_uri: any) {
-      return {
-        type: 'string',
-      };
-    });
+    ZSchema.setSchemaReader((_uri: any) => ({
+      type: 'string',
+    }));
   },
   tests: [
     {

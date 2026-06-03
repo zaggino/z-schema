@@ -64,8 +64,8 @@ const schema = {
   title: 'Car API',
 };
 
-describe('Using path to schema as a third argument', function () {
-  it('Should pass the test', function () {
+describe('Using path to schema as a third argument', () => {
+  it('Should pass the test', () => {
     const validator = ZSchema.create();
     const cars = [
       {
@@ -79,8 +79,8 @@ describe('Using path to schema as a third argument', function () {
   });
 });
 
-describe('Schema path tracking in validation errors', function () {
-  it('should include schema path for property type validation', function () {
+describe('Schema path tracking in validation errors', () => {
+  it('should include schema path for property type validation', () => {
     const validator = ZSchema.create({ reportPathAsArray: true });
     const testSchema = {
       type: 'object',
@@ -101,7 +101,7 @@ describe('Schema path tracking in validation errors', function () {
     }
   });
 
-  it('should include schema path for array item validation', function () {
+  it('should include schema path for array item validation', () => {
     const validator = ZSchema.create({ reportPathAsArray: true });
     const testSchema = {
       type: 'array',
@@ -119,7 +119,7 @@ describe('Schema path tracking in validation errors', function () {
     }
   });
 
-  it('should include schema path for nested object validation', function () {
+  it('should include schema path for nested object validation', () => {
     const validator = ZSchema.create({ reportPathAsArray: true });
     const testSchema = {
       type: 'object',
@@ -145,7 +145,7 @@ describe('Schema path tracking in validation errors', function () {
     }
   });
 
-  it('should handle root level type validation', function () {
+  it('should handle root level type validation', () => {
     const validator = ZSchema.create({ reportPathAsArray: true });
     const testSchema = { type: 'string' };
     const data = 123;
@@ -160,7 +160,7 @@ describe('Schema path tracking in validation errors', function () {
     }
   });
 
-  it('should include schema path for $ref validation', function () {
+  it('should include schema path for $ref validation', () => {
     const validator = ZSchema.create({ reportPathAsArray: true });
     const testSchema = {
       type: 'object',

@@ -3,8 +3,8 @@
 
 import { ZSchema } from '../../src/z-schema.ts';
 
-describe('Issue #224: Not getting all schema errors from optional parent object', function () {
-  it('should report all errors for optional object with oneOf including null', function () {
+describe('Issue #224: Not getting all schema errors from optional parent object', () => {
+  it('should report all errors for optional object with oneOf including null', () => {
     const options = { breakOnFirstError: false };
     const validator = ZSchema.create(options);
     const schema = {
@@ -82,7 +82,7 @@ describe('Issue #224: Not getting all schema errors from optional parent object'
     expect(innerPaths).toContain('#/optionalFatherObject/name');
   });
 
-  it('should report all errors for optional object without oneOf', function () {
+  it('should report all errors for optional object without oneOf', () => {
     const options = { breakOnFirstError: false };
     const validator = ZSchema.create(options);
     const schema = {

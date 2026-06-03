@@ -2,12 +2,20 @@ import { describe, expect, it } from 'vitest';
 
 import { ZSchema } from '../../src/z-schema.ts';
 
+const asyncValidator = (input: unknown): Promise<boolean> =>
+  Promise.resolve(typeof input === 'string' && input.length > 3);
+
+const slowValidator = async (): Promise<boolean> => {
+  await new Promise((resolve) => {
+    setTimeout(resolve, 50); // 50ms delay
+  });
+  return true;
+};
+
 describe('Format Validators', () => {
   describe('Async Format Validator Registration', () => {
     it('should register an async format validator', () => {
       const validator = ZSchema.create();
-
-      const asyncValidator = async (input: unknown): Promise<boolean> => typeof input === 'string' && input.length > 3;
 
       validator.registerFormat('async-test', asyncValidator);
 
@@ -68,13 +76,6 @@ describe('Format Validators', () => {
   describe('Async Timeout Handling', () => {
     it('should timeout async format validation', async () => {
       const validator = ZSchema.create({ async: true, safe: true, asyncTimeout: 10 }); // 10ms timeout
-
-      const slowValidator = async (): Promise<boolean> => {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 50); // 50ms delay
-        });
-        return true;
-      };
 
       validator.registerFormat('slow-async', slowValidator);
 

@@ -47,7 +47,7 @@ export default {
       valid: false,
       after(err: any) {
         expect(err.length).toBe(3);
-        err.forEach(function (e: any) {
+        err.forEach((e: any) => {
           expect(e.code).toBe('UNRESOLVABLE_REFERENCE');
           expect(e.schemaId).toBe('dummy');
         });

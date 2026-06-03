@@ -31,7 +31,7 @@ export default {
       validateSchemaOnly: true,
       valid: false,
       after(err: any, valid: any, data: any, validator: any) {
-        err.forEach(function (e: any) {
+        err.forEach((e: any) => {
           if (e.params.includes(REF_NAME)) {
             expect(e.code).not.toBe('UNRESOLVABLE_REFERENCE');
           }

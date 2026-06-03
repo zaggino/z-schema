@@ -1,8 +1,8 @@
 import { ValidateError } from '../../src/errors.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
-describe('Error objects include `keyword` field', function () {
-  it('JSON validation errors include the keyword that caused the error', function () {
+describe('Error objects include `keyword` field', () => {
+  it('JSON validation errors include the keyword that caused the error', () => {
     const validator = ZSchema.create({ version: 'draft-04' });
     const schema = {
       type: 'object',
@@ -23,7 +23,7 @@ describe('Error objects include `keyword` field', function () {
     expect(missing!.keyword).toBe('required');
   });
 
-  it('Schema validation errors include the keyword that caused the schema validation error', function () {
+  it('Schema validation errors include the keyword that caused the schema validation error', () => {
     const validator = ZSchema.create({ version: 'draft-04' });
     const badSchema = {
       type: 'array',

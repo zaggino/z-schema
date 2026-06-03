@@ -102,7 +102,7 @@ export async function runTests({ reader }: { reader: <T>(testFilePath: string) =
                 console.warn(`excluded by test description: ${test.description}`);
                 return;
               }
-              it([testSuite.description, test.description].join(' '), function () {
+              it([testSuite.description, test.description].join(' '), () => {
                 const validatorOptions: ZSchemaOptions = { version };
 
                 const isModernFormatSuite = file === 'draft2019-09/format.json' || file === 'draft2020-12/format.json';

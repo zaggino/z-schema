@@ -95,7 +95,7 @@ export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonS
     }
     if (formatValidatorFn.length === 2) {
       // callback-based async
-      report.addAsyncTaskWithPath(formatValidatorFn, [json], function (result) {
+      report.addAsyncTaskWithPath(formatValidatorFn, [json], (result) => {
         if (result !== true) {
           report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
         }
@@ -115,7 +115,7 @@ export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonS
             }
           },
           [] as any,
-          function (resolvedResult) {
+          (resolvedResult) => {
             if (resolvedResult !== true) {
               report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
             }
