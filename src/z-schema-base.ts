@@ -314,8 +314,7 @@ export class ZSchemaBase {
     const visited = new WeakSet<object>();
 
     // clean-up the schema and resolve references
-    const cleanup = (node: any) => {
-      let key;
+    const cleanup = (node: unknown) => {
       const typeOf = whatIs(node);
       if (typeOf !== 'object' && typeOf !== 'array') {
         return;
@@ -327,23 +326,25 @@ export class ZSchemaBase {
 
       visited.add(node as object);
 
-      if (node.$ref && node.__$refResolved) {
-        const from = node.__$refResolved as JsonSchemaInternal;
-        const to = node as JsonSchemaInternal;
-        delete node.$ref;
-        delete node.__$refResolved;
-        for (key in from) {
+      const schemaNode = node as JsonSchemaInternal;
+      if (schemaNode.$ref && schemaNode.__$refResolved) {
+        const from = schemaNode.__$refResolved as JsonSchemaInternal;
+        const to = schemaNode;
+        delete schemaNode.$ref;
+        delete schemaNode.__$refResolved;
+        for (const key in from) {
           if (Object.hasOwn(from, key)) {
             copyProp(from, to, key);
           }
         }
       }
-      for (key in node) {
-        if (Object.hasOwn(node as object, key)) {
+      const record = node as Record<string, unknown>;
+      for (const key in record) {
+        if (Object.hasOwn(record, key)) {
           if (isInternalKey(key)) {
-            delete node[key];
+            delete record[key];
           } else {
-            cleanup(node[key]);
+            cleanup(record[key]);
           }
         }
       }

@@ -112,7 +112,7 @@ export const normalizeOptions = (options?: ZSchemaOptions) => {
     keys = Object.keys(defaultOptions) as Array<keyof ZSchemaOptions>;
     for (const key of keys) {
       if (options[key] === undefined) {
-        (options as any)[key] = shallowClone(defaultOptions[key]);
+        (options as Record<string, unknown>)[key] = shallowClone(defaultOptions[key]);
       }
     }
 

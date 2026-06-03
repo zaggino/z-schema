@@ -117,6 +117,8 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
       return;
     }
 
+    const schemaNode = node as JsonSchemaInternal;
+
     if (_depth >= maxDepth) {
       throw new Error(
         `Maximum recursion depth (${maxDepth}) exceeded in collectIds. ` +
@@ -126,7 +128,7 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
 
     let addedScope = false;
 
-    const nodeId = getId(node as JsonSchemaInternal);
+    const nodeId = getId(schemaNode);
     if (typeof nodeId === 'string') {
       let type: Id['type'] = isAbsoluteUri(nodeId) ? 'absolute' : 'relative';
       if (scope.length === 0) {
@@ -135,17 +137,17 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
       const id: Id = {
         id: nodeId,
         type,
-        obj: node as JsonSchemaInternal,
+        obj: schemaNode,
       };
       if (type === 'absolute' || (type === 'root' && isAbsoluteUri(nodeId))) {
         id.absoluteUri = nodeId;
       } else if (
         type === 'root' &&
-        typeof node.id === 'string' &&
-        isAbsoluteUri(node.id as string) &&
-        node.id !== nodeId
+        typeof schemaNode.id === 'string' &&
+        isAbsoluteUri(schemaNode.id) &&
+        schemaNode.id !== nodeId
       ) {
-        id.absoluteUri = resolveSchemaScopeId(node.id as string, node as JsonSchemaInternal, nodeId);
+        id.absoluteUri = resolveSchemaScopeId(schemaNode.id, schemaNode, nodeId);
       } else if (type === 'relative') {
         let absoluteParent: Id | undefined;
         for (let i = scope.length - 1; i >= 0; i--) {
@@ -158,7 +160,7 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
         id.absoluteParent = absoluteParent;
         if (id.absoluteParent) {
           const parentUri = id.absoluteParent.absoluteUri || id.absoluteParent.id;
-          id.absoluteUri = resolveSchemaScopeId(parentUri, node as JsonSchemaInternal, id.id);
+          id.absoluteUri = resolveSchemaScopeId(parentUri, schemaNode, id.id);
         }
       }
       ids.push(id);
@@ -171,11 +173,11 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
         walk(item, scope, _depth + 1);
       }
     } else {
-      for (const key of Object.keys(node as object)) {
+      for (const key of Object.keys(schemaNode)) {
         if (isInternalKey(key) || NON_SCHEMA_KEYWORDS_SET.has(key)) {
           continue;
         }
-        walk(node[key], scope, _depth + 1);
+        walk((schemaNode as Record<string, unknown>)[key], scope, _depth + 1);
       }
     }
 
