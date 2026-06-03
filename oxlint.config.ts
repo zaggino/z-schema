@@ -196,14 +196,6 @@ export default defineConfig({
     // type: maintainability
     // Requires class methods that do not use `this` to be declared as `static`.
     'class-methods-use-this': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 4
-    // complexity: dangerous
-    // The validator intentionally rejects promises with structured validation reports, not Error instances; changing this is an API change.
-    // type: bug-prevention
-    // Requires Promise rejection reasons to be Error objects.
-    'typescript/prefer-promise-reject-errors': 'off',
   },
   overrides: [
     {

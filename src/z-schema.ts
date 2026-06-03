@@ -161,13 +161,13 @@ export class ZSchema extends ZSchemaBase {
       try {
         this._validate(json, schema, options || {}, (err, valid) => {
           if (err || !valid) {
-            reject(err);
+            reject(err ?? new Error('Validation failed'));
           } else {
             resolve(valid);
           }
         });
       } catch (error) {
-        reject(error);
+        reject(error instanceof Error ? error : new Error(String(error)));
       }
     });
   }
@@ -271,13 +271,13 @@ export class ZSchemaAsync extends ZSchemaBase {
       try {
         this._validate(json, schema, options, (err, valid) => {
           if (err || !valid) {
-            reject(err);
+            reject(err ?? new Error('Validation failed'));
           } else {
             resolve(valid);
           }
         });
       } catch (error) {
-        reject(error);
+        reject(error instanceof Error ? error : new Error(String(error)));
       }
     });
   }
