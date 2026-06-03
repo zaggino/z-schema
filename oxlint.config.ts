@@ -30,9 +30,6 @@ export default defineConfig({
     ],
     'no-warning-comments': 'off',
     'promise/avoid-new': 'off',
-    // Kept off intentionally (not a TODO): the flagged callbacks are public-API
-    // contract — the exported `ValidateCallback` `validate`/`_validate` overload
-    // and `Report.processAsyncTasks`. Enabling would force a breaking API change.
     'promise/prefer-await-to-callbacks': 'off',
     'require-unicode-regexp': 'off',
     'sort-keys': 'off',
@@ -41,14 +38,6 @@ export default defineConfig({
     'typescript/no-dynamic-delete': 'off',
     'typescript/no-explicit-any': 'off',
     'typescript/no-non-null-assertion': 'off',
-    // Kept off intentionally (not a TODO): the internal schema-type view
-    // (JsonSchemaInternal re-typing every sub-schema keyword) removed the
-    // public↔internal bridge casts, but the remaining assertions are
-    // irreducible — untrusted `JSON.parse`/`Object.create(null)` results,
-    // generic deep-clone (`res as T`/`as U`), the `Object.keys(x) as (keyof X)[]`
-    // idiom, prototype-pollution guards, unknown-tree traversal, and error-path
-    // `error as ValidateError`. None have a type-guard equivalent, so the rule
-    // stays off rather than scattering ~60 inline disables across the codebase.
     'typescript/no-unsafe-type-assertion': 'off',
     'typescript/prefer-nullish-coalescing': 'off',
     'typescript/promise-function-async': 'off',
@@ -57,10 +46,6 @@ export default defineConfig({
     'unicorn/no-array-for-each': 'off',
     'unicorn/no-thenable': 'off',
     'unicorn/prefer-node-protocol': 'off',
-
-    // ── Intentionally kept off for performance (NOT in the TODO backlog) ──
-    // Excluded from the lint re-enable effort on performance grounds: the
-    // "fixed" form is measurably slower than the construct it replaces.
 
     // Object destructuring only. Array destructuring goes through the iterator
     // protocol (slower than indexed access) which the validation hot paths rely
