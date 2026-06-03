@@ -82,14 +82,6 @@ export default defineConfig({
     // Disabled to reach a clean baseline; re-evaluate and re-enable incrementally.
 
     // TODO: evaluate this rule in the future
-    // occurrences in codebase: 105
-    // complexity: dangerous
-    // Member access on `any`-typed values is common in schema traversal code; fixing requires narrowing types or adding casts throughout.
-    // type: type-safety
-    // Disallows accessing properties on values typed as `any`, which bypasses TypeScript's type checking.
-    'typescript/no-unsafe-member-access': 'off',
-
-    // TODO: evaluate this rule in the future
     // occurrences in codebase: 23
     // complexity: dangerous
     // Most sites assert values to `any` or narrow types; tightening requires real upstream typing work.
@@ -109,6 +101,7 @@ export default defineConfig({
         'typescript/no-unsafe-return': 'off',
         'typescript/no-unsafe-assignment': 'off',
         'typescript/no-unsafe-argument': 'off',
+        'typescript/no-unsafe-member-access': 'off',
       },
     },
   ],
