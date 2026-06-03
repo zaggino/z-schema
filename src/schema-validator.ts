@@ -731,7 +731,7 @@ export class SchemaValidator {
     if (hasParentSchema) {
       if (schema.__$schemaResolved && schema.__$schemaResolved !== schema) {
         const subReport = new Report(report);
-        const valid = validate.call(this.validator, subReport, schema.__$schemaResolved, schema);
+        const valid = validate(this.validator, subReport, schema.__$schemaResolved, schema);
         if (!valid) {
           report.addError('PARENT_SCHEMA_VALIDATION_FAILED', undefined, subReport, schema, '$schema');
         }
@@ -799,7 +799,7 @@ export class SchemaValidator {
         report.path.push('enum');
         for (let idx = 0; idx < schema.enum.length; idx++) {
           report.path.push(idx);
-          validate.call(this.validator, report, tmpSchema, schema.enum[idx]);
+          validate(this.validator, report, tmpSchema, schema.enum[idx]);
           report.path.pop();
         }
         report.path.pop();
@@ -807,7 +807,7 @@ export class SchemaValidator {
 
       if (schema.default) {
         report.path.push('default');
-        validate.call(this.validator, report, schema, schema.default);
+        validate(this.validator, report, schema, schema.default);
         report.path.pop();
       }
     }

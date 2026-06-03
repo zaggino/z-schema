@@ -11,9 +11,9 @@ import { deferOrRunSync, shouldSkipValidate, supportsDependentKeywords } from '.
 // maxProperties
 // ---------------------------------------------------------------------------
 
-export function maxPropertiesValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function maxPropertiesValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.1.2
-  if (shouldSkipValidate(this.validateOptions, ['OBJECT_PROPERTIES_MAXIMUM'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['OBJECT_PROPERTIES_MAXIMUM'])) {
     return;
   }
   if (!isObject(json)) {
@@ -35,9 +35,9 @@ export function maxPropertiesValidator(this: ZSchemaBase, report: Report, schema
 // minProperties
 // ---------------------------------------------------------------------------
 
-export function minPropertiesValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function minPropertiesValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.2.2
-  if (shouldSkipValidate(this.validateOptions, ['OBJECT_PROPERTIES_MINIMUM'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['OBJECT_PROPERTIES_MINIMUM'])) {
     return;
   }
   if (!isObject(json)) {
@@ -59,9 +59,9 @@ export function minPropertiesValidator(this: ZSchemaBase, report: Report, schema
 // required
 // ---------------------------------------------------------------------------
 
-export function requiredValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function requiredValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.3.2
-  if (shouldSkipValidate(this.validateOptions, ['OBJECT_MISSING_REQUIRED_PROPERTY'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['OBJECT_MISSING_REQUIRED_PROPERTY'])) {
     return;
   }
   if (!isObject(json)) {
@@ -81,14 +81,14 @@ export function requiredValidator(this: ZSchemaBase, report: Report, schema: Jso
 // ---------------------------------------------------------------------------
 
 export function additionalPropertiesValidator(
-  this: ZSchemaBase,
+  ctx: ZSchemaBase,
   report: Report,
   schema: JsonSchemaInternal,
   json: unknown
 ) {
   // covered in properties and patternProperties
   if (schema.properties === undefined && schema.patternProperties === undefined) {
-    propertiesValidator.call(this, report, schema, json);
+    propertiesValidator(ctx, report, schema, json);
   }
 }
 
@@ -97,14 +97,14 @@ export function additionalPropertiesValidator(
 // ---------------------------------------------------------------------------
 
 export function patternPropertiesValidator(
-  this: ZSchemaBase,
+  ctx: ZSchemaBase,
   report: Report,
   schema: JsonSchemaInternal,
   json: unknown
 ) {
   // covered in properties
   if (schema.properties === undefined) {
-    propertiesValidator.call(this, report, schema, json);
+    propertiesValidator(ctx, report, schema, json);
   }
 }
 
@@ -112,9 +112,9 @@ export function patternPropertiesValidator(
 // properties
 // ---------------------------------------------------------------------------
 
-export function propertiesValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function propertiesValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.4.2
-  if (shouldSkipValidate(this.validateOptions, ['OBJECT_ADDITIONAL_PROPERTIES'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['OBJECT_ADDITIONAL_PROPERTIES'])) {
     return;
   }
   if (!isObject(json)) {
@@ -148,8 +148,8 @@ export function propertiesValidator(this: ZSchemaBase, report: Report, schema: J
     // Validation of the json succeeds if, after these two steps, set "s" is empty.
     if (s.length > 0) {
       // assumeAdditional can be an array of allowed properties
-      if (Array.isArray(this.options.assumeAdditional)) {
-        for (const allowed of this.options.assumeAdditional) {
+      if (Array.isArray(ctx.options.assumeAdditional)) {
+        for (const allowed of ctx.options.assumeAdditional) {
           const io = s.indexOf(allowed);
           if (io !== -1) {
             s.splice(io, 1);
@@ -169,9 +169,9 @@ export function propertiesValidator(this: ZSchemaBase, report: Report, schema: J
 // dependencies
 // ---------------------------------------------------------------------------
 
-export function dependenciesValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function dependenciesValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.4.5.2
-  if (shouldSkipValidate(this.validateOptions, ['OBJECT_DEPENDENCY_KEY'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['OBJECT_DEPENDENCY_KEY'])) {
     return;
   }
   if (!isObject(json)) {
@@ -200,7 +200,7 @@ export function dependenciesValidator(this: ZSchemaBase, report: Report, schema:
         }
       } else {
         // if dependency is a schema, validate against this schema
-        this._jsonValidate(report, dependencyDefinition, json);
+        ctx._jsonValidate(report, dependencyDefinition, json);
       }
     }
   }
@@ -210,13 +210,8 @@ export function dependenciesValidator(this: ZSchemaBase, report: Report, schema:
 // dependentSchemas
 // ---------------------------------------------------------------------------
 
-export function dependentSchemasValidator(
-  this: ZSchemaBase,
-  report: Report,
-  schema: JsonSchemaInternal,
-  json: unknown
-) {
-  if (!supportsDependentKeywords(schema, this.options.version)) {
+export function dependentSchemasValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  if (!supportsDependentKeywords(schema, ctx.options.version)) {
     return;
   }
   if (!isObject(json) || !isObject(schema.dependentSchemas)) {
@@ -228,7 +223,7 @@ export function dependentSchemasValidator(
   for (const dependencyName of keys) {
     if (Object.hasOwn(json, dependencyName)) {
       const dependencySchema = schema.dependentSchemas[dependencyName];
-      this._jsonValidate(report, dependencySchema, json);
+      ctx._jsonValidate(report, dependencySchema, json);
     }
   }
 }
@@ -238,15 +233,15 @@ export function dependentSchemasValidator(
 // ---------------------------------------------------------------------------
 
 export function dependentRequiredValidator(
-  this: ZSchemaBase,
+  ctx: ZSchemaBase,
   report: Report,
   schema: JsonSchemaInternal,
   json: unknown
 ) {
-  if (!supportsDependentKeywords(schema, this.options.version)) {
+  if (!supportsDependentKeywords(schema, ctx.options.version)) {
     return;
   }
-  if (shouldSkipValidate(this.validateOptions, ['OBJECT_DEPENDENCY_KEY'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['OBJECT_DEPENDENCY_KEY'])) {
     return;
   }
   if (!isObject(json) || !isObject(schema.dependentRequired)) {
@@ -283,8 +278,8 @@ export function dependentRequiredValidator(
 // propertyNames
 // ---------------------------------------------------------------------------
 
-export function propertyNamesValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
-  if (shouldSkipValidate(this.validateOptions, ['PROPERTY_NAMES'])) {
+export function propertyNamesValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  if (shouldSkipValidate(ctx.validateOptions, ['PROPERTY_NAMES'])) {
     return;
   }
 
@@ -303,7 +298,7 @@ export function propertyNamesValidator(this: ZSchemaBase, report: Report, schema
   for (const key of keys) {
     const subReport = new Report_(report);
     subReports.push(subReport);
-    this._jsonValidate(subReport, propertyNamesSchema as any, key);
+    ctx._jsonValidate(subReport, propertyNamesSchema as any, key);
   }
 
   const addPropertyNameErrors = () => {

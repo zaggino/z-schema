@@ -10,9 +10,9 @@ import { shouldSkipValidate } from './shared.js';
 // type
 // ---------------------------------------------------------------------------
 
-export function typeValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function typeValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.2
-  if (shouldSkipValidate(this.validateOptions, ['INVALID_TYPE'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['INVALID_TYPE'])) {
     return;
   }
   const jsonType = whatIs(json);
@@ -29,13 +29,13 @@ export function typeValidator(this: ZSchemaBase, report: Report, schema: JsonSch
 // enum
 // ---------------------------------------------------------------------------
 
-export function enumValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function enumValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.1.2
-  if (shouldSkipValidate(this.validateOptions, ['ENUM_CASE_MISMATCH', 'ENUM_MISMATCH'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['ENUM_CASE_MISMATCH', 'ENUM_MISMATCH'])) {
     return;
   }
-  const eqOpts = { maxDepth: this.options.maxRecursionDepth };
-  const eqOptsCI = { caseInsensitiveComparison: true, maxDepth: this.options.maxRecursionDepth };
+  const eqOpts = { maxDepth: ctx.options.maxRecursionDepth };
+  const eqOptsCI = { caseInsensitiveComparison: true, maxDepth: ctx.options.maxRecursionDepth };
   let caseInsensitiveMatch = false,
     match = false;
   for (const enumVal of schema.enum!) {
@@ -49,7 +49,7 @@ export function enumValidator(this: ZSchemaBase, report: Report, schema: JsonSch
 
   if (!match) {
     const error =
-      caseInsensitiveMatch && this.options.enumCaseInsensitiveComparison ? 'ENUM_CASE_MISMATCH' : 'ENUM_MISMATCH';
+      caseInsensitiveMatch && ctx.options.enumCaseInsensitiveComparison ? 'ENUM_CASE_MISMATCH' : 'ENUM_MISMATCH';
     report.addError(error, [JSON.stringify(json)], undefined, schema, 'enum');
   }
 }
@@ -58,9 +58,9 @@ export function enumValidator(this: ZSchemaBase, report: Report, schema: JsonSch
 // const
 // ---------------------------------------------------------------------------
 
-export function constValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function constValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   const constValue = schema.const;
-  if (!areEqual(json, constValue, { maxDepth: this.options.maxRecursionDepth })) {
+  if (!areEqual(json, constValue, { maxDepth: ctx.options.maxRecursionDepth })) {
     report.addError('CONST', [JSON.stringify(constValue)], undefined, schema);
   }
 }

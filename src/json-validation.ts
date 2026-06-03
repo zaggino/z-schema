@@ -85,14 +85,14 @@ interface CollectEvaluatedPropertiesArgs {
 
 type CollectEvaluatedArgs = CollectEvaluatedItemsArgs | CollectEvaluatedPropertiesArgs;
 
-function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<number | string> | 'all' {
+function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<number | string> | 'all' {
   const { report, currentSchema, json, mode, depth } = args;
 
   if (!currentSchema || typeof currentSchema === 'boolean') {
     return new Set();
   }
 
-  if (depth > (this.options.maxRecursionDepth ?? 100)) {
+  if (depth > (ctx.options.maxRecursionDepth ?? 100)) {
     report.addError('COLLECT_EVALUATED_DEPTH_EXCEEDED', [depth]);
     return new Set();
   }
@@ -111,7 +111,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
 
   const recurse = (subSchema: JsonSchemaInternal | boolean | undefined): Set<number | string> | 'all' => {
     if (mode === 'items') {
-      return collectEvaluated.call(this, {
+      return collectEvaluated(ctx, {
         report,
         currentSchema: subSchema,
         json,
@@ -120,7 +120,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
         depth: depth + 1,
       });
     }
-    return collectEvaluated.call(this, {
+    return collectEvaluated(ctx, {
       report,
       currentSchema: subSchema,
       json,
@@ -169,7 +169,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
         let passed = getCachedValidationResult(report, currentSchema.contains, jsonArr[i]);
         if (passed === undefined) {
           const subReport = new Report(report);
-          validate.call(this, subReport, currentSchema.contains as JsonSchemaInternal | boolean, jsonArr[i]);
+          validate(ctx, subReport, currentSchema.contains as JsonSchemaInternal | boolean, jsonArr[i]);
           passed = subReport.errors.length === 0;
         }
         if (passed) {
@@ -277,7 +277,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
       let passed = getCachedValidationResult(report, subSchema, json);
       if (passed === undefined) {
         const subReport = new Report(report);
-        validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
+        validate(ctx, subReport, subSchema as JsonSchemaInternal | boolean, json);
         passed = subReport.errors.length === 0;
       }
       if (passed && merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
@@ -293,7 +293,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
       let passed = getCachedValidationResult(report, subSchema, json);
       if (passed === undefined) {
         const subReport = new Report(report);
-        validate.call(this, subReport, subSchema as JsonSchemaInternal | boolean, json);
+        validate(ctx, subReport, subSchema as JsonSchemaInternal | boolean, json);
         passed = subReport.errors.length === 0;
       }
       if (passed && merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
@@ -307,7 +307,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
     let condPassed = getCachedValidationResult(report, currentSchema.if, json);
     if (condPassed === undefined) {
       const condReport = new Report(report);
-      validate.call(this, condReport, currentSchema.if as JsonSchemaInternal | boolean, json);
+      validate(ctx, condReport, currentSchema.if as JsonSchemaInternal | boolean, json);
       condPassed = condReport.errors.length === 0;
     }
     if (condPassed) {
@@ -350,7 +350,7 @@ function collectEvaluated(this: ZSchemaBase, args: CollectEvaluatedArgs): Set<nu
 // unevaluatedItems
 // ---------------------------------------------------------------------------
 
-function unevaluatedItemsValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+function unevaluatedItemsValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   if (!Array.isArray(json)) {
     return;
   }
@@ -369,7 +369,7 @@ function unevaluatedItemsValidator(this: ZSchemaBase, report: Report, schema: Js
     return;
   }
 
-  const evaluatedItems = collectEvaluated.call(this, {
+  const evaluatedItems = collectEvaluated(ctx, {
     report,
     currentSchema: schema,
     json,
@@ -400,7 +400,7 @@ function unevaluatedItemsValidator(this: ZSchemaBase, report: Report, schema: Js
     for (let i = 0; i < unevaluatedIndices.length; i++) {
       const idx = unevaluatedIndices[i];
       const subReport = new Report(report);
-      validate.call(this, subReport, unevalSchema as JsonSchemaInternal, json[idx]);
+      validate(ctx, subReport, unevalSchema as JsonSchemaInternal, json[idx]);
       if (subReport.errors.length > 0) {
         report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
         break;
@@ -413,7 +413,7 @@ function unevaluatedItemsValidator(this: ZSchemaBase, report: Report, schema: Js
 // unevaluatedProperties
 // ---------------------------------------------------------------------------
 
-function unevaluatedPropertiesValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+function unevaluatedPropertiesValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   if (!isObject(json)) {
     return;
   }
@@ -434,7 +434,7 @@ function unevaluatedPropertiesValidator(this: ZSchemaBase, report: Report, schem
     return;
   }
 
-  const evaluatedProperties = collectEvaluated.call(this, {
+  const evaluatedProperties = collectEvaluated(ctx, {
     report,
     currentSchema: schema,
     json,
@@ -471,7 +471,7 @@ function unevaluatedPropertiesValidator(this: ZSchemaBase, report: Report, schem
     for (let i = 0; i < unevaluatedKeys.length; i++) {
       const key = unevaluatedKeys[i];
       const subReport = new Report(report);
-      validate.call(this, subReport, unevalSchema as JsonSchemaInternal, (json as Record<string, unknown>)[key]);
+      validate(ctx, subReport, unevalSchema as JsonSchemaInternal, (json as Record<string, unknown>)[key]);
       if (subReport.errors.length > 0) {
         report.addError('OBJECT_UNEVALUATED_PROPERTIES', [key], undefined, schema, 'unevaluatedProperties');
       }
@@ -577,25 +577,25 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
 // recurseArray
 // ---------------------------------------------------------------------------
 
-function recurseArray(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown[]) {
+function recurseArray(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown[]) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.2
 
   const schemaUri = typeof schema.$schema === 'string' ? schema.$schema : undefined;
   const isDraft202012Schema =
     schemaUri === 'https://json-schema.org/draft/2020-12/schema' ||
-    (!schemaUri && this.options.version === 'draft2020-12');
+    (!schemaUri && ctx.options.version === 'draft2020-12');
   const prefixItems = isDraft202012Schema && Array.isArray(schema.prefixItems) ? schema.prefixItems : undefined;
 
   if (prefixItems) {
     for (let idx = 0; idx < json.length; idx++) {
       if (idx < prefixItems.length) {
         report.path.push(idx);
-        validate.call(this, report, prefixItems[idx], json[idx]);
+        validate(ctx, report, prefixItems[idx], json[idx]);
         report.path.pop();
       } else if (schema.items !== undefined && !Array.isArray(schema.items)) {
         report.path.push(idx);
         report.schemaPath.push('items');
-        validate.call(this, report, schema.items, json[idx]);
+        validate(ctx, report, schema.items, json[idx]);
         report.schemaPath.pop();
         report.path.pop();
       }
@@ -612,12 +612,12 @@ function recurseArray(this: ZSchemaBase, report: Report, schema: JsonSchemaInter
       // equal to doesn't make sense here
       if (idx < schema.items.length) {
         report.path.push(idx);
-        validate.call(this, report, schema.items[idx], json[idx]);
+        validate(ctx, report, schema.items[idx], json[idx]);
         report.path.pop();
       } else if (typeof schema.additionalItems === 'object') {
         // might be boolean, so check that it's an object
         report.path.push(idx);
-        validate.call(this, report, schema.additionalItems, json[idx]);
+        validate(ctx, report, schema.additionalItems, json[idx]);
         report.path.pop();
       }
     }
@@ -628,7 +628,7 @@ function recurseArray(this: ZSchemaBase, report: Report, schema: JsonSchemaInter
       report.path.push(idx);
       // Track schema path for array items validation
       report.schemaPath.push('items');
-      validate.call(this, report, schema.items, json[idx]);
+      validate(ctx, report, schema.items, json[idx]);
       report.schemaPath.pop();
       report.path.pop();
     }
@@ -639,7 +639,7 @@ function recurseArray(this: ZSchemaBase, report: Report, schema: JsonSchemaInter
 // recurseObject
 // ---------------------------------------------------------------------------
 
-function recurseObject(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Record<any, any>) {
+function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Record<any, any>) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.3
 
   // If "additionalProperties" is absent, it is considered present with an empty schema as a value.
@@ -709,7 +709,7 @@ function recurseObject(this: ZSchemaBase, report: Report, schema: JsonSchemaInte
         // This is additionalProperties or patternProperties
         report.schemaPath.push('additionalProperties');
       }
-      validate.call(this, report, schema_s, propertyValue);
+      validate(ctx, report, schema_s, propertyValue);
       report.path.pop();
       report.schemaPath.pop();
       if (isProp) {
@@ -724,7 +724,7 @@ function recurseObject(this: ZSchemaBase, report: Report, schema: JsonSchemaInte
 // ---------------------------------------------------------------------------
 
 export function validate(
-  this: ZSchemaBase,
+  ctx: ZSchemaBase,
   report: Report,
   schema: boolean | JsonSchemaInternal,
   json: unknown
@@ -778,11 +778,11 @@ export function validate(
   // follow schema.$ref keys
   if (schema.$ref !== undefined) {
     const applySiblingKeywordsWithRef =
-      this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+      ctx.options.version === 'draft2019-09' || ctx.options.version === 'draft2020-12';
 
     if (applySiblingKeywordsWithRef) {
       if (schema.__$refResolved) {
-        validate.call(this, report, schema.__$refResolved as JsonSchemaInternal, json);
+        validate(ctx, report, schema.__$refResolved as JsonSchemaInternal, json);
       } else {
         report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
       }
@@ -816,13 +816,13 @@ export function validate(
   // follow schema.$recursiveRef keys
   if (schema.$recursiveRef !== undefined) {
     const applySiblingKeywordsWithRecursiveRef =
-      this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+      ctx.options.version === 'draft2019-09' || ctx.options.version === 'draft2020-12';
 
     if (applySiblingKeywordsWithRecursiveRef) {
       const recursiveRefTarget = resolveRecursiveRef(schema, recursiveAnchorStack);
 
       if (recursiveRefTarget) {
-        validate.call(this, report, recursiveRefTarget, json);
+        validate(ctx, report, recursiveRefTarget, json);
       } else {
         report.addError('REF_UNRESOLVED', [schema.$recursiveRef], undefined, schema);
       }
@@ -835,7 +835,7 @@ export function validate(
 
   // follow schema.$dynamicRef keys
   if (schema.$dynamicRef !== undefined) {
-    const applySiblingKeywordsWithDynamicRef = this.options.version === 'draft2020-12';
+    const applySiblingKeywordsWithDynamicRef = ctx.options.version === 'draft2020-12';
 
     if (applySiblingKeywordsWithDynamicRef) {
       const dynamicRefTarget = resolveDynamicRef(schema, dynamicScopeStack);
@@ -843,7 +843,7 @@ export function validate(
       if (dynamicRefTarget === undefined) {
         report.addError('REF_UNRESOLVED', [schema.$dynamicRef], undefined, schema);
       } else {
-        validate.call(this, report, dynamicRefTarget, json);
+        validate(ctx, report, dynamicRefTarget, json);
       }
       const dynamicRefIdx = keys.indexOf('$dynamicRef');
       if (dynamicRefIdx !== -1) {
@@ -852,7 +852,7 @@ export function validate(
     }
   }
 
-  const validationVocabularyEnabled = isValidationVocabularyEnabled(schema, report, this.options.version);
+  const validationVocabularyEnabled = isValidationVocabularyEnabled(schema, report, ctx.options.version);
   if (!validationVocabularyEnabled) {
     let wi = 0;
     for (let ri = 0; ri < keys.length; ri++) {
@@ -867,9 +867,9 @@ export function validate(
   if (validationVocabularyEnabled && schema.type) {
     keys.splice(keys.indexOf('type'), 1);
     report.schemaPath.push('type');
-    JsonValidators.type.call(this, report, schema, json);
+    JsonValidators.type(ctx, report, schema, json);
     report.schemaPath.pop();
-    if (report.errors.length && this.options.breakOnFirstError) {
+    if (report.errors.length && ctx.options.breakOnFirstError) {
       if (pushedRecursiveAnchor) {
         recursiveAnchorStack.pop();
       }
@@ -892,37 +892,37 @@ export function validate(
     }
     const validator = JsonValidators[key];
     if (validator) {
-      validator.call(this, report, schema, json);
-      if (report.errors.length && this.options.breakOnFirstError) {
+      validator(ctx, report, schema, json);
+      if (report.errors.length && ctx.options.breakOnFirstError) {
         break;
       }
     }
   }
 
   // Run unevaluated* validators after all others have cached their combinator results
-  if (deferredUnevaluatedKeys.length > 0 && !(report.errors.length > 0 && this.options.breakOnFirstError)) {
+  if (deferredUnevaluatedKeys.length > 0 && !(report.errors.length > 0 && ctx.options.breakOnFirstError)) {
     for (let i = 0; i < deferredUnevaluatedKeys.length; i++) {
       const key = deferredUnevaluatedKeys[i];
       const validator = JsonValidators[key];
       if (validator) {
-        validator.call(this, report, schema, json);
-        if (report.errors.length && this.options.breakOnFirstError) {
+        validator(ctx, report, schema, json);
+        if (report.errors.length && ctx.options.breakOnFirstError) {
           break;
         }
       }
     }
   }
 
-  if (report.errors.length === 0 || this.options.breakOnFirstError === false) {
+  if (report.errors.length === 0 || ctx.options.breakOnFirstError === false) {
     if (Array.isArray(json)) {
-      recurseArray.call(this, report, schema, json);
+      recurseArray(ctx, report, schema, json);
     } else if (isObject(json)) {
-      recurseObject.call(this, report, schema, json);
+      recurseObject(ctx, report, schema, json);
     }
   }
 
-  if (typeof this.options.customValidator === 'function') {
-    this.options.customValidator.call(this, report, schema, json);
+  if (typeof ctx.options.customValidator === 'function') {
+    ctx.options.customValidator.call(ctx, report, schema, json);
   }
 
   if (pushedRecursiveAnchor) {

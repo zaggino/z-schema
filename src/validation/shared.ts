@@ -9,7 +9,7 @@ import { isObject } from '../utils/what-is.js';
 // Shared types
 // ---------------------------------------------------------------------------
 
-export type JsonValidatorFn = (this: ZSchemaBase, report: Report, schema: JsonSchema, json: unknown) => void;
+export type JsonValidatorFn = (ctx: ZSchemaBase, report: Report, schema: JsonSchema, json: unknown) => void;
 
 // ---------------------------------------------------------------------------
 // Draft / vocabulary helpers

@@ -65,7 +65,7 @@ export class ZSchemaBase {
    * create a circular dependency).
    */
   _jsonValidate(report: Report, schema: boolean | JsonSchemaInternal, json: unknown): boolean {
-    return validateJson.call(this, report, schema, json);
+    return validateJson(this, report, schema, json);
   }
 
   getDefaultSchemaId(): string {
@@ -160,7 +160,7 @@ export class ZSchemaBase {
     }
 
     if (!foundError) {
-      validateJson.call(this, report, _schema, json);
+      validateJson(this, report, _schema, json);
     }
 
     if (callback) {

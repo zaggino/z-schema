@@ -8,11 +8,11 @@ import { cacheValidationResult, deferOrRunSync } from './shared.js';
 // allOf
 // ---------------------------------------------------------------------------
 
-export function allOfValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function allOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.3.2
   for (let i = 0; i < schema.allOf!.length; i++) {
-    const validateResult = this._jsonValidate(report, schema.allOf![i], json);
-    if (this.options.breakOnFirstError && !validateResult) {
+    const validateResult = ctx._jsonValidate(report, schema.allOf![i], json);
+    if (ctx.options.breakOnFirstError && !validateResult) {
       break;
     }
   }
@@ -22,14 +22,14 @@ export function allOfValidator(this: ZSchemaBase, report: Report, schema: JsonSc
 // anyOf
 // ---------------------------------------------------------------------------
 
-export function anyOfValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function anyOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.4.2
   const subReports: Report[] = [];
 
   for (let i = 0; i < schema.anyOf!.length; i++) {
     const subReport = new Report(report);
     subReports.push(subReport);
-    this._jsonValidate(subReport, schema.anyOf![i], json);
+    ctx._jsonValidate(subReport, schema.anyOf![i], json);
     cacheValidationResult(report, schema.anyOf![i], json, subReport.errors.length === 0);
   }
 
@@ -53,14 +53,14 @@ export function anyOfValidator(this: ZSchemaBase, report: Report, schema: JsonSc
 // oneOf
 // ---------------------------------------------------------------------------
 
-export function oneOfValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function oneOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.5.2
   const subReports: Report[] = [];
 
   for (let i = 0; i < schema.oneOf!.length; i++) {
     const subReport = new Report(report);
     subReports.push(subReport);
-    this._jsonValidate(subReport, schema.oneOf![i], json);
+    ctx._jsonValidate(subReport, schema.oneOf![i], json);
     cacheValidationResult(report, schema.oneOf![i], json, subReport.errors.length === 0);
   }
 
@@ -85,10 +85,10 @@ export function oneOfValidator(this: ZSchemaBase, report: Report, schema: JsonSc
 // not
 // ---------------------------------------------------------------------------
 
-export function notValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function notValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
   const subReport = new Report(report);
-  if (this._jsonValidate(subReport, schema.not!, json)) {
+  if (ctx._jsonValidate(subReport, schema.not!, json)) {
     report.addError('NOT_PASSED', undefined, undefined, schema, 'not');
   }
 }
@@ -97,8 +97,8 @@ export function notValidator(this: ZSchemaBase, report: Report, schema: JsonSche
 // if / then / else
 // ---------------------------------------------------------------------------
 
-export function ifValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
-  if (this.options.version === 'draft-04' || this.options.version === 'draft-06') {
+export function ifValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  if (ctx.options.version === 'draft-04' || ctx.options.version === 'draft-06') {
     return;
   }
 
@@ -111,7 +111,7 @@ export function ifValidator(this: ZSchemaBase, report: Report, schema: JsonSchem
   }
 
   const conditionReport = new Report(report);
-  this._jsonValidate(conditionReport, conditionSchema as any, json);
+  ctx._jsonValidate(conditionReport, conditionSchema as any, json);
   cacheValidationResult(report, conditionSchema, json, conditionReport.errors.length === 0);
 
   const branchSchema = conditionReport.errors.length === 0 ? thenSchema : elseSchema;
@@ -119,7 +119,7 @@ export function ifValidator(this: ZSchemaBase, report: Report, schema: JsonSchem
     return;
   }
 
-  this._jsonValidate(report, branchSchema as any, json);
+  ctx._jsonValidate(report, branchSchema as any, json);
 }
 
 export function thenValidator() {
