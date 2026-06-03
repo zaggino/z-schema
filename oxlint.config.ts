@@ -27,7 +27,7 @@ export default defineConfig({
     'require-unicode-regexp': 'off',
     'sort-keys': 'off',
     'typescript/array-type': ['error', { default: 'array-simple' }],
-    'typescript/consistent-type-imports': 'error',
+    'typescript/consistent-return': 'off',
     'typescript/no-explicit-any': 'off',
     'typescript/no-non-null-assertion': 'off',
     'unicorn/prefer-node-protocol': 'off',
@@ -295,18 +295,6 @@ export default defineConfig({
     // type: maintainability
     // Requires class methods that do not use `this` to be declared as `static`.
     'class-methods-use-this': 'off',
-
-    // ── Additional type-aware rules surfaced once full type-aware was enabled ──
-    // These only report when the tsconfig `rootDir` lets oxlint-tsgolint build a
-    // complete program (see tsconfig.json). Same TODO/backlog treatment as above.
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 5
-    // complexity: moderate
-    // Conflicts with the enabled `unicorn/no-useless-undefined`: functions returning `T | undefined` cannot satisfy both (this rule wants `return undefined;`, the other forbids it). Deferred until that tension is resolved.
-    // type: bug-prevention
-    // Requires functions to either always or never return a value (no implicit `undefined` on some paths).
-    'typescript/consistent-return': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 4
