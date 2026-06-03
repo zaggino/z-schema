@@ -13,9 +13,9 @@ import { isFormatAssertionVocabEnabled, shouldSkipValidate } from './shared.js';
 // minLength
 // ---------------------------------------------------------------------------
 
-export function minLengthValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function minLengthValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.2.2
-  if (shouldSkipValidate(this.validateOptions, ['MIN_LENGTH'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['MIN_LENGTH'])) {
     return;
   }
   if (typeof json !== 'string') {
@@ -30,9 +30,9 @@ export function minLengthValidator(this: ZSchemaBase, report: Report, schema: Js
 // maxLength
 // ---------------------------------------------------------------------------
 
-export function maxLengthValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function maxLengthValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.1.2
-  if (shouldSkipValidate(this.validateOptions, ['MAX_LENGTH'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['MAX_LENGTH'])) {
     return;
   }
   if (typeof json !== 'string') {
@@ -47,9 +47,9 @@ export function maxLengthValidator(this: ZSchemaBase, report: Report, schema: Js
 // pattern
 // ---------------------------------------------------------------------------
 
-export function patternValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function patternValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.2.3.2
-  if (shouldSkipValidate(this.validateOptions, ['PATTERN'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['PATTERN'])) {
     return;
   }
   if (typeof json !== 'string') {
@@ -70,24 +70,24 @@ export function patternValidator(this: ZSchemaBase, report: Report, schema: Json
 // format
 // ---------------------------------------------------------------------------
 
-export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
-  if (this.options.formatAssertions === false) {
+  if (ctx.options.formatAssertions === false) {
     return;
   }
 
   // When formatAssertions is explicitly true, respect the meta-schema vocabulary:
   // for draft 2019-09/2020-12, format is annotation-only unless the format-assertion
   // vocabulary is enabled in the meta-schema.
-  if (this.options.formatAssertions === true && !isFormatAssertionVocabEnabled(schema, report, this.options.version)) {
+  if (ctx.options.formatAssertions === true && !isFormatAssertionVocabEnabled(schema, report, ctx.options.version)) {
     return;
   }
 
-  const isModernDraft = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+  const isModernDraft = ctx.options.version === 'draft2019-09' || ctx.options.version === 'draft2020-12';
 
-  const formatValidatorFn = resolveFormatValidator(schema.format!, this.options);
+  const formatValidatorFn = resolveFormatValidator(schema.format!, ctx.options);
   if (typeof formatValidatorFn === 'function') {
-    if (shouldSkipValidate(this.validateOptions, ['INVALID_FORMAT'])) {
+    if (shouldSkipValidate(ctx.validateOptions, ['INVALID_FORMAT'])) {
       return;
     }
     if (report.hasError('INVALID_TYPE', [schema.type, whatIs(json)])) {
@@ -101,7 +101,7 @@ export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonS
         }
       });
     } else {
-      const result = formatValidatorFn.call(this, json);
+      const result = formatValidatorFn.call(ctx, json);
       if (result instanceof Promise) {
         // Promise-based async
         const promiseResult = result;
@@ -126,7 +126,7 @@ export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonS
         report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
       }
     }
-  } else if (this.options.ignoreUnknownFormats !== true && !isModernDraft) {
+  } else if (ctx.options.ignoreUnknownFormats !== true && !isModernDraft) {
     report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
   }
 }
@@ -135,8 +135,8 @@ export function formatValidator(this: ZSchemaBase, report: Report, schema: JsonS
 // contentEncoding
 // ---------------------------------------------------------------------------
 
-export function contentEncodingValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
-  if (this.options.version !== 'draft-07') {
+export function contentEncodingValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  if (ctx.options.version !== 'draft-07') {
     return;
   }
   if (typeof json !== 'string') {
@@ -163,13 +163,8 @@ export function contentEncodingValidator(this: ZSchemaBase, report: Report, sche
 // contentMediaType
 // ---------------------------------------------------------------------------
 
-export function contentMediaTypeValidator(
-  this: ZSchemaBase,
-  report: Report,
-  schema: JsonSchemaInternal,
-  json: unknown
-) {
-  if (this.options.version !== 'draft-07') {
+export function contentMediaTypeValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  if (ctx.options.version !== 'draft-07') {
     return;
   }
   if (typeof json !== 'string') {

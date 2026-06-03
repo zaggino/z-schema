@@ -9,9 +9,9 @@ import { cacheValidationResult, deferOrRunSync, shouldSkipValidate } from './sha
 // additionalItems
 // ---------------------------------------------------------------------------
 
-export function additionalItemsValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function additionalItemsValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.2
-  if (shouldSkipValidate(this.validateOptions, ['ARRAY_ADDITIONAL_ITEMS'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['ARRAY_ADDITIONAL_ITEMS'])) {
     return;
   }
   if (!Array.isArray(json)) {
@@ -45,9 +45,9 @@ export function prefixItemsValidator() {
 // maxItems
 // ---------------------------------------------------------------------------
 
-export function maxItemsValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function maxItemsValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.2.2
-  if (shouldSkipValidate(this.validateOptions, ['ARRAY_LENGTH_LONG'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['ARRAY_LENGTH_LONG'])) {
     return;
   }
   if (!Array.isArray(json)) {
@@ -62,9 +62,9 @@ export function maxItemsValidator(this: ZSchemaBase, report: Report, schema: Jso
 // minItems
 // ---------------------------------------------------------------------------
 
-export function minItemsValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function minItemsValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.3.2
-  if (shouldSkipValidate(this.validateOptions, ['ARRAY_LENGTH_SHORT'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['ARRAY_LENGTH_SHORT'])) {
     return;
   }
   if (!Array.isArray(json)) {
@@ -79,9 +79,9 @@ export function minItemsValidator(this: ZSchemaBase, report: Report, schema: Jso
 // uniqueItems
 // ---------------------------------------------------------------------------
 
-export function uniqueItemsValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function uniqueItemsValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.4.2
-  if (shouldSkipValidate(this.validateOptions, ['ARRAY_UNIQUE'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['ARRAY_UNIQUE'])) {
     return;
   }
   if (!Array.isArray(json)) {
@@ -89,7 +89,7 @@ export function uniqueItemsValidator(this: ZSchemaBase, report: Report, schema: 
   }
   if (schema.uniqueItems === true) {
     const matches: any[] = [];
-    if (!isUniqueArray(json, matches, this.options.maxRecursionDepth)) {
+    if (!isUniqueArray(json, matches, ctx.options.maxRecursionDepth)) {
       report.addError('ARRAY_UNIQUE', matches, undefined, schema, 'uniqueItems');
     }
   }
@@ -99,8 +99,8 @@ export function uniqueItemsValidator(this: ZSchemaBase, report: Report, schema: 
 // contains
 // ---------------------------------------------------------------------------
 
-export function containsValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
-  if (shouldSkipValidate(this.validateOptions, ['CONTAINS'])) {
+export function containsValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  if (shouldSkipValidate(ctx.validateOptions, ['CONTAINS'])) {
     return;
   }
 
@@ -118,7 +118,7 @@ export function containsValidator(this: ZSchemaBase, report: Report, schema: Jso
   for (let idx = 0; idx < json.length; idx++) {
     const subReport = new Report_(report);
     subReports.push(subReport);
-    this._jsonValidate(subReport, containsSchema as any, json[idx]);
+    ctx._jsonValidate(subReport, containsSchema as any, json[idx]);
     cacheValidationResult(report, containsSchema, json[idx], subReport.errors.length === 0);
   }
 
@@ -130,7 +130,7 @@ export function containsValidator(this: ZSchemaBase, report: Report, schema: Jso
       }
     }
 
-    const supportsContainsBounds = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+    const supportsContainsBounds = ctx.options.version === 'draft2019-09' || ctx.options.version === 'draft2020-12';
     const minContains: number =
       supportsContainsBounds && typeof schema.minContains === 'number' ? (schema.minContains ?? 1) : 1;
     const maxContains =

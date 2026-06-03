@@ -31,9 +31,8 @@ export default defineConfig({
     'no-warning-comments': 'off',
     'promise/avoid-new': 'off',
     // Kept off intentionally (not a TODO): the flagged callbacks are public-API
-    // contract — the exported `ValidateCallback` `validate`/`_validate` overload,
-    // `Report.processAsyncTasks`, and the user-registered `(str, callback)` async
-    // format-validator signature. Enabling would force a breaking API change.
+    // contract — the exported `ValidateCallback` `validate`/`_validate` overload
+    // and `Report.processAsyncTasks`. Enabling would force a breaking API change.
     'promise/prefer-await-to-callbacks': 'off',
     'require-unicode-regexp': 'off',
     'sort-keys': 'off',
@@ -89,14 +88,6 @@ export default defineConfig({
     // type: type-safety
     // Disallows accessing properties on values typed as `any`, which bypasses TypeScript's type checking.
     'typescript/no-unsafe-member-access': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 81
-    // complexity: moderate
-    // `this` is used inside functions that are exported; restructuring requires converting them to methods or passing context explicitly.
-    // type: bug-prevention
-    // Disallows `this` inside exported standalone functions where the `this` context is unpredictable.
-    'oxc/no-this-in-exported-function': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 32

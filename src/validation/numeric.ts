@@ -8,9 +8,9 @@ import { shouldSkipValidate } from './shared.js';
 // multipleOf
 // ---------------------------------------------------------------------------
 
-export function multipleOfValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function multipleOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.1.2
-  if (shouldSkipValidate(this.validateOptions, ['MULTIPLE_OF'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['MULTIPLE_OF'])) {
     return;
   }
   if (typeof json !== 'number') {
@@ -27,9 +27,9 @@ export function multipleOfValidator(this: ZSchemaBase, report: Report, schema: J
 // maximum
 // ---------------------------------------------------------------------------
 
-export function maximumValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function maximumValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.2.2
-  if (shouldSkipValidate(this.validateOptions, ['MAXIMUM', 'MAXIMUM_EXCLUSIVE'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['MAXIMUM', 'MAXIMUM_EXCLUSIVE'])) {
     return;
   }
   if (typeof json !== 'number') {
@@ -48,15 +48,10 @@ export function maximumValidator(this: ZSchemaBase, report: Report, schema: Json
 // exclusiveMaximum
 // ---------------------------------------------------------------------------
 
-export function exclusiveMaximumValidator(
-  this: ZSchemaBase,
-  report: Report,
-  schema: JsonSchemaInternal,
-  json: unknown
-) {
+export function exclusiveMaximumValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // In draft-06+, exclusiveMaximum is a standalone number
   if (typeof schema.exclusiveMaximum === 'number') {
-    if (shouldSkipValidate(this.validateOptions, ['MAXIMUM_EXCLUSIVE'])) {
+    if (shouldSkipValidate(ctx.validateOptions, ['MAXIMUM_EXCLUSIVE'])) {
       return;
     }
     if (typeof json !== 'number') {
@@ -73,9 +68,9 @@ export function exclusiveMaximumValidator(
 // minimum
 // ---------------------------------------------------------------------------
 
-export function minimumValidator(this: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+export function minimumValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.3.2
-  if (shouldSkipValidate(this.validateOptions, ['MINIMUM', 'MINIMUM_EXCLUSIVE'])) {
+  if (shouldSkipValidate(ctx.validateOptions, ['MINIMUM', 'MINIMUM_EXCLUSIVE'])) {
     return;
   }
   if (typeof json !== 'number') {
@@ -94,15 +89,10 @@ export function minimumValidator(this: ZSchemaBase, report: Report, schema: Json
 // exclusiveMinimum
 // ---------------------------------------------------------------------------
 
-export function exclusiveMinimumValidator(
-  this: ZSchemaBase,
-  report: Report,
-  schema: JsonSchemaInternal,
-  json: unknown
-) {
+export function exclusiveMinimumValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // In draft-06+, exclusiveMinimum is a standalone number
   if (typeof schema.exclusiveMinimum === 'number') {
-    if (shouldSkipValidate(this.validateOptions, ['MINIMUM_EXCLUSIVE'])) {
+    if (shouldSkipValidate(ctx.validateOptions, ['MINIMUM_EXCLUSIVE'])) {
       return;
     }
     if (typeof json !== 'number') {
