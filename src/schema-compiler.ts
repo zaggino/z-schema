@@ -139,8 +139,13 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
       };
       if (type === 'absolute' || (type === 'root' && isAbsoluteUri(nodeId))) {
         id.absoluteUri = nodeId;
-      } else if (type === 'root' && typeof node.id === 'string' && isAbsoluteUri(node.id) && node.id !== nodeId) {
-        id.absoluteUri = resolveSchemaScopeId(node.id, node as JsonSchemaInternal, nodeId);
+      } else if (
+        type === 'root' &&
+        typeof node.id === 'string' &&
+        isAbsoluteUri(node.id as string) &&
+        node.id !== nodeId
+      ) {
+        id.absoluteUri = resolveSchemaScopeId(node.id as string, node as JsonSchemaInternal, nodeId);
       } else if (type === 'relative') {
         let absoluteParent: Id | undefined;
         for (let i = scope.length - 1; i >= 0; i--) {
@@ -166,7 +171,7 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
         walk(item, scope, _depth + 1);
       }
     } else {
-      for (const key of Object.keys(node)) {
+      for (const key of Object.keys(node as object)) {
         if (isInternalKey(key) || NON_SCHEMA_KEYWORDS_SET.has(key)) {
           continue;
         }
@@ -265,7 +270,7 @@ export const collectReferences = (
   if (Array.isArray(obj)) {
     for (let i = 0; i < obj.length; i++) {
       path.push(i);
-      collectReferences(obj[i], results, scope, path, options, maxDepth, _depth + 1);
+      collectReferences(obj[i] as JsonSchemaInternal, results, scope, path, options, maxDepth, _depth + 1);
       path.pop();
     }
   } else {
@@ -276,7 +281,15 @@ export const collectReferences = (
         continue;
       }
       path.push(key);
-      collectReferences((obj as any)[key], results, scope, path, options, maxDepth, _depth + 1);
+      collectReferences(
+        (obj as Record<string, JsonSchemaInternal>)[key],
+        results,
+        scope,
+        path,
+        options,
+        maxDepth,
+        _depth + 1
+      );
       path.pop();
     }
   }

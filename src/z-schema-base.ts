@@ -321,11 +321,11 @@ export class ZSchemaBase {
         return;
       }
 
-      if (visited.has(node)) {
+      if (visited.has(node as object)) {
         return;
       }
 
-      visited.add(node);
+      visited.add(node as object);
 
       if (node.$ref && node.__$refResolved) {
         const from = node.__$refResolved as JsonSchemaInternal;
@@ -339,7 +339,7 @@ export class ZSchemaBase {
         }
       }
       for (key in node) {
-        if (Object.hasOwn(node, key)) {
+        if (Object.hasOwn(node as object, key)) {
           if (isInternalKey(key)) {
             delete node[key];
           } else {

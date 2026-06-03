@@ -114,7 +114,7 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
               callback(false);
             }
           },
-          [] as any,
+          [],
           (resolvedResult) => {
             if (resolvedResult !== true) {
               report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');

@@ -118,7 +118,7 @@ export function containsValidator(ctx: ZSchemaBase, report: Report, schema: Json
   for (let idx = 0; idx < json.length; idx++) {
     const subReport = new Report_(report);
     subReports.push(subReport);
-    ctx._jsonValidate(subReport, containsSchema as any, json[idx]);
+    ctx._jsonValidate(subReport, containsSchema as JsonSchemaInternal, json[idx]);
     cacheValidationResult(report, containsSchema, json[idx], subReport.errors.length === 0);
   }
 

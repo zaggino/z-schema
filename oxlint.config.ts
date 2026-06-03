@@ -96,14 +96,6 @@ export default defineConfig({
     // type: type-safety
     // Flags type assertions that bypass the type checker (notably assertions to/from `any`), which can mask runtime errors.
     'typescript/no-unsafe-type-assertion': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 13
-    // complexity: dangerous
-    // Arguments typed as `any` are passed into typed parameters; fixing requires narrowing the source types or adding explicit casts.
-    // type: type-safety
-    // Disallows passing `any`-typed values as arguments to typed function parameters.
-    'typescript/no-unsafe-argument': 'off',
   },
   overrides: [
     {
@@ -116,6 +108,7 @@ export default defineConfig({
         'typescript/no-unsafe-call': 'off',
         'typescript/no-unsafe-return': 'off',
         'typescript/no-unsafe-assignment': 'off',
+        'typescript/no-unsafe-argument': 'off',
       },
     },
   ],

@@ -154,7 +154,7 @@ export const findId = (
   let result;
   if (Array.isArray(schema)) {
     for (let i = 0; i < schema.length; i++) {
-      result = findId(schema[i], id, targetBaseUri, nextBaseUri, maxDepth, _depth + 1);
+      result = findId(schema[i] as JsonSchemaInternal, id, targetBaseUri, nextBaseUri, maxDepth, _depth + 1);
       if (result) {
         return result;
       }

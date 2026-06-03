@@ -181,7 +181,7 @@ export function deferOrRunSync(report: Report, subReports: Report[], decisionFn:
           callback(null);
         }, 0);
       },
-      [] as any,
+      [],
       () => {
         decisionFn();
       }
