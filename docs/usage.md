@@ -59,7 +59,7 @@ try {
   validator.validate(data, schema);
   // validation passed — returns true
 } catch (err) {
-  console.log(err.name); // 'z-schema validation error'
+  console.log(err.name); // 'ValidateError'
   console.log(err.message); // summary message
   console.log(err.details); // SchemaErrorDetail[]
 }
@@ -151,7 +151,7 @@ validator.validate({ name: 'Alice', age: 30 }, 'person');
 
 `ValidateError` (thrown or returned) has:
 
-- `.name` — `'z-schema validation error'`
+- `.name` — `'ValidateError'`
 - `.message` — summary string
 - `.details` — array of `SchemaErrorDetail`:
 

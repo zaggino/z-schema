@@ -23,19 +23,21 @@ function validateWithAutomaticDownloads(
     const missingReferences = result.valid ? [] : validator.getMissingRemoteReferences(result.err!);
     if (missingReferences.length > 0) {
       let finished = 0;
-      missingReferences.forEach(function (url: string) {
-        fetch(url).then(async (res) => {
-          if (!res.ok) {
-            const text = await res.text().catch(() => '');
-            throw new Error(`HTTP ${res.status} ${res.statusText}: ${text}`);
-          }
-          const json = await res.json();
-          validator.setRemoteReference(url, json);
-          finished++;
-          if (finished === missingReferences.length) {
-            validate();
-          }
-        });
+      const loadReference = async (url: string) => {
+        const res = await fetch(url);
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error(`HTTP ${res.status} ${res.statusText}: ${text}`);
+        }
+        const json = await res.json();
+        validator.setRemoteReference(url, json);
+        finished++;
+        if (finished === missingReferences.length) {
+          validate();
+        }
+      };
+      missingReferences.forEach((url: string) => {
+        void loadReference(url);
       });
     } else {
       finish();

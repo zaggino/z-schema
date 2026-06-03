@@ -121,7 +121,7 @@ export class Report {
     return this.errors.length === 0;
   }
 
-  addAsyncTask<FV, FN extends (...args: any[]) => FV>(
+  addAsyncTask<FN extends (...args: any[]) => any>(
     fn: FN,
     args: Parameters<FN>,
     asyncTaskResultProcessFn: (result: ReturnType<FN>) => void
@@ -329,7 +329,7 @@ export class Report {
       errorMessage = errorMessage.replace(`{${idx}}`, param.toString());
     }
 
-    const err: SchemaErrorDetail = {
+    const err = {
       code: errorCode,
       params,
       message: errorMessage,
@@ -337,10 +337,9 @@ export class Report {
       schemaPath: this.getSchemaPath(),
       schemaId: this.getSchemaId(),
       keyword,
-    };
-
-    (err as any)[schemaSymbol] = schema;
-    (err as any)[jsonSymbol] = this.getJson();
+      [schemaSymbol]: schema,
+      [jsonSymbol]: this.getJson(),
+    } as SchemaErrorDetail;
 
     if (schema && typeof schema === 'string') {
       err.description = schema;

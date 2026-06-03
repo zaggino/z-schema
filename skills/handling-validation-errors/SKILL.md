@@ -16,11 +16,11 @@ import type { SchemaErrorDetail } from 'z-schema';
 
 `ValidateError` extends `Error`:
 
-| Property   | Type                  | Description                          |
-| ---------- | --------------------- | ------------------------------------ |
-| `.name`    | `string`              | Always `'z-schema validation error'` |
-| `.message` | `string`              | Summary message                      |
-| `.details` | `SchemaErrorDetail[]` | All individual errors                |
+| Property   | Type                  | Description              |
+| ---------- | --------------------- | ------------------------ |
+| `.name`    | `string`              | Always `'ValidateError'` |
+| `.message` | `string`              | Summary message          |
+| `.details` | `SchemaErrorDetail[]` | All individual errors    |
 
 Each `SchemaErrorDetail`:
 

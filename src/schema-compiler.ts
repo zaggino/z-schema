@@ -289,7 +289,11 @@ const resolveSchemaScopeId = (base: string | undefined, schema: JsonSchemaIntern
 };
 
 export class SchemaCompiler {
-  constructor(private readonly validator: ZSchemaBase) {}
+  private readonly validator: ZSchemaBase;
+
+  constructor(validator: ZSchemaBase) {
+    this.validator = validator;
+  }
 
   collectAndCacheIds(schema: JsonSchemaInternal) {
     const ids = collectIds(schema, this.validator.options.maxRecursionDepth);

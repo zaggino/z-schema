@@ -54,7 +54,7 @@ export default {
         format: 'fillHello',
       },
       valid: true,
-      after(err: any, valid: any, obj: any) {
+      after(_err: any, valid: any, obj: any) {
         expect(obj.hello).toBe('world');
       },
     },

@@ -692,7 +692,11 @@ const SchemaValidators = {
 } as const;
 
 export class SchemaValidator {
-  constructor(private readonly validator: ZSchemaBase) {}
+  private readonly validator: ZSchemaBase;
+
+  constructor(validator: ZSchemaBase) {
+    this.validator = validator;
+  }
 
   get options() {
     return this.validator.options;

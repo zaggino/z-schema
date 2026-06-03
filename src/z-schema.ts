@@ -25,7 +25,7 @@ export class ZSchema extends ZSchemaBase {
    * @param validatorFunction - A sync or async function `(value: unknown) => boolean | Promise<boolean>`.
    */
   public static registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
-    return registerFormat(name, validatorFunction);
+    registerFormat(name, validatorFunction);
   }
 
   /**
@@ -33,7 +33,7 @@ export class ZSchema extends ZSchemaBase {
    * @param name - The format name to unregister.
    */
   public static unregisterFormat(name: string): void {
-    return unregisterFormat(name);
+    unregisterFormat(name);
   }
 
   /** Returns the names of all globally registered format validators. */
@@ -67,7 +67,7 @@ export class ZSchema extends ZSchemaBase {
    * @param schemaReader - A function `(uri: string) => JsonSchema | undefined`, or `undefined` to clear.
    */
   public static setSchemaReader(schemaReader: SchemaReader | undefined) {
-    return setSchemaReader(schemaReader);
+    setSchemaReader(schemaReader);
   }
 
   public static schemaSymbol = schemaSymbol;
@@ -159,7 +159,13 @@ export class ZSchema extends ZSchemaBase {
   validateAsync(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): Promise<true> {
     return new Promise((resolve, reject) => {
       try {
-        this._validate(json, schema, options || {}, (err, valid) => (err || !valid ? reject(err) : resolve(valid)));
+        this._validate(json, schema, options || {}, (err, valid) => {
+          if (err || !valid) {
+            reject(err);
+          } else {
+            resolve(valid);
+          }
+        });
       } catch (error) {
         reject(error);
       }
@@ -263,7 +269,13 @@ export class ZSchemaAsync extends ZSchemaBase {
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<true> {
     return new Promise((resolve, reject) => {
       try {
-        this._validate(json, schema, options, (err, valid) => (err || !valid ? reject(err) : resolve(valid)));
+        this._validate(json, schema, options, (err, valid) => {
+          if (err || !valid) {
+            reject(err);
+          } else {
+            resolve(valid);
+          }
+        });
       } catch (error) {
         reject(error);
       }

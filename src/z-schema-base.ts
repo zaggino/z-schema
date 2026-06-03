@@ -263,8 +263,8 @@ export class ZSchemaBase {
     }
     const details = err.details || [];
     const missingRefs: string[] = [];
-    function collect(details: SchemaErrorDetail[]) {
-      for (const detail of details) {
+    function collect(items: SchemaErrorDetail[]) {
+      for (const detail of items) {
         if (detail.code === 'UNRESOLVABLE_REFERENCE' || detail.code === 'SCHEMA_NOT_REACHABLE') {
           missingRefs.push(detail.params[0] as string);
         }
@@ -314,36 +314,36 @@ export class ZSchemaBase {
     const visited = new WeakSet<object>();
 
     // clean-up the schema and resolve references
-    const cleanup = (schema: any) => {
+    const cleanup = (node: any) => {
       let key;
-      const typeOf = whatIs(schema);
+      const typeOf = whatIs(node);
       if (typeOf !== 'object' && typeOf !== 'array') {
         return;
       }
 
-      if (visited.has(schema)) {
+      if (visited.has(node)) {
         return;
       }
 
-      visited.add(schema);
+      visited.add(node);
 
-      if (schema.$ref && schema.__$refResolved) {
-        const from = schema.__$refResolved;
-        const to = schema;
-        delete schema.$ref;
-        delete schema.__$refResolved;
+      if (node.$ref && node.__$refResolved) {
+        const from = node.__$refResolved;
+        const to = node;
+        delete node.$ref;
+        delete node.__$refResolved;
         for (key in from) {
           if (Object.hasOwn(from, key)) {
             copyProp(from, to, key);
           }
         }
       }
-      for (key in schema) {
-        if (Object.hasOwn(schema, key)) {
+      for (key in node) {
+        if (Object.hasOwn(node, key)) {
           if (isInternalKey(key)) {
-            delete schema[key];
+            delete node[key];
           } else {
-            cleanup(schema[key]);
+            cleanup(node[key]);
           }
         }
       }

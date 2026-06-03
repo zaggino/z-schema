@@ -34,7 +34,7 @@ export default {
       schema: [schema1, schema2],
       validateSchemaOnly: true,
       valid: true,
-      after(err: any, valid: any, data: any, validator: any) {
+      after(_err: any, valid: any, data: any, validator: any) {
         const newSch = validator.getResolvedSchema('person-object');
         expect(isequal(newSch, expectedResult)).toBe(true);
       },

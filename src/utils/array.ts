@@ -7,7 +7,7 @@ import { areEqual } from './json.js';
  * Falls back to pairwise deep comparison (O(n²)) when the array contains
  * objects or arrays that need structural equality checks.
  */
-export const isUniqueArray = <T>(arr: T[], indexes?: number[], maxDepth?: number): boolean => {
+export const isUniqueArray = (arr: unknown[], indexes?: number[], maxDepth?: number): boolean => {
   const l = arr.length;
   if (l <= 1) {
     return true;

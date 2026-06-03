@@ -76,12 +76,11 @@ export const Errors = {
 };
 
 export class ValidateError extends Error {
-  name: string;
+  override readonly name: string = 'ValidateError';
   details?: SchemaErrorDetail[];
 
   constructor(message: string, details?: SchemaErrorDetail[]) {
     super(message);
-    this.name = 'z-schema validation error';
     this.details = details;
   }
 }

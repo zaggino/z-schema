@@ -88,7 +88,7 @@ export function additionalPropertiesValidator(
 ) {
   // covered in properties and patternProperties
   if (schema.properties === undefined && schema.patternProperties === undefined) {
-    return propertiesValidator.call(this, report, schema, json);
+    propertiesValidator.call(this, report, schema, json);
   }
 }
 
@@ -104,7 +104,7 @@ export function patternPropertiesValidator(
 ) {
   // covered in properties
   if (schema.properties === undefined) {
-    return propertiesValidator.call(this, report, schema, json);
+    propertiesValidator.call(this, report, schema, json);
   }
 }
 

@@ -82,7 +82,7 @@ describe('Using path to schema as a third argument', function () {
 describe('Schema path tracking in validation errors', function () {
   it('should include schema path for property type validation', function () {
     const validator = ZSchema.create({ reportPathAsArray: true });
-    const schema = {
+    const testSchema = {
       type: 'object',
       properties: {
         name: { type: 'string' },
@@ -92,7 +92,7 @@ describe('Schema path tracking in validation errors', function () {
     const data = { name: 'John', age: 'thirty' };
 
     try {
-      validator.validate(data, schema);
+      validator.validate(data, testSchema);
       expect.fail('Validation should have failed');
     } catch (error: any) {
       expect(error.details).toHaveLength(1);
@@ -103,14 +103,14 @@ describe('Schema path tracking in validation errors', function () {
 
   it('should include schema path for array item validation', function () {
     const validator = ZSchema.create({ reportPathAsArray: true });
-    const schema = {
+    const testSchema = {
       type: 'array',
       items: { type: 'string' },
     };
     const data = ['valid', 123, 'also-valid'];
 
     try {
-      validator.validate(data, schema);
+      validator.validate(data, testSchema);
       expect.fail('Validation should have failed');
     } catch (error: any) {
       expect(error.details).toHaveLength(1);
@@ -121,7 +121,7 @@ describe('Schema path tracking in validation errors', function () {
 
   it('should include schema path for nested object validation', function () {
     const validator = ZSchema.create({ reportPathAsArray: true });
-    const schema = {
+    const testSchema = {
       type: 'object',
       properties: {
         user: {
@@ -136,7 +136,7 @@ describe('Schema path tracking in validation errors', function () {
     const data = { user: { name: 'John', age: 'thirty' } };
 
     try {
-      validator.validate(data, schema);
+      validator.validate(data, testSchema);
       expect.fail('Validation should have failed');
     } catch (error: any) {
       expect(error.details).toHaveLength(1);
@@ -147,11 +147,11 @@ describe('Schema path tracking in validation errors', function () {
 
   it('should handle root level type validation', function () {
     const validator = ZSchema.create({ reportPathAsArray: true });
-    const schema = { type: 'string' };
+    const testSchema = { type: 'string' };
     const data = 123;
 
     try {
-      validator.validate(data, schema);
+      validator.validate(data, testSchema);
       expect.fail('Validation should have failed');
     } catch (error: any) {
       expect(error.details).toHaveLength(1);
@@ -162,7 +162,7 @@ describe('Schema path tracking in validation errors', function () {
 
   it('should include schema path for $ref validation', function () {
     const validator = ZSchema.create({ reportPathAsArray: true });
-    const schema = {
+    const testSchema = {
       type: 'object',
       properties: {
         user: { $ref: '#/definitions/User' },
@@ -180,7 +180,7 @@ describe('Schema path tracking in validation errors', function () {
     const data = { user: { name: 'John', age: 'thirty' } };
 
     try {
-      validator.validate(data, schema);
+      validator.validate(data, testSchema);
       expect.fail('Validation should have failed');
     } catch (error: any) {
       expect(error.details).toHaveLength(1);
