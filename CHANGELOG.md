@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.3.1](https://github.com/zaggino/z-schema/compare/v12.3.0...v12.3.1) (2026-06-03)
+
+
+### Bug Fixes
+
+* run copy:schemas before check in release-please workflow ([#440](https://github.com/zaggino/z-schema/issues/440)) ([dcd2f76](https://github.com/zaggino/z-schema/commit/dcd2f76e40f9ac152241241fc34129f00ff256fe))
+
 ## [12.3.0](https://github.com/zaggino/z-schema/compare/v12.2.0...v12.3.0) (2026-06-03)
 
 
