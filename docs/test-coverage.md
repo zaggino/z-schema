@@ -41,5 +41,5 @@ Line coverage status: **high**
 | src/z-schema-options.ts       |     92% |         92% |       100% |      70% |
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
-| src/z-schema.ts               |     76% |         76% |        79% |     100% |
-| **Total**                     | **90%** |     **90%** |    **95%** |  **88%** |
+| src/z-schema.ts               |     76% |         76% |        79% |      83% |
+| **Total**                     | **90%** |     **90%** |    **95%** |  **87%** |
