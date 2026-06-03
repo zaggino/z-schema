@@ -14,7 +14,9 @@ export default defineConfig({
   },
   rules: {
     // ── Intentional project rules on top of ultracite defaults
+    eqeqeq: 'off',
     'func-style': ['error', 'declaration', { allowArrowFunctions: true }],
+    'no-eq-null': 'off',
     'no-inline-comments': 'off',
     'no-plusplus': 'off',
     'no-unused-vars': [
@@ -22,10 +24,6 @@ export default defineConfig({
       { args: 'after-used', argsIgnorePattern: '^_', caughtErrors: 'all', caughtErrorsIgnorePattern: '^_' },
     ],
     'no-warning-comments': 'off',
-    // Object destructuring only. Array destructuring goes through the iterator
-    // protocol (slower than indexed access) which the validation hot paths rely
-    // on, so it is intentionally not enforced here.
-    'prefer-destructuring': ['error', { array: false, object: true }],
     'require-unicode-regexp': 'off',
     'sort-keys': 'off',
     'typescript/array-type': ['error', { default: 'array-simple' }],
@@ -37,6 +35,11 @@ export default defineConfig({
     // ── Intentionally kept off for performance (NOT in the TODO backlog) ──
     // Excluded from the lint re-enable effort on performance grounds: the
     // "fixed" form is measurably slower than the construct it replaces.
+
+    // Object destructuring only. Array destructuring goes through the iterator
+    // protocol (slower than indexed access) which the validation hot paths rely
+    // on, so it is intentionally not enforced here.
+    'prefer-destructuring': ['error', { array: false, object: true }],
 
     // Spread over .concat()/.slice() allocates via the iterator protocol —
     // slower than Array#concat/#slice in hot paths (report.ts, schema-compiler.ts).
@@ -198,22 +201,6 @@ export default defineConfig({
     // type: type-safety
     // Disallows assigning `any`-typed values to typed variables or properties.
     'typescript/no-unsafe-assignment': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 10
-    // complexity: easy
-    // `== null` comparisons are used where `=== null || === undefined` (or `??`) is preferred.
-    // type: best-practice
-    // Disallows `== null` comparisons, requiring strict equality checks for `null` and `undefined`.
-    'no-eq-null': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 10
-    // complexity: easy
-    // Loose equality (`==`) is used in some comparisons; replacing with strict equality (`===`) is mostly mechanical.
-    // type: bug-prevention
-    // Requires strict equality operators (`===`/`!==`) instead of loose equality (`==`/`!=`).
-    eqeqeq: 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 9
