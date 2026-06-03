@@ -15,11 +15,6 @@ import { defaultOptions } from './z-schema-options.js';
 import { getSchemaReader, setSchemaReader } from './z-schema-reader.js';
 
 export class ZSchema extends ZSchemaBase {
-  /** Use ZSchema.create() instead. @internal */
-  constructor(options: ZSchemaOptions | undefined, token: symbol) {
-    super(options, token);
-  }
-
   // ----- static methods start -----
 
   // class scoped format functions
@@ -221,11 +216,6 @@ export class ZSchema extends ZSchemaBase {
  * Created via `ZSchema.create({ safe: true })`.
  */
 export class ZSchemaSafe extends ZSchemaBase {
-  /** Use ZSchema.create() instead. @internal */
-  constructor(options: ZSchemaOptions | undefined, token: symbol) {
-    super(options, token);
-  }
-
   /**
    * Validate JSON data against a schema.
    * @param json - The data to validate.
@@ -262,11 +252,6 @@ export class ZSchemaSafe extends ZSchemaBase {
  * Created via `ZSchema.create({ async: true })`.
  */
 export class ZSchemaAsync extends ZSchemaBase {
-  /** Use ZSchema.create() instead. @internal */
-  constructor(options: ZSchemaOptions | undefined, token: symbol) {
-    super(options, token);
-  }
-
   /**
    * Validate JSON data against a schema asynchronously.
    * @param json - The data to validate.
@@ -301,11 +286,6 @@ export class ZSchemaAsync extends ZSchemaBase {
  * Created via `ZSchema.create({ async: true, safe: true })`.
  */
 export class ZSchemaAsyncSafe extends ZSchemaBase {
-  /** Use ZSchema.create() instead. @internal */
-  constructor(options: ZSchemaOptions | undefined, token: symbol) {
-    super(options, token);
-  }
-
   /**
    * Validate JSON data against a schema asynchronously.
    * The promise always resolves (never rejects).

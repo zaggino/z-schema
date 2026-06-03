@@ -143,7 +143,7 @@ export const findId = (
   const inTargetBase = !targetBaseUri || nextBaseUri === targetBaseUri;
 
   if (inTargetBase) {
-    if (schemaId && (schemaId === id || (schemaId[0] === '#' && schemaId.slice(1) === id))) {
+    if (schemaId && (schemaId === id || (schemaId.startsWith('#') && schemaId.slice(1) === id))) {
       return schema;
     }
     if (schema.$anchor === id || schema.$dynamicAnchor === id) {

@@ -76,7 +76,7 @@ export class Report {
   commonErrorMessage?: string;
   __$recursiveAnchorStack: JsonSchemaInternal[] = [];
   __$dynamicScopeStack: JsonSchemaInternal[] = [];
-  __validationResultCache: Map<unknown, Map<unknown, boolean>> = new Map();
+  __validationResultCache = new Map<unknown, Map<unknown, boolean>>();
   errors: SchemaErrorDetail[] = [];
   json?: unknown;
   path: Array<number | string> = [];

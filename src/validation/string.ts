@@ -143,7 +143,7 @@ export function contentEncodingValidator(this: ZSchemaBase, report: Report, sche
     return;
   }
 
-  const contentEncoding = schema.contentEncoding;
+  const { contentEncoding } = schema;
   if (contentEncoding !== 'base64') {
     return;
   }
@@ -176,7 +176,7 @@ export function contentMediaTypeValidator(
     return;
   }
 
-  const contentMediaType = schema.contentMediaType;
+  const { contentMediaType } = schema;
   if (contentMediaType !== 'application/json') {
     return;
   }

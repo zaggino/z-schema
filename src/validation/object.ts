@@ -120,8 +120,8 @@ export function propertiesValidator(this: ZSchemaBase, report: Report, schema: J
   if (!isObject(json)) {
     return;
   }
-  const properties = schema.properties !== undefined ? schema.properties : {};
-  const patternProperties = schema.patternProperties !== undefined ? schema.patternProperties : {};
+  const properties = schema.properties === undefined ? {} : schema.properties;
+  const patternProperties = schema.patternProperties === undefined ? {} : schema.patternProperties;
   if (schema.additionalProperties === false) {
     // The property set of the json to validate.
     let s = Object.keys(json);

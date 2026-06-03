@@ -232,7 +232,7 @@ const resolveReference = (base: string | undefined, ref: string) => {
 
   const baseStr = base ?? '';
 
-  if (ref[0] === '#') {
+  if (ref.startsWith('#')) {
     const hashIndex = baseStr.indexOf('#');
     const baseNoFrag = hashIndex === -1 ? baseStr : baseStr.slice(0, hashIndex);
     return baseNoFrag + ref;
@@ -261,7 +261,8 @@ const resolveReference = (base: string | undefined, ref: string) => {
   return baseDir + ref;
 };
 
-const isSimpleIdentifier = (id: string) => id[0] !== '#' && !id.includes('/') && !id.includes('.') && !id.includes('#');
+const isSimpleIdentifier = (id: string) =>
+  !id.startsWith('#') && !id.includes('/') && !id.includes('.') && !id.includes('#');
 
 const resolveIdScope = (base: string | undefined, id: string) => {
   if (isAbsoluteUri(id)) {
@@ -288,7 +289,7 @@ const resolveSchemaScopeId = (base: string | undefined, schema: JsonSchemaIntern
 };
 
 export class SchemaCompiler {
-  constructor(private validator: ZSchemaBase) {}
+  constructor(private readonly validator: ZSchemaBase) {}
 
   collectAndCacheIds(schema: JsonSchemaInternal) {
     const ids = collectIds(schema, this.validator.options.maxRecursionDepth);
@@ -406,13 +407,13 @@ export class SchemaCompiler {
             (s as JsonSchemaInternal).id = remotePath;
             // try to compile the schema
             const subreport = new Report(report);
-            if (!this.compileSchema(subreport, s)) {
+            if (this.compileSchema(subreport, s)) {
+              response = this.validator.scache.getSchemaByUri(report, refObj.ref, schema);
+            } else {
               // copy errors to report
               for (let i = 0; i < subreport.errors.length; i++) {
                 report.errors.push(subreport.errors[i]);
               }
-            } else {
-              response = this.validator.scache.getSchemaByUri(report, refObj.ref, schema);
             }
           }
         }
