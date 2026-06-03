@@ -23,6 +23,7 @@ export default defineConfig({
     'no-inline-comments': 'off',
     'no-param-reassign': 'off',
     'no-plusplus': 'off',
+    'no-use-before-define': ['error', { functions: false, classes: false, variables: true }],
     'no-unused-vars': [
       'error',
       { args: 'after-used', argsIgnorePattern: '^_', caughtErrors: 'all', caughtErrorsIgnorePattern: '^_' },
@@ -107,14 +108,6 @@ export default defineConfig({
     // type: best-practice
     // Prefers `async`/`await` over callback-based APIs when a promise-based alternative is available.
     'promise/prefer-await-to-callbacks': 'off',
-
-    // TODO: evaluate this rule in the future
-    // occurrences in codebase: 26
-    // complexity: moderate
-    // Identifiers are referenced before their declaration; hoisting or reordering declarations is required per site.
-    // type: bug-prevention
-    // Disallows references to variables, functions, or classes before they are defined in the source.
-    'no-use-before-define': 'off',
 
     // TODO: evaluate this rule in the future
     // occurrences in codebase: 23
