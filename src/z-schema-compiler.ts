@@ -1,8 +1,25 @@
-import type { JsonSchema } from './json-schema-versions.js';
+import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ValidateResponse } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
+import { getId } from './json-schema.js';
+import { shallowClone } from './utils/clone.js';
+import { isAbsoluteUri } from './utils/uri.js';
 import { ZSchema } from './z-schema.js';
+
+/**
+ * A {@link JsonSchema} that is guaranteed to carry an identifier — `$id` for
+ * draft-06+ schemas or `id` for draft-04 — so it can be referenced by string
+ * via {@link ZSchemaCompiler.validate}.
+ */
+export type JsonSchemaWithId = JsonSchema & ({ $id: string } | { id: string });
+
+/**
+ * Monotonic counter used to mint unique internal `$id`s for anonymous schemas
+ * compiled via {@link ZSchemaCompiler.compile}. Module-scoped and deterministic
+ * (no `Math.random` / `Date.now`).
+ */
+let anonymousSchemaCounter = 0;
 
 /**
  * A compiled validation function that throws {@link ValidateError} on failure.
@@ -96,9 +113,12 @@ export class ZSchemaCompiler<T extends ZSchemaOptions = ZSchemaOptions> {
 
   constructor(options?: T) {
     this._options = (options ?? {}) as T;
-    // Always create a plain ZSchema so we can dispatch to the right method variant.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { async: _async, safe: _safe, ...rest } = this._options;
+    // Dispatch to the async/safe variants ourselves (see compile/validate), so
+    // the internal validator is always a plain ZSchema. Strip the dispatch-only
+    // flags off a copy before creating it — never mutate the caller's options.
+    const rest: ZSchemaOptions = { ...this._options };
+    delete rest.async;
+    delete rest.safe;
     this._zschema = ZSchema.create(rest);
   }
 
@@ -109,14 +129,31 @@ export class ZSchemaCompiler<T extends ZSchemaOptions = ZSchemaOptions> {
   /**
    * Register a JSON Schema for later use with {@link validate} (by its `$id` / `id`).
    *
-   * The schema is compiled and cached eagerly. Subsequent calls to
-   * `validate(data, schemaRef)` can reference it by its `$id`.
+   * The schema is validated and its identified (sub-)schemas are cached under
+   * their absolute `$id`/`id` URIs. Subsequent calls to `validate(data, ref)`
+   * can then reference it by that identifier.
    *
-   * @param schema - A JSON Schema object. Must have a `$id` (or `id`) to be referenceable.
+   * A `$id` (or `id` for draft-04) is **required** to make the schema
+   * referenceable — the parameter type enforces this. If a schema without one
+   * is passed at runtime (e.g. from untyped JavaScript), the call still
+   * validates the schema but emits a `console.warn`, since it cannot be
+   * referenced afterwards.
+   *
+   * Like {@link compile}, this validates eagerly and throws on an invalid
+   * schema **regardless of the `safe` option** — `safe` only affects data
+   * validation, not schema validation.
+   *
+   * @param schema - A JSON Schema object carrying a `$id` (or `id` for draft-04).
    * @returns `this` for chaining.
-   * @throws {@link ValidateError} if the schema is invalid.
+   * @throws {@link ValidateError} if the schema is invalid (even in `safe` mode).
    */
-  addSchema(schema: JsonSchema): this {
+  addSchema(schema: JsonSchemaWithId): this {
+    if (!getId(schema as JsonSchemaInternal)) {
+      console.warn(
+        'z-schema: addSchema() was called with a schema that has no $id (or id for draft-04); ' +
+          'it cannot be referenced via validate(data, ref).'
+      );
+    }
     this._zschema.validateSchema(schema);
     return this;
   }
@@ -124,11 +161,20 @@ export class ZSchemaCompiler<T extends ZSchemaOptions = ZSchemaOptions> {
   /**
    * Compile a JSON Schema into a reusable validation function.
    *
-   * The schema is validated and compiled eagerly. Subsequent calls to the
-   * returned function skip schema compilation and go straight to data validation.
+   * The schema is validated and compiled eagerly: invalid schemas throw a
+   * {@link ValidateError} here, at compile time, **regardless of the `safe`
+   * option** (`safe` only governs how the returned function reports invalid
+   * *data*).
+   *
+   * The schema is registered in the validator's cache under an identifier (its
+   * own `$id`/`id`, or a unique internal one minted for anonymous schemas), and
+   * the returned function validates by that identifier. This means each
+   * invocation reuses the already-compiled schema — no per-call re-compilation
+   * or cloning.
    *
    * @param schema - A JSON Schema object or a boolean schema (`true`/`false`).
    * @returns A validation function whose signature is inferred from the constructor options.
+   * @throws {@link ValidateError} if the schema is invalid (even in `safe` mode).
    */
   compile(schema: JsonSchema | boolean): InferValidateFunction<T> {
     // Boolean schemas: true accepts everything, false rejects everything.
@@ -140,19 +186,65 @@ export class ZSchemaCompiler<T extends ZSchemaOptions = ZSchemaOptions> {
       resolvedSchema = schema;
     }
 
-    // Pre-compile and validate the schema so errors surface at compile time.
-    this._zschema.validateSchema(resolvedSchema);
+    // Resolve a string reference for the schema so the returned function can
+    // validate by id — the cached path returns the already-compiled schema and
+    // skips the per-call deep-clone + recompilation that validating by object
+    // would incur.
+    const ref = this._registerForCompile(resolvedSchema);
 
     if (this._options.async && this._options.safe) {
-      return ((data: unknown) => this._zschema.validateAsyncSafe(data, resolvedSchema)) as InferValidateFunction<T>;
+      return ((data: unknown) => this._zschema.validateAsyncSafe(data, ref)) as InferValidateFunction<T>;
     }
     if (this._options.async) {
-      return ((data: unknown) => this._zschema.validateAsync(data, resolvedSchema)) as InferValidateFunction<T>;
+      return ((data: unknown) => this._zschema.validateAsync(data, ref)) as InferValidateFunction<T>;
     }
     if (this._options.safe) {
-      return ((data: unknown) => this._zschema.validateSafe(data, resolvedSchema)) as InferValidateFunction<T>;
+      return ((data: unknown) => this._zschema.validateSafe(data, ref)) as InferValidateFunction<T>;
     }
-    return ((data: unknown) => this._zschema.validate(data, resolvedSchema)) as InferValidateFunction<T>;
+    return ((data: unknown) => this._zschema.validate(data, ref)) as InferValidateFunction<T>;
+  }
+
+  /**
+   * Validate and register a schema for {@link compile}, returning the string id
+   * the compiled function should validate against.
+   *
+   * Schemas that already carry an `$id`/`id` are registered under it. Anonymous
+   * schemas are given a unique absolute internal `$id` (on a private clone, so
+   * the caller's object is never mutated) so they too can be cached and reused.
+   */
+  private _registerForCompile(resolvedSchema: JsonSchema): string {
+    const existingId = getId(resolvedSchema as JsonSchemaInternal);
+    if (existingId) {
+      // Validates (throws on invalid) and caches under the existing id.
+      this._zschema.validateSchema(resolvedSchema);
+      return existingId;
+    }
+
+    const ref = `urn:z-schema:compiled:${(anonymousSchemaCounter += 1)}`;
+    // `urn:` is an absolute URI, so collectAndCacheIds caches the schema by it.
+    /* c8 ignore next */
+    if (!isAbsoluteUri(ref)) {
+      throw new Error(`Internal error: generated schema id is not absolute: ${ref}`);
+    }
+
+    // Clone before assigning the id so the caller's schema object is untouched.
+    const owned = shallowClone(resolvedSchema) as JsonSchemaInternal;
+    // Draft-04 reads `id`; draft-06+ reads `$id` (getId falls back to `id`).
+    if (this._isDraft04(owned)) {
+      owned.id = ref;
+    } else {
+      owned.$id = ref;
+    }
+    this._zschema.validateSchema(owned as JsonSchema);
+    return ref;
+  }
+
+  /** Whether schema id resolution should use the draft-04 `id` keyword. */
+  private _isDraft04(schema: JsonSchemaInternal): boolean {
+    if (this._options.version === 'draft-04') {
+      return true;
+    }
+    return typeof schema.$schema === 'string' && schema.$schema.includes('draft-04');
   }
 
   /**
