@@ -172,6 +172,28 @@ describe('ZSchemaCompiler', () => {
       expect(schema).toEqual({ type: 'object', required: ['name'] });
     });
 
+    it('should not let two schemas with the same $id clobber each other', () => {
+      const compiler = new ZSchemaCompiler({ version: 'none' });
+      const validateString = compiler.compile({ $id: 'shared', type: 'string' });
+      const validateNumber = compiler.compile({ $id: 'shared', type: 'number' });
+
+      // Each compiled function keeps its own semantics despite the shared $id —
+      // they are registered under distinct internal references.
+      expect(validateString('hello')).toBe(true);
+      expect(() => validateString(42)).toThrow();
+      expect(validateNumber(42)).toBe(true);
+      expect(() => validateNumber('hello')).toThrow();
+    });
+
+    it('should compile a schema whose only id is a bare fragment', () => {
+      const compiler = new ZSchemaCompiler({ version: 'none' });
+      // A fragment-only $id is not resolvable as a remote URI, but compiling by
+      // a minted reference must still work.
+      const validate = compiler.compile({ $id: '#frag', type: 'string' });
+      expect(validate('hello')).toBe(true);
+      expect(() => validate(42)).toThrow();
+    });
+
     it('should compile multiple schemas independently', () => {
       const compiler = new ZSchemaCompiler();
       const validateString = compiler.compile({ type: 'string' });

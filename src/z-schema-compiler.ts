@@ -3,8 +3,6 @@ import type { ValidateResponse } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { getId } from './json-schema.js';
-import { shallowClone } from './utils/clone.js';
-import { isAbsoluteUri } from './utils/uri.js';
 import { ZSchema } from './z-schema.js';
 
 /**
@@ -15,9 +13,9 @@ import { ZSchema } from './z-schema.js';
 export type JsonSchemaWithId = JsonSchema & ({ $id: string } | { id: string });
 
 /**
- * Monotonic counter used to mint unique internal `$id`s for anonymous schemas
- * compiled via {@link ZSchemaCompiler.compile}. Module-scoped and deterministic
- * (no `Math.random` / `Date.now`).
+ * Monotonic counter used to mint unique internal URIs for schemas compiled via
+ * {@link ZSchemaCompiler.compile}. Module-scoped and deterministic (no
+ * `Math.random` / `Date.now`).
  */
 let anonymousSchemaCounter = 0;
 
@@ -166,11 +164,15 @@ export class ZSchemaCompiler<T extends ZSchemaOptions = ZSchemaOptions> {
    * option** (`safe` only governs how the returned function reports invalid
    * *data*).
    *
-   * The schema is registered in the validator's cache under an identifier (its
-   * own `$id`/`id`, or a unique internal one minted for anonymous schemas), and
-   * the returned function validates by that identifier. This means each
+   * The schema is registered in the validator's cache under a unique internal
+   * URI and the returned function validates by that reference, so each
    * invocation reuses the already-compiled schema — no per-call re-compilation
    * or cloning.
+   *
+   * Note: every `compile()` call registers a schema in this compiler's instance
+   * cache for the lifetime of the compiler. Compile a bounded set of schemas
+   * (typically once at startup); do not call `compile()` per request in a hot
+   * loop with distinct schemas.
    *
    * @param schema - A JSON Schema object or a boolean schema (`true`/`false`).
    * @returns A validation function whose signature is inferred from the constructor options.
@@ -186,10 +188,9 @@ export class ZSchemaCompiler<T extends ZSchemaOptions = ZSchemaOptions> {
       resolvedSchema = schema;
     }
 
-    // Resolve a string reference for the schema so the returned function can
-    // validate by id — the cached path returns the already-compiled schema and
-    // skips the per-call deep-clone + recompilation that validating by object
-    // would incur.
+    // Register the schema and validate by reference — the cached path returns
+    // the already-compiled schema and skips the per-call deep-clone +
+    // recompilation that validating by object would incur.
     const ref = this._registerForCompile(resolvedSchema);
 
     if (this._options.async && this._options.safe) {
@@ -208,43 +209,20 @@ export class ZSchemaCompiler<T extends ZSchemaOptions = ZSchemaOptions> {
    * Validate and register a schema for {@link compile}, returning the string id
    * the compiled function should validate against.
    *
-   * Schemas that already carry an `$id`/`id` are registered under it. Anonymous
-   * schemas are given a unique absolute internal `$id` (on a private clone, so
-   * the caller's object is never mutated) so they too can be cached and reused.
+   * The schema is registered under a **freshly minted, unique** internal URI
+   * (never its own `$id`/`id`) via {@link ZSchema.setRemoteReference}, which
+   * deep-clones it and only assigns an id when one is absent — so the caller's
+   * object and its existing identity are left untouched. Using a unique key per
+   * `compile()` call means two schemas sharing the same `$id`, or a schema whose
+   * only id is a bare fragment, cannot clobber or shadow each other in the cache.
    */
   private _registerForCompile(resolvedSchema: JsonSchema): string {
-    const existingId = getId(resolvedSchema as JsonSchemaInternal);
-    if (existingId) {
-      // Validates (throws on invalid) and caches under the existing id.
-      this._zschema.validateSchema(resolvedSchema);
-      return existingId;
-    }
+    // Eagerly validate so invalid schemas throw at compile time (even in safe mode).
+    this._zschema.validateSchema(resolvedSchema);
 
     const ref = `urn:z-schema:compiled:${(anonymousSchemaCounter += 1)}`;
-    // `urn:` is an absolute URI, so collectAndCacheIds caches the schema by it.
-    /* c8 ignore next */
-    if (!isAbsoluteUri(ref)) {
-      throw new Error(`Internal error: generated schema id is not absolute: ${ref}`);
-    }
-
-    // Clone before assigning the id so the caller's schema object is untouched.
-    const owned = shallowClone(resolvedSchema) as JsonSchemaInternal;
-    // Draft-04 reads `id`; draft-06+ reads `$id` (getId falls back to `id`).
-    if (this._isDraft04(owned)) {
-      owned.id = ref;
-    } else {
-      owned.$id = ref;
-    }
-    this._zschema.validateSchema(owned as JsonSchema);
+    this._zschema.setRemoteReference(ref, resolvedSchema);
     return ref;
-  }
-
-  /** Whether schema id resolution should use the draft-04 `id` keyword. */
-  private _isDraft04(schema: JsonSchemaInternal): boolean {
-    if (this._options.version === 'draft-04') {
-      return true;
-    }
-    return typeof schema.$schema === 'string' && schema.$schema.includes('draft-04');
   }
 
   /**
