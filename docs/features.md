@@ -102,11 +102,13 @@ const compiler = new ZSchemaCompiler();
 const validate = compiler.compile({ type: 'object', required: ['name'] });
 
 try {
-  validate({}); // throws on error by default, doesn't throw when safe:true is set
+  validate({}); // throws on invalid data by default; returns { valid, err? } when safe:true is set
 } catch (err) {
-  console.log(err); // error object
+  console.log(err.details); // array of error details
 }
 ```
+
+> Invalid **schemas** throw at `compile()`/`addSchema()` time regardless of the `safe` option — `safe` only governs how invalid **data** is reported.
 
 ### Combined async + safe
 

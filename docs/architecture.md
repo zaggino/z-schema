@@ -4,7 +4,7 @@
 
 ```
 index.ts (public API)
-  ├─ z-schema-compiler.ts (ZSchemaCompiler)
+  ├─ z-schema-compiler.ts (ZSchemaCompiler — compile-to-function wrapper; depends on z-schema.ts)
   └─ z-schema.ts (ZSchema, ZSchemaSafe, ZSchemaAsync, ZSchemaAsyncSafe)
        ├─ z-schema-versions.ts (register bundled draft-04/draft-06/draft-07/draft-2019-09/draft-2020-12 meta-schemas)
        └─ z-schema-base.ts (ZSchemaBase — core validation orchestration)

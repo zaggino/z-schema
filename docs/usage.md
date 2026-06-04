@@ -385,6 +385,12 @@ The returned function type is **automatically inferred** from the `async` and `s
 
 This works because `ZSchemaCompiler` is generic: `ZSchemaCompiler<T extends ZSchemaOptions>`. The `InferValidateFunction<T>` conditional type maps your options to the correct function type at compile time.
 
+> **Note:** inference requires passing the options as an object literal directly to the constructor (`new ZSchemaCompiler({ async: true })`). If you pass a variable that is widened to `ZSchemaOptions`, TypeScript can no longer see the literal `true`, and `compile()` falls back to `ValidateFunction`.
+
+> **Note:** invalid **schemas** always throw a `ValidateError` at `compile()` (and `addSchema()`) time, even with `{ safe: true }`. The `safe` option only controls how the returned function reports invalid **data** — it does not suppress schema compilation errors. Wrap `compile()`/`addSchema()` in a `try`/`catch` if you compile untrusted schemas.
+
+The schema is registered in the validator's cache when you call `compile()`, so the returned function reuses the already-compiled schema on every call — there is no per-call recompilation.
+
 ### Safe mode
 
 ```typescript
@@ -392,6 +398,9 @@ const compiler = new ZSchemaCompiler({ safe: true });
 const validate = compiler.compile({ type: 'string' });
 
 const result = validate(42); // { valid: false, err: ValidateError }
+
+// Note: an invalid *schema* still throws here, even in safe mode:
+// compiler.compile({ type: 'nope' }) // throws ValidateError
 ```
 
 ### Async + safe mode
@@ -411,7 +420,20 @@ const acceptAll = compiler.compile(true); // accepts any data
 const rejectAll = compiler.compile(false); // rejects all data
 ```
 
-All other `ZSchemaOptions` (e.g., `version`, `breakOnFirstError`) are forwarded to the internal validator.
+### Registering schemas by reference
+
+Use `addSchema()` to register a schema for later validation by its identifier, then `validate(data, ref)`:
+
+```typescript
+const compiler = new ZSchemaCompiler();
+compiler.addSchema({ $id: 'person', type: 'object', required: ['name'] });
+
+compiler.validate({ name: 'Alice' }, 'person'); // returns true (throws on failure)
+```
+
+`addSchema()` **requires** the schema to carry a `$id` (or `id` for draft-04) — that identifier is how `validate(data, ref)` finds it. The parameter type enforces this; passing a schema without one from untyped JavaScript still validates the schema but logs a `console.warn`, because it cannot be referenced afterwards.
+
+All other `ZSchemaOptions` (e.g., `version`, `breakOnFirstError`, `customFormats`) are forwarded to the internal validator.
 
 ## TypeScript Types
 

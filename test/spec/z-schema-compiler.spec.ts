@@ -1,3 +1,10 @@
+import type {
+  AsyncSafeValidateFunction,
+  AsyncValidateFunction,
+  SafeValidateFunction,
+  ValidateFunction,
+} from '../../src/z-schema-compiler.ts';
+
 import { ZSchemaCompiler } from '../../src/z-schema-compiler.ts';
 
 const objectSchema = { type: 'object', required: ['name'], properties: { name: { type: 'string' } } };
@@ -123,13 +130,68 @@ describe('ZSchemaCompiler', () => {
       const validateFalse = compiler.compile(false);
       expect(validateFalse('anything').valid).toBe(false);
     });
+
+    it('should work with boolean schemas in async mode', async () => {
+      const compiler = new ZSchemaCompiler({ async: true, version: 'none' });
+      await expect(compiler.compile(true)('anything')).resolves.toBe(true);
+      await expect(compiler.compile(false)('anything')).rejects.toThrow();
+    });
+
+    it('should work with boolean schemas in async + safe mode', async () => {
+      const compiler = new ZSchemaCompiler({ async: true, safe: true, version: 'none' });
+      await expect(compiler.compile(true)('anything')).resolves.toEqual({ valid: true });
+      const result = await compiler.compile(false)('anything');
+      expect(result.valid).toBe(false);
+    });
   });
 
   describe('schema pre-compilation', () => {
     it('should throw at compile time for invalid schemas', () => {
       const compiler = new ZSchemaCompiler();
-      // A schema referencing a non-existent $ref should fail at compile time
+      // A $ref to an unreachable remote schema fails during the eager compile-time
+      // validateSchema call (the remote can't be resolved), so compile() throws.
       expect(() => compiler.compile({ $ref: 'http://nonexistent/schema' })).toThrow();
+    });
+
+    it('should reuse the compiled schema across repeated calls', () => {
+      const compiler = new ZSchemaCompiler();
+      const validate = compiler.compile(objectSchema);
+      // The compiled function caches the schema by id and must return stable
+      // results no matter how many times — and in which order — it is called.
+      for (let i = 0; i < 5; i++) {
+        expect(validate({ name: 'Alice' })).toBe(true);
+        expect(() => validate({})).toThrow();
+      }
+    });
+
+    it('should not mutate the caller schema object when compiling', () => {
+      const compiler = new ZSchemaCompiler();
+      const schema = { type: 'object', required: ['name'] };
+      compiler.compile(schema);
+      // The internal id is assigned to a private clone, never the input.
+      expect(schema).toEqual({ type: 'object', required: ['name'] });
+    });
+
+    it('should not let two schemas with the same $id clobber each other', () => {
+      const compiler = new ZSchemaCompiler({ version: 'none' });
+      const validateString = compiler.compile({ $id: 'shared', type: 'string' });
+      const validateNumber = compiler.compile({ $id: 'shared', type: 'number' });
+
+      // Each compiled function keeps its own semantics despite the shared $id —
+      // they are registered under distinct internal references.
+      expect(validateString('hello')).toBe(true);
+      expect(() => validateString(42)).toThrow();
+      expect(validateNumber(42)).toBe(true);
+      expect(() => validateNumber('hello')).toThrow();
+    });
+
+    it('should compile a schema whose only id is a bare fragment', () => {
+      const compiler = new ZSchemaCompiler({ version: 'none' });
+      // A fragment-only $id is not resolvable as a remote URI, but compiling by
+      // a minted reference must still work.
+      const validate = compiler.compile({ $id: '#frag', type: 'string' });
+      expect(validate('hello')).toBe(true);
+      expect(() => validate(42)).toThrow();
     });
 
     it('should compile multiple schemas independently', () => {
@@ -241,7 +303,77 @@ describe('ZSchemaCompiler', () => {
 
     it('should throw on addSchema with an invalid schema', () => {
       const compiler = new ZSchemaCompiler();
-      expect(() => compiler.addSchema({ type: 'not-a-valid-type' } as any)).toThrow();
+      expect(() => compiler.addSchema({ type: 'not-a-valid-type', $id: 'bad' } as any)).toThrow();
+    });
+
+    it('should warn when addSchema is called without a $id', () => {
+      const compiler = new ZSchemaCompiler({ version: 'none' });
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      try {
+        compiler.addSchema({ type: 'string' } as any);
+        expect(warn).toHaveBeenCalledOnce();
+      } finally {
+        warn.mockRestore();
+      }
+    });
+
+    it('should throw for an unregistered ref (sync)', () => {
+      const compiler = new ZSchemaCompiler({ version: 'none' });
+      expect(() => compiler.validate({}, 'never-registered')).toThrow();
+    });
+
+    it('should report invalid for an unregistered ref (safe)', () => {
+      const compiler = new ZSchemaCompiler({ safe: true, version: 'none' });
+      const result = compiler.validate({}, 'never-registered');
+      expect(result.valid).toBe(false);
+      expect(result.err).toBeDefined();
+    });
+
+    it('should reject for an unregistered ref (async)', async () => {
+      const compiler = new ZSchemaCompiler({ async: true, version: 'none' });
+      await expect(compiler.validate({}, 'never-registered')).rejects.toThrow();
+    });
+  });
+
+  describe('data edge cases', () => {
+    it('should reject undefined data against an object schema', () => {
+      const validate = new ZSchemaCompiler().compile(objectSchema);
+      const undefinedData: unknown = undefined;
+      expect(() => validate(undefinedData)).toThrow();
+    });
+
+    it('should reject null data against an object schema', () => {
+      const validate = new ZSchemaCompiler().compile(objectSchema);
+      expect(() => validate(null)).toThrow();
+    });
+
+    it('should accept null when the schema allows null', () => {
+      const validate = new ZSchemaCompiler().compile({ type: 'null' });
+      expect(validate(null)).toBe(true);
+    });
+  });
+
+  describe('customFormats passthrough', () => {
+    it('should honor a custom format passed via options', () => {
+      const compiler = new ZSchemaCompiler({
+        safe: true,
+        version: 'draft-04',
+        customFormats: { 'only-foo': (value: unknown) => value === 'foo' },
+      });
+      const validate = compiler.compile({ type: 'string', format: 'only-foo' });
+      expect(validate('foo').valid).toBe(true);
+      expect(validate('bar').valid).toBe(false);
+    });
+  });
+
+  describe('compile() return-type inference', () => {
+    it('infers the function type from the constructor options', () => {
+      expectTypeOf(new ZSchemaCompiler().compile(objectSchema)).toEqualTypeOf<ValidateFunction>();
+      expectTypeOf(new ZSchemaCompiler({ safe: true }).compile(objectSchema)).toEqualTypeOf<SafeValidateFunction>();
+      expectTypeOf(new ZSchemaCompiler({ async: true }).compile(objectSchema)).toEqualTypeOf<AsyncValidateFunction>();
+      expectTypeOf(
+        new ZSchemaCompiler({ async: true, safe: true }).compile(objectSchema)
+      ).toEqualTypeOf<AsyncSafeValidateFunction>();
     });
   });
 
@@ -254,23 +386,20 @@ describe('ZSchemaCompiler', () => {
     });
 
     it('should respect breakOnFirstError option', () => {
-      const schema = {
-        type: 'object',
-        required: ['a', 'b', 'c'],
-      };
+      // Three independent keyword failures on a single value: without the option
+      // all three are collected; with it, validation stops after the first.
+      const schema = { type: 'string', minLength: 5, pattern: '^x', enum: ['zzz'] };
+      const badValue = 'a';
 
-      // Without breakOnFirstError — all errors reported
       const compilerAll = new ZSchemaCompiler({ safe: true });
-      const validateAll = compilerAll.compile(schema);
-      const resultAll = validateAll({});
+      const resultAll = compilerAll.compile(schema)(badValue);
       expect(resultAll.valid).toBe(false);
+      expect(resultAll.err!.details!.length).toBeGreaterThan(1);
 
-      // With breakOnFirstError — fewer errors reported
       const compilerBreak = new ZSchemaCompiler({ safe: true, breakOnFirstError: true });
-      const validateBreak = compilerBreak.compile(schema);
-      const resultBreak = validateBreak({});
+      const resultBreak = compilerBreak.compile(schema)(badValue);
       expect(resultBreak.valid).toBe(false);
-      expect(resultBreak.err!.details!.length).toBeLessThanOrEqual(resultAll.err!.details!.length);
+      expect(resultBreak.err!.details!.length).toBeLessThan(resultAll.err!.details!.length);
     });
   });
 });
