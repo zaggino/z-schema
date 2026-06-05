@@ -431,7 +431,7 @@ compiler.addSchema({ $id: 'person', type: 'object', required: ['name'] });
 compiler.validate({ name: 'Alice' }, 'person'); // returns true (throws on failure)
 ```
 
-`addSchema()` **requires** the schema to carry a `$id` (or `id` for draft-04) — that identifier is how `validate(data, ref)` finds it. The parameter type enforces this; passing a schema without one from untyped JavaScript still validates the schema but logs a `console.warn`, because it cannot be referenced afterwards.
+`addSchema()` **requires** the schema to carry a `$id` (or `id` for draft-04) — that identifier is how `validate(data, ref)` finds it. The parameter type enforces this; passing a schema without one from untyped JavaScript **throws**, because the schema could never be referenced afterwards.
 
 All other `ZSchemaOptions` (e.g., `version`, `breakOnFirstError`, `customFormats`) are forwarded to the internal validator.
 

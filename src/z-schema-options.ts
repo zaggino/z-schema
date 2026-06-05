@@ -42,9 +42,7 @@ export interface ZSchemaOptions {
   maxRecursionDepth?: number;
 }
 
-export const defaultOptions: Required<ZSchemaOptions> = {
-  async: false,
-  safe: false,
+export const defaultOptions: Required<Omit<ZSchemaOptions, 'async' | 'safe'>> = {
   // default version to validate against
   version: CURRENT_DEFAULT_SCHEMA_VERSION,
   // default timeout for all async tasks
@@ -111,8 +109,13 @@ export const normalizeOptions = (options?: ZSchemaOptions) => {
     let keys = Object.keys(options) as Array<keyof ZSchemaOptions>;
 
     // check that the options are correctly configured
+    const _defaults = defaultOptions as Record<string, unknown>;
     for (const key of keys) {
-      if (defaultOptions[key] === undefined) {
+      // async/safe are dispatch-only flags, stripped before normalizeOptions is called
+      if (key === 'async' || key === 'safe') {
+        continue;
+      }
+      if (_defaults[key] === undefined) {
         throw new Error(`Unexpected option passed to constructor: ${key}`);
       }
     }
@@ -121,7 +124,7 @@ export const normalizeOptions = (options?: ZSchemaOptions) => {
     keys = Object.keys(defaultOptions) as Array<keyof ZSchemaOptions>;
     for (const key of keys) {
       if (options[key] === undefined) {
-        (options as Record<string, unknown>)[key] = shallowClone(defaultOptions[key]);
+        (options as Record<string, unknown>)[key] = shallowClone(_defaults[key]);
       }
     }
 

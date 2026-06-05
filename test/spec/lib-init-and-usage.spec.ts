@@ -60,4 +60,28 @@ describe('Initialization and usage', () => {
       valid: false,
     });
   });
+
+  it('Should not store the factory-only async/safe flags on the instance options', () => {
+    // async/safe are dispatch-only flags consumed by create(); they must not leak
+    // into the validator's stored options (nothing reads them post-dispatch).
+    const asyncSafe = ZSchema.create({ async: true, safe: true, version: 'none' }) as unknown as {
+      options: Record<string, unknown>;
+    };
+    expect('async' in asyncSafe.options).toBe(false);
+    expect('safe' in asyncSafe.options).toBe(false);
+
+    const safe = ZSchema.create({ safe: true, version: 'none' }) as unknown as { options: Record<string, unknown> };
+    expect('safe' in safe.options).toBe(false);
+
+    const plain = ZSchema.create({ version: 'none' }) as unknown as { options: Record<string, unknown> };
+    expect('async' in plain.options).toBe(false);
+    expect('safe' in plain.options).toBe(false);
+  });
+
+  it('Should not mutate the caller options object passed to create()', () => {
+    const opts = { async: true, safe: true, version: 'none' as const };
+    ZSchema.create(opts);
+    // create() strips async/safe onto a copy — the caller's object is untouched.
+    expect(opts).toEqual({ async: true, safe: true, version: 'none' });
+  });
 });

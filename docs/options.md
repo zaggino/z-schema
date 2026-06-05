@@ -8,6 +8,8 @@ When true, `ZSchema.create()` returns an async validator (`ZSchemaAsync` or `ZSc
 
 Also used by `ZSchemaCompiler` to determine whether `compile()` returns an async validation function.
 
+`async` and `safe` are dispatch-only flags: they select which validator variant `ZSchema.create()` returns and are **not** stored on the resulting instance's options.
+
 Default: `false`
 
 ```javascript
