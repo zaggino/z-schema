@@ -102,16 +102,24 @@ export class ZSchema extends ZSchemaBase {
   public static create(options: ZSchemaOptions & { safe: true }): ZSchemaSafe;
   public static create(options?: ZSchemaOptions): ZSchema;
   public static create(options: ZSchemaOptions = {}): ZSchema | ZSchemaSafe | ZSchemaAsync | ZSchemaAsyncSafe {
-    if (options.async && options.safe) {
-      return new ZSchemaAsyncSafe(options, FACTORY_TOKEN);
+    const isAsync = options.async;
+    const isSafe = options.safe;
+    // async/safe are dispatch-only flags — strip them onto a copy so they never
+    // reach (or get stored on) the validator instance, and the caller's object is
+    // left untouched.
+    const rest: ZSchemaOptions = { ...options };
+    delete rest.async;
+    delete rest.safe;
+    if (isAsync && isSafe) {
+      return new ZSchemaAsyncSafe(rest, FACTORY_TOKEN);
     }
-    if (options.async) {
-      return new ZSchemaAsync(options, FACTORY_TOKEN);
+    if (isAsync) {
+      return new ZSchemaAsync(rest, FACTORY_TOKEN);
     }
-    if (options.safe) {
-      return new ZSchemaSafe(options, FACTORY_TOKEN);
+    if (isSafe) {
+      return new ZSchemaSafe(rest, FACTORY_TOKEN);
     }
-    return new ZSchema(options, FACTORY_TOKEN);
+    return new ZSchema(rest, FACTORY_TOKEN);
   }
 
   /**
