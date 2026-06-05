@@ -133,9 +133,8 @@ export class ZSchemaCompiler<T extends ZSchemaOptions = ZSchemaOptions> {
    *
    * A `$id` (or `id` for draft-04) is **required** to make the schema
    * referenceable — the parameter type enforces this. If a schema without one
-   * is passed at runtime (e.g. from untyped JavaScript), the call still
-   * validates the schema but emits a `console.warn`, since it cannot be
-   * referenced afterwards.
+   * is passed at runtime (e.g. from untyped JavaScript), the call throws,
+   * since the schema could never be referenced afterward.
    *
    * Like {@link compile}, this validates eagerly and throws on an invalid
    * schema **regardless of the `safe` option** — `safe` only affects data
@@ -147,9 +146,9 @@ export class ZSchemaCompiler<T extends ZSchemaOptions = ZSchemaOptions> {
    */
   addSchema(schema: JsonSchemaWithId): this {
     if (!getId(schema as JsonSchemaInternal)) {
-      console.warn(
-        'z-schema: addSchema() was called with a schema that has no $id (or id for draft-04); ' +
-          'it cannot be referenced via validate(data, ref).'
+      throw new Error(
+        'z-schema: addSchema() requires a schema with a $id (or id for draft-04); ' +
+          'without one it cannot be referenced via validate(data, ref).'
       );
     }
     this._zschema.validateSchema(schema);
@@ -184,6 +183,11 @@ export class ZSchemaCompiler<T extends ZSchemaOptions = ZSchemaOptions> {
     let resolvedSchema: JsonSchema;
     if (typeof schema === 'boolean') {
       resolvedSchema = schema ? ({} as JsonSchema) : ({ not: {} } as JsonSchema);
+      // Boolean schemas are valid by definition. Pre-mark the synthetic wrapper as
+      // validated so it short-circuits strict meta-validation (strictMode/noTypeless)
+      // — both the eager compile-time validateSchema and the data-path validateSchema
+      // honor __$validated. Only this fresh wrapper is mutated, never the caller's object.
+      (resolvedSchema as JsonSchemaInternal).__$validated = true;
     } else {
       resolvedSchema = schema;
     }

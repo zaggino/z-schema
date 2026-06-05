@@ -145,6 +145,48 @@ describe('ZSchemaCompiler', () => {
     });
   });
 
+  describe('boolean schemas under strict options and real versions', () => {
+    // Regression: boolean schemas are valid JSON Schema, but the synthetic wrappers
+    // ({} for true, { not: {} } for false) used to fail strict meta-validation
+    // (KEYWORD_UNDEFINED_STRICT) and throw at compile time under strictMode/noTypeless.
+    it('should compile a true schema under strictMode (throw mode)', () => {
+      const compiler = new ZSchemaCompiler({ strictMode: true });
+      const validate = compiler.compile(true);
+      expect(validate('anything')).toBe(true);
+      expect(validate(42)).toBe(true);
+    });
+
+    it('should compile a false schema under strictMode (throw mode)', () => {
+      const compiler = new ZSchemaCompiler({ strictMode: true });
+      const validate = compiler.compile(false);
+      expect(() => validate('anything')).toThrow();
+    });
+
+    it('should compile boolean schemas under noTypeless', () => {
+      const compiler = new ZSchemaCompiler({ noTypeless: true });
+      expect(compiler.compile(true)('x')).toBe(true);
+      expect(() => compiler.compile(false)('x')).toThrow();
+    });
+
+    it('should compile boolean schemas under the default version (no version: none)', () => {
+      const compiler = new ZSchemaCompiler();
+      expect(compiler.compile(true)('x')).toBe(true);
+      expect(() => compiler.compile(false)('x')).toThrow();
+    });
+
+    it('should compile boolean schemas under strictMode in safe mode', () => {
+      const compiler = new ZSchemaCompiler({ strictMode: true, safe: true });
+      expect(compiler.compile(true)('x').valid).toBe(true);
+      expect(compiler.compile(false)('x').valid).toBe(false);
+    });
+
+    it('should compile boolean schemas under strictMode in async mode', async () => {
+      const compiler = new ZSchemaCompiler({ strictMode: true, async: true });
+      await expect(compiler.compile(true)('x')).resolves.toBe(true);
+      await expect(compiler.compile(false)('x')).rejects.toThrow();
+    });
+  });
+
   describe('schema pre-compilation', () => {
     it('should throw at compile time for invalid schemas', () => {
       const compiler = new ZSchemaCompiler();
@@ -306,15 +348,12 @@ describe('ZSchemaCompiler', () => {
       expect(() => compiler.addSchema({ type: 'not-a-valid-type', $id: 'bad' } as any)).toThrow();
     });
 
-    it('should warn when addSchema is called without a $id', () => {
+    it('should throw when addSchema is called without a $id', () => {
+      // A schema with no $id/id can never be referenced via validate(data, ref),
+      // so registering it is a no-op that looks successful — addSchema must throw
+      // rather than silently warn-and-continue.
       const compiler = new ZSchemaCompiler({ version: 'none' });
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      try {
-        compiler.addSchema({ type: 'string' } as any);
-        expect(warn).toHaveBeenCalledOnce();
-      } finally {
-        warn.mockRestore();
-      }
+      expect(() => compiler.addSchema({ type: 'string' } as any)).toThrow(/\$id/);
     });
 
     it('should throw for an unregistered ref (sync)', () => {
@@ -332,6 +371,54 @@ describe('ZSchemaCompiler', () => {
     it('should reject for an unregistered ref (async)', async () => {
       const compiler = new ZSchemaCompiler({ async: true, version: 'none' });
       await expect(compiler.validate({}, 'never-registered')).rejects.toThrow();
+    });
+
+    it('should report invalid for an unregistered ref (async + safe)', async () => {
+      const compiler = new ZSchemaCompiler({ async: true, safe: true, version: 'none' });
+      const result = await compiler.validate({}, 'never-registered');
+      expect(result.valid).toBe(false);
+      expect(result.err).toBeDefined();
+    });
+
+    it('should resolve a $ref from a compiled schema against a previously addSchema-d schema', () => {
+      const compiler = new ZSchemaCompiler({ version: 'none' });
+      compiler.addSchema({
+        $id: 'person',
+        type: 'object',
+        required: ['name'],
+        properties: { name: { type: 'string' } },
+      });
+      // A compiled schema referencing the addSchema-d schema by $ref must resolve
+      // through the shared instance cache.
+      const validate = compiler.compile({ $ref: 'person' });
+      expect(validate({ name: 'Alice' })).toBe(true);
+      expect(() => validate({})).toThrow();
+    });
+
+    it('should let an addSchema-d schema and a compiled schema with distinct ids coexist', () => {
+      const compiler = new ZSchemaCompiler({ version: 'none' });
+      compiler.addSchema({ $id: 'str', type: 'string' });
+      const validateNumber = compiler.compile({ $id: 'num', type: 'number' });
+
+      // The compiled function (keyed by a minted urn) and the addSchema-d ref each
+      // keep their own semantics — registering one does not disturb the other.
+      expect(validateNumber(42)).toBe(true);
+      expect(() => validateNumber('hello')).toThrow();
+      expect(compiler.validate('hello', 'str')).toBe(true);
+      expect(() => compiler.validate(42, 'str')).toThrow();
+    });
+
+    it('should register and validate a draft-04 schema by its id', () => {
+      const compiler = new ZSchemaCompiler({ version: 'draft-04' });
+      compiler.addSchema({
+        $schema: 'http://json-schema.org/draft-04/schema#',
+        id: 'draft4-person',
+        type: 'object',
+        required: ['name'],
+        properties: { name: { type: 'string' } },
+      } as any);
+      expect(compiler.validate({ name: 'Alice' }, 'draft4-person')).toBe(true);
+      expect(() => compiler.validate({}, 'draft4-person')).toThrow();
     });
   });
 
@@ -363,6 +450,27 @@ describe('ZSchemaCompiler', () => {
       const validate = compiler.compile({ type: 'string', format: 'only-foo' });
       expect(validate('foo').valid).toBe(true);
       expect(validate('bar').valid).toBe(false);
+    });
+
+    it('should honor a custom format in throw mode', () => {
+      const compiler = new ZSchemaCompiler({
+        version: 'draft-04',
+        customFormats: { 'only-foo': (value: unknown) => value === 'foo' },
+      });
+      const validate = compiler.compile({ type: 'string', format: 'only-foo' });
+      expect(validate('foo')).toBe(true);
+      expect(() => validate('bar')).toThrow();
+    });
+
+    it('should honor a custom format in async mode', async () => {
+      const compiler = new ZSchemaCompiler({
+        async: true,
+        version: 'draft-04',
+        customFormats: { 'only-foo': (value: unknown) => value === 'foo' },
+      });
+      const validate = compiler.compile({ type: 'string', format: 'only-foo' });
+      await expect(validate('foo')).resolves.toBe(true);
+      await expect(validate('bar')).rejects.toThrow();
     });
   });
 
