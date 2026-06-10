@@ -18,10 +18,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
 
       - name: Checkout agentskills repository
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
         with:
           repository: agentskills/agentskills
           path: agentskills
