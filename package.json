@@ -90,7 +90,7 @@
     "@vitest/coverage-v8": "^4.1.0",
     "lefthook": "^2.1.9",
     "lodash.isequal": "^4.5.0",
-    "oxfmt": "^0.52.0",
+    "oxfmt": "^0.53.0",
     "oxlint": "^1.56.0",
     "oxlint-tsgolint": "^0.23.0",
     "rimraf": "^6.1.2",
