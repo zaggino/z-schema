@@ -1,5 +1,7 @@
 import { copyFileSync, mkdirSync, readdirSync, rmSync } from 'fs';
-import { join } from 'path';
+import path from 'node:path';
+
+const { join } = path;
 
 const targetSchemasDir = join(import.meta.dirname, '../src/schemas');
 

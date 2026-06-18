@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import path from 'node:path';
 
 import { runTests } from './json-schema-test-suite.common.ts';
+
+const { join } = path;
 
 await runTests({
   reader: <T>(testFilePath: string): Promise<T> => {

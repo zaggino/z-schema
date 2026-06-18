@@ -107,12 +107,16 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
         const promiseResult = result;
         report.addAsyncTaskWithPath(
           async (callback: (result: unknown) => void) => {
+            let resolved: unknown = false;
             try {
-              const resolved = await promiseResult;
-              callback(resolved);
+              resolved = await promiseResult;
             } catch {
-              callback(false);
+              // A rejected validator promise is treated as an invalid result (false).
             }
+            // Terminal callback of the async task; `return callback(...)` would trip
+            // no-confusing-void-expression since the callback returns void.
+            // oxlint-disable-next-line node/callback-return
+            callback(resolved);
           },
           [],
           (resolvedResult) => {

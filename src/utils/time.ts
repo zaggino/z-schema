@@ -24,7 +24,8 @@ export interface ParsedRfc3339Time {
   utcMinute: number;
 }
 
-const RFC3339_TIME_REGEX = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(\.[0-9]+)?(z|([+-][0-9]{2}:[0-9]{2}))$/i;
+const RFC3339_TIME_REGEX =
+  /^(?<hour>[0-9]{2}):(?<minute>[0-9]{2}):(?<second>[0-9]{2})(?<fraction>\.[0-9]+)?(?<offset>z|(?<offsetValue>[+-][0-9]{2}:[0-9]{2}))$/i;
 
 export const parseRfc3339Time = (time: string): ParsedRfc3339Time | null => {
   const matches = RFC3339_TIME_REGEX.exec(time);
@@ -42,7 +43,7 @@ export const parseRfc3339Time = (time: string): ParsedRfc3339Time | null => {
   let utcHour = hour;
   let utcMinute = minute;
   if (matches[5].toLowerCase() !== 'z') {
-    const offsetMatches = /^([+-])([0-9]{2}):([0-9]{2})$/.exec(matches[5]);
+    const offsetMatches = /^(?<sign>[+-])(?<hour>[0-9]{2}):(?<minute>[0-9]{2})$/.exec(matches[5]);
     if (offsetMatches === null) {
       return null;
     }

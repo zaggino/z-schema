@@ -1,10 +1,12 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
 import { decideCoverageUpdate, isForkPullRequest } from '../../scripts/coverage-update-utils.mts';
+
+const { join } = path;
 
 describe('coverage update decision logic', () => {
   it('commits only when pull request is same-repo, non-bot, and tracked files changed', () => {

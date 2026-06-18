@@ -1,7 +1,9 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { isAbsolute, resolve } from 'node:path';
+import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+
+const { isAbsolute, resolve } = path;
 
 export type CoverageUpdateReason = 'changed' | 'no_changes' | 'fork_pr' | 'bot_actor' | 'push_rejected';
 

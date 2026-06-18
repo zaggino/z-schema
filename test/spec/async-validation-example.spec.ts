@@ -298,18 +298,22 @@ describe('Async Validation Example', () => {
         { phone: '', expected: false },
       ];
 
-      for (const testCase of testCases) {
-        const payload = {
-          personId: 'user123',
-          address: {
-            postcode: 'SW1A 1AA',
-            phone: testCase.phone,
-          },
-        };
+      const results = await Promise.all(
+        testCases.map((testCase) => {
+          const payload = {
+            personId: 'user123',
+            address: {
+              postcode: 'SW1A 1AA',
+              phone: testCase.phone,
+            },
+          };
 
-        const result = await validator.validateAsyncSafe(payload, personSchema);
+          return validator.validateAsyncSafe(payload, personSchema);
+        })
+      );
 
-        expect(result.valid).toBe(testCase.expected);
+      for (let i = 0; i < testCases.length; i++) {
+        expect(results[i].valid).toBe(testCases[i].expected);
       }
     });
   });

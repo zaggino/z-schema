@@ -14,7 +14,7 @@ const dateValidator: FormatValidatorFn = (date: unknown) => {
     return true;
   }
   // full-date from http://tools.ietf.org/html/rfc3339#section-5.6
-  const matches = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(date);
+  const matches = /^(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})$/.exec(date);
   if (matches === null) {
     return false;
   }
@@ -39,7 +39,7 @@ const dateTimeValidator: FormatValidatorFn = (dateTime: unknown) => {
   const datePart = dateTime.slice(0, tIdx);
   const timePart = dateTime.slice(tIdx + 1);
   // Check date
-  const dateMatches = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(datePart);
+  const dateMatches = /^(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})$/.exec(datePart);
   if (dateMatches === null) {
     return false;
   }
@@ -61,7 +61,7 @@ const emailValidator: FormatValidatorFn = (email: unknown) => {
     return true;
   }
 
-  const ipv6Literal = /^(.+)@\[IPv6:([^\]]+)\]$/i.exec(email);
+  const ipv6Literal = /^(?<localPart>.+)@\[IPv6:(?<address>[^\]]+)\]$/i.exec(email);
   if (!ipv6Literal) {
     return false;
   }
@@ -226,7 +226,7 @@ const uriValidator: FormatValidatorFn = (uri: unknown) => {
   if (!hasValidPercentEncoding(uri)) {
     return false;
   }
-  const match = /^([a-zA-Z][a-zA-Z0-9+.-]*):\/\/([^/?#]*)/.exec(uri);
+  const match = /^(?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?<authority>[^/?#]*)/.exec(uri);
   if (match) {
     const authority = match[2];
     const atIndex = authority.indexOf('@');
@@ -267,7 +267,7 @@ const uriReferenceValidator: FormatValidatorFn = (uri: unknown) => {
     return false;
   }
   // URI-reference allows relative URIs
-  return /^([a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/.test(uri);
+  return /^(?:[a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/.test(uri);
 };
 
 const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => {
@@ -275,7 +275,7 @@ const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => {
     return true;
   }
   // URI template allows braces for expressions.
-  if (!/^([a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^`| ]*$/.test(uri)) {
+  if (!/^(?:[a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^`| ]*$/.test(uri)) {
     return false;
   }
 
@@ -338,7 +338,7 @@ const relativeJsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   }
   // Relative JSON Pointer: non-negative integer prefix (no leading zeros unless zero),
   // followed by either '#', a JSON Pointer, or nothing.
-  const match = /^(0|[1-9]\d*)(.*)$/.exec(pointer);
+  const match = /^(?<int>0|[1-9]\d*)(?<suffix>.*)$/.exec(pointer);
   if (!match) {
     return false;
   }
@@ -406,7 +406,7 @@ const iriReferenceValidator: FormatValidatorFn = (iriReference: unknown) => {
   if (typeof iriReference !== 'string') {
     return true;
   }
-  return /^([a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/u.test(iriReference);
+  return /^(?:[a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/u.test(iriReference);
 };
 
 export interface FormatValidatorsOptions {

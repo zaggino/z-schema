@@ -11,7 +11,9 @@
 // This runs after tsdown, which cleans `umd/` on each build. Authored as plain
 // `.mjs` (no TypeScript syntax) so it runs on any supported Node version.
 import { writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import path from 'node:path';
+
+const { join } = path;
 
 const umdPackageJson = join(import.meta.dirname, '..', 'umd', 'package.json');
 
