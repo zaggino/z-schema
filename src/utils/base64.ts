@@ -28,7 +28,7 @@ export const decodeBase64 = (value: string): string | undefined => {
   // where `atob` above is used instead.)
   const bufferCtor = (
     globalThis as {
-      Buffer?: { from(data: string, encoding: string): { toString(encoding: string): string } };
+      Buffer?: { from: (data: string, encoding: string) => { toString: (encoding: string) => string } };
     }
   ).Buffer;
   if (bufferCtor !== undefined) {

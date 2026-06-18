@@ -1,6 +1,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+
+const { resolve } = path;
 
 /**
  * Resolve `inputPath` relative to `baseDir` and verify it stays within that directory.

@@ -5,9 +5,13 @@ pre-commit:
   parallel: false
   commands:
     oxlint:
-      glob: '*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}'
-      run: npx oxlint -c oxlint.config.ts --fix {staged_files}
-      stage_fixed: true
+      # Run over the whole project, NOT just {staged_files}: type-aware linting
+      # (typeAware: true in oxlint.config.ts) needs the full program to resolve
+      # types. Linting an isolated staged-file subset makes cross-file types
+      # collapse to the `error` type and raises spurious no-unsafe-* errors.
+      # Check-only (no --fix): a whole-project autofix could touch unstaged files.
+      # Run `npm run fix` to apply fixes. ~1s; type-aware is also gated in CI.
+      run: npx oxlint -c oxlint.config.ts
     oxfmt:
       # --no-error-on-unmatched-pattern: don't fail the commit when every staged
       # file is excluded by ignore rules (e.g. only CHANGELOG.md was staged).

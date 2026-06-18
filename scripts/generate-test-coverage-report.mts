@@ -1,5 +1,5 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, isAbsolute, join, relative } from 'node:path';
+import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import {
@@ -7,6 +7,8 @@ import {
   roundCoveragePercentage,
   updateReadmeCoverageBadgeFile,
 } from './update-readme-coverage-badge.mts';
+
+const { dirname, isAbsolute, join, relative } = path;
 
 export interface CoverageNumbers {
   branchPct: number;
