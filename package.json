@@ -82,7 +82,7 @@
   },
   "devDependencies": {
     "@types/lodash.isequal": "^4.5.8",
-    "@types/node": "^25.2.0",
+    "@types/node": "^26.0.1",
     "@types/punycode": "^2.1.4",
     "@types/validator": "^13.15.10",
     "@vitest/browser-playwright": "^4.1.0",
@@ -90,7 +90,7 @@
     "@vitest/coverage-v8": "^4.1.0",
     "lefthook": "^2.1.9",
     "lodash.isequal": "^4.5.0",
-    "oxfmt": "^0.54.0",
+    "oxfmt": "^0.56.0",
     "oxlint": "^1.56.0",
     "oxlint-tsgolint": "^0.23.0",
     "rimraf": "^6.1.2",
