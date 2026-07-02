@@ -44,7 +44,7 @@ describe('Issue #69: Floating point precision in multipleOf validation', () => {
 
     const schema: JsonSchema = {
       type: 'integer',
-      multipleOf: 0.123_456_789,
+      multipleOf: 0.123456789,
     };
 
     const data = 1e308;
