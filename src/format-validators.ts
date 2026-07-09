@@ -371,6 +371,9 @@ const timeValidator: FormatValidatorFn = (time: unknown) => {
 // Matches a lone (unpaired) UTF-16 surrogate — either a high surrogate not
 // followed by a low surrogate, or a low surrogate not preceded by a high one.
 const LONE_SURROGATE_REGEX = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+// A quoted local part: any char except a bare quote/backslash; backslash escapes
+// allowed. Leniently permits raw control chars (e.g. bare CR/LF), which stricter
+// RFC 5321 parsing forbids — an accepted limitation, not exercised by the suite.
 const QUOTED_LOCAL_PART_REGEX = /^"(?:[^"\\]|\\.)*"$/u;
 const UNQUOTED_LOCAL_PART_REGEX = /^[^\s@]+$/u;
 
@@ -390,6 +393,8 @@ const idnEmailValidator: FormatValidatorFn = (email: unknown) => {
   }
   // Split on the last '@': everything after it is the (idn-)hostname domain,
   // everything before it is the local part (which may itself be quoted).
+  // Note: unlike the ASCII `email` validator, IP-literal domains
+  // (`user@[192.168.1.1]` / `@[IPv6:...]`) are not supported here.
   const atIdx = email.lastIndexOf('@');
   if (atIdx <= 0 || atIdx === email.length - 1) {
     return false;

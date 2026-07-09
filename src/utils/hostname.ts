@@ -8,26 +8,31 @@ const IDN_SEPARATOR_TEST_REGEX = /[\u3002\uFF0E\uFF61]/;
 // General_Category / Script Unicode-property regexes (JS regex has no
 // \p{Bidi_Class} or \p{Joining_Type}). It covers the JSON-Schema-Test-Suite
 // corpus, not the full IDNA table. Known limitations: joining-context (CONTEXTJ)
-// only models Arabic script; Bidi class detection covers L/R/AL/AN/EN/NSM and
-// treats everything else as ON. All regexes/Sets are hoisted to module scope so
-// they are compiled once (format validation runs on hot paths).
+// only models Arabic script; the ZWJ/ZWNJ Virama context recognizes only the
+// Devanagari virama U+094D (not other scripts' viramas); Bidi class detection
+// covers L/R/AL/AN/EN/NSM and treats everything else as ON; and U-labels are not
+// required to be in Unicode NFC form. All regexes/Sets are hoisted to module scope
+// so they are compiled once (format validation runs on hot paths).
 
-// RFC 5892 \u00A72.6 lists a handful of code points that are PVALID (or governed by a
-// contextual rule) despite being Punctuation/Symbol. A blanket "reject
+// Matches an A-label (ACE) prefix; hoisted so it is compiled once, not per label.
+const XN_LABEL_REGEX = /^xn--/i;
+
+// RFC 5892 section 2.6 lists a handful of code points that are PVALID (or governed
+// by a contextual rule) despite being Punctuation/Symbol. A blanket "reject
 // P/S/Z/C" DISALLOWED heuristic must whitelist exactly these so valid labels are
-// not rejected. Letters (e.g. U+00DF \u00DF, U+03C2 \u03C2) and Numbers (e.g. U+3007) are
-// unaffected by the heuristic and need no entry here.
+// not rejected. Letters (e.g. U+00DF sharp s, U+03C2 final sigma) and Numbers
+// (e.g. U+3007) are unaffected by the heuristic and need no entry here.
 const DISALLOWED_CATEGORY_REGEX = /[\p{P}\p{S}\p{Z}\p{C}]/u;
-const DISALLOWED_CATEGORY_WHITELIST = new Set([
+const DISALLOWED_CATEGORY_WHITELIST: ReadonlySet<string> = new Set([
   '-', // HYPHEN-MINUS (medial; leading/trailing rejected separately)
   '\u00B7', // MIDDLE DOT (CONTEXTO)
   '\u0375', // GREEK LOWER NUMERAL SIGN / KERAIA (CONTEXTO)
   '\u05F3', // HEBREW PUNCTUATION GERESH (CONTEXTO)
   '\u05F4', // HEBREW PUNCTUATION GERSHAYIM (CONTEXTO)
   '\u30FB', // KATAKANA MIDDLE DOT (CONTEXTO)
-  '\u06FD', // ARABIC SIGN SINDHI AMPERSAND (RFC 5892 \u00A72.6 PVALID)
-  '\u06FE', // ARABIC SIGN SINDHI POSTPOSITION MEN (RFC 5892 \u00A72.6 PVALID)
-  '\u0F0B', // TIBETAN MARK INTERSYLLABIC TSHEG (RFC 5892 \u00A72.6 PVALID)
+  '\u06FD', // ARABIC SIGN SINDHI AMPERSAND (RFC 5892 section 2.6 PVALID)
+  '\u06FE', // ARABIC SIGN SINDHI POSTPOSITION MEN (RFC 5892 section 2.6 PVALID)
+  '\u0F0B', // TIBETAN MARK INTERSYLLABIC TSHEG (RFC 5892 section 2.6 PVALID)
   '\u200C', // ZERO WIDTH NON-JOINER (CONTEXTJ, checked separately)
   '\u200D', // ZERO WIDTH JOINER (CONTEXTJ, checked separately)
 ]);
@@ -206,7 +211,7 @@ const hasCjkKanaOrHan = (input: string): boolean =>
   /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(input);
 
 const toUnicodeLabel = (label: string): string | null => {
-  if (!/^xn--/i.test(label)) {
+  if (!XN_LABEL_REGEX.test(label)) {
     return label;
   }
   try {
@@ -221,7 +226,7 @@ const isValidIdnUnicodeLabel = (label: string): boolean => {
     return false;
   }
 
-  if (label.length >= 4 && label[2] === '-' && label[3] === '-' && !/^xn--/i.test(label)) {
+  if (label.length >= 4 && label[2] === '-' && label[3] === '-' && !XN_LABEL_REGEX.test(label)) {
     return false;
   }
 
@@ -263,7 +268,7 @@ const isValidIdnUnicodeLabel = (label: string): boolean => {
   }
 
   // Reject IDNA2008-DISALLOWED code points (Punctuation/Symbol/Separator/Other,
-  // minus the RFC 5892 \u00A72.6 / contextual exceptions). Iterated by code point so a
+  // minus the RFC 5892 section 2.6 / contextual exceptions). Iterated by code point so a
   // surrogate pair is not mistaken for a lone \p{Cs} half.
   for (const char of label) {
     if (isDisallowedCodePoint(char)) {
@@ -337,7 +342,7 @@ export const isValidHostname = (hostname: string): boolean => {
     }
 
     // Punycode (A-label) hostnames encode IDN labels, so validate the decoded Unicode form
-    if (/^xn--/i.test(label)) {
+    if (XN_LABEL_REGEX.test(label)) {
       const unicodeLabel = toUnicodeLabel(label);
       if (unicodeLabel === null || !isValidIdnUnicodeLabel(unicodeLabel)) {
         return false;
@@ -376,7 +381,7 @@ export const isValidIdnHostname = (hostname: string): boolean => {
     // U-label must reproduce the original A-label. This also rejects an A-label
     // that decodes to pure ASCII, since such a label never re-encodes to an "xn--"
     // form (RFC 5890 §2.3.2.1, RFC 5891 §5.4).
-    if (/^xn--/i.test(label) && aLabel.toLowerCase() !== label.toLowerCase()) {
+    if (XN_LABEL_REGEX.test(label) && aLabel.toLowerCase() !== label.toLowerCase()) {
       return false;
     }
 
