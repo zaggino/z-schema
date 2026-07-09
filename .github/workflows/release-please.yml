@@ -34,9 +34,6 @@ jobs:
           node-version-file: .nvmrc
           registry-url: 'https://registry.npmjs.org'
 
-      - run: npm install -g npm@latest
-        if: ${{ steps.release.outputs.release_created }}
-
       - run: npm ci
         if: ${{ steps.release.outputs.release_created }}
 
