@@ -7,7 +7,7 @@ Line coverage status: **high**
 | File                          |  Line % | Statement % | Function % | Branch % |
 | ----------------------------- | ------: | ----------: | ---------: | -------: |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
-| src/format-validators.ts      |     94% |         94% |        90% |      92% |
+| src/format-validators.ts      |     94% |         95% |        91% |      92% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
 | src/json-validation.ts        |     91% |         91% |       100% |      89% |
@@ -20,7 +20,7 @@ Line coverage status: **high**
 | src/utils/clone.ts            |     97% |         98% |       100% |      94% |
 | src/utils/constants.ts        |    100% |        100% |       100% |     100% |
 | src/utils/date.ts             |    100% |        100% |       100% |     100% |
-| src/utils/hostname.ts         |    100% |        100% |       100% |     100% |
+| src/utils/hostname.ts         |     96% |         96% |       100% |      97% |
 | src/utils/json.ts             |     98% |         98% |       100% |      97% |
 | src/utils/properties.ts       |    100% |        100% |       100% |      75% |
 | src/utils/schema-regex.ts     |     94% |         94% |       100% |      77% |
@@ -42,4 +42,4 @@ Line coverage status: **high**
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
 | src/z-schema.ts               |     76% |         76% |        79% |      83% |
-| **Total**                     | **90%** |     **90%** |    **95%** |  **87%** |
+| **Total**                     | **90%** |     **91%** |    **95%** |  **88%** |
