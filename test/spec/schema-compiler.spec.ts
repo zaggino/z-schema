@@ -13,7 +13,7 @@ describe('collectReferences', () => {
       },
       allOf: [{ $ref: '#/definitions/foo' }],
     };
-    const refs = collectReferences(schema as any);
+    const refs = collectReferences(schema);
     expect(refs).toHaveLength(1);
     expect(refs[0].ref).toBe('file:///c:/folder/file.json#/definitions/foo');
     expect(refs[0].key).toBe('$ref');
@@ -173,7 +173,7 @@ describe('collectReferences', () => {
         },
       ],
     };
-    const refs = collectReferences(schema as any);
+    const refs = collectReferences(schema);
     expect(refs.length).toBe(1);
     expect(refs[0].ref).toBe('http://localhost:1234/sibling_id/base/foo.json');
     const validator = ZSchema.create({ version: 'draft-04' });

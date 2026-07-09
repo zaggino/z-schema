@@ -169,7 +169,7 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
         let passed = getCachedValidationResult(report, currentSchema.contains, jsonArr[i]);
         if (passed === undefined) {
           const subReport = new Report(report);
-          validate(ctx, subReport, currentSchema.contains as JsonSchemaInternal | boolean, jsonArr[i]);
+          validate(ctx, subReport, currentSchema.contains, jsonArr[i]);
           passed = subReport.errors.length === 0;
         }
         if (passed) {
@@ -264,7 +264,7 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
   // allOf
   if (Array.isArray(currentSchema.allOf)) {
     for (let i = 0; i < currentSchema.allOf.length; i++) {
-      if (merge(recurse(currentSchema.allOf[i] as JsonSchemaInternal | boolean))) {
+      if (merge(recurse(currentSchema.allOf[i]))) {
         return 'all';
       }
     }
@@ -277,10 +277,10 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
       let passed = getCachedValidationResult(report, subSchema, json);
       if (passed === undefined) {
         const subReport = new Report(report);
-        validate(ctx, subReport, subSchema as JsonSchemaInternal | boolean, json);
+        validate(ctx, subReport, subSchema, json);
         passed = subReport.errors.length === 0;
       }
-      if (passed && merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
+      if (passed && merge(recurse(subSchema))) {
         return 'all';
       }
     }
@@ -293,10 +293,10 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
       let passed = getCachedValidationResult(report, subSchema, json);
       if (passed === undefined) {
         const subReport = new Report(report);
-        validate(ctx, subReport, subSchema as JsonSchemaInternal | boolean, json);
+        validate(ctx, subReport, subSchema, json);
         passed = subReport.errors.length === 0;
       }
-      if (passed && merge(recurse(subSchema as JsonSchemaInternal | boolean))) {
+      if (passed && merge(recurse(subSchema))) {
         return 'all';
       }
     }
@@ -339,7 +339,7 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
 
   // $dynamicRef
   const dynamicTarget = resolveDynamicRef(currentSchema, report.__$dynamicScopeStack);
-  if (dynamicTarget && dynamicTarget !== currentSchema && merge(recurse(dynamicTarget as JsonSchemaInternal))) {
+  if (dynamicTarget && dynamicTarget !== currentSchema && merge(recurse(dynamicTarget))) {
     return 'all';
   }
 

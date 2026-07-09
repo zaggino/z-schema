@@ -161,7 +161,7 @@ describe('ZSchemaTestSuite', () => {
               schema = schema[schemaIndex];
             }
 
-            const response = await validator.validateAsyncSafe(data, schema as any, validateOptions as any);
+            const response = await validator.validateAsyncSafe(data, schema as any, validateOptions);
             const { valid, err } = response;
 
             expect(typeof valid).toBe('boolean' /*, 'returned response is not a boolean'*/);
@@ -200,7 +200,7 @@ describe('ZSchemaTestSuite', () => {
               schema = schema[schemaIndex];
             }
             try {
-              valid = validator.validate(data, schema as any, validateOptions as any);
+              valid = validator.validate(data, schema as any, validateOptions);
             } catch (error) {
               valid = false;
               caughtErr = error;
