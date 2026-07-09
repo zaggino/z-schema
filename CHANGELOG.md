@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.4.0](https://github.com/zaggino/z-schema/compare/v12.3.1...v12.4.0) (2026-07-09)
+
+
+### Features
+
+* **format:** implement IDNA2008 idn-hostname/idn-email validation (RFC 5890-5893) ([2bd8ba2](https://github.com/zaggino/z-schema/commit/2bd8ba29dc4762137397143032580ed1eda55fdf))
+
 ## [12.3.1](https://github.com/zaggino/z-schema/compare/v12.3.0...v12.3.1) (2026-06-03)
 
 
