@@ -368,12 +368,33 @@ const timeValidator: FormatValidatorFn = (time: unknown) => {
   return parseRfc3339Time(time) !== null;
 };
 
+// Matches a lone (unpaired) UTF-16 surrogate — either a high surrogate not
+// followed by a low surrogate, or a low surrogate not preceded by a high one.
+const LONE_SURROGATE_REGEX = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+const QUOTED_LOCAL_PART_REGEX = /^"(?:[^"\\]|\\.)*"$/u;
+const UNQUOTED_LOCAL_PART_REGEX = /^[^\s@]+$/u;
+
+const isValidIdnEmailLocalPart = (localPart: string): boolean => {
+  if (localPart.length === 0 || LONE_SURROGATE_REGEX.test(localPart)) {
+    return false;
+  }
+  if (localPart.length >= 2 && localPart.startsWith('"') && localPart.endsWith('"')) {
+    return QUOTED_LOCAL_PART_REGEX.test(localPart);
+  }
+  return UNQUOTED_LOCAL_PART_REGEX.test(localPart);
+};
+
 const idnEmailValidator: FormatValidatorFn = (email: unknown) => {
   if (typeof email !== 'string') {
     return true;
   }
-  // Simple email check, allowing international chars
-  return /^[^\s@]+@[^\s@]+$/.test(email);
+  // Split on the last '@': everything after it is the (idn-)hostname domain,
+  // everything before it is the local part (which may itself be quoted).
+  const atIdx = email.lastIndexOf('@');
+  if (atIdx <= 0 || atIdx === email.length - 1) {
+    return false;
+  }
+  return isValidIdnEmailLocalPart(email.slice(0, atIdx)) && isValidIdnHostname(email.slice(atIdx + 1));
 };
 
 const idnHostnameValidator: FormatValidatorFn = (hostname: unknown) => {
