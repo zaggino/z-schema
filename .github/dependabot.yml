@@ -18,6 +18,11 @@ updates:
       development:
         dependency-type: 'development'
         patterns: ['*']
+    ignore:
+      # tsdown's peer range still caps TypeScript at ^6; ignore the TS 7 major
+      # until tsdown widens it. Remove this once tsdown supports TypeScript 7.
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: 'gitsubmodule'
     directory: '/'
     schedule:
