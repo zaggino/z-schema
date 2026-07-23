@@ -151,8 +151,7 @@ const SchemaValidators = {
     // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.3.1.1
     if (Array.isArray(schema.items)) {
       for (let idx = 0; idx < schema.items.length; idx++) {
-        report.path.push('items');
-        report.path.push(idx);
+        report.path.push('items', idx);
         this.validateSchema(report, schema.items[idx]);
         report.path.pop();
         report.path.pop();
@@ -279,8 +278,7 @@ const SchemaValidators = {
     const keys = Object.keys(schema.properties);
     for (const key of keys) {
       const val = schema.properties[key];
-      report.path.push('properties');
-      report.path.push(key);
+      report.path.push('properties', key);
       this.validateSchema(report, val);
       report.path.pop();
       report.path.pop();
@@ -320,8 +318,7 @@ const SchemaValidators = {
           'patternProperties'
         );
       }
-      report.path.push('patternProperties');
-      report.path.push(key);
+      report.path.push('patternProperties', key);
       this.validateSchema(report, val);
       report.path.pop();
       report.path.pop();
@@ -345,8 +342,7 @@ const SchemaValidators = {
         isObject(schemaDependency) || (report.options.version !== 'draft-04' && typeof schemaDependency === 'boolean');
 
       if (isSchemaDependency) {
-        report.path.push('dependencies');
-        report.path.push(schemaKey);
+        report.path.push('dependencies', schemaKey);
         this.validateSchema(report, schemaDependency as JsonSchemaInternal);
         report.path.pop();
         report.path.pop();
@@ -485,8 +481,7 @@ const SchemaValidators = {
       report.addError('KEYWORD_MUST_BE', ['allOf', 'an array with at least one element'], undefined, schema, 'allOf');
     } else {
       for (let idx = 0; idx < schema.allOf.length; idx++) {
-        report.path.push('allOf');
-        report.path.push(idx);
+        report.path.push('allOf', idx);
         this.validateSchema(report, schema.allOf[idx]);
         report.path.pop();
         report.path.pop();
@@ -501,8 +496,7 @@ const SchemaValidators = {
       report.addError('KEYWORD_MUST_BE', ['anyOf', 'an array with at least one element'], undefined, schema, 'anyOf');
     } else {
       for (let idx = 0; idx < schema.anyOf.length; idx++) {
-        report.path.push('anyOf');
-        report.path.push(idx);
+        report.path.push('anyOf', idx);
         this.validateSchema(report, schema.anyOf[idx]);
         report.path.pop();
         report.path.pop();
@@ -517,8 +511,7 @@ const SchemaValidators = {
       report.addError('KEYWORD_MUST_BE', ['oneOf', 'an array with at least one element'], undefined, schema, 'oneOf');
     } else {
       for (let idx = 0; idx < schema.oneOf.length; idx++) {
-        report.path.push('oneOf');
-        report.path.push(idx);
+        report.path.push('oneOf', idx);
         this.validateSchema(report, schema.oneOf[idx]);
         report.path.pop();
         report.path.pop();
@@ -604,8 +597,7 @@ const SchemaValidators = {
     const keys = Object.keys(schema.definitions);
     for (const key of keys) {
       const val = schema.definitions[key];
-      report.path.push('definitions');
-      report.path.push(key);
+      report.path.push('definitions', key);
       this.validateSchema(report, val);
       report.path.pop();
       report.path.pop();
@@ -624,8 +616,7 @@ const SchemaValidators = {
     const keys = Object.keys(schema.$defs);
     for (const key of keys) {
       const val = schema.$defs[key];
-      report.path.push('$defs');
-      report.path.push(key);
+      report.path.push('$defs', key);
       this.validateSchema(report, val);
       report.path.pop();
       report.path.pop();

@@ -4,10 +4,11 @@ import ultracite from 'ultracite/oxfmt';
 export default defineConfig({
   ...ultracite,
   printWidth: 120,
-  singleQuote: true,
-  trailingComma: 'es5',
+  proseWrap: 'preserve',
   semi: true,
+  singleQuote: true,
   sortPackageJson: true,
+  trailingComma: 'es5',
   sortImports: {
     groups: ['type', 'builtin', 'external', ['internal', 'subpath'], ['parent', 'sibling', 'index'], 'unknown'],
   },

@@ -8,23 +8,20 @@ describe('Report schema path tracking', () => {
 
   it('should track schema path segments', () => {
     const report = new Report({});
-    report.schemaPath.push('properties');
-    report.schemaPath.push('name');
+    report.schemaPath.push('properties', 'name');
     report.schemaPath.push('type');
     expect(report.schemaPath).toEqual(['properties', 'name', 'type']);
   });
 
   it('should return schema path via getSchemaPath', () => {
     const report = new Report({});
-    report.schemaPath.push('properties');
-    report.schemaPath.push('age');
+    report.schemaPath.push('properties', 'age');
     expect(report.getSchemaPath()).toEqual(['properties', 'age']);
   });
 
   it('should inherit schema path from parent report', () => {
     const parentReport = new Report({});
-    parentReport.schemaPath.push('properties');
-    parentReport.schemaPath.push('user');
+    parentReport.schemaPath.push('properties', 'user');
 
     const childReport = new Report(parentReport);
     childReport.schemaPath.push('name');
@@ -34,8 +31,7 @@ describe('Report schema path tracking', () => {
 
   it('should include schema path in error details', () => {
     const report = new Report({});
-    report.schemaPath.push('properties');
-    report.schemaPath.push('email');
+    report.schemaPath.push('properties', 'email');
     report.schemaPath.push('type');
 
     report.addError('INVALID_TYPE', ['string', 'number']);
@@ -54,12 +50,10 @@ describe('Report schema path tracking', () => {
 
   it('should maintain schema path across nested reports', () => {
     const parentReport = new Report({});
-    parentReport.schemaPath.push('allOf');
-    parentReport.schemaPath.push(0);
+    parentReport.schemaPath.push('allOf', 0);
 
     const childReport = new Report(parentReport);
-    childReport.schemaPath.push('properties');
-    childReport.schemaPath.push('name');
+    childReport.schemaPath.push('properties', 'name');
 
     childReport.addError('INVALID_TYPE', ['string', 'number']);
 

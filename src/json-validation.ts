@@ -703,8 +703,7 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
       // Track schema path for properties validation
       if (isProp) {
         // This is a defined property
-        report.schemaPath.push('properties');
-        report.schemaPath.push(m);
+        report.schemaPath.push('properties', m);
       } else {
         // This is additionalProperties or patternProperties
         report.schemaPath.push('additionalProperties');
