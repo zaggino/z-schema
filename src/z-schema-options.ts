@@ -4,6 +4,9 @@ import type { Report } from './report.js';
 
 import { CURRENT_DEFAULT_SCHEMA_VERSION } from './json-schema-versions.js';
 import { shallowClone } from './utils/clone.js';
+// These constants are consumed locally (default options + async-timeout clamping)
+// and also re-exported as public API, so this cannot collapse to a bare re-export.
+// oxlint-disable-next-line unicorn/prefer-export-from
 import { DEFAULT_MAX_RECURSION_DEPTH, MAX_ASYNC_TIMEOUT } from './utils/constants.js';
 
 export { DEFAULT_MAX_RECURSION_DEPTH, MAX_ASYNC_TIMEOUT };

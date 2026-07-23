@@ -1,7 +1,6 @@
 // Export types and interfaces from relevant files
 
-import { ZSchema } from './z-schema.js';
-
+export { ZSchema as default } from './z-schema.js';
 export type { ErrorCode, ErrorParam, Errors } from './errors.js';
 export { ValidateError } from './errors.js';
 export type { FormatValidatorFn, FormatValidatorsOptions } from './format-validators.js';
@@ -29,5 +28,3 @@ export type { ZSchema, ZSchemaAsync, ZSchemaAsyncSafe, ZSchemaSafe } from './z-s
 export type { ValidateOptions, ValidateResponse } from './z-schema-base.js';
 export type { ZSchemaOptions } from './z-schema-options.js';
 export type { SchemaReader } from './z-schema-reader.js';
-
-export default ZSchema;

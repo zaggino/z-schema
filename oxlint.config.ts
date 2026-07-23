@@ -46,6 +46,7 @@ export default defineConfig({
     'unicorn/no-array-for-each': 'off',
     'unicorn/no-thenable': 'off',
     'unicorn/prefer-node-protocol': 'off',
+    'unicorn/prefer-number-coercion': 'off',
 
     // Object destructuring only. Array destructuring goes through the iterator
     // protocol (slower than indexed access) which the validation hot paths rely
@@ -78,6 +79,9 @@ export default defineConfig({
       rules: {
         'vitest/no-conditional-expect': 'off',
         'vitest/no-standalone-expect': 'off',
+        // Some tests deliberately push path segments across separate calls to
+        // exercise incremental accumulation; merging them would weaken the test.
+        'unicorn/prefer-single-call': 'off',
         // Legacy ZSchemaTestSuite fixtures are intentionally loosely typed
         // (hooks receive arbitrary validator/error shapes); not worth retyping.
         'typescript/no-unsafe-call': 'off',
