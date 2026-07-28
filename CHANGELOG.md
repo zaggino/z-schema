@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.4.1](https://github.com/zaggino/z-schema/compare/v12.4.0...v12.4.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* **deps:** bump brace-expansion to 5.0.8 (GHSA-3jxr-9vmj-r5cp) ([d924e08](https://github.com/zaggino/z-schema/commit/d924e08f7fde3910df57c39271a8cf82f11e74dd))
+
 ## [12.4.0](https://github.com/zaggino/z-schema/compare/v12.3.1...v12.4.0) (2026-07-09)
 
 
