@@ -19,6 +19,8 @@
 /dist
 /node_modules/
 /npm-debug.log
+/pnpm-lock.yaml
+/pnpm-workspace.yaml
 /specs/
 /src/schemas/*
 /test/dist
