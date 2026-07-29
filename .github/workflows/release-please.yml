@@ -22,7 +22,7 @@ jobs:
           release-type: node
           token: ${{ secrets.GH_TOKEN }}
 
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
         if: ${{ steps.release.outputs.release_created }}
 
       - run: git submodule update --init
