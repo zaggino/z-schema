@@ -1,5 +1,13 @@
 # Changelog
 
+## [12.4.2](https://github.com/zaggino/z-schema/compare/v12.4.1...v12.4.2) (2026-08-13)
+
+
+### Bug Fixes
+
+* **deps:** bump postcss, nanoid and brace-expansion to patched releases ([#476](https://github.com/zaggino/z-schema/issues/476)) ([ff230d6](https://github.com/zaggino/z-schema/commit/ff230d682c7a6f5fc3648464ba82039025e160c9))
+* **format:** validate uri-template expression bodies per RFC 6570 ([#480](https://github.com/zaggino/z-schema/issues/480)) ([105547b](https://github.com/zaggino/z-schema/commit/105547b04d91b34be78b85c2b46b3ae958ad0d4f))
+
 ## [12.4.1](https://github.com/zaggino/z-schema/compare/v12.4.0...v12.4.1) (2026-07-28)
 
 
