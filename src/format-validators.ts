@@ -270,16 +270,37 @@ const uriReferenceValidator: FormatValidatorFn = (uri: unknown) => {
   return /^(?:[a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/.test(uri);
 };
 
+// RFC 6570 §2.3: varchar = ALPHA / DIGIT / "_" / pct-encoded
+const URI_TEMPLATE_VARCHAR_SRC = '(?:[A-Za-z0-9_]|%[0-9A-Fa-f]{2})';
+// RFC 6570 §2.3: varname = varchar *( ["."] varchar )
+const URI_TEMPLATE_VARNAME_SRC = `${URI_TEMPLATE_VARCHAR_SRC}(?:\\.?${URI_TEMPLATE_VARCHAR_SRC})*`;
+// RFC 6570 §2.4: varspec = varname [ modifier-level4 ]; modifier-level4 = prefix / explode
+// prefix = ":" max-length, max-length = %x31-39 0*3DIGIT (1-9999, no leading zero); explode = "*"
+const URI_TEMPLATE_VARSPEC_SRC = `${URI_TEMPLATE_VARNAME_SRC}(?::[1-9][0-9]{0,3}|\\*)?`;
+// RFC 6570 §2.2: operator = op-level2 ("+" / "#") / op-level3 ("." / "/" / ";" / "?" / "&")
+//                         / op-reserve ("=" / "," / "!" / "@" / "|")
+// op-reserve is accepted for ABNF fidelity only — the spec leaves its expansion semantics
+// undefined. "|" is unreachable in practice: the literal charset check in uriTemplateValidator
+// rejects any "|" anywhere in the input before this regex runs. Same for a bare space.
+// RFC 6570 §2: expression body (braces excluded) = [ operator ] variable-list
+//              variable-list = varspec *( "," varspec )
+const URI_TEMPLATE_EXPRESSION_REGEX = new RegExp(
+  `^[+#./;?&=,!@|]?${URI_TEMPLATE_VARSPEC_SRC}(?:,${URI_TEMPLATE_VARSPEC_SRC})*$`
+);
+
 const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => {
   if (typeof uri !== 'string') {
     return true;
   }
   // URI template allows braces for expressions.
+  // Literal text is checked leniently here: RFC 6570 also excludes "'" and bare "%" from
+  // literals, but tightening that would reject inputs accepted by earlier versions.
   if (!/^(?:[a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^`| ]*$/.test(uri)) {
     return false;
   }
 
   let inExpression = false;
+  let expressionStart = -1;
   for (let idx = 0; idx < uri.length; idx++) {
     const ch = uri[idx];
     if (ch === '{') {
@@ -287,8 +308,12 @@ const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => {
         return false;
       }
       inExpression = true;
+      expressionStart = idx + 1;
     } else if (ch === '}') {
       if (!inExpression) {
+        return false;
+      }
+      if (!URI_TEMPLATE_EXPRESSION_REGEX.test(uri.slice(expressionStart, idx))) {
         return false;
       }
       inExpression = false;

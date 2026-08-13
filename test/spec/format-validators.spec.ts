@@ -147,4 +147,67 @@ describe('Format Validators', () => {
       expect(validator.options.asyncTimeout).toBe(5000);
     });
   });
+
+  describe('URI Template Format Validator', () => {
+    const uriTemplateSchema = { type: 'string', format: 'uri-template' };
+
+    it.each([
+      // literals only
+      ['', 'empty string'],
+      ['foo', 'plain literal'],
+      ['a%41b', 'percent-encoded triplet in a literal'],
+      ['a\u{1F600}b', 'supplementary plane character in a literal'],
+      ['http://example.com/dictionary', 'absolute URI without expressions'],
+      // expressions
+      ['http://example.com/dictionary/{term:1}/{term}', 'absolute URI with expressions'],
+      ['dictionary/{term:1}/{term}', 'relative template with expressions'],
+      ['{var}', 'bare varspec'],
+      ['{+var}', 'reserved expansion operator'],
+      ['{#var*}', 'fragment operator with explode modifier'],
+      ['{.a}', 'label operator (op-level3), not a leading varname dot'],
+      ['{/a,b}', 'path-segment operator with a variable list'],
+      ['{;x,y}', 'path-style parameter operator'],
+      ['{?x,y}', 'form-style query operator'],
+      ['{&x}', 'form-style query continuation operator'],
+      ['{,var}', 'op-reserve operator accepted for ABNF fidelity'],
+      ['{a.b:3}', 'dotted varname with a prefix modifier'],
+      ['{%41var}', 'varname starting with a percent-encoded triplet'],
+      ['{v:1}', 'minimum prefix max-length'],
+      ['{v:9999}', 'maximum prefix max-length'],
+    ])('should accept %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(true);
+    });
+
+    it.each([
+      // malformed expression bodies — the RFC 6570 §2 gap this block guards
+      ['{}', 'empty expression'],
+      ['{a,,b}', 'empty varspec inside the variable list'],
+      ['{v:0}', 'zero prefix max-length'],
+      ['{v:10000}', 'five-digit prefix max-length'],
+      ['{v:01}', 'leading zero in prefix max-length'],
+      ['{v:99999}', 'five-digit prefix max-length above the cap'],
+      ['{var:}', 'prefix modifier without a max-length'],
+      ['{*}', 'explode modifier without a varname'],
+      ['{:3}', 'prefix modifier without a varname'],
+      ['{a..b}', 'consecutive dots in a varname'],
+      ['{a.}', 'trailing dot in a varname'],
+      ['{a-b}', 'hyphen is not a varchar'],
+      // brace structure
+      ['{a{b}', 'nested opening brace'],
+      ['{a}}', 'trailing unmatched closing brace'],
+      ['}{', 'closing brace before an opening brace'],
+      ['foo}bar', 'unmatched closing brace in a literal'],
+      ['http://example.com/dictionary/{term:1}/{term', 'unterminated expression'],
+    ])('should reject %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(false);
+    });
+
+    // Format validators apply to strings only; every other type is vacuously valid.
+    it.each([12, 13.7, {}, [], false, null])('should ignore non-string input %j', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, { format: 'uri-template' }).valid).toBe(true);
+    });
+  });
 });
