@@ -280,8 +280,9 @@ const URI_TEMPLATE_VARSPEC_SRC = `${URI_TEMPLATE_VARNAME_SRC}(?::[1-9][0-9]{0,3}
 // RFC 6570 §2.2: operator = op-level2 ("+" / "#") / op-level3 ("." / "/" / ";" / "?" / "&")
 //                         / op-reserve ("=" / "," / "!" / "@" / "|")
 // op-reserve is accepted for ABNF fidelity only — the spec leaves its expansion semantics
-// undefined. "|" is unreachable in practice: the literal charset check in uriTemplateValidator
-// rejects any "|" anywhere in the input before this regex runs. Same for a bare space.
+// undefined. The "|" branch is unreachable in practice: the literal charset check in
+// uriTemplateValidator rejects any "|" anywhere in the input before this regex runs, and a
+// literal space is blocked by that same check.
 // RFC 6570 §2: expression body (braces excluded) = [ operator ] variable-list
 //              variable-list = varspec *( "," varspec )
 const URI_TEMPLATE_EXPRESSION_REGEX = new RegExp(
@@ -299,28 +300,29 @@ const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => {
     return false;
   }
 
-  let inExpression = false;
-  let expressionStart = -1;
+  // A non-null expressionStart doubles as "inside an expression", so the slice below cannot
+  // read a stale index — the null check narrows it to a number.
+  let expressionStart: number | null = null;
   for (let idx = 0; idx < uri.length; idx++) {
     const ch = uri[idx];
     if (ch === '{') {
-      if (inExpression) {
+      if (expressionStart !== null) {
         return false;
       }
-      inExpression = true;
       expressionStart = idx + 1;
     } else if (ch === '}') {
-      if (!inExpression) {
+      if (expressionStart === null) {
         return false;
       }
       if (!URI_TEMPLATE_EXPRESSION_REGEX.test(uri.slice(expressionStart, idx))) {
         return false;
       }
-      inExpression = false;
+      expressionStart = null;
     }
   }
 
-  return !inExpression;
+  // An unterminated expression leaves expressionStart set.
+  return expressionStart === null;
 };
 
 const hasValidTildeEscapes = (segment: string): boolean => {

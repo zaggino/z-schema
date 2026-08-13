@@ -158,6 +158,11 @@ describe('Format Validators', () => {
       ['a%41b', 'percent-encoded triplet in a literal'],
       ['a\u{1F600}b', 'supplementary plane character in a literal'],
       ['http://example.com/dictionary', 'absolute URI without expressions'],
+      // Literal text is validated leniently on purpose: RFC 6570 excludes bare "%" and "'"
+      // from literals, but tightening that would reject input earlier versions accepted.
+      // These two pin that deliberate leniency so it cannot regress silently.
+      ['foo%bar', 'bare percent in a literal (deliberately lenient)'],
+      ["foo'bar", 'apostrophe in a literal (deliberately lenient)'],
       // expressions
       ['http://example.com/dictionary/{term:1}/{term}', 'absolute URI with expressions'],
       ['dictionary/{term:1}/{term}', 'relative template with expressions'],
@@ -169,11 +174,15 @@ describe('Format Validators', () => {
       ['{;x,y}', 'path-style parameter operator'],
       ['{?x,y}', 'form-style query operator'],
       ['{&x}', 'form-style query continuation operator'],
-      ['{,var}', 'op-reserve operator accepted for ABNF fidelity'],
+      ['{,var}', 'op-reserve "," accepted for ABNF fidelity'],
+      ['{=var}', 'op-reserve "=" accepted for ABNF fidelity'],
+      ['{!var}', 'op-reserve "!" accepted for ABNF fidelity'],
+      ['{@var}', 'op-reserve "@" accepted for ABNF fidelity'],
       ['{a.b:3}', 'dotted varname with a prefix modifier'],
       ['{%41var}', 'varname starting with a percent-encoded triplet'],
       ['{v:1}', 'minimum prefix max-length'],
       ['{v:9999}', 'maximum prefix max-length'],
+      ['{?x:1,y*}', 'variable list mixing a prefix and an explode modifier'],
     ])('should accept %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(true);
@@ -193,6 +202,8 @@ describe('Format Validators', () => {
       ['{a..b}', 'consecutive dots in a varname'],
       ['{a.}', 'trailing dot in a varname'],
       ['{a-b}', 'hyphen is not a varchar'],
+      ['{a,b,}', 'trailing comma in the variable list'],
+      ['{a,.b}', 'leading dot on a varspec after a comma'],
       // brace structure
       ['{a{b}', 'nested opening brace'],
       ['{a}}', 'trailing unmatched closing brace'],
