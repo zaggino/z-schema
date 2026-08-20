@@ -163,6 +163,7 @@ describe('Format Validators', () => {
       // These two pin that deliberate leniency so it cannot regress silently.
       ['foo%bar', 'bare percent in a literal (deliberately lenient)'],
       ["foo'bar", 'apostrophe in a literal (deliberately lenient)'],
+      ['foo\u0080bar', 'C1 control in a literal (deliberately lenient)'],
       // expressions
       ['http://example.com/dictionary/{term:1}/{term}', 'absolute URI with expressions'],
       ['dictionary/{term:1}/{term}', 'relative template with expressions'],
@@ -210,6 +211,11 @@ describe('Format Validators', () => {
       ['}{', 'closing brace before an opening brace'],
       ['foo}bar', 'unmatched closing brace in a literal'],
       ['http://example.com/dictionary/{term:1}/{term', 'unterminated expression'],
+      // literal charset — RFC 6570 §2.1 starts literals at %x21, so no C0 control or DEL
+      ['foo\u007Fbar', 'a delete character in a literal'],
+      ['foo\u0000bar', 'a NUL character in a literal'],
+      ['foo\u001Fbar', 'a unit-separator control character in a literal'],
+      ['{foo\u007Fbar}', 'a delete character inside an expression body'],
     ])('should reject %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(false);
