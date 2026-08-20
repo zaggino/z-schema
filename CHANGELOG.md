@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.4.3](https://github.com/zaggino/z-schema/compare/v12.4.2...v12.4.3) (2026-08-20)
+
+
+### Bug Fixes
+
+* **format:** reject control characters in uri-template literals ([#483](https://github.com/zaggino/z-schema/issues/483)) ([442ffaf](https://github.com/zaggino/z-schema/commit/442ffaf90f67d4f14933a2cf12ccee39c70825d5))
+
 ## [12.4.2](https://github.com/zaggino/z-schema/compare/v12.4.1...v12.4.2) (2026-08-13)
 
 
