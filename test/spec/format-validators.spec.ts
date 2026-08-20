@@ -158,9 +158,9 @@ describe('Format Validators', () => {
       ['a%41b', 'percent-encoded triplet in a literal'],
       ['a\u{1F600}b', 'supplementary plane character in a literal'],
       ['http://example.com/dictionary', 'absolute URI without expressions'],
-      // Literal text is validated leniently on purpose: RFC 6570 excludes bare "%" and "'"
-      // from literals, but tightening that would reject input earlier versions accepted.
-      // These two pin that deliberate leniency so it cannot regress silently.
+      // Literal text is validated leniently on purpose: RFC 6570 excludes bare "%", "'" and
+      // the C1 controls from literals, but tightening that would reject input earlier versions
+      // accepted. These three pin that deliberate leniency so it cannot regress silently.
       ['foo%bar', 'bare percent in a literal (deliberately lenient)'],
       ["foo'bar", 'apostrophe in a literal (deliberately lenient)'],
       ['foo\u0080bar', 'C1 control in a literal (deliberately lenient)'],
