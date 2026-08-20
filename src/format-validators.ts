@@ -294,8 +294,9 @@ const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => {
     return true;
   }
   // URI template allows braces for expressions.
-  // Literal text is checked leniently here: RFC 6570 also excludes "'" and bare "%" from
-  // literals, but tightening that would reject inputs accepted by earlier versions.
+  // Literal text is checked leniently here: RFC 6570 also excludes "'", bare "%" and the C1
+  // controls (%x80-%x9F) from literals, but tightening those would reject inputs accepted by
+  // earlier versions. C0 controls and DEL are rejected in the scan below.
   if (!/^(?:[a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^`| ]*$/.test(uri)) {
     return false;
   }
@@ -304,13 +305,19 @@ const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => {
   // read a stale index — the null check narrows it to a number.
   let expressionStart: number | null = null;
   for (let idx = 0; idx < uri.length; idx++) {
-    const ch = uri[idx];
-    if (ch === '{') {
+    const code = uri.charCodeAt(idx);
+    // RFC 6570 §2.1: literals start at %x21, so C0 controls and DEL are never literal text.
+    // Checking every position is safe as well as cheaper: an expression body containing one
+    // would already fail the varchar rule in URI_TEMPLATE_EXPRESSION_REGEX.
+    if (code <= 0x1f || code === 0x7f) {
+      return false;
+    }
+    if (code === 0x7b /* { */) {
       if (expressionStart !== null) {
         return false;
       }
       expressionStart = idx + 1;
-    } else if (ch === '}') {
+    } else if (code === 0x7d /* } */) {
       if (expressionStart === null) {
         return false;
       }
