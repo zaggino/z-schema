@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.4.4](https://github.com/zaggino/z-schema/compare/v12.4.3...v12.4.4) (2026-08-27)
+
+
+### Bug Fixes
+
+* **format:** validate uri/uri-reference/iri/iri-reference per RFC 3986/3987 ABNF ([#487](https://github.com/zaggino/z-schema/issues/487)) ([cb92cab](https://github.com/zaggino/z-schema/commit/cb92cab4be641c9459e585856fbdc215486e8cad))
+
 ## [12.4.3](https://github.com/zaggino/z-schema/compare/v12.4.2...v12.4.3) (2026-08-20)
 
 
