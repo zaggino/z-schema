@@ -5,6 +5,8 @@ import isURLModule from 'validator/lib/isURL.js';
 import { isValidRfc3339Date } from './utils/date.js';
 import { isValidHostname, isValidIdnHostname } from './utils/hostname.js';
 import { sortedKeys } from './utils/json.js';
+import { isValidUri, isValidUriReference } from './utils/rfc-3986.js';
+import { isValidIri, isValidIriReference } from './utils/rfc-3987.js';
 import { parseRfc3339Time } from './utils/time.js';
 
 export type FormatValidatorFn = (input: unknown) => boolean | Promise<boolean>;
@@ -201,75 +203,14 @@ const uuidValidator: FormatValidatorFn = (input: unknown) => {
 
 const strictUriValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string' || isURLModule.default(uri);
 
-const isHexChar = (c: number) => (c >= 48 && c <= 57) || (c >= 65 && c <= 70) || (c >= 97 && c <= 102);
+const uriValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string' || isValidUri(uri);
 
-const hasValidPercentEncoding = (str: string): boolean => {
-  for (let i = 0; i < str.length; i++) {
-    if (
-      str[i] === '%' &&
-      (i + 2 >= str.length || !isHexChar(str.charCodeAt(i + 1)) || !isHexChar(str.charCodeAt(i + 2)))
-    ) {
-      return false;
-    }
-  }
-  return true;
-};
+const uriReferenceValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string' || isValidUriReference(uri);
 
-const uriValidator: FormatValidatorFn = (uri: unknown) => {
-  if (typeof uri !== 'string') {
-    return true;
-  }
-  // eslint-disable-next-line no-control-regex
-  if (/[^\u0000-\u007F]/.test(uri)) {
-    return false;
-  }
-  if (!hasValidPercentEncoding(uri)) {
-    return false;
-  }
-  const match = /^(?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?<authority>[^/?#]*)/.exec(uri);
-  if (match) {
-    const authority = match[2];
-    const atIndex = authority.indexOf('@');
-    if (atIndex > 0) {
-      // userinfo is a string; prefer-set-has misfires here — two String#includes
-      // calls are faster than building a Set or a regex for this membership check.
-      // oxlint-disable-next-line unicorn/prefer-set-has
-      const userinfo = authority.slice(0, atIndex);
-      if (userinfo.includes('[') || userinfo.includes(']')) {
-        return false;
-      }
-    }
-    // Validate port: must be numeric
-    let hostPort = atIndex === -1 ? authority : authority.slice(atIndex + 1);
-    if (hostPort.startsWith('[')) {
-      const bracketEnd = hostPort.indexOf(']');
-      if (bracketEnd !== -1) {
-        hostPort = hostPort.slice(bracketEnd + 1);
-      }
-    }
-    const colonIndex = hostPort.lastIndexOf(':');
-    if (colonIndex !== -1) {
-      const port = hostPort.slice(colonIndex + 1);
-      if (port.length > 0 && !/^\d+$/.test(port)) {
-        return false;
-      }
-    }
-  }
-  return /^[a-zA-Z][a-zA-Z0-9+.-]*:[^"\\<>^{}^`| ]*$/.test(uri);
-};
-
-const uriReferenceValidator: FormatValidatorFn = (uri: unknown) => {
-  if (typeof uri !== 'string') {
-    return true;
-  }
-  // eslint-disable-next-line no-control-regex
-  if (/[^\u0000-\u007F]/.test(uri)) {
-    return false;
-  }
-  // URI-reference allows relative URIs
-  return /^(?:[a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/.test(uri);
-};
-
+// This RFC 6570 grammar stays inline while RFC 3986/3987's lives in src/utils/rfc-398*.ts. The
+// difference is that uri-template is not recognized by its regex alone: uriTemplateValidator
+// scans for brace delimiters and applies the expression regex per extracted body, so the grammar
+// and that stateful scan are one unit. Extract it only if it ever becomes regex-recognizable.
 // RFC 6570 §2.3: varchar = ALPHA / DIGIT / "_" / pct-encoded
 const URI_TEMPLATE_VARCHAR_SRC = '(?:[A-Za-z0-9_]|%[0-9A-Fa-f]{2})';
 // RFC 6570 §2.3: varname = varchar *( ["."] varchar )
@@ -443,31 +384,10 @@ const idnHostnameValidator: FormatValidatorFn = (hostname: unknown) => {
   return isValidIdnHostname(hostname);
 };
 
-const iriValidator: FormatValidatorFn = (iri: unknown) => {
-  if (typeof iri !== 'string') {
-    return true;
-  }
-  if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:[^"\\<>^{}^`| ]*$/u.test(iri)) {
-    return false;
-  }
-  try {
-    // Constructed purely to detect an unparseable IRI (throws). Avoids URL.canParse,
-    // which is unavailable in older browsers the UMD build still targets; no-new is
-    // disabled here as the construction is intentional and the result is unused.
-    // oxlint-disable-next-line no-new
-    new URL(iri);
-    return true;
-  } catch {
-    return false;
-  }
-};
+const iriValidator: FormatValidatorFn = (iri: unknown) => typeof iri !== 'string' || isValidIri(iri);
 
-const iriReferenceValidator: FormatValidatorFn = (iriReference: unknown) => {
-  if (typeof iriReference !== 'string') {
-    return true;
-  }
-  return /^(?:[a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^{}^`| ]*$/u.test(iriReference);
-};
+const iriReferenceValidator: FormatValidatorFn = (iriReference: unknown) =>
+  typeof iriReference !== 'string' || isValidIriReference(iriReference);
 
 export interface FormatValidatorsOptions {
   strictUris?: boolean;
