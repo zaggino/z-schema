@@ -52,7 +52,7 @@
 ## Utility Functions
 
 - Pure utility functions go in `src/utils/`. Each file is single-purpose.
-- Current utils: `array.ts`, `clone.ts`, `json.ts`, `properties.ts`, `schema-regex.ts`, `symbols.ts`, `unicode.ts`, `uri.ts`, `what-is.ts`.
+- Current utils: `array.ts`, `clone.ts`, `json.ts`, `properties.ts`, `rfc-3986.ts`, `rfc-3987.ts`, `schema-regex.ts`, `symbols.ts`, `unicode.ts`, `uri.ts`, `what-is.ts`.
 
 ## Performance
 

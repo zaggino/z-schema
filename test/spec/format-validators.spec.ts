@@ -227,4 +227,213 @@ describe('Format Validators', () => {
       expect(validator.validateSafe(data, { format: 'uri-template' }).valid).toBe(true);
     });
   });
+
+  describe('URI Format Validator', () => {
+    const uriSchema = { type: 'string', format: 'uri' };
+
+    it.each([
+      ['http://foo.bar/?baz=qux#quux', 'a valid URL with anchor'],
+      ['http://foo.com/blah_(wikipedia)_blah#cite-1', 'parentheses in a path'],
+      ['http://foo.bar/?q=Test%20URL-encoded%20stuff', 'percent-encoded query'],
+      ['http://xn--nw2a.xn--j6w193g/', 'punycode host'],
+      ["http://-.~_!$&'()*+,;=:%40:80%2f::::::@example.com", 'userinfo of sub-delims, colons and pct-encoded'],
+      ['http://223.255.255.254', 'IPv4 host'],
+      ['ftp://ftp.is.co.za/rfc/rfc1808.txt', 'ftp scheme'],
+      ['ldap://[2001:db8::7]/c=GB?objectClass?one', 'IPv6 IP-literal host'],
+      ['mailto:John.Doe@example.com', 'path-rootless with an at-sign'],
+      ['news:comp.infosystems.www.servers.unix', 'path-rootless'],
+      ['tel:+1-816-555-1212', 'plus is a sub-delim'],
+      ['urn:oasis:names:specification:docbook:dtd:xml:4.1.2', 'colons are pchar in a rootless path'],
+      // RFC 3986 §3.2.2 orders `host` as `IP-literal / IPv4address / reg-name`, and every
+      // IPv4address is also a well-formed reg-name, so a quad that fails `dec-octet` falls
+      // through to reg-name and is still a valid host.
+      ['http://087.10.0.1/', 'leading-zero quad is a valid reg-name'],
+      ['http://999.999.999.999/', 'out-of-bounds quad is a valid reg-name'],
+      ['http://x.com/?arr%5B%5D=1', 'percent-encoded brackets in a query'],
+    ])('should accept %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, uriSchema).valid).toBe(true);
+    });
+
+    it.each([
+      ['//foo.bar/?baz=qux#quux', 'protocol-relative reference is not a URI'],
+      ['/abc', 'relative reference is not a URI'],
+      ['abc', 'bare word is not a URI'],
+      ['\\\\WINDOWS\\fileshare', 'backslashes are in no production'],
+      ['http:// shouldfail.com', 'space in the authority'],
+      [':// should fail', 'missing scheme'],
+      ['bar,baz:foo', 'comma is not a scheme character'],
+      ['1http://example.com', 'scheme must start with a letter'],
+      ['ht_tp://example.com', 'underscore is not a scheme character'],
+      ['https://[@example.org/test.txt', 'unterminated IP-literal'],
+      ['https://example.org/foobar®.txt', 'non-ASCII is rejected by the URI grammar itself'],
+      ['https://example.org/foobar\\.txt', 'backslash in a path'],
+      ['https://example.org/foobar".txt', 'double quote in a path'],
+      ['https://example.org/foobar<>.txt', 'angle brackets in a path'],
+      ['https://example.org/foobar{}.txt', 'braces in a path'],
+      ['https://example.org/foobar^.txt', 'caret in a path'],
+      ['https://example.org/foobar`.txt', 'backtick in a path'],
+      ['https://example.org/foo bar.txt', 'space in a path'],
+      ['https://example.org/foobar|.txt', 'pipe in a path'],
+      ['http://example.com/%6G', 'percent-encoding with a non-hex digit'],
+      ['http://example.com/%A', 'incomplete percent-encoding triplet'],
+      ['http://example.com/%', 'lone percent sign'],
+      ['http://example.com:abc/path', 'non-numeric port'],
+      ['http://[::ffff:01.2.3.4]', 'leading zero in an IPv6-embedded IPv4 quad'],
+      // A single slash makes this `path-absolute`, so there is no authority for an
+      // IP-literal to sit in — the brackets are just characters in a path segment.
+      ['http:/[::1]', 'brackets in a path segment, not an authority'],
+      // `[` and `]` are gen-delims admitted only by `IP-literal`, so raw brackets in a
+      // query are not RFC 3986 conformant even though they are common in the wild —
+      // callers percent-encode them.
+      ['http://x.com/?arr[]=1', 'raw brackets in a query'],
+    ])('should reject %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, uriSchema).valid).toBe(false);
+    });
+
+    // Format validators apply to strings only; every other type is vacuously valid.
+    it.each([12, 13.7, {}, [], false, null])('should ignore non-string input %j', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, { format: 'uri' }).valid).toBe(true);
+    });
+  });
+
+  describe('URI Reference Format Validator', () => {
+    const uriReferenceSchema = { type: 'string', format: 'uri-reference' };
+
+    it.each([
+      ['http://foo.bar/?baz=qux#quux', 'a full URI is also a URI-reference'],
+      ['//foo.bar/?baz=qux#quux', 'network-path reference'],
+      ['/abc', 'absolute-path reference'],
+      ['abc', 'relative-path reference'],
+      ['#fragment', 'fragment-only reference'],
+      ['', 'empty reference is path-empty'],
+      ['?query=1', 'query-only reference'],
+      ['//', 'network-path reference with an empty authority'],
+      // RFC 3986 §3.3 `path-noscheme` begins with `segment-nz-nc`, which exists solely to
+      // forbid a colon in the first segment; later segments are plain `segment = *pchar`,
+      // which does admit one. Contrast with the rejected `1:b` below.
+      ['./this:that', 'a colon is legal after a first segment that has none'],
+      ['http://087.10.0.1/', 'leading-zero quad is a valid reg-name'],
+      ['http://999.999.999.999/', 'out-of-bounds quad is a valid reg-name'],
+    ])('should accept %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, uriReferenceSchema).valid).toBe(true);
+    });
+
+    it.each([
+      ['\\\\WINDOWS\\fileshare', 'backslashes are in no production'],
+      ['#frag\\ment', 'backslash in a fragment'],
+      ['/foobar®.txt', 'non-ASCII'],
+      ['https://example.org/foobar\\.txt', 'backslash in a path'],
+      ['/%zz', 'incomplete percent-encoding'],
+      ['/a"b', 'double quote in a path'],
+      ['/[::1]', 'brackets outside an authority'],
+      ['//example.com:abc/p', 'non-numeric port'],
+      ['//a@b@example.com/', 'more than one at-sign in the authority'],
+      ['//[::ffff:192.168.0.01]/p', 'leading zero in the IPv4 part of an IPv6 literal'],
+      // Mirror image of the accepted `./this:that` above: `path-noscheme`'s first segment
+      // is `segment-nz-nc`, which forbids a colon. `1:b` cannot be read as a scheme either,
+      // since a scheme must start with ALPHA.
+      ['1:b', 'colon in the first segment of a relative-path reference'],
+    ])('should reject %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, uriReferenceSchema).valid).toBe(false);
+    });
+
+    // Format validators apply to strings only; every other type is vacuously valid.
+    it.each([12, 13.7, {}, [], false, null])('should ignore non-string input %j', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, { format: 'uri-reference' }).valid).toBe(true);
+    });
+
+    // The [ userinfo "@" ] host split is the one place the grammar's character classes overlap.
+    // Measured flat at ~0.3ms across these sizes; the bound is deliberately loose so this only
+    // fires on a genuine complexity regression, not on a slow machine.
+    it('rejects an adversarial userinfo/host split in linear time', () => {
+      const validator = ZSchema.create();
+      const schema = { type: 'string', format: 'uri-reference' };
+      const size = 40_000;
+      const adversarial = `//${'a'.repeat(size)}@${'b'.repeat(size)}:!`;
+      const started = performance.now();
+      expect(validator.validateSafe(adversarial, schema).valid).toBe(false);
+      expect(performance.now() - started).toBeLessThan(1000);
+    });
+  });
+
+  describe('IRI Format Validator', () => {
+    const iriSchema = { type: 'string', format: 'iri' };
+
+    it.each([
+      ['http://ƒøø.ßår/?∂éœ=πîx#πîüx', 'non-ASCII in host, query and fragment'],
+      ['http://ƒøø.com/blah_(wîkïpédiå)_blah#ßité-1', 'parentheses and non-ASCII'],
+      ['http://ƒøø.ßår/?q=Test%20URL-encoded%20stuff', 'percent-encoding in an IRI'],
+      ['http://[2001:0db8:85a3:0000:0000:8a2e:0370:7334]', 'full IPv6 literal'],
+      ['http://[2001:db8::1]', 'compressed IPv6 literal'],
+      // RFC 5234 §2.3 makes ABNF string literals case-insensitive, so the "v" of
+      // IPvFuture matches "V" too.
+      ['http://[V1.fe]', 'uppercase IPvFuture version letter'],
+      ['http://192.168.0.1/p', 'IPv4 host'],
+      ['urn:example:resource', 'path-rootless'],
+      ['file:/etc/hosts', 'path-absolute'],
+      ['http://ƒøø.ßår/\u{10300}', 'supplementary-plane ucschar in a path'],
+      ['http://ƒøø.ßår/?q=\u{F0000}', 'supplementary-plane iprivate in a query'],
+    ])('should accept %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, iriSchema).valid).toBe(true);
+    });
+
+    it.each([
+      ['/abc', 'relative reference is not an IRI'],
+      ['\\\\WINDOWS\\filëßåré', 'backslashes'],
+      ['âππ', 'bare word is not an IRI'],
+      ['http://2001:0db8:85a3:0000:0000:8a2e:0370:7334', 'IPv6 without enclosing brackets'],
+      ['http://[::ffff:192.168.0.01]', 'leading zero in an IPv6-embedded IPv4 quad'],
+      ['http://ƒøø.ßår/\n', 'trailing newline'],
+      // The important asymmetry: RFC 3987 §2.2 widens `iquery` with `iprivate` but leaves
+      // `ipath` and `ifragment` alone, so the same code point is valid after `?` and invalid
+      // after `#` (see the accepted supplementary-plane iprivate query case above).
+      ['http://ƒøø.ßår/#\u{F0000}', 'iprivate is not permitted in a fragment'],
+      ['http://ƒøø.ßår/\u{F0000}', 'iprivate is not permitted in a path'],
+    ])('should reject %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, iriSchema).valid).toBe(false);
+    });
+
+    // Format validators apply to strings only; every other type is vacuously valid.
+    it.each([12, 13.7, {}, [], false, null])('should ignore non-string input %j', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, { format: 'iri' }).valid).toBe(true);
+    });
+  });
+
+  describe('IRI Reference Format Validator', () => {
+    const iriReferenceSchema = { type: 'string', format: 'iri-reference' };
+
+    it.each([
+      ['http://ƒøø.ßår/?∂éœ=πîx#πîüx', 'a full IRI is also an IRI-reference'],
+      ['//ƒøø.ßår/?∂éœ=πîx#πîüx', 'network-path reference'],
+      ['/âππ', 'absolute-path reference'],
+      ['âππ', 'relative-path reference'],
+      ['#ƒrägmênt', 'fragment-only reference'],
+    ])('should accept %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, iriReferenceSchema).valid).toBe(true);
+    });
+
+    it.each([
+      ['\\\\WINDOWS\\filëßåré', 'backslashes'],
+      ['#ƒräg\\mênt', 'backslash in a fragment'],
+    ])('should reject %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, iriReferenceSchema).valid).toBe(false);
+    });
+
+    // Format validators apply to strings only; every other type is vacuously valid.
+    it.each([12, 13.7, {}, [], false, null])('should ignore non-string input %j', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, { format: 'iri-reference' }).valid).toBe(true);
+    });
+  });
 });

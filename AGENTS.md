@@ -56,6 +56,8 @@ src/                  # Library source (TypeScript, ESM)
     clone.ts          # Deep/shallow clone
     json.ts           # JSON path traversal, sorted keys
     properties.ts     # Object property copy
+    rfc-3986.ts       # RFC 3986 URI/URI-reference grammar
+    rfc-3987.ts       # RFC 3987 IRI/IRI-reference grammar (RFC 3986 + wider classes)
     schema-regex.ts   # Schema-aware regex
     symbols.ts        # Shared symbols (jsonSymbol, schemaSymbol)
     unicode.ts        # Unicode-aware string length
