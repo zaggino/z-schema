@@ -6,7 +6,7 @@
 // character classes only — if a production ever needs restating here, the change belongs in
 // rfc-3986.ts instead.
 
-import { buildTopLevelRegexes, isValidAuthorityIpLiteral, UNRESERVED_CHARS_SRC } from './rfc-3986.js';
+import { buildUriPredicates, UNRESERVED_CHARS_SRC } from './rfc-3986.js';
 
 // RFC 3987 §2.2: ucschar = %xA0-D7FF / %xF900-FDCF / %xFDF0-FFEF / %x10000-1FFFD
 //   / %x20000-2FFFD / %x30000-3FFFD / %x40000-4FFFD / %x50000-5FFFD / %x60000-6FFFD
@@ -28,15 +28,14 @@ const IPRIVATE_SRC = '\\uE000-\\uF8FF\\u{F0000}-\\u{FFFFD}\\u{100000}-\\u{10FFFD
 // RFC 3987 §2.2: iunreserved = ALPHA / DIGIT / "-" / "." / "_" / "~" / ucschar
 const IUNRESERVED_CHARS_SRC = `${UNRESERVED_CHARS_SRC}${UCSCHAR_SRC}`;
 
-const { absolute: IRI_REGEX, relative: IRI_RELATIVE_REF_REGEX } = buildTopLevelRegexes({
+const IRI_PREDICATES = buildUriPredicates({
   unreservedChars: IUNRESERVED_CHARS_SRC,
   privateQueryChars: IPRIVATE_SRC,
   unicode: true,
 });
 
 /** Tests a string against RFC 3987 §2.2 `IRI` — an absolute IRI with an optional fragment. */
-export const isValidIri = (iri: string): boolean => IRI_REGEX.test(iri) && isValidAuthorityIpLiteral(iri);
+export const isValidIri = IRI_PREDICATES.isAbsolute;
 
 /** Tests a string against RFC 3987 §2.2 `IRI-reference` — an `IRI` or an `irelative-ref`. */
-export const isValidIriReference = (iri: string): boolean =>
-  (IRI_REGEX.test(iri) || IRI_RELATIVE_REF_REGEX.test(iri)) && isValidAuthorityIpLiteral(iri);
+export const isValidIriReference = IRI_PREDICATES.isReference;

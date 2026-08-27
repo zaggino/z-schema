@@ -207,6 +207,10 @@ const uriValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string
 
 const uriReferenceValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string' || isValidUriReference(uri);
 
+// This RFC 6570 grammar stays inline while RFC 3986/3987's lives in src/utils/rfc-398*.ts. The
+// difference is that uri-template is not recognized by its regex alone: uriTemplateValidator
+// scans for brace delimiters and applies the expression regex per extracted body, so the grammar
+// and that stateful scan are one unit. Extract it only if it ever becomes regex-recognizable.
 // RFC 6570 §2.3: varchar = ALPHA / DIGIT / "_" / pct-encoded
 const URI_TEMPLATE_VARCHAR_SRC = '(?:[A-Za-z0-9_]|%[0-9A-Fa-f]{2})';
 // RFC 6570 §2.3: varname = varchar *( ["."] varchar )

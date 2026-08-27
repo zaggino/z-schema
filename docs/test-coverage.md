@@ -23,7 +23,7 @@ Line coverage status: **high**
 | src/utils/hostname.ts         |     96% |         96% |       100% |      97% |
 | src/utils/json.ts             |     98% |         98% |       100% |      97% |
 | src/utils/properties.ts       |    100% |        100% |       100% |      75% |
-| src/utils/rfc-3986.ts         |     95% |         96% |       100% |      90% |
+| src/utils/rfc-3986.ts         |    100% |        100% |       100% |     100% |
 | src/utils/rfc-3987.ts         |    100% |        100% |       100% |     100% |
 | src/utils/schema-regex.ts     |     94% |         94% |       100% |      77% |
 | src/utils/symbols.ts          |    100% |        100% |       100% |     100% |
@@ -44,4 +44,4 @@ Line coverage status: **high**
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
 | src/z-schema.ts               |     76% |         76% |        79% |      83% |
-| **Total**                     | **90%** |     **91%** |    **95%** |  **88%** |
+| **Total**                     | **91%** |     **91%** |    **95%** |  **88%** |

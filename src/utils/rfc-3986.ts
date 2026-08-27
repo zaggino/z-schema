@@ -5,7 +5,7 @@
 // relative-ref). Fragments are composed as uncompiled `_SRC` strings and only the two
 // top-level productions are compiled, once, at module scope — format validation runs on
 // hot paths. RFC 3987 (IRI) is defined as this grammar with widened character classes,
-// so `buildTopLevelRegexes` is exported for src/utils/rfc-3987.ts to instantiate; that
+// so `buildUriPredicates` is exported for src/utils/rfc-3987.ts to instantiate; that
 // module contributes character classes only, never production shapes.
 //
 // Deliberately NOT gated behind safe-regex2 (used in src/utils/schema-regex.ts for
@@ -63,7 +63,7 @@ const UPPERCASE_V_CHAR_CODE = 86;
  * Returns `true` unchanged when the host is not an IP-literal, so the common case costs a
  * single `String#includes` and allocates nothing.
  */
-export const isValidAuthorityIpLiteral = (value: string): boolean => {
+const isValidAuthorityIpLiteral = (value: string): boolean => {
   if (!value.includes('[')) {
     return true;
   }
@@ -101,7 +101,7 @@ export interface UriGrammarOptions {
  * a colon in the first segment. JS has no conditional groups, so they stay separate and the
  * `uri-reference` / `iri-reference` validators test both.
  */
-export const buildTopLevelRegexes = ({
+const buildTopLevelRegexes = ({
   unreservedChars,
   privateQueryChars = '',
   unicode = false,
@@ -159,15 +159,43 @@ export const buildTopLevelRegexes = ({
   };
 };
 
+/** The pair of predicates a single instantiation of the grammar yields. */
+export interface UriPredicates {
+  /** Matches the `URI` / `IRI` production — a scheme is required. */
+  isAbsolute: (value: string) => boolean;
+  /** Matches the `URI-reference` / `IRI-reference` production — absolute or relative. */
+  isReference: (value: string) => boolean;
+}
+
+/**
+ * Instantiates the grammar and returns its two predicates.
+ *
+ * The regex pass and the IP-literal check are paired *here*, deliberately, rather than at each
+ * call site. `isValidAuthorityIpLiteral` is only sound on a string that has already matched a
+ * top-level production — that is what makes any bracket pair it finds provably the authority's
+ * host — so their ordering is an invariant rather than a convention. Keeping both halves inside
+ * this closure means a caller cannot obtain one without the other, or run them out of order.
+ */
+export const buildUriPredicates = (options: UriGrammarOptions): UriPredicates => {
+  const { absolute, relative } = buildTopLevelRegexes(options);
+  return {
+    isAbsolute: (value: string) => absolute.test(value) && isValidAuthorityIpLiteral(value),
+    isReference: (value: string) => (absolute.test(value) || relative.test(value)) && isValidAuthorityIpLiteral(value),
+  };
+};
+
 // Every class in the URI grammar is pure ASCII, so non-ASCII input is rejected by the grammar
 // itself — no separate /[^\u0000-\u007F]/ pre-check is needed, and none is compiled with `u`.
-const { absolute: URI_REGEX, relative: URI_RELATIVE_REF_REGEX } = buildTopLevelRegexes({
-  unreservedChars: UNRESERVED_CHARS_SRC,
-});
+//
+// That also means the URI grammar never exercises the stricter `u`-flag parse, under which a
+// mis-escaped "-" in a character class is a construction-time SyntaxError rather than a silently
+// different range. The IRI instantiation in rfc-3987.ts compiles these same shared fragments with
+// `u`, so an escaping mistake does fail loudly — but only for as long as something imports that
+// module. The spec 'compiles the shared grammar fragments under the u flag' pins it directly.
+const URI_PREDICATES = buildUriPredicates({ unreservedChars: UNRESERVED_CHARS_SRC });
 
 /** Tests a string against RFC 3986 §3 `URI` — an absolute URI with an optional fragment. */
-export const isValidUri = (uri: string): boolean => URI_REGEX.test(uri) && isValidAuthorityIpLiteral(uri);
+export const isValidUri = URI_PREDICATES.isAbsolute;
 
 /** Tests a string against RFC 3986 §4.1 `URI-reference` — a `URI` or a `relative-ref`. */
-export const isValidUriReference = (uri: string): boolean =>
-  (URI_REGEX.test(uri) || URI_RELATIVE_REF_REGEX.test(uri)) && isValidAuthorityIpLiteral(uri);
+export const isValidUriReference = URI_PREDICATES.isReference;

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { buildUriPredicates, UNRESERVED_CHARS_SRC } from '../../src/utils/rfc-3986.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
 const asyncValidator = (input: unknown): Promise<boolean> =>
@@ -287,6 +288,9 @@ describe('Format Validators', () => {
       // query are not RFC 3986 conformant even though they are common in the wild —
       // callers percent-encode them.
       ['http://x.com/?arr[]=1', 'raw brackets in a query'],
+      // IP-literal bracket contents are checked semantically after the grammar matches.
+      ['http://[]', 'empty IP-literal'],
+      ['http://[fe80::1%eth0]', 'RFC 4007 zone id is not part of RFC 3986 IPv6address'],
     ])('should reject %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, uriSchema).valid).toBe(false);
@@ -434,6 +438,26 @@ describe('Format Validators', () => {
     it.each([12, 13.7, {}, [], false, null])('should ignore non-string input %j', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, { format: 'iri-reference' }).valid).toBe(true);
+    });
+  });
+
+  // Reaches into src/utils/rfc-3986.ts on purpose, unlike every block above: this pins a property
+  // of the grammar sources themselves, not the behaviour of a registered format.
+  describe('URI Grammar Source Invariants', () => {
+    // The URI grammar compiles without the `u` flag, where a mis-escaped "-" in a character class
+    // is a silently different range rather than an error. Only the IRI instantiation compiles the
+    // shared fragments under `u` and so fails loudly — which would stop protecting the URI path if
+    // that module were ever severed. Asserting it here keeps the check where it cannot be lost.
+    it('compiles the shared grammar fragments under the u flag', () => {
+      expect(() => buildUriPredicates({ unreservedChars: UNRESERVED_CHARS_SRC, unicode: true })).not.toThrow();
+    });
+
+    it('pairs the IP-literal check with the grammar in both predicates', () => {
+      const { isAbsolute, isReference } = buildUriPredicates({ unreservedChars: UNRESERVED_CHARS_SRC });
+      // Matches the grammar (bracketed host) but is not a valid IPv6address, so only the paired
+      // semantic check can reject it.
+      expect(isAbsolute('http://[::ffff:01.2.3.4]')).toBe(false);
+      expect(isReference('//[::ffff:01.2.3.4]/p')).toBe(false);
     });
   });
 });
