@@ -24,9 +24,11 @@ const PCT_ENCODED_SRC = '%[0-9A-Fa-f]{2}';
 const SUB_DELIMS_CHARS_SRC = "!$&'()*+,;=";
 
 // RFC 3986 §2.3: unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
-// The "-" MUST stay escaped: `[A-Za-z0-9-._~]` reads "9-." as a range, which is a tolerated
-// quirk without the `u` flag but a construction-time SyntaxError with it (the IRI grammar
-// compiles with `u`).
+// The "-" is escaped defensively, not out of necessity: `[A-Za-z0-9-._~]` compiles and matches
+// identically under both no flags and `u` (verified across 0..0x2FFFF). It does throw under `v`
+// (unicodeSets), which this module does not use. Keep the escape anyway — a hyphen's meaning in
+// a character class depends on its position relative to the ranges already consumed, so leaving
+// it bare makes any later edit to this class body harder to reason about than it needs to be.
 export const UNRESERVED_CHARS_SRC = 'A-Za-z0-9\\-._~';
 
 // RFC 3986 §3.1: scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
@@ -42,9 +44,10 @@ const PORT_SRC = '[0-9]*';
 // the hardest part of the grammar to prove correct, and `validator` already implements it.
 const IP_LITERAL_SRC = '\\[[^\\]]*\\]';
 
-// RFC 3986 Appendix A: IPvFuture = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
-// RFC 5234 §2.3 makes ABNF string literals case-insensitive, so "v" also matches "V". Spelled
-// as [vV] rather than the `i` flag, which would additionally loosen the HEXDIG class.
+// RFC 3986 §3.2.2: IPvFuture = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
+// RFC 5234 §2.3 makes ABNF string literals case-insensitive, so "v" also matches "V". Spelled as
+// [vV] rather than the `i` flag so the case-sensitivity of this pattern stays a property of the
+// one atom that needs it, instead of a whole-regex setting later edits would silently inherit.
 const IPV_FUTURE_REGEX = /^[vV][0-9A-Fa-f]+\.[A-Za-z0-9\-._~!$&'()*+,;=:]+$/;
 
 // Captures the contents of the first bracket pair. Safe to run against the whole input: `[`
@@ -83,14 +86,16 @@ const isValidAuthorityIpLiteral = (value: string): boolean => {
   return isIPModule.default(inner, 6);
 };
 
+// Detects a `\u{...}` code-point escape in a character-class body, which only has its intended
+// meaning when the pattern is compiled with the `u` flag.
+const ASTRAL_ESCAPE_REGEX = /\\u\{/;
+
 /** Inputs that distinguish RFC 3987's grammar from RFC 3986's — character classes only. */
 export interface UriGrammarOptions {
   /** Body of the `unreserved` character class: RFC 3986's `unreserved`, or RFC 3987's `iunreserved`. */
   unreservedChars: string;
   /** Extra class body permitted in the query alone — RFC 3987's `iprivate`. Empty for a URI. */
   privateQueryChars?: string;
-  /** Compile with the `u` flag. Required when any class body uses `\u{...}` escapes. */
-  unicode?: boolean;
 }
 
 /**
@@ -104,7 +109,6 @@ export interface UriGrammarOptions {
 const buildTopLevelRegexes = ({
   unreservedChars,
   privateQueryChars = '',
-  unicode = false,
 }: UriGrammarOptions): { absolute: RegExp; relative: RegExp } => {
   const uc = unreservedChars;
   const sd = SUB_DELIMS_CHARS_SRC;
@@ -145,7 +149,13 @@ const buildTopLevelRegexes = ({
   const tail = `(?:\\?${query})?(?:#${fragment})?$`;
 
   // Making the whole hier-part / relative-part alternation optional expresses path-empty.
-  const flags = unicode ? 'u' : '';
+  //
+  // The `u` flag is derived from the class bodies rather than passed in, so it cannot desync from
+  // their content. Taking it as an option allowed a caller to supply astral escapes with
+  // `unicode: false`, which does not throw: outside `u` mode a `\\u{...}` escape is an identity escape,
+  // so it would silently compile as the literal characters "u{...}" and yield a narrower grammar.
+  // Same approach as `needsUnicode` in src/utils/schema-regex.ts.
+  const flags = ASTRAL_ESCAPE_REGEX.test(unreservedChars) || ASTRAL_ESCAPE_REGEX.test(privateQueryChars) ? 'u' : '';
   return {
     // §3: URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
     // hier-part = "//" authority path-abempty / path-absolute / path-rootless / path-empty

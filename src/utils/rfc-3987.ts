@@ -12,7 +12,8 @@ import { buildUriPredicates, UNRESERVED_CHARS_SRC } from './rfc-3986.js';
 //   / %x20000-2FFFD / %x30000-3FFFD / %x40000-4FFFD / %x50000-5FFFD / %x60000-6FFFD
 //   / %x70000-7FFFD / %x80000-8FFFD / %x90000-9FFFD / %xA0000-AFFFD / %xB0000-BFFFD
 //   / %xC0000-CFFFD / %xD0000-DFFFD / %xE1000-EFFFD
-// The `\u{...}` escapes require the `u` flag, hence `unicode: true` below.
+// The `\u{...}` escapes require the `u` flag, which buildTopLevelRegexes derives from these
+// class bodies rather than taking as an argument - it cannot be passed inconsistently.
 const UCSCHAR_SRC =
   '\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF' +
   '\\u{10000}-\\u{1FFFD}\\u{20000}-\\u{2FFFD}\\u{30000}-\\u{3FFFD}\\u{40000}-\\u{4FFFD}' +
@@ -31,7 +32,6 @@ const IUNRESERVED_CHARS_SRC = `${UNRESERVED_CHARS_SRC}${UCSCHAR_SRC}`;
 const IRI_PREDICATES = buildUriPredicates({
   unreservedChars: IUNRESERVED_CHARS_SRC,
   privateQueryChars: IPRIVATE_SRC,
-  unicode: true,
 });
 
 /** Tests a string against RFC 3987 §2.2 `IRI` — an absolute IRI with an optional fragment. */

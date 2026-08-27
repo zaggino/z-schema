@@ -6,6 +6,25 @@ import { ZSchema } from '../../src/z-schema.ts';
 const asyncValidator = (input: unknown): Promise<boolean> =>
   Promise.resolve(typeof input === 'string' && input.length > 3);
 
+// Times repeated validation of an adversarial `[ userinfo "@" ] host` string. Firefox coarsens
+// performance.now() to 1ms, so a single sub-millisecond run reads as 0 and makes any ratio
+// meaningless — the repeat count lifts each measurement well clear of timer granularity in every
+// browser project. Returns total elapsed ms, which is what the caller compares across sizes.
+const ADVERSARIAL_SPLIT_RUNS = 25;
+
+const timeAdversarialSplit = (size: number): number => {
+  const validator = ZSchema.create();
+  const schema = { type: 'string', format: 'uri-reference' };
+  const adversarial = `//${'a'.repeat(size)}@${'b'.repeat(size)}:!`;
+  const started = performance.now();
+  for (let run = 0; run < ADVERSARIAL_SPLIT_RUNS; run++) {
+    if (validator.validateSafe(adversarial, schema).valid) {
+      throw new Error('adversarial input must not validate');
+    }
+  }
+  return performance.now() - started;
+};
+
 const slowValidator = async (): Promise<boolean> => {
   await new Promise((resolve) => {
     setTimeout(resolve, 50); // 50ms delay
@@ -251,6 +270,13 @@ describe('Format Validators', () => {
       ['http://087.10.0.1/', 'leading-zero quad is a valid reg-name'],
       ['http://999.999.999.999/', 'out-of-bounds quad is a valid reg-name'],
       ['http://x.com/?arr%5B%5D=1', 'percent-encoded brackets in a query'],
+      // Structural productions the grammar supports but the upstream suite never exercises.
+      ['mailto:', 'path-empty — the hier-part alternation is optional'],
+      ['urn:/a/b', 'path-absolute under a scheme'],
+      ['http://', 'reg-name accepts zero repetitions, so the authority may be empty'],
+      ['http://example.com:/path', 'port = *DIGIT, so an empty port is well-formed'],
+      // IPvFuture accepts either case of the version letter; only "V" was covered before.
+      ['http://[v1.fe]', 'lowercase IPvFuture version letter'],
     ])('should accept %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, uriSchema).valid).toBe(true);
@@ -291,6 +317,16 @@ describe('Format Validators', () => {
       // IP-literal bracket contents are checked semantically after the grammar matches.
       ['http://[]', 'empty IP-literal'],
       ['http://[fe80::1%eth0]', 'RFC 4007 zone id is not part of RFC 3986 IPv6address'],
+      // IPvFuture = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" ). Every part of that is
+      // load-bearing; without these the regex is only ever exercised in the accept direction.
+      ['http://[v1]', 'IPvFuture without the separating dot'],
+      ['http://[v.1]', 'IPvFuture with no hex digit before the dot'],
+      ['http://[vZZ.1]', 'IPvFuture with a non-hex version'],
+      ['http://[v1.]', 'IPvFuture with an empty trailer'],
+      // Brackets are gen-delims: no production but IP-literal admits them. This is the invariant
+      // the whole-string bracket scan in isValidAuthorityIpLiteral depends on.
+      ['http://us[er@example.com/', 'bracket in userinfo'],
+      ['http://example.com/#fr[ag]', 'bracket in a fragment'],
     ])('should reject %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, uriSchema).valid).toBe(false);
@@ -352,17 +388,18 @@ describe('Format Validators', () => {
       expect(validator.validateSafe(data, { format: 'uri-reference' }).valid).toBe(true);
     });
 
-    // The [ userinfo "@" ] host split is the one place the grammar's character classes overlap.
-    // Measured flat at ~0.3ms across these sizes; the bound is deliberately loose so this only
-    // fires on a genuine complexity regression, not on a slow machine.
-    it('rejects an adversarial userinfo/host split in linear time', () => {
-      const validator = ZSchema.create();
-      const schema = { type: 'string', format: 'uri-reference' };
-      const size = 40_000;
-      const adversarial = `//${'a'.repeat(size)}@${'b'.repeat(size)}:!`;
-      const started = performance.now();
-      expect(validator.validateSafe(adversarial, schema).valid).toBe(false);
-      expect(performance.now() - started).toBeLessThan(1000);
+    // The [ userinfo "@" ] host split is the one place the grammar's character classes overlap:
+    // userinfo's class is a superset of reg-name's, and only the "@" disambiguates where the
+    // split falls. This is the construct most likely to degrade if the authority production is
+    // ever edited, so assert the scaling rather than a single wall-clock ceiling — a
+    // linear-to-quadratic regression at one input size can still land under a fixed bound.
+    it('rejects an adversarial userinfo/host split without super-linear blowup', () => {
+      const small = timeAdversarialSplit(25_000);
+      const large = timeAdversarialSplit(100_000);
+      // 4x the input. Linear predicts ~4x, quadratic ~16x. The bound sits between the two so it
+      // catches a genuine complexity change while tolerating timer noise on a loaded machine.
+      expect(large / small).toBeLessThan(10);
+      expect(large).toBeLessThan(2000);
     });
   });
 
@@ -400,6 +437,10 @@ describe('Format Validators', () => {
       // after `#` (see the accepted supplementary-plane iprivate query case above).
       ['http://ƒøø.ßår/#\u{F0000}', 'iprivate is not permitted in a fragment'],
       ['http://ƒøø.ßår/\u{F0000}', 'iprivate is not permitted in a path'],
+      // ucschar starts at U+00A0; the code point just below it must still be rejected.
+      ['http://\u009F.example.com/', 'U+009F sits just below the ucschar range'],
+      // The widened classes do not relax percent-encoding, which stays shared with RFC 3986.
+      ['http://example.com/%ZZ', 'percent-encoding with non-hex digits in an IRI'],
     ])('should reject %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, iriSchema).valid).toBe(false);
@@ -421,6 +462,9 @@ describe('Format Validators', () => {
       ['/âππ', 'absolute-path reference'],
       ['âππ', 'relative-path reference'],
       ['#ƒrägmênt', 'fragment-only reference'],
+      // The segment-colon rule must survive the widened iunreserved class — same discriminator
+      // as the uri-reference block, with a non-ASCII segment.
+      ['./this:β', 'colon after a first segment that has none'],
     ])('should accept %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, iriReferenceSchema).valid).toBe(true);
@@ -429,6 +473,8 @@ describe('Format Validators', () => {
     it.each([
       ['\\\\WINDOWS\\filëßåré', 'backslashes'],
       ['#ƒräg\\mênt', 'backslash in a fragment'],
+      ['1:β', 'colon in the first segment of a relative-path reference'],
+      ['/à[1]', 'bracket outside an authority'],
     ])('should reject %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, iriReferenceSchema).valid).toBe(false);
@@ -444,12 +490,22 @@ describe('Format Validators', () => {
   // Reaches into src/utils/rfc-3986.ts on purpose, unlike every block above: this pins a property
   // of the grammar sources themselves, not the behaviour of a registered format.
   describe('URI Grammar Source Invariants', () => {
-    // The URI grammar compiles without the `u` flag, where a mis-escaped "-" in a character class
-    // is a silently different range rather than an error. Only the IRI instantiation compiles the
-    // shared fragments under `u` and so fails loudly — which would stop protecting the URI path if
-    // that module were ever severed. Asserting it here keeps the check where it cannot be lost.
-    it('compiles the shared grammar fragments under the u flag', () => {
-      expect(() => buildUriPredicates({ unreservedChars: UNRESERVED_CHARS_SRC, unicode: true })).not.toThrow();
+    // The `u` flag is derived from the class bodies rather than passed in. Getting that wrong is
+    // silent rather than loud: outside `u` mode a `\u{...}` escape is an identity escape, so the
+    // range would compile as the literal characters "u{...}" and simply match less. Assert the
+    // derivation behaviourally, since there is no exception to catch.
+    it('derives the u flag from the class bodies', () => {
+      const astral = buildUriPredicates({
+        unreservedChars: `${UNRESERVED_CHARS_SRC}\\u{10000}-\\u{1FFFD}`,
+      });
+      expect(astral.isAbsolute('http://example.com/\u{10300}')).toBe(true);
+      // The unextended ASCII grammar must not accept the same input.
+      const ascii = buildUriPredicates({ unreservedChars: UNRESERVED_CHARS_SRC });
+      expect(ascii.isAbsolute('http://example.com/\u{10300}')).toBe(false);
+    });
+
+    it('keeps the shared ASCII class bodies safe to compile under the u flag', () => {
+      expect(() => new RegExp(`[${UNRESERVED_CHARS_SRC}]`, 'u')).not.toThrow();
     });
 
     it('pairs the IP-literal check with the grammar in both predicates', () => {
