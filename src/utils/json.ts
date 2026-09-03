@@ -38,7 +38,8 @@ export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptio
     );
   }
 
-  let i, len;
+  let i;
+  let len;
 
   // both are arrays, and:
   if (Array.isArray(json1) && Array.isArray(json2)) {
