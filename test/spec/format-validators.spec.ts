@@ -497,6 +497,154 @@ describe('Format Validators', () => {
     });
   });
 
+  describe('Email Format Validator', () => {
+    const emailSchema = { type: 'string', format: 'email' };
+
+    it.each([
+      ['test@io', 'a single-label domain is a valid address (RFC 5321)'],
+      ['test@255.255.255.255', 'an unbracketed IPv4 domain'],
+      ['"test"@iana.org', 'a quoted local part'],
+      ['a@[IPv6:::1]', 'an IPv6 address literal, which uses the bracketed-literal path'],
+      ['a@[ipv6:::1]', 'a lowercase IPv6 tag in an address literal'],
+    ])('should accept %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, emailSchema).valid).toBe(true);
+    });
+
+    // The ASCII `email` format is ASCII-only (RFC 5321/5322); Unicode addresses are
+    // `idn-email`. The first three rows are each accepted by validator.js on their own,
+    // so together they pin the up-front non-ASCII rejection rather than any isEmail option.
+    it.each([
+      ['a\u00E9@iana.org', 'a non-ASCII character in the local part'],
+      ['a@\u00E9.org', 'a non-ASCII character in the domain'],
+      ['"test\\\u00A9"@iana.org', 'a non-ASCII character in a quoted pair'],
+      ['a\uFF20iana.org', 'a fullwidth commercial at is not a separator'],
+      ['test@.iana.org', 'a domain starting with a dot is still rejected without require_tld'],
+      ['test@iana.org.', 'a domain ending with a dot is still rejected without require_tld'],
+      ['test@iana..com', 'two subsequent dots in the domain are still rejected'],
+      ['test@-iana.org', 'a domain label starting with a hyphen'],
+      ['a@[1.2.3]', 'an IPv4 address literal with three octets'],
+    ])('should reject %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, emailSchema).valid).toBe(false);
+    });
+
+    // Format validators apply to strings only; every other type is vacuously valid.
+    it.each([12, 13.7, {}, [], false, null])('should ignore non-string input %j', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, { format: 'email' }).valid).toBe(true);
+    });
+  });
+
+  describe('Hostname Format Validator', () => {
+    const hostnameSchema = { type: 'string', format: 'hostname' };
+
+    it.each([
+      ['www.example.com', 'a plain hostname'],
+      ['xn--nxasmq6b', 'an A-label whose decoded U-label is valid'],
+    ])('should accept %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, hostnameSchema).valid).toBe(true);
+    });
+
+    // The UTS 46 mapping step belongs to `idn-hostname` only: the plain `hostname`
+    // format rejects every non-ASCII code point outright, so neither the fullwidth
+    // full stop nor the KELVIN SIGN may be mapped into an ASCII hostname here.
+    it.each([
+      ['example\uFF0Ecom', 'a fullwidth full stop is not mapped to a label separator'],
+      ['\u212Aelvin.example.com', 'the KELVIN SIGN is not case-mapped to "k"'],
+      ['-hostname', 'a label starting with a hyphen'],
+    ])('should reject %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, hostnameSchema).valid).toBe(false);
+    });
+
+    it.each([12, 13.7, {}, [], false, null])('should ignore non-string input %j', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, { format: 'hostname' }).valid).toBe(true);
+    });
+  });
+
+  describe('IDN Hostname Format Validator', () => {
+    const idnHostnameSchema = { type: 'string', format: 'idn-hostname' };
+
+    it.each([
+      // UTS 46 mapping step (section 4 step 1), nontransitional.
+      ['a\u200Bb', 'an ignored ZERO WIDTH SPACE is deleted by the mapping'],
+      ['a\u00ADb', 'an ignored SOFT HYPHEN is deleted by the mapping'],
+      // U+FFA0 is ignored, so it must be deleted before the compatibility fold --
+      // NFKC would otherwise turn it into U+1160 instead of removing it.
+      ['a\uFFA0b', 'HALFWIDTH HANGUL FILLER is ignored, not width-folded'],
+      ['\uFF41'.repeat(63), 'a label of 63 fullwidth letters is 63 octets after mapping'],
+      ['\uFF58\uFF4E--nxasmq6b', 'an ACE prefix produced by the mapping decodes as an A-label'],
+      ['\uFF11\uFF12\uFF13', 'fullwidth digits map to ASCII digits'],
+      ['cafe\u0301.com', 'a non-NFC U-label is normalised to NFC'],
+      // Per-code-point NFKC leaves a combining mark behind; the final NFC composes it.
+      ['\uFF76\uFF9E', 'halfwidth katakana plus a sound mark compose to U+30AC'],
+      ['\u212Aelvin', 'the KELVIN SIGN case-maps to "k"'],
+      ['\u337F.com', 'SQUARE CORPORATION maps to its four-ideograph sequence'],
+      ['Example.COM', 'uppercase ASCII takes the ASCII case-mapping fast path'],
+      ['xn--NXASMQ6B', 'an A-label with an uppercase Punycode body'],
+      // Nontransitional processing: these deviations must survive the mapping. Case
+      // *folding* would turn U+00DF into "ss" and U+03C2 into sigma.
+      ['\u00DF\u03C2\u0F0B\u3007', 'the U+00DF and U+03C2 deviations are preserved'],
+      ['\u0915\u094D\u200C\u0937', 'ZWNJ is a deviation, not ignored, so CONTEXTJ still sees it'],
+      ['\u0915\u094D\u200D\u0937', 'ZWJ is a deviation, not ignored, so CONTEXTJ still sees it'],
+      // U+FF61 and U+FF0E are the only two UTS 46 `mapped` code points whose fold
+      // output contains a label separator, so the separator guard must not swallow
+      // them -- IDN_SEPARATOR_REGEX turns both into '.'.
+      ['a\uFF61b', 'a fullwidth halfwidth ideographic full stop separates labels'],
+      ['a\uFF0Eb', 'a fullwidth full stop separates labels'],
+      ['a\u3002b', 'an ideographic full stop separates labels'],
+      ['\u1FB3', 'U+1FB3 maps to alpha + iota via the U+0345 rule'],
+    ])('should accept %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, idnHostnameSchema).valid).toBe(true);
+    });
+
+    it.each([
+      // These four guard against deriving the ignored set from the
+      // Default_Ignorable_Code_Point property: 3880 Default_Ignorable code points are
+      // DISALLOWED rather than ignored, and deleting the bidi controls below would
+      // accept spoofed hostnames. No JSON-Schema-Test-Suite case covers this, so
+      // these rows are the only thing that fails if the set is ever "simplified".
+      ['a\u202Eb', 'RIGHT-TO-LEFT OVERRIDE is DISALLOWED, not ignored'],
+      ['a\u202Ab', 'LEFT-TO-RIGHT EMBEDDING is DISALLOWED, not ignored'],
+      ['a\u200Eb', 'LEFT-TO-RIGHT MARK is DISALLOWED, not ignored'],
+      ['a\u061Cb', 'ARABIC LETTER MARK is DISALLOWED, not ignored'],
+      // The compatibility fold must never introduce a label separator.
+      ['a\u2024b', 'ONE DOT LEADER must not be folded into a label separator'],
+      ['a\uFE52b', 'SMALL FULL STOP must not be folded into a label separator'],
+      ['a\u2026b', 'HORIZONTAL ELLIPSIS must not be folded into label separators'],
+      ['\uFDFA.com', 'an Arabic ligature folding to a sequence containing spaces'],
+      ['a\uFFE3b', 'FULLWIDTH MACRON folds to a space, which is DISALLOWED'],
+      // A label the mapping empties is invalid (UTS 46 VerifyDnsLength).
+      ['\u200B', 'a hostname that is empty after mapping'],
+      ['a.\u200B.b', 'a label that is empty after mapping'],
+      ['\uFF41'.repeat(64), 'a label of 64 fullwidth letters exceeds 63 octets after mapping'],
+      // The fold must not introduce a NON-ASCII separator either: U+FE12 is
+      // DISALLOWED but folds to U+3002, which IDN_SEPARATOR_REGEX would then treat
+      // as a label break. Guarding only the ASCII '.' let this through.
+      ['a\uFE12b', 'U+FE12 must not forge an ideographic full stop separator'],
+      // UTS 46 maps U+0345 to U+03B9; leaving it in place understates both its Bidi
+      // class (NSM where an L letter belongs) and the label length.
+      ['\u05D0\u0345', 'alef + U+0345 is R+L and must fail the Bidi rule'],
+      ['\u1FB3'.repeat(29), '29 x U+1FB3 expands to a 65-octet A-label'],
+      // RFC 5891 section 5.4 -- a decoded U-label must be in NFC form. The mapping
+      // step cannot catch this: an A-label is pure ASCII and passes through untouched.
+      ['xn--u-ccb.com', 'an A-label decoding to U+0075 U+0308 rather than U+00FC'],
+      ['XN--aa---o47jg78q', 'lowercasing does not rescue hyphens in positions 3 and 4'],
+    ])('should reject %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, idnHostnameSchema).valid).toBe(false);
+    });
+
+    it.each([12, 13.7, {}, [], false, null])('should ignore non-string input %j', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, { format: 'idn-hostname' }).valid).toBe(true);
+    });
+  });
+
   // Reaches into src/utils/rfc-3986.ts on purpose, unlike every block above: this pins a property
   // of the grammar sources themselves, not the behaviour of a registered format.
   describe('URI Grammar Source Invariants', () => {

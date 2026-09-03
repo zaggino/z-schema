@@ -55,11 +55,25 @@ const dateTimeValidator: FormatValidatorFn = (dateTime: unknown) => {
   return parseRfc3339Time(timePart) !== null;
 };
 
+// Matches any code unit outside the ASCII range; hoisted so it is compiled once.
+// eslint-disable-next-line no-control-regex
+const NON_ASCII_REGEX = /[^\u0000-\u007F]/;
+
 const emailValidator: FormatValidatorFn = (email: unknown) => {
   if (typeof email !== 'string') {
     return true;
   }
-  if (isEmailModule.default(email, { require_tld: true, allow_ip_domain: true })) {
+  // RFC 5321/5322 addresses are ASCII-only — Unicode addresses are `idn-email`.
+  // Checked up front because `validator` would otherwise accept non-ASCII in the
+  // local part (its `allow_utf8_local_part` option defaults to true, and applies to
+  // quoted pairs too) and in the domain (`isFQDN` allows non-ASCII label chars).
+  if (NON_ASCII_REGEX.test(email)) {
+    return false;
+  }
+  // `require_tld` is deliberately false: a single-label domain (`test@io`) is a
+  // valid address. Dot placement is still enforced by `isFQDN`, so `test@.iana.org`,
+  // `test@iana.org.` and `test@iana..com` remain invalid.
+  if (isEmailModule.default(email, { require_tld: false, allow_ip_domain: true })) {
     return true;
   }
 
@@ -74,7 +88,7 @@ const emailValidator: FormatValidatorFn = (email: unknown) => {
     return false;
   }
 
-  return isEmailModule.default(`${localPart}@example.com`, { require_tld: true });
+  return isEmailModule.default(`${localPart}@example.com`, { require_tld: false });
 };
 
 const hostnameValidator: FormatValidatorFn = (hostname: unknown) => {

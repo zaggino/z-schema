@@ -6,16 +6,156 @@ const IDN_SEPARATOR_TEST_REGEX = /[\u3002\uFF0E\uFF61]/;
 
 // IDNA2008 (RFC 5890-5893) support below is a hand-rolled approximation built on
 // General_Category / Script Unicode-property regexes (JS regex has no
-// \p{Bidi_Class} or \p{Joining_Type}). It covers the JSON-Schema-Test-Suite
+// \p{Bidi_Class} or \p{Joining_Type}), plus a UTS 46 mapping step
+// (applyUts46Mapping) for idn-hostname. It covers the JSON-Schema-Test-Suite
 // corpus, not the full IDNA table. Known limitations: joining-context (CONTEXTJ)
 // only models Arabic script; the ZWJ/ZWNJ Virama context recognizes only the
-// Devanagari virama U+094D (not other scripts' viramas); Bidi class detection
-// covers L/R/AL/AN/EN/NSM and treats everything else as ON; and U-labels are not
-// required to be in Unicode NFC form. All regexes/Sets are hoisted to module scope
-// so they are compiled once (format validation runs on hot paths).
+// Devanagari virama U+094D (not other scripts' viramas); and Bidi class detection
+// covers L/R/AL/AN/EN/NSM and treats everything else as ON.
+//
+// The mapping step is nontransitional (UTS 46 section 4): the deviation code
+// points U+00DF, U+03C2, U+200C and U+200D are preserved rather than folded. It
+// derives the `mapped` column from String.prototype.toLowerCase plus a
+// per-code-point NFKC, which reproduces the real table for the case-mapped and
+// compatibility entries but not for `disallowed_STD3_valid` code points (e.g.
+// U+00A1, reachable through an A-label such as "xn--7a", is accepted where UTS 46
+// with STD3 rules would reject it) nor for \p{No} dot-formers (e.g. U+2488 "1.",
+// which is accepted as a single label -- a pre-existing gap the mapping step
+// neither fixes nor widens). U+0345 and the U+1F80-U+1FFC block are handled
+// explicitly because omitting them lets invalid labels validate rather than
+// merely rejecting valid ones. The plain `hostname` format does not map at all;
+// isValidHostname rejects every non-ASCII code point outright.
+//
+// All regexes/Sets are hoisted to module scope so they are compiled once (format
+// validation runs on hot paths).
 
 // Matches an A-label (ACE) prefix; hoisted so it is compiled once, not per label.
 const XN_LABEL_REGEX = /^xn--/i;
+
+// The exact UTS 46 IdnaMappingTable `ignored` status, NOT
+// \p{Default_Ignorable_Code_Point}: 3880 Default_Ignorable code points are
+// DISALLOWED rather than ignored -- notably U+061C ALM, U+200E/200F LRM/RLM and
+// U+202A-202E (the bidi overrides). Deleting those would accept bidi-spoofed
+// hostnames, and no JSON-Schema-Test-Suite case covers it, so the guard lives in
+// the idn-hostname unit tests instead. Encoding the real set also means ZWNJ/ZWJ
+// need no exception here: they are UTS 46 `deviation`, not `ignored`, so
+// nontransitional processing keeps them for the CONTEXTJ checks below.
+const UTS46_IGNORED_TEST_REGEX =
+  // Several members of this set (U+034F, U+17B4/B5, U+180B-180F, U+1D173-1D17A and the
+  // U+E0100-E01EF variation selectors) are General_Category=Mn, so no-misleading-character-class fires
+  // on the class; they are code point escapes, not literal combining sequences, and the
+  // membership is dictated by the UTS 46 table.
+  // eslint-disable-next-line no-misleading-character-class
+  /[\u00AD\u034F\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B\u2060-\u2064\u206A-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0\u{1BCA0}-\u{1BCA3}\u{1D173}-\u{1D17A}\u{E0100}-\u{E01EF}]/u;
+// The same character class with `g`, for `replace`. Deliberately duplicated rather
+// than shared via `new RegExp(source, flags)`: literals stay greppable, and this
+// mirrors the IDN_SEPARATOR_REGEX/_TEST_REGEX pairing above, which exists because
+// `.test()` on a `g`-flagged regex advances a stateful `lastIndex`.
+const UTS46_IGNORED_REGEX =
+  // eslint-disable-next-line no-misleading-character-class -- see above
+  /[\u00AD\u034F\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B\u2060-\u2064\u206A-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0\u{1BCA0}-\u{1BCA3}\u{1D173}-\u{1D17A}\u{E0100}-\u{E01EF}]/gu;
+
+// Every code point that may act as a label separator, including the ASCII '.'.
+// Used to withhold a compatibility mapping that would introduce one.
+const LABEL_SEPARATOR_TEST_REGEX = /[.\u3002\uFF0E\uFF61]/;
+
+// U+0345 COMBINING GREEK YPOGEGRAMMENI, plus the U+1F80-U+1FFC block whose
+// precomposed code points decompose through it (63 of them; the range also spans
+// a few that do not, which the replace below simply leaves alone).
+const YPOGEGRAMMENI_TEST_REGEX = /[\u0345\u1F80-\u1FFC]/;
+const YPOGEGRAMMENI_REGEX = /\u0345/g;
+// UTS 46 section 4 step 1 (Map), nontransitional processing. Deliberately NOT
+// applied by isValidHostname, which rejects every non-ASCII code point outright.
+const applyUts46Mapping = (hostname: string): string => {
+  // One charCode pass classifies the input, so the two fast paths below cost a
+  // single scan between them rather than a regex test each.
+  let hasNonAscii = false;
+  let needsMapping = false;
+  for (let idx = 0; idx < hostname.length; idx++) {
+    const code = hostname.charCodeAt(idx);
+    if (code > 0x7f) {
+      hasNonAscii = true;
+      needsMapping = true;
+      break;
+    }
+    // Lowercase ASCII letters, digits, '.' and '-' are already fully mapped: no
+    // ASCII code point is `ignored`, carries a compatibility mapping, or is
+    // altered by NFC.
+    if (!((code >= 0x61 && code <= 0x7a) || (code >= 0x30 && code <= 0x39) || code === 0x2e || code === 0x2d)) {
+      needsMapping = true;
+    }
+  }
+  // Already-mapped ASCII -- by far the common case. Returned by identity.
+  if (!needsMapping) {
+    return hostname;
+  }
+  // Any other all-ASCII hostname needs case mapping only.
+  if (!hasNonAscii) {
+    return hostname.toLowerCase();
+  }
+
+  let mapped = hostname;
+  // 1. Delete `ignored` code points. Must precede the fold below: U+FFA0 is
+  //    `ignored`, but NFKC would turn it into U+1160 rather than remove it.
+  if (UTS46_IGNORED_TEST_REGEX.test(mapped)) {
+    mapped = mapped.replace(UTS46_IGNORED_REGEX, '');
+  }
+  // 2. Case mapping -- toLowerCase, never case folding. Nontransitional processing
+  //    preserves the deviation code points U+00DF and U+03C2, which folding would
+  //    turn into "ss" and sigma; toLowerCase leaves both alone while still applying
+  //    genuine `mapped` entries such as U+212A KELVIN SIGN -> "k".
+  mapped = mapped.toLowerCase();
+  // 3. UTS 46 maps U+0345 COMBINING GREEK YPOGEGRAMMENI to U+03B9 GREEK SMALL
+  //    LETTER IOTA (its mapping column follows NFKC_Casefold, whose case-folding
+  //    step covers this; plain NFKC does not). Skipping it is not cosmetic: it
+  //    leaves a Bidi_Class=NSM combining mark where a Bidi_Class=L letter belongs,
+  //    so "<alef>U+0345" would pass the RFC 5893 Bidi rule as R+NSM instead of
+  //    failing as R+L, and it understates label length -- U+1FB3 must expand to
+  //    two code points, so 29 of them are a 65-octet A-label, over the limit.
+  //    Applied over NFD so the 63 precomposed code points in U+1F80-U+1FFC that
+  //    decompose through U+0345 are covered by the same rule; the trailing NFC
+  //    undoes the decomposition. Runs before the fold below because the
+  //    NFKC-invariance shortcut there would otherwise skip it (U+1FB3 is
+  //    NFKC-invariant).
+  if (YPOGEGRAMMENI_TEST_REGEX.test(mapped)) {
+    mapped = mapped.normalize('NFD').replace(YPOGEGRAMMENI_REGEX, '\u03B9').normalize('NFC');
+  }
+  // 4. Compatibility fold. NFKC output is always in NFC form, so a string that
+  //    NFKC leaves untouched is both fully folded and already NFC -- the common
+  //    case for real IDNs, since Greek, Cyrillic, Hangul and Han labels carry no
+  //    compatibility mappings. One whole-string call to detect that is worth it:
+  //    it skips both the per-code-point loop and the recomposition in step 5. A
+  //    code point cannot fold under the per-code-point pass while leaving the
+  //    whole string fixed -- both apply the same NFKC to the same code point.
+  const compatFolded = mapped.normalize('NFKC');
+  if (compatFolded === mapped) {
+    return mapped;
+  }
+  // Something folds, so redo it one code point at a time: whole-string NFKC would
+  // also apply the mappings this implementation must withhold. A mapping whose
+  // output contains a label separator is skipped, leaving the original code point
+  // for the separator replacement and the DISALLOWED check to judge. Exactly 33
+  // non-ASCII code points fold to a string containing one; only U+FF0E and U+FF61
+  // are UTS 46 `mapped`, and IDN_SEPARATOR_REGEX already turns both into '.'. The
+  // other 31 are DISALLOWED or disallowed_STD3_mapped, so without the guard
+  // U+2024 ONE DOT LEADER (-> '.') and U+FE12 (-> U+3002) would each forge a label
+  // separator and split "a<cp>b" into two valid labels.
+  // Iterated by code point (not index) so a surrogate pair folds as one character,
+  // matching the DISALLOWED loop in isValidIdnUnicodeLabel.
+  let folded = '';
+  for (const char of mapped) {
+    if (char.charCodeAt(0) < 0x80) {
+      folded += char;
+      continue;
+    }
+    const normalized = char.normalize('NFKC');
+    folded += LABEL_SEPARATOR_TEST_REGEX.test(normalized) ? char : normalized;
+  }
+  // 5. Normalize to NFC. Fixes non-NFC U-labels and composes the combining marks
+  //    the per-code-point fold leaves behind (halfwidth katakana U+FF76 U+FF9E ->
+  //    U+30AB U+3099 -> U+30AC).
+  return folded.normalize('NFC');
+};
 
 // RFC 5892 section 2.6 lists a handful of code points that are PVALID (or governed
 // by a contextual rule) despite being Punctuation/Symbol. A blanket "reject
@@ -354,7 +494,12 @@ export const isValidHostname = (hostname: string): boolean => {
 };
 
 export const isValidIdnHostname = (hostname: string): boolean => {
-  const normalizedHostname = hostname.replace(IDN_SEPARATOR_REGEX, '.');
+  // UTS 46 order: map first, then split on the label separators. U+FF61 maps to
+  // U+3002 rather than '.', so the separator replacement has to follow the mapping.
+  let normalizedHostname = applyUts46Mapping(hostname);
+  if (IDN_SEPARATOR_TEST_REGEX.test(normalizedHostname)) {
+    normalizedHostname = normalizedHostname.replace(IDN_SEPARATOR_REGEX, '.');
+  }
   const labels = splitHostnameLabels(normalizedHostname);
   if (labels === null) {
     return false;
@@ -381,8 +526,19 @@ export const isValidIdnHostname = (hostname: string): boolean => {
     // U-label must reproduce the original A-label. This also rejects an A-label
     // that decodes to pure ASCII, since such a label never re-encodes to an "xn--"
     // form (RFC 5890 §2.3.2.1, RFC 5891 §5.4).
-    if (XN_LABEL_REGEX.test(label) && aLabel.toLowerCase() !== label.toLowerCase()) {
-      return false;
+    if (XN_LABEL_REGEX.test(label)) {
+      if (aLabel.toLowerCase() !== label.toLowerCase()) {
+        return false;
+      }
+      // RFC 5891 §5.4 / UTS 46 validity criterion 1 -- the decoded U-label must be
+      // in NFC form. applyUts46Mapping cannot enforce this: an A-label is pure
+      // ASCII, so it is returned untouched by the mapping and only the Punycode
+      // decode below produces the Unicode that needs normalizing. Without this,
+      // "xn--u-ccb" (decoding to U+0075 U+0308 rather than the composed U+00FC)
+      // would validate.
+      if (unicodeLabel.normalize('NFC') !== unicodeLabel) {
+        return false;
+      }
     }
 
     // RFC 5890 §2.3.2.1 — the A-label form of any label must not exceed 63 octets.
