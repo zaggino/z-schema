@@ -21,7 +21,9 @@ const IDN_SEPARATOR_TEST_REGEX = /[\u3002\uFF0E\uFF61]/;
 // U+00A1, reachable through an A-label such as "xn--7a", is accepted where UTS 46
 // with STD3 rules would reject it) nor for \p{No} dot-formers (e.g. U+2488 "1.",
 // which is accepted as a single label -- a pre-existing gap the mapping step
-// neither fixes nor widens). The plain `hostname` format does not map at all;
+// neither fixes nor widens). U+0345 and the U+1F80-U+1FFC block are handled
+// explicitly because omitting them lets invalid labels validate rather than
+// merely rejecting valid ones. The plain `hostname` format does not map at all;
 // isValidHostname rejects every non-ASCII code point outright.
 //
 // All regexes/Sets are hoisted to module scope so they are compiled once (format
@@ -53,6 +55,15 @@ const UTS46_IGNORED_REGEX =
   // eslint-disable-next-line no-misleading-character-class -- see above
   /[\u00AD\u034F\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B\u2060-\u2064\u206A-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0\u{1BCA0}-\u{1BCA3}\u{1D173}-\u{1D17A}\u{E0100}-\u{E01EF}]/gu;
 
+// Every code point that may act as a label separator, including the ASCII '.'.
+// Used to withhold a compatibility mapping that would introduce one.
+const LABEL_SEPARATOR_TEST_REGEX = /[.\u3002\uFF0E\uFF61]/;
+
+// U+0345 COMBINING GREEK YPOGEGRAMMENI, plus the U+1F80-U+1FFC block whose
+// precomposed code points decompose through it (63 of them; the range also spans
+// a few that do not, which the replace below simply leaves alone).
+const YPOGEGRAMMENI_TEST_REGEX = /[\u0345\u1F80-\u1FFC]/;
+const YPOGEGRAMMENI_REGEX = /\u0345/g;
 // UTS 46 section 4 step 1 (Map), nontransitional processing. Deliberately NOT
 // applied by isValidHostname, which rejects every non-ASCII code point outright.
 const applyUts46Mapping = (hostname: string): string => {
@@ -94,11 +105,26 @@ const applyUts46Mapping = (hostname: string): string => {
   //    turn into "ss" and sigma; toLowerCase leaves both alone while still applying
   //    genuine `mapped` entries such as U+212A KELVIN SIGN -> "k".
   mapped = mapped.toLowerCase();
-  // 3. Compatibility fold. NFKC output is always in NFC form, so a string that
+  // 3. UTS 46 maps U+0345 COMBINING GREEK YPOGEGRAMMENI to U+03B9 GREEK SMALL
+  //    LETTER IOTA (its mapping column follows NFKC_Casefold, whose case-folding
+  //    step covers this; plain NFKC does not). Skipping it is not cosmetic: it
+  //    leaves a Bidi_Class=NSM combining mark where a Bidi_Class=L letter belongs,
+  //    so "<alef>U+0345" would pass the RFC 5893 Bidi rule as R+NSM instead of
+  //    failing as R+L, and it understates label length -- U+1FB3 must expand to
+  //    two code points, so 29 of them are a 65-octet A-label, over the limit.
+  //    Applied over NFD so the 63 precomposed code points in U+1F80-U+1FFC that
+  //    decompose through U+0345 are covered by the same rule; the trailing NFC
+  //    undoes the decomposition. Runs before the fold below because the
+  //    NFKC-invariance shortcut there would otherwise skip it (U+1FB3 is
+  //    NFKC-invariant).
+  if (YPOGEGRAMMENI_TEST_REGEX.test(mapped)) {
+    mapped = mapped.normalize('NFD').replace(YPOGEGRAMMENI_REGEX, '\u03B9').normalize('NFC');
+  }
+  // 4. Compatibility fold. NFKC output is always in NFC form, so a string that
   //    NFKC leaves untouched is both fully folded and already NFC -- the common
   //    case for real IDNs, since Greek, Cyrillic, Hangul and Han labels carry no
   //    compatibility mappings. One whole-string call to detect that is worth it:
-  //    it skips both the per-code-point loop and the recomposition in step 4. A
+  //    it skips both the per-code-point loop and the recomposition in step 5. A
   //    code point cannot fold under the per-code-point pass while leaving the
   //    whole string fixed -- both apply the same NFKC to the same code point.
   const compatFolded = mapped.normalize('NFKC');
@@ -106,13 +132,16 @@ const applyUts46Mapping = (hostname: string): string => {
     return mapped;
   }
   // Something folds, so redo it one code point at a time: whole-string NFKC would
-  // also apply the mappings this implementation must withhold. A mapping that
-  // introduces a '.' is skipped -- of the 31 non-ASCII code points whose NFKC
-  // output contains a dot, every one is DISALLOWED or disallowed_STD3_mapped
-  // except U+FF0E, which IDN_SEPARATOR_REGEX already handles. Without the guard
-  // U+2024 ONE DOT LEADER would silently turn "a<U+2024>b" into the two-label
-  // "a.b". Iterated by code point (not index) so a surrogate pair folds as one
-  // character, matching the DISALLOWED loop in isValidIdnUnicodeLabel.
+  // also apply the mappings this implementation must withhold. A mapping whose
+  // output contains a label separator is skipped, leaving the original code point
+  // for the separator replacement and the DISALLOWED check to judge. Exactly 33
+  // non-ASCII code points fold to a string containing one; only U+FF0E and U+FF61
+  // are UTS 46 `mapped`, and IDN_SEPARATOR_REGEX already turns both into '.'. The
+  // other 31 are DISALLOWED or disallowed_STD3_mapped, so without the guard
+  // U+2024 ONE DOT LEADER (-> '.') and U+FE12 (-> U+3002) would each forge a label
+  // separator and split "a<cp>b" into two valid labels.
+  // Iterated by code point (not index) so a surrogate pair folds as one character,
+  // matching the DISALLOWED loop in isValidIdnUnicodeLabel.
   let folded = '';
   for (const char of mapped) {
     if (char.charCodeAt(0) < 0x80) {
@@ -120,9 +149,9 @@ const applyUts46Mapping = (hostname: string): string => {
       continue;
     }
     const normalized = char.normalize('NFKC');
-    folded += normalized.includes('.') ? char : normalized;
+    folded += LABEL_SEPARATOR_TEST_REGEX.test(normalized) ? char : normalized;
   }
-  // 4. Normalize to NFC. Fixes non-NFC U-labels and composes the combining marks
+  // 5. Normalize to NFC. Fixes non-NFC U-labels and composes the combining marks
   //    the per-code-point fold leaves behind (halfwidth katakana U+FF76 U+FF9E ->
   //    U+30AB U+3099 -> U+30AC).
   return folded.normalize('NFC');
@@ -497,8 +526,19 @@ export const isValidIdnHostname = (hostname: string): boolean => {
     // U-label must reproduce the original A-label. This also rejects an A-label
     // that decodes to pure ASCII, since such a label never re-encodes to an "xn--"
     // form (RFC 5890 §2.3.2.1, RFC 5891 §5.4).
-    if (XN_LABEL_REGEX.test(label) && aLabel.toLowerCase() !== label.toLowerCase()) {
-      return false;
+    if (XN_LABEL_REGEX.test(label)) {
+      if (aLabel.toLowerCase() !== label.toLowerCase()) {
+        return false;
+      }
+      // RFC 5891 §5.4 / UTS 46 validity criterion 1 -- the decoded U-label must be
+      // in NFC form. applyUts46Mapping cannot enforce this: an A-label is pure
+      // ASCII, so it is returned untouched by the mapping and only the Punycode
+      // decode below produces the Unicode that needs normalizing. Without this,
+      // "xn--u-ccb" (decoding to U+0075 U+0308 rather than the composed U+00FC)
+      // would validate.
+      if (unicodeLabel.normalize('NFC') !== unicodeLabel) {
+        return false;
+      }
     }
 
     // RFC 5890 §2.3.2.1 — the A-label form of any label must not exceed 63 octets.

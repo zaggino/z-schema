@@ -497,8 +497,6 @@ describe('Format Validators', () => {
     });
   });
 
-  // Reaches into src/utils/rfc-3986.ts on purpose, unlike every block above: this pins a property
-  // of the grammar sources themselves, not the behaviour of a registered format.
   describe('Email Format Validator', () => {
     const emailSchema = { type: 'string', format: 'email' };
 
@@ -592,6 +590,13 @@ describe('Format Validators', () => {
       ['\u00DF\u03C2\u0F0B\u3007', 'the U+00DF and U+03C2 deviations are preserved'],
       ['\u0915\u094D\u200C\u0937', 'ZWNJ is a deviation, not ignored, so CONTEXTJ still sees it'],
       ['\u0915\u094D\u200D\u0937', 'ZWJ is a deviation, not ignored, so CONTEXTJ still sees it'],
+      // U+FF61 and U+FF0E are the only two UTS 46 `mapped` code points whose fold
+      // output contains a label separator, so the separator guard must not swallow
+      // them -- IDN_SEPARATOR_REGEX turns both into '.'.
+      ['a\uFF61b', 'a fullwidth halfwidth ideographic full stop separates labels'],
+      ['a\uFF0Eb', 'a fullwidth full stop separates labels'],
+      ['a\u3002b', 'an ideographic full stop separates labels'],
+      ['\u1FB3', 'U+1FB3 maps to alpha + iota via the U+0345 rule'],
     ])('should accept %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, idnHostnameSchema).valid).toBe(true);
@@ -617,6 +622,17 @@ describe('Format Validators', () => {
       ['\u200B', 'a hostname that is empty after mapping'],
       ['a.\u200B.b', 'a label that is empty after mapping'],
       ['\uFF41'.repeat(64), 'a label of 64 fullwidth letters exceeds 63 octets after mapping'],
+      // The fold must not introduce a NON-ASCII separator either: U+FE12 is
+      // DISALLOWED but folds to U+3002, which IDN_SEPARATOR_REGEX would then treat
+      // as a label break. Guarding only the ASCII '.' let this through.
+      ['a\uFE12b', 'U+FE12 must not forge an ideographic full stop separator'],
+      // UTS 46 maps U+0345 to U+03B9; leaving it in place understates both its Bidi
+      // class (NSM where an L letter belongs) and the label length.
+      ['\u05D0\u0345', 'alef + U+0345 is R+L and must fail the Bidi rule'],
+      ['\u1FB3'.repeat(29), '29 x U+1FB3 expands to a 65-octet A-label'],
+      // RFC 5891 section 5.4 -- a decoded U-label must be in NFC form. The mapping
+      // step cannot catch this: an A-label is pure ASCII and passes through untouched.
+      ['xn--u-ccb.com', 'an A-label decoding to U+0075 U+0308 rather than U+00FC'],
       ['XN--aa---o47jg78q', 'lowercasing does not rescue hyphens in positions 3 and 4'],
     ])('should reject %j (%s)', (data) => {
       const validator = ZSchema.create();
@@ -629,6 +645,8 @@ describe('Format Validators', () => {
     });
   });
 
+  // Reaches into src/utils/rfc-3986.ts on purpose, unlike every block above: this pins a property
+  // of the grammar sources themselves, not the behaviour of a registered format.
   describe('URI Grammar Source Invariants', () => {
     // The `u` flag is derived from the class bodies rather than passed in. Getting that wrong is
     // silent rather than loud: outside `u` mode a `\u{...}` escape is an identity escape, so the
