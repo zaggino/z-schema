@@ -500,8 +500,8 @@ export class SchemaCompiler {
   }
 
   compileArrayOfSchemas(report: Report, arr: JsonSchemaInternal[]) {
-    let compiled = 0,
-      lastLoopCompiled;
+    let compiled = 0;
+    let lastLoopCompiled;
 
     do {
       // remove all UNRESOLVABLE_REFERENCE errors before compiling array again

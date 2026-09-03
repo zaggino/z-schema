@@ -36,8 +36,8 @@ export function enumValidator(ctx: ZSchemaBase, report: Report, schema: JsonSche
   }
   const eqOpts = { maxDepth: ctx.options.maxRecursionDepth };
   const eqOptsCI = { caseInsensitiveComparison: true, maxDepth: ctx.options.maxRecursionDepth };
-  let caseInsensitiveMatch = false,
-    match = false;
+  let caseInsensitiveMatch = false;
+  let match = false;
   for (const enumVal of schema.enum!) {
     if (areEqual(json, enumVal, eqOpts)) {
       match = true;
