@@ -20,7 +20,7 @@ Line coverage status: **high**
 | src/utils/clone.ts            |     97% |         98% |       100% |      94% |
 | src/utils/constants.ts        |    100% |        100% |       100% |     100% |
 | src/utils/date.ts             |    100% |        100% |       100% |     100% |
-| src/utils/hostname.ts         |     97% |         97% |       100% |      97% |
+| src/utils/hostname.ts         |     97% |         98% |       100% |      98% |
 | src/utils/json.ts             |     98% |         98% |       100% |      97% |
 | src/utils/properties.ts       |    100% |        100% |       100% |      75% |
 | src/utils/rfc-3986.ts         |    100% |        100% |       100% |     100% |
