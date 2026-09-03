@@ -45,9 +45,9 @@
 
 ## Dependencies
 
-- **Runtime**: `validator` (format validation: email, IP, URL). One dependency only — minimize additions.
+- **Runtime**: `validator` (format validation: email, IP, URL), `punycode` (IDNA A-label transcoding), `safe-regex2` (ReDoS guard). Keep this list short — minimize additions.
 - **Optional**: `commander` (CLI support via `bin/z-schema`). Not required for library usage.
-- Avoid adding new runtime dependencies unless absolutely necessary.
+- Avoid adding new runtime dependencies unless absolutely necessary. Both UMD targets set `deps: { alwaysBundle: [/.*/] }` in [tsdown.config.ts](../tsdown.config.ts), so every runtime dependency is inlined into `umd/ZSchema.js` **and** `umd/ZSchema.min.js` — a dependency carrying a large Unicode table (e.g. `tr46`, ~220 KB) roughly doubles the browser bundle. Prefer a narrow hand-rolled implementation when it covers the required behavior; see the UTS 46 mapping step in [src/utils/hostname.ts](../src/utils/hostname.ts).
 
 ## Utility Functions
 
