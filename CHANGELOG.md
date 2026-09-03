@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.4.5](https://github.com/zaggino/z-schema/compare/v12.4.4...v12.4.5) (2026-09-03)
+
+
+### Bug Fixes
+
+* **format:** reject non-ASCII email and apply UTS 46 mapping to idn-hostname ([#491](https://github.com/zaggino/z-schema/issues/491)) ([72633d2](https://github.com/zaggino/z-schema/commit/72633d207501d1c881556fa108aa7d794101c3b8))
+
 ## [12.4.4](https://github.com/zaggino/z-schema/compare/v12.4.3...v12.4.4) (2026-08-27)
 
 
