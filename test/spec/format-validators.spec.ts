@@ -6,6 +6,24 @@ import { ZSchema } from '../../src/z-schema.ts';
 const asyncValidator = (input: unknown): Promise<boolean> =>
   Promise.resolve(typeof input === 'string' && input.length > 3);
 
+// Wraps a boundary code point between two ASCII letters so a lone surrogate half never pairs with
+// adjacent content and the row still exercises "a boundary character mid-literal".
+const atBoundary = (codePoint: number): string => `a${String.fromCodePoint(codePoint)}b`;
+
+// literals = %x21 / %x23-24 / %x26-3B / %x3D / %x3F-5B / %x5D / %x5F / %x61-7A / %x7E,
+// the %x26-3B range per Errata 6937. Everything else below %x80 is excluded — including
+// "%" (%x25), which is legal only as the opening of a pct-encoded triplet.
+const isLiteral = (code: number): boolean =>
+  code === 0x21 ||
+  (code >= 0x23 && code <= 0x24) ||
+  (code >= 0x26 && code <= 0x3b) ||
+  code === 0x3d ||
+  (code >= 0x3f && code <= 0x5b) ||
+  code === 0x5d ||
+  code === 0x5f ||
+  (code >= 0x61 && code <= 0x7a) ||
+  code === 0x7e;
+
 // Times repeated validation of an adversarial `[ userinfo "@" ] host` string. Firefox coarsens
 // performance.now() to 1ms, so a single sub-millisecond run reads as 0 and makes any ratio
 // meaningless — the repeat count lifts each measurement well clear of timer granularity in every
@@ -189,12 +207,8 @@ describe('Format Validators', () => {
       ['a%41b', 'percent-encoded triplet in a literal'],
       ['a\u{1F600}b', 'supplementary plane character in a literal'],
       ['http://example.com/dictionary', 'absolute URI without expressions'],
-      // Literal text is validated leniently on purpose: RFC 6570 excludes bare "%", "'" and
-      // the C1 controls from literals, but tightening that would reject input earlier versions
-      // accepted. These three pin that deliberate leniency so it cannot regress silently.
-      ['foo%bar', 'bare percent in a literal (deliberately lenient)'],
-      ["foo'bar", 'apostrophe in a literal (deliberately lenient)'],
-      ['foo\u0080bar', 'C1 control in a literal (deliberately lenient)'],
+      ['foo%bar', 'percent-encoded triplet mid-literal ("%ba" is a well-formed pct-encoded)'],
+      ["foo'bar", 'apostrophe restored to the literal set by RFC 6570 Errata 6937 (Verified)'],
       // expressions
       ['http://example.com/dictionary/{term:1}/{term}', 'absolute URI with expressions'],
       ['dictionary/{term:1}/{term}', 'relative template with expressions'],
@@ -210,11 +224,27 @@ describe('Format Validators', () => {
       ['{=var}', 'op-reserve "=" accepted for ABNF fidelity'],
       ['{!var}', 'op-reserve "!" accepted for ABNF fidelity'],
       ['{@var}', 'op-reserve "@" accepted for ABNF fidelity'],
+      ['{|var}', 'op-reserve "|" accepted for ABNF fidelity'],
       ['{a.b:3}', 'dotted varname with a prefix modifier'],
       ['{%41var}', 'varname starting with a percent-encoded triplet'],
       ['{v:1}', 'minimum prefix max-length'],
       ['{v:9999}', 'maximum prefix max-length'],
       ['{?x:1,y*}', 'variable list mixing a prefix and an explode modifier'],
+      ['{var}{var}', 'two expressions with no literal between them'],
+      ['{a}lit{b}', 'two expressions separated by a literal'],
+      // ucschar / iprivate boundary code points (RFC 3987 §2.2, imported via RFC 6570 §1.5)
+      [atBoundary(0x00_a0), 'ucschar floor (%xA0)'],
+      [atBoundary(0xd7_ff), 'ucschar ceiling before the surrogate range'],
+      [atBoundary(0xe0_00), 'iprivate floor (%xE000), just past the surrogate range'],
+      [atBoundary(0xf8_ff), 'iprivate ceiling before ucschar resumes at %xF900'],
+      [atBoundary(0xf9_00), 'ucschar resumes after the iprivate gap'],
+      [atBoundary(0xfd_cf), 'ucschar ceiling before the %xFDD0-FDEF noncharacter block'],
+      [atBoundary(0xfd_f0), 'ucschar resumes after the noncharacter block'],
+      [atBoundary(0xff_ef), 'ucschar ceiling before the BMP noncharacters %xFFFE/%xFFFF'],
+      [atBoundary(0x1_ff_fd), 'ucschar ceiling of the first supplementary-plane range'],
+      [atBoundary(0xe_10_00), 'ucschar resumes after the plane-14 hole'],
+      [atBoundary(0xf_00_00), 'iprivate resumes in plane 15'],
+      [atBoundary(0x10_ff_fd), 'iprivate ceiling, the last valid Unicode code point'],
     ])('should accept %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(true);
@@ -236,6 +266,10 @@ describe('Format Validators', () => {
       ['{a-b}', 'hyphen is not a varchar'],
       ['{a,b,}', 'trailing comma in the variable list'],
       ['{a,.b}', 'leading dot on a varspec after a comma'],
+      ['{var=def}', 'variable default value syntax is not part of RFC 6570 varspec'],
+      ['{,+var}', 'reserved operator "+" must be the first character after "{"'],
+      ['{var*:3}', 'explode and prefix modifiers are mutually exclusive'],
+      ['{var:3*}', 'prefix and explode modifiers are mutually exclusive, in either order'],
       // brace structure
       ['{a{b}', 'nested opening brace'],
       ['{a}}', 'trailing unmatched closing brace'],
@@ -247,9 +281,49 @@ describe('Format Validators', () => {
       ['foo\u0000bar', 'a NUL character in a literal'],
       ['foo\u001Fbar', 'a unit-separator control character in a literal'],
       ['{foo\u007Fbar}', 'a delete character inside an expression body'],
+      [atBoundary(0x00_80), "C1 control in a literal (below ucschar's %xA0 floor)"],
+      [atBoundary(0x00_9f), "C1 control ceiling, just below ucschar's %xA0 floor"],
+      [`a${String.fromCharCode(0xd8_00)}b`, 'lone high surrogate, unpaired'],
+      [`a${String.fromCharCode(0xdf_ff)}b`, 'lone low surrogate, unpaired'],
+      [atBoundary(0xfd_d0), 'noncharacter, start of the %xFDD0-FDEF block excluded from ucschar'],
+      [atBoundary(0xfd_ef), 'noncharacter, end of the %xFDD0-FDEF block'],
+      [atBoundary(0xff_fe), 'BMP noncharacter excluded from ucschar'],
+      [atBoundary(0xff_ff), 'BMP noncharacter excluded from ucschar'],
+      [atBoundary(0x1_ff_fe), 'supplementary-plane noncharacter excluded from ucschar'],
+      [atBoundary(0xe_00_00), "plane-14 hole below ucschar's %xE1000 floor"],
+      [atBoundary(0xe_0f_ff), "plane-14 hole, just below ucschar's %xE1000 floor"],
+      // non-literal ASCII — excluded from LITERAL_CHARS_SRC and not an operator or modifier char
+      ['a b', 'space is not a literal char'],
+      ['a"b', 'double quote is not a literal char'],
+      ['a\\b', 'backslash is not a literal char'],
+      ['a<b', 'less-than is not a literal char'],
+      ['a>b', 'greater-than is not a literal char'],
+      ['a^b', 'caret is not a literal char'],
+      ['a`b', 'backtick is not a literal char'],
+      ['a|b', 'bare pipe outside an expression is not a literal char'],
+      // malformed pct-encoded triplets
+      ['a%', 'a bare percent with no hex digits following'],
+      ['a%4', 'a percent with a single hex digit and nothing after'],
+      ['a%GG', 'a percent followed by two non-hex characters'],
+      ['a%b', 'a percent followed by a single hex digit and nothing after'],
     ])('should reject %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(false);
+    });
+
+    // LITERAL_CHARS_SRC compresses the ABNF's hex ranges into class ranges (`&-;`, `?-[`) — the
+    // one fragment in the grammar that is not a 1:1 transcription of a production. Enumerating
+    // the whole ASCII range against the ABNF makes that compression assertable, not sampled.
+    it('accepts exactly the ASCII characters RFC 6570 §2.1 admits as literals', () => {
+      const validator = ZSchema.create();
+      const mismatches: string[] = [];
+      for (let code = 0; code <= 0x7f; code++) {
+        const { valid } = validator.validateSafe(atBoundary(code), uriTemplateSchema);
+        if (valid !== isLiteral(code)) {
+          mismatches.push(`0x${code.toString(16)} expected ${isLiteral(code)} got ${valid}`);
+        }
+      }
+      expect(mismatches).toEqual([]);
     });
 
     // Format validators apply to strings only; every other type is vacuously valid.
@@ -672,6 +746,50 @@ describe('Format Validators', () => {
       // semantic check can reject it.
       expect(isAbsolute('http://[::ffff:01.2.3.4]')).toBe(false);
       expect(isReference('//[::ffff:01.2.3.4]/p')).toBe(false);
+    });
+  });
+
+  // The only regression net for backtracking linearity in src/utils/rfc-6570.ts: that grammar is
+  // deliberately not gated behind safe-regex2 (see the rationale at the top of that file), so these
+  // adversarial inputs completing inside the default vitest timeout is the signal being asserted —
+  // no wall-clock assertion, since an absolute bound is either vacuous or flaky across engines.
+  describe('URI Template Grammar Backtracking Linearity', () => {
+    const uriTemplateSchema = { type: 'string', format: 'uri-template' };
+
+    it('accepts a long run of literal characters', () => {
+      const validator = ZSchema.create();
+      const data = 'a'.repeat(100_000);
+      expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(true);
+    });
+
+    it('rejects a long unterminated variable list (comma-separated)', () => {
+      const validator = ZSchema.create();
+      const data = `{${'a,'.repeat(50_000)}`;
+      expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(false);
+    });
+
+    it('rejects a long unterminated dotted varname', () => {
+      const validator = ZSchema.create();
+      const data = `{${'a.'.repeat(50_000)}a`;
+      expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(false);
+    });
+
+    it('rejects a long run of bare percent signs', () => {
+      const validator = ZSchema.create();
+      const data = '%'.repeat(100_000);
+      expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(false);
+    });
+
+    it('rejects a long run of pct-encoded triplets followed by a truncated one', () => {
+      const validator = ZSchema.create();
+      const data = `${'%41'.repeat(50_000)}%4`;
+      expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(false);
+    });
+
+    it('rejects a long run of expressions followed by a malformed one', () => {
+      const validator = ZSchema.create();
+      const data = `${'{a}'.repeat(50_000)}{a,a,a`;
+      expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(false);
     });
   });
 });

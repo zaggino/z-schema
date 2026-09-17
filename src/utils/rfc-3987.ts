@@ -5,6 +5,9 @@
 // production shape is imported from src/utils/rfc-3986.ts. This module therefore contains
 // character classes only — if a production ever needs restating here, the change belongs in
 // rfc-3986.ts instead.
+//
+// UCSCHAR_SRC and IPRIVATE_SRC are also exported for src/utils/rfc-6570.ts, which RFC 6570
+// §1.5 imports from this RFC normatively; that module contributes no production shapes back.
 
 import { buildUriPredicates, UNRESERVED_CHARS_SRC } from './rfc-3986.js';
 
@@ -12,9 +15,10 @@ import { buildUriPredicates, UNRESERVED_CHARS_SRC } from './rfc-3986.js';
 //   / %x20000-2FFFD / %x30000-3FFFD / %x40000-4FFFD / %x50000-5FFFD / %x60000-6FFFD
 //   / %x70000-7FFFD / %x80000-8FFFD / %x90000-9FFFD / %xA0000-AFFFD / %xB0000-BFFFD
 //   / %xC0000-CFFFD / %xD0000-DFFFD / %xE1000-EFFFD
-// The `\u{...}` escapes require the `u` flag, which buildTopLevelRegexes derives from these
-// class bodies rather than taking as an argument - it cannot be passed inconsistently.
-const UCSCHAR_SRC =
+// The `\u{...}` escapes require the `u` flag, so every consumer must compile with it.
+// buildTopLevelRegexes derives it from these class bodies rather than taking it as an argument,
+// so it cannot be passed inconsistently; rfc-6570.ts hardcodes it, having no caller to disagree.
+export const UCSCHAR_SRC =
   '\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF' +
   '\\u{10000}-\\u{1FFFD}\\u{20000}-\\u{2FFFD}\\u{30000}-\\u{3FFFD}\\u{40000}-\\u{4FFFD}' +
   '\\u{50000}-\\u{5FFFD}\\u{60000}-\\u{6FFFD}\\u{70000}-\\u{7FFFD}\\u{80000}-\\u{8FFFD}' +
@@ -24,7 +28,7 @@ const UCSCHAR_SRC =
 // RFC 3987 §2.2: iprivate = %xE000-F8FF / %xF0000-FFFFD / %x100000-10FFFD
 // Admitted by `iquery` alone — `ipath` and `ifragment` do not widen, so a private-use code
 // point is valid after "?" and invalid after "#".
-const IPRIVATE_SRC = '\\uE000-\\uF8FF\\u{F0000}-\\u{FFFFD}\\u{100000}-\\u{10FFFD}';
+export const IPRIVATE_SRC = '\\uE000-\\uF8FF\\u{F0000}-\\u{FFFFD}\\u{100000}-\\u{10FFFD}';
 
 // RFC 3987 §2.2: iunreserved = ALPHA / DIGIT / "-" / "." / "_" / "~" / ucschar
 const IUNRESERVED_CHARS_SRC = `${UNRESERVED_CHARS_SRC}${UCSCHAR_SRC}`;

@@ -17,7 +17,8 @@
 import isIPModule from 'validator/lib/isIP.js';
 
 // RFC 3986 §2.1: pct-encoded = "%" HEXDIG HEXDIG
-const PCT_ENCODED_SRC = '%[0-9A-Fa-f]{2}';
+// Exported for src/utils/rfc-6570.ts: RFC 6570 §1.5 imports pct-encoded from this RFC.
+export const PCT_ENCODED_SRC = '%[0-9A-Fa-f]{2}';
 
 // RFC 3986 §2.2: sub-delims = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
 // Character-class body: none of these are special inside `[...]`, with or without the `u` flag.
