@@ -58,6 +58,7 @@ src/                  # Library source (TypeScript, ESM)
     properties.ts     # Object property copy
     rfc-3986.ts       # RFC 3986 URI/URI-reference grammar
     rfc-3987.ts       # RFC 3987 IRI/IRI-reference grammar (RFC 3986 + wider classes)
+    rfc-6570.ts       # RFC 6570 URI Template grammar (ucschar/iprivate from RFC 3987)
     schema-regex.ts   # Schema-aware regex
     symbols.ts        # Shared symbols (jsonSymbol, schemaSymbol)
     unicode.ts        # Unicode-aware string length

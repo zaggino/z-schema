@@ -7,6 +7,7 @@ import { isValidHostname, isValidIdnHostname } from './utils/hostname.js';
 import { sortedKeys } from './utils/json.js';
 import { isValidUri, isValidUriReference } from './utils/rfc-3986.js';
 import { isValidIri, isValidIriReference } from './utils/rfc-3987.js';
+import { isValidUriTemplate } from './utils/rfc-6570.js';
 import { parseRfc3339Time } from './utils/time.js';
 
 export type FormatValidatorFn = (input: unknown) => boolean | Promise<boolean>;
@@ -221,71 +222,7 @@ const uriValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string
 
 const uriReferenceValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string' || isValidUriReference(uri);
 
-// This RFC 6570 grammar stays inline while RFC 3986/3987's lives in src/utils/rfc-398*.ts. The
-// difference is that uri-template is not recognized by its regex alone: uriTemplateValidator
-// scans for brace delimiters and applies the expression regex per extracted body, so the grammar
-// and that stateful scan are one unit. Extract it only if it ever becomes regex-recognizable.
-// RFC 6570 §2.3: varchar = ALPHA / DIGIT / "_" / pct-encoded
-const URI_TEMPLATE_VARCHAR_SRC = '(?:[A-Za-z0-9_]|%[0-9A-Fa-f]{2})';
-// RFC 6570 §2.3: varname = varchar *( ["."] varchar )
-const URI_TEMPLATE_VARNAME_SRC = `${URI_TEMPLATE_VARCHAR_SRC}(?:\\.?${URI_TEMPLATE_VARCHAR_SRC})*`;
-// RFC 6570 §2.4: varspec = varname [ modifier-level4 ]; modifier-level4 = prefix / explode
-// prefix = ":" max-length, max-length = %x31-39 0*3DIGIT (1-9999, no leading zero); explode = "*"
-const URI_TEMPLATE_VARSPEC_SRC = `${URI_TEMPLATE_VARNAME_SRC}(?::[1-9][0-9]{0,3}|\\*)?`;
-// RFC 6570 §2.2: operator = op-level2 ("+" / "#") / op-level3 ("." / "/" / ";" / "?" / "&")
-//                         / op-reserve ("=" / "," / "!" / "@" / "|")
-// op-reserve is accepted for ABNF fidelity only — the spec leaves its expansion semantics
-// undefined. The "|" branch is unreachable in practice: the literal charset check in
-// uriTemplateValidator rejects any "|" anywhere in the input before this regex runs, and a
-// literal space is blocked by that same check.
-// RFC 6570 §2: expression body (braces excluded) = [ operator ] variable-list
-//              variable-list = varspec *( "," varspec )
-const URI_TEMPLATE_EXPRESSION_REGEX = new RegExp(
-  `^[+#./;?&=,!@|]?${URI_TEMPLATE_VARSPEC_SRC}(?:,${URI_TEMPLATE_VARSPEC_SRC})*$`
-);
-
-const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => {
-  if (typeof uri !== 'string') {
-    return true;
-  }
-  // URI template allows braces for expressions.
-  // Literal text is checked leniently here: RFC 6570 also excludes "'", bare "%" and the C1
-  // controls (%x80-%x9F) from literals, but tightening those would reject inputs accepted by
-  // earlier versions. C0 controls and DEL are rejected in the scan below.
-  if (!/^(?:[a-zA-Z][a-zA-Z0-9+.-]*:)?[^"\\<>^`| ]*$/.test(uri)) {
-    return false;
-  }
-
-  // A non-null expressionStart doubles as "inside an expression", so the slice below cannot
-  // read a stale index — the null check narrows it to a number.
-  let expressionStart: number | null = null;
-  for (let idx = 0; idx < uri.length; idx++) {
-    const code = uri.charCodeAt(idx);
-    // RFC 6570 §2.1: literals start at %x21, so C0 controls and DEL are never literal text.
-    // Checking every position is safe as well as cheaper: an expression body containing one
-    // would already fail the varchar rule in URI_TEMPLATE_EXPRESSION_REGEX.
-    if (code <= 0x1f || code === 0x7f) {
-      return false;
-    }
-    if (code === 0x7b /* { */) {
-      if (expressionStart !== null) {
-        return false;
-      }
-      expressionStart = idx + 1;
-    } else if (code === 0x7d /* } */) {
-      if (expressionStart === null) {
-        return false;
-      }
-      if (!URI_TEMPLATE_EXPRESSION_REGEX.test(uri.slice(expressionStart, idx))) {
-        return false;
-      }
-      expressionStart = null;
-    }
-  }
-
-  // An unterminated expression leaves expressionStart set.
-  return expressionStart === null;
-};
+const uriTemplateValidator: FormatValidatorFn = (uri: unknown) => typeof uri !== 'string' || isValidUriTemplate(uri);
 
 const hasValidTildeEscapes = (segment: string): boolean => {
   for (let i = 0; i < segment.length; i++) {

@@ -4,6 +4,7 @@ z-schema provides full support for JSON Schema **draft-04**, **draft-06**, **dra
 
 - [Validate against subschema](#validate-against-subschema)
 - [Compile arrays of schemas and use references between them](#compile-arrays-of-schemas-and-use-references-between-them)
+- [Built-in formats](#built-in-formats)
 - [Register a custom format](#register-a-custom-format)
 - [Automatic downloading of remote schemas](#automatic-downloading-of-remote-schemas)
 - [Prefill default values to object using format](#prefill-default-values-to-object-using-format)
@@ -89,6 +90,34 @@ validator.validateSchema(schemas);
 // now validate data against the compiled schema
 validator.validate(data, schemas[2]);
 ```
+
+## Built-in formats
+
+z-schema ships with validators for all standard JSON Schema formats:
+
+| Format                  | Validates                                                                          |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| `date`                  | RFC 3339 full-date (`2024-01-15`)                                                  |
+| `date-time`             | RFC 3339 date-time (`2024-01-15T09:30:00Z`)                                        |
+| `time`                  | RFC 3339 time (`09:30:00Z`)                                                        |
+| `email`                 | RFC 5321 email address                                                             |
+| `idn-email`             | Internationalized email                                                            |
+| `hostname`              | RFC 1123 hostname                                                                  |
+| `host-name`             | Alias for `hostname`                                                               |
+| `idn-hostname`          | Internationalized hostname                                                         |
+| `ipv4`                  | IPv4 address                                                                       |
+| `ipv6`                  | IPv6 address                                                                       |
+| `uri`                   | RFC 3986 URI                                                                       |
+| `strict-uri`            | RFC 3986 URI, validated strictly (also what `strictUris: true` swaps in for `uri`) |
+| `uri-reference`         | URI or relative reference                                                          |
+| `uri-template`          | RFC 6570 URI Template (full ABNF, Errata 6937)                                     |
+| `iri`                   | Internationalized URI                                                              |
+| `iri-reference`         | Internationalized URI reference                                                    |
+| `json-pointer`          | RFC 6901 JSON Pointer                                                              |
+| `relative-json-pointer` | Relative JSON Pointer                                                              |
+| `regex`                 | ECMA-262 regex                                                                     |
+| `duration`              | ISO 8601 duration                                                                  |
+| `uuid`                  | RFC 4122 UUID                                                                      |
 
 ## Register a custom format
 

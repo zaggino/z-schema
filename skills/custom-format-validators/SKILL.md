@@ -11,27 +11,29 @@ JSON Schema `format` constrains string (or other) values beyond basic type check
 
 z-schema ships with validators for all standard JSON Schema formats:
 
-| Format                  | Validates                                   |
-| ----------------------- | ------------------------------------------- |
-| `date`                  | RFC 3339 full-date (`2024-01-15`)           |
-| `date-time`             | RFC 3339 date-time (`2024-01-15T09:30:00Z`) |
-| `time`                  | RFC 3339 time (`09:30:00Z`)                 |
-| `email`                 | RFC 5321 email address                      |
-| `idn-email`             | Internationalized email                     |
-| `hostname`              | RFC 1123 hostname                           |
-| `idn-hostname`          | Internationalized hostname                  |
-| `ipv4`                  | IPv4 address                                |
-| `ipv6`                  | IPv6 address                                |
-| `uri`                   | RFC 3986 URI                                |
-| `uri-reference`         | URI or relative reference                   |
-| `uri-template`          | RFC 6570 URI template                       |
-| `iri`                   | Internationalized URI                       |
-| `iri-reference`         | Internationalized URI reference             |
-| `json-pointer`          | RFC 6901 JSON Pointer                       |
-| `relative-json-pointer` | Relative JSON Pointer                       |
-| `regex`                 | ECMA-262 regex                              |
-| `duration`              | ISO 8601 duration                           |
-| `uuid`                  | RFC 4122 UUID                               |
+| Format                  | Validates                                                                          |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| `date`                  | RFC 3339 full-date (`2024-01-15`)                                                  |
+| `date-time`             | RFC 3339 date-time (`2024-01-15T09:30:00Z`)                                        |
+| `time`                  | RFC 3339 time (`09:30:00Z`)                                                        |
+| `email`                 | RFC 5321 email address                                                             |
+| `idn-email`             | Internationalized email                                                            |
+| `hostname`              | RFC 1123 hostname                                                                  |
+| `host-name`             | Alias for `hostname`                                                               |
+| `idn-hostname`          | Internationalized hostname                                                         |
+| `ipv4`                  | IPv4 address                                                                       |
+| `ipv6`                  | IPv6 address                                                                       |
+| `uri`                   | RFC 3986 URI                                                                       |
+| `strict-uri`            | RFC 3986 URI, validated strictly (also what `strictUris: true` swaps in for `uri`) |
+| `uri-reference`         | URI or relative reference                                                          |
+| `uri-template`          | RFC 6570 URI Template (full ABNF, Errata 6937)                                     |
+| `iri`                   | Internationalized URI                                                              |
+| `iri-reference`         | Internationalized URI reference                                                    |
+| `json-pointer`          | RFC 6901 JSON Pointer                                                              |
+| `relative-json-pointer` | Relative JSON Pointer                                                              |
+| `regex`                 | ECMA-262 regex                                                                     |
+| `duration`              | ISO 8601 duration                                                                  |
+| `uuid`                  | RFC 4122 UUID                                                                      |
 
 ## Registering a sync format
 
