@@ -1,5 +1,3 @@
-import isequal from 'lodash.isequal';
-
 const schema1 = {
   id: 'long-string',
   type: 'string',
@@ -36,7 +34,7 @@ export default {
       valid: true,
       after(_err: any, valid: any, data: any, validator: any) {
         const newSch = validator.getResolvedSchema('person-object');
-        expect(isequal(newSch, expectedResult)).toBe(true);
+        expect(newSch).toEqual(expectedResult);
       },
     },
   ],
