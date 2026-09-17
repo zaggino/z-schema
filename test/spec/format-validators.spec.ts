@@ -10,6 +10,20 @@ const asyncValidator = (input: unknown): Promise<boolean> =>
 // adjacent content and the row still exercises "a boundary character mid-literal".
 const atBoundary = (codePoint: number): string => `a${String.fromCodePoint(codePoint)}b`;
 
+// literals = %x21 / %x23-24 / %x26-3B / %x3D / %x3F-5B / %x5D / %x5F / %x61-7A / %x7E,
+// the %x26-3B range per Errata 6937. Everything else below %x80 is excluded — including
+// "%" (%x25), which is legal only as the opening of a pct-encoded triplet.
+const isLiteral = (code: number): boolean =>
+  code === 0x21 ||
+  (code >= 0x23 && code <= 0x24) ||
+  (code >= 0x26 && code <= 0x3b) ||
+  code === 0x3d ||
+  (code >= 0x3f && code <= 0x5b) ||
+  code === 0x5d ||
+  code === 0x5f ||
+  (code >= 0x61 && code <= 0x7a) ||
+  code === 0x7e;
+
 // Times repeated validation of an adversarial `[ userinfo "@" ] host` string. Firefox coarsens
 // performance.now() to 1ms, so a single sub-millisecond run reads as 0 and makes any ratio
 // meaningless — the repeat count lifts each measurement well clear of timer granularity in every
@@ -295,6 +309,21 @@ describe('Format Validators', () => {
     ])('should reject %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(false);
+    });
+
+    // LITERAL_CHARS_SRC compresses the ABNF's hex ranges into class ranges (`&-;`, `?-[`) — the
+    // one fragment in the grammar that is not a 1:1 transcription of a production. Enumerating
+    // the whole ASCII range against the ABNF makes that compression assertable, not sampled.
+    it('accepts exactly the ASCII characters RFC 6570 §2.1 admits as literals', () => {
+      const validator = ZSchema.create();
+      const mismatches: string[] = [];
+      for (let code = 0; code <= 0x7f; code++) {
+        const { valid } = validator.validateSafe(atBoundary(code), uriTemplateSchema);
+        if (valid !== isLiteral(code)) {
+          mismatches.push(`0x${code.toString(16)} expected ${isLiteral(code)} got ${valid}`);
+        }
+      }
+      expect(mismatches).toEqual([]);
     });
 
     // Format validators apply to strings only; every other type is vacuously valid.
@@ -724,7 +753,7 @@ describe('Format Validators', () => {
   // deliberately not gated behind safe-regex2 (see the rationale at the top of that file), so these
   // adversarial inputs completing inside the default vitest timeout is the signal being asserted —
   // no wall-clock assertion, since an absolute bound is either vacuous or flaky across engines.
-  describe('URI Template Grammar Source Invariants', () => {
+  describe('URI Template Grammar Backtracking Linearity', () => {
     const uriTemplateSchema = { type: 'string', format: 'uri-template' };
 
     it('accepts a long run of literal characters', () => {

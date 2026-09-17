@@ -95,6 +95,8 @@ validator.validate(data, schemas[2]);
 
 z-schema ships with validators for all standard JSON Schema formats:
 
+<!-- Keep this table in sync with the same table in skills/custom-format-validators/SKILL.md. -->
+
 | Format                  | Validates                                                                          |
 | ----------------------- | ---------------------------------------------------------------------------------- |
 | `date`                  | RFC 3339 full-date (`2024-01-15`)                                                  |

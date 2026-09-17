@@ -11,6 +11,8 @@ JSON Schema `format` constrains string (or other) values beyond basic type check
 
 z-schema ships with validators for all standard JSON Schema formats:
 
+<!-- Keep this table in sync with the same table in docs/features.md. -->
+
 | Format                  | Validates                                                                          |
 | ----------------------- | ---------------------------------------------------------------------------------- |
 | `date`                  | RFC 3339 full-date (`2024-01-15`)                                                  |

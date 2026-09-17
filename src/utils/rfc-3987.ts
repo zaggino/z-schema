@@ -7,8 +7,7 @@
 // rfc-3986.ts instead.
 //
 // UCSCHAR_SRC and IPRIVATE_SRC are also exported for src/utils/rfc-6570.ts, which RFC 6570
-// §1.5 imports them from this RFC normatively; that module contributes no production shapes
-// back here.
+// §1.5 imports from this RFC normatively; that module contributes no production shapes back.
 
 import { buildUriPredicates, UNRESERVED_CHARS_SRC } from './rfc-3986.js';
 
@@ -16,8 +15,9 @@ import { buildUriPredicates, UNRESERVED_CHARS_SRC } from './rfc-3986.js';
 //   / %x20000-2FFFD / %x30000-3FFFD / %x40000-4FFFD / %x50000-5FFFD / %x60000-6FFFD
 //   / %x70000-7FFFD / %x80000-8FFFD / %x90000-9FFFD / %xA0000-AFFFD / %xB0000-BFFFD
 //   / %xC0000-CFFFD / %xD0000-DFFFD / %xE1000-EFFFD
-// The `\u{...}` escapes require the `u` flag, which buildTopLevelRegexes derives from these
-// class bodies rather than taking as an argument - it cannot be passed inconsistently.
+// The `\u{...}` escapes require the `u` flag, so every consumer must compile with it.
+// buildTopLevelRegexes derives it from these class bodies rather than taking it as an argument,
+// so it cannot be passed inconsistently; rfc-6570.ts hardcodes it, having no caller to disagree.
 export const UCSCHAR_SRC =
   '\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF' +
   '\\u{10000}-\\u{1FFFD}\\u{20000}-\\u{2FFFD}\\u{30000}-\\u{3FFFD}\\u{40000}-\\u{4FFFD}' +

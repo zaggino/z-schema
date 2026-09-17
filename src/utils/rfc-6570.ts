@@ -3,12 +3,11 @@
 //
 // URI-Template = *( literals / expression ) has no nesting — an expression cannot contain
 // an expression, and "{" / "}" are excluded from literals — so the production is a regular
-// language and compiles to one anchored regex with no companion scan, unlike the two-pass
-// grammar + scan this replaces.
+// language and compiles to one anchored regex with no companion scan.
 //
-// ucschar and iprivate are imported from src/utils/rfc-3987.ts rather than restated here:
-// RFC 6570 §1.5 imports them from RFC 3987 normatively, so this module contributes no
-// character classes of its own for those two.
+// pct-encoded, ucschar and iprivate are imported rather than restated here: RFC 6570 §1.5
+// imports them normatively from RFC 3986 and RFC 3987, so this module defines no character
+// class that another RFC already owns.
 //
 // Deliberately NOT gated behind safe-regex2, for the same reason src/utils/rfc-3986.ts:11-15
 // gives, plus one specific to this grammar: the three top-level branches (expression, a
@@ -17,13 +16,15 @@
 // excluded from the literal class, and nothing else can start either — and the star-height-2
 // region (varname repeating inside variable-list's repeating varspec) is equally forced,
 // because "." and "," are not varchars. Every alternation is decided by one lookahead
-// character, so backtracking stays linear. Measured: <= 0.33 ms on 100k-char adversarial
-// inputs.
+// character, so backtracking stays linear; test/spec/format-validators.spec.ts pins that
+// with adversarial inputs.
 
+import { PCT_ENCODED_SRC } from './rfc-3986.js';
 import { IPRIVATE_SRC, UCSCHAR_SRC } from './rfc-3987.js';
 
-// RFC 6570 §1.5 (via RFC 3986 §2.1): pct-encoded = "%" HEXDIG HEXDIG
-const PCT_ENCODED_SRC = '%[0-9A-Fa-f]{2}';
+// Regex escapes below are doubled so one backslash survives into the pattern string: in a
+// template literal `\.` is a NonEscapeCharacter and the backslash is dropped, which would
+// leave an unintended wildcard or a dangling quantifier.
 
 // RFC 6570 §2.1, as corrected by Errata 6937 (Verified):
 //   literals = %x21 / %x23-24 / %x26-3B / %x3D / %x3F-5B
@@ -43,16 +44,11 @@ const LITERALS_SRC = `(?:[${LITERAL_CHARS_SRC}]|${PCT_ENCODED_SRC})`;
 // RFC 6570 §2.3: varchar = ALPHA / DIGIT / "_" / pct-encoded
 const VARCHAR_SRC = `(?:[A-Za-z0-9_]|${PCT_ENCODED_SRC})`;
 // RFC 6570 §2.3: varname = varchar *( ["."] varchar )
-// The "." must be a real `\.` in the compiled regex, not a bare ".": inside a template literal,
-// "\." is not a recognized string escape, so a single backslash is dropped before the pattern is
-// ever compiled and the regex engine would see an unescaped, unintended wildcard. `\\.` puts one
-// literal backslash character in the source string, which is what regex-escapes the dot.
 const VARNAME_SRC = `${VARCHAR_SRC}(?:\\.?${VARCHAR_SRC})*`;
 // RFC 6570 §2.4: varspec = varname [ modifier-level4 ]
 //   modifier-level4 = prefix / explode
 //   prefix = ":" max-length ; max-length = %x31-39 0*3DIGIT (1-9999, no leading zero)
 //   explode = "*"
-// Same NonEscapeCharacter hazard as VARNAME_SRC above: `\\*` puts a real backslash ahead of "*".
 const VARSPEC_SRC = `${VARNAME_SRC}(?::[1-9][0-9]{0,3}|\\*)?`;
 // RFC 6570 §2.2: operator = op-level2 / op-level3 / op-reserve
 //   op-level2 = "+" / "#" ; op-level3 = "." / "/" / ";" / "?" / "&"
@@ -62,8 +58,7 @@ const VARSPEC_SRC = `${VARNAME_SRC}(?::[1-9][0-9]{0,3}|\\*)?`;
 const OPERATOR_SRC = '[+#./;?&=,!@|]';
 // RFC 6570 §2: expression = "{" [ operator ] variable-list "}"
 //              variable-list = varspec *( "," varspec )
-// "{" and "}" must be escaped: under the `u` flag an unescaped "}" is a SyntaxError. As above,
-// `\\{` / `\\}` (not `\{` / `\}`) are what actually survive template-literal parsing as escapes.
+// "{" and "}" must be escaped: under the `u` flag an unescaped "}" is a SyntaxError.
 const EXPRESSION_SRC = `\\{${OPERATOR_SRC}?${VARSPEC_SRC}(?:,${VARSPEC_SRC})*\\}`;
 
 // RFC 6570 §2: URI-Template = *( literals / expression )
