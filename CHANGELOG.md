@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.4.6](https://github.com/zaggino/z-schema/compare/v12.4.5...v12.4.6) (2026-09-17)
+
+
+### Bug Fixes
+
+* **format:** validate uri-template against the complete RFC 6570 ABNF ([#498](https://github.com/zaggino/z-schema/issues/498)) ([ddbe4df](https://github.com/zaggino/z-schema/commit/ddbe4dfba24f2ea68b1fc5295ba5252b217b602a))
+
 ## [12.4.5](https://github.com/zaggino/z-schema/compare/v12.4.4...v12.4.5) (2026-09-03)
 
 
