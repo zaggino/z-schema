@@ -7,7 +7,7 @@ Line coverage status: **high**
 | File                          |  Line % | Statement % | Function % | Branch % |
 | ----------------------------- | ------: | ----------: | ---------: | -------: |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
-| src/format-validators.ts      |     95% |         95% |        90% |      93% |
+| src/format-validators.ts      |     94% |         94% |        90% |      93% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
 | src/json-validation.ts        |     91% |         91% |       100% |      89% |
@@ -25,6 +25,7 @@ Line coverage status: **high**
 | src/utils/properties.ts       |    100% |        100% |       100% |      75% |
 | src/utils/rfc-3986.ts         |    100% |        100% |       100% |     100% |
 | src/utils/rfc-3987.ts         |    100% |        100% |       100% |     100% |
+| src/utils/rfc-6570.ts         |    100% |        100% |       100% |     100% |
 | src/utils/schema-regex.ts     |     94% |         94% |       100% |      77% |
 | src/utils/symbols.ts          |    100% |        100% |       100% |     100% |
 | src/utils/time.ts             |     97% |         97% |       100% |      95% |
