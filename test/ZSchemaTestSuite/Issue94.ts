@@ -34,7 +34,7 @@ export default {
       valid: true,
       after(_err: any, valid: any, data: any, validator: any) {
         const newSch = validator.getResolvedSchema('person-object');
-        expect(newSch).toEqual(expectedResult);
+        expect(newSch).toStrictEqual(expectedResult);
       },
     },
   ],
