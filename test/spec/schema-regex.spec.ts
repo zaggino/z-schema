@@ -1,5 +1,5 @@
-import { MAX_SCHEMA_REGEX_LENGTH } from '../../src/utils/constants.ts';
-import { compileSchemaRegex } from '../../src/utils/schema-regex.ts';
+import { MAX_SCHEMA_REGEX_CACHE_SIZE, MAX_SCHEMA_REGEX_LENGTH } from '../../src/utils/constants.ts';
+import { clearSchemaRegexCache, compileSchemaRegex } from '../../src/utils/schema-regex.ts';
 
 describe('compileSchemaRegex', () => {
   it('fails for invalid regex pattern (no Unicode)', () => {
@@ -72,5 +72,59 @@ describe('compileSchemaRegex', () => {
       const result = compileSchemaRegex(pattern);
       expect(result.ok).toBe(true);
     }
+  });
+
+  describe('memoization', () => {
+    beforeEach(() => {
+      clearSchemaRegexCache();
+    });
+
+    it('returns the same result object for a repeated pattern', () => {
+      const first = compileSchemaRegex('^memo-[a-z]+$');
+      const second = compileSchemaRegex('^memo-[a-z]+$');
+      expect(second).toBe(first);
+      expect(second.ok).toBe(true);
+    });
+
+    it('memoizes failing patterns', () => {
+      const first = compileSchemaRegex('(a+)+');
+      const second = compileSchemaRegex('(a+)+');
+      expect(second).toBe(first);
+      expect(second.ok).toBe(false);
+    });
+
+    it('shared RegExp is stateless across repeated test() calls', () => {
+      const result = compileSchemaRegex('^x+$');
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value.global).toBe(false);
+        expect(result.value.sticky).toBe(false);
+        expect(result.value.test('xxx')).toBe(true);
+        expect(compileSchemaRegex('^x+$')).toBe(result);
+        expect(result.value.test('xxx')).toBe(true);
+      }
+    });
+
+    it('evicts only the oldest entry once the cache is full', () => {
+      const compiled = [];
+      for (let i = 0; i <= MAX_SCHEMA_REGEX_CACHE_SIZE; i++) {
+        compiled.push(compileSchemaRegex(`^evict-${i}$`));
+      }
+      // One insert past the cap evicted exactly entry 0; entries 1..cap are still cached.
+      expect(compileSchemaRegex('^evict-1$')).toBe(compiled[1]);
+      expect(compileSchemaRegex(`^evict-${MAX_SCHEMA_REGEX_CACHE_SIZE}$`)).toBe(compiled[MAX_SCHEMA_REGEX_CACHE_SIZE]);
+      const recompiled = compileSchemaRegex('^evict-0$');
+      expect(recompiled).not.toBe(compiled[0]);
+      expect(recompiled.ok).toBe(true);
+    });
+
+    it('does not cache patterns exceeding the maximum length', () => {
+      const oversized = 'a'.repeat(MAX_SCHEMA_REGEX_LENGTH + 1);
+      const first = compileSchemaRegex(oversized);
+      const second = compileSchemaRegex(oversized);
+      expect(first.ok).toBe(false);
+      expect(second.ok).toBe(false);
+      expect(second).not.toBe(first);
+    });
   });
 });
