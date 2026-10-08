@@ -6,14 +6,15 @@ Line coverage status: **high**
 
 | File                          |  Line % | Statement % | Function % | Branch % |
 | ----------------------------- | ------: | ----------: | ---------: | -------: |
+| src/compiled-schema-cache.ts  |     94% |         94% |        86% |      84% |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
-| src/format-validators.ts      |     94% |         94% |        90% |      93% |
+| src/format-validators.ts      |     95% |         95% |        93% |      93% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
 | src/json-validation.ts        |     91% |         91% |       100% |      89% |
 | src/report.ts                 |     94% |         94% |        95% |      88% |
-| src/schema-cache.ts           |     90% |         90% |        92% |      89% |
-| src/schema-compiler.ts        |     94% |         93% |       100% |      90% |
+| src/schema-cache.ts           |     91% |         91% |        91% |      89% |
+| src/schema-compiler.ts        |     94% |         94% |       100% |      90% |
 | src/schema-validator.ts       |     78% |         78% |       100% |      76% |
 | src/utils/array.ts            |    100% |        100% |       100% |     100% |
 | src/utils/base64.ts           |     61% |         61% |       100% |      63% |
@@ -30,7 +31,7 @@ Line coverage status: **high**
 | src/utils/symbols.ts          |    100% |        100% |       100% |     100% |
 | src/utils/time.ts             |     97% |         97% |       100% |      95% |
 | src/utils/unicode.ts          |    100% |        100% |       100% |     100% |
-| src/utils/uri.ts              |     90% |         91% |        75% |     100% |
+| src/utils/uri.ts              |     88% |         88% |        80% |      91% |
 | src/utils/what-is.ts          |     81% |         81% |       100% |      85% |
 | src/validation/array.ts       |     92% |         93% |       100% |      91% |
 | src/validation/combinators.ts |     96% |         96% |       100% |      93% |
@@ -40,9 +41,9 @@ Line coverage status: **high**
 | src/validation/shared.ts      |     93% |         93% |       100% |      83% |
 | src/validation/string.ts      |     90% |         90% |       100% |      89% |
 | src/validation/type.ts        |    100% |        100% |       100% |      96% |
-| src/z-schema-base.ts          |     87% |         87% |        89% |      80% |
+| src/z-schema-base.ts          |     88% |         88% |        89% |      83% |
 | src/z-schema-options.ts       |     92% |         92% |       100% |      70% |
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
-| src/z-schema.ts               |     76% |         76% |        79% |      83% |
-| **Total**                     | **91%** |     **91%** |    **95%** |  **88%** |
+| src/z-schema.ts               |     78% |         78% |        82% |      83% |
+| **Total**                     | **91%** |     **91%** |    **96%** |  **88%** |
