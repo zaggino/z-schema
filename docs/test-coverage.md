@@ -11,7 +11,7 @@ Line coverage status: **high**
 | src/format-validators.ts      |     95% |         95% |        93% |      93% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
-| src/json-validation.ts        |     91% |         91% |       100% |      89% |
+| src/json-validation.ts        |     91% |         91% |        86% |      90% |
 | src/report.ts                 |     90% |         90% |        75% |      88% |
 | src/schema-cache.ts           |     94% |         94% |       100% |      89% |
 | src/schema-compiler.ts        |     94% |         94% |       100% |      90% |
@@ -33,8 +33,8 @@ Line coverage status: **high**
 | src/utils/unicode.ts          |    100% |        100% |       100% |     100% |
 | src/utils/uri.ts              |     88% |         88% |        80% |      91% |
 | src/utils/what-is.ts          |     81% |         81% |       100% |      85% |
-| src/validation/array.ts       |     92% |         93% |       100% |      91% |
-| src/validation/combinators.ts |     96% |         96% |       100% |      93% |
+| src/validation/array.ts       |     92% |         93% |        60% |      91% |
+| src/validation/combinators.ts |     96% |         96% |        78% |      93% |
 | src/validation/numeric.ts     |     90% |         90% |       100% |      91% |
 | src/validation/object.ts      |     89% |         90% |       100% |      86% |
 | src/validation/ref.ts         |     97% |         97% |       100% |      94% |
@@ -46,4 +46,4 @@ Line coverage status: **high**
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
 | src/z-schema.ts               |     78% |         78% |        82% |      83% |
-| **Total**                     | **91%** |     **91%** |    **94%** |  **89%** |
+| **Total**                     | **91%** |     **91%** |    **92%** |  **89%** |
