@@ -104,10 +104,10 @@ export class ZSchema extends ZSchemaBase {
   public static create(
     options: ZSchemaOptions & { async?: true; safe?: true } = {}
   ): ZSchema | ZSchemaSafe | ZSchemaAsync | ZSchemaAsyncSafe {
+    // async/safe are left on the caller's object (normalizeOptions accepts them), so reusing the
+    // same options object always yields the same variant.
     const isAsync = options.async;
     const isSafe = options.safe;
-    delete options.async;
-    delete options.safe;
     if (isAsync && isSafe) {
       return new ZSchemaAsyncSafe(options, FACTORY_TOKEN);
     }

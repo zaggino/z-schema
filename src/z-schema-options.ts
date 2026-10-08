@@ -97,6 +97,12 @@ export const defaultOptions: ZSchemaOptions = {
   maxRecursionDepth: DEFAULT_MAX_RECURSION_DEPTH,
 };
 
+/**
+ * `ZSchema.create` dispatch flags. They have no default but are accepted, so the caller's options
+ * object (which the validator stores as-is) never has to be stripped of them.
+ */
+const FACTORY_DISPATCH_KEYS = new Set<string>(['async', 'safe']);
+
 export const normalizeOptions = (options?: ZSchemaOptions) => {
   let normalized;
 
@@ -106,7 +112,7 @@ export const normalizeOptions = (options?: ZSchemaOptions) => {
 
     // check that the options are correctly configured
     for (const key of keys) {
-      if (defaultOptions[key] === undefined) {
+      if (defaultOptions[key] === undefined && !FACTORY_DISPATCH_KEYS.has(key)) {
         throw new Error(`Unexpected option passed to constructor: ${key}`);
       }
     }
