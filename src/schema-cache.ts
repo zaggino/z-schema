@@ -2,27 +2,16 @@ import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
+import { bumpGlobalSchemaStateGeneration } from './compiled-schema-cache.js';
 import { findId, getId } from './json-schema.js';
 import { Report } from './report.js';
 import { deepClone } from './utils/clone.js';
 import { decodeJSONPointer } from './utils/json.js';
-import { getQueryPath, getRemotePath, isAbsoluteUri } from './utils/uri.js';
+import { getQueryPath, getRemotePath, getSafeRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { normalizeOptions } from './z-schema-options.js';
 
 export type SchemaCacheStorage = Record<string, JsonSchemaInternal>;
 export type ReferenceSchemaCacheStorage = Array<[JsonSchemaInternal, JsonSchemaInternal]>;
-
-// Normalize a URI into a cache key, rejecting keys that could pollute Object.prototype.
-function getSafeRemotePath(uri: string): string | undefined {
-  const remotePath = getRemotePath(uri);
-  if (!remotePath) {
-    return undefined;
-  }
-  if (remotePath === '__proto__' || remotePath === 'constructor' || remotePath === 'prototype') {
-    return undefined;
-  }
-  return remotePath;
-}
 
 const getEffectiveId = (schema: JsonSchemaInternal): string | undefined => {
   let id = getId(schema);
@@ -68,6 +57,7 @@ export class SchemaCache {
   }
 
   static cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
+    bumpGlobalSchemaStateGeneration();
     const remotePath = getSafeRemotePath(uri);
     if (remotePath) {
       this.global_cache[remotePath] = schema;

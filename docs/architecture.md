@@ -20,6 +20,7 @@ index.ts (public API)
             │         ├─ combinators.ts (allOf, anyOf, oneOf, not, if/then/else)
             │         └─ ref.ts ($dynamicRef/$recursiveRef resolution)
             ├─ schema-cache.ts (cache schemas by URI and id)
+            ├─ compiled-schema-cache.ts (per-instance cache of compiled object schemas)
             ├─ report.ts (accumulate validation errors)
             ├─ errors.ts (error codes, ValidateError)
             ├─ format-validators.ts (built-in + custom format validation)
@@ -117,6 +118,12 @@ Meta-schemas are bundled in `src/schemas/` (copied from `json-schema-spec/` at b
 - **Instance cache** (`this.cache`) — per-instance, populated by `validator.setRemoteReference()` and by schemas cloned from the global cache on first access. Instance cache entries take precedence over global ones.
 
 When a schema is looked up by URI, the instance cache is checked first. If not found, the global cache entry is deep-cloned into the instance cache (so compilation metadata doesn't leak between instances) and returned. Subsequent lookups for the same URI on the same instance hit the instance cache directly without re-cloning.
+
+### Compiled-schema cache
+
+Schemas passed to `validate()` as objects are cloned, compiled and meta-validated on every call, which dominates the cost for small schemas. `CompiledSchemaCache` (`compiled-schema-cache.ts`) is a per-instance cache keyed by `JSON.stringify(schema)` that stores the compiled and validated clone, so structurally equal schema objects skip cloning, compilation and schema validation. It is bounded (100 entries and 16M total key characters, FIFO eviction); schemas that cannot be serialized (e.g. circular) bypass it. Only schemas that compiled and validated with no errors, in a call without `includeErrors`/`excludeErrors`, are stored.
+
+Entries are invalidated when: the instance's `setRemoteReference()`, `registerFormat()` or `unregisterFormat()` is called (the instance cache is cleared); any global state changes (static `setRemoteReference()`, global `registerFormat()`/`unregisterFormat()`, `setSchemaReader()`), which bumps a global generation counter checked on lookup; or the schema's `id` no longer maps to the cached object in the instance `SchemaCache`.
 
 ## Build Outputs
 

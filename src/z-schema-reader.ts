@@ -1,5 +1,7 @@
 import type { JsonSchema } from './json-schema-versions.js';
 
+import { bumpGlobalSchemaStateGeneration } from './compiled-schema-cache.js';
+
 // a sync function that loads schemas for future use, for example from schemas directory, during server startup
 export type SchemaReader = (uri: string) => JsonSchema;
 
@@ -11,4 +13,5 @@ export function getSchemaReader(): SchemaReader | undefined {
 
 export function setSchemaReader(schemaReader: SchemaReader | undefined) {
   _schemaReader = schemaReader;
+  bumpGlobalSchemaStateGeneration();
 }
