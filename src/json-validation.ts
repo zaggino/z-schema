@@ -574,6 +574,110 @@ export const JsonValidators: Record<keyof JsonSchemaAll, JsonValidatorFn> = {
 };
 
 // ---------------------------------------------------------------------------
+// keyword plan
+// ---------------------------------------------------------------------------
+
+/** Validators that never add errors or async tasks, so `validate()` can skip their keys entirely. */
+const NOOP_VALIDATORS: ReadonlySet<JsonValidatorFn> = new Set<JsonValidatorFn>([
+  noopValidator,
+  definitionsValidator,
+  itemsValidator,
+  prefixItemsValidator,
+  thenValidator,
+  elseValidator,
+  maxContainsValidator,
+  minContainsValidator,
+]);
+
+/**
+ * Per-schema-node dispatch plan, cached lazily on the node under {@link keywordPlanSymbol}.
+ * Symbol keys are skipped by `Object.keys`, `for...in` and `JSON.stringify`, so the plan never leaks into clones or output.
+ * @internal
+ */
+export interface KeywordPlan {
+  /** `Object.keys(schema).length === 0` (raw count, includes internal keys). */
+  readonly empty: boolean;
+  /**
+   * Keys of `schema` in original order that have a non-no-op validator. Internal `__$*` keys, unknown keywords and
+   * no-op keywords (`$ref`, `items`, `then`, ...) are dropped, as is `type` when `schema.type` is truthy because it
+   * is dispatched first. Dropping no-op keys is behavior-preserving: they never add errors or async tasks, so neither
+   * results nor the point where `breakOnFirstError` stops change. Must be treated as read-only.
+   */
+  readonly keys: ReadonlyArray<keyof JsonSchemaAll>;
+  /** Lazily computed `keys` minus `VALIDATION_VOCAB_KEYWORDS`, used when the validation vocabulary is disabled. */
+  keysVocabDisabled?: ReadonlyArray<keyof JsonSchemaAll>;
+}
+
+const keywordPlanSymbol: unique symbol = Symbol('z-schema.keywordPlan');
+
+type PlannedSchema = JsonSchemaInternal & { [keywordPlanSymbol]?: KeywordPlan };
+
+function buildKeywordPlan(schema: JsonSchemaInternal): KeywordPlan {
+  const all = Object.keys(schema) as Array<keyof JsonSchemaAll>;
+  const skipType = !!schema.type;
+  const keys: Array<keyof JsonSchemaAll> = [];
+  for (let i = 0; i < all.length; i++) {
+    const key = all[i];
+    const validator = Object.hasOwn(JsonValidators, key) ? JsonValidators[key] : undefined;
+    if (!validator || NOOP_VALIDATORS.has(validator) || (skipType && key === 'type')) {
+      continue;
+    }
+    keys.push(key);
+  }
+  return { empty: all.length === 0, keys };
+}
+
+/**
+ * Get (building and caching on first use) the keyword plan of a schema node.
+ * Frozen/sealed schemas get a fresh plan on every call.
+ * @internal
+ */
+export function getKeywordPlan(schema: JsonSchemaInternal): KeywordPlan {
+  const planned = schema as PlannedSchema;
+  let plan = planned[keywordPlanSymbol];
+  if (plan === undefined) {
+    plan = buildKeywordPlan(schema);
+    if (Object.isExtensible(schema)) {
+      Object.defineProperty(planned, keywordPlanSymbol, {
+        value: plan,
+        enumerable: false,
+        configurable: true,
+        writable: true,
+      });
+    }
+  }
+  return plan;
+}
+
+/**
+ * Drop the cached keyword plan of a schema node. Must be called by any code that adds a validation
+ * keyword to a schema node after it may have been used as a schema (e.g. schema-validator's
+ * `assumeAdditional` / `noEmptyStrings` / `noEmptyArrays` / `noTypeless` rewrites).
+ * @internal
+ */
+export function invalidateKeywordPlan(schema: JsonSchemaInternal): void {
+  const planned = schema as PlannedSchema;
+  if (planned[keywordPlanSymbol] !== undefined) {
+    planned[keywordPlanSymbol] = undefined;
+  }
+}
+
+function getVocabDisabledKeys(plan: KeywordPlan): ReadonlyArray<keyof JsonSchemaAll> {
+  let filtered = plan.keysVocabDisabled;
+  if (filtered === undefined) {
+    const out: Array<keyof JsonSchemaAll> = [];
+    for (let i = 0; i < plan.keys.length; i++) {
+      if (!VALIDATION_VOCAB_KEYWORDS.has(plan.keys[i])) {
+        out.push(plan.keys[i]);
+      }
+    }
+    filtered = out;
+    plan.keysVocabDisabled = filtered;
+  }
+  return filtered;
+}
+
+// ---------------------------------------------------------------------------
 // recurseArray
 // ---------------------------------------------------------------------------
 
@@ -746,8 +850,8 @@ export function validate(
   }
 
   // check if schema is empty, everything is valid against empty schema
-  let keys = Object.keys(schema) as Array<keyof JsonSchemaAll>;
-  if (keys.length === 0) {
+  let plan = getKeywordPlan(schema);
+  if (plan.empty) {
     return true;
   }
 
@@ -785,10 +889,6 @@ export function validate(
       } else {
         report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
       }
-      const refIdx = keys.indexOf('$ref');
-      if (refIdx !== -1) {
-        keys.splice(refIdx, 1);
-      }
     } else {
       // avoid infinite loop with maxRefs
       let maxRefs = 99;
@@ -800,7 +900,7 @@ export function validate(
           break;
         } else {
           schema = schema.__$refResolved;
-          keys = Object.keys(schema) as Array<keyof JsonSchemaAll>;
+          plan = getKeywordPlan(schema);
         }
         maxRefs--;
       }
@@ -825,10 +925,6 @@ export function validate(
       } else {
         report.addError('REF_UNRESOLVED', [schema.$recursiveRef], undefined, schema);
       }
-      const recursiveRefIdx = keys.indexOf('$recursiveRef');
-      if (recursiveRefIdx !== -1) {
-        keys.splice(recursiveRefIdx, 1);
-      }
     }
   }
 
@@ -844,27 +940,14 @@ export function validate(
       } else {
         validate(ctx, report, dynamicRefTarget, json);
       }
-      const dynamicRefIdx = keys.indexOf('$dynamicRef');
-      if (dynamicRefIdx !== -1) {
-        keys.splice(dynamicRefIdx, 1);
-      }
     }
   }
 
   const validationVocabularyEnabled = isValidationVocabularyEnabled(schema, report, ctx.options.version);
-  if (!validationVocabularyEnabled) {
-    let wi = 0;
-    for (let ri = 0; ri < keys.length; ri++) {
-      if (!VALIDATION_VOCAB_KEYWORDS.has(keys[ri])) {
-        keys[wi++] = keys[ri];
-      }
-    }
-    keys.length = wi;
-  }
+  const keys = validationVocabularyEnabled ? plan.keys : getVocabDisabledKeys(plan);
 
   // type checking first
   if (validationVocabularyEnabled && schema.type) {
-    keys.splice(keys.indexOf('type'), 1);
     report.schemaPath.push('type');
     JsonValidators.type(ctx, report, schema, json);
     report.schemaPath.pop();
@@ -882,24 +965,26 @@ export function validate(
   // now iterate all the keys in schema and execute validation methods
   // Defer unevaluatedItems/unevaluatedProperties to run after other validators,
   // so combinator validation results are cached and available for annotation collection
-  const deferredUnevaluatedKeys: Array<keyof JsonSchemaAll> = [];
+  let deferredUnevaluatedKeys: Array<keyof JsonSchemaAll> | undefined;
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
     if (key === 'unevaluatedItems' || key === 'unevaluatedProperties') {
-      deferredUnevaluatedKeys.push(key);
+      if (deferredUnevaluatedKeys === undefined) {
+        deferredUnevaluatedKeys = [key];
+      } else {
+        deferredUnevaluatedKeys.push(key);
+      }
       continue;
     }
-    const validator = JsonValidators[key];
-    if (validator) {
-      validator(ctx, report, schema, json);
-      if (report.errors.length && ctx.options.breakOnFirstError) {
-        break;
-      }
+    // every key in the plan has a non-no-op validator
+    JsonValidators[key](ctx, report, schema, json);
+    if (report.errors.length && ctx.options.breakOnFirstError) {
+      break;
     }
   }
 
   // Run unevaluated* validators after all others have cached their combinator results
-  if (deferredUnevaluatedKeys.length > 0 && !(report.errors.length > 0 && ctx.options.breakOnFirstError)) {
+  if (deferredUnevaluatedKeys !== undefined && !(report.errors.length > 0 && ctx.options.breakOnFirstError)) {
     for (let i = 0; i < deferredUnevaluatedKeys.length; i++) {
       const key = deferredUnevaluatedKeys[i];
       const validator = JsonValidators[key];

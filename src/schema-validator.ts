@@ -3,7 +3,7 @@ import type { ZSchemaBase } from './z-schema-base.js';
 
 import { isFormatSupported } from './format-validators.js';
 import { getId } from './json-schema.js';
-import { validate } from './json-validation.js';
+import { invalidateKeywordPlan, validate } from './json-validation.js';
 import { Report } from './report.js';
 import { isUniqueArray } from './utils/array.js';
 import { shallowClone } from './utils/clone.js';
@@ -177,6 +177,7 @@ const SchemaValidators = {
     // custom - assume defined false mode
     if (this.options.assumeAdditional && schema.additionalItems === undefined && Array.isArray(schema.items)) {
       schema.additionalItems = false;
+      invalidateKeywordPlan(schema);
     }
   },
   maxItems(this: SchemaValidator, report: Report, schema: JsonSchemaInternal) {
@@ -291,6 +292,7 @@ const SchemaValidators = {
     // custom - assume defined false mode
     if (this.options.assumeAdditional && schema.additionalProperties === undefined) {
       schema.additionalProperties = false;
+      invalidateKeywordPlan(schema);
     }
     // custom - forceProperties
     if (this.options.forceProperties === true && keys.length === 0) {
@@ -415,6 +417,7 @@ const SchemaValidators = {
       schema.format === undefined
     ) {
       schema.minLength = 1;
+      invalidateKeywordPlan(schema);
     }
     if (
       this.options.noEmptyArrays === true &&
@@ -422,6 +425,7 @@ const SchemaValidators = {
       schema.minItems === undefined
     ) {
       schema.minItems = 1;
+      invalidateKeywordPlan(schema);
     }
     if (
       this.options.forceProperties === true &&
@@ -738,6 +742,7 @@ export class SchemaValidator {
         const inheritType = (sch: JsonSchema) => {
           if (!sch.type) {
             sch.type = schema.type;
+            invalidateKeywordPlan(sch);
           }
         };
         if (Array.isArray(schema.anyOf)) {
