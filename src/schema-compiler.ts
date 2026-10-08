@@ -425,6 +425,7 @@ export class SchemaCompiler {
             // at this pre-compilation stage we treat it as an internal object)
             (s as JsonSchemaInternal).id = remotePath;
             // try to compile the schema
+            // Eager on purpose: these errors are read by content (copied/filtered), so do not use Report.createSubReport.
             const subreport = new Report(report);
             if (this.compileSchema(subreport, s)) {
               response = this.validator.scache.getSchemaByUri(report, refObj.ref, schema);
@@ -558,6 +559,7 @@ export class SchemaCompiler {
 
     for (const schema of arr) {
       // try to compile each schema separately
+      // Eager on purpose: these errors are read by content (copied/filtered), so do not use Report.createSubReport.
       const report = new Report(mainReport);
       const isValid = this.compileSchema(report, schema);
       if (isValid) {

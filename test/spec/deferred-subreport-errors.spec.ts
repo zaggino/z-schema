@@ -4,7 +4,7 @@ import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 
 import { Report } from '../../src/report.ts';
 import { ZSchema } from '../../src/z-schema.ts';
-import { runBothModes, runBothModesAsync, shapeOf } from '../lib/deferred-errors.ts';
+import { expectSameThrown, runBothModes, settle, shapeOf, withEagerSubReports } from '../lib/deferred-errors.ts';
 
 interface Case {
   name: string;
@@ -243,7 +243,8 @@ describe('deferred sub-report errors: differential against eager materialization
       validator.registerFormat('async-a', (input: unknown) => Promise.resolve(input === 'ok'));
       return await validator.validate({ v: 'nope' }, structuredClone(schema));
     };
-    const { deferred, eager } = await runBothModesAsync(run);
+    const deferred = await run();
+    const eager = await withEagerSubReports(run);
     expect(eager.valid).toBe(false);
     expect(deferred.valid).toBe(false);
     expect(shapeOf(deferred.err?.details)).toStrictEqual(shapeOf(eager.err?.details));
@@ -263,7 +264,8 @@ describe('deferred sub-report errors: differential against eager materialization
       validator.registerFormat('async-a', (input: unknown) => Promise.resolve(input === 'ok'));
       return await validator.validate('ok', structuredClone(schema));
     };
-    const { deferred, eager } = await runBothModesAsync(run);
+    const deferred = await run();
+    const eager = await withEagerSubReports(run);
     expect(deferred.valid).toBe(eager.valid);
     expect(shapeOf(deferred.err?.details)).toStrictEqual(shapeOf(eager.err?.details));
   });
@@ -298,5 +300,136 @@ describe('deferred sub-report errors: customValidator exemption', () => {
     const parent = new Report({ customValidator: () => {} });
     expect(Report.createSubReport(parent).deferErrors).toBe(false);
     expect(Report.createSubReport(new Report({})).deferErrors).toBe(true);
+  });
+});
+
+const runInstallHook = () => {
+  const seen: SchemaErrorDetail[] = [];
+  const validator = ZSchema.create({});
+  validator.registerFormat('install-hook', () => {
+    validator.options.customValidator = (report: Report) => {
+      for (const err of report.errors) {
+        seen.push(err);
+      }
+    };
+    return false;
+  });
+  const result = validator.validateSafe(
+    { a: 'x', b: 1 },
+    {
+      properties: {
+        a: { anyOf: [{ type: 'number' }, { type: 'string', format: 'install-hook' }] },
+        b: { anyOf: [{ type: 'string' }, { type: 'string', minLength: 1 }] },
+      },
+    }
+  );
+  return { result, seen };
+};
+
+describe('deferred sub-report errors: mid-validation customValidator (C1)', () => {
+  it('shows materialized errors to a customValidator installed by a format validator inside anyOf', () => {
+    const { deferred, eager } = runBothModes(runInstallHook);
+    expect(deferred.seen.length).toBeGreaterThan(0);
+    for (const err of deferred.seen) {
+      expect(typeof err.message).toBe('string');
+    }
+    expect(shapeOf(deferred.seen)).toStrictEqual(shapeOf(eager.seen));
+    expect(shapeOf(deferred.result.err?.details)).toStrictEqual(shapeOf(eager.result.err?.details));
+  });
+});
+
+const runFlipPathAsArray = () => {
+  const validator = ZSchema.create({});
+  validator.registerFormat('flip', () => {
+    validator.options.reportPathAsArray = true;
+    return false;
+  });
+  return validator.validateSafe(
+    { a: 1, b: 'x' },
+    {
+      properties: {
+        a: { anyOf: [{ type: 'string' }, { type: 'boolean' }] },
+        b: { anyOf: [{ type: 'number' }, { type: 'string', format: 'flip' }] },
+      },
+    }
+  );
+};
+
+describe('deferred sub-report errors: reportPathAsArray flipped mid-run (C2)', () => {
+  it('snapshots reportPathAsArray at add time', () => {
+    const { deferred, eager } = runBothModes(runFlipPathAsArray);
+    expect(shapeOf(deferred.err?.details)).toStrictEqual(shapeOf(eager.err?.details));
+  });
+});
+
+const undefinedParamRepro = () => ZSchema.create().validateSafe(undefined, { anyOf: [{ enum: ['x'] }, true] } as never);
+const excludedUndefinedParam = () =>
+  ZSchema.create().validateSafe(undefined, { enum: ['x'] }, { excludeErrors: ['ENUM_MISMATCH'] });
+const objectParam = () =>
+  ZSchema.create().validateSafe({ k: 1 }, { anyOf: [{ enum: [{ k: 2 }] }, { type: 'string' }] });
+
+// validateSafe converts a thrown error into `err`, so compare the surfaced error itself.
+const expectSameResult = (d: ReturnType<typeof undefinedParamRepro>, e: ReturnType<typeof undefinedParamRepro>) => {
+  expect(d.valid).toBe(e.valid);
+  expect(d.err?.constructor).toBe(e.err?.constructor);
+  expect(d.err?.message).toBe(e.err?.message);
+  expect(shapeOf(d.err?.details)).toStrictEqual(shapeOf(e.err?.details));
+};
+
+describe('deferred sub-report errors: message construction exceptions (C3)', () => {
+  it('surfaces the same TypeError for an undefined param inside anyOf', () => {
+    const deferred = settle(undefinedParamRepro);
+    const eager = settle(() => withEagerSubReports(undefinedParamRepro));
+    expect(!eager.threw && eager.value.err instanceof TypeError).toBe(true);
+    if (expectSameThrown(deferred, eager) && !eager.threw) {
+      expectSameResult(deferred.value, eager.value);
+    }
+  });
+
+  it('matches for an excluded code with an undefined param', () => {
+    // main builds the message (failing on the undefined param) before the excludeErrors check
+    const deferred = settle(excludedUndefinedParam);
+    const eager = settle(() => withEagerSubReports(excludedUndefinedParam));
+    expect(!eager.threw && eager.value.err instanceof TypeError).toBe(true);
+    if (expectSameThrown(deferred, eager) && !eager.threw) {
+      expectSameResult(deferred.value, eager.value);
+    }
+  });
+
+  it('matches for an object param (enum of objects)', () => {
+    const { deferred, eager } = runBothModes(objectParam);
+    expect(shapeOf(deferred.err?.details)).toStrictEqual(shapeOf(eager.err?.details));
+    expect(deferred.err?.details?.[0].inner?.[0].message).toContain('{"k":1}');
+  });
+
+  it('throws on a circular object param in both modes', () => {
+    const circular: Record<string, unknown> = {};
+    circular.self = circular;
+    const report = new Report({});
+    report.deferErrors = true;
+    expect(() => {
+      report.addCustomError('ENUM_MISMATCH', 'x {0}', [circular as never]);
+    }).toThrow(TypeError);
+    expect(report.errors).toHaveLength(0);
+  });
+});
+
+const maxErrorsRun = (defer: boolean) => {
+  const parent = new Report({});
+  const sub = new Report(parent, { maxErrors: 2 });
+  sub.deferErrors = defer;
+  for (let i = 0; i < 5; i++) {
+    sub.path = [i];
+    sub.addError('INVALID_TYPE', ['string', 'number']);
+  }
+  parent.addError('ANY_OF_MISSING', undefined, sub);
+  return shapeOf(parent.errors);
+};
+
+describe('deferred sub-report errors: maxErrors (S5)', () => {
+  it('honors reportOptions.maxErrors on a deferred sub-report (no public path sets it; direct Report)', () => {
+    const deferred = maxErrorsRun(true);
+    expect(deferred).toStrictEqual(maxErrorsRun(false));
+    expect((deferred as Array<{ values: { inner: unknown[] } }>)[0].values.inner).toHaveLength(2);
   });
 });

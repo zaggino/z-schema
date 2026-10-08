@@ -4,7 +4,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 
 import { ZSchema } from '../../src/z-schema.ts';
-import { runBothModes, shapeOf } from '../lib/deferred-errors.ts';
+import { expectSameThrown, settle, shapeOf, withEagerSubReports } from '../lib/deferred-errors.ts';
 
 const suiteRoot = path.join(import.meta.dirname, '..', 'public', 'json-schema-test-suite');
 
@@ -60,23 +60,22 @@ describe('deferred sub-report errors: JSON-Schema-Test-Suite differential', () =
               }
               return ZSchema.create({ version }).validateSafe(test.data, schema);
             };
-            let result;
-            try {
-              result = runBothModes(run);
-            } catch {
-              // Cases that throw (e.g. unresolvable remotes) must throw in both modes alike.
-              expect(() => runBothModes(run)).toThrow();
-              continue;
-            }
-            const { deferred, eager } = result;
+            const deferredOutcome = settle(run);
+            const eagerOutcome = settle(() => withEagerSubReports(run));
             const label = `${rel} :: ${group.description} :: ${test.description}`;
-            expect({ label, valid: deferred.valid }).toStrictEqual({ label, valid: eager.valid });
-            if (!eager.valid) {
-              invalidCompared++;
-              expect({ label, shape: shapeOf(deferred.err?.details) }).toStrictEqual({
-                label,
-                shape: shapeOf(eager.err?.details),
-              });
+            if (expectSameThrown(deferredOutcome, eagerOutcome) && !eagerOutcome.threw) {
+              const deferred = deferredOutcome.value;
+              const eager = eagerOutcome.value;
+              expect({ label, valid: deferred.valid }).toStrictEqual({ label, valid: eager.valid });
+              expect(deferred.err?.constructor).toBe(eager.err?.constructor);
+              expect(deferred.err?.message).toBe(eager.err?.message);
+              if (!eager.valid) {
+                invalidCompared++;
+                expect({ label, shape: shapeOf(deferred.err?.details) }).toStrictEqual({
+                  label,
+                  shape: shapeOf(eager.err?.details),
+                });
+              }
             }
             compared++;
           }

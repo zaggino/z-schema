@@ -65,24 +65,6 @@ export interface ReportOptions {
   maxErrors?: number;
 }
 
-/**
- * Whether sub-reports created through {@link Report.createSubReport} may defer
- * materialization of their error details. Test-only switch, see
- * {@link setSubReportErrorDeferral}.
- */
-let deferralEnabled = true;
-
-/**
- * Enables or disables deferred error materialization for sub-reports. Deferral is
- * purely an optimization: the observable error details are identical either way.
- * Exists so tests can run differential comparisons.
- *
- * @internal
- */
-export function setSubReportErrorDeferral(enabled: boolean): void {
-  deferralEnabled = enabled;
-}
-
 function pathToString(path: Array<string | number>): string {
   // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
   return `#/${path
@@ -116,137 +98,164 @@ function findSchemaId(rootSchema: JsonSchemaInternal, path: Array<string | numbe
 }
 
 /**
- * Builds an error detail from snapshotted inputs. This is the single place that defines the
- * shape and key order of error details, shared by eager adds and deferred materialization.
- * `path` becomes the returned `path` when `pathAsArray` is set, so it must be a private copy.
+ * An error recorded by a deferred sub-report, and the single snapshot form of every error added
+ * through {@link Report.addCustomError}. It captures everything needed to build the real
+ * {@link SchemaErrorDetail} (the path arrays keep mutating during traversal, so they are copied at
+ * add time, as are the root schema and the `reportPathAsArray` option). The detail is built only
+ * by {@link PendingError.materialize}, which defines the shape and key order of error details for
+ * both eager adds and deferred errors that end up observable (e.g. inside an `inner` list).
+ *
+ * `code`, `params` and `keyword` are real fields so `hasError` works unchanged; the remaining
+ * {@link SchemaErrorDetail} fields are getters that materialize on demand.
  */
-function buildErrorDetail(
-  errorCode: string,
-  errorMessage: string,
-  params: ErrorParam[],
-  path: Array<string | number>,
-  schemaPath: Array<string | number>,
-  rootSchema: JsonSchemaInternal | undefined,
-  json: unknown,
-  schema: JsonSchema | boolean | undefined,
-  keyword: keyof JsonSchemaAll | undefined,
-  inner: SchemaErrorDetail[] | null,
-  pathAsArray: boolean | undefined
-): SchemaErrorDetail {
-  for (let idx = 0; idx < params.length; idx++) {
-    const param = params[idx] === null || isObject(params[idx]) ? JSON.stringify(params[idx]) : params[idx];
-    errorMessage = errorMessage.replace(`{${idx}}`, param.toString());
-  }
-
-  const err = {
-    code: errorCode,
-    params,
-    message: errorMessage,
-    path: pathAsArray === true ? path : pathToString(path),
-    schemaPath,
-    schemaId: rootSchema ? findSchemaId(rootSchema, path.slice()) : undefined,
-    keyword,
-    [schemaSymbol]: schema,
-    [jsonSymbol]: json,
-  } as SchemaErrorDetail;
-
-  if (schema && typeof schema === 'string') {
-    err.description = schema;
-  } else if (schema && typeof schema === 'object') {
-    if (schema.title) {
-      err.title = schema.title;
-    }
-    if (schema.description) {
-      err.description = schema.description;
-    }
-  }
-
-  if (inner !== null) {
-    err.inner = inner.length === 0 ? undefined : materializeEntries(inner);
-  }
-
-  return err;
-}
-
-/**
- * An error recorded by a deferred sub-report. It holds snapshots of everything needed to build
- * the real {@link SchemaErrorDetail} later (only if the error ends up observable, e.g. inside an
- * `inner` list of an eager report). `code` and `params` are real fields so `hasError` works unchanged.
- */
-class PendingError {
-  code: string;
-  params: ErrorParam[];
-  errorMessage: string;
-  path: Array<string | number>;
-  schemaPath: Array<string | number>;
-  rootSchema: JsonSchemaInternal | undefined;
-  report: Report;
-  schema: JsonSchema | boolean | undefined;
-  keyword: keyof JsonSchemaAll | undefined;
+class PendingError implements SchemaErrorDetail {
+  readonly code: string;
+  readonly params: ErrorParam[];
+  readonly keyword: keyof JsonSchemaAll | undefined;
+  private readonly errorMessage: string;
+  private readonly dataPath: Array<string | number>;
+  private readonly snapshotSchemaPath: Array<string | number>;
+  private readonly rootSchema: JsonSchemaInternal | undefined;
+  private readonly pathAsArray: boolean;
+  private readonly report: Report;
+  private readonly schema: JsonSchema | boolean | undefined;
   // null = no `inner` key; an empty array = `inner: undefined` (mirrors the eager shape)
-  inner: SchemaErrorDetail[] | null;
-  materialized?: SchemaErrorDetail;
+  private readonly innerEntries: SchemaErrorDetail[] | null;
+  private detail?: SchemaErrorDetail;
 
   constructor(
-    code: string,
-    params: ErrorParam[],
-    errorMessage: string,
-    path: Array<string | number>,
-    schemaPath: Array<string | number>,
-    rootSchema: JsonSchemaInternal | undefined,
     report: Report,
+    code: string,
+    errorMessage: string,
+    params: ErrorParam[],
+    dataPath: Array<string | number>,
+    snapshotSchemaPath: Array<string | number>,
     schema: JsonSchema | boolean | undefined,
     keyword: keyof JsonSchemaAll | undefined,
-    inner: SchemaErrorDetail[] | null
+    innerEntries: SchemaErrorDetail[] | null
   ) {
     this.code = code;
     this.params = params;
+    this.keyword = keyword;
     this.errorMessage = errorMessage;
-    this.path = path;
-    this.schemaPath = schemaPath;
-    this.rootSchema = rootSchema;
+    this.dataPath = dataPath;
+    this.snapshotSchemaPath = snapshotSchemaPath;
+    this.rootSchema = report.rootSchema;
+    this.pathAsArray = report.options.reportPathAsArray === true;
     this.report = report;
     this.schema = schema;
-    this.keyword = keyword;
-    this.inner = inner;
+    this.innerEntries = innerEntries;
   }
 
+  get message(): string {
+    return this.materialize().message;
+  }
+
+  get path(): string | Array<string | number> {
+    return this.materialize().path;
+  }
+
+  get schemaPath(): Array<string | number> | undefined {
+    return this.materialize().schemaPath;
+  }
+
+  get schemaId(): string | undefined {
+    return this.materialize().schemaId;
+  }
+
+  get title(): string | undefined {
+    return this.materialize().title;
+  }
+
+  get description(): string | undefined {
+    return this.materialize().description;
+  }
+
+  get inner(): SchemaErrorDetail[] | undefined {
+    return this.materialize().inner;
+  }
+
+  /**
+   * Builds (once) the plain error detail. May throw while formatting params, exactly as the
+   * pre-deferral eager construction did.
+   */
   materialize(): SchemaErrorDetail {
-    if (this.materialized === undefined) {
-      this.materialized = buildErrorDetail(
-        this.code,
-        this.errorMessage,
-        this.params,
-        this.path,
-        this.schemaPath,
-        this.rootSchema,
-        this.report.getJson(),
-        this.schema,
-        this.keyword,
-        this.inner,
-        this.report.options.reportPathAsArray
-      );
+    if (this.detail === undefined) {
+      this.detail = this.build();
     }
-    return this.materialized;
+    return this.detail;
+  }
+
+  private build(): SchemaErrorDetail {
+    const { params } = this;
+    let { errorMessage } = this;
+    for (let idx = 0; idx < params.length; idx++) {
+      const param = params[idx] === null || isObject(params[idx]) ? JSON.stringify(params[idx]) : params[idx];
+      errorMessage = errorMessage.replace(`{${idx}}`, param.toString());
+    }
+
+    const { schema } = this;
+    const err = {
+      code: this.code,
+      params,
+      message: errorMessage,
+      path: this.pathAsArray ? this.dataPath : pathToString(this.dataPath),
+      schemaPath: this.snapshotSchemaPath,
+      schemaId: this.rootSchema ? findSchemaId(this.rootSchema, this.dataPath.slice()) : undefined,
+      keyword: this.keyword,
+      [schemaSymbol]: schema,
+      [jsonSymbol]: this.report.getJson(),
+    } as SchemaErrorDetail;
+
+    if (schema && typeof schema === 'string') {
+      err.description = schema;
+    } else if (schema && typeof schema === 'object') {
+      if (schema.title) {
+        err.title = schema.title;
+      }
+      if (schema.description) {
+        err.description = schema.description;
+      }
+    }
+
+    if (this.innerEntries !== null) {
+      err.inner = this.innerEntries.length === 0 ? undefined : materializeEntries(this.innerEntries);
+    }
+
+    return err;
   }
 }
 
 /**
  * Replaces any {@link PendingError} entries with their materialized details. Returns the input
- * array itself when nothing needs materializing.
+ * array itself when nothing needs materializing. The `instanceof` check is what keeps public
+ * `inner`/`details` lists made of plain own-key objects rather than getter-backed records.
  */
 function materializeEntries(entries: SchemaErrorDetail[]): SchemaErrorDetail[] {
   for (let i = 0; i < entries.length; i++) {
-    if ((entries[i] as unknown) instanceof PendingError) {
+    if (entries[i] instanceof PendingError) {
       const out = entries.slice(0, i);
       for (let j = i; j < entries.length; j++) {
-        const entry = entries[j] as unknown;
-        out.push(entry instanceof PendingError ? entry.materialize() : (entry as SchemaErrorDetail));
+        const entry = entries[j];
+        out.push(entry instanceof PendingError ? entry.materialize() : entry);
       }
       return out;
     }
   }
   return entries;
+}
+
+/**
+ * True when formatting `params` into a message cannot throw (string, number, boolean, null).
+ */
+function areParamsSafe(params: ErrorParam[]): boolean {
+  for (let i = 0; i < params.length; i++) {
+    const p = params[i] as unknown;
+    if (p !== null && typeof p !== 'string' && typeof p !== 'number' && typeof p !== 'boolean') {
+      return false;
+    }
+  }
+  return true;
 }
 
 type TaskResult = unknown;
@@ -274,6 +283,8 @@ export class Report {
   /**
    * When set, `addCustomError` records a cheap {@link PendingError} instead of building the full
    * detail. Only ever set on JSON-validation sub-reports via {@link Report.createSubReport}.
+   *
+   * @internal
    */
   deferErrors = false;
 
@@ -281,11 +292,30 @@ export class Report {
    * Creates a sub-report whose errors are materialized lazily. Safe because the errors of such
    * sub-reports are only observed through `.errors.length`, `hasError`, or as `inner` of a parent
    * error. Deferral is disabled when a `customValidator` is set, since it may read `report.errors`.
+   *
+   * @internal
    */
   static createSubReport(parent: Report): Report {
     const report = new Report(parent);
-    report.deferErrors = deferralEnabled && typeof parent.options.customValidator !== 'function';
+    report.deferErrors = typeof parent.options.customValidator !== 'function';
     return report;
+  }
+
+  /**
+   * Replaces pending (deferred) errors of this report and its ancestors with plain error details,
+   * in place. Used before handing a report to user code that may read `errors`.
+   *
+   * @internal
+   */
+  materializeErrors(): void {
+    const { errors } = this;
+    for (let i = 0; i < errors.length; i++) {
+      const err = errors[i];
+      if (err instanceof PendingError) {
+        errors[i] = err.materialize();
+      }
+    }
+    this.parentReport?.materializeErrors();
   }
 
   constructor(parentOrOptions: ZSchemaOptions | Report, validateOptions?: ValidateOptions); // primary | subreport
@@ -504,8 +534,13 @@ export class Report {
 
     params ||= [];
 
-    // Check if this error code should be excluded
-    if (Array.isArray(this.validateOptions.excludeErrors) && this.validateOptions.excludeErrors.includes(errorCode)) {
+    // Formatting params into the message can throw for exotic values (undefined, circular objects,
+    // BigInt, symbols). Eager reports always threw at that point, before the excludeErrors check,
+    // so keep that order whenever formatting could throw; with safe params the order is unobservable.
+    const safeParams = areParamsSafe(params);
+    const excluded =
+      Array.isArray(this.validateOptions.excludeErrors) && this.validateOptions.excludeErrors.includes(errorCode);
+    if (safeParams && excluded) {
       return;
     }
 
@@ -529,38 +564,18 @@ export class Report {
       }
     }
 
-    if (this.deferErrors) {
-      this.errors.push(
-        new PendingError(
-          errorCode,
-          params,
-          errorMessage,
-          path,
-          schemaPath,
-          this.rootSchema,
-          this,
-          schema,
-          keyword,
-          inner
-        ) as unknown as SchemaErrorDetail
-      );
+    const pending = new PendingError(this, errorCode, errorMessage, params, path, schemaPath, schema, keyword, inner);
+
+    if (safeParams) {
+      this.errors.push(this.deferErrors ? pending : pending.materialize());
       return;
     }
 
-    this.errors.push(
-      buildErrorDetail(
-        errorCode,
-        errorMessage,
-        params,
-        path,
-        schemaPath,
-        this.rootSchema,
-        this.getJson(),
-        schema,
-        keyword,
-        inner,
-        this.options.reportPathAsArray
-      )
-    );
+    // unsafe params: build first (throws exactly when the eager path did), then apply excludeErrors
+    const detail = pending.materialize();
+    if (excluded) {
+      return;
+    }
+    this.errors.push(detail);
   }
 }

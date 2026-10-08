@@ -921,6 +921,10 @@ export function validate(
   }
 
   if (typeof ctx.options.customValidator === 'function') {
+    // customValidator may have been installed mid-validation, after this report started deferring
+    if (report.deferErrors) {
+      report.materializeErrors();
+    }
     ctx.options.customValidator.call(ctx, report, schema, json);
   }
 

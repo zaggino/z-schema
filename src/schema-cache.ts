@@ -186,6 +186,7 @@ export class SchemaCache {
           remoteReport = anscestorReport;
           usesAncestorReport = true;
         } else {
+          // Eager on purpose: these errors are read by content (copied/filtered), so do not use Report.createSubReport.
           remoteReport = new Report(report);
           const noCache = !(result.id && isAbsoluteUri(result.id));
           if (this.validator.sc.compileSchema(remoteReport, result, { noCache })) {

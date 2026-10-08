@@ -1,38 +1,78 @@
 import type { SchemaErrorDetail } from '../../src/report.ts';
 
-import { setSubReportErrorDeferral } from '../../src/report.ts';
+import { Report } from '../../src/report.ts';
 import { jsonSymbol, schemaSymbol } from '../../src/utils/symbols.ts';
 
 /**
- * Runs `fn` once with sub-report error deferral enabled and once with it disabled.
+ * Runs `fn` with sub-reports forced eager (never deferring), by replacing
+ * `Report.createSubReport` with a plain `new Report(parent)`. Works for sync and promise-returning
+ * functions; the spy is restored once the result settles.
+ */
+export function withEagerSubReports<T>(fn: () => T): T {
+  const spy = vi.spyOn(Report, 'createSubReport').mockImplementation((parent) => new Report(parent));
+  let result: T;
+  try {
+    result = fn();
+  } catch (error) {
+    spy.mockRestore();
+    throw error;
+  }
+  if (result instanceof Promise) {
+    const pending = result;
+    return (async () => {
+      try {
+        return await pending;
+      } finally {
+        spy.mockRestore();
+      }
+    })() as T;
+  }
+  spy.mockRestore();
+  return result;
+}
+
+/**
+ * Runs `fn` once with deferral (the default) and once forced eager. For async `fn`, `await` the
+ * fields of the returned object (the runs are sequential: `deferred` is created first).
  */
 export function runBothModes<T>(fn: () => T): { deferred: T; eager: T } {
-  setSubReportErrorDeferral(true);
   const deferred = fn();
-  setSubReportErrorDeferral(false);
+  return { deferred, eager: withEagerSubReports(fn) };
+}
+
+export type Outcome<T> = { threw: false; value: T } | { threw: true; error: unknown };
+
+/**
+ * Captures a thrown exception as data so the two modes can be compared including exceptions.
+ */
+export function settle<T>(fn: () => T): Outcome<T> {
   try {
-    const eager = fn();
-    return { deferred, eager };
-  } finally {
-    setSubReportErrorDeferral(true);
+    return { threw: false, value: fn() };
+  } catch (error) {
+    return { threw: true, error };
   }
 }
 
 /**
- * Async variant of {@link runBothModes}. Runs the modes sequentially.
+ * Asserts both modes ended alike: both threw the same error constructor and message, or neither
+ * threw. Returns true when neither threw (so the caller should compare the values).
  */
-export async function runBothModesAsync<T>(fn: () => Promise<T>): Promise<{ deferred: T; eager: T }> {
-  setSubReportErrorDeferral(true);
-  const deferred = await fn();
-  setSubReportErrorDeferral(false);
-  try {
-    const eager = await fn();
-    return { deferred, eager };
-  } finally {
-    setSubReportErrorDeferral(true);
+export function expectSameThrown<T>(deferred: Outcome<T>, eager: Outcome<T>): deferred is { threw: false; value: T } {
+  expect(deferred.threw).toBe(eager.threw);
+  if (deferred.threw && eager.threw) {
+    const d = deferred.error as Error;
+    const e = eager.error as Error;
+    expect(d.constructor).toBe(e.constructor);
+    expect(d.message).toBe(e.message);
   }
+  return !deferred.threw && !eager.threw;
 }
 
+/**
+ * Reduces a schema reference to comparable data. Deliberately identity-insensitive: the two runs
+ * validate separately `structuredClone`d schemas, so reference equality or a deep compare of the
+ * whole schema would be meaningless; the key list plus title/description/id catches wrong-schema bugs.
+ */
 function describeSchemaRef(value: unknown): unknown {
   if (value && typeof value === 'object') {
     const obj = value as Record<string, unknown>;
