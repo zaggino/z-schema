@@ -104,35 +104,20 @@ export class ZSchema extends ZSchemaBase {
   public static create(
     options: ZSchemaOptions & { async?: true; safe?: true } = {}
   ): ZSchema | ZSchemaSafe | ZSchemaAsync | ZSchemaAsyncSafe {
-    const hasAsync = Object.hasOwn(options, 'async');
-    const hasSafe = Object.hasOwn(options, 'safe');
+    // async/safe are left on the caller's object (normalizeOptions accepts them), so reusing the
+    // same options object always yields the same variant.
     const isAsync = options.async;
     const isSafe = options.safe;
-    // async/safe are dispatch-only flags that normalizeOptions would reject, so they are removed
-    // for construction. The validator keeps (and fills defaults into) the caller's object, so they
-    // are put back afterwards — otherwise reusing the same options object would silently produce
-    // a different variant.
-    delete options.async;
-    delete options.safe;
-    try {
-      if (isAsync && isSafe) {
-        return new ZSchemaAsyncSafe(options, FACTORY_TOKEN);
-      }
-      if (isAsync) {
-        return new ZSchemaAsync(options, FACTORY_TOKEN);
-      }
-      if (isSafe) {
-        return new ZSchemaSafe(options, FACTORY_TOKEN);
-      }
-      return new ZSchema(options, FACTORY_TOKEN);
-    } finally {
-      if (hasAsync) {
-        options.async = isAsync;
-      }
-      if (hasSafe) {
-        options.safe = isSafe;
-      }
+    if (isAsync && isSafe) {
+      return new ZSchemaAsyncSafe(options, FACTORY_TOKEN);
     }
+    if (isAsync) {
+      return new ZSchemaAsync(options, FACTORY_TOKEN);
+    }
+    if (isSafe) {
+      return new ZSchemaSafe(options, FACTORY_TOKEN);
+    }
+    return new ZSchema(options, FACTORY_TOKEN);
   }
 
   /**

@@ -62,26 +62,26 @@ describe('Initialization and usage', () => {
   });
 
   describe('options object passed to create', () => {
-    it('keeps async/safe on the caller object so it can be reused', () => {
-      const options = { async: true, safe: true, version: 'none' } as const;
-      const first = ZSchema.create(options);
-      expect(options).toMatchObject({ async: true, safe: true });
-      const second = ZSchema.create(options);
-      expect(first).toBeInstanceOf(ZSchemaAsyncSafe);
-      expect(second).toBeInstanceOf(ZSchemaAsyncSafe);
-    });
-
-    it('reuses the same options object for every variant', () => {
+    it('keeps async/safe on the caller object so it can be reused for every variant', () => {
       const variants = [
         [{ async: true }, ZSchemaAsync],
         [{ safe: true }, ZSchemaSafe],
         [{ async: true, safe: true }, ZSchemaAsyncSafe],
       ] as const;
       for (const [flags, Variant] of variants) {
-        const options: ZSchemaOptions & { async?: true; safe?: true } = { ...flags };
+        const options: ZSchemaOptions & { async?: true; safe?: true } = { ...flags, version: 'none' };
         expect(ZSchema.create(options)).toBeInstanceOf(Variant);
+        expect(options).toMatchObject(flags);
         expect(ZSchema.create(options)).toBeInstanceOf(Variant);
       }
+    });
+
+    it('accepts validator.options as setRemoteReference validation options', () => {
+      const validator = ZSchema.create({ safe: true });
+      expect(() => {
+        validator.setRemoteReference('http://example.com/remote', { type: 'string' }, validator.options);
+      }).not.toThrow();
+      expect(validator.validate('x', { $ref: 'http://example.com/remote' }).valid).toBe(true);
     });
 
     it('still stores the caller object and fills defaults into it', () => {
@@ -98,10 +98,9 @@ describe('Initialization and usage', () => {
       expect(Object.hasOwn(options, 'safe')).toBe(false);
     });
 
-    it('restores async/safe even when construction throws', () => {
+    it('still rejects unknown options alongside async/safe', () => {
       const options = { safe: true, bogus: 1 } as ZSchemaOptions & { safe: true };
-      expect(() => ZSchema.create(options)).toThrow('Unexpected option passed to constructor: bogus');
-      expect(options.safe).toBe(true);
+      expect(() => ZSchema.create(options)).toThrow(/Unexpected option passed to constructor: bogus/);
     });
   });
 });
