@@ -6,7 +6,7 @@ Line coverage status: **high**
 
 | File                          |  Line % | Statement % | Function % | Branch % |
 | ----------------------------- | ------: | ----------: | ---------: | -------: |
-| src/compiled-schema-cache.ts  |     93% |         94% |        93% |      92% |
+| src/compiled-schema-cache.ts  |     94% |         94% |        94% |      90% |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
 | src/format-validators.ts      |     95% |         95% |        93% |      93% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
@@ -41,7 +41,7 @@ Line coverage status: **high**
 | src/validation/shared.ts      |     93% |         93% |       100% |      83% |
 | src/validation/string.ts      |     90% |         90% |       100% |      89% |
 | src/validation/type.ts        |    100% |        100% |       100% |      96% |
-| src/z-schema-base.ts          |     89% |         89% |        90% |      84% |
+| src/z-schema-base.ts          |     89% |         89% |        90% |      85% |
 | src/z-schema-options.ts       |     96% |         96% |       100% |      83% |
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
