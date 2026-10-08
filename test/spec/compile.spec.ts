@@ -1,6 +1,7 @@
 import type { JsonSchema } from '../../src/json-schema-versions.ts';
 import type { ValidateOptions, ValidateResponse } from '../../src/z-schema-base.ts';
 import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
+import type { ZSchemaSafe } from '../../src/z-schema.ts';
 
 import { ValidateError } from '../../src/index.ts';
 import { ZSchema } from '../../src/z-schema.ts';
@@ -11,6 +12,36 @@ const codesOf = (res: ValidateResponse): string[] => (res.err?.details ?? []).ma
 
 const walk = (o: unknown): string[] =>
   o && typeof o === 'object' ? Object.keys(o).flatMap((k) => [k, ...walk((o as Record<string, unknown>)[k])]) : [];
+
+const createPair = (setup: (v: ZSchemaSafe) => void, schema: JsonSchema) => {
+  const ref = ZSchema.create({ safe: true });
+  const cmp = ZSchema.create({ safe: true });
+  setup(ref);
+  setup(cmp);
+  return { ref, cmp, fn: cmp.compile(schema) };
+};
+
+const expectSameResults = (
+  ref: ZSchemaSafe,
+  fn: (json: unknown) => ValidateResponse,
+  schema: JsonSchema,
+  data: unknown[]
+) => {
+  for (const d of data) {
+    const expected = ref.validate(d, schema);
+    const actual = fn(d);
+    expect(actual.valid).toBe(expected.valid);
+    expect(codesOf(actual)).toEqual(codesOf(expected));
+  }
+};
+
+const markerCounter = (into: number[]) => (_report: unknown, schema: unknown) => {
+  const node = schema as { 'x-marker'?: boolean; __seen?: number };
+  if (node['x-marker']) {
+    node.__seen = (node.__seen ?? 0) + 1;
+    into.push(node.__seen);
+  }
+};
 
 describe('compile()', () => {
   describe('variants', () => {
@@ -127,11 +158,84 @@ describe('compile()', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('does not clear the compiledSchemaCache', () => {
-      const v = ZSchema.create({});
-      const spy = vi.spyOn(v.compiledSchemaCache, 'clear');
-      v.compile(numberSchema);
-      expect(spy).not.toHaveBeenCalled();
+    it('ignores changes to the caller schema made after compile', () => {
+      const schema: { type: string } = { type: 'string' };
+      const fn = ZSchema.create({ safe: true }).compile(schema);
+      schema.type = 'number';
+      expect(fn('s').valid).toBe(true);
+      expect(fn(1).valid).toBe(false);
+    });
+
+    it('compiles once: calls reuse the compiled schema without clearing the cache', () => {
+      const v = ZSchema.create({ safe: true });
+      const fn = v.compile({ $id: 'http://example.com/once', type: 'object', properties: { a: { type: 'string' } } });
+      const compileSpy = vi.spyOn(v.sc, 'compileSchema');
+      const clearSpy = vi.spyOn(v.compiledSchemaCache, 'clear');
+      expect(fn({ a: 's' }).valid).toBe(true);
+      expect(fn({ a: 1 }).valid).toBe(false);
+      expect(compileSpy).not.toHaveBeenCalled();
+      expect(clearSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('parity with validate(data, schema) across cache changes', () => {
+    it('relative $ref resolves against the schema $id', () => {
+      expect.hasAssertions();
+      const schema: JsonSchema = { $id: 'http://example.com/dir/root.json', $ref: 'other.json' };
+      const { ref, fn } = createPair((v) => {
+        v.setRemoteReference('http://example.com/dir/other.json', { type: 'string' });
+      }, schema);
+      expectSameResults(ref, fn, schema, ['abc', 1]);
+    });
+
+    it('relative $id with a relative $ref', () => {
+      expect.hasAssertions();
+      const schema: JsonSchema = { $id: 'dir/root.json', $ref: 'other.json' };
+      const { ref, fn } = createPair((v) => {
+        v.setRemoteReference('dir/other.json', { type: 'string' });
+      }, schema);
+      expectSameResults(ref, fn, schema, ['abc', 1]);
+    });
+
+    it('picks up a replaced remote reference', () => {
+      const uri = 'http://example.com/replaced.json';
+      const schema: JsonSchema = { $ref: uri };
+      const { ref, cmp, fn } = createPair((v) => {
+        v.setRemoteReference(uri, { type: 'string' });
+      }, schema);
+      expectSameResults(ref, fn, schema, ['a', 1]);
+      ref.setRemoteReference(uri, { type: 'number' });
+      cmp.setRemoteReference(uri, { type: 'number' });
+      expectSameResults(ref, fn, schema, ['a', 1]);
+      expect(fn(1).valid).toBe(true);
+    });
+
+    it('hands a customValidator a fresh schema on every call', () => {
+      const compiledSeen: number[] = [];
+      const validatedSeen: number[] = [];
+      // Only the marked user-schema node is counted; meta-schema nodes are shared across calls.
+      const schema = { type: 'string', 'x-marker': true } as JsonSchema;
+      const ref = ZSchema.create({ safe: true, customValidator: markerCounter(validatedSeen) });
+      const fn = ZSchema.create({ safe: true, customValidator: markerCounter(compiledSeen) }).compile(schema);
+      for (let i = 0; i < 3; i++) {
+        ref.validate('a', schema);
+        fn('a');
+      }
+      expect(validatedSeen).toEqual([1, 1, 1]);
+      expect(compiledSeen).toEqual(validatedSeen);
+    });
+
+    it('runs async format validators like validate()', async () => {
+      const schema: JsonSchema = { type: 'string', format: 'slow-even-length' };
+      const v = ZSchema.create({ async: true, safe: true });
+      v.registerFormat('slow-even-length', (value) =>
+        Promise.resolve(typeof value === 'string' && value.length % 2 === 0)
+      );
+      const fn = v.compile(schema);
+      const [okRes, badRes] = await Promise.all([fn('ab'), fn('abc')]);
+      expect(okRes).toEqual(await v.validate('ab', schema));
+      expect(badRes.valid).toBe(false);
+      expect(codesOf(badRes)).toEqual(codesOf(await v.validate('abc', schema)));
     });
   });
 

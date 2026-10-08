@@ -112,9 +112,9 @@ await validateAsync(1);
 
 - The schema is validated eagerly: an invalid schema throws `ValidateError` from `compile()` in every variant, including safe and async ones.
 - Boolean schemas are supported; `compile(false)` always fails with `SCHEMA_IS_FALSE`.
-- It is faster than `validate(data, schemaObject)` on hot paths (about 35% in a benchmark with a typical object schema), because it validates by a cached reference and skips the per-call cache-key cost of an object schema. Speed is equivalent to `validateSchema(schemaWithId)` followed by `validate(data, id)`, but no `$id` is needed.
-- Each `compile()` call permanently registers one schema in that validator instance's cache. Compile once (for example at startup), not per request.
-- The caller's schema object is not mutated. The schema's own `$id`s become resolvable, as with `validateSchema`.
+- `compile()` takes a private snapshot of the schema: later changes to the object you passed have no effect, and that object is never mutated.
+- Calling the returned function behaves exactly like `validate(data, snapshot)`: same results, `$ref` resolution, `customValidator` handling and invalidation when remote references, formats or options change. It goes through the same [compiled-schema cache](architecture.md#compiled-schema-cache), but its cache key is computed once at compile time instead of serializing the schema on every call, so it is faster on hot paths.
+- Compile once (for example at startup) and reuse the function. The cache is bounded, so an evicted schema is transparently recompiled on its next call.
 
 ## Built-in formats
 

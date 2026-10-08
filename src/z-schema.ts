@@ -195,16 +195,15 @@ export class ZSchema extends ZSchemaBase {
   /**
    * Compile a schema into a reusable validate function.
    *
-   * The schema is validated eagerly and registered in this instance's cache; the returned function
-   * validates by cached reference, avoiding the per-call cache-key cost of passing a schema object to `validate()`.
-   * Boolean schemas are supported (`false` always fails with `SCHEMA_IS_FALSE`).
-   *
-   * Each call permanently registers one schema in this instance's cache, so compile once at startup,
-   * not per request. The schema's own `$id`s are indexed just as `validateSchema` does. The caller's
-   * schema object is not mutated.
+   * The schema is snapshotted (later changes to the passed object have no effect), then compiled and
+   * meta-validated eagerly. Calling the returned function is equivalent to
+   * `validate(json, snapshot, options)` — same results, `$ref` resolution and cache invalidation — but
+   * skips the per-call serialization that keys an object schema in the compiled-schema cache, so it is
+   * faster on hot paths. Boolean schemas are supported (`false` always fails with `SCHEMA_IS_FALSE`).
    * @param schema - The schema to compile.
-   * @returns A function `(json, options?)` equivalent to `validate(json, schema, options)`: returns `true` or throws {@link ValidateError}.
-   * @throws {@link ValidateError} if the schema is invalid (thrown at compile time by every variant).
+   * @returns A function `(json, options?)` that returns `true` or throws {@link ValidateError}.
+   * @throws {@link ValidateError} if the schema is invalid. Every variant throws here, including the safe
+   * and async ones, so the return type stays a plain function.
    *
    * @example
    * ```ts
@@ -214,7 +213,7 @@ export class ZSchema extends ZSchemaBase {
    * ```
    */
   compile(schema: JsonSchema | boolean): (json: unknown, options?: ValidateOptions) => true {
-    const target = this._compileTarget(schema) as JsonSchema | string; // boolean is handled natively by _validate
+    const target = this._compileTarget(schema);
     return (json, options) => this.validate(json, target, options);
   }
 
@@ -265,27 +264,13 @@ export class ZSchemaSafe extends ZSchemaBase {
   }
 
   /**
-   * Compile a schema into a reusable validate function.
-   *
-   * The schema is validated eagerly and registered in this instance's cache; the returned function
-   * validates by cached reference, avoiding the per-call cache-key cost of passing a schema object to `validate()`.
-   * Boolean schemas are supported (`false` always fails with `SCHEMA_IS_FALSE`).
-   *
-   * Each call permanently registers one schema in this instance's cache, so compile once at startup,
-   * not per request. The schema's own `$id`s are indexed just as `validateSchema` does. The caller's
-   * schema object is not mutated.
+   * Compile a schema into a reusable validate function. See {@link ZSchema.compile} for the semantics.
    * @param schema - The schema to compile.
-   * @returns A function `(json, options?)` equivalent to `validate(json, schema, options)`: returns `{ valid, err? }`.
-   * @throws {@link ValidateError} if the schema is invalid (thrown at compile time by every variant).
-   *
-   * @example
-   * ```ts
-   * const validate = validator.compile({ type: 'number' });
-   * validate('x'); // { valid: false, err }
-   * ```
+   * @returns A function `(json, options?)` that returns `{ valid, err? }`.
+   * @throws {@link ValidateError} if the schema is invalid.
    */
   compile(schema: JsonSchema | boolean): (json: unknown, options?: ValidateOptions) => ValidateResponse {
-    const target = this._compileTarget(schema) as JsonSchema | string; // boolean is handled natively by _validate
+    const target = this._compileTarget(schema);
     return (json, options) => this.validate(json, target, options);
   }
 
@@ -334,27 +319,13 @@ export class ZSchemaAsync extends ZSchemaBase {
   }
 
   /**
-   * Compile a schema into a reusable validate function.
-   *
-   * The schema is validated eagerly and registered in this instance's cache; the returned function
-   * validates by cached reference, avoiding the per-call cache-key cost of passing a schema object to `validate()`.
-   * Boolean schemas are supported (`false` always fails with `SCHEMA_IS_FALSE`).
-   *
-   * Each call permanently registers one schema in this instance's cache, so compile once at startup,
-   * not per request. The schema's own `$id`s are indexed just as `validateSchema` does. The caller's
-   * schema object is not mutated.
+   * Compile a schema into a reusable validate function. See {@link ZSchema.compile} for the semantics.
    * @param schema - The schema to compile.
-   * @returns A function `(json, options?)` equivalent to `validate(json, schema, options)`: resolves `true` or rejects with {@link ValidateError}.
-   * @throws {@link ValidateError} if the schema is invalid (thrown at compile time by every variant).
-   *
-   * @example
-   * ```ts
-   * const validate = validator.compile({ type: 'number' });
-   * await validate(1); // true
-   * ```
+   * @returns A function `(json, options?)` that resolves `true` or rejects with {@link ValidateError}.
+   * @throws {@link ValidateError} if the schema is invalid.
    */
   compile(schema: JsonSchema | boolean): (json: unknown, options?: ValidateOptions) => Promise<true> {
-    const target = this._compileTarget(schema) as JsonSchema | string; // boolean is handled natively by _validate
+    const target = this._compileTarget(schema);
     return (json, options) => this.validate(json, target, options);
   }
 
@@ -395,27 +366,13 @@ export class ZSchemaAsyncSafe extends ZSchemaBase {
   }
 
   /**
-   * Compile a schema into a reusable validate function.
-   *
-   * The schema is validated eagerly and registered in this instance's cache; the returned function
-   * validates by cached reference, avoiding the per-call cache-key cost of passing a schema object to `validate()`.
-   * Boolean schemas are supported (`false` always fails with `SCHEMA_IS_FALSE`).
-   *
-   * Each call permanently registers one schema in this instance's cache, so compile once at startup,
-   * not per request. The schema's own `$id`s are indexed just as `validateSchema` does. The caller's
-   * schema object is not mutated.
+   * Compile a schema into a reusable validate function. See {@link ZSchema.compile} for the semantics.
    * @param schema - The schema to compile.
-   * @returns A function `(json, options?)` equivalent to `validate(json, schema, options)`: always resolves `{ valid, err? }`.
-   * @throws {@link ValidateError} if the schema is invalid (thrown at compile time by every variant).
-   *
-   * @example
-   * ```ts
-   * const validate = validator.compile({ type: 'number' });
-   * await validate('x'); // { valid: false, err }
-   * ```
+   * @returns A function `(json, options?)` that always resolves `{ valid, err? }`.
+   * @throws {@link ValidateError} if the schema is invalid.
    */
   compile(schema: JsonSchema | boolean): (json: unknown, options?: ValidateOptions) => Promise<ValidateResponse> {
-    const target = this._compileTarget(schema) as JsonSchema | string; // boolean is handled natively by _validate
+    const target = this._compileTarget(schema);
     return (json, options) => this.validate(json, target, options);
   }
 

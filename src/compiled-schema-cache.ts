@@ -174,6 +174,8 @@ export class CompiledSchemaCache {
   private totalKeyLength = 0;
   private currentOwner: string | undefined;
   private readonly owners = new Map<string, string>();
+  // `null` records a pinned schema that cannot be keyed, so it is not re-stringified on every call.
+  private readonly pinnedKeys = new WeakMap<object, string | null>();
 
   /**
    * Computes the structural cache key of a schema.
@@ -181,11 +183,25 @@ export class CompiledSchemaCache {
    * containing values that do not round-trip through JSON such as `NaN`, `undefined`, Dates).
    */
   keyOf(schema: JsonSchema): string | undefined {
+    const pinned = this.pinnedKeys.get(schema);
+    if (pinned !== undefined) {
+      return pinned ?? undefined;
+    }
     try {
       return JSON.stringify(schema, strictReplacer);
     } catch {
       return undefined;
     }
+  }
+
+  /**
+   * Computes and remembers the key of a schema object that is never mutated afterwards (the private
+   * snapshot behind `compile()`), so later {@link keyOf} calls for it skip `JSON.stringify`.
+   */
+  pinKey(schema: JsonSchema): string | undefined {
+    const key = this.keyOf(schema);
+    this.pinnedKeys.set(schema, key ?? null);
+    return key;
   }
 
   /** Marks `key` as the schema being compiled on a miss; pair with {@link endOwner} in a finally. */
