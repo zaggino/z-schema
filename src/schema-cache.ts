@@ -67,13 +67,19 @@ export class SchemaCache {
   cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
     const remotePath = getSafeRemotePath(uri);
     if (remotePath) {
+      const prev = this.cache[remotePath];
       this.cache[remotePath] = schema;
+      this.validator.compiledSchemaCache.onScacheWrite(remotePath, prev, schema);
     }
   }
 
   removeFromCacheByUri(uri: string) {
     const remotePath = getSafeRemotePath(uri);
     if (remotePath) {
+      if (this.cache[remotePath] !== undefined) {
+        // a removed mapping can change how cached schemas resolve `$ref`
+        this.validator.compiledSchemaCache.clear();
+      }
       delete this.cache[remotePath];
     }
   }
@@ -114,6 +120,8 @@ export class SchemaCache {
       if (!clone.id || (!isAbsoluteUri(clone.id) && isAbsoluteUri(path))) {
         clone.id = path;
       }
+      // New mapping (nothing was at `path`), so no cached schema can have resolved through it:
+      // schemas with unresolved refs are never cached. No compiled-schema-cache notification needed.
       this.cache[path] = clone;
       return clone;
     }

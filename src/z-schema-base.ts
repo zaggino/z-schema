@@ -4,7 +4,7 @@ import type { JsonSchema, JsonSchemaInternal, JsonSchemaVersion } from './json-s
 import type { SchemaErrorDetail } from './report.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
-import { CompiledSchemaCache } from './compiled-schema-cache.js';
+import { CompiledSchemaCache, hasUnresolvedRef } from './compiled-schema-cache.js';
 import { getValidateError } from './errors.js';
 import { getSupportedFormats } from './format-validators.js';
 import { VERSION_SCHEMA_URL_MAPPING } from './json-schema-versions.js';
@@ -132,8 +132,12 @@ export class ZSchemaBase {
     } else if (typeof schema === 'boolean') {
       _schema = this.scache.getSchema(report, schema)!;
     } else {
-      cacheKey = this.compiledSchemaCache.keyOf(schema);
-      const cached = cacheKey === undefined ? undefined : this.compiledSchemaCache.get(cacheKey, this.scache);
+      // A customValidator receives the compiled schema and may mutate it; the uncached path hands
+      // every call a fresh clone, so a shared cached clone would leak mutations. Bypass the cache.
+      if (typeof this.options.customValidator !== 'function') {
+        cacheKey = this.compiledSchemaCache.keyOf(schema);
+      }
+      const cached = cacheKey === undefined ? undefined : this.compiledSchemaCache.get(cacheKey, this.options);
       if (cached) {
         _schema = cached;
         compiled = true;
@@ -144,18 +148,24 @@ export class ZSchemaBase {
     }
 
     if (!validated) {
-      if (!foundError) {
-        compiled = this.sc.compileSchema(report, _schema);
-      }
-      if (!compiled) {
-        foundError = true;
-      }
+      // Instance-cache writes made while compiling are attributed to this key (see CompiledSchemaCache).
+      this.compiledSchemaCache.beginOwner(cacheKey);
+      try {
+        if (!foundError) {
+          compiled = this.sc.compileSchema(report, _schema);
+        }
+        if (!compiled) {
+          foundError = true;
+        }
 
-      if (!foundError) {
-        validated = this.sv.validateSchema(report, _schema);
-      }
-      if (!validated) {
-        foundError = true;
+        if (!foundError) {
+          validated = this.sv.validateSchema(report, _schema);
+        }
+        if (!validated) {
+          foundError = true;
+        }
+      } finally {
+        this.compiledSchemaCache.endOwner();
       }
 
       // Schema-validation errors can be filtered out by includeErrors/excludeErrors,
@@ -166,9 +176,10 @@ export class ZSchemaBase {
         validated &&
         report.errors.length === 0 &&
         !options.includeErrors?.length &&
-        !options.excludeErrors?.length
+        !options.excludeErrors?.length &&
+        !hasUnresolvedRef(_schema, this.options.maxRecursionDepth!)
       ) {
-        this.compiledSchemaCache.set(cacheKey, _schema);
+        this.compiledSchemaCache.set(cacheKey, _schema, this.options);
       }
     }
 
