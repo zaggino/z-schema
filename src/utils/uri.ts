@@ -16,3 +16,18 @@ export const isAbsoluteUri = (uri: string): boolean => /^[a-zA-Z][a-zA-Z\d+.-]*:
 export const isRelativeUri = (uri: string): boolean =>
   // relative URIs that end with a hash sign, issue #56
   /.+#/.test(uri);
+
+/**
+ * Normalizes a URI into a schema-cache key, rejecting keys that could pollute `Object.prototype`.
+ * @returns The remote path, or `undefined` when empty or a prototype-polluting key.
+ */
+export function getSafeRemotePath(uri: string): string | undefined {
+  const remotePath = getRemotePath(uri);
+  if (!remotePath) {
+    return undefined;
+  }
+  if (remotePath === '__proto__' || remotePath === 'constructor' || remotePath === 'prototype') {
+    return undefined;
+  }
+  return remotePath;
+}

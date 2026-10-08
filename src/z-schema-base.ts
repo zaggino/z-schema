@@ -4,6 +4,7 @@ import type { JsonSchema, JsonSchemaInternal, JsonSchemaVersion } from './json-s
 import type { SchemaErrorDetail } from './report.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
+import { CompiledSchemaCache, hasUnresolvedRef } from './compiled-schema-cache.js';
 import { getValidateError } from './errors.js';
 import { getSupportedFormats } from './format-validators.js';
 import { VERSION_SCHEMA_URL_MAPPING } from './json-schema-versions.js';
@@ -44,6 +45,7 @@ export class ZSchemaBase {
   sc: SchemaCompiler;
   sv: SchemaValidator;
   validateOptions: ValidateOptions = {};
+  compiledSchemaCache = new CompiledSchemaCache();
   options: ZSchemaOptions;
 
   constructor(options: ZSchemaOptions | undefined, token: symbol) {
@@ -111,6 +113,9 @@ export class ZSchemaBase {
     report.json = json;
 
     let _schema: JsonSchemaInternal;
+    let compiled = false;
+    let validated = false;
+    let cacheKey: string | undefined;
     if (typeof schema === 'string') {
       const schemaName = schema;
       _schema = this.scache.getSchema(report, schemaName)!;
@@ -124,24 +129,58 @@ export class ZSchemaBase {
         }
         throw e;
       }
-    } else {
+    } else if (typeof schema === 'boolean') {
       _schema = this.scache.getSchema(report, schema)!;
+    } else {
+      // A customValidator receives the compiled schema and may mutate it; the uncached path hands
+      // every call a fresh clone, so a shared cached clone would leak mutations. Bypass the cache.
+      if (typeof this.options.customValidator !== 'function') {
+        cacheKey = this.compiledSchemaCache.keyOf(schema);
+      }
+      const cached = cacheKey === undefined ? undefined : this.compiledSchemaCache.get(cacheKey, this.options);
+      if (cached) {
+        _schema = cached;
+        compiled = true;
+        validated = true;
+      } else {
+        _schema = this.scache.getSchema(report, schema)!;
+      }
     }
 
-    let compiled = false;
-    if (!foundError) {
-      compiled = this.sc.compileSchema(report, _schema);
-    }
-    if (!compiled) {
-      foundError = true;
-    }
-
-    let validated = false;
-    if (!foundError) {
-      validated = this.sv.validateSchema(report, _schema);
-    }
     if (!validated) {
-      foundError = true;
+      // Instance-cache writes made while compiling are attributed to this key (see CompiledSchemaCache).
+      this.compiledSchemaCache.beginOwner(cacheKey);
+      try {
+        if (!foundError) {
+          compiled = this.sc.compileSchema(report, _schema);
+        }
+        if (!compiled) {
+          foundError = true;
+        }
+
+        if (!foundError) {
+          validated = this.sv.validateSchema(report, _schema);
+        }
+        if (!validated) {
+          foundError = true;
+        }
+      } finally {
+        this.compiledSchemaCache.endOwner();
+      }
+
+      // Schema-validation errors can be filtered out by includeErrors/excludeErrors,
+      // so only cache results produced by an unfiltered call.
+      if (
+        cacheKey !== undefined &&
+        compiled &&
+        validated &&
+        report.errors.length === 0 &&
+        !options.includeErrors?.length &&
+        !options.excludeErrors?.length &&
+        !hasUnresolvedRef(_schema, this.options.maxRecursionDepth!)
+      ) {
+        this.compiledSchemaCache.set(cacheKey, _schema, this.options);
+      }
     }
 
     if (options.schemaPath) {
@@ -218,6 +257,7 @@ export class ZSchemaBase {
       this.options.customFormats = {};
     }
     this.options.customFormats[name] = validatorFunction;
+    this.compiledSchemaCache.clear();
   }
 
   /**
@@ -229,6 +269,7 @@ export class ZSchemaBase {
       this.options.customFormats = {};
     }
     this.options.customFormats[name] = null;
+    this.compiledSchemaCache.clear();
   }
 
   /** Returns the names of format validators registered on this instance. */
@@ -250,6 +291,7 @@ export class ZSchemaBase {
   setRemoteReference(uri: string, schema: string | JsonSchema, validationOptions?: ZSchemaOptions) {
     const _schema = prepareRemoteSchema(schema, uri, validationOptions, this.options.maxRecursionDepth);
     this.scache.cacheSchemaByUri(uri, _schema);
+    this.compiledSchemaCache.clear();
   }
 
   /**

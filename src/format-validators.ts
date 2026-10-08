@@ -2,6 +2,7 @@ import isEmailModule from 'validator/lib/isEmail.js';
 import isIPModule from 'validator/lib/isIP.js';
 import isURLModule from 'validator/lib/isURL.js';
 
+import { bumpGlobalSchemaStateGeneration } from './compiled-schema-cache.js';
 import { isValidRfc3339Date } from './utils/date.js';
 import { isValidHostname, isValidIdnHostname } from './utils/hostname.js';
 import { sortedKeys } from './utils/json.js';
@@ -396,10 +397,12 @@ export function resolveFormatValidator(name: string, options?: FormatValidatorsO
 
 export function registerFormat(name: string, validatorFunction: FormatValidatorFn) {
   customValidators[name] = validatorFunction;
+  bumpGlobalSchemaStateGeneration();
 }
 
 export function unregisterFormat(name: string) {
   delete customValidators[name];
+  bumpGlobalSchemaStateGeneration();
 }
 
 export function getSupportedFormats(customFormats?: Record<string, FormatValidatorFn | null>) {

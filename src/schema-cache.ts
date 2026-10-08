@@ -2,27 +2,16 @@ import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
+import { bumpGlobalSchemaStateGeneration } from './compiled-schema-cache.js';
 import { findId, getId } from './json-schema.js';
 import { Report } from './report.js';
 import { deepClone } from './utils/clone.js';
 import { decodeJSONPointer } from './utils/json.js';
-import { getQueryPath, getRemotePath, isAbsoluteUri } from './utils/uri.js';
+import { getQueryPath, getRemotePath, getSafeRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { normalizeOptions } from './z-schema-options.js';
 
 export type SchemaCacheStorage = Record<string, JsonSchemaInternal>;
 export type ReferenceSchemaCacheStorage = Array<[JsonSchemaInternal, JsonSchemaInternal]>;
-
-// Normalize a URI into a cache key, rejecting keys that could pollute Object.prototype.
-function getSafeRemotePath(uri: string): string | undefined {
-  const remotePath = getRemotePath(uri);
-  if (!remotePath) {
-    return undefined;
-  }
-  if (remotePath === '__proto__' || remotePath === 'constructor' || remotePath === 'prototype') {
-    return undefined;
-  }
-  return remotePath;
-}
 
 const getEffectiveId = (schema: JsonSchemaInternal): string | undefined => {
   let id = getId(schema);
@@ -68,6 +57,7 @@ export class SchemaCache {
   }
 
   static cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
+    bumpGlobalSchemaStateGeneration();
     const remotePath = getSafeRemotePath(uri);
     if (remotePath) {
       this.global_cache[remotePath] = schema;
@@ -77,13 +67,19 @@ export class SchemaCache {
   cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
     const remotePath = getSafeRemotePath(uri);
     if (remotePath) {
+      const prev = this.cache[remotePath];
       this.cache[remotePath] = schema;
+      this.validator.compiledSchemaCache.onScacheWrite(remotePath, prev, schema);
     }
   }
 
   removeFromCacheByUri(uri: string) {
     const remotePath = getSafeRemotePath(uri);
     if (remotePath) {
+      if (this.cache[remotePath] !== undefined) {
+        // a removed mapping can change how cached schemas resolve `$ref`
+        this.validator.compiledSchemaCache.clear();
+      }
       delete this.cache[remotePath];
     }
   }
@@ -124,6 +120,8 @@ export class SchemaCache {
       if (!clone.id || (!isAbsoluteUri(clone.id) && isAbsoluteUri(path))) {
         clone.id = path;
       }
+      // New mapping (nothing was at `path`), so no cached schema can have resolved through it:
+      // schemas with unresolved refs are never cached. No compiled-schema-cache notification needed.
       this.cache[path] = clone;
       return clone;
     }
