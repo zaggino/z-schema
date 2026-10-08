@@ -1,8 +1,30 @@
+import type { JsonSchemaInternal } from '../../src/json-schema-versions.ts';
+import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
+
 import { getKeywordPlan, invalidateKeywordPlan } from '../../src/json-validation.ts';
+import { Report } from '../../src/report.ts';
 import { deepClone } from '../../src/utils/clone.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
 const plan = (schema: object) => getKeywordPlan(schema);
+
+const compileInternal = (options: Record<string, unknown>, schema: object) => {
+  const v = ZSchema.create(options as never) as never as {
+    options: never;
+    scache: { getSchema: (r: Report, s: object) => JsonSchemaInternal };
+    sc: { compileSchema: (r: Report, s: JsonSchemaInternal) => unknown };
+    sv: { validateSchema: (r: Report, s: JsonSchemaInternal) => unknown };
+  };
+  const report = new Report(v.options);
+  const compiled = v.scache.getSchema(report, schema);
+  v.sc.compileSchema(report, compiled);
+  return { v, report, compiled };
+};
+
+const codes = (opts: ZSchemaOptions, schema: object, data: unknown) => {
+  const r = ZSchema.create({ version: 'draft2020-12', ...opts }).validateSafe(data, schema);
+  return r.valid ? [] : r.err!.details!.map((d) => d.code);
+};
 
 describe('keyword plan', () => {
   it('excludes internal, no-op and unknown keys and preserves order', () => {
@@ -154,6 +176,71 @@ describe('keyword plan', () => {
     });
   });
 
+  describe('customValidator', () => {
+    it('re-reads keywords of nodes mutated by the hook (shared child visited twice)', () => {
+      // compile deep-clones the schema, so share the child through $ref (both refs resolve to one node)
+      const schema = { $defs: { c: { type: 'number' } }, allOf: [{ $ref: '#/$defs/c' }, { $ref: '#/$defs/c' }] };
+      let mutated = false;
+      const validator = ZSchema.create({
+        version: 'draft2020-12',
+        customValidator: (_report: unknown, sch: Record<string, unknown>) => {
+          if (!mutated && sch.type === 'number' && sch.$ref === undefined) {
+            mutated = true;
+            sch.minimum = 10;
+          }
+        },
+      } as ZSchemaOptions);
+      const result = validator.validateSafe(5, schema);
+      // main: first visit has no minimum, second visit re-reads Object.keys and rejects 5
+      expect(result.valid).toBe(false);
+      expect(result.err!.details!.map((d) => d.code)).toEqual(['MINIMUM']);
+    });
+
+    it('does not reuse a plan cached before a customValidator call', () => {
+      const node: Record<string, unknown> = { minimum: 1 };
+      const before = getKeywordPlan(node);
+      expect(getKeywordPlan(node as never)).toBe(before);
+      const validator = ZSchema.create({ version: 'draft2020-12', customValidator: () => {} } as ZSchemaOptions);
+      expect(validator.validateSafe(5, { type: 'number' }).valid).toBe(true);
+      const after = getKeywordPlan(node);
+      expect(after).not.toBe(before);
+      expect(after.keys).toEqual(before.keys);
+      expect(getKeywordPlan(node as never)).toBe(after);
+    });
+  });
+
+  describe('breakOnFirstError with errors already present at loop entry', () => {
+    it('stops after the $ref error without running a later validator-bearing key', () => {
+      const schema = { $ref: '#/$defs/a', maximum: 1, $defs: { a: { minimum: 10 } } };
+      expect(codes({ breakOnFirstError: true }, schema, 5)).toEqual(['MINIMUM']);
+      expect(codes({ breakOnFirstError: false }, schema, 5)).toEqual(['MINIMUM', 'MAXIMUM']);
+    });
+
+    it('runs the first validator-bearing key (a real validator) and then stops', () => {
+      // Compiled key order is $ref, maximum, minimum, ... ($ref is spliced out). The remote $ref fails multipleOf
+      // first; main then runs only the first validator-bearing key (maximum, fails) and breaks before minimum.
+      const validator = ZSchema.create({ version: 'draft2020-12', breakOnFirstError: true });
+      validator.setRemoteReference('http://example.com/mult7.json', { multipleOf: 7 });
+      const schema = { maximum: 1, minimum: 100, $ref: 'http://example.com/mult7.json' };
+      const result = validator.validateSafe(5, schema);
+      expect(result.err!.details!.map((d) => d.code)).toEqual(['MULTIPLE_OF', 'MAXIMUM']);
+    });
+
+    it('runs nothing when the first validator-bearing key is a no-op', () => {
+      // main: keys = [$defs, title, maximum] after $ref splice; $defs is a no-op validator key, so the loop
+      // checks errors after it and breaks before maximum.
+      const schema = { $defs: { a: { minimum: 10 } }, $ref: '#/$defs/a', title: 't', maximum: 1 };
+      expect(codes({ breakOnFirstError: true }, schema, 5)).toEqual(['MINIMUM']);
+    });
+
+    it('keeps $ref as a no-op key on legacy drafts (draft-07 sibling after chase)', () => {
+      // draft-07: $ref siblings are ignored; chase replaces schema with the target, so no pre-existing errors
+      // can come from the $ref itself and the exact-stop path is only reachable via earlier report errors.
+      const schema = { definitions: { a: { maximum: 1, minimum: 10 } }, $ref: '#/definitions/a' };
+      expect(codes({ version: 'draft-07', breakOnFirstError: true }, schema, 5)).toEqual(['MAXIMUM']);
+    });
+  });
+
   describe('invalidation', () => {
     it('rebuilds the plan after invalidateKeywordPlan', () => {
       const schema: Record<string, unknown> = { type: 'string', maxLength: 5 };
@@ -164,11 +251,50 @@ describe('keyword plan', () => {
       expect(plan(schema).keys).toEqual(['maxLength', 'minLength']);
     });
 
-    it('applies noEmptyStrings rewrites even when the node was planned before schema validation', () => {
-      const validator = ZSchema.create({ safe: true, noEmptyStrings: true });
-      const schema = { type: 'object', properties: { s: { type: 'string' } } };
-      expect(validator.validate({ s: '' }, schema).valid).toBe(false);
-      expect(validator.validate({ s: 'x' }, schema).valid).toBe(true);
+    // Each test pre-plans the target node, runs schema validation (which rewrites it), and asserts the plan was
+    // rebuilt. Without the matching invalidateKeywordPlan call in schema-validator.ts the stale plan survives.
+    it('rebuilds the additionalItems plan (assumeAdditional)', () => {
+      const { v, report, compiled } = compileInternal({ assumeAdditional: true }, { items: [{ type: 'string' }] });
+      expect(getKeywordPlan(compiled).keys).not.toContain('additionalItems');
+      v.sv.validateSchema(report, compiled);
+      expect(getKeywordPlan(compiled).keys).toContain('additionalItems');
+    });
+
+    it('rebuilds the additionalProperties plan (assumeAdditional)', () => {
+      const { v, report, compiled } = compileInternal(
+        { assumeAdditional: true },
+        { properties: { a: { type: 'string' } } }
+      );
+      expect(getKeywordPlan(compiled).keys).not.toContain('additionalProperties');
+      v.sv.validateSchema(report, compiled);
+      expect(getKeywordPlan(compiled).keys).toContain('additionalProperties');
+    });
+
+    it('rebuilds the minLength plan (noEmptyStrings)', () => {
+      const { v, report, compiled } = compileInternal({ noEmptyStrings: true }, { type: 'string' });
+      expect(getKeywordPlan(compiled).keys).not.toContain('minLength');
+      v.sv.validateSchema(report, compiled);
+      expect(getKeywordPlan(compiled).keys).toContain('minLength');
+    });
+
+    it('rebuilds the minItems plan (noEmptyArrays)', () => {
+      const { v, report, compiled } = compileInternal({ noEmptyArrays: true }, { type: 'array' });
+      expect(getKeywordPlan(compiled).keys).not.toContain('minItems');
+      v.sv.validateSchema(report, compiled);
+      expect(getKeywordPlan(compiled).keys).toContain('minItems');
+    });
+
+    it('rebuilds the plan of sub-schemas that inherit type (noTypeless)', () => {
+      const { v, report, compiled } = compileInternal(
+        { noTypeless: true },
+        { type: 'string', anyOf: [{ minLength: 1 }] }
+      );
+      const sub = compiled.anyOf![0];
+      const before = getKeywordPlan(sub);
+      expect(getKeywordPlan(sub)).toBe(before);
+      v.sv.validateSchema(report, compiled);
+      expect(sub.type).toBe('string');
+      expect(getKeywordPlan(sub)).not.toBe(before);
     });
   });
 });
