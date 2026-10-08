@@ -6,14 +6,14 @@ Line coverage status: **high**
 
 | File                          |  Line % | Statement % | Function % | Branch % |
 | ----------------------------- | ------: | ----------: | ---------: | -------: |
-| src/compiled-schema-cache.ts  |     94% |         94% |        86% |      84% |
+| src/compiled-schema-cache.ts  |     93% |         94% |        93% |      92% |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
 | src/format-validators.ts      |     95% |         95% |        93% |      93% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
 | src/json-validation.ts        |     91% |         91% |       100% |      89% |
 | src/report.ts                 |     94% |         94% |        95% |      88% |
-| src/schema-cache.ts           |     91% |         91% |        91% |      89% |
+| src/schema-cache.ts           |     94% |         94% |       100% |      89% |
 | src/schema-compiler.ts        |     94% |         94% |       100% |      90% |
 | src/schema-validator.ts       |     78% |         78% |       100% |      76% |
 | src/utils/array.ts            |    100% |        100% |       100% |     100% |
