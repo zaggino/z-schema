@@ -147,6 +147,17 @@ try {
 validator.validate({ name: 'Alice', age: 30 }, 'person');
 ```
 
+### Compile to a Reusable Function
+
+`compile(schema)` validates the schema up front and returns a function with the same return type as the variant's `validate()`. It behaves like passing the schema object to `validate()`, but is faster on hot paths. Compile once at startup and reuse the function. See [features.md](features.md#compile-a-schema-to-a-reusable-function).
+
+```typescript
+const validator = ZSchema.create();
+const validateUser = validator.compile({ type: 'object', required: ['name'] }); // throws if the schema is invalid
+
+validateUser({ name: 'Alice' }); // true, or throws ValidateError
+```
+
 ## Error Handling
 
 `ValidateError` (thrown or returned) has:

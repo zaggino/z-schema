@@ -4,6 +4,7 @@ z-schema provides full support for JSON Schema **draft-04**, **draft-06**, **dra
 
 - [Validate against subschema](#validate-against-subschema)
 - [Compile arrays of schemas and use references between them](#compile-arrays-of-schemas-and-use-references-between-them)
+- [Compile a schema to a reusable function](#compile-a-schema-to-a-reusable-function)
 - [Built-in formats](#built-in-formats)
 - [Register a custom format](#register-a-custom-format)
 - [Automatic downloading of remote schemas](#automatic-downloading-of-remote-schemas)
@@ -90,6 +91,30 @@ validator.validateSchema(schemas);
 // now validate data against the compiled schema
 validator.validate(data, schemas[2]);
 ```
+
+## Compile a schema to a reusable function
+
+`compile(schema)` validates the schema and returns a function `(json, options?)` whose return type matches the variant's `validate()`. Per-call `ValidateOptions` (`schemaPath`, `includeErrors`, `excludeErrors`) pass through.
+
+```javascript
+// sync: returns true or throws ValidateError
+const validate = ZSchema.create().compile({ type: 'object', required: ['name'] });
+validate({ name: 'Martin' }); // true
+
+// safe: returns { valid, err? }
+const validateSafe = ZSchema.create({ safe: true }).compile({ type: 'number' });
+validateSafe('x'); // { valid: false, err: ValidateError }
+
+// async: Promise<true> / rejects (async + safe resolves { valid, err? })
+const validateAsync = ZSchema.create({ async: true }).compile({ type: 'number' });
+await validateAsync(1);
+```
+
+- The schema is validated eagerly: an invalid schema throws `ValidateError` from `compile()` in every variant, including safe and async ones.
+- Boolean schemas are supported; `compile(false)` always fails with `SCHEMA_IS_FALSE`.
+- `compile()` takes a private snapshot of the schema: later changes to the object you passed have no effect, and that object is never mutated.
+- Calling the returned function behaves exactly like `validate(data, snapshot)`: same results, `$ref` resolution, `customValidator` handling and invalidation when remote references, formats or options change. It goes through the same [compiled-schema cache](architecture.md#compiled-schema-cache), but its cache key is computed once at compile time instead of serializing the schema on every call, so it is faster on hot paths.
+- Compile once (for example at startup) and reuse the function. The cache is bounded, so an evicted schema is transparently recompiled on its next call.
 
 ## Built-in formats
 

@@ -113,7 +113,6 @@ export class ZSchemaBase {
     report.json = json;
 
     let _schema: JsonSchemaInternal;
-    let compiled = false;
     let validated = false;
     let cacheKey: string | undefined;
     if (typeof schema === 'string') {
@@ -140,47 +139,14 @@ export class ZSchemaBase {
       const cached = cacheKey === undefined ? undefined : this.compiledSchemaCache.get(cacheKey, this.options);
       if (cached) {
         _schema = cached;
-        compiled = true;
         validated = true;
       } else {
         _schema = this.scache.getSchema(report, schema)!;
       }
     }
 
-    if (!validated) {
-      // Instance-cache writes made while compiling are attributed to this key (see CompiledSchemaCache).
-      this.compiledSchemaCache.beginOwner(cacheKey);
-      try {
-        if (!foundError) {
-          compiled = this.sc.compileSchema(report, _schema);
-        }
-        if (!compiled) {
-          foundError = true;
-        }
-
-        if (!foundError) {
-          validated = this.sv.validateSchema(report, _schema);
-        }
-        if (!validated) {
-          foundError = true;
-        }
-      } finally {
-        this.compiledSchemaCache.endOwner();
-      }
-
-      // Schema-validation errors can be filtered out by includeErrors/excludeErrors,
-      // so only cache results produced by an unfiltered call.
-      if (
-        cacheKey !== undefined &&
-        compiled &&
-        validated &&
-        report.errors.length === 0 &&
-        !options.includeErrors?.length &&
-        !options.excludeErrors?.length &&
-        !hasUnresolvedRef(_schema, this.options.maxRecursionDepth!)
-      ) {
-        this.compiledSchemaCache.set(cacheKey, _schema, this.options);
-      }
+    if (!validated && !this._compileAndValidate(report, _schema, cacheKey, options)) {
+      foundError = true;
     }
 
     if (options.schemaPath) {
@@ -245,6 +211,74 @@ export class ZSchemaBase {
       throw getValidateError({ message: report.commonErrorMessage!, details: report.errors });
     }
     return true;
+  }
+
+  /**
+   * Compiles and meta-validates `schema` in place — the cache-miss path of `_validate`. When the
+   * result is cacheable it is stored in the compiled-schema cache under `cacheKey`.
+   * @returns `true` if the schema compiled and validated; errors are recorded on `report`.
+   */
+  _compileAndValidate(
+    report: Report,
+    schema: JsonSchemaInternal,
+    cacheKey: string | undefined,
+    options: ValidateOptions
+  ): boolean {
+    let compiled = false;
+    let validated = false;
+    // Instance-cache writes made while compiling are attributed to this key (see CompiledSchemaCache).
+    this.compiledSchemaCache.beginOwner(cacheKey);
+    try {
+      compiled = this.sc.compileSchema(report, schema);
+      if (compiled) {
+        validated = this.sv.validateSchema(report, schema);
+      }
+    } finally {
+      this.compiledSchemaCache.endOwner();
+    }
+
+    // Schema-validation errors can be filtered out by includeErrors/excludeErrors,
+    // so only cache results produced by an unfiltered call.
+    if (
+      cacheKey !== undefined &&
+      compiled &&
+      validated &&
+      report.errors.length === 0 &&
+      !options.includeErrors?.length &&
+      !options.excludeErrors?.length &&
+      !hasUnresolvedRef(schema, this.options.maxRecursionDepth!)
+    ) {
+      this.compiledSchemaCache.set(cacheKey, schema, this.options);
+    }
+    return compiled && validated;
+  }
+
+  /**
+   * Internal helper behind the variants' `compile()`: returns the schema the compiled function passes
+   * to `validate()`.
+   *
+   * Boolean schemas are returned as-is (`_validate` handles them natively). An object schema is
+   * snapshotted into a private deep clone whose structural cache key is pinned, then compiled and
+   * meta-validated eagerly (throwing on an invalid schema) and stored in the compiled-schema cache.
+   * Validating against the snapshot therefore takes exactly the `validate(data, schemaObject)` path —
+   * same cache invalidation, `customValidator` bypass and `$ref` resolution — minus the per-call
+   * `JSON.stringify` of the schema.
+   */
+  _compileTarget(schema: JsonSchema | boolean): JsonSchema {
+    if (typeof schema === 'boolean') {
+      // _validate handles boolean schemas natively; the public validate() signatures just don't list them.
+      return schema as unknown as JsonSchema;
+    }
+    const snapshot = deepClone(schema, this.options.maxRecursionDepth);
+    const pinnedKey = this.compiledSchemaCache.pinKey(snapshot);
+    const report = new Report(this.options);
+    // Mirrors _validate: with a customValidator the cache is bypassed, so nothing is primed.
+    const cacheKey = typeof this.options.customValidator === 'function' ? undefined : pinnedKey;
+    this._compileAndValidate(report, this.scache.getSchema(report, snapshot), cacheKey, {});
+    if (!report.isValid()) {
+      throw getValidateError({ message: report.commonErrorMessage!, details: report.errors });
+    }
+    return snapshot;
   }
 
   /**

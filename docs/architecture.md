@@ -56,6 +56,7 @@ index.ts (public API)
 All variants also expose:
 
 - `validateSchema(schema)` — compile + validate a schema (or array of schemas) against the meta-schema
+- `compile(schema)` — validate a schema eagerly and return a reusable `(json, options?)` function with the same return type as the variant's `validate()`
 - `validateSafe(json, schema)` — object-based result (available on `ZSchema`, convenience method)
 - `validateAsync(json, schema)` — promise-based (available on `ZSchema`, convenience method)
 - `setRemoteReference(uri, schema)` — cache a remote schema by URI (instance method)
@@ -133,6 +134,7 @@ Schemas passed to `validate()` as objects are cloned, compiled and meta-validate
 - Each entry holds a shallow snapshot of the instance options (and `customFormats`); a hit with different current options is a miss.
 - Instance `registerFormat`/`unregisterFormat`/`setRemoteReference` clear the cache; global format registration, the static `SchemaCache.cacheSchemaByUri` (static `setRemoteReference`) and `setSchemaReader` bump a global generation that invalidates every instance.
 - The cache is bypassed entirely when a `customValidator` is set, because it receives the compiled schema and may mutate it.
+- `compile()` deep-clones the schema into a private snapshot that nothing mutates and pins its key (`pinKey`, a `WeakMap`), so `keyOf()` skips `JSON.stringify` for it. It then primes the cache through the same miss path as `_validate` (`_compileAndValidate`), and the returned function calls `validate(json, snapshot)`. All the rules above therefore apply to compiled functions unchanged.
 
 Entries are invalidated when: the instance's `setRemoteReference()`, `registerFormat()` or `unregisterFormat()` is called (the instance cache is cleared); any global state changes (static `setRemoteReference()`, global `registerFormat()`/`unregisterFormat()`, `setSchemaReader()`), which bumps a global generation counter checked on lookup; or the schema's `id` no longer maps to the cached object in the instance `SchemaCache`.
 
