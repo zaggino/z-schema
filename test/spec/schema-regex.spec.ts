@@ -105,16 +105,26 @@ describe('compileSchemaRegex', () => {
       }
     });
 
-    it('evicts the oldest entry once the cache is full', () => {
-      const oldest = compileSchemaRegex('^evict-0$');
-      for (let i = 1; i <= MAX_SCHEMA_REGEX_CACHE_SIZE; i++) {
-        compileSchemaRegex(`^evict-${i}$`);
+    it('evicts only the oldest entry once the cache is full', () => {
+      const compiled = [];
+      for (let i = 0; i <= MAX_SCHEMA_REGEX_CACHE_SIZE; i++) {
+        compiled.push(compileSchemaRegex(`^evict-${i}$`));
       }
-      const newest = compileSchemaRegex(`^evict-${MAX_SCHEMA_REGEX_CACHE_SIZE}$`);
-      expect(compileSchemaRegex(`^evict-${MAX_SCHEMA_REGEX_CACHE_SIZE}$`)).toBe(newest);
+      // One insert past the cap evicted exactly entry 0; entries 1..cap are still cached.
+      expect(compileSchemaRegex('^evict-1$')).toBe(compiled[1]);
+      expect(compileSchemaRegex(`^evict-${MAX_SCHEMA_REGEX_CACHE_SIZE}$`)).toBe(compiled[MAX_SCHEMA_REGEX_CACHE_SIZE]);
       const recompiled = compileSchemaRegex('^evict-0$');
-      expect(recompiled).not.toBe(oldest);
+      expect(recompiled).not.toBe(compiled[0]);
       expect(recompiled.ok).toBe(true);
+    });
+
+    it('does not cache patterns exceeding the maximum length', () => {
+      const oversized = 'a'.repeat(MAX_SCHEMA_REGEX_LENGTH + 1);
+      const first = compileSchemaRegex(oversized);
+      const second = compileSchemaRegex(oversized);
+      expect(first.ok).toBe(false);
+      expect(second.ok).toBe(false);
+      expect(second).not.toBe(first);
     });
   });
 });
