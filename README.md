@@ -147,6 +147,17 @@ try {
 }
 ```
 
+### Compile to a Function
+
+```typescript
+const validator = ZSchema.create();
+const validateUser = validator.compile({ type: 'object', required: ['name'] });
+
+validateUser({ name: 'Alice' }); // true, or throws ValidateError
+```
+
+See [features](docs/features.md#compile-a-schema-to-a-reusable-function) for details.
+
 ### Custom Format Validators
 
 Register custom format validators for sync or async checks.

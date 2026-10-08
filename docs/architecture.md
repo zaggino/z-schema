@@ -56,6 +56,7 @@ index.ts (public API)
 All variants also expose:
 
 - `validateSchema(schema)` — compile + validate a schema (or array of schemas) against the meta-schema
+- `compile(schema)` — validate a schema eagerly and return a reusable `(json, options?)` function with the same return type as the variant's `validate()`
 - `validateSafe(json, schema)` — object-based result (available on `ZSchema`, convenience method)
 - `validateAsync(json, schema)` — promise-based (available on `ZSchema`, convenience method)
 - `setRemoteReference(uri, schema)` — cache a remote schema by URI (instance method)

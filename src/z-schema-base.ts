@@ -40,6 +40,8 @@ export type ValidateCallback = (err: ValidateResponse['err'], valid: ValidateRes
  */
 export const FACTORY_TOKEN = Symbol('ZSchema.factory');
 
+let compiledSchemaCounter = 0;
+
 export class ZSchemaBase {
   scache: SchemaCache;
   sc: SchemaCompiler;
@@ -245,6 +247,24 @@ export class ZSchemaBase {
       throw getValidateError({ message: report.commonErrorMessage!, details: report.errors });
     }
     return true;
+  }
+
+  /**
+   * Internal helper behind the variants' `compile()`. Boolean schemas are returned as-is (`_validate`
+   * handles them natively). Object schemas are validated eagerly (throws on an invalid schema), cloned,
+   * registered in this instance's cache under a freshly minted `urn:z-schema:compiled:N` URI, and that URI
+   * is returned so callers can validate by string ref instead of paying the per-call object cache key.
+   */
+  _compileTarget(schema: JsonSchema | boolean): string | boolean {
+    if (typeof schema === 'boolean') {
+      return schema;
+    }
+    this._validateSchema(schema);
+    const ref = `urn:z-schema:compiled:${++compiledSchemaCounter}`;
+    // Deliberately no compiledSchemaCache.clear(): nothing can reference a freshly minted URI, so clearing
+    // would only discard the object-path cache.
+    this.scache.cacheSchemaByUri(ref, prepareRemoteSchema(schema, ref, undefined, this.options.maxRecursionDepth));
+    return ref;
   }
 
   /**

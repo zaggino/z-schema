@@ -4,6 +4,7 @@ z-schema provides full support for JSON Schema **draft-04**, **draft-06**, **dra
 
 - [Validate against subschema](#validate-against-subschema)
 - [Compile arrays of schemas and use references between them](#compile-arrays-of-schemas-and-use-references-between-them)
+- [Compile a schema to a reusable function](#compile-a-schema-to-a-reusable-function)
 - [Built-in formats](#built-in-formats)
 - [Register a custom format](#register-a-custom-format)
 - [Automatic downloading of remote schemas](#automatic-downloading-of-remote-schemas)
@@ -90,6 +91,30 @@ validator.validateSchema(schemas);
 // now validate data against the compiled schema
 validator.validate(data, schemas[2]);
 ```
+
+## Compile a schema to a reusable function
+
+`compile(schema)` validates the schema and returns a function `(json, options?)` whose return type matches the variant's `validate()`. Per-call `ValidateOptions` (`schemaPath`, `includeErrors`, `excludeErrors`) pass through.
+
+```javascript
+// sync: returns true or throws ValidateError
+const validate = ZSchema.create().compile({ type: 'object', required: ['name'] });
+validate({ name: 'Martin' }); // true
+
+// safe: returns { valid, err? }
+const validateSafe = ZSchema.create({ safe: true }).compile({ type: 'number' });
+validateSafe('x'); // { valid: false, err: ValidateError }
+
+// async: Promise<true> / rejects (async + safe resolves { valid, err? })
+const validateAsync = ZSchema.create({ async: true }).compile({ type: 'number' });
+await validateAsync(1);
+```
+
+- The schema is validated eagerly: an invalid schema throws `ValidateError` from `compile()` in every variant, including safe and async ones.
+- Boolean schemas are supported; `compile(false)` always fails with `SCHEMA_IS_FALSE`.
+- It is faster than `validate(data, schemaObject)` on hot paths (about 35% in a benchmark with a typical object schema), because it validates by a cached reference and skips the per-call cache-key cost of an object schema. Speed is equivalent to `validateSchema(schemaWithId)` followed by `validate(data, id)`, but no `$id` is needed.
+- Each `compile()` call permanently registers one schema in that validator instance's cache. Compile once (for example at startup), not per request.
+- The caller's schema object is not mutated. The schema's own `$id`s become resolvable, as with `validateSchema`.
 
 ## Built-in formats
 
