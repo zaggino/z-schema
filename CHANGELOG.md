@@ -1,5 +1,25 @@
 # Changelog
 
+## [12.5.0](https://github.com/zaggino/z-schema/compare/v12.4.6...v12.5.0) (2026-10-08)
+
+
+### Features
+
+* **z-schema:** add compile() returning a reusable validate function ([#513](https://github.com/zaggino/z-schema/issues/513)) ([57f26fc](https://github.com/zaggino/z-schema/commit/57f26fcd116f26f72524d60f79572953f7640ef7))
+
+
+### Bug Fixes
+
+* **z-schema:** keep async/safe on caller options in ZSchema.create ([#512](https://github.com/zaggino/z-schema/issues/512)) ([1e72f4d](https://github.com/zaggino/z-schema/commit/1e72f4d85137312d96d35fb9eb768e337b644a95))
+
+
+### Performance Improvements
+
+* **report:** defer error materialization in json-validation sub-reports ([#510](https://github.com/zaggino/z-schema/issues/510)) ([7dc019c](https://github.com/zaggino/z-schema/commit/7dc019c37ed6b648d8d542bc9d846a0dd4bf590e))
+* **schema-regex:** memoize compiled schema patterns ([#507](https://github.com/zaggino/z-schema/issues/507)) ([961b31c](https://github.com/zaggino/z-schema/commit/961b31cb57c1caeb2600ea4071486dacd95e1f83))
+* **validate:** cache compiled schemas passed as objects ([#509](https://github.com/zaggino/z-schema/issues/509)) ([d4dbe2a](https://github.com/zaggino/z-schema/commit/d4dbe2aaf22843798ef9a02ee1a8162c2accb04b))
+* **validate:** precompute per-schema keyword plan ([#511](https://github.com/zaggino/z-schema/issues/511)) ([724a9ea](https://github.com/zaggino/z-schema/commit/724a9ea33dee18aa2714c0f584a3c6821ea97c3d))
+
 ## [12.4.6](https://github.com/zaggino/z-schema/compare/v12.4.5...v12.4.6) (2026-09-17)
 
 
