@@ -1,7 +1,7 @@
 import type { JsonSchemaInternal } from '../json-schema-versions.js';
-import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 
+import { Report } from '../report.js';
 import { difference } from '../utils/array.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { isObject } from '../utils/what-is.js';
@@ -292,11 +292,10 @@ export function propertyNamesValidator(ctx: ZSchemaBase, report: Report, schema:
     return;
   }
 
-  const Report_ = report.constructor as typeof Report;
   const keys = Object.keys(json);
   const subReports: Report[] = [];
   for (const key of keys) {
-    const subReport = new Report_(report);
+    const subReport = Report.createSubReport(report);
     subReports.push(subReport);
     ctx._jsonValidate(subReport, propertyNamesSchema, key);
   }

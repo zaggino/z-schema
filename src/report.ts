@@ -65,6 +65,190 @@ export interface ReportOptions {
   maxErrors?: number;
 }
 
+/**
+ * Whether sub-reports created through {@link Report.createSubReport} may defer
+ * materialization of their error details. Test-only switch, see
+ * {@link setSubReportErrorDeferral}.
+ */
+let deferralEnabled = true;
+
+/**
+ * Enables or disables deferred error materialization for sub-reports. Deferral is
+ * purely an optimization: the observable error details are identical either way.
+ * Exists so tests can run differential comparisons.
+ *
+ * @internal
+ */
+export function setSubReportErrorDeferral(enabled: boolean): void {
+  deferralEnabled = enabled;
+}
+
+function pathToString(path: Array<string | number>): string {
+  // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
+  return `#/${path
+    .map((segment) => {
+      segment = segment.toString();
+
+      if (isAbsoluteUri(segment)) {
+        return `uri(${segment})`;
+      }
+
+      return segment.replaceAll('~', '~0').replaceAll('/', '~1');
+    })
+    .join('/')}`;
+}
+
+/**
+ * Finds the closest `id` along `path` (consumed destructively) in `rootSchema`.
+ */
+function findSchemaId(rootSchema: JsonSchemaInternal, path: Array<string | number>): string | undefined {
+  // try to find id in the error path
+  while (path.length > 0) {
+    const obj = get(rootSchema, path);
+    if (isObject(obj) && typeof obj.id === 'string') {
+      return obj.id;
+    }
+    path.pop();
+  }
+
+  // return id of the root
+  return rootSchema.id;
+}
+
+/**
+ * Builds an error detail from snapshotted inputs. This is the single place that defines the
+ * shape and key order of error details, shared by eager adds and deferred materialization.
+ * `path` becomes the returned `path` when `pathAsArray` is set, so it must be a private copy.
+ */
+function buildErrorDetail(
+  errorCode: string,
+  errorMessage: string,
+  params: ErrorParam[],
+  path: Array<string | number>,
+  schemaPath: Array<string | number>,
+  rootSchema: JsonSchemaInternal | undefined,
+  json: unknown,
+  schema: JsonSchema | boolean | undefined,
+  keyword: keyof JsonSchemaAll | undefined,
+  inner: SchemaErrorDetail[] | null,
+  pathAsArray: boolean | undefined
+): SchemaErrorDetail {
+  for (let idx = 0; idx < params.length; idx++) {
+    const param = params[idx] === null || isObject(params[idx]) ? JSON.stringify(params[idx]) : params[idx];
+    errorMessage = errorMessage.replace(`{${idx}}`, param.toString());
+  }
+
+  const err = {
+    code: errorCode,
+    params,
+    message: errorMessage,
+    path: pathAsArray === true ? path : pathToString(path),
+    schemaPath,
+    schemaId: rootSchema ? findSchemaId(rootSchema, path.slice()) : undefined,
+    keyword,
+    [schemaSymbol]: schema,
+    [jsonSymbol]: json,
+  } as SchemaErrorDetail;
+
+  if (schema && typeof schema === 'string') {
+    err.description = schema;
+  } else if (schema && typeof schema === 'object') {
+    if (schema.title) {
+      err.title = schema.title;
+    }
+    if (schema.description) {
+      err.description = schema.description;
+    }
+  }
+
+  if (inner !== null) {
+    err.inner = inner.length === 0 ? undefined : materializeEntries(inner);
+  }
+
+  return err;
+}
+
+/**
+ * An error recorded by a deferred sub-report. It holds snapshots of everything needed to build
+ * the real {@link SchemaErrorDetail} later (only if the error ends up observable, e.g. inside an
+ * `inner` list of an eager report). `code` and `params` are real fields so `hasError` works unchanged.
+ */
+class PendingError {
+  code: string;
+  params: ErrorParam[];
+  errorMessage: string;
+  path: Array<string | number>;
+  schemaPath: Array<string | number>;
+  rootSchema: JsonSchemaInternal | undefined;
+  report: Report;
+  schema: JsonSchema | boolean | undefined;
+  keyword: keyof JsonSchemaAll | undefined;
+  // null = no `inner` key; an empty array = `inner: undefined` (mirrors the eager shape)
+  inner: SchemaErrorDetail[] | null;
+  materialized?: SchemaErrorDetail;
+
+  constructor(
+    code: string,
+    params: ErrorParam[],
+    errorMessage: string,
+    path: Array<string | number>,
+    schemaPath: Array<string | number>,
+    rootSchema: JsonSchemaInternal | undefined,
+    report: Report,
+    schema: JsonSchema | boolean | undefined,
+    keyword: keyof JsonSchemaAll | undefined,
+    inner: SchemaErrorDetail[] | null
+  ) {
+    this.code = code;
+    this.params = params;
+    this.errorMessage = errorMessage;
+    this.path = path;
+    this.schemaPath = schemaPath;
+    this.rootSchema = rootSchema;
+    this.report = report;
+    this.schema = schema;
+    this.keyword = keyword;
+    this.inner = inner;
+  }
+
+  materialize(): SchemaErrorDetail {
+    if (this.materialized === undefined) {
+      this.materialized = buildErrorDetail(
+        this.code,
+        this.errorMessage,
+        this.params,
+        this.path,
+        this.schemaPath,
+        this.rootSchema,
+        this.report.getJson(),
+        this.schema,
+        this.keyword,
+        this.inner,
+        this.report.options.reportPathAsArray
+      );
+    }
+    return this.materialized;
+  }
+}
+
+/**
+ * Replaces any {@link PendingError} entries with their materialized details. Returns the input
+ * array itself when nothing needs materializing.
+ */
+function materializeEntries(entries: SchemaErrorDetail[]): SchemaErrorDetail[] {
+  for (let i = 0; i < entries.length; i++) {
+    if ((entries[i] as unknown) instanceof PendingError) {
+      const out = entries.slice(0, i);
+      for (let j = i; j < entries.length; j++) {
+        const entry = entries[j] as unknown;
+        out.push(entry instanceof PendingError ? entry.materialize() : (entry as SchemaErrorDetail));
+      }
+      return out;
+    }
+  }
+  return entries;
+}
+
 type TaskResult = unknown;
 type TaskFn = (...args: unknown[]) => TaskResult;
 type TaskFnArgs = Parameters<TaskFn>;
@@ -87,6 +271,22 @@ export class Report {
   options: ZSchemaOptions;
   reportOptions: ReportOptions;
   validateOptions: ValidateOptions = {};
+  /**
+   * When set, `addCustomError` records a cheap {@link PendingError} instead of building the full
+   * detail. Only ever set on JSON-validation sub-reports via {@link Report.createSubReport}.
+   */
+  deferErrors = false;
+
+  /**
+   * Creates a sub-report whose errors are materialized lazily. Safe because the errors of such
+   * sub-reports are only observed through `.errors.length`, `hasError`, or as `inner` of a parent
+   * error. Deferral is disabled when a `customValidator` is set, since it may read `report.errors`.
+   */
+  static createSubReport(parent: Report): Report {
+    const report = new Report(parent);
+    report.deferErrors = deferralEnabled && typeof parent.options.customValidator !== 'function';
+    return report;
+  }
 
   constructor(parentOrOptions: ZSchemaOptions | Report, validateOptions?: ValidateOptions); // primary | subreport
   constructor(parentReport: Report, reportOptions: ReportOptions, validateOptions?: ValidateOptions); // subreport with options
@@ -216,18 +416,7 @@ export class Report {
       : this.path.slice();
 
     if (returnPathAsString !== true) {
-      // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
-      return `#/${path
-        .map((segment) => {
-          segment = segment.toString();
-
-          if (isAbsoluteUri(segment)) {
-            return `uri(${segment})`;
-          }
-
-          return segment.replaceAll('~', '~0').replaceAll('/', '~1');
-        })
-        .join('/')}`;
+      return pathToString(path);
     }
     return path;
   }
@@ -245,19 +434,10 @@ export class Report {
     }
 
     // get the error path as an array
-    const path = this.parentReport ? this.parentReport.path.concat(this.path) : this.path.slice();
-
-    // try to find id in the error path
-    while (path.length > 0) {
-      const obj = get(this.rootSchema, path);
-      if (isObject(obj) && typeof obj.id === 'string') {
-        return obj.id;
-      }
-      path.pop();
-    }
-
-    // return id of the root
-    return this.rootSchema.id;
+    return findSchemaId(
+      this.rootSchema,
+      this.parentReport ? this.parentReport.path.concat(this.path) : this.path.slice()
+    );
   }
 
   hasError(errCode: string, errParams: any[]) {
@@ -324,55 +504,63 @@ export class Report {
 
     params ||= [];
 
-    for (let idx = 0; idx < params.length; idx++) {
-      const param = params[idx] === null || isObject(params[idx]) ? JSON.stringify(params[idx]) : params[idx];
-      errorMessage = errorMessage.replace(`{${idx}}`, param.toString());
-    }
-
-    const err = {
-      code: errorCode,
-      params,
-      message: errorMessage,
-      path: this.getPath(this.options.reportPathAsArray),
-      schemaPath: this.getSchemaPath(),
-      schemaId: this.getSchemaId(),
-      keyword,
-      [schemaSymbol]: schema,
-      [jsonSymbol]: this.getJson(),
-    } as SchemaErrorDetail;
-
-    if (schema && typeof schema === 'string') {
-      err.description = schema;
-    } else if (schema && typeof schema === 'object') {
-      if (schema.title) {
-        err.title = schema.title;
-      }
-      if (schema.description) {
-        err.description = schema.description;
-      }
-    }
-
-    if (subReports != null) {
-      if (!Array.isArray(subReports)) {
-        subReports = [subReports];
-      }
-      err.inner = [];
-      for (let si = 0; si < subReports.length; si++) {
-        const errs = subReports[si].errors;
-        for (let ei = 0; ei < errs.length; ei++) {
-          err.inner.push(errs[ei]);
-        }
-      }
-      if (err.inner.length === 0) {
-        err.inner = undefined;
-      }
-    }
-
     // Check if this error code should be excluded
     if (Array.isArray(this.validateOptions.excludeErrors) && this.validateOptions.excludeErrors.includes(errorCode)) {
       return;
     }
 
-    this.errors.push(err);
+    // snapshot: path arrays keep mutating as traversal continues
+    const path = this.parentReport ? this.parentReport.path.concat(this.path) : this.path.slice();
+    const schemaPath = this.parentReport
+      ? this.parentReport.schemaPath.concat(this.schemaPath)
+      : this.schemaPath.slice();
+
+    let inner: SchemaErrorDetail[] | null = null;
+    if (subReports != null) {
+      if (!Array.isArray(subReports)) {
+        subReports = [subReports];
+      }
+      inner = [];
+      for (let si = 0; si < subReports.length; si++) {
+        const errs = subReports[si].errors;
+        for (let ei = 0; ei < errs.length; ei++) {
+          inner.push(errs[ei]);
+        }
+      }
+    }
+
+    if (this.deferErrors) {
+      this.errors.push(
+        new PendingError(
+          errorCode,
+          params,
+          errorMessage,
+          path,
+          schemaPath,
+          this.rootSchema,
+          this,
+          schema,
+          keyword,
+          inner
+        ) as unknown as SchemaErrorDetail
+      );
+      return;
+    }
+
+    this.errors.push(
+      buildErrorDetail(
+        errorCode,
+        errorMessage,
+        params,
+        path,
+        schemaPath,
+        this.rootSchema,
+        this.getJson(),
+        schema,
+        keyword,
+        inner,
+        this.options.reportPathAsArray
+      )
+    );
   }
 }
