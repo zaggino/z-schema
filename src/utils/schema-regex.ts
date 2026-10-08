@@ -3,11 +3,38 @@
 
 import isSafeRegex from 'safe-regex2';
 
-import { MAX_SCHEMA_REGEX_LENGTH } from './constants.js';
+import { MAX_SCHEMA_REGEX_CACHE_SIZE, MAX_SCHEMA_REGEX_LENGTH } from './constants.js';
 
-export function compileSchemaRegex(
-  pattern: string
-): { ok: true; value: RegExp } | { ok: false; error: { pattern: string; message: string } } {
+type CompileSchemaRegexResult =
+  | { ok: true; value: RegExp }
+  | { ok: false; error: { pattern: string; message: string } };
+
+// Patterns are compiled on every validation of `pattern` / `patternProperties` /
+// `additionalProperties`, and the ReDoS check (safe-regex2) is expensive, so results
+// are memoized per pattern string. Sharing a RegExp across callers is safe because
+// the compiled expressions never carry the `g` or `y` flag, so `test()` is stateless.
+const regexCache = new Map<string, CompileSchemaRegexResult>();
+
+export function compileSchemaRegex(pattern: string): CompileSchemaRegexResult {
+  let result = regexCache.get(pattern);
+  if (result === undefined) {
+    result = compileSchemaRegexUncached(pattern);
+    if (regexCache.size >= MAX_SCHEMA_REGEX_CACHE_SIZE) {
+      // Map iterates in insertion order, so the first key is the oldest entry (FIFO
+      // eviction keeps the hit path to a single lookup).
+      regexCache.delete(regexCache.keys().next().value!);
+    }
+    regexCache.set(pattern, result);
+  }
+  return result;
+}
+
+/** Clears the pattern cache used by {@link compileSchemaRegex}. Intended for tests. */
+export function clearSchemaRegexCache(): void {
+  regexCache.clear();
+}
+
+function compileSchemaRegexUncached(pattern: string): CompileSchemaRegexResult {
   if (pattern.length > MAX_SCHEMA_REGEX_LENGTH) {
     return {
       ok: false,

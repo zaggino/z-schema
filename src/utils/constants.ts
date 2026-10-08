@@ -19,3 +19,10 @@ export const MAX_ASYNC_TIMEOUT = 60_000;
  * (CWE-95).
  */
 export const MAX_SCHEMA_REGEX_LENGTH = 10_000;
+
+/**
+ * Maximum number of distinct patterns memoized by {@link compileSchemaRegex}.
+ * Bounds memory when schemas with many dynamically generated patterns are
+ * validated; the oldest entry is evicted once the limit is hit.
+ */
+export const MAX_SCHEMA_REGEX_CACHE_SIZE = 1000;
