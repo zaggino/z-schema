@@ -721,6 +721,7 @@ export class SchemaValidator {
     const hasParentSchema = schema.$schema && getId(schema) !== schema.$schema;
     if (hasParentSchema) {
       if (schema.__$schemaResolved && schema.__$schemaResolved !== schema) {
+        // Eager on purpose: these errors are read by content (copied/filtered), so do not use Report.createSubReport.
         const subReport = new Report(report);
         const valid = validate(this.validator, subReport, schema.__$schemaResolved, schema);
         if (!valid) {

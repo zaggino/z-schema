@@ -27,7 +27,7 @@ export function anyOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSch
   const subReports: Report[] = [];
 
   for (let i = 0; i < schema.anyOf!.length; i++) {
-    const subReport = new Report(report);
+    const subReport = Report.createSubReport(report);
     subReports.push(subReport);
     ctx._jsonValidate(subReport, schema.anyOf![i], json);
     cacheValidationResult(report, schema.anyOf![i], json, subReport.errors.length === 0);
@@ -58,7 +58,7 @@ export function oneOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSch
   const subReports: Report[] = [];
 
   for (let i = 0; i < schema.oneOf!.length; i++) {
-    const subReport = new Report(report);
+    const subReport = Report.createSubReport(report);
     subReports.push(subReport);
     ctx._jsonValidate(subReport, schema.oneOf![i], json);
     cacheValidationResult(report, schema.oneOf![i], json, subReport.errors.length === 0);
@@ -87,7 +87,7 @@ export function oneOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSch
 
 export function notValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
-  const subReport = new Report(report);
+  const subReport = Report.createSubReport(report);
   if (ctx._jsonValidate(subReport, schema.not!, json)) {
     report.addError('NOT_PASSED', undefined, undefined, schema, 'not');
   }
@@ -110,7 +110,7 @@ export function ifValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchema
     return;
   }
 
-  const conditionReport = new Report(report);
+  const conditionReport = Report.createSubReport(report);
   ctx._jsonValidate(conditionReport, conditionSchema, json);
   cacheValidationResult(report, conditionSchema, json, conditionReport.errors.length === 0);
 
