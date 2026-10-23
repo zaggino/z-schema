@@ -88,13 +88,13 @@
     "@vitest/coverage-istanbul": "^5.0.0",
     "@vitest/coverage-v8": "^5.0.0",
     "lefthook": "^2.1.9",
-    "oxfmt": "^0.71.0",
+    "oxfmt": "^0.73.0",
     "oxlint": "^1.75.0",
     "oxlint-tsgolint": "^7.0.2001",
     "rimraf": "^6.1.2",
     "tsdown": "^0.23.0",
     "typescript": "^6.0.3",
-    "ultracite": "^7.9.4",
+    "ultracite": "^8.0.1",
     "vitest": "^5.0.0"
   },
   "optionalDependencies": {

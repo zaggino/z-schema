@@ -13,10 +13,14 @@ npm install z-schema
 ```typescript
 // ESM / TypeScript
 import ZSchema from 'z-schema';
+```
 
+```typescript
 // Or named import
 import { ZSchema } from 'z-schema';
+```
 
+```typescript
 // CommonJS
 const ZSchema = require('z-schema');
 ```
