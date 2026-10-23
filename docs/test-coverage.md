@@ -8,7 +8,7 @@ Line coverage status: **high**
 | ----------------------------- | ------: | ----------: | ---------: | -------: |
 | src/compiled-schema-cache.ts  |     94% |         94% |        94% |      90% |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
-| src/format-validators.ts      |     95% |         95% |        93% |      93% |
+| src/format-validators.ts      |     96% |         96% |        93% |      94% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
 | src/json-validation.ts        |     90% |         91% |        82% |      90% |
