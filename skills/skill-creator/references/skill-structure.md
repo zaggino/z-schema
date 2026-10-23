@@ -212,13 +212,19 @@ All code examples in z-schema skills must follow these rules:
 ```typescript
 // Default import (most common)
 import ZSchema from 'z-schema';
+```
 
+```typescript
 // Named import
 import { ZSchema } from 'z-schema';
+```
 
+```typescript
 // Type-only imports
 import type { JsonSchema, ZSchemaOptions, SchemaErrorDetail, ValidateResponse } from 'z-schema';
+```
 
+```typescript
 // Value import (for instanceof checks, etc.)
 import { ValidateError } from 'z-schema';
 ```

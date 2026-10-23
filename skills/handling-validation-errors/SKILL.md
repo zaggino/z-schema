@@ -10,8 +10,9 @@ z-schema reports validation errors as `ValidateError` objects containing a `.det
 ## Error structure
 
 ```typescript
-import { ValidateError } from 'z-schema';
 import type { SchemaErrorDetail } from 'z-schema';
+
+import { ValidateError } from 'z-schema';
 ```
 
 `ValidateError` extends `Error`:
