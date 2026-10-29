@@ -98,7 +98,7 @@ const applyUts46Mapping = (hostname: string): string => {
   // 1. Delete `ignored` code points. Must precede the fold below: U+FFA0 is
   //    `ignored`, but NFKC would turn it into U+1160 rather than remove it.
   if (UTS46_IGNORED_TEST_REGEX.test(mapped)) {
-    mapped = mapped.replace(UTS46_IGNORED_REGEX, '');
+    mapped = mapped.replaceAll(UTS46_IGNORED_REGEX, '');
   }
   // 2. Case mapping -- toLowerCase, never case folding. Nontransitional processing
   //    preserves the deviation code points U+00DF and U+03C2, which folding would
@@ -118,7 +118,7 @@ const applyUts46Mapping = (hostname: string): string => {
   //    NFKC-invariance shortcut there would otherwise skip it (U+1FB3 is
   //    NFKC-invariant).
   if (YPOGEGRAMMENI_TEST_REGEX.test(mapped)) {
-    mapped = mapped.normalize('NFD').replace(YPOGEGRAMMENI_REGEX, '\u03B9').normalize('NFC');
+    mapped = mapped.normalize('NFD').replaceAll(YPOGEGRAMMENI_REGEX, '\u03B9').normalize('NFC');
   }
   // 4. Compatibility fold. NFKC output is always in NFC form, so a string that
   //    NFKC leaves untouched is both fully folded and already NFC -- the common
@@ -498,7 +498,7 @@ export const isValidIdnHostname = (hostname: string): boolean => {
   // U+3002 rather than '.', so the separator replacement has to follow the mapping.
   let normalizedHostname = applyUts46Mapping(hostname);
   if (IDN_SEPARATOR_TEST_REGEX.test(normalizedHostname)) {
-    normalizedHostname = normalizedHostname.replace(IDN_SEPARATOR_REGEX, '.');
+    normalizedHostname = normalizedHostname.replaceAll(IDN_SEPARATOR_REGEX, '.');
   }
   const labels = splitHostnameLabels(normalizedHostname);
   if (labels === null) {
