@@ -1,4 +1,4 @@
-import type { ErrorCode, ErrorParam } from './errors.js';
+import type { ErrorCode, ErrorParam, ValidateError } from './errors.js';
 import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ValidateCallback, ValidateOptions } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
@@ -266,6 +266,7 @@ type AsyncTask = [TaskFn, TaskFnArgs, TaskProcessFn];
 
 export class Report {
   asyncTasks: AsyncTask[] = [];
+  deferredAsyncTasks?: AsyncTask[];
   commonErrorMessage?: string;
   __$recursiveAnchorStack: JsonSchemaInternal[] = [];
   __$dynamicScopeStack: JsonSchemaInternal[] = [];
@@ -360,21 +361,37 @@ export class Report {
   }
 
   /**
-   * Like {@link addAsyncTask}, but automatically saves the current `path` and
-   * restores it around `processFn`.  This eliminates the manual
-   * path-save/restore boilerplate that every async-aware validator would
-   * otherwise need.
+   * Like {@link addAsyncTask}, but restores the current data/schema paths and
+   * root schema around `processFn`. With `afterPending`, the task runs after
+   * pending tasks, including work added by conditional branches, have settled.
    */
-  addAsyncTaskWithPath(fn: (...args: any[]) => any, args: any[], processFn: (result: any) => void) {
+  addAsyncTaskWithPath(
+    fn: (...args: any[]) => any,
+    args: any[],
+    processFn: (result: any) => void,
+    afterPending = false
+  ) {
     const pathBefore = shallowClone(this.path);
-    this.asyncTasks.push([
+    const schemaPathBefore = shallowClone(this.schemaPath);
+    const rootSchemaBefore = this.rootSchema;
+    const queue = afterPending ? (this.deferredAsyncTasks ??= []) : this.asyncTasks;
+    queue.push([
       fn,
       args,
       (result: TaskResult) => {
         const backup = this.path;
+        const oldSchemaPath = this.schemaPath;
+        const oldRootSchema = this.rootSchema;
         this.path = pathBefore;
-        processFn(result);
-        this.path = backup;
+        this.schemaPath = schemaPathBefore;
+        this.rootSchema = rootSchemaBefore;
+        try {
+          processFn(result);
+        } finally {
+          this.path = backup;
+          this.schemaPath = oldSchemaPath;
+          this.rootSchema = oldRootSchema;
+        }
       },
     ]);
   }
@@ -394,8 +411,12 @@ export class Report {
     const timeoutAt = Date.now() + validationTimeout;
     let tasksCount = this.asyncTasks.length;
     let timedOut = false;
+    let finished = false;
+    let running = false;
+    let tasksStarted = 0;
 
     const finish = () => {
+      finished = true;
       setTimeout(() => {
         const valid = this.errors.length === 0;
         const err = valid ? undefined : getValidateError({ details: this.errors });
@@ -404,29 +425,61 @@ export class Report {
     };
 
     const respond = (asyncTaskResultProcessFn: TaskProcessFn) => (asyncTaskResult: TaskResult) => {
-      if (timedOut) {
+      if (timedOut || finished) {
         return;
       }
-      asyncTaskResultProcessFn(asyncTaskResult);
-      if (--tasksCount === 0) {
-        finish();
+      try {
+        const previousLength = this.asyncTasks.length;
+        asyncTaskResultProcessFn(asyncTaskResult);
+        tasksCount += this.asyncTasks.length - previousLength - 1;
+        runTasks.call(this);
+      } catch (error) {
+        finished = true;
+        // oxlint-disable-next-line node/callback-return -- terminal failure callback
+        callback(error as ValidateError, false);
       }
     };
 
-    // finish if tasks are completed or there are any errors and breaking on first error was requested
-    if (tasksCount === 0 || (this.errors.length > 0 && this.options.breakOnFirstError)) {
+    function runTasks(this: Report) {
+      if (running || finished) {
+        return;
+      }
+      running = true;
+      for (;;) {
+        while (tasksStarted < this.asyncTasks.length) {
+          if (finished) {
+            break;
+          }
+          const [fn, fnArgs, processFn] = this.asyncTasks[tasksStarted++];
+          fn(...fnArgs, respond(processFn));
+        }
+        if (finished || tasksCount > 0 || !this.deferredAsyncTasks?.length) {
+          break;
+        }
+        const deferred = this.deferredAsyncTasks;
+        this.deferredAsyncTasks = undefined;
+        tasksCount = deferred.length;
+        for (let i = 0; i < deferred.length; i++) {
+          this.asyncTasks.push(deferred[i]);
+        }
+      }
+      running = false;
+      if (tasksCount === 0) {
+        finish();
+      }
+    }
+
+    // A parent still needs its sub-report's pending promises consumed, even if that
+    // branch already has a synchronous error and another branch may succeed.
+    if (tasksCount === 0 || (!this.parentReport && this.errors.length > 0 && this.options.breakOnFirstError)) {
       finish();
       return;
     }
 
-    for (let i = 0; i < this.asyncTasks.length; i++) {
-      const [fn, fnArgs, processFn] = this.asyncTasks[i];
-      const respondCallback = respond(processFn);
-      fn(...fnArgs, respondCallback);
-    }
+    runTasks.call(this);
 
     const checkTimeout = () => {
-      if (timedOut || tasksCount <= 0) {
+      if (timedOut || finished || tasksCount <= 0) {
         return;
       }
       if (Date.now() >= timeoutAt) {
