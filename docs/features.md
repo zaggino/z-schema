@@ -165,6 +165,8 @@ ZSchema.registerFormat('xstring', async (str) => {
 });
 ```
 
+Applicators wait for asynchronous formats before deciding whether their subschemas match. For example, `not` negates the completed result, and `if` selects `then` or `else` after its condition completes. Validation also waits for asynchronous formats in the selected branch. In drafts with `unevaluatedProperties` or `unevaluatedItems`, the corresponding annotation checks run after those results are available.
+
 The default timeout for async format validation is 2000ms, configurable per instance:
 
 ```javascript

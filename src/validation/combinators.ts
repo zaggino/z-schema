@@ -30,16 +30,16 @@ export function anyOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSch
     const subReport = Report.createSubReport(report);
     subReports.push(subReport);
     ctx._jsonValidate(subReport, schema.anyOf![i], json);
-    cacheValidationResult(report, schema.anyOf![i], json, subReport.errors.length === 0);
   }
 
   // Aggregate async tasks and decide when ready
-  deferOrRunSync(report, subReports, () => {
+  deferOrRunSync(ctx, report, subReports, () => {
     let passed = false;
-    for (const subReport of subReports) {
+    for (let i = 0; i < subReports.length; i++) {
+      const subReport = subReports[i];
+      cacheValidationResult(report, schema.anyOf![i], json, subReport.errors.length === 0);
       if (subReport.errors.length === 0) {
         passed = true;
-        break;
       }
     }
 
@@ -61,13 +61,14 @@ export function oneOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSch
     const subReport = Report.createSubReport(report);
     subReports.push(subReport);
     ctx._jsonValidate(subReport, schema.oneOf![i], json);
-    cacheValidationResult(report, schema.oneOf![i], json, subReport.errors.length === 0);
   }
 
   // Aggregate async tasks and decide when ready
-  deferOrRunSync(report, subReports, () => {
+  deferOrRunSync(ctx, report, subReports, () => {
     let passes = 0;
-    for (const subReport of subReports) {
+    for (let i = 0; i < subReports.length; i++) {
+      const subReport = subReports[i];
+      cacheValidationResult(report, schema.oneOf![i], json, subReport.errors.length === 0);
       if (subReport.errors.length === 0) {
         passes++;
       }
@@ -88,9 +89,18 @@ export function oneOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSch
 export function notValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.6.2
   const subReport = Report.createSubReport(report);
-  if (ctx._jsonValidate(subReport, schema.not!, json)) {
-    report.addError('NOT_PASSED', undefined, undefined, schema, 'not');
+  const valid = ctx._jsonValidate(subReport, schema.not!, json);
+  if (subReport.asyncTasks.length === 0) {
+    if (valid) {
+      report.addError('NOT_PASSED', undefined, undefined, schema, 'not');
+    }
+    return;
   }
+  deferOrRunSync(ctx, report, [subReport], () => {
+    if (subReport.errors.length === 0) {
+      report.addError('NOT_PASSED', undefined, undefined, schema, 'not');
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -112,6 +122,16 @@ export function ifValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchema
 
   const conditionReport = Report.createSubReport(report);
   ctx._jsonValidate(conditionReport, conditionSchema, json);
+  if (conditionReport.asyncTasks.length > 0) {
+    deferOrRunSync(ctx, report, [conditionReport], () => {
+      cacheValidationResult(report, conditionSchema, json, conditionReport.errors.length === 0);
+      const selected = conditionReport.errors.length === 0 ? thenSchema : elseSchema;
+      if (selected !== undefined) {
+        ctx._jsonValidate(report, selected, json);
+      }
+    });
+    return;
+  }
   cacheValidationResult(report, conditionSchema, json, conditionReport.errors.length === 0);
 
   const branchSchema = conditionReport.errors.length === 0 ? thenSchema : elseSchema;

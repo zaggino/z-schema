@@ -48,6 +48,7 @@ import {
 import { resolveDynamicRef, resolveRecursiveRef } from './validation/ref.js';
 import {
   getCachedValidationResult,
+  deferUntilAsyncTasksComplete,
   isValidationVocabularyEnabled,
   VALIDATION_VOCAB_KEYWORDS,
 } from './validation/shared.js';
@@ -918,6 +919,7 @@ export function validate(
   if (plan.empty) {
     return true;
   }
+  const asyncTasksBefore = report.asyncTasks.length;
 
   // this method can be called recursively, so we need to remember our root
   let isRoot = false;
@@ -1054,15 +1056,13 @@ export function validate(
 
   // Run unevaluated* validators after all others have cached their combinator results
   if (deferredUnevaluatedKeys !== undefined && !(report.errors.length > 0 && ctx.options.breakOnFirstError)) {
-    for (let i = 0; i < deferredUnevaluatedKeys.length; i++) {
-      const key = deferredUnevaluatedKeys[i];
-      const validator = JsonValidators[key];
-      if (validator) {
-        validator(ctx, report, schema, json);
-        if (report.errors.length && ctx.options.breakOnFirstError) {
-          break;
-        }
-      }
+    const unevaluatedKeys = deferredUnevaluatedKeys;
+    if (report.asyncTasks.length > asyncTasksBefore) {
+      deferUntilAsyncTasksComplete(ctx, report, () => {
+        validateUnevaluated(ctx, report, schema, json, unevaluatedKeys);
+      });
+    } else {
+      validateUnevaluated(ctx, report, schema, json, unevaluatedKeys);
     }
   }
 
@@ -1098,4 +1098,25 @@ export function validate(
 
   // return valid just to be able to break at some code points
   return report.errors.length === 0;
+}
+
+function validateUnevaluated(
+  ctx: ZSchemaBase,
+  report: Report,
+  schema: JsonSchemaInternal,
+  json: unknown,
+  keys: Array<keyof JsonSchemaAll>
+) {
+  if (report.errors.length > 0 && ctx.options.breakOnFirstError) {
+    return;
+  }
+  for (let i = 0; i < keys.length; i++) {
+    const validator = JsonValidators[keys[i]];
+    if (validator) {
+      validator(ctx, report, schema, json);
+      if (report.errors.length && ctx.options.breakOnFirstError) {
+        break;
+      }
+    }
+  }
 }

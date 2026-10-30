@@ -118,12 +118,12 @@ export function containsValidator(ctx: ZSchemaBase, report: Report, schema: Json
     const subReport = Report.createSubReport(report);
     subReports.push(subReport);
     ctx._jsonValidate(subReport, containsSchema, json[idx]);
-    cacheValidationResult(report, containsSchema, json[idx], subReport.errors.length === 0);
   }
 
   const addContainsErrorIfNeeded = () => {
     let matchingItems = 0;
     for (let i = 0; i < subReports.length; i++) {
+      cacheValidationResult(report, containsSchema, json[i], subReports[i].errors.length === 0);
       if (subReports[i].errors.length === 0) {
         matchingItems += 1;
       }
@@ -143,7 +143,7 @@ export function containsValidator(ctx: ZSchemaBase, report: Report, schema: Json
     }
   };
 
-  deferOrRunSync(report, subReports, addContainsErrorIfNeeded);
+  deferOrRunSync(ctx, report, subReports, addContainsErrorIfNeeded);
 }
 
 // ---------------------------------------------------------------------------

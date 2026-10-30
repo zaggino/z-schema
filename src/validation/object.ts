@@ -308,5 +308,5 @@ export function propertyNamesValidator(ctx: ZSchemaBase, report: Report, schema:
     }
   };
 
-  deferOrRunSync(report, subReports, addPropertyNameErrors);
+  deferOrRunSync(ctx, report, subReports, addPropertyNameErrors);
 }
