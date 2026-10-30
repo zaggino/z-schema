@@ -3,6 +3,7 @@ import type { Report } from '../../src/report.ts';
 
 import { describe, expect, it } from 'vitest';
 
+import { ValidateError } from '../../src/errors.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 import { nextTurn } from '../lib/async.ts';
 
@@ -169,7 +170,8 @@ describe('async format applicators', () => {
     });
 
     expect(result.valid).toBe(false);
-    expect(result.err).toBe(error);
+    expect(result.err).toBeInstanceOf(ValidateError);
+    expect(result.err!.cause).toBe(error);
   });
 
   it('does not turn a timed-out not subschema into a passing result', async () => {
@@ -372,7 +374,8 @@ describe('async hardening', () => {
 
     const result = await pending;
     expect(result.valid).toBe(false);
-    expect(result.err).toBe(error);
+    expect(result.err).toBeInstanceOf(ValidateError);
+    expect(result.err!.cause).toBe(error);
   });
 
   it('rejects with a throw from a nested deferred decision (non-safe)', async () => {
@@ -388,11 +391,13 @@ describe('async hardening', () => {
     await nextTurn();
     f.resolve(true);
 
-    expect(await outcome).toBe(error);
+    const rejected = await outcome;
+    expect(rejected).toBeInstanceOf(ValidateError);
+    expect((rejected as ValidateError).cause).toBe(error);
   });
 
-  // Non-Error throws are normalized to an Error with the thrown value as cause.
-  it.each([['str'], [undefined]])('wraps non-Error throw %s with cause', async (thrown) => {
+  // Anything thrown is converted to a ValidateError with the thrown value as cause.
+  it.each([['str'], [undefined]])('converts non-Error throw %s to a ValidateError with cause', async (thrown) => {
     const { validator, g, f } = createThrowing(thrown);
     const pending = validator.validate('x', throwingSchema);
     await nextTurn();
@@ -401,7 +406,7 @@ describe('async hardening', () => {
 
     const result = await pending;
     expect(result.valid).toBe(false);
-    expect(result.err).toBeInstanceOf(Error);
+    expect(result.err).toBeInstanceOf(ValidateError);
     expect(result.err!.cause).toBe(thrown);
   });
 
@@ -422,7 +427,8 @@ describe('async hardening', () => {
 
     expect(settled).toBe(1);
     expect(result.valid).toBe(false);
-    expect(result.err).toBe(error);
+    expect(result.err).toBeInstanceOf(ValidateError);
+    expect(result.err!.cause).toBe(error);
   });
 
   // A nested timeout must not discard sibling errors.
@@ -714,7 +720,7 @@ describe('async hardening', () => {
 
     const result = await pending;
     expect(result.valid).toBe(false);
-    expect(result.err).toBeInstanceOf(Error);
+    expect(result.err).toBeInstanceOf(ValidateError);
     expect(result.err!.cause).toBe(thrown);
   });
 

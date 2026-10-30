@@ -3,7 +3,7 @@ import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal } from './json-schem
 import type { ValidateCallback, ValidateOptions } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
-import { Errors, getValidateError } from './errors.js';
+import { Errors, getValidateError, toValidateError } from './errors.js';
 import { shallowClone } from './utils/clone.js';
 import { MAX_ASYNC_TIMEOUT } from './utils/constants.js';
 import { get } from './utils/json.js';
@@ -586,8 +586,9 @@ export class Report {
   /**
    * Drains pending async tasks and reports the result through `callback`.
    * This is the top-level entry point and owns the only timer. The callback is invoked from a
-   * `setTimeout` (completion and abort alike). On abort, a thrown non-`Error` is wrapped in an
-   * `Error` with `cause`. With `breakOnFirstError`, errors are truncated to the first recorded one.
+   * `setTimeout` (completion and abort alike). On abort, the thrown value is converted to a
+   * `ValidateError` with the original as `cause` (see `toValidateError`). With `breakOnFirstError`,
+   * errors are truncated to the first recorded one.
    *
    * @param timeout - Timeout in milliseconds; falsy values fall back to 2000, capped at the maximum.
    * @param callback - Receives the validation error (if any) and validity.
@@ -605,22 +606,9 @@ export class Report {
         callback(err, valid);
       },
       (error) => {
-        let normalized: Error;
-        if (error instanceof Error) {
-          normalized = error;
-        } else {
-          let message: string;
-          try {
-            message = String(error);
-          } catch {
-            // e.g. Object.create(null) or a throwing toString
-            message = 'Non-Error value thrown';
-          }
-          normalized = new Error(message, { cause: error });
-        }
-        // A thrown non-validation Error is passed through as-is, the same as the synchronous path.
+        const err = toValidateError(error);
         deferToTimer(() => {
-          callback(normalized, false);
+          callback(err, false);
         });
       },
       deferToTimer

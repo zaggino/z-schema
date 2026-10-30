@@ -2,6 +2,7 @@ import type { SchemaErrorDetail } from '../../src/report.ts';
 import type { ValidateOptions } from '../../src/z-schema-base.ts';
 import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 
+import { ValidateError } from '../../src/errors.ts';
 import { Report } from '../../src/report.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 import { expectSameThrown, runBothModes, settle, shapeOf, withEagerSubReports } from '../lib/deferred-errors.ts';
@@ -377,10 +378,12 @@ const expectSameResult = (d: ReturnType<typeof undefinedParamRepro>, e: ReturnTy
 };
 
 describe('deferred sub-report errors: message construction exceptions (C3)', () => {
-  it('surfaces the same TypeError for an undefined param inside anyOf', () => {
+  it('surfaces the same TypeError (as ValidateError cause) for an undefined param inside anyOf', () => {
     const deferred = settle(undefinedParamRepro);
     const eager = settle(() => withEagerSubReports(undefinedParamRepro));
-    expect(!eager.threw && eager.value.err instanceof TypeError).toBe(true);
+    expect(!eager.threw && eager.value.err instanceof ValidateError && eager.value.err.cause instanceof TypeError).toBe(
+      true
+    );
     if (expectSameThrown(deferred, eager) && !eager.threw) {
       expectSameResult(deferred.value, eager.value);
     }
@@ -390,7 +393,9 @@ describe('deferred sub-report errors: message construction exceptions (C3)', () 
     // main builds the message (failing on the undefined param) before the excludeErrors check
     const deferred = settle(excludedUndefinedParam);
     const eager = settle(() => withEagerSubReports(excludedUndefinedParam));
-    expect(!eager.threw && eager.value.err instanceof TypeError).toBe(true);
+    expect(!eager.threw && eager.value.err instanceof ValidateError && eager.value.err.cause instanceof TypeError).toBe(
+      true
+    );
     if (expectSameThrown(deferred, eager) && !eager.threw) {
       expectSameResult(deferred.value, eager.value);
     }

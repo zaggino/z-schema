@@ -79,12 +79,37 @@ export class ValidateError extends Error {
   override readonly name: string = 'ValidateError';
   details?: SchemaErrorDetail[];
 
-  constructor(message: string, details?: SchemaErrorDetail[]) {
-    super(message);
+  constructor(message: string, details?: SchemaErrorDetail[], options?: ErrorOptions) {
+    super(message, options);
     this.details = details;
   }
 }
 
 export function getValidateError({ message, details }: { message?: string; details: SchemaErrorDetail[] }) {
   return new ValidateError(message || '', details);
+}
+
+/**
+ * Convert anything thrown during validation into a {@link ValidateError}. A `ValidateError` is returned as-is;
+ * any other value (an `Error` from a `customValidator`, or a non-`Error` value) becomes a `ValidateError` with
+ * the original message, no `details`, and the thrown value as `cause`.
+ * @param error - The thrown value.
+ * @returns A `ValidateError` describing `error`.
+ */
+export function toValidateError(error: unknown): ValidateError {
+  if (error instanceof ValidateError) {
+    return error;
+  }
+  let message: string;
+  if (error instanceof Error) {
+    ({ message } = error);
+  } else {
+    try {
+      message = String(error);
+    } catch {
+      // e.g. Object.create(null) or a throwing toString
+      message = 'Non-Error value thrown';
+    }
+  }
+  return new ValidateError(message, undefined, { cause: error });
 }
