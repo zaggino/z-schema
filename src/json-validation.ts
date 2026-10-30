@@ -50,6 +50,7 @@ import {
   getCachedValidationResult,
   deferOrRunSync,
   deferUntilAsyncTasksComplete,
+  runAfterPending,
   isValidationVocabularyEnabled,
   VALIDATION_VOCAB_KEYWORDS,
 } from './validation/shared.js';
@@ -174,7 +175,7 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
           validate(ctx, subReport, currentSchema.contains, jsonArr[i]);
           // An unsettled (async-pending) result is not a success. Applicators cache their result before the
           // deferred unevaluated* phase runs, so this fallback is a defensive path.
-          passed = subReport.errors.length === 0 && subReport.asyncTasks.length === 0;
+          passed = settledPass(subReport);
         }
         if (passed) {
           evaluated.add(i);
@@ -282,7 +283,7 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
       if (passed === undefined) {
         const subReport = Report.createSubReport(report);
         validate(ctx, subReport, subSchema, json);
-        passed = subReport.errors.length === 0 && subReport.asyncTasks.length === 0;
+        passed = settledPass(subReport);
       }
       if (passed && merge(recurse(subSchema))) {
         return 'all';
@@ -298,7 +299,7 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
       if (passed === undefined) {
         const subReport = Report.createSubReport(report);
         validate(ctx, subReport, subSchema, json);
-        passed = subReport.errors.length === 0 && subReport.asyncTasks.length === 0;
+        passed = settledPass(subReport);
       }
       if (passed && merge(recurse(subSchema))) {
         return 'all';
@@ -348,6 +349,11 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
   }
 
   return evaluated;
+}
+
+/** A sub-report result counts as a pass only when it has neither errors nor unsettled async work. */
+function settledPass(r: Report): boolean {
+  return r.errors.length === 0 && r.asyncTasks.length === 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -401,20 +407,22 @@ function unevaluatedItemsValidator(ctx: ZSchemaBase, report: Report, schema: Jso
     report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
   } else {
     // unevaluatedItems as a schema — validate each unevaluated item against it
-    // Once a sub-report has pending async tasks, it and all later ones are collected and decided together.
+    // A sub-report that already has an error decides immediately, even with its own or earlier async work
+    // pending: errors are never removed and only one error is ever emitted, so waiting cannot change the outcome.
     let pendingReports: Report[] | undefined;
     for (let i = 0; i < unevaluatedIndices.length; i++) {
       const idx = unevaluatedIndices[i];
       const subReport = Report.createSubReport(report);
       validate(ctx, subReport, unevalSchema, json[idx]);
-      if (pendingReports === undefined && subReport.asyncTasks.length > 0) {
-        pendingReports = [];
-      }
-      if (pendingReports !== undefined) {
-        pendingReports.push(subReport);
-      } else if (subReport.errors.length > 0) {
+      if (subReport.errors.length > 0) {
         report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
         return;
+      }
+      if (subReport.asyncTasks.length > 0) {
+        if (pendingReports === undefined) {
+          pendingReports = [];
+        }
+        pendingReports.push(subReport);
       }
     }
     if (pendingReports !== undefined) {
@@ -490,31 +498,39 @@ function unevaluatedPropertiesValidator(ctx: ZSchemaBase, report: Report, schema
     );
   } else {
     // unevaluatedProperties as a schema — validate each unevaluated key against it
-    // Once a sub-report has pending async tasks, it and all later ones are collected and decided together.
-    let pendingReports: Report[] | undefined;
-    let pendingKeys: string[] | undefined;
+    // Keys that already have an error report immediately (errors are never removed); only keys whose outcome
+    // still depends on async work are decided later, so their errors may follow later keys' errors (see the
+    // async error-order caveat in docs/features.md).
+    let pending: Array<{ report: Report; key: string }> | undefined;
     for (let i = 0; i < unevaluatedKeys.length; i++) {
       const key = unevaluatedKeys[i];
       const subReport = Report.createSubReport(report);
       validate(ctx, subReport, unevalSchema, (json as Record<string, unknown>)[key]);
-      if (pendingReports === undefined && subReport.asyncTasks.length > 0) {
-        pendingReports = [];
-        pendingKeys = [];
-      }
-      if (pendingReports !== undefined) {
-        pendingReports.push(subReport);
-        pendingKeys!.push(key);
-      } else if (subReport.errors.length > 0) {
+      if (subReport.errors.length > 0) {
         report.addError('OBJECT_UNEVALUATED_PROPERTIES', [key], undefined, schema, 'unevaluatedProperties');
+      } else if (subReport.asyncTasks.length > 0) {
+        if (pending === undefined) {
+          pending = [];
+        }
+        pending.push({ report: subReport, key });
       }
     }
-    if (pendingReports !== undefined) {
-      const reports = pendingReports;
-      const keys = pendingKeys!;
+    if (pending !== undefined) {
+      const entries = pending;
+      const reports: Report[] = [];
+      for (let i = 0; i < entries.length; i++) {
+        reports.push(entries[i].report);
+      }
       deferOrRunSync(ctx, report, reports, () => {
-        for (let i = 0; i < reports.length; i++) {
-          if (reports[i].errors.length > 0) {
-            report.addError('OBJECT_UNEVALUATED_PROPERTIES', [keys[i]], undefined, schema, 'unevaluatedProperties');
+        for (let i = 0; i < entries.length; i++) {
+          if (entries[i].report.errors.length > 0) {
+            report.addError(
+              'OBJECT_UNEVALUATED_PROPERTIES',
+              [entries[i].key],
+              undefined,
+              schema,
+              'unevaluatedProperties'
+            );
           }
         }
       });
@@ -647,6 +663,8 @@ export interface KeywordPlan {
    * results nor the point where `breakOnFirstError` stops change. Must be treated as read-only.
    */
   readonly keys: ReadonlyArray<keyof JsonSchemaAll>;
+  /** `keys` contains `unevaluatedItems` or `unevaluatedProperties` (the only consumers of a lone `if` annotation). */
+  readonly unevaluated: boolean;
   /** Value of {@link planEpoch} when the plan was built; a plan from an older epoch is stale. */
   readonly epoch: number;
   /** Lazily computed `keys` minus `VALIDATION_VOCAB_KEYWORDS`, used when the validation vocabulary is disabled. */
@@ -668,6 +686,7 @@ function buildKeywordPlan(schema: JsonSchemaInternal): KeywordPlan {
   const all = Object.keys(schema) as Array<keyof JsonSchemaAll>;
   const skipType = !!schema.type;
   const keys: Array<keyof JsonSchemaAll> = [];
+  let unevaluated = false;
   for (let i = 0; i < all.length; i++) {
     const key = all[i];
     const validator = Object.hasOwn(JsonValidators, key) ? JsonValidators[key] : undefined;
@@ -675,8 +694,11 @@ function buildKeywordPlan(schema: JsonSchemaInternal): KeywordPlan {
       continue;
     }
     keys.push(key);
+    if (key === 'unevaluatedItems' || key === 'unevaluatedProperties') {
+      unevaluated = true;
+    }
   }
-  return { empty: all.length === 0, keys, epoch: planEpoch };
+  return { empty: all.length === 0, keys, unevaluated, epoch: planEpoch };
 }
 
 /**
@@ -929,6 +951,16 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
   }
 }
 
+function runCustomValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown): void {
+  // customValidator may have been installed mid-validation, after this report started deferring
+  if (report.deferErrors) {
+    report.materializeErrors();
+  }
+  ctx.options.customValidator!.call(ctx, report, schema, json);
+  // the hook may have mutated compiled nodes: invalidate every plan stored so far
+  planEpoch++;
+}
+
 // ---------------------------------------------------------------------------
 // validate — main entry point
 // ---------------------------------------------------------------------------
@@ -962,6 +994,11 @@ export function validate(
     return true;
   }
   const asyncTasksBefore = report.asyncTasks.length;
+  // While this node (and everything below it) is traversed, a lone `if` must record its annotation.
+  const unevaluatedScoped = plan.unevaluated;
+  if (unevaluatedScoped) {
+    report.__$unevaluatedScope++;
+  }
 
   // this method can be called recursively, so we need to remember our root
   let isRoot = false;
@@ -1066,6 +1103,9 @@ export function validate(
       if (pushedDynamicScope) {
         dynamicScopeStack.pop();
       }
+      if (unevaluatedScoped) {
+        report.__$unevaluatedScope--;
+      }
       return false;
     }
   }
@@ -1074,6 +1114,7 @@ export function validate(
   // Defer unevaluatedItems/unevaluatedProperties to run after other validators,
   // so combinator validation results are cached and available for annotation collection
   let deferredUnevaluatedKeys: Array<keyof JsonSchemaAll> | undefined;
+  let hookChained = false;
   const exactStop = ctx.options.breakOnFirstError && report.errors.length > 0;
   if (exactStop) {
     runFirstKeyOnly(ctx, report, schema, json, validationVocabularyEnabled);
@@ -1101,8 +1142,18 @@ export function validate(
   if (deferredUnevaluatedKeys !== undefined && !(report.errors.length > 0 && ctx.options.breakOnFirstError)) {
     const unevaluatedKeys = deferredUnevaluatedKeys;
     if (report.asyncTasks.length > asyncTasksBefore) {
+      // The hook is chained after this decision: it may queue more async work (an async unevaluated* schema),
+      // and the hook must see its result.
+      const chainHook = typeof ctx.options.customValidator === 'function';
+      hookChained = chainHook;
       deferUntilAsyncTasksComplete(ctx, report, () => {
+        const before = report.asyncTasks.length;
         validateUnevaluated(ctx, report, schema, json, unevaluatedKeys);
+        if (chainHook) {
+          runAfterPending(ctx, report, before, () => {
+            runCustomValidator(ctx, report, schema, json);
+          });
+        }
       });
     } else {
       validateUnevaluated(ctx, report, schema, json, unevaluatedKeys);
@@ -1117,22 +1168,14 @@ export function validate(
     }
   }
 
-  if (typeof ctx.options.customValidator === 'function') {
-    const { customValidator } = ctx.options;
-    const runCustomValidator = () => {
-      // customValidator may have been installed mid-validation, after this report started deferring
-      if (report.deferErrors) {
-        report.materializeErrors();
-      }
-      customValidator.call(ctx, report, schema, json);
-      // the hook may have mutated compiled nodes: invalidate every plan stored so far
-      planEpoch++;
-    };
+  if (!hookChained && typeof ctx.options.customValidator === 'function') {
     if (report.asyncTasks.length > asyncTasksBefore) {
       // async results for this node are not settled yet: run the hook once they are
-      deferUntilAsyncTasksComplete(ctx, report, runCustomValidator);
+      deferUntilAsyncTasksComplete(ctx, report, () => {
+        runCustomValidator(ctx, report, schema, json);
+      });
     } else {
-      runCustomValidator();
+      runCustomValidator(ctx, report, schema, json);
     }
   }
 
@@ -1141,6 +1184,9 @@ export function validate(
   }
   if (pushedDynamicScope) {
     dynamicScopeStack.pop();
+  }
+  if (unevaluatedScoped) {
+    report.__$unevaluatedScope--;
   }
 
   // we don't need the root pointer anymore

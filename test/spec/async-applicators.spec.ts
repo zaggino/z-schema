@@ -1,13 +1,10 @@
 import type { JsonSchema } from '../../src/json-schema-versions.ts';
+import type { Report } from '../../src/report.ts';
 
 import { describe, expect, it } from 'vitest';
 
 import { ZSchema } from '../../src/z-schema.ts';
-
-const nextTurn = () =>
-  new Promise<void>((resolve) => {
-    setTimeout(resolve, 0);
-  });
+import { nextTurn } from '../lib/async.ts';
 
 describe('async format applicators', () => {
   it('accepts a value rejected by an asynchronous not subschema', async () => {
@@ -325,22 +322,21 @@ describe('async format applicators', () => {
   });
 });
 
-interface LooseValidator {
-  validate: (json: unknown, schema: unknown) => Promise<{ valid: boolean; err?: Error }>;
-  registerFormat: (name: string, fn: () => Promise<boolean>) => void;
-}
+/** Narrows an unknown schema to an object carrying `key: value`. */
+const hasKeyword = (schema: unknown, key: string, value: unknown) =>
+  typeof schema === 'object' && schema !== null && key in schema && (schema as Record<string, unknown>)[key] === value;
 
-const createThrowing = (thrown: unknown, safe: boolean) => {
-  const validator = ZSchema.create({
-    async: true,
-    safe,
-    version: 'draft2020-12',
-    customValidator: (_report: unknown, schema: { title?: string }) => {
-      if (schema.title === 'boom') {
-        throw thrown;
-      }
-    },
-  } as never) as unknown as LooseValidator;
+const throwingOptions = (thrown: unknown) => ({
+  async: true as const,
+  version: 'draft2020-12' as const,
+  customValidator: (_report: Report, schema: unknown) => {
+    if (hasKeyword(schema, 'title', 'boom')) {
+      throw thrown;
+    }
+  },
+});
+
+const withGatedFormats = <T extends Pick<ZSchema, 'registerFormat'>>(validator: T) => {
   const g = Promise.withResolvers<boolean>();
   const f = Promise.withResolvers<boolean>();
   validator.registerFormat('g', () => g.promise);
@@ -348,15 +344,20 @@ const createThrowing = (thrown: unknown, safe: boolean) => {
   return { validator, g, f };
 };
 
+const createThrowing = (thrown: unknown) =>
+  withGatedFormats(ZSchema.create({ ...throwingOptions(thrown), safe: true }));
+
+const createRejecting = (thrown: unknown) => withGatedFormats(ZSchema.create(throwingOptions(thrown)));
+
 describe('async hardening', () => {
-  const throwingSchema = {
+  const throwingSchema: JsonSchema = {
     anyOf: [{ allOf: [{ format: 'g' }, { if: { format: 'f' }, then: { title: 'boom' } }] }, {}],
   };
 
-  // Pins step 1: a throw inside a nested deferred decision was swallowed (valid: true).
+  // A throw inside a nested deferred decision must surface as an error, not become a pass (valid: true).
   it('surfaces a throw from a nested deferred decision (safe)', async () => {
     const error = new TypeError('boom');
-    const { validator, g, f } = createThrowing(error, true);
+    const { validator, g, f } = createThrowing(error);
     const pending = validator.validate('x', throwingSchema);
     await nextTurn();
     f.resolve(true);
@@ -370,9 +371,8 @@ describe('async hardening', () => {
 
   it('rejects with a throw from a nested deferred decision (non-safe)', async () => {
     const error = new TypeError('boom');
-    const { validator, g, f } = createThrowing(error, false);
+    const { validator, g, f } = createRejecting(error);
     const pending = validator.validate('x', throwingSchema);
-    // oxlint-disable-next-line promise/prefer-await-to-then
     const outcome = pending.then(
       () => {},
       (error_: unknown) => error_
@@ -385,9 +385,9 @@ describe('async hardening', () => {
     expect(await outcome).toBe(error);
   });
 
-  // Pins step 1: non-Error throws are normalized with the thrown value as cause.
+  // Non-Error throws are normalized to an Error with the thrown value as cause.
   it.each([['str'], [undefined]])('wraps non-Error throw %s with cause', async (thrown) => {
-    const { validator, g, f } = createThrowing(thrown, true);
+    const { validator, g, f } = createThrowing(thrown);
     const pending = validator.validate('x', throwingSchema);
     await nextTurn();
     f.resolve(true);
@@ -399,10 +399,11 @@ describe('async hardening', () => {
     expect(result.err!.cause).toBe(thrown);
   });
 
-  // Pins step 1: a synchronous throw from a callback-style format must not hang or settle twice.
+  // A synchronous throw from a callback-style format must not hang or settle twice.
   it('reports a sync throw from a callback-style format exactly once', async () => {
     const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12' });
     const error = new Error('cb boom');
+    // Deliberately an undocumented shape: the 2-argument callback-style format is not part of the public type.
     validator.registerFormat('cb', ((_value: unknown, _cb: (r: boolean) => void) => {
       throw error;
     }) as never);
@@ -418,7 +419,7 @@ describe('async hardening', () => {
     expect(result.err).toBe(error);
   });
 
-  // Pins step 1: a nested timeout must not discard sibling errors.
+  // A nested timeout must not discard sibling errors.
   it('keeps sibling errors when a nested format times out', async () => {
     const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12', asyncTimeout: 50 });
     validator.registerFormat('never', () => new Promise<boolean>(() => {}));
@@ -438,7 +439,7 @@ describe('async hardening', () => {
     expect(details.find((d) => d.code === 'INVALID_TYPE')?.path).toBe('#/a');
   });
 
-  // Pins step 2: unevaluatedProperties / unevaluatedItems as schemas must wait for async formats.
+  // unevaluatedProperties / unevaluatedItems as schemas must wait for async formats.
   it('fails unevaluatedProperties schema when an async format rejects', async () => {
     const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12' });
     const bad = Promise.withResolvers<boolean>();
@@ -469,7 +470,7 @@ describe('async hardening', () => {
     expect(result.valid).toBe(true);
   });
 
-  it('reports unevaluatedProperties errors in key order across sync and async failures', async () => {
+  it('reports sync unevaluatedProperties failures first, then async ones in key order', async () => {
     const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12' });
     const a = Promise.withResolvers<boolean>();
     const c = Promise.withResolvers<boolean>();
@@ -491,7 +492,8 @@ describe('async hardening', () => {
       'OBJECT_UNEVALUATED_PROPERTIES',
       'OBJECT_UNEVALUATED_PROPERTIES',
     ]);
-    expect(details.map((d) => d.params)).toEqual([['a'], ['b'], ['c']]);
+    // Sync-failing key b is reported immediately; async keys a and c follow in key order regardless of settle order.
+    expect(details.map((d) => d.params)).toEqual([['b'], ['a'], ['c']]);
   });
 
   it('reports exactly one ARRAY_UNEVALUATED_ITEMS for async failing items', async () => {
@@ -513,7 +515,7 @@ describe('async hardening', () => {
     expect(result.err!.details![0].keyword).toBe('unevaluatedItems');
   });
 
-  // Pins step 2: a passing lone `if` contributes evaluated properties, even when async.
+  // A passing lone `if` contributes evaluated properties, even when its condition is async.
   it.each([
     [true, true],
     [false, false],
@@ -536,19 +538,19 @@ describe('async hardening', () => {
     }
   });
 
-  // Pins step 2: customValidator runs after async results of its node settle.
+  // customValidator runs only after the async results of its node have settled.
   it('lets customValidator see async format errors of its node', async () => {
     const seen: string[][] = [];
     const validator = ZSchema.create({
       async: true,
       safe: true,
       version: 'draft2020-12',
-      customValidator: (report: { errors: Array<{ code: string }> }, schema: { format?: string }) => {
-        if (schema.format === 'bad') {
+      customValidator: (report, schema) => {
+        if (hasKeyword(schema, 'format', 'bad')) {
           seen.push(report.errors.map((e) => e.code));
         }
       },
-    } as never);
+    });
     const bad = Promise.withResolvers<boolean>();
     validator.registerFormat('bad', () => bad.promise);
     const pending = validator.validate('x', { format: 'bad' });
@@ -561,7 +563,7 @@ describe('async hardening', () => {
     expect(seen[0]).toContain('INVALID_FORMAT');
   });
 
-  // Pins step 2: breakOnFirstError truncates late async errors to one.
+  // breakOnFirstError truncates late async errors to one.
   it('truncates to one detail with breakOnFirstError for two async failures', async () => {
     const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12', breakOnFirstError: true });
     const x = Promise.withResolvers<boolean>();
@@ -595,5 +597,123 @@ describe('async hardening', () => {
     const result = await pending;
     expect(result.valid).toBe(false);
     expect(result.err!.details).toHaveLength(1);
+  });
+
+  it('does not call the format of a lone if when nothing consumes its result', async () => {
+    const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12' });
+    let calls = 0;
+    validator.registerFormat('never', () => {
+      calls += 1;
+      return new Promise<boolean>(() => {});
+    });
+    const result = await validator.validate('x', { if: { format: 'never' } });
+
+    expect(result.valid).toBe(true);
+    expect(calls).toBe(0);
+  });
+
+  it('accepts a lone async-format if in sync mode without throwing', () => {
+    const validator = ZSchema.create({ safe: true, version: 'draft2020-12' });
+    validator.registerFormat('af', () => Promise.resolve(true));
+
+    expect(validator.validate('x', { if: { format: 'af' } }).valid).toBe(true);
+  });
+
+  // The lone `if` sits in an allOf branch, so its evaluated properties must reach the ancestor's unevaluatedProperties.
+  it.each([
+    [true, true],
+    [false, false],
+  ])(
+    'lone async if inside allOf resolving %s gives valid=%s under parent unevaluatedProperties:false',
+    async (condition, valid) => {
+      const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12' });
+      const af = Promise.withResolvers<boolean>();
+      validator.registerFormat('af', () => af.promise);
+      const pending = validator.validate(
+        { a: 'x' },
+        { allOf: [{ if: { properties: { a: { format: 'af' } } } }], unevaluatedProperties: false }
+      );
+      await nextTurn();
+      af.resolve(condition);
+
+      const result = await pending;
+      expect(result.valid).toBe(valid);
+      if (!valid) {
+        expect(result.err!.details!.map((d) => d.code)).toEqual(['OBJECT_UNEVALUATED_PROPERTIES']);
+      }
+    }
+  );
+
+  it('lets customValidator see OBJECT_UNEVALUATED_PROPERTIES from a deferred unevaluatedProperties schema', async () => {
+    const seen: string[][] = [];
+    const validator = ZSchema.create({
+      async: true,
+      safe: true,
+      version: 'draft2020-12',
+      customValidator: (report, schema) => {
+        if (hasKeyword(schema, 'type', 'object') && 'anyOf' in (schema as object)) {
+          seen.push(report.errors.map((e) => e.code));
+        }
+      },
+    });
+    const deferreds = new Map<string, PromiseWithResolvers<boolean>>();
+    validator.registerFormat('af', (value: unknown) => {
+      const d = Promise.withResolvers<boolean>();
+      deferreds.set(String(value), d);
+      return d.promise;
+    });
+    const pending = validator.validate(
+      { b: 'ok', a: 'bad' },
+      {
+        type: 'object',
+        anyOf: [{ properties: { b: { format: 'af' } } }],
+        unevaluatedProperties: { type: 'string', format: 'af' },
+      }
+    );
+    await nextTurn();
+    deferreds.get('ok')?.resolve(true);
+    await nextTurn();
+    deferreds.get('bad')?.resolve(false);
+
+    const result = await pending;
+    expect(result.valid).toBe(false);
+    expect(seen).toHaveLength(1);
+    expect(seen[0]).toContain('OBJECT_UNEVALUATED_PROPERTIES');
+  });
+
+  it('reports ARRAY_UNEVALUATED_ITEMS for a sync failure while an earlier item format never settles', async () => {
+    const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12', asyncTimeout: 50 });
+    validator.registerFormat('never', () => new Promise<boolean>(() => {}));
+    const result = await validator.validate(['long-enough', 5], {
+      unevaluatedItems: { type: 'string', format: 'never' },
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.err!.details!.map((d) => d.code)).toContain('ARRAY_UNEVALUATED_ITEMS');
+  });
+
+  it('reports ARRAY_UNEVALUATED_ITEMS for an item that failed synchronously while its own format never settles', async () => {
+    const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12', asyncTimeout: 50 });
+    validator.registerFormat('never', () => new Promise<boolean>(() => {}));
+    const result = await validator.validate(['long-enough', 'x'], {
+      unevaluatedItems: { minLength: 3, format: 'never' },
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.err!.details!.map((d) => d.code)).toContain('ARRAY_UNEVALUATED_ITEMS');
+  });
+
+  it('passes a null-prototype throw from customValidator in a deferred decision to the caller without hanging', async () => {
+    const thrown = Object.create(null);
+    const { validator, g, f } = createThrowing(thrown);
+    const pending = validator.validate('x', throwingSchema);
+    await nextTurn();
+    f.resolve(true);
+    g.resolve(false);
+
+    const result = await pending;
+    expect(result.valid).toBe(false);
+    expect(result.err).toBeInstanceOf(Error);
+    expect(result.err!.cause).toBe(thrown);
   });
 });

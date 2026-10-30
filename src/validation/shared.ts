@@ -22,6 +22,9 @@ export const shouldSkipValidate = (options: ValidateOptions, errors: readonly Er
   options.includeErrors.length > 0 &&
   !errors.some((err) => options.includeErrors!.includes(err));
 
+export const isModernDraft = (version: JsonSchemaVersion | 'none' | undefined) =>
+  version === 'draft2019-09' || version === 'draft2020-12';
+
 export const supportsDependentKeywords = (
   schema: JsonSchemaInternal,
   version: JsonSchemaVersion | 'none' | undefined
@@ -166,24 +169,28 @@ class AsyncAbort {
 
 /**
  * Preserve the traversal context needed by a decision made after async work resolves.
- * Snapshots the dynamic-scope stacks; the schema path is restored by `addAsyncTaskWithPath`.
+ * Snapshots the dynamic-scope stacks and the unevaluated-scope counter; the schema path is restored by `addAsyncTaskWithPath`.
  */
 function deferredContext(ctx: ZSchemaBase, report: Report, decisionFn: () => void): () => void {
   const recursiveScope = report.__$recursiveAnchorStack.slice();
   const dynamicScope = report.__$dynamicScopeStack.slice();
+  const unevaluatedScope = report.__$unevaluatedScope;
   return () => {
     const oldOptions = ctx.validateOptions;
     const oldRecursiveScope = report.__$recursiveAnchorStack;
     const oldDynamicScope = report.__$dynamicScopeStack;
+    const oldUnevaluatedScope = report.__$unevaluatedScope;
     ctx.validateOptions = report.validateOptions;
     report.__$recursiveAnchorStack = recursiveScope;
     report.__$dynamicScopeStack = dynamicScope;
+    report.__$unevaluatedScope = unevaluatedScope;
     try {
       decisionFn();
     } finally {
       ctx.validateOptions = oldOptions;
       report.__$recursiveAnchorStack = oldRecursiveScope;
       report.__$dynamicScopeStack = oldDynamicScope;
+      report.__$unevaluatedScope = oldUnevaluatedScope;
     }
   };
 }
@@ -212,7 +219,6 @@ export function deferOrRunSync(ctx: ZSchemaBase, report: Report, subReports: Rep
             return;
           }
           if (--pending === 0) {
-            // oxlint-disable-next-line node/callback-return -- terminal completion callback
             callback(null);
           }
         };
@@ -221,7 +227,6 @@ export function deferOrRunSync(ctx: ZSchemaBase, report: Report, subReports: Rep
             return;
           }
           aborted = true;
-          // oxlint-disable-next-line node/callback-return -- terminal failure callback
           callback(new AsyncAbort(error));
         };
         for (let i = 0; i < subReports.length; i++) {
@@ -260,4 +265,16 @@ export function deferUntilAsyncTasksComplete(ctx: ZSchemaBase, report: Report, d
     deferredContext(ctx, report, decisionFn),
     true
   );
+}
+
+/**
+ * Run `fn` once this report's async tasks have settled if the node added tasks since `tasksBefore`
+ * (deferred behind them, including tasks they add); otherwise run it immediately.
+ */
+export function runAfterPending(ctx: ZSchemaBase, report: Report, tasksBefore: number, fn: () => void): void {
+  if (report.asyncTasks.length > tasksBefore) {
+    deferUntilAsyncTasksComplete(ctx, report, fn);
+  } else {
+    fn();
+  }
 }

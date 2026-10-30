@@ -169,7 +169,7 @@ Applicators wait for asynchronous formats before deciding whether their subschem
 
 An exception thrown during async validation (for example from a `customValidator`) rejects the promise or is passed to the callback. Non-`Error` values are wrapped in an `Error` with `cause`. A rejected format promise counts as an invalid format.
 
-Error order: in async mode, errors from delayed decisions are added after later sibling errors, so the order of `details` can differ from sync mode.
+Error order: in async mode, errors from delayed decisions (including `unevaluatedProperties` keys validated by an async schema) are added after later sibling errors, so the order of `details` can differ from sync mode.
 
 The default timeout for async format validation is 2000ms, configurable per instance:
 

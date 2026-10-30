@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { ZSchema } from '../../src/z-schema.js';
+import { nextTurn } from '../lib/async.ts';
 
 const asyncValidValid = (input: unknown): Promise<boolean> =>
   Promise.resolve(typeof input === 'string' && input === 'valid');
@@ -92,13 +93,8 @@ describe('Async Format Validation Integration', () => {
   });
 });
 
-const nextTurn = () =>
-  new Promise<void>((resolve) => {
-    setTimeout(resolve, 0);
-  });
-
 describe('Async rejection handling', () => {
-  // Pins step 2: a rejected format promise whose task never runs must not become an unhandled rejection.
+  // A rejected format promise whose task never runs (skipped after a sync error) must not become an unhandled rejection.
   it('does not emit an unhandled rejection for a rejected format after a sync error', async () => {
     const validator = ZSchema.create({ async: true, safe: true, breakOnFirstError: true, version: 'draft2020-12' });
     validator.registerFormat('rejects', () => Promise.reject(new Error('x')));

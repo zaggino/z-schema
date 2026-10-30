@@ -2,7 +2,7 @@ import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 
 import { Report } from '../report.js';
-import { cacheValidationResult, deferOrRunSync } from './shared.js';
+import { cacheValidationResult, deferOrRunSync, isModernDraft } from './shared.js';
 
 // ---------------------------------------------------------------------------
 // allOf
@@ -120,8 +120,8 @@ export function ifValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchema
     return;
   }
   const noBranches = thenSchema === undefined && elseSchema === undefined;
-  // A passing lone `if` still contributes annotations to unevaluated*, so 2019-09+ caches its result.
-  if (noBranches && ctx.options.version !== 'draft2019-09' && ctx.options.version !== 'draft2020-12') {
+  // A lone `if` only matters as an annotation for an enclosing unevaluated* (2019-09+), so skip it otherwise.
+  if (noBranches && !(isModernDraft(ctx.options.version) && report.__$unevaluatedScope > 0)) {
     return;
   }
 

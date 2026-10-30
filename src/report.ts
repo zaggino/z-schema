@@ -280,6 +280,13 @@ export class Report {
   commonErrorMessage?: string;
   __$recursiveAnchorStack: JsonSchemaInternal[] = [];
   __$dynamicScopeStack: JsonSchemaInternal[] = [];
+  /**
+   * Number of enclosing schema nodes (at the current traversal point) that have `unevaluatedItems` or
+   * `unevaluatedProperties`. Inherited by sub-reports at creation. A lone `if` is evaluated only while > 0.
+   *
+   * @internal
+   */
+  __$unevaluatedScope = 0;
   __validationResultCache = new Map<unknown, Map<unknown, boolean>>();
   errors: SchemaErrorDetail[] = [];
   json?: unknown;
@@ -344,6 +351,7 @@ export class Report {
       this.validateOptions = validateOptions || parentOrOptions.validateOptions;
       this.__$recursiveAnchorStack = parentOrOptions.__$recursiveAnchorStack.slice();
       this.__$dynamicScopeStack = parentOrOptions.__$dynamicScopeStack.slice();
+      this.__$unevaluatedScope = parentOrOptions.__$unevaluatedScope;
       this.__validationResultCache = parentOrOptions.__validationResultCache;
     } else {
       // primary
@@ -446,8 +454,9 @@ export class Report {
     onAbort: (error: unknown) => void,
     defer: (fn: () => void) => void = queueMicrotask
   ): void {
-    const validationTimeout = timeout === undefined ? 0 : Math.min(Math.max(timeout || 2000, 0), MAX_ASYNC_TIMEOUT);
-    const timeoutAt = Date.now() + validationTimeout;
+    // Only the top level passes a timeout; `processAsyncTasks` owns the default. Sub-reports skip the clock.
+    const validationTimeout = timeout === undefined ? 0 : Math.min(Math.max(timeout, 0), MAX_ASYNC_TIMEOUT);
+    const timeoutAt = timeout === undefined ? 0 : Date.now() + validationTimeout;
     let tasksCount = this.asyncTasks.length;
     let timedOut = false;
     let finished = false;
@@ -455,21 +464,22 @@ export class Report {
     let tasksStarted = 0;
     let timer: ReturnType<typeof setTimeout> | undefined;
 
-    const finish = () => {
-      finished = true;
+    const stopTimer = () => {
       if (timer !== undefined) {
         clearTimeout(timer);
         timer = undefined;
       }
+    };
+
+    const finish = () => {
+      finished = true;
+      stopTimer();
       defer(onComplete);
     };
 
     const abort = (error: unknown) => {
       finished = true;
-      if (timer !== undefined) {
-        clearTimeout(timer);
-        timer = undefined;
-      }
+      stopTimer();
       onAbort(error);
     };
 
@@ -573,11 +583,23 @@ export class Report {
         callback(err, valid);
       },
       (error) => {
-        const normalized = error instanceof Error ? error : new Error(String(error), { cause: error });
+        let normalized: Error;
+        if (error instanceof Error) {
+          normalized = error;
+        } else {
+          let message: string;
+          try {
+            message = String(error);
+          } catch {
+            // e.g. Object.create(null) or a throwing toString
+            message = 'Non-Error value thrown';
+          }
+          normalized = new Error(message, { cause: error });
+        }
         // A thrown non-validation Error is passed through as-is, the same as the synchronous path.
-        setTimeout(() => {
+        deferToTimer(() => {
           callback(normalized, false);
-        }, 0);
+        });
       },
       deferToTimer
     );

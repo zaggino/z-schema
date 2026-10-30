@@ -1,20 +1,23 @@
+import type { JsonSchema } from '../../src/json-schema-versions.ts';
+import type { ValidateOptions } from '../../src/z-schema-base.ts';
 import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 
 import { describe, expect, it } from 'vitest';
 
 import { ZSchema } from '../../src/z-schema.ts';
+import { nextTurn } from '../lib/async.ts';
 
 /* oxlint-disable no-await-in-loop -- tests deliberately step resolution order across turns */
 
-const nextTurn = () =>
-  new Promise<void>((resolve) => {
-    setTimeout(resolve, 0);
-  });
-
 type Version = NonNullable<ZSchemaOptions['version']>;
 
+/** Turns to wait for a named format to be called; calls are made within a few chained microtask/timer hops of the previous resolution. */
+const TURNS_PER_ORDERED_FORMAT = 4;
+/** Upper bound on drain iterations; each iteration resolves every outstanding call, so nesting depth in these scenarios settles well within it. */
+const MAX_DRAIN_TURNS = 50;
+
 interface Scenario {
-  schema: unknown;
+  schema: JsonSchema;
   data: unknown;
   version?: Version;
   /** Result per format name, or a function of the checked value. `'reject'` rejects (async) / false (sync). */
@@ -27,7 +30,7 @@ interface Scenario {
 interface Call {
   name: string;
   value: string;
-  deferred: PromiseWithResolvers<unknown>;
+  deferred: PromiseWithResolvers<boolean>;
 }
 
 interface Summary {
@@ -63,7 +66,7 @@ const runSync = (s: Scenario): Summary => {
       return out === 'reject' ? false : (out as boolean);
     });
   }
-  return summarize(validator.validate(s.data, s.schema as never));
+  return summarize(validator.validate(s.data, s.schema));
 };
 
 const runAsync = async (s: Scenario): Promise<{ summary: Summary; calls: Call[] }> => {
@@ -76,11 +79,11 @@ const runAsync = async (s: Scenario): Promise<{ summary: Summary; calls: Call[] 
   const calls: Call[] = [];
   const done = new Set<Call>();
   for (const name of Object.keys(s.formats)) {
-    validator.registerFormat(name, ((value: unknown) => {
-      const call: Call = { name, value: String(value), deferred: Promise.withResolvers<unknown>() };
+    validator.registerFormat(name, (value: unknown) => {
+      const call: Call = { name, value: String(value), deferred: Promise.withResolvers<boolean>() };
       calls.push(call);
       return call.deferred.promise;
-    }) as never);
+    });
   }
   const resolveCall = (call: Call) => {
     done.add(call);
@@ -88,29 +91,34 @@ const runAsync = async (s: Scenario): Promise<{ summary: Summary; calls: Call[] 
     if (out === 'reject') {
       call.deferred.reject(new Error('format lookup failed'));
     } else {
-      call.deferred.resolve(out);
+      call.deferred.resolve(out as boolean);
     }
   };
   const state = { settled: false };
-  // oxlint-disable-next-line promise/prefer-await-to-then
-  const pending = validator.validate(s.data, s.schema as never).then((result) => {
+  const pending = (async () => {
+    const result = await validator.validate(s.data, s.schema);
     state.settled = true;
     return result;
-  });
+  })();
   await nextTurn();
   for (const name of s.order ?? []) {
-    for (let i = 0; i < 4; i += 1) {
+    let resolved = false;
+    for (let i = 0; i < TURNS_PER_ORDERED_FORMAT && !resolved; i += 1) {
       const found = calls.filter((c) => c.name === name && !done.has(c));
       if (found.length > 0) {
         for (const call of found) {
           resolveCall(call);
         }
-        break;
+        resolved = true;
+      } else {
+        await nextTurn();
       }
-      await nextTurn();
+    }
+    if (!resolved) {
+      throw new Error(`format ${name} was never called`);
     }
   }
-  for (let i = 0; i < 50 && !state.settled; i += 1) {
+  for (let i = 0; i < MAX_DRAIN_TURNS && !state.settled; i += 1) {
     for (const call of calls.filter((c) => !done.has(c)).toReversed()) {
       resolveCall(call);
     }
@@ -135,11 +143,11 @@ const matching =
 const setup = () => {
   const validator = ZSchema.create({ async: true, safe: true });
   const deferreds = new Map<string, PromiseWithResolvers<boolean>>();
-  validator.registerFormat('g', ((value: string) => {
+  validator.registerFormat('g', (value: unknown) => {
     const d = Promise.withResolvers<boolean>();
-    deferreds.set(value, d);
+    deferreds.set(String(value), d);
     return d.promise;
-  }) as never);
+  });
   return { validator, deferreds };
 };
 
@@ -150,32 +158,40 @@ describe('async applicator coverage', () => {
     const schema = {
       anyOf: [{ oneOf: [{ not: { format: 'A' } }, { if: { format: 'B' }, then: { format: 'C' } }] }],
     };
-    const orders = [
+    // C is only called once B has resolved true (then-branch), so orders listing C before B cannot be driven.
+    const ordersWithThen = [
       ['A', 'B', 'C'],
-      ['C', 'B', 'A'],
       ['B', 'A', 'C'],
       ['B', 'C', 'A'],
     ];
+    // With B false the then-branch never runs, so C is never called and must not appear in the order.
+    const ordersWithoutThen = [
+      ['A', 'B'],
+      ['B', 'A'],
+    ];
 
-    it.each(orders)('passes when only the if/then branch matches (order %s)', async (...order) => {
+    it.each(ordersWithThen)('passes when only the if/then branch matches (order %s)', async (...order) => {
       const summary = await parity({ schema, data: 'x', formats: { A: true, B: true, C: true }, order });
       expect(summary.valid).toBe(true);
       expect(summary.details).toEqual([]);
     });
 
-    it.each(orders)('fails with ANY_OF_MISSING when no oneOf branch matches (order %s)', async (...order) => {
+    it.each(ordersWithThen)('fails with ANY_OF_MISSING when no oneOf branch matches (order %s)', async (...order) => {
       const summary = await parity({ schema, data: 'x', formats: { A: true, B: true, C: false }, order });
       expect(summary.valid).toBe(false);
       expect(summary.details).toHaveLength(1);
       expect(summary.details[0]).toMatchObject({ code: 'ANY_OF_MISSING', path: '#/' });
     });
 
-    it.each(orders)('fails with ANY_OF_MISSING when both oneOf branches match (order %s)', async (...order) => {
-      const summary = await parity({ schema, data: 'x', formats: { A: false, B: false, C: true }, order });
-      expect(summary.valid).toBe(false);
-      expect(summary.details).toHaveLength(1);
-      expect(codes(summary)).toEqual(['ANY_OF_MISSING']);
-    });
+    it.each(ordersWithoutThen)(
+      'fails with ANY_OF_MISSING when both oneOf branches match (order %s)',
+      async (...order) => {
+        const summary = await parity({ schema, data: 'x', formats: { A: false, B: false, C: true }, order });
+        expect(summary.valid).toBe(false);
+        expect(summary.details).toHaveLength(1);
+        expect(codes(summary)).toEqual(['ANY_OF_MISSING']);
+      }
+    );
   });
 
   describe('oneOf', () => {
@@ -301,7 +317,7 @@ describe('async applicator coverage', () => {
   });
 
   describe('unevaluatedProperties', () => {
-    const nested = {
+    const nested: JsonSchema = {
       type: 'object',
       properties: { p: {} },
       allOf: [
@@ -405,18 +421,18 @@ describe('async applicator coverage', () => {
       }
     });
 
-    it('is deterministic regardless of resolution order', async () => {
+    it('skips the formats of a short-circuited branch and reports a single error', async () => {
       const s: Scenario = {
         schema: { oneOf: [{ allOf: [{ minLength: 10 }, { format: 'a' }] }, { format: 'b' }] },
         data: 'x',
         formats: { a: true, b: false },
         breakOnFirstError: true,
       };
-      const { summary: first } = await runAsync({ ...s, order: ['a', 'b'] });
-      const { summary: second } = await runAsync({ ...s, order: ['b', 'a'] });
-      expect(first).toEqual(second);
-      expect(first.details).toHaveLength(1);
-      expect(first.details[0].code).toBe('ONE_OF_MISSING');
+      // The sync minLength failure short-circuits the first branch, so format a is never called; only b is.
+      const { summary, calls } = await runAsync({ ...s, order: ['b'] });
+      expect(calls.map((c) => c.name)).toEqual(['b']);
+      expect(summary.details).toHaveLength(1);
+      expect(summary.details[0].code).toBe('ONE_OF_MISSING');
     });
   });
 
@@ -446,7 +462,7 @@ describe('async applicator coverage', () => {
   });
 
   describe('scope-sensitive dynamic references', () => {
-    const dynamicSchema = {
+    const dynamicSchema: JsonSchema = {
       $id: 'https://example.com/outer',
       $dynamicAnchor: 'T',
       if: { properties: { gate: { format: 'cond' } }, required: ['gate'] },
@@ -460,7 +476,7 @@ describe('async applicator coverage', () => {
         },
       },
     };
-    const recursiveSchema = {
+    const recursiveSchema: JsonSchema = {
       $id: 'https://example.com/outer',
       $recursiveAnchor: true,
       if: { properties: { gate: { format: 'cond' } }, required: ['gate'] },
@@ -474,7 +490,7 @@ describe('async applicator coverage', () => {
         },
       },
     };
-    const cases: Array<[string, Version, unknown]> = [
+    const cases: Array<[string, Version, JsonSchema]> = [
       ['$dynamicRef', 'draft2020-12', dynamicSchema],
       ['$recursiveRef', 'draft2019-09', recursiveSchema],
     ];
@@ -533,10 +549,10 @@ describe('async applicator coverage', () => {
   });
 
   describe('concurrency', () => {
-    const schemaOne = { anyOf: [{ format: 'g' }, { minLength: 50 }] };
-    const schemaTwo = { properties: { a: { format: 'g', maxLength: 1 } } };
-    const optionsOne = { includeErrors: ['ANY_OF_MISSING', 'INVALID_FORMAT', 'MIN_LENGTH'] } as never;
-    const optionsTwo = { excludeErrors: ['MAX_LENGTH'] } as never;
+    const schemaOne: JsonSchema = { anyOf: [{ format: 'g' }, { minLength: 50 }] };
+    const schemaTwo: JsonSchema = { properties: { a: { format: 'g', maxLength: 1 } } };
+    const optionsOne = { includeErrors: ['ANY_OF_MISSING', 'INVALID_FORMAT', 'MIN_LENGTH'] } satisfies ValidateOptions;
+    const optionsTwo = { excludeErrors: ['MAX_LENGTH'] } satisfies ValidateOptions;
 
     const orders = [
       ['two first', ['two', 'one']],
@@ -549,7 +565,9 @@ describe('async applicator coverage', () => {
       const two = validator.validate({ a: 'two' }, schemaTwo, optionsTwo);
       await nextTurn();
       for (const key of order) {
-        deferreds.get(key)!.resolve(false);
+        const deferred = deferreds.get(key);
+        expect(deferred, `format was never called for ${key}`).toBeDefined();
+        deferred?.resolve(false);
         await nextTurn();
       }
       const [r1, r2] = [summarize(await one), summarize(await two)];
@@ -569,7 +587,9 @@ describe('async applicator coverage', () => {
       const two = compiledTwo({ a: 'two' }, optionsTwo);
       await nextTurn();
       for (const key of order) {
-        deferreds.get(key)!.resolve(false);
+        const deferred = deferreds.get(key);
+        expect(deferred, `format was never called for ${key}`).toBeDefined();
+        deferred?.resolve(false);
         await nextTurn();
       }
       const [r1, r2] = [summarize(await one), summarize(await two)];
@@ -586,7 +606,7 @@ describe('async applicator coverage', () => {
       keyword?: string;
       inner?: number;
     }
-    const cases: Array<[string, unknown, unknown, Expected]> = [
+    const cases: Array<[string, unknown, JsonSchema, Expected]> = [
       [
         'anyOf',
         5,
@@ -622,12 +642,12 @@ describe('async applicator coverage', () => {
       '%s (breakOnFirstError=%s)',
       (_n, data, schema, expected, breakOnFirstError) => {
         const validator = ZSchema.create({ safe: true, breakOnFirstError });
-        const result = validator.validate(data, schema as never);
+        const result = validator.validate(data, schema);
         expect(result.valid).toBe(false);
         const details = result.err!.details!;
         expect(details).toHaveLength(1);
         expect(details[0]).toMatchObject({ code: expected.code, path: '#/', schemaPath: [] });
-        expect((details[0] as { keyword?: string }).keyword).toBe(expected.keyword);
+        expect(details[0].keyword).toBe(expected.keyword);
         expect(details[0].inner?.length).toBe(expected.inner);
       }
     );

@@ -380,7 +380,7 @@ const validator = ZSchema.create({
 
 Register a function that is called on every sub-schema during validation. Use this for custom cross-field validation logic that cannot be expressed in standard JSON Schema.
 
-In async mode, it runs after the node's async results are in.
+In async mode, it runs after the node's async results are in (including the async results of `unevaluatedProperties`/`unevaluatedItems` schemas of that node). With `breakOnFirstError`, a hook deferred behind pending async work may not run once an error has already stopped the validation.
 
 > **Performance:** The custom validator function is invoked for **every** sub-schema during JSON validation. Keep the function fast and avoid expensive operations (network calls, heavy computation) inside it. For field-level checks, prefer [custom formats](features.md#register-a-custom-format) which only run when the `format` keyword is present.
 

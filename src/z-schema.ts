@@ -178,7 +178,7 @@ export class ZSchema extends ZSchemaBase {
    * @param json - The data to validate.
    * @param schema - A JSON Schema object or a schema id string.
    * @param options - Per-call options.
-   * @returns A promise resolving to `{ valid: true }` or `{ valid: false, err: ValidateError }`.
+   * @returns A promise resolving to `{ valid: true }` or `{ valid: false, err: ValidateError }`. err can be a plain `Error` rather than a `ValidateError` when validation throws (for example from a `customValidator`); a thrown non-`Error` value is wrapped in an `Error` with `cause`.
    */
   validateAsyncSafe(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): Promise<ValidateResponse> {
     return new Promise((resolve) => {
@@ -351,7 +351,7 @@ export class ZSchemaAsyncSafe extends ZSchemaBase {
    * @param json - The data to validate.
    * @param schema - A JSON Schema object or a schema id string.
    * @param options - Per-call options.
-   * @returns A promise resolving to `{ valid: true }` or `{ valid: false, err: ValidateError }`.
+   * @returns A promise resolving to `{ valid: true }` or `{ valid: false, err: ValidateError }`. err can be a plain `Error` rather than a `ValidateError` when validation throws (for example from a `customValidator`); a thrown non-`Error` value is wrapped in an `Error` with `cause`.
    */
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<ValidateResponse> {
     return new Promise((resolve) => {
