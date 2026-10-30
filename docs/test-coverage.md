@@ -12,7 +12,7 @@ Line coverage status: **high**
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
 | src/json-validation.ts        |     90% |         90% |        84% |      89% |
-| src/report.ts                 |     92% |         92% |        79% |      90% |
+| src/report.ts                 |     89% |         89% |        77% |      88% |
 | src/schema-cache.ts           |     95% |         95% |       100% |      90% |
 | src/schema-compiler.ts        |     94% |         94% |       100% |      90% |
 | src/schema-validator.ts       |     78% |         78% |       100% |      76% |
@@ -34,7 +34,7 @@ Line coverage status: **high**
 | src/utils/uri.ts              |     88% |         88% |        80% |      91% |
 | src/utils/what-is.ts          |     81% |         81% |       100% |      85% |
 | src/validation/array.ts       |     92% |         93% |        60% |      91% |
-| src/validation/combinators.ts |     97% |         97% |        82% |      96% |
+| src/validation/combinators.ts |     97% |         97% |        82% |      95% |
 | src/validation/numeric.ts     |     90% |         90% |       100% |      91% |
 | src/validation/object.ts      |     89% |         90% |       100% |      86% |
 | src/validation/ref.ts         |     97% |         97% |       100% |      94% |
@@ -46,4 +46,4 @@ Line coverage status: **high**
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
 | src/z-schema.ts               |     84% |         85% |        89% |      83% |
-| **Total**                     | **91%** |     **92%** |    **92%** |  **89%** |
+| **Total**                     | **91%** |     **91%** |    **92%** |  **89%** |
