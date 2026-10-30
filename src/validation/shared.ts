@@ -169,28 +169,28 @@ class AsyncAbort {
 
 /**
  * Preserve the traversal context needed by a decision made after async work resolves.
- * Snapshots the dynamic-scope stacks and the unevaluated-scope counter; the schema path is restored by `addAsyncTaskWithPath`.
+ * Snapshots the dynamic-scope stacks and the unevaluated-instance scope; the schema path is restored by `addAsyncTaskWithPath`.
  */
 function deferredContext(ctx: ZSchemaBase, report: Report, decisionFn: () => void): () => void {
   const recursiveScope = report.__$recursiveAnchorStack.slice();
   const dynamicScope = report.__$dynamicScopeStack.slice();
-  const unevaluatedScope = report.__$unevaluatedScope;
+  const unevaluatedInstance = report.__$unevaluatedInstance;
   return () => {
     const oldOptions = ctx.validateOptions;
     const oldRecursiveScope = report.__$recursiveAnchorStack;
     const oldDynamicScope = report.__$dynamicScopeStack;
-    const oldUnevaluatedScope = report.__$unevaluatedScope;
+    const oldUnevaluatedInstance = report.__$unevaluatedInstance;
     ctx.validateOptions = report.validateOptions;
     report.__$recursiveAnchorStack = recursiveScope;
     report.__$dynamicScopeStack = dynamicScope;
-    report.__$unevaluatedScope = unevaluatedScope;
+    report.__$unevaluatedInstance = unevaluatedInstance;
     try {
       decisionFn();
     } finally {
       ctx.validateOptions = oldOptions;
       report.__$recursiveAnchorStack = oldRecursiveScope;
       report.__$dynamicScopeStack = oldDynamicScope;
-      report.__$unevaluatedScope = oldUnevaluatedScope;
+      report.__$unevaluatedInstance = oldUnevaluatedInstance;
     }
   };
 }

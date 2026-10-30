@@ -153,6 +153,16 @@ const setup = () => {
 
 const codes = (summary: Summary) => summary.details.map((d) => d.code);
 
+/** Rejects the deferred format call for each key in order, one turn apart. */
+const rejectInOrder = async (deferreds: Map<string, PromiseWithResolvers<boolean>>, order: string[]) => {
+  for (const key of order) {
+    const deferred = deferreds.get(key);
+    expect(deferred, `format was never called for ${key}`).toBeDefined();
+    deferred?.resolve(false);
+    await nextTurn();
+  }
+};
+
 describe('async applicator coverage', () => {
   describe('deep nesting', () => {
     const schema = {
@@ -255,12 +265,7 @@ describe('async applicator coverage', () => {
         order: ['m'],
       });
       expect(summary.valid).toBe(valid);
-      if (valid) {
-        expect(summary.details).toEqual([]);
-      } else {
-        expect(summary.details).toHaveLength(1);
-        expect(summary.details[0]).toMatchObject({ code: 'CONTAINS', path: '#/' });
-      }
+      expect(summary.details).toMatchObject(valid ? [] : [{ code: 'CONTAINS', path: '#/' }]);
     });
   });
 
@@ -334,16 +339,17 @@ describe('async applicator coverage', () => {
     };
 
     it.each([
-      ['branch passes', { c: 1, x: 'a' }, true],
-      ['branch fails', { c: 1, x: 'a' }, false],
-      ['extra property unevaluated at both levels', { c: 1, x: 'a', z: 1 }, true],
-    ] as Array<[string, object, boolean]>)('nested levels with async oneOf: %s', async (_n, data, f) => {
-      const summary = await parity({ schema: nested, data, formats: { f, g: true }, order: ['f'] });
-      expect(summary.valid).toBe(f && !('z' in data));
-      if (!summary.valid) {
-        expect(summary.details.length).toBeGreaterThan(0);
+      ['branch passes', { c: 1, x: 'a' }, true, true],
+      ['branch fails', { c: 1, x: 'a' }, false, false],
+      ['extra property unevaluated at both levels', { c: 1, x: 'a', z: 1 }, true, false],
+    ] as Array<[string, object, boolean, boolean]>)(
+      'nested levels with async oneOf: %s',
+      async (_n, data, f, valid) => {
+        const summary = await parity({ schema: nested, data, formats: { f, g: true }, order: ['f'] });
+        expect(summary.valid).toBe(valid);
+        expect(summary.details.length > 0).toBe(!valid);
       }
-    });
+    );
 
     const refSchema = {
       $defs: { child: { properties: { a: {} }, unevaluatedProperties: { type: 'number' } } },
@@ -564,12 +570,7 @@ describe('async applicator coverage', () => {
       const one = validator.validate('one', schemaOne, optionsOne);
       const two = validator.validate({ a: 'two' }, schemaTwo, optionsTwo);
       await nextTurn();
-      for (const key of order) {
-        const deferred = deferreds.get(key);
-        expect(deferred, `format was never called for ${key}`).toBeDefined();
-        deferred?.resolve(false);
-        await nextTurn();
-      }
+      await rejectInOrder(deferreds, order);
       const [r1, r2] = [summarize(await one), summarize(await two)];
       expect(r1.valid).toBe(false);
       expect(r1.details).toHaveLength(1);
@@ -586,12 +587,7 @@ describe('async applicator coverage', () => {
       const one = compiledOne('one', optionsOne);
       const two = compiledTwo({ a: 'two' }, optionsTwo);
       await nextTurn();
-      for (const key of order) {
-        const deferred = deferreds.get(key);
-        expect(deferred, `format was never called for ${key}`).toBeDefined();
-        deferred?.resolve(false);
-        await nextTurn();
-      }
+      await rejectInOrder(deferreds, order);
       const [r1, r2] = [summarize(await one), summarize(await two)];
       expect(r1.details).toHaveLength(1);
       expect(r1.details[0]).toMatchObject({ code: 'ANY_OF_MISSING', path: '#/' });

@@ -273,20 +273,23 @@ export class Report {
   asyncTasks: AsyncTask[] = [];
   /**
    * Tasks queued with `afterPending`. They start only once every regular task of this report
-   * (including tasks those add while running) has completed, then are moved to `asyncTasks`.
+   * (including tasks those add while running) has completed, then are moved to `asyncTasks` one at a time.
    * Used for `unevaluated*` checks and the `customValidator` hook, which need settled results.
+   *
+   * @internal
    */
   deferredAsyncTasks?: AsyncTask[];
   commonErrorMessage?: string;
   __$recursiveAnchorStack: JsonSchemaInternal[] = [];
   __$dynamicScopeStack: JsonSchemaInternal[] = [];
   /**
-   * Number of enclosing schema nodes (at the current traversal point) that have `unevaluatedItems` or
-   * `unevaluatedProperties`. Inherited by sub-reports at creation. A lone `if` is evaluated only while > 0.
+   * The instance value of the innermost schema node being traversed that has `unevaluatedItems` or
+   * `unevaluatedProperties`. Inherited by sub-reports at creation. A lone `if` is evaluated only when
+   * its instance is this value (annotations attach to the same instance location).
    *
    * @internal
    */
-  __$unevaluatedScope = 0;
+  __$unevaluatedInstance: unknown = undefined;
   __validationResultCache = new Map<unknown, Map<unknown, boolean>>();
   errors: SchemaErrorDetail[] = [];
   json?: unknown;
@@ -351,7 +354,7 @@ export class Report {
       this.validateOptions = validateOptions || parentOrOptions.validateOptions;
       this.__$recursiveAnchorStack = parentOrOptions.__$recursiveAnchorStack.slice();
       this.__$dynamicScopeStack = parentOrOptions.__$dynamicScopeStack.slice();
-      this.__$unevaluatedScope = parentOrOptions.__$unevaluatedScope;
+      this.__$unevaluatedInstance = parentOrOptions.__$unevaluatedInstance;
       this.__validationResultCache = parentOrOptions.__validationResultCache;
     } else {
       // primary
@@ -433,15 +436,17 @@ export class Report {
 
   /**
    * Drains pending async tasks, reporting completion or abort separately.
-   * Internal: used by {@link processAsyncTasks} and by sub-report coordination.
    *
-   * Completion: all tasks (and then the `afterPending` ones) settled, or the top level has
-   * already recorded an error under `breakOnFirstError`; `onComplete` is scheduled via `defer`.
-   * Abort: a task or its result processing threw; `onAbort` receives the thrown value and
-   * `onComplete` is not called. Only the top-level report passes a timeout, so only it has a
-   * timer; the timer starts only if tasks remain after the first run and is cleared on
-   * completion or abort. Sub-reports have no timer: the top-level timeout bounds the whole validation.
-   * The timeout path adds `ASYNC_TIMEOUT` and calls `onComplete` directly, not through `defer`.
+   * - Complete vs abort: `onComplete` is scheduled via `defer` once all tasks settled (or the top level
+   *   already has an error under `breakOnFirstError`). If a task or its result processing throws,
+   *   `onAbort` receives the thrown value and `onComplete` is not called.
+   * - Timer: only the top level passes a timeout and so owns a timer; sub-reports have none, the
+   *   top-level timeout bounds the whole validation. The timeout path adds `ASYNC_TIMEOUT` and calls
+   *   `onComplete` directly, not through `defer`.
+   * - Deferred tasks ({@link deferredAsyncTasks}) start only after all regular tasks settled, one at a
+   *   time, with tasks deferred by a running one going first (nested before outer).
+   *
+   * @internal
    *
    * @param timeout - Timeout in milliseconds; when `undefined`, no timer runs and the caller bounds the work.
    * @param onComplete - Called when all tasks settled, or after an `ASYNC_TIMEOUT` error was added to this report.
@@ -454,10 +459,11 @@ export class Report {
     onAbort: (error: unknown) => void,
     defer: (fn: () => void) => void = queueMicrotask
   ): void {
-    // Only the top level passes a timeout; `processAsyncTasks` owns the default. Sub-reports skip the clock.
-    const validationTimeout = timeout === undefined ? 0 : Math.min(Math.max(timeout, 0), MAX_ASYNC_TIMEOUT);
-    const timeoutAt = timeout === undefined ? 0 : Date.now() + validationTimeout;
+    // The top-level clock starts before the first synchronous pass, as it always has; sub-reports skip it.
+    const startedAt = timeout === undefined ? 0 : Date.now();
     let tasksCount = this.asyncTasks.length;
+    // Deferred tasks not yet started; they run one at a time, see runTasks.
+    let deferredQueue: AsyncTask[] = [];
     let timedOut = false;
     let finished = false;
     let running = false;
@@ -472,12 +478,18 @@ export class Report {
     };
 
     const finish = () => {
+      if (finished) {
+        return;
+      }
       finished = true;
       stopTimer();
       defer(onComplete);
     };
 
     const abort = (error: unknown) => {
+      if (finished) {
+        return;
+      }
       finished = true;
       stopTimer();
       onAbort(error);
@@ -511,15 +523,18 @@ export class Report {
             const [fn, fnArgs, processFn] = this.asyncTasks[tasksStarted++];
             fn.apply(undefined, fnArgs.concat(respond(processFn)));
           }
-          if (finished || tasksCount > 0 || !this.deferredAsyncTasks?.length) {
+          if (finished || tasksCount > 0 || (!this.deferredAsyncTasks?.length && deferredQueue.length === 0)) {
             break;
           }
-          const deferred = this.deferredAsyncTasks;
+          // Deferred tasks run one at a time. Tasks deferred while the previous one ran (nested nodes,
+          // chained hooks) go ahead of the older ones, so inner work and hooks settle before outer ones.
+          // E.g. root [childUneval(D1), rootHook(D2)]: D1 queues regular task T and chained child hook D3.
+          // Once T settles the queue is [D3, D2]: the child hook runs, then the root hook sees T's errors.
+          const queue = (this.deferredAsyncTasks ?? []).concat(deferredQueue);
           this.deferredAsyncTasks = undefined;
-          tasksCount = deferred.length;
-          for (let i = 0; i < deferred.length; i++) {
-            this.asyncTasks.push(deferred[i]);
-          }
+          this.asyncTasks.push(queue[0]);
+          tasksCount = 1;
+          deferredQueue = queue.slice(1);
         }
       } catch (error) {
         running = false;
@@ -534,7 +549,10 @@ export class Report {
 
     // Finish early only at the top level, once an error exists under breakOnFirstError. Sub-reports
     // must still run their tasks: their errors are just one branch's result and the parent waits on them.
-    if (tasksCount === 0 || (!this.parentReport && this.errors.length > 0 && this.options.breakOnFirstError)) {
+    if (
+      (tasksCount === 0 && !this.deferredAsyncTasks?.length) ||
+      (!this.parentReport && this.errors.length > 0 && this.options.breakOnFirstError)
+    ) {
       finish();
       return;
     }
@@ -544,6 +562,10 @@ export class Report {
     if (timeout === undefined || finished || tasksCount <= 0) {
       return;
     }
+
+    // Only the top level passes a timeout; `processAsyncTasks` owns the default. Sub-reports skip the clock.
+    const validationTimeout = Math.min(Math.max(timeout, 0), MAX_ASYNC_TIMEOUT);
+    const timeoutAt = startedAt + validationTimeout;
 
     const checkTimeout = () => {
       if (timedOut || finished || tasksCount <= 0) {

@@ -120,8 +120,9 @@ export function ifValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchema
     return;
   }
   const noBranches = thenSchema === undefined && elseSchema === undefined;
-  // A lone `if` only matters as an annotation for an enclosing unevaluated* (2019-09+), so skip it otherwise.
-  if (noBranches && !(isModernDraft(ctx.options.version) && report.__$unevaluatedScope > 0)) {
+  // A lone `if` only matters as an annotation for an unevaluated* at the same instance (2019-09+), so skip it
+  // otherwise. Annotations attach to the instance location, so child instances don't count.
+  if (noBranches && !(isModernDraft(ctx.options.version) && report.__$unevaluatedInstance === json)) {
     return;
   }
 
@@ -130,9 +131,6 @@ export function ifValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchema
   if (conditionReport.asyncTasks.length > 0) {
     deferOrRunSync(ctx, report, [conditionReport], () => {
       cacheValidationResult(report, conditionSchema, json, conditionReport.errors.length === 0);
-      if (noBranches) {
-        return;
-      }
       const selected = conditionReport.errors.length === 0 ? thenSchema : elseSchema;
       if (selected !== undefined) {
         ctx._jsonValidate(report, selected, json);

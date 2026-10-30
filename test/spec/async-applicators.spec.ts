@@ -323,8 +323,14 @@ describe('async format applicators', () => {
 });
 
 /** Narrows an unknown schema to an object carrying `key: value`. */
-const hasKeyword = (schema: unknown, key: string, value: unknown) =>
+const hasKeyword = (schema: unknown, key: string, value: unknown): schema is Record<string, unknown> =>
   typeof schema === 'object' && schema !== null && key in schema && (schema as Record<string, unknown>)[key] === value;
+
+interface ResultLike {
+  err?: { details?: Array<{ code: string }> };
+}
+const details = (r: ResultLike) => r.err?.details ?? [];
+const codes = (r: ResultLike) => details(r).map((d) => d.code);
 
 const throwingOptions = (thrown: unknown) => ({
   async: true as const,
@@ -434,9 +440,8 @@ describe('async hardening', () => {
     );
 
     expect(result.valid).toBe(false);
-    const details = result.err!.details!;
-    expect(details.map((d) => d.code)).toContain('ASYNC_TIMEOUT');
-    expect(details.find((d) => d.code === 'INVALID_TYPE')?.path).toBe('#/a');
+    expect(codes(result)).toContain('ASYNC_TIMEOUT');
+    expect(result.err!.details!.find((d) => d.code === 'INVALID_TYPE')?.path).toBe('#/a');
   });
 
   // unevaluatedProperties / unevaluatedItems as schemas must wait for async formats.
@@ -450,12 +455,13 @@ describe('async hardening', () => {
 
     const result = await pending;
     expect(result.valid).toBe(false);
-    expect(result.err!.details).toHaveLength(1);
-    expect(result.err!.details![0].code).toBe('OBJECT_UNEVALUATED_PROPERTIES');
-    expect(result.err!.details![0].params).toEqual(['a']);
-    expect(result.err!.details![0].path).toBe('#/');
-    expect(result.err!.details![0].schemaPath).toEqual([]);
-    expect(result.err!.details![0].keyword).toBe('unevaluatedProperties');
+    const errs = result.err!.details!;
+    expect(errs).toHaveLength(1);
+    expect(errs[0].code).toBe('OBJECT_UNEVALUATED_PROPERTIES');
+    expect(errs[0].params).toEqual(['a']);
+    expect(errs[0].path).toBe('#/');
+    expect(errs[0].schemaPath).toEqual([]);
+    expect(errs[0].keyword).toBe('unevaluatedProperties');
   });
 
   it('passes unevaluatedProperties schema when an async format accepts', async () => {
@@ -486,14 +492,13 @@ describe('async hardening', () => {
 
     const result = await pending;
     expect(result.valid).toBe(false);
-    const details = result.err!.details!;
-    expect(details.map((d) => d.code)).toEqual([
+    expect(codes(result)).toEqual([
       'OBJECT_UNEVALUATED_PROPERTIES',
       'OBJECT_UNEVALUATED_PROPERTIES',
       'OBJECT_UNEVALUATED_PROPERTIES',
     ]);
     // Sync-failing key b is reported immediately; async keys a and c follow in key order regardless of settle order.
-    expect(details.map((d) => d.params)).toEqual([['b'], ['a'], ['c']]);
+    expect(result.err!.details!.map((d) => d.params)).toEqual([['b'], ['a'], ['c']]);
   });
 
   it('reports exactly one ARRAY_UNEVALUATED_ITEMS for async failing items', async () => {
@@ -509,17 +514,18 @@ describe('async hardening', () => {
 
     const result = await pending;
     expect(result.valid).toBe(false);
-    expect(result.err!.details).toHaveLength(1);
-    expect(result.err!.details![0].code).toBe('ARRAY_UNEVALUATED_ITEMS');
-    expect(result.err!.details![0].schemaPath).toEqual([]);
-    expect(result.err!.details![0].keyword).toBe('unevaluatedItems');
+    const errs = result.err!.details!;
+    expect(errs).toHaveLength(1);
+    expect(errs[0].code).toBe('ARRAY_UNEVALUATED_ITEMS');
+    expect(errs[0].schemaPath).toEqual([]);
+    expect(errs[0].keyword).toBe('unevaluatedItems');
   });
 
   // A passing lone `if` contributes evaluated properties, even when its condition is async.
   it.each([
-    [true, true],
-    [false, false],
-  ])('lone async if resolving %s gives valid=%s with unevaluatedProperties:false', async (condition, valid) => {
+    [true, []],
+    [false, ['OBJECT_UNEVALUATED_PROPERTIES']],
+  ])('lone async if resolving %s gives codes %j with unevaluatedProperties:false', async (condition, expectedCodes) => {
     const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12' });
     const af = Promise.withResolvers<boolean>();
     validator.registerFormat('af', () => af.promise);
@@ -531,11 +537,8 @@ describe('async hardening', () => {
     af.resolve(condition);
 
     const result = await pending;
-    expect(result.valid).toBe(valid);
-    if (!valid) {
-      expect(result.err!.details).toHaveLength(1);
-      expect(result.err!.details![0].code).toBe('OBJECT_UNEVALUATED_PROPERTIES');
-    }
+    expect(result.valid).toBe(expectedCodes.length === 0);
+    expect(codes(result)).toEqual(expectedCodes);
   });
 
   // customValidator runs only after the async results of its node have settled.
@@ -580,7 +583,7 @@ describe('async hardening', () => {
 
     const result = await pending;
     expect(result.valid).toBe(false);
-    expect(result.err!.details).toHaveLength(1);
+    expect(details(result)).toHaveLength(1);
   });
 
   it('truncates to one detail with breakOnFirstError for sync type error plus async failure', async () => {
@@ -596,7 +599,7 @@ describe('async hardening', () => {
 
     const result = await pending;
     expect(result.valid).toBe(false);
-    expect(result.err!.details).toHaveLength(1);
+    expect(details(result)).toHaveLength(1);
   });
 
   it('does not call the format of a lone if when nothing consumes its result', async () => {
@@ -621,11 +624,11 @@ describe('async hardening', () => {
 
   // The lone `if` sits in an allOf branch, so its evaluated properties must reach the ancestor's unevaluatedProperties.
   it.each([
-    [true, true],
-    [false, false],
+    [true, []],
+    [false, ['OBJECT_UNEVALUATED_PROPERTIES']],
   ])(
-    'lone async if inside allOf resolving %s gives valid=%s under parent unevaluatedProperties:false',
-    async (condition, valid) => {
+    'lone async if inside allOf resolving %s gives codes %j under parent unevaluatedProperties:false',
+    async (condition, expectedCodes) => {
       const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12' });
       const af = Promise.withResolvers<boolean>();
       validator.registerFormat('af', () => af.promise);
@@ -637,10 +640,8 @@ describe('async hardening', () => {
       af.resolve(condition);
 
       const result = await pending;
-      expect(result.valid).toBe(valid);
-      if (!valid) {
-        expect(result.err!.details!.map((d) => d.code)).toEqual(['OBJECT_UNEVALUATED_PROPERTIES']);
-      }
+      expect(result.valid).toBe(expectedCodes.length === 0);
+      expect(codes(result)).toEqual(expectedCodes);
     }
   );
 
@@ -651,7 +652,7 @@ describe('async hardening', () => {
       safe: true,
       version: 'draft2020-12',
       customValidator: (report, schema) => {
-        if (hasKeyword(schema, 'type', 'object') && 'anyOf' in (schema as object)) {
+        if (hasKeyword(schema, 'type', 'object') && 'anyOf' in schema) {
           seen.push(report.errors.map((e) => e.code));
         }
       },
@@ -689,7 +690,7 @@ describe('async hardening', () => {
     });
 
     expect(result.valid).toBe(false);
-    expect(result.err!.details!.map((d) => d.code)).toContain('ARRAY_UNEVALUATED_ITEMS');
+    expect(codes(result)).toContain('ARRAY_UNEVALUATED_ITEMS');
   });
 
   it('reports ARRAY_UNEVALUATED_ITEMS for an item that failed synchronously while its own format never settles', async () => {
@@ -700,7 +701,7 @@ describe('async hardening', () => {
     });
 
     expect(result.valid).toBe(false);
-    expect(result.err!.details!.map((d) => d.code)).toContain('ARRAY_UNEVALUATED_ITEMS');
+    expect(codes(result)).toContain('ARRAY_UNEVALUATED_ITEMS');
   });
 
   it('passes a null-prototype throw from customValidator in a deferred decision to the caller without hanging', async () => {
@@ -715,5 +716,138 @@ describe('async hardening', () => {
     expect(result.valid).toBe(false);
     expect(result.err).toBeInstanceOf(Error);
     expect(result.err!.cause).toBe(thrown);
+  });
+
+  // A lone `if` is only evaluated when an enclosing unevaluated* node sits at the same instance.
+  const childLoneIf: JsonSchema = {
+    properties: { a: { if: { format: 'asyncFmt' } } },
+    unevaluatedProperties: false,
+  };
+
+  it('does not call or throw on a lone async if at a child instance in sync mode', () => {
+    const validator = ZSchema.create({ version: 'draft2020-12' });
+    let calls = 0;
+    validator.registerFormat('asyncFmt', () => {
+      calls += 1;
+      return Promise.resolve(true);
+    });
+
+    expect(validator.validate({ a: 'x' }, childLoneIf)).toBe(true);
+    expect(calls).toBe(0);
+  });
+
+  it('does not call a lone async if at a child instance in async mode', async () => {
+    const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12' });
+    let calls = 0;
+    validator.registerFormat('asyncFmt', () => {
+      calls += 1;
+      return Promise.resolve(true);
+    });
+    const result = await validator.validate({ a: 'x' }, childLoneIf);
+
+    expect(result.valid).toBe(true);
+    expect(calls).toBe(0);
+  });
+
+  // The sub-report of an anyOf branch inherits the unevaluated scope, so the lone `if` still contributes.
+  it.each([
+    [true, []],
+    [false, ['OBJECT_UNEVALUATED_PROPERTIES']],
+  ])('lone async if inside anyOf branch resolving %s gives codes %j', async (condition, expectedCodes) => {
+    const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12' });
+    const af = Promise.withResolvers<boolean>();
+    validator.registerFormat('af', () => af.promise);
+    const pending = validator.validate(
+      { a: 'x' },
+      {
+        anyOf: [{ if: { properties: { a: { format: 'af' } } } }],
+        unevaluatedProperties: false,
+      }
+    );
+    await nextTurn();
+    af.resolve(condition);
+
+    const result = await pending;
+    expect(result.valid).toBe(expectedCodes.length === 0);
+    expect(codes(result)).toEqual(expectedCodes);
+  });
+
+  // Deferred restoration: the lone `if` sits in a then-branch selected by an async condition.
+  it.each([
+    [true, []],
+    [false, ['OBJECT_UNEVALUATED_PROPERTIES']],
+  ])(
+    'lone async if inside async-selected then resolving %s gives codes %j (async equals sync)',
+    async (condition, expectedCodes) => {
+      const schema: JsonSchema = {
+        if: { format: 'sel' },
+        then: { if: { properties: { a: { format: 'af' } } } },
+        unevaluatedProperties: false,
+      };
+      const syncValidator = ZSchema.create({ safe: true, version: 'draft2020-12' });
+      syncValidator.registerFormat('sel', () => true);
+      syncValidator.registerFormat('af', () => condition);
+      const syncResult = syncValidator.validate({ a: 'x' }, schema);
+      expect(codes(syncResult)).toEqual(expectedCodes);
+
+      const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12' });
+      const sel = Promise.withResolvers<boolean>();
+      const af = Promise.withResolvers<boolean>();
+      validator.registerFormat('sel', () => sel.promise);
+      validator.registerFormat('af', () => af.promise);
+      const pending = validator.validate({ a: 'x' }, schema);
+      await nextTurn();
+      sel.resolve(true);
+      await nextTurn();
+      af.resolve(condition);
+
+      const result = await pending;
+      expect(result.valid).toBe(syncResult.valid);
+      expect(codes(result)).toEqual(expectedCodes);
+    }
+  );
+
+  // Deferred tasks run nested-first: the root hook runs after the nested deferred unevaluatedProperties work settled.
+  it('lets the root customValidator see errors from nested deferred unevaluatedProperties', async () => {
+    // The schema is cloned before it reaches the hook, so nodes are matched by shape, not identity.
+    const schema: JsonSchema = {
+      allOf: [{ if: { format: 'af' }, then: {}, unevaluatedProperties: { format: 'bad' } }],
+    };
+    const calls: Array<[boolean, string[]]> = [];
+    const validator = ZSchema.create({
+      async: true,
+      safe: true,
+      version: 'draft2020-12',
+      customValidator: (report, s) => {
+        const isRoot = typeof s === 'object' && s !== null && 'allOf' in s && !('$id' in s);
+        const isChild = typeof s === 'object' && s !== null && 'unevaluatedProperties' in s && 'then' in s;
+        if (isRoot || isChild) {
+          calls.push([isRoot, report.errors.map((e) => e.code)]);
+        }
+      },
+    });
+    validator.registerFormat('af', () => Promise.resolve(true));
+    validator.registerFormat('bad', () => Promise.resolve(false));
+    const result = await validator.validate({ x: 'y' }, schema);
+
+    expect(result.valid).toBe(false);
+    const rootIndex = calls.findIndex(([isRoot]) => isRoot);
+    const childIndex = calls.findIndex(([isRoot]) => !isRoot);
+    expect(childIndex).toBeGreaterThanOrEqual(0);
+    expect(rootIndex).toBeGreaterThan(childIndex);
+    expect(calls[rootIndex][1]).toContain('OBJECT_UNEVALUATED_PROPERTIES');
+  });
+
+  it('reports OBJECT_UNEVALUATED_PROPERTIES for a key failing synchronously while another key format never settles', async () => {
+    const validator = ZSchema.create({ async: true, safe: true, version: 'draft2020-12', asyncTimeout: 50 });
+    validator.registerFormat('never', () => new Promise<boolean>(() => {}));
+    const result = await validator.validate(
+      { a: 'long-enough', b: 'x' },
+      { unevaluatedProperties: { minLength: 3, format: 'never' } }
+    );
+
+    expect(result.valid).toBe(false);
+    const unevaluated = result.err!.details!.filter((d) => d.code === 'OBJECT_UNEVALUATED_PROPERTIES');
+    expect(unevaluated.map((d) => d.params)).toContainEqual(['b']);
   });
 });

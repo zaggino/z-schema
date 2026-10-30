@@ -7,7 +7,7 @@ import { decodeBase64, isValidBase64 } from '../utils/base64.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { unicodeLength } from '../utils/unicode.js';
 import { whatIs } from '../utils/what-is.js';
-import { isFormatAssertionVocabEnabled, shouldSkipValidate } from './shared.js';
+import { isFormatAssertionVocabEnabled, isModernDraft, shouldSkipValidate } from './shared.js';
 
 // ---------------------------------------------------------------------------
 // minLength
@@ -88,8 +88,6 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
     return;
   }
 
-  const isModernDraft = ctx.options.version === 'draft2019-09' || ctx.options.version === 'draft2020-12';
-
   const formatValidatorFn = resolveFormatValidator(schema.format!, ctx.options);
   if (typeof formatValidatorFn === 'function') {
     if (shouldSkipValidate(ctx.validateOptions, ['INVALID_FORMAT'])) {
@@ -114,8 +112,7 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
         const settled = result.catch(toFalse);
         report.addAsyncTaskWithPath(
           (callback: (result: unknown) => void) => {
-            // Terminal callback of the async task; `return callback(...)` would trip
-            // no-confusing-void-expression since the callback returns void.
+            // settled never rejects; void marks it as intentionally not awaited
             void settled.then(callback);
           },
           [],
@@ -130,7 +127,7 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
         report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
       }
     }
-  } else if (ctx.options.ignoreUnknownFormats !== true && !isModernDraft) {
+  } else if (ctx.options.ignoreUnknownFormats !== true && !isModernDraft(ctx.options.version)) {
     report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
   }
 }
