@@ -32,7 +32,7 @@ export function anyOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSch
     ctx._jsonValidate(subReport, schema.anyOf![i], json);
   }
 
-  // Aggregate async tasks and decide when ready
+  // Wait for each sub-report's async work, then decide.
   deferOrRunSync(ctx, report, subReports, () => {
     let passed = false;
     for (let i = 0; i < subReports.length; i++) {
@@ -63,7 +63,7 @@ export function oneOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSch
     ctx._jsonValidate(subReport, schema.oneOf![i], json);
   }
 
-  // Aggregate async tasks and decide when ready
+  // Wait for each sub-report's async work, then decide.
   deferOrRunSync(ctx, report, subReports, () => {
     let passes = 0;
     for (let i = 0; i < subReports.length; i++) {
@@ -116,7 +116,12 @@ export function ifValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchema
   const thenSchema = schema.then;
   const elseSchema = schema.else;
 
-  if (conditionSchema === undefined || (thenSchema === undefined && elseSchema === undefined)) {
+  if (conditionSchema === undefined) {
+    return;
+  }
+  const noBranches = thenSchema === undefined && elseSchema === undefined;
+  // A passing lone `if` still contributes annotations to unevaluated*, so 2019-09+ caches its result.
+  if (noBranches && ctx.options.version !== 'draft2019-09' && ctx.options.version !== 'draft2020-12') {
     return;
   }
 
@@ -125,6 +130,9 @@ export function ifValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchema
   if (conditionReport.asyncTasks.length > 0) {
     deferOrRunSync(ctx, report, [conditionReport], () => {
       cacheValidationResult(report, conditionSchema, json, conditionReport.errors.length === 0);
+      if (noBranches) {
+        return;
+      }
       const selected = conditionReport.errors.length === 0 ? thenSchema : elseSchema;
       if (selected !== undefined) {
         ctx._jsonValidate(report, selected, json);

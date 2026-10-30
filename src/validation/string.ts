@@ -70,6 +70,15 @@ export function patternValidator(ctx: ZSchemaBase, report: Report, schema: JsonS
 // format
 // ---------------------------------------------------------------------------
 
+function passThrough(value: unknown): unknown {
+  return value;
+}
+
+// A rejected validator promise is treated as an invalid result (false).
+function toFalse(): unknown {
+  return false;
+}
+
 export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
   if (ctx.options.formatAssertions === false) {
@@ -104,19 +113,16 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
       const result = formatValidatorFn.call(ctx, json);
       if (result instanceof Promise) {
         // Promise-based async
-        const promiseResult = result;
+        // Attach the rejection handler now: if the task never runs (early finish), a rejected
+        // promise must not surface as an unhandled rejection.
+        // oxlint-disable-next-line promise/prefer-await-to-then
+        const settled = result.then(passThrough, toFalse);
         report.addAsyncTaskWithPath(
-          async (callback: (result: unknown) => void) => {
-            let resolved: unknown = false;
-            try {
-              resolved = await promiseResult;
-            } catch {
-              // A rejected validator promise is treated as an invalid result (false).
-            }
+          (callback: (result: unknown) => void) => {
             // Terminal callback of the async task; `return callback(...)` would trip
             // no-confusing-void-expression since the callback returns void.
-            // oxlint-disable-next-line node/callback-return
-            callback(resolved);
+            // oxlint-disable-next-line node/callback-return, promise/no-callback-in-promise, promise/prefer-await-to-then
+            void settled.then(callback);
           },
           [],
           (resolvedResult) => {

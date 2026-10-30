@@ -56,6 +56,8 @@ export default defineConfig({
     // Spread over .concat()/.slice() allocates via the iterator protocol —
     // slower than Array#concat/#slice in hot paths (report.ts, schema-compiler.ts).
     'unicorn/prefer-spread': 'off',
+    // Same rationale: the core eslint rule also flags fn.apply(undefined, args.concat(cb)) in report.ts.
+    'prefer-spread': 'off',
 
     // for…of adds iterator-protocol overhead vs indexed access in validation
     // hot paths (validation/array.ts items loop, report.ts path building).

@@ -91,3 +91,34 @@ describe('Async Format Validation Integration', () => {
     expect(result.err!.details![0].code).toBe('ONE_OF_MISSING');
   });
 });
+
+const nextTurn = () =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, 0);
+  });
+
+describe('Async rejection handling', () => {
+  // Pins step 2: a rejected format promise whose task never runs must not become an unhandled rejection.
+  it('does not emit an unhandled rejection for a rejected format after a sync error', async () => {
+    const validator = ZSchema.create({ async: true, safe: true, breakOnFirstError: true, version: 'draft2020-12' });
+    validator.registerFormat('rejects', () => Promise.reject(new Error('x')));
+    let unhandled = 0;
+    const spy = () => {
+      unhandled += 1;
+    };
+    process.on('unhandledRejection', spy);
+    try {
+      const result = await validator.validate(
+        { a: 1, b: 'y' },
+        { properties: { a: { type: 'string' }, b: { format: 'rejects' } } }
+      );
+      await nextTurn();
+      await nextTurn();
+
+      expect(result.valid).toBe(false);
+      expect(unhandled).toBe(0);
+    } finally {
+      process.off('unhandledRejection', spy);
+    }
+  });
+});

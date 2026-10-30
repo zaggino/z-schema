@@ -153,35 +153,47 @@ export function getCachedValidationResult(report: Report, schema: unknown, json:
 }
 
 // ---------------------------------------------------------------------------
-// Async task aggregation
+// Async sub-report coordination
 // ---------------------------------------------------------------------------
 
-/** Preserve the traversal context needed by a decision made after a format resolves. */
+/** Marks a sub-report drain that aborted (threw), as opposed to one that finished with validation errors. */
+class AsyncAbort {
+  readonly error: unknown;
+  constructor(error: unknown) {
+    this.error = error;
+  }
+}
+
+/**
+ * Preserve the traversal context needed by a decision made after async work resolves.
+ * Snapshots the dynamic-scope stacks; the schema path is restored by `addAsyncTaskWithPath`.
+ */
 function deferredContext(ctx: ZSchemaBase, report: Report, decisionFn: () => void): () => void {
-  const schemaPath = report.schemaPath.slice();
   const recursiveScope = report.__$recursiveAnchorStack.slice();
   const dynamicScope = report.__$dynamicScopeStack.slice();
   return () => {
     const oldOptions = ctx.validateOptions;
-    const oldSchemaPath = report.schemaPath;
     const oldRecursiveScope = report.__$recursiveAnchorStack;
     const oldDynamicScope = report.__$dynamicScopeStack;
     ctx.validateOptions = report.validateOptions;
-    report.schemaPath = schemaPath;
     report.__$recursiveAnchorStack = recursiveScope;
     report.__$dynamicScopeStack = dynamicScope;
     try {
       decisionFn();
     } finally {
       ctx.validateOptions = oldOptions;
-      report.schemaPath = oldSchemaPath;
       report.__$recursiveAnchorStack = oldRecursiveScope;
       report.__$dynamicScopeStack = oldDynamicScope;
     }
   };
 }
 
-/** Wait for sub-report completion, or decide immediately when all validation is synchronous. */
+/**
+ * Wait for sub-report completion, or decide immediately when all validation is synchronous.
+ * Sub-reports are drained without their own timer (the top-level report's timeout bounds the
+ * whole validation). A sub-report that finishes with validation errors still counts as done;
+ * only a thrown value aborts, and it is rethrown into the parent so it is never swallowed.
+ */
 export function deferOrRunSync(ctx: ZSchemaBase, report: Report, subReports: Report[], decisionFn: () => void): void {
   let pending = 0;
   for (let i = 0; i < subReports.length; i++) {
@@ -194,28 +206,38 @@ export function deferOrRunSync(ctx: ZSchemaBase, report: Report, subReports: Rep
     const decide = deferredContext(ctx, report, decisionFn);
     report.addAsyncTaskWithPath(
       (callback: (result: unknown) => void) => {
+        let aborted = false;
+        const onDone = () => {
+          if (aborted) {
+            return;
+          }
+          if (--pending === 0) {
+            // oxlint-disable-next-line node/callback-return -- terminal completion callback
+            callback(null);
+          }
+        };
+        const onAbort = (error: unknown) => {
+          if (aborted) {
+            return;
+          }
+          aborted = true;
+          // oxlint-disable-next-line node/callback-return -- terminal failure callback
+          callback(new AsyncAbort(error));
+        };
         for (let i = 0; i < subReports.length; i++) {
           const subReport = subReports[i];
           if (subReport.asyncTasks.length === 0) {
             continue;
           }
-          // The block-scoped report belongs to this callback; pending is the shared counter.
+          // subReport is const per iteration; pending and aborted are intentionally shared across iterations.
           // oxlint-disable-next-line no-loop-func
-          subReport.processAsyncTasks(report.options.asyncTimeout, (error) => {
-            if (error && (subReport.errors.length === 0 || error.details?.some((e) => e.code === 'ASYNC_TIMEOUT'))) {
-              // oxlint-disable-next-line node/callback-return -- terminal failure callback
-              callback(error);
-            } else if (--pending === 0) {
-              // oxlint-disable-next-line node/callback-return -- terminal completion callback
-              callback(null);
-            }
-          });
+          subReport.drainAsyncTasks(undefined, onDone, onAbort);
         }
       },
       [],
-      (error) => {
-        if (error instanceof Error) {
-          throw error;
+      (result) => {
+        if (result instanceof AsyncAbort) {
+          throw result.error;
         }
         decide();
       }
@@ -225,7 +247,10 @@ export function deferOrRunSync(ctx: ZSchemaBase, report: Report, subReports: Rep
   }
 }
 
-/** Run an annotation check after pending applicators, including their selected branches. */
+/**
+ * Run an annotation check after pending applicators, including their selected branches.
+ * Queued as a deferred task so it runs once all pending tasks have settled.
+ */
 export function deferUntilAsyncTasksComplete(ctx: ZSchemaBase, report: Report, decisionFn: () => void): void {
   report.addAsyncTaskWithPath(
     (callback: (result: unknown) => void) => {

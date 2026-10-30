@@ -56,7 +56,7 @@ const validator = ZSchema.create({
 
 ## asyncTimeout
 
-Defines a time limit in milliseconds for async tasks (such as async format validators) before validation fails with an `ASYNC_TIMEOUT` error.
+Defines a total time limit in milliseconds for all async work in one validation (such as async format validators, including those inside applicators like `anyOf` or `if`) before validation fails with an `ASYNC_TIMEOUT` error. In the `ASYNC_TIMEOUT` message, `{0}` is the number of pending top-level tasks.
 
 Values are clamped to the range `[0, 60 000]` during option normalization to prevent resource exhaustion (CWE-400). Any value above `60 000` is silently reduced to `60 000`.
 
@@ -297,6 +297,8 @@ const validator = ZSchema.create({
 
 When true, validation stops after the first error is found.
 
+In async mode, only the first recorded error is kept. It can differ from the error sync mode reports, because async results arrive later.
+
 > **Performance:** Enabling this option can significantly speed up validation of invalid data by short-circuiting as soon as the first error is found, rather than collecting all errors. Recommended for production use when you only need to know whether data is valid.
 
 Default: `false`
@@ -377,6 +379,8 @@ const validator = ZSchema.create({
 ## customValidator
 
 Register a function that is called on every sub-schema during validation. Use this for custom cross-field validation logic that cannot be expressed in standard JSON Schema.
+
+In async mode, it runs after the node's async results are in.
 
 > **Performance:** The custom validator function is invoked for **every** sub-schema during JSON validation. Keep the function fast and avoid expensive operations (network calls, heavy computation) inside it. For field-level checks, prefer [custom formats](features.md#register-a-custom-format) which only run when the `format` keyword is present.
 
