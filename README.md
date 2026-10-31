@@ -370,14 +370,21 @@ Big thanks to:
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/mayankdhingra02">
+                    <img src="https://avatars.githubusercontent.com/u/21103842?v=4" width="100;" alt="mayankdhingra02"/>
+                    <br />
+                    <sub><b>mayankdhingra02</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
                 <a href="https://github.com/barrtender">
                     <img src="https://avatars.githubusercontent.com/u/3101221?v=4" width="100;" alt="barrtender"/>
                     <br />
                     <sub><b>barrtender</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/RomanHotsiy">
                     <img src="https://avatars.githubusercontent.com/u/3975738?v=4" width="100;" alt="RomanHotsiy"/>
@@ -413,6 +420,8 @@ Big thanks to:
                     <sub><b>Matthew Dahl</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/jfromaniello">
                     <img src="https://avatars.githubusercontent.com/u/178512?v=4" width="100;" alt="jfromaniello"/>
@@ -420,8 +429,6 @@ Big thanks to:
                     <sub><b>José F. Romaniello</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/KEIII">
                     <img src="https://avatars.githubusercontent.com/u/1167833?v=4" width="100;" alt="KEIII"/>
@@ -457,6 +464,8 @@ Big thanks to:
                     <sub><b>Tao Huang</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/BuBuaBu">
                     <img src="https://avatars.githubusercontent.com/u/3825745?v=4" width="100;" alt="BuBuaBu"/>
