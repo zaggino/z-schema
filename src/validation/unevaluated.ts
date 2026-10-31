@@ -11,74 +11,32 @@ import { deferOrRunSync, getCachedValidationResult } from './shared.js';
 // collectEvaluated — unified traversal for unevaluatedItems / unevaluatedProperties
 // ---------------------------------------------------------------------------
 
-interface CollectEvaluatedItemsArgs {
-  report: Report;
-  currentSchema: JsonSchemaInternal | boolean | undefined;
-  json: unknown;
-  mode: 'items';
-  jsonArr: unknown[];
-  depth: number;
-}
-
-interface CollectEvaluatedPropertiesArgs {
-  report: Report;
-  currentSchema: JsonSchemaInternal | boolean | undefined;
-  json: unknown;
-  mode: 'properties';
-  jsonData: Record<string, unknown>;
-  depth: number;
-}
-
-type CollectEvaluatedArgs = CollectEvaluatedItemsArgs | CollectEvaluatedPropertiesArgs;
-
-function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<number | string> | 'all' {
-  const { report, currentSchema, json, mode, depth } = args;
-
+/**
+ * Collects the evaluated indices (items mode, `dataKeys === undefined`, `json` is the array) or property names
+ * (properties mode, `dataKeys === Object.keys(json)`) of `currentSchema` and every applicator reachable from it into
+ * `evaluated`. Returns `true` when everything counts as evaluated (the contents of `evaluated` are then irrelevant).
+ */
+function collectEvaluated(
+  ctx: ZSchemaBase,
+  report: Report,
+  currentSchema: JsonSchemaInternal | boolean | undefined,
+  json: unknown,
+  dataKeys: string[] | undefined,
+  evaluated: Set<number | string>,
+  depth: number
+): boolean {
   if (!currentSchema || typeof currentSchema === 'boolean') {
-    return new Set();
+    return false;
   }
 
   if (depth > (ctx.options.maxRecursionDepth ?? 100)) {
     report.addError('COLLECT_EVALUATED_DEPTH_EXCEEDED', [depth]);
-    return new Set();
+    return false;
   }
 
-  const evaluated = new Set<number | string>();
-
-  const merge = (other: Set<number | string> | 'all') => {
-    if (other === 'all') {
-      return true;
-    }
-    for (const v of other) {
-      evaluated.add(v);
-    }
-    return false;
-  };
-
-  const recurse = (subSchema: JsonSchemaInternal | boolean | undefined): Set<number | string> | 'all' => {
-    if (mode === 'items') {
-      return collectEvaluated(ctx, {
-        report,
-        currentSchema: subSchema,
-        json,
-        mode: 'items',
-        jsonArr: args.jsonArr,
-        depth: depth + 1,
-      });
-    }
-    return collectEvaluated(ctx, {
-      report,
-      currentSchema: subSchema,
-      json,
-      mode: 'properties',
-      jsonData: args.jsonData,
-      depth: depth + 1,
-    });
-  };
-
   // --- Mode-specific leaf collection ---
-  if (mode === 'items') {
-    const { jsonArr } = args;
+  if (dataKeys === undefined) {
+    const jsonArr = json as unknown[];
 
     // prefixItems (2020-12 tuple)
     if (Array.isArray(currentSchema.prefixItems)) {
@@ -96,7 +54,7 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
           evaluated.add(i);
         }
       } else if (currentSchema.items !== false) {
-        return 'all';
+        return true;
       }
     }
 
@@ -106,7 +64,7 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
       currentSchema.additionalItems !== false &&
       Array.isArray(currentSchema.items)
     ) {
-      return 'all';
+      return true;
     }
 
     // contains - evaluates specific indices that match the schema
@@ -128,33 +86,41 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
 
     // unevaluatedItems: true means all items evaluated
     if (currentSchema.unevaluatedItems === true) {
-      return 'all';
+      return true;
     }
   } else {
-    // mode === 'properties'
-    const { jsonData } = args;
+    // properties mode
+    const jsonData = json as Record<string, unknown>;
+    const schemaProps = currentSchema.properties;
 
     // properties
-    if (isObject(currentSchema.properties)) {
-      const propKeysCE = Object.keys(currentSchema.properties);
-      for (let i = 0; i < propKeysCE.length; i++) {
-        const key = propKeysCE[i];
+    if (isObject(schemaProps)) {
+      const propKeys = Object.keys(schemaProps);
+      for (let i = 0; i < propKeys.length; i++) {
+        const key = propKeys[i];
         if (Object.hasOwn(jsonData, key)) {
           evaluated.add(key);
         }
       }
     }
 
-    // patternProperties
-    if (isObject(currentSchema.patternProperties)) {
-      for (const pattern of Object.keys(currentSchema.patternProperties)) {
-        const result = compileSchemaRegex(pattern);
+    // patternProperties - patterns are compiled once per node and shared with the additionalProperties pass
+    let patternRegexes: RegExp[] | undefined;
+    const schemaPatterns = currentSchema.patternProperties;
+    if (isObject(schemaPatterns)) {
+      patternRegexes = [];
+      const patterns = Object.keys(schemaPatterns);
+      for (let pi = 0; pi < patterns.length; pi++) {
+        const result = compileSchemaRegex(patterns[pi]);
         if (result.ok) {
-          const jdKeys = Object.keys(jsonData);
-          for (let i = 0; i < jdKeys.length; i++) {
-            if (result.value.test(jdKeys[i])) {
-              evaluated.add(jdKeys[i]);
-            }
+          patternRegexes.push(result.value);
+        }
+      }
+      for (let pi = 0; pi < patternRegexes.length; pi++) {
+        const regex = patternRegexes[pi];
+        for (let i = 0; i < dataKeys.length; i++) {
+          if (regex.test(dataKeys[i])) {
+            evaluated.add(dataKeys[i]);
           }
         }
       }
@@ -162,27 +128,19 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
 
     // additionalProperties - evaluates all non-properties/non-patternProperties keys
     if (currentSchema.additionalProperties !== undefined) {
-      const propKeySet = new Set(isObject(currentSchema.properties) ? Object.keys(currentSchema.properties) : []);
-      const patternRegexes: RegExp[] = [];
-      if (isObject(currentSchema.patternProperties)) {
-        for (const pattern of Object.keys(currentSchema.patternProperties)) {
-          const result = compileSchemaRegex(pattern);
-          if (result.ok) {
-            patternRegexes.push(result.value);
-          }
-        }
-      }
-      const apKeys = Object.keys(jsonData);
-      for (let i = 0; i < apKeys.length; i++) {
-        const key = apKeys[i];
-        if (propKeySet.has(key)) {
+      const hasProps = isObject(schemaProps);
+      for (let i = 0; i < dataKeys.length; i++) {
+        const key = dataKeys[i];
+        if (hasProps && Object.hasOwn(schemaProps, key)) {
           continue;
         }
         let matchedPattern = false;
-        for (let pi = 0; pi < patternRegexes.length; pi++) {
-          if (patternRegexes[pi].test(key)) {
-            matchedPattern = true;
-            break;
+        if (patternRegexes !== undefined) {
+          for (let pi = 0; pi < patternRegexes.length; pi++) {
+            if (patternRegexes[pi].test(key)) {
+              matchedPattern = true;
+              break;
+            }
           }
         }
         if (matchedPattern) {
@@ -193,17 +151,31 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
     }
 
     // dependentSchemas - only applies when the dependency key is present in the data
-    if (isObject(currentSchema.dependentSchemas)) {
-      for (const [depKey, depSchema] of Object.entries(currentSchema.dependentSchemas as Record<string, unknown>)) {
-        if (Object.hasOwn(jsonData, depKey) && merge(recurse(depSchema as JsonSchemaInternal | boolean))) {
-          return 'all';
+    const { dependentSchemas } = currentSchema;
+    if (isObject(dependentSchemas)) {
+      const depKeys = Object.keys(dependentSchemas);
+      for (let i = 0; i < depKeys.length; i++) {
+        const depKey = depKeys[i];
+        if (
+          Object.hasOwn(jsonData, depKey) &&
+          collectEvaluated(
+            ctx,
+            report,
+            (dependentSchemas as Record<string, JsonSchemaInternal | boolean>)[depKey],
+            json,
+            dataKeys,
+            evaluated,
+            depth + 1
+          )
+        ) {
+          return true;
         }
       }
     }
 
     // unevaluatedProperties: true in a sub-schema means all props are evaluated
     if (currentSchema.unevaluatedProperties === true) {
-      return 'all';
+      return true;
     }
   }
 
@@ -212,8 +184,8 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
   // allOf
   if (Array.isArray(currentSchema.allOf)) {
     for (let i = 0; i < currentSchema.allOf.length; i++) {
-      if (merge(recurse(currentSchema.allOf[i]))) {
-        return 'all';
+      if (collectEvaluated(ctx, report, currentSchema.allOf[i], json, dataKeys, evaluated, depth + 1)) {
+        return true;
       }
     }
   }
@@ -228,8 +200,8 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
         ctx._jsonValidate(subReport, subSchema, json);
         passed = settledPass(subReport);
       }
-      if (passed && merge(recurse(subSchema))) {
-        return 'all';
+      if (passed && collectEvaluated(ctx, report, subSchema, json, dataKeys, evaluated, depth + 1)) {
+        return true;
       }
     }
   }
@@ -244,8 +216,8 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
         ctx._jsonValidate(subReport, subSchema, json);
         passed = settledPass(subReport);
       }
-      if (passed && merge(recurse(subSchema))) {
-        return 'all';
+      if (passed && collectEvaluated(ctx, report, subSchema, json, dataKeys, evaluated, depth + 1)) {
+        return true;
       }
     }
   }
@@ -259,14 +231,20 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
       condPassed = settledPass(condReport);
     }
     if (condPassed) {
-      if (merge(recurse(currentSchema.if))) {
-        return 'all';
+      if (collectEvaluated(ctx, report, currentSchema.if, json, dataKeys, evaluated, depth + 1)) {
+        return true;
       }
-      if (currentSchema.then !== undefined && merge(recurse(currentSchema.then))) {
-        return 'all';
+      if (
+        currentSchema.then !== undefined &&
+        collectEvaluated(ctx, report, currentSchema.then, json, dataKeys, evaluated, depth + 1)
+      ) {
+        return true;
       }
-    } else if (currentSchema.else !== undefined && merge(recurse(currentSchema.else))) {
-      return 'all';
+    } else if (
+      currentSchema.else !== undefined &&
+      collectEvaluated(ctx, report, currentSchema.else, json, dataKeys, evaluated, depth + 1)
+    ) {
+      return true;
     }
   }
 
@@ -274,24 +252,32 @@ function collectEvaluated(ctx: ZSchemaBase, args: CollectEvaluatedArgs): Set<num
   if (
     currentSchema.__$refResolved &&
     currentSchema.__$refResolved !== currentSchema &&
-    merge(recurse(currentSchema.__$refResolved))
+    collectEvaluated(ctx, report, currentSchema.__$refResolved, json, dataKeys, evaluated, depth + 1)
   ) {
-    return 'all';
+    return true;
   }
 
   // $recursiveRef
   const recursiveTarget = resolveRecursiveRef(currentSchema, report.__$recursiveAnchorStack);
-  if (recursiveTarget && recursiveTarget !== currentSchema && merge(recurse(recursiveTarget))) {
-    return 'all';
+  if (
+    recursiveTarget &&
+    recursiveTarget !== currentSchema &&
+    collectEvaluated(ctx, report, recursiveTarget, json, dataKeys, evaluated, depth + 1)
+  ) {
+    return true;
   }
 
   // $dynamicRef
   const dynamicTarget = resolveDynamicRef(currentSchema, report.__$dynamicScopeStack);
-  if (dynamicTarget && dynamicTarget !== currentSchema && merge(recurse(dynamicTarget))) {
-    return 'all';
+  if (
+    dynamicTarget &&
+    dynamicTarget !== currentSchema &&
+    collectEvaluated(ctx, report, dynamicTarget, json, dataKeys, evaluated, depth + 1)
+  ) {
+    return true;
   }
 
-  return evaluated;
+  return false;
 }
 
 /** A sub-report result counts as a pass only when it has neither errors nor unsettled async work. */
@@ -322,41 +308,29 @@ export function unevaluatedItemsValidator(ctx: ZSchemaBase, report: Report, sche
     return;
   }
 
-  const evaluatedItems = collectEvaluated(ctx, {
-    report,
-    currentSchema: schema,
-    json,
-    mode: 'items',
-    jsonArr: json,
-    depth: 0,
-  });
-
-  if (evaluatedItems === 'all') {
-    return;
-  }
-
-  const unevaluatedIndices: number[] = [];
-  for (let i = 0; i < json.length; i++) {
-    if (!evaluatedItems.has(i)) {
-      unevaluatedIndices.push(i);
-    }
-  }
-
-  if (unevaluatedIndices.length === 0) {
+  const evaluatedItems = new Set<number | string>();
+  if (collectEvaluated(ctx, report, schema, json, undefined, evaluatedItems, 0)) {
     return;
   }
 
   if (unevalSchema === false) {
-    report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
+    for (let i = 0; i < json.length; i++) {
+      if (!evaluatedItems.has(i)) {
+        report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
+        return;
+      }
+    }
   } else {
     // unevaluatedItems as a schema — validate each unevaluated item against it
     // A sub-report that already has an error decides immediately, even with its own or earlier async work
     // pending: errors are never removed and only one error is ever emitted, so waiting cannot change the outcome.
     let pendingReports: Report[] | undefined;
-    for (let i = 0; i < unevaluatedIndices.length; i++) {
-      const idx = unevaluatedIndices[i];
+    for (let i = 0; i < json.length; i++) {
+      if (evaluatedItems.has(i)) {
+        continue;
+      }
       const subReport = Report.createSubReport(report);
-      ctx._jsonValidate(subReport, unevalSchema, json[idx]);
+      ctx._jsonValidate(subReport, unevalSchema, json[i]);
       if (subReport.errors.length > 0) {
         report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
         return;
@@ -412,31 +386,22 @@ export function unevaluatedPropertiesValidator(
     return;
   }
 
-  const evaluatedProperties = collectEvaluated(ctx, {
-    report,
-    currentSchema: schema,
-    json,
-    mode: 'properties',
-    jsonData: json as Record<string, unknown>,
-    depth: 0,
-  });
-
-  if (evaluatedProperties === 'all') {
-    return;
-  }
-
-  const unevaluatedKeys: string[] = [];
-  for (let i = 0; i < allKeys.length; i++) {
-    if (!evaluatedProperties.has(allKeys[i])) {
-      unevaluatedKeys.push(allKeys[i]);
-    }
-  }
-
-  if (unevaluatedKeys.length === 0) {
+  const evaluatedProperties = new Set<number | string>();
+  if (collectEvaluated(ctx, report, schema, json, allKeys, evaluatedProperties, 0)) {
     return;
   }
 
   if (unevalSchema === false) {
+    // The error message joins every unevaluated key, so the list is only built on this path.
+    const unevaluatedKeys: string[] = [];
+    for (let i = 0; i < allKeys.length; i++) {
+      if (!evaluatedProperties.has(allKeys[i])) {
+        unevaluatedKeys.push(allKeys[i]);
+      }
+    }
+    if (unevaluatedKeys.length === 0) {
+      return;
+    }
     report.addError(
       'OBJECT_UNEVALUATED_PROPERTIES',
       [unevaluatedKeys.join(', ')],
@@ -451,8 +416,11 @@ export function unevaluatedPropertiesValidator(
     // async error-order caveat in docs/features.md).
     let pendingReports: Report[] | undefined;
     let pendingKeys: string[] | undefined;
-    for (let i = 0; i < unevaluatedKeys.length; i++) {
-      const key = unevaluatedKeys[i];
+    for (let i = 0; i < allKeys.length; i++) {
+      const key = allKeys[i];
+      if (evaluatedProperties.has(key)) {
+        continue;
+      }
       const subReport = Report.createSubReport(report);
       ctx._jsonValidate(subReport, unevalSchema, (json as Record<string, unknown>)[key]);
       if (subReport.errors.length > 0) {
