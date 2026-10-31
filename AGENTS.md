@@ -34,12 +34,13 @@ src/                  # Library source (TypeScript, ESM)
   z-schema-reader.ts  # Remote schema reader (SchemaReader type)
   schema-compiler.ts  # Schema compilation ($ref resolution, id collection)
   schema-validator.ts # Schema-level validation
-  json-validation.ts  # JSON validation orchestration (validate, recurse*, collectEvaluated)
+  json-validation.ts  # JSON validation orchestration (validate, recurse*)
   schema-cache.ts     # Schema caching by URI/id
   compiled-schema-cache.ts # Per-instance cache of compiled object schemas (keyed by JSON.stringify)
   errors.ts           # Error codes (Errors enum) and ValidateError class
   format-validators.ts# Built-in & custom format validators
   report.ts           # Validation report (error accumulation, SchemaErrorDetail)
+  async-tasks.ts      # Async task scheduler (drainTasks) used by Report
   json-schema.ts      # Shared/common JSON Schema definitions + helpers
   json-schema-versions.ts # Draft-specific schema unions and version mappings
   z-schema-versions.ts # Registers bundled draft meta-schemas into global cache
@@ -51,6 +52,7 @@ src/                  # Library source (TypeScript, ESM)
     array.ts          # items, prefixItems, contains, min/maxItems, uniqueItems validators
     object.ts         # properties, patternProperties, additionalProperties, required, etc.
     combinators.ts    # allOf, anyOf, oneOf, not, if/then/else validators
+    unevaluated.ts    # unevaluatedItems/unevaluatedProperties validators and evaluated-annotation collection (collectEvaluated)
     ref.ts            # $dynamicRef/$recursiveRef resolution helpers
   utils/              # Pure utility functions
     array.ts          # Array helpers

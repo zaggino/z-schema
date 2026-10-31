@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { ZSchema } from '../../src/z-schema.ts';
-import { nextTurn } from '../lib/async.ts';
+import { nextTurn } from '../lib/async-harness.ts';
 
 const asyncValidValid = (input: unknown): Promise<boolean> =>
   Promise.resolve(typeof input === 'string' && input === 'valid');

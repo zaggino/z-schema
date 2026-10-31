@@ -6,13 +6,14 @@ Line coverage status: **high**
 
 | File                          |  Line % | Statement % | Function % | Branch % |
 | ----------------------------- | ------: | ----------: | ---------: | -------: |
+| src/async-tasks.ts            |     95% |         95% |       100% |      92% |
 | src/compiled-schema-cache.ts  |     94% |         94% |        94% |      91% |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
 | src/format-validators.ts      |     96% |         96% |        93% |      94% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
-| src/json-validation.ts        |     90% |         90% |        84% |      89% |
-| src/report.ts                 |     89% |         89% |        77% |      88% |
+| src/json-validation.ts        |     94% |         94% |        82% |      92% |
+| src/report.ts                 |     86% |         87% |        71% |      87% |
 | src/schema-cache.ts           |     95% |         95% |       100% |      90% |
 | src/schema-compiler.ts        |     94% |         94% |       100% |      90% |
 | src/schema-validator.ts       |     78% |         78% |       100% |      76% |
@@ -41,6 +42,7 @@ Line coverage status: **high**
 | src/validation/shared.ts      |     93% |         93% |       100% |      83% |
 | src/validation/string.ts      |     89% |         89% |       100% |      89% |
 | src/validation/type.ts        |    100% |        100% |       100% |      96% |
+| src/validation/unevaluated.ts |     85% |         86% |        88% |      86% |
 | src/z-schema-base.ts          |     98% |         98% |       100% |      93% |
 | src/z-schema-options.ts       |     96% |         96% |       100% |      83% |
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |

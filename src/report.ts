@@ -1,22 +1,16 @@
+import type { AsyncTask, TaskProcessFn, TaskResult } from './async-tasks.js';
 import type { ErrorCode, ErrorParam } from './errors.js';
 import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ValidateCallback, ValidateOptions } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
+import { deferToTimer, drainTasks } from './async-tasks.js';
 import { Errors, getValidateError, toValidateError } from './errors.js';
 import { shallowClone } from './utils/clone.js';
-import { MAX_ASYNC_TIMEOUT } from './utils/constants.js';
 import { get } from './utils/json.js';
 import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
 import { isAbsoluteUri } from './utils/uri.js';
 import { isObject } from './utils/what-is.js';
-
-const ASYNC_TIMEOUT_POLL_MS = 10;
-
-// Keeps the user-facing callback asynchronous (macrotask), unlike internal sub-report completion.
-const deferToTimer = (fn: () => void): void => {
-  setTimeout(fn, 0);
-};
 
 export interface SchemaErrorDetail {
   /**
@@ -263,12 +257,6 @@ function areParamsSafe(params: ErrorParam[]): boolean {
   return true;
 }
 
-type TaskResult = unknown;
-type TaskFn = (...args: unknown[]) => TaskResult;
-type TaskFnArgs = Parameters<TaskFn>;
-type TaskProcessFn = (result: ReturnType<TaskFn>) => void;
-type AsyncTask = [TaskFn, TaskFnArgs, TaskProcessFn];
-
 export class Report {
   asyncTasks: AsyncTask[] = [];
   /**
@@ -435,155 +423,6 @@ export class Report {
   }
 
   /**
-   * Drains pending async tasks, reporting completion or abort separately.
-   *
-   * - Complete vs abort: `onComplete` is scheduled via `defer` once all tasks settled (or the top level
-   *   already has an error under `breakOnFirstError`). If a task or its result processing throws,
-   *   `onAbort` receives the thrown value and `onComplete` is not called.
-   * - Timer: only the top level passes a timeout and so owns a timer; sub-reports have none, the
-   *   top-level timeout bounds the whole validation. The timeout path adds `ASYNC_TIMEOUT` and calls
-   *   `onComplete` directly, not through `defer`.
-   * - Deferred tasks ({@link deferredAsyncTasks}) start only after all regular tasks settled, one at a
-   *   time, with tasks deferred by a running one going first (nested before outer).
-   *
-   * @internal
-   *
-   * @param timeout - Timeout in milliseconds; when `undefined`, no timer runs and the caller bounds the work.
-   * @param onComplete - Called when all tasks settled, or after an `ASYNC_TIMEOUT` error was added to this report.
-   * @param onAbort - Called with the thrown value when a task or its result processing throws.
-   * @param defer - Schedules `onComplete` after the last task settles; defaults to a microtask. The timeout path calls `onComplete` directly.
-   */
-  drainAsyncTasks(
-    timeout: number | undefined,
-    onComplete: () => void,
-    onAbort: (error: unknown) => void,
-    defer: (fn: () => void) => void = queueMicrotask
-  ): void {
-    // The top-level clock starts before the first synchronous pass, as it always has; sub-reports skip it.
-    const startedAt = timeout === undefined ? 0 : Date.now();
-    let tasksCount = this.asyncTasks.length;
-    // Deferred tasks not yet started; they run one at a time, see runTasks.
-    let deferredQueue: AsyncTask[] = [];
-    let timedOut = false;
-    let finished = false;
-    let running = false;
-    let tasksStarted = 0;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-
-    const stopTimer = () => {
-      if (timer !== undefined) {
-        clearTimeout(timer);
-        timer = undefined;
-      }
-    };
-
-    const finish = () => {
-      if (finished) {
-        return;
-      }
-      finished = true;
-      stopTimer();
-      defer(onComplete);
-    };
-
-    const abort = (error: unknown) => {
-      if (finished) {
-        return;
-      }
-      finished = true;
-      stopTimer();
-      onAbort(error);
-    };
-
-    const respond = (asyncTaskResultProcessFn: TaskProcessFn) => (asyncTaskResult: TaskResult) => {
-      if (timedOut || finished) {
-        return;
-      }
-      try {
-        const previousLength = this.asyncTasks.length;
-        asyncTaskResultProcessFn(asyncTaskResult);
-        tasksCount += this.asyncTasks.length - previousLength - 1;
-        runTasks.call(this);
-      } catch (error) {
-        abort(error);
-      }
-    };
-
-    function runTasks(this: Report) {
-      if (running || finished) {
-        return;
-      }
-      running = true;
-      try {
-        for (;;) {
-          while (tasksStarted < this.asyncTasks.length) {
-            if (finished) {
-              break;
-            }
-            const [fn, fnArgs, processFn] = this.asyncTasks[tasksStarted++];
-            fn.apply(undefined, fnArgs.concat(respond(processFn)));
-          }
-          if (finished || tasksCount > 0 || (!this.deferredAsyncTasks?.length && deferredQueue.length === 0)) {
-            break;
-          }
-          // Deferred tasks run one at a time. Tasks deferred while the previous one ran (nested nodes,
-          // chained hooks) go ahead of the older ones, so inner work and hooks settle before outer ones.
-          // E.g. root [childUneval(D1), rootHook(D2)]: D1 queues regular task T and chained child hook D3.
-          // Once T settles the queue is [D3, D2]: the child hook runs, then the root hook sees T's errors.
-          const queue = (this.deferredAsyncTasks ?? []).concat(deferredQueue);
-          this.deferredAsyncTasks = undefined;
-          this.asyncTasks.push(queue[0]);
-          tasksCount = 1;
-          deferredQueue = queue.slice(1);
-        }
-      } catch (error) {
-        running = false;
-        abort(error);
-        return;
-      }
-      running = false;
-      if (tasksCount === 0) {
-        finish();
-      }
-    }
-
-    // Finish early only at the top level, once an error exists under breakOnFirstError. Sub-reports
-    // must still run their tasks: their errors are just one branch's result and the parent waits on them.
-    if (
-      (tasksCount === 0 && !this.deferredAsyncTasks?.length) ||
-      (!this.parentReport && this.errors.length > 0 && this.options.breakOnFirstError)
-    ) {
-      finish();
-      return;
-    }
-
-    runTasks.call(this);
-
-    if (timeout === undefined || finished || tasksCount <= 0) {
-      return;
-    }
-
-    // Only the top level passes a timeout; `processAsyncTasks` owns the default. Sub-reports skip the clock.
-    const validationTimeout = Math.min(Math.max(timeout, 0), MAX_ASYNC_TIMEOUT);
-    const timeoutAt = startedAt + validationTimeout;
-
-    const checkTimeout = () => {
-      if (timedOut || finished || tasksCount <= 0) {
-        return;
-      }
-      timer = undefined;
-      if (Date.now() >= timeoutAt) {
-        timedOut = true;
-        this.addError('ASYNC_TIMEOUT', [tasksCount, validationTimeout]);
-        onComplete();
-        return;
-      }
-      timer = setTimeout(checkTimeout, ASYNC_TIMEOUT_POLL_MS);
-    };
-    timer = setTimeout(checkTimeout, ASYNC_TIMEOUT_POLL_MS);
-  }
-
-  /**
    * Drains pending async tasks and reports the result through `callback`.
    * This is the top-level entry point and owns the only timer. The callback is invoked from a
    * `setTimeout` (completion and abort alike). On abort, the thrown value is converted to a
@@ -594,9 +433,9 @@ export class Report {
    * @param callback - Receives the validation error (if any) and validity.
    */
   processAsyncTasks(timeout: number | undefined, callback: ValidateCallback) {
-    this.drainAsyncTasks(
-      timeout || 2000,
-      () => {
+    drainTasks(this, {
+      topLevel: { timeout: timeout || 2000 },
+      onComplete: () => {
         // Async tasks that settled after the first error can add more; breakOnFirstError promises one.
         if (this.options.breakOnFirstError && this.errors.length > 1) {
           this.errors.length = 1;
@@ -605,14 +444,13 @@ export class Report {
         const err = valid ? undefined : getValidateError({ details: this.errors });
         callback(err, valid);
       },
-      (error) => {
+      onAbort: (error) => {
         const err = toValidateError(error);
         deferToTimer(() => {
           callback(err, false);
         });
       },
-      deferToTimer
-    );
+    });
   }
 
   getPath(returnPathAsString?: boolean) {

@@ -4,6 +4,7 @@ import type { JsonSchema, JsonSchemaAll, JsonSchemaInternal, JsonSchemaVersion }
 import type { Report } from '../report.js';
 import type { ValidateOptions, ZSchemaBase } from '../z-schema-base.js';
 
+import { drainTasks } from '../async-tasks.js';
 import { isObject } from '../utils/what-is.js';
 
 // ---------------------------------------------------------------------------
@@ -236,7 +237,7 @@ export function deferOrRunSync(ctx: ZSchemaBase, report: Report, subReports: Rep
           }
           // subReport is const per iteration; pending and aborted are intentionally shared across iterations.
           // oxlint-disable-next-line no-loop-func
-          subReport.drainAsyncTasks(undefined, onDone, onAbort);
+          drainTasks(subReport, { onComplete: onDone, onAbort });
         }
       },
       [],
