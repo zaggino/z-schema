@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ValidateError } from '../../src/errors.ts';
 import { ZSchema } from '../../src/z-schema.ts';
-import { nextTurn } from '../lib/async.ts';
+import { nextTurn } from '../lib/async-harness.ts';
 
 describe('async format applicators', () => {
   it('accepts a value rejected by an asynchronous not subschema', async () => {

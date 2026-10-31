@@ -5,7 +5,7 @@ import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 import { describe, expect, it } from 'vitest';
 
 import { ZSchema } from '../../src/z-schema.ts';
-import { nextTurn } from '../lib/async.ts';
+import { nextTurn } from '../lib/async-harness.ts';
 
 /* oxlint-disable no-await-in-loop -- tests deliberately step resolution order across turns */
 
