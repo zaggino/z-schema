@@ -41,9 +41,9 @@ Line coverage status: **high**
 | src/validation/shared.ts      |     93% |         93% |       100% |      83% |
 | src/validation/string.ts      |     89% |         89% |       100% |      89% |
 | src/validation/type.ts        |    100% |        100% |       100% |      96% |
-| src/z-schema-base.ts          |     97% |         97% |       100% |      92% |
+| src/z-schema-base.ts          |     98% |         98% |       100% |      93% |
 | src/z-schema-options.ts       |     96% |         96% |       100% |      83% |
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
-| src/z-schema.ts               |     89% |         89% |        92% |      94% |
+| src/z-schema.ts               |     91% |         92% |        94% |      94% |
 | **Total**                     | **92%** |     **92%** |    **93%** |  **89%** |
