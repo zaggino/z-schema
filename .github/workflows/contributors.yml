@@ -15,6 +15,24 @@ jobs:
       pull-requests: write
     steps:
       - name: Contribute List
-        uses: akhilmhdh/contributors-readme-action@v2.3.11
+        # Pinned to the v2.3.11 commit: this third-party action receives the GH_TOKEN PAT.
+        uses: akhilmhdh/contributors-readme-action@83ea0b4f1ac928fbfe88b9e8460a932a528eb79f # v2.3.11
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      # The action opens each update from a new random `contributors-readme-action-*` branch and has no
+      # fixed-branch option, so updates would pile up as duplicate PRs. Keep only the newest one open.
+      # Only same-repo PRs opened by the GH_TOKEN identity (the action's PRs) are candidates.
+      - name: Close superseded contributor PRs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          login=$(gh api user --jq .login)
+          numbers=$(gh pr list --repo "$REPO" --state open --author "$login" --limit 100 \
+            --json number,headRefName,isCrossRepository \
+            --jq '[.[] | select((.isCrossRepository | not) and (.headRefName | startswith("contributors-readme-action-")))] | sort_by(.number) | reverse | .[1:] | .[].number')
+          for number in $numbers; do
+            gh pr close "$number" --repo "$REPO" --delete-branch --comment "Superseded by a newer contributors update."
+          done
