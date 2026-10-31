@@ -6,7 +6,7 @@ Line coverage status: **high**
 
 | File                          |  Line % | Statement % | Function % | Branch % |
 | ----------------------------- | ------: | ----------: | ---------: | -------: |
-| src/compiled-schema-cache.ts  |     94% |         94% |        94% |      90% |
+| src/compiled-schema-cache.ts  |     94% |         94% |        94% |      91% |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
 | src/format-validators.ts      |     96% |         96% |        93% |      94% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
@@ -41,9 +41,9 @@ Line coverage status: **high**
 | src/validation/shared.ts      |     93% |         93% |       100% |      83% |
 | src/validation/string.ts      |     89% |         89% |       100% |      89% |
 | src/validation/type.ts        |    100% |        100% |       100% |      96% |
-| src/z-schema-base.ts          |     89% |         89% |        90% |      85% |
+| src/z-schema-base.ts          |     97% |         97% |       100% |      92% |
 | src/z-schema-options.ts       |     96% |         96% |       100% |      83% |
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
-| src/z-schema.ts               |     84% |         85% |        89% |      94% |
-| **Total**                     | **91%** |     **91%** |    **92%** |  **89%** |
+| src/z-schema.ts               |     89% |         89% |        92% |      94% |
+| **Total**                     | **92%** |     **92%** |    **93%** |  **89%** |
