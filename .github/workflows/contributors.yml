@@ -18,3 +18,16 @@ jobs:
         uses: akhilmhdh/contributors-readme-action@v2.3.11
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      # The action opens each update from a new random `contributors-readme-action-*` branch and has no
+      # fixed-branch option, so updates would pile up as duplicate PRs. Keep only the newest one open.
+      - name: Close superseded contributor PRs
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh pr list --repo "$REPO" --state open --limit 100 --json number,headRefName \
+            --jq '[.[] | select(.headRefName | startswith("contributors-readme-action-"))] | sort_by(.number) | reverse | .[1:] | .[].number' |
+            while read -r number; do
+              gh pr close "$number" --repo "$REPO" --delete-branch --comment "Superseded by a newer contributors update."
+            done
