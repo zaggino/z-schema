@@ -26,6 +26,7 @@
 
 - The library uses a **throw-or-return** pattern. The base `ZSchema.validate()` throws `ValidateError` on failure. `ZSchemaSafe.validate()` catches and returns `{ valid, err? }`.
 - `ValidateError` extends `Error` with a `.details` property (array of `SchemaErrorDetail`).
+- Every error a validation API throws, rejects with, or returns as `err` is a `ValidateError`. Values thrown from deeper code (a `customValidator`, the compiler) are wrapped with `toValidateError` (same message, original as `cause`). New usage errors raised during validation should be constructed as `ValidateError` directly.
 - Errors are defined in the `Errors` object in `src/errors.ts` with template strings (`{0}`, `{1}` placeholders).
 - To add a new error code, add it to the `Errors` object in `src/errors.ts`.
 

@@ -101,8 +101,9 @@ export function toValidateError(error: unknown): ValidateError {
     return error;
   }
   let message: string;
-  if (error instanceof Error) {
-    ({ message } = error);
+  // The tag check also catches an Error from another realm (e.g. an iframe), which fails instanceof.
+  if (error instanceof Error || Object.prototype.toString.call(error) === '[object Error]') {
+    ({ message } = error as Error);
   } else {
     try {
       message = String(error);
