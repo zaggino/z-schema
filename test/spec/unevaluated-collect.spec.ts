@@ -259,3 +259,81 @@ describe('unevaluatedItems', () => {
     });
   });
 });
+
+describe('evaluated-annotation propagation', () => {
+  const safe2019 = ZSchema.create({ version: 'draft2019-09', safe: true });
+
+  it('items as a schema in a subschema evaluates every item', () => {
+    expect(detailsOf({ allOf: [{ items: {} }], unevaluatedItems: false }, [1, 2])).toEqual([]);
+  });
+
+  it('additionalItems after array-form items evaluates every item (2019-09)', () => {
+    expect(detailsOf({ items: [{}], additionalItems: {}, unevaluatedItems: false }, [1, 2, 3], safe2019)).toEqual([]);
+  });
+
+  it('unevaluatedItems: true in a subschema evaluates every item', () => {
+    expect(detailsOf({ allOf: [{ unevaluatedItems: true }], unevaluatedItems: false }, [1, 2])).toEqual([]);
+  });
+
+  it('oneOf: only the matching branch contributes', () => {
+    const schema: JsonSchema = {
+      oneOf: [
+        { properties: { a: {} }, required: ['a'] },
+        { properties: { b: {} }, required: ['b'] },
+      ],
+      unevaluatedProperties: false,
+    };
+    expect(detailsOf(schema, { a: 1, c: 2 })).toEqual([['OBJECT_UNEVALUATED_PROPERTIES', ['c'], '#/']]);
+  });
+
+  it('allOf: a later entry with unevaluatedProperties: true wins over keys collected earlier', () => {
+    const schema: JsonSchema = {
+      allOf: [{ properties: { a: {} } }, { unevaluatedProperties: true }],
+      unevaluatedProperties: false,
+    };
+    expect(detailsOf(schema, { a: 1, z: 2 })).toEqual([]);
+  });
+
+  it('$dynamicRef target contributes its properties', () => {
+    const schema: JsonSchema = {
+      $id: 'https://example.com/dyn',
+      $defs: { d: { $dynamicAnchor: 'd', properties: { a: {} } } },
+      $dynamicRef: '#d',
+      unevaluatedProperties: false,
+    };
+    expect(detailsOf(schema, { a: 1, b: 2 })).toEqual([['OBJECT_UNEVALUATED_PROPERTIES', ['b'], '#/']]);
+  });
+
+  it('if/then/else in properties mode: only the taken branch contributes', () => {
+    const schema: JsonSchema = {
+      if: { required: ['x'] },
+      then: { properties: { t: {} } },
+      else: { properties: { e: {} } },
+      unevaluatedProperties: false,
+    };
+    expect(detailsOf(schema, { e: 1 })).toEqual([]);
+    expect(detailsOf(schema, { e: 1, t: 2 })).toEqual([['OBJECT_UNEVALUATED_PROPERTIES', ['t'], '#/']]);
+  });
+
+  it('additionalProperties evaluates data keys named like Object.prototype members', () => {
+    const schema: JsonSchema = {
+      allOf: [{ properties: { a: {} }, additionalProperties: { type: 'number' } }],
+      unevaluatedProperties: false,
+    };
+    expect(detailsOf(schema, JSON.parse('{"constructor":1,"__proto__":2,"a":"x"}'))).toEqual([]);
+  });
+
+  it('unevaluatedItems checks only the items present when annotations were collected', () => {
+    const data: unknown[] = [{ first: true }];
+    const mutating = ZSchema.create({
+      version: 'draft2020-12',
+      safe: true,
+      customValidator: (_report, _schema, json) => {
+        if (json === data[0] && data.length === 1) {
+          data.push(42);
+        }
+      },
+    });
+    expect(detailsOf({ unevaluatedItems: { type: 'object' } }, data, mutating)).toEqual([]);
+  });
+});

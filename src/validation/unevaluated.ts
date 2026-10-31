@@ -304,7 +304,10 @@ export function unevaluatedItemsValidator(ctx: ZSchemaBase, report: Report, sche
     return;
   }
 
-  if (json.length === 0) {
+  // Snapshot the length: a customValidator may mutate the data while items are validated, and only the items
+  // present when annotations were collected are checked.
+  const { length } = json;
+  if (length === 0) {
     return;
   }
 
@@ -314,7 +317,7 @@ export function unevaluatedItemsValidator(ctx: ZSchemaBase, report: Report, sche
   }
 
   if (unevalSchema === false) {
-    for (let i = 0; i < json.length; i++) {
+    for (let i = 0; i < length; i++) {
       if (!evaluatedItems.has(i)) {
         report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
         return;
@@ -325,7 +328,7 @@ export function unevaluatedItemsValidator(ctx: ZSchemaBase, report: Report, sche
     // A sub-report that already has an error decides immediately, even with its own or earlier async work
     // pending: errors are never removed and only one error is ever emitted, so waiting cannot change the outcome.
     let pendingReports: Report[] | undefined;
-    for (let i = 0; i < json.length; i++) {
+    for (let i = 0; i < length; i++) {
       if (evaluatedItems.has(i)) {
         continue;
       }
