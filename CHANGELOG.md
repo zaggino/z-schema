@@ -1,5 +1,19 @@
 # Changelog
 
+## [12.5.1](https://github.com/zaggino/z-schema/compare/v12.5.0...v12.5.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* await asynchronous applicator results ([#525](https://github.com/zaggino/z-schema/issues/525)) ([eded406](https://github.com/zaggino/z-schema/commit/eded40694221e2df9bbf02f4812a4bd34e326ad0))
+* harden async applicator error propagation and timeouts ([#527](https://github.com/zaggino/z-schema/issues/527)) ([206b981](https://github.com/zaggino/z-schema/commit/206b9813081c6f17df781111ea51be194664c369))
+* surface every validation failure as ValidateError ([#529](https://github.com/zaggino/z-schema/issues/529)) ([9492c5e](https://github.com/zaggino/z-schema/commit/9492c5e508e6fafad5645631ada69b21f40ec212))
+
+
+### Performance Improvements
+
+* allocation-free evaluated-annotation collection for unevaluated* ([#533](https://github.com/zaggino/z-schema/issues/533)) ([b55fe89](https://github.com/zaggino/z-schema/commit/b55fe8994c2d7eb39bd06f16bab21eb9a6cb59c3))
+
 ## [12.5.0](https://github.com/zaggino/z-schema/compare/v12.4.6...v12.5.0) (2026-10-08)
 
 
