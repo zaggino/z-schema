@@ -5,7 +5,7 @@ import type { ZSchemaOptions } from './z-schema-options.js';
 import type { SchemaReader } from './z-schema-reader.js';
 
 import './z-schema-versions.js';
-import { toValidateError } from './errors.js';
+import { toValidateError, ValidateError } from './errors.js';
 import { getRegisteredFormats, registerFormat, unregisterFormat } from './format-validators.js';
 import { prepareRemoteSchema, SchemaCache } from './schema-cache.js';
 import { deepClone } from './utils/clone.js';
@@ -126,10 +126,15 @@ export class ZSchema extends ZSchemaBase {
    * @param schema - A JSON Schema object or a schema id string (previously registered via `validateSchema`).
    * @param options - Per-call options (`schemaPath`, `includeErrors`, `excludeErrors`).
    * @returns `true` if valid.
-   * @throws {@link ValidateError} if validation fails, with a `details` array of structured errors.
+   * @throws {@link ValidateError} if validation fails, with a `details` array of structured errors. If validation
+   * throws (for example from a `customValidator`), the thrown value becomes the `cause` of a `ValidateError`.
    */
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): true {
-    return this._validate(json, schema, options);
+    try {
+      return this._validate(json, schema, options);
+    } catch (error) {
+      throw toValidateError(error);
+    }
   }
 
   /**
@@ -161,7 +166,7 @@ export class ZSchema extends ZSchemaBase {
       try {
         this._validate(json, schema, options || {}, (err, valid) => {
           if (err || !valid) {
-            reject(err ?? new Error('Validation failed'));
+            reject(err ?? new ValidateError('Validation failed'));
           } else {
             resolve(valid);
           }
@@ -221,10 +226,14 @@ export class ZSchema extends ZSchemaBase {
    * Validate one or more JSON Schemas, compiling and caching them for later use with `validate()`.
    * @param schemaOrArr - A single schema or an array of schemas (for cross-referencing).
    * @returns `true` if all schemas are valid.
-   * @throws {@link ValidateError} if any schema is invalid.
+   * @throws {@link ValidateError} if any schema is invalid, or with the thrown value as `cause` if compilation throws.
    */
   validateSchema(schemaOrArr: JsonSchema | JsonSchema[]): true {
-    return this._validateSchema(schemaOrArr);
+    try {
+      return this._validateSchema(schemaOrArr);
+    } catch (error) {
+      throw toValidateError(error);
+    }
   }
 
   /**
@@ -307,7 +316,7 @@ export class ZSchemaAsync extends ZSchemaBase {
       try {
         this._validate(json, schema, options, (err, valid) => {
           if (err || !valid) {
-            reject(err ?? new Error('Validation failed'));
+            reject(err ?? new ValidateError('Validation failed'));
           } else {
             resolve(valid);
           }
@@ -333,10 +342,14 @@ export class ZSchemaAsync extends ZSchemaBase {
    * Validate one or more JSON Schemas (synchronous, throws on error).
    * @param schemaOrArr - A single schema or an array of schemas.
    * @returns `true` if all schemas are valid.
-   * @throws {@link ValidateError} if any schema is invalid.
+   * @throws {@link ValidateError} if any schema is invalid, or with the thrown value as `cause` if compilation throws.
    */
   validateSchema(schemaOrArr: JsonSchema | JsonSchema[]): true {
-    return this._validateSchema(schemaOrArr);
+    try {
+      return this._validateSchema(schemaOrArr);
+    } catch (error) {
+      throw toValidateError(error);
+    }
   }
 }
 

@@ -1,11 +1,11 @@
-import type { Errors, ValidateError } from './errors.js';
+import type { Errors } from './errors.js';
 import type { FormatValidatorFn } from './format-validators.js';
 import type { JsonSchema, JsonSchemaInternal, JsonSchemaVersion } from './json-schema-versions.js';
 import type { SchemaErrorDetail } from './report.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { CompiledSchemaCache, hasUnresolvedRef } from './compiled-schema-cache.js';
-import { getValidateError } from './errors.js';
+import { getValidateError, toValidateError, ValidateError } from './errors.js';
 import { getSupportedFormats } from './format-validators.js';
 import { VERSION_SCHEMA_URL_MAPPING } from './json-schema-versions.js';
 import { isInternalKey } from './json-schema.js';
@@ -99,7 +99,7 @@ export class ZSchemaBase {
     this.validateOptions = options;
 
     if (typeof schema !== 'string' && typeof schema !== 'boolean' && !isObject(schema)) {
-      const e = new Error(
+      const e = new ValidateError(
         `Invalid .validate call - schema must be a string or object but ${whatIs(schema)} was passed!`
       );
       if (callback) {
@@ -122,7 +122,7 @@ export class ZSchemaBase {
       const schemaName = schema;
       _schema = this.scache.getSchema(report, schemaName)!;
       if (!_schema) {
-        const e = new Error(`Schema with id '${schemaName}' wasn't found in the validator cache!`);
+        const e = new ValidateError(`Schema with id '${schemaName}' wasn't found in the validator cache!`);
         if (callback) {
           setTimeout(() => {
             callback(e, false);
@@ -156,7 +156,7 @@ export class ZSchemaBase {
       report.rootSchema = _schema;
       _schema = get(_schema, options.schemaPath) as JsonSchemaInternal;
       if (!_schema) {
-        const e = new Error(`Schema path '${options.schemaPath}' wasn't found in the schema!`);
+        const e = new ValidateError(`Schema path '${options.schemaPath}' wasn't found in the schema!`);
         if (callback) {
           setTimeout(() => {
             callback(e, false);
@@ -175,7 +175,7 @@ export class ZSchemaBase {
       report.processAsyncTasks(this.options.asyncTimeout, callback);
       return;
     } else if (report.asyncTasks.length > 0) {
-      throw new Error(
+      throw new ValidateError(
         'This validation has async tasks and cannot be done in sync mode, please provide callback argument.'
       );
     }
@@ -191,7 +191,7 @@ export class ZSchemaBase {
 
   _validateSchema(schemaOrArr: JsonSchema | JsonSchema[]): true {
     if (Array.isArray(schemaOrArr) && schemaOrArr.length === 0) {
-      throw new Error('.compileSchema was called with an empty array');
+      throw new ValidateError('.compileSchema was called with an empty array');
     }
 
     const report = new Report(this.options);
@@ -265,13 +265,22 @@ export class ZSchemaBase {
    * meta-validated eagerly (throwing on an invalid schema) and stored in the compiled-schema cache.
    * Validating against the snapshot therefore takes exactly the `validate(data, schemaObject)` path —
    * same cache invalidation, `customValidator` bypass and `$ref` resolution — minus the per-call
-   * `JSON.stringify` of the schema.
+   * `JSON.stringify` of the schema. Anything thrown while compiling surfaces as a `ValidateError`
+   * (see `toValidateError`).
    */
   _compileTarget(schema: JsonSchema | boolean): JsonSchema {
     if (typeof schema === 'boolean') {
       // _validate handles boolean schemas natively; the public validate() signatures just don't list them.
       return schema as unknown as JsonSchema;
     }
+    try {
+      return this._compileSnapshot(schema);
+    } catch (error) {
+      throw toValidateError(error);
+    }
+  }
+
+  private _compileSnapshot(schema: JsonSchema): JsonSchema {
     const snapshot = deepClone(schema, this.options.maxRecursionDepth);
     const pinnedKey = this.compiledSchemaCache.pinKey(snapshot);
     const report = new Report(this.options);
