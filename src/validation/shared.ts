@@ -236,7 +236,7 @@ export function deferOrRunSync(ctx: ZSchemaBase, report: Report, subReports: Rep
           }
           // subReport is const per iteration; pending and aborted are intentionally shared across iterations.
           // oxlint-disable-next-line no-loop-func
-          subReport.drainAsyncTasks(undefined, onDone, onAbort);
+          subReport.drainAsyncTasks(onDone, onAbort);
         }
       },
       [],
