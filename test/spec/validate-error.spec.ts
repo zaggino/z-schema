@@ -2,6 +2,7 @@ import type { JsonSchema } from '../../src/json-schema-versions.ts';
 import type { ValidateOptions } from '../../src/z-schema-base.ts';
 import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 
+import { toValidateError } from '../../src/errors.ts';
 import { ValidateError } from '../../src/index.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
@@ -37,6 +38,40 @@ const failureOf = async (
     }
   }
   const result = await ZSchema.create({ ...options, async: true, safe: true }).validate(json, schema, validateOptions);
+  return result.err;
+};
+
+/** Like {@link failureOf}, but through a `compile()`d validator; the hook throws only for `data`, not at compile time. */
+const compiledFailureOf = async (variant: Variant, thrown: unknown): Promise<unknown> => {
+  const data = { marker: true };
+  const options: ZSchemaOptions = {
+    customValidator: (_report, _schema, json) => {
+      if (json === data) {
+        throw thrown;
+      }
+    },
+  };
+  const schema: JsonSchema = { type: 'object' };
+  if (variant === 'sync') {
+    try {
+      ZSchema.create(options).compile(schema)(data);
+      return null;
+    } catch (error) {
+      return error;
+    }
+  }
+  if (variant === 'safe') {
+    return ZSchema.create({ ...options, safe: true }).compile(schema)(data).err;
+  }
+  if (variant === 'async') {
+    try {
+      await ZSchema.create({ ...options, async: true }).compile(schema)(data);
+      return null;
+    } catch (error) {
+      return error;
+    }
+  }
+  const result = await ZSchema.create({ ...options, async: true, safe: true }).compile(schema)(data);
   return result.err;
 };
 
@@ -85,6 +120,13 @@ describe('every validation failure surfaces as ValidateError', () => {
       expect((err as ValidateError).message).toBe("Schema path 'nope' wasn't found in the schema!");
     });
 
+    it('compiled validator wraps a customValidator throw', async () => {
+      const thrown = new RangeError('compiled hook');
+      const err = await compiledFailureOf(variant, thrown);
+      expect(err).toBeInstanceOf(ValidateError);
+      expect((err as ValidateError).cause).toBe(thrown);
+    });
+
     it('still reports schema violations as ValidateError with details', async () => {
       const err = await failureOf(variant, {}, 'x', { type: 'number' });
       expect(err).toBeInstanceOf(ValidateError);
@@ -105,27 +147,6 @@ describe('every validation failure surfaces as ValidateError', () => {
     expect(() => validator.validateSchema([])).toThrow(ValidateError);
   });
 
-  it('compiled sync validator wraps a customValidator throw', () => {
-    const thrown = new RangeError('compiled hook');
-    const data = { marker: true };
-    // The hook also runs during compile-time meta-validation; throw only for the data.
-    const validate = ZSchema.create({
-      customValidator: (_report, _schema, json) => {
-        if (json === data) {
-          throw thrown;
-        }
-      },
-    }).compile({ type: 'object' });
-    let caught: unknown;
-    try {
-      validate(data);
-    } catch (error) {
-      caught = error;
-    }
-    expect(caught).toBeInstanceOf(ValidateError);
-    expect((caught as ValidateError).cause).toBe(thrown);
-  });
-
   it('compile() wraps a non-ValidateError thrown while compiling', () => {
     const cyclic: Record<string, unknown> = { type: 'object' };
     cyclic.properties = { self: cyclic };
@@ -143,5 +164,52 @@ describe('every validation failure surfaces as ValidateError', () => {
   it('API misuse outside validation keeps throwing a plain Error', () => {
     expect(() => ZSchema.create({ bogus: 1 } as never)).toThrow(Error);
     expect(() => ZSchema.create({ bogus: 1 } as never)).not.toThrow(ValidateError);
+  });
+
+  it('validateSchema wraps a customValidator throw in the throwing variants', () => {
+    const thrown = new TypeError('schema hook');
+    for (const validator of [
+      ZSchema.create(throwingValidator(thrown)),
+      ZSchema.create({ ...throwingValidator(thrown), async: true }),
+    ]) {
+      let caught: unknown;
+      try {
+        validator.validateSchema({ type: 'object' });
+      } catch (error) {
+        caught = error;
+      }
+      expect(caught).toBeInstanceOf(ValidateError);
+      expect((caught as ValidateError).cause).toBe(thrown);
+    }
+  });
+
+  it('validateSchema returns a wrapped customValidator throw in the safe variants', () => {
+    const thrown = new TypeError('schema hook');
+    const errs = [
+      ZSchema.create({ ...throwingValidator(thrown), safe: true }).validateSchema({ type: 'object' }).err,
+      ZSchema.create({ ...throwingValidator(thrown), async: true, safe: true }).validateSchema({ type: 'object' }).err,
+      ZSchema.create(throwingValidator(thrown)).validateSchemaSafe({ type: 'object' }).err,
+    ];
+    for (const err of errs) {
+      expect(err).toBeInstanceOf(ValidateError);
+      expect(err?.cause).toBe(thrown);
+    }
+  });
+
+  it('_validate in callback mode passes a synchronous throw to the callback', async () => {
+    const thrown = new TypeError('hook failed');
+    const validator = ZSchema.create(throwingValidator(thrown));
+    const err = await new Promise<unknown>((resolve) => {
+      validator._validate({}, { type: 'object' }, (error) => {
+        resolve(error);
+      });
+    });
+    expect(err).toBeInstanceOf(ValidateError);
+    expect((err as ValidateError).cause).toBe(thrown);
+  });
+
+  it('toValidateError returns an existing ValidateError unchanged', () => {
+    const original = new ValidateError('already', []);
+    expect(toValidateError(original)).toBe(original);
   });
 });

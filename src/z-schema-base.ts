@@ -95,7 +95,34 @@ export class ZSchemaBase {
     if (!options) {
       options = {};
     }
+    if (callback === undefined) {
+      return this._runValidate(json, schema, options);
+    }
+    // Callback mode reports every failure through the callback, including a synchronous throw
+    // (for example from a customValidator), converted like the other async failures.
+    try {
+      this._runValidate(json, schema, options, callback);
+    } catch (error) {
+      const err = toValidateError(error);
+      setTimeout(() => {
+        callback(err, false);
+      }, 0);
+    }
+  }
 
+  private _runValidate(json: unknown, schema: JsonSchema | string, options: ValidateOptions): true;
+  private _runValidate(
+    json: unknown,
+    schema: JsonSchema | string,
+    options: ValidateOptions,
+    callback: ValidateCallback
+  ): void;
+  private _runValidate(
+    json: unknown,
+    schema: JsonSchema | string,
+    options: ValidateOptions,
+    callback?: ValidateCallback
+  ): true | void {
     this.validateOptions = options;
 
     if (typeof schema !== 'string' && typeof schema !== 'boolean' && !isObject(schema)) {
