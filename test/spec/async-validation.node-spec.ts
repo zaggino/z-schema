@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { ZSchema } from '../../src/z-schema.js';
+import { ZSchema } from '../../src/z-schema.ts';
+import { nextTurn } from '../lib/async.ts';
 
 const asyncValidValid = (input: unknown): Promise<boolean> =>
   Promise.resolve(typeof input === 'string' && input === 'valid');
@@ -89,5 +90,31 @@ describe('Async Format Validation Integration', () => {
     expect(result.valid).toBe(false);
     expect(result.err!.details).toHaveLength(1);
     expect(result.err!.details![0].code).toBe('ONE_OF_MISSING');
+  });
+});
+
+describe('Async rejection handling', () => {
+  // A rejected format promise whose task never runs (skipped after a sync error) must not become an unhandled rejection.
+  it('does not emit an unhandled rejection for a rejected format after a sync error', async () => {
+    const validator = ZSchema.create({ async: true, safe: true, breakOnFirstError: true, version: 'draft2020-12' });
+    validator.registerFormat('rejects', () => Promise.reject(new Error('x')));
+    let unhandled = 0;
+    const spy = () => {
+      unhandled += 1;
+    };
+    process.on('unhandledRejection', spy);
+    try {
+      const result = await validator.validate(
+        { a: 1, b: 'y' },
+        { properties: { a: { type: 'string' }, b: { format: 'rejects' } } }
+      );
+      await nextTurn();
+      await nextTurn();
+
+      expect(result.valid).toBe(false);
+      expect(unhandled).toBe(0);
+    } finally {
+      process.off('unhandledRejection', spy);
+    }
   });
 });

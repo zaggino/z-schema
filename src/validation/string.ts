@@ -7,7 +7,7 @@ import { decodeBase64, isValidBase64 } from '../utils/base64.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { unicodeLength } from '../utils/unicode.js';
 import { whatIs } from '../utils/what-is.js';
-import { isFormatAssertionVocabEnabled, shouldSkipValidate } from './shared.js';
+import { isFormatAssertionVocabEnabled, isModernDraft, shouldSkipValidate } from './shared.js';
 
 // ---------------------------------------------------------------------------
 // minLength
@@ -70,6 +70,11 @@ export function patternValidator(ctx: ZSchemaBase, report: Report, schema: JsonS
 // format
 // ---------------------------------------------------------------------------
 
+// A rejected validator promise is treated as an invalid result (false).
+function toFalse(): unknown {
+  return false;
+}
+
 export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
   if (ctx.options.formatAssertions === false) {
@@ -82,8 +87,6 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
   if (ctx.options.formatAssertions === true && !isFormatAssertionVocabEnabled(schema, report, ctx.options.version)) {
     return;
   }
-
-  const isModernDraft = ctx.options.version === 'draft2019-09' || ctx.options.version === 'draft2020-12';
 
   const formatValidatorFn = resolveFormatValidator(schema.format!, ctx.options);
   if (typeof formatValidatorFn === 'function') {
@@ -104,19 +107,13 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
       const result = formatValidatorFn.call(ctx, json);
       if (result instanceof Promise) {
         // Promise-based async
-        const promiseResult = result;
+        // Attach the rejection handler now: if the task never runs (early finish), a rejected
+        // promise must not surface as an unhandled rejection.
+        const settled = result.catch(toFalse);
         report.addAsyncTaskWithPath(
-          async (callback: (result: unknown) => void) => {
-            let resolved: unknown = false;
-            try {
-              resolved = await promiseResult;
-            } catch {
-              // A rejected validator promise is treated as an invalid result (false).
-            }
-            // Terminal callback of the async task; `return callback(...)` would trip
-            // no-confusing-void-expression since the callback returns void.
-            // oxlint-disable-next-line node/callback-return
-            callback(resolved);
+          (callback: (result: unknown) => void) => {
+            // settled never rejects; void marks it as intentionally not awaited
+            void settled.then(callback);
           },
           [],
           (resolvedResult) => {
@@ -130,7 +127,7 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
         report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
       }
     }
-  } else if (ctx.options.ignoreUnknownFormats !== true && !isModernDraft) {
+  } else if (ctx.options.ignoreUnknownFormats !== true && !isModernDraft(ctx.options.version)) {
     report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
   }
 }

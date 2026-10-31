@@ -1,4 +1,3 @@
-import type { ValidateError } from './errors.js';
 import type { FormatValidatorFn } from './format-validators.js';
 import type { JsonSchema } from './json-schema-versions.js';
 import type { ValidateOptions, ValidateResponse } from './z-schema-base.js';
@@ -6,6 +5,7 @@ import type { ZSchemaOptions } from './z-schema-options.js';
 import type { SchemaReader } from './z-schema-reader.js';
 
 import './z-schema-versions.js';
+import { toValidateError } from './errors.js';
 import { getRegisteredFormats, registerFormat, unregisterFormat } from './format-validators.js';
 import { prepareRemoteSchema, SchemaCache } from './schema-cache.js';
 import { deepClone } from './utils/clone.js';
@@ -144,7 +144,7 @@ export class ZSchema extends ZSchemaBase {
       this._validate(json, schema, options ?? {});
       return { valid: true };
     } catch (error) {
-      return { valid: false, err: error as ValidateError };
+      return { valid: false, err: toValidateError(error) };
     }
   }
 
@@ -167,7 +167,7 @@ export class ZSchema extends ZSchemaBase {
           }
         });
       } catch (error) {
-        reject(error instanceof Error ? error : new Error(String(error), { cause: error }));
+        reject(toValidateError(error));
       }
     });
   }
@@ -178,7 +178,7 @@ export class ZSchema extends ZSchemaBase {
    * @param json - The data to validate.
    * @param schema - A JSON Schema object or a schema id string.
    * @param options - Per-call options.
-   * @returns A promise resolving to `{ valid: true }` or `{ valid: false, err: ValidateError }`.
+   * @returns A promise resolving to `{ valid: true }` or `{ valid: false, err: ValidateError }`. If validation throws (for example from a `customValidator`), err is a `ValidateError` with the thrown value as `cause`.
    */
   validateAsyncSafe(json: unknown, schema: JsonSchema | string, options?: ValidateOptions): Promise<ValidateResponse> {
     return new Promise((resolve) => {
@@ -187,7 +187,7 @@ export class ZSchema extends ZSchemaBase {
           resolve({ valid, err });
         });
       } catch (error) {
-        resolve({ valid: false, err: error as ValidateError });
+        resolve({ valid: false, err: toValidateError(error) });
       }
     });
   }
@@ -237,7 +237,7 @@ export class ZSchema extends ZSchemaBase {
       this._validateSchema(schemaOrArr);
       return { valid: true };
     } catch (error) {
-      return { valid: false, err: error as ValidateError };
+      return { valid: false, err: toValidateError(error) };
     }
   }
 }
@@ -259,7 +259,7 @@ export class ZSchemaSafe extends ZSchemaBase {
       this._validate(json, schema, options);
       return { valid: true };
     } catch (error) {
-      return { valid: false, err: error as ValidateError };
+      return { valid: false, err: toValidateError(error) };
     }
   }
 
@@ -284,7 +284,7 @@ export class ZSchemaSafe extends ZSchemaBase {
       this._validateSchema(schemaOrArr);
       return { valid: true };
     } catch (error) {
-      return { valid: false, err: error as ValidateError };
+      return { valid: false, err: toValidateError(error) };
     }
   }
 }
@@ -313,7 +313,7 @@ export class ZSchemaAsync extends ZSchemaBase {
           }
         });
       } catch (error) {
-        reject(error instanceof Error ? error : new Error(String(error), { cause: error }));
+        reject(toValidateError(error));
       }
     });
   }
@@ -351,7 +351,7 @@ export class ZSchemaAsyncSafe extends ZSchemaBase {
    * @param json - The data to validate.
    * @param schema - A JSON Schema object or a schema id string.
    * @param options - Per-call options.
-   * @returns A promise resolving to `{ valid: true }` or `{ valid: false, err: ValidateError }`.
+   * @returns A promise resolving to `{ valid: true }` or `{ valid: false, err: ValidateError }`. If validation throws (for example from a `customValidator`), err is a `ValidateError` with the thrown value as `cause`.
    */
   validate(json: unknown, schema: JsonSchema | string, options: ValidateOptions = {}): Promise<ValidateResponse> {
     return new Promise((resolve) => {
@@ -360,7 +360,7 @@ export class ZSchemaAsyncSafe extends ZSchemaBase {
           resolve({ valid, err });
         });
       } catch (error) {
-        resolve({ valid: false, err: error as ValidateError });
+        resolve({ valid: false, err: toValidateError(error) });
       }
     });
   }
@@ -386,7 +386,7 @@ export class ZSchemaAsyncSafe extends ZSchemaBase {
       this._validateSchema(schemaOrArr);
       return { valid: true };
     } catch (error) {
-      return { valid: false, err: error as ValidateError };
+      return { valid: false, err: toValidateError(error) };
     }
   }
 }

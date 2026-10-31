@@ -32,6 +32,9 @@ export interface ValidateResponse {
   err?: ValidateError;
 }
 
+/**
+ * Callback of the asynchronous validation path. If validation throws (for example from a `customValidator`), err is a `ValidateError` with the thrown value as `cause`.
+ */
 export type ValidateCallback = (err: ValidateResponse['err'], valid: ValidateResponse['valid']) => void;
 
 /**

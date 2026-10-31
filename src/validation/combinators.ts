@@ -2,7 +2,7 @@ import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 
 import { Report } from '../report.js';
-import { cacheValidationResult, deferOrRunSync } from './shared.js';
+import { cacheValidationResult, deferOrRunSync, isModernDraft } from './shared.js';
 
 // ---------------------------------------------------------------------------
 // allOf
@@ -32,7 +32,7 @@ export function anyOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSch
     ctx._jsonValidate(subReport, schema.anyOf![i], json);
   }
 
-  // Aggregate async tasks and decide when ready
+  // Wait for each sub-report's async work, then decide.
   deferOrRunSync(ctx, report, subReports, () => {
     let passed = false;
     for (let i = 0; i < subReports.length; i++) {
@@ -63,7 +63,7 @@ export function oneOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSch
     ctx._jsonValidate(subReport, schema.oneOf![i], json);
   }
 
-  // Aggregate async tasks and decide when ready
+  // Wait for each sub-report's async work, then decide.
   deferOrRunSync(ctx, report, subReports, () => {
     let passes = 0;
     for (let i = 0; i < subReports.length; i++) {
@@ -116,7 +116,13 @@ export function ifValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchema
   const thenSchema = schema.then;
   const elseSchema = schema.else;
 
-  if (conditionSchema === undefined || (thenSchema === undefined && elseSchema === undefined)) {
+  if (conditionSchema === undefined) {
+    return;
+  }
+  const noBranches = thenSchema === undefined && elseSchema === undefined;
+  // A lone `if` only matters as an annotation for an unevaluated* at the same instance (2019-09+), so skip it
+  // otherwise. Annotations attach to the instance location, so child instances don't count.
+  if (noBranches && !(isModernDraft(ctx.options.version) && report.__$unevaluatedInstance === json)) {
     return;
   }
 
