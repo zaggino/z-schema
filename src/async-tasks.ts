@@ -3,12 +3,12 @@ import type { Report } from './report.js';
 import { MAX_ASYNC_TIMEOUT } from './utils/constants.js';
 
 export type TaskResult = unknown;
-export type TaskFn = (...args: unknown[]) => TaskResult;
-export type TaskFnArgs = Parameters<TaskFn>;
+type TaskFn = (...args: unknown[]) => TaskResult;
+type TaskFnArgs = Parameters<TaskFn>;
 export type TaskProcessFn = (result: ReturnType<TaskFn>) => void;
 export type AsyncTask = [TaskFn, TaskFnArgs, TaskProcessFn];
 
-export const ASYNC_TIMEOUT_POLL_MS = 10;
+const ASYNC_TIMEOUT_POLL_MS = 10;
 
 // Keeps the user-facing callback asynchronous (macrotask), unlike internal sub-report completion.
 export const deferToTimer = (fn: () => void): void => {
@@ -44,7 +44,7 @@ export interface DrainConfig {
 export function drainTasks(report: Report, config: DrainConfig): void {
   const { topLevel, onComplete, onAbort } = config;
   const defer = topLevel ? deferToTimer : queueMicrotask;
-  // The top-level clock starts before the first synchronous pass, as it always has; sub-reports skip it.
+  // The top-level clock starts before the first synchronous pass.
   const startedAt = topLevel === undefined ? 0 : Date.now();
   let tasksCount = report.asyncTasks.length;
   // Deferred tasks not yet started; they run one at a time, see runTasks.
@@ -134,10 +134,9 @@ export function drainTasks(report: Report, config: DrainConfig): void {
 
   // Finish early only at the top level, once an error exists under breakOnFirstError. Sub-reports
   // must still run their tasks: their errors are just one branch's result and the parent waits on them.
-  // Only the top-level report (no parent) is drained with `topLevel`.
   if (
     (tasksCount === 0 && !report.deferredAsyncTasks?.length) ||
-    (!report.parentReport && report.errors.length > 0 && report.options.breakOnFirstError)
+    (topLevel !== undefined && report.errors.length > 0 && report.options.breakOnFirstError)
   ) {
     finish();
     return;
@@ -149,7 +148,7 @@ export function drainTasks(report: Report, config: DrainConfig): void {
     return;
   }
 
-  // Only the top level passes a timeout; `processAsyncTasks` owns the default. Sub-reports skip the clock.
+  // `processAsyncTasks` owns the default timeout.
   const validationTimeout = Math.min(Math.max(topLevel.timeout, 0), MAX_ASYNC_TIMEOUT);
   const timeoutAt = startedAt + validationTimeout;
 

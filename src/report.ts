@@ -423,19 +423,6 @@ export class Report {
   }
 
   /**
-   * Drains pending async tasks of a sub-report; see {@link drainTasks}. Completion is scheduled via a
-   * microtask and no timer runs: the top-level timeout bounds the whole validation.
-   *
-   * @internal
-   *
-   * @param onComplete - Called when all tasks settled.
-   * @param onAbort - Called with the thrown value when a task or its result processing throws.
-   */
-  drainAsyncTasks(onComplete: () => void, onAbort: (error: unknown) => void): void {
-    drainTasks(this, { onComplete, onAbort });
-  }
-
-  /**
    * Drains pending async tasks and reports the result through `callback`.
    * This is the top-level entry point and owns the only timer. The callback is invoked from a
    * `setTimeout` (completion and abort alike). On abort, the thrown value is converted to a
