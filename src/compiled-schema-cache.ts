@@ -105,7 +105,7 @@ export function hasUnresolvedRef(node: unknown, maxDepth: number, visited = new 
 
 /**
  * Every option, required: a new `ZSchemaOptions` key does not compile until {@link snapshotOptions}
- * lists it. {@link sameOptions} must compare the same keys (a spec iterates `defaultOptions` to check).
+ * lists it. {@link sameOptions} must compare the same keys (a spec iterates the snapshot's keys to check).
  */
 type OptionsSnapshot = { [K in keyof Required<ZSchemaOptions>]: ZSchemaOptions[K] };
 
@@ -142,7 +142,9 @@ function snapshotOptions(o: ZSchemaOptions): OptionsSnapshot {
   };
 }
 
-function sameShallow(a: Record<string, unknown>, b: Record<string, unknown>): boolean {
+type CustomFormats = NonNullable<ZSchemaOptions['customFormats']>;
+
+function sameShallow(a: CustomFormats, b: CustomFormats): boolean {
   const keys = Object.keys(a);
   if (keys.length !== Object.keys(b).length) {
     return false;

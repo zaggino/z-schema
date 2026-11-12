@@ -1,12 +1,19 @@
 import { CompiledSchemaCache } from '../../src/compiled-schema-cache.ts';
 import { SchemaCache } from '../../src/schema-cache.ts';
-import { defaultOptions, normalizeOptions } from '../../src/z-schema-options.ts';
+import { normalizeOptions } from '../../src/z-schema-options.ts';
 import { setSchemaReader } from '../../src/z-schema-reader.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
 const unknownFormatSchema = () => ({ $schema: 'http://json-schema.org/draft-07/schema#', format: 'zcache-fmt' });
 
 const fake = (n: number) => ({ title: String(n) }) as never;
+
+const snapshotKeys = () => {
+  const cache = new CompiledSchemaCache();
+  const options = normalizeOptions();
+  cache.set('k', fake(1), options);
+  return Object.keys(cache.getEntry('k', options)!.options);
+};
 
 const code = (result: { err?: { details?: Array<{ code: string }> } }) => result.err?.details?.[0].code;
 
@@ -309,7 +316,8 @@ describe('compiled schema cache', () => {
     });
 
     // The lookup compares options one by one by name, so this is what keeps that list complete.
-    it.each(Object.keys(defaultOptions))('a changed, deleted or restored %s is noticed', (key) => {
+    // The snapshot's own keys are the source: its type forces it to hold every option.
+    it.each(snapshotKeys())('a changed, deleted or restored %s is noticed', (key) => {
       const options = normalizeOptions() as Record<string, unknown>;
       const cache = new CompiledSchemaCache();
       const original = options[key];
