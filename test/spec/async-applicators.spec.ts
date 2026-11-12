@@ -383,7 +383,7 @@ describe('async hardening', () => {
     const { validator, g, f } = createRejecting(error);
     const pending = validator.validate('x', throwingSchema);
     const outcome = pending.then(
-      () => {},
+      () => null,
       (error_: unknown) => error_
     );
     await nextTurn();
