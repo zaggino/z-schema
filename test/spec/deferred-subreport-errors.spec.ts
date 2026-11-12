@@ -414,6 +414,16 @@ describe('deferred sub-report errors: message construction exceptions (C3)', () 
     expect(deferred.err?.details?.[0].inner?.[0].message).toContain('{"k":1}');
   });
 
+  it('formats an array param through its own toString', () => {
+    const arr: unknown[] & { [Symbol.toPrimitive]?: () => never } = ['a', 'b'];
+    arr[Symbol.toPrimitive] = () => {
+      throw new Error('no primitive');
+    };
+    const report = new Report({});
+    report.addCustomError('ENUM_MISMATCH', 'x {0}', [arr as never]);
+    expect(report.errors[0]?.message).toBe('x a,b');
+  });
+
   it('throws on a circular object param in both modes', () => {
     const circular: Record<string, unknown> = {};
     circular.self = circular;
