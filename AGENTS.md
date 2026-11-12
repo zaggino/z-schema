@@ -56,7 +56,7 @@ src/                  # Library source (TypeScript, ESM)
     object.ts         # properties, patternProperties, additionalProperties, required, etc.
     combinators.ts    # allOf, anyOf, oneOf, not, if/then/else validators
     unevaluated.ts    # unevaluatedItems/unevaluatedProperties validators and evaluated-annotation collection (collectEvaluated)
-    ref.ts            # $dynamicRef/$recursiveRef resolution helpers
+    ref.ts            # $dynamicRef/$recursiveRef resolution helpers, legacy $ref chain walker (walkLegacyRef)
   utils/              # Pure utility functions
     array.ts          # Array helpers
     clone.ts          # Deep/shallow clone

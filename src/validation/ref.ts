@@ -95,16 +95,25 @@ const MAX_LEGACY_REF_HOPS = 99;
  * reference is unresolved, or one that references itself. `undefined` when the chain takes MAX_LEGACY_REF_HOPS hops.
  * The returned value can be a non-object (a boolean schema target).
  */
-export function walkLegacyRef(schema: JsonSchemaInternal): unknown {
-  let current: unknown = schema;
-  let hops = 0;
-  while ((current as JsonSchemaInternal).$ref && hops < MAX_LEGACY_REF_HOPS) {
-    const next = (current as JsonSchemaInternal).__$refResolved as unknown;
+export function walkLegacyRef(schema: JsonSchemaInternal): JsonSchemaInternal | boolean | undefined {
+  let current: JsonSchemaInternal | boolean = schema;
+  for (let hops = 0; hops < MAX_LEGACY_REF_HOPS; hops++) {
+    if (typeof current !== 'object' || !current.$ref) {
+      return current;
+    }
+    const next: JsonSchemaInternal | boolean | undefined = current.__$refResolved;
     if (!next || next === current) {
       return current;
     }
     current = next;
-    hops++;
   }
-  return hops === MAX_LEGACY_REF_HOPS ? undefined : current;
+  return undefined;
 }
+
+/**
+ * True when a legacy `$ref` walk ended on a schema object whose keywords apply (not a hop-limit, unresolved,
+ * self-referencing or boolean stop).
+ */
+export const isResolvedLegacyTarget = (
+  target: JsonSchemaInternal | boolean | undefined
+): target is JsonSchemaInternal => typeof target === 'object' && !target.$ref;

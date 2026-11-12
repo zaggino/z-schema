@@ -3,7 +3,6 @@ import type { BuildState, Check, FastValidator, KeywordCompiler } from './valida
 import type { ZSchemaBase } from './z-schema-base.js';
 
 import { isInternalKey } from './json-schema.js';
-import { isObject } from './utils/what-is.js';
 import {
   compileContains,
   compileItemKeywords,
@@ -21,7 +20,7 @@ import {
   compileMultipleOf,
 } from './validation/numeric.js';
 import { compileObjectKeywords } from './validation/object.js';
-import { walkLegacyRef } from './validation/ref.js';
+import { isResolvedLegacyTarget, walkLegacyRef } from './validation/ref.js';
 import { isModernDraft, isValidationVocabularyEnabled } from './validation/shared.js';
 import {
   compileContent,
@@ -45,7 +44,7 @@ function compileRef(state: BuildState, node: JsonSchemaInternal, checks: Check[]
   if (!isModernDraft(state.ctx.options.version)) {
     return; // legacy: an empty $ref is inert; a non-empty one never reaches the keyword loop
   }
-  const target = node.__$refResolved as unknown;
+  const target = node.__$refResolved;
   if (target === undefined) {
     unsupported();
   }
@@ -185,13 +184,13 @@ function compileNode(state: DriverState, node: unknown): FastValidator {
   }
 
   if (schema.$ref && !isModernDraft(state.ctx.options.version)) {
-    // siblings of a legacy $ref are ignored: only the final target of the chain is validated
-    // the final target must be a resolved object: a hop limit, an unresolved or self reference and a boolean are rejected
+    // siblings of a legacy $ref are ignored: only the final target of the chain is validated, and it must be a
+    // resolved object (a hop limit, an unresolved or self reference and a boolean are rejected)
     const target = walkLegacyRef(schema);
-    if (!isObject(target) || (target as JsonSchemaInternal).$ref) {
+    if (!isResolvedLegacyTarget(target)) {
       return unsupported();
     }
-    const built = state.compileChild(target as JsonSchemaInternal);
+    const built = state.compileChild(target);
     slot.fn = built;
     state.memo.set(schema, built);
     return built;

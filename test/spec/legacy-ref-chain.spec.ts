@@ -1,4 +1,5 @@
 import type { JsonSchema } from '../../src/json-schema-versions.ts';
+import type { ZSchemaBase } from '../../src/z-schema-base.ts';
 
 import { describe, expect, it } from 'vitest';
 
@@ -7,7 +8,7 @@ import { buildFastFor, interpreterRun } from '../lib/fast-validator.ts';
 
 const VERSIONS = ['draft-07', 'draft-04'] as const;
 
-/** A root whose `$ref` chain takes exactly `hops` hops through `definitions` to `{ type: 'string' }`. */
+/** A root whose `$ref` chain takes exactly `hops` hops through `definitions`, ending on `last`. */
 const chain = (hops: number, last: unknown): JsonSchema => {
   const definitions: Record<string, unknown> = {};
   for (let i = 0; i < hops; i++) {
@@ -19,6 +20,12 @@ const chain = (hops: number, last: unknown): JsonSchema => {
 const PINNED: Record<string, { valid: boolean; codes: string[] }> = {
   true: { valid: true, codes: [] },
   false: { valid: false, codes: ['REF_UNRESOLVED'] },
+};
+
+/** True when `validator` holds a compiled-cache entry for `schema`. */
+const isCached = (validator: ZSchemaBase, schema: JsonSchema): boolean => {
+  const key = validator.compiledSchemaCache.keyOf(schema);
+  return key !== undefined && validator.compiledSchemaCache.getEntry(key, validator.options) !== undefined;
 };
 
 const codes = (r: { err?: { details?: Array<{ code: string }> } }) => r.err?.details?.map((d) => d.code) ?? [];
@@ -59,13 +66,14 @@ describe.each(VERSIONS)('legacy $ref chain (%s)', (version) => {
     expect(buildFastFor(v, schema as JsonSchema)).toBeDefined();
   });
 
-  it('reports REF_UNRESOLVED for an unresolved $ref and builds no fast validator', () => {
+  it('reports REF_UNRESOLVED for an unresolved $ref and is never cached', () => {
     const schema = { $ref: 'http://localhost:1234/legacy-chain-missing.json' } as JsonSchema;
     const v = ZSchema.create({ ...options, safe: true });
     for (let i = 0; i < 2; i++) {
       expect(codes(v.validate('a', schema))).toEqual(['REF_UNRESOLVED']);
     }
-    expect(buildFastFor(v, schema)).toBeUndefined();
+    // a schema with an unresolved reference is not compiled into the cache, so no fast validator can exist
+    expect(isCached(v, schema)).toBe(false);
     expect(codes(interpreterRun(options, schema, 'a'))).toEqual(['REF_UNRESOLVED']);
   });
 
@@ -75,7 +83,8 @@ describe.each(VERSIONS)('legacy $ref chain (%s)', (version) => {
     for (let i = 0; i < 2; i++) {
       expect(codes(v.validate('a', schema))).toEqual(['REF_UNRESOLVED', 'INVALID_TYPE']);
     }
-    expect(buildFastFor(v, schema)).toBeUndefined();
+    // not compiled into the cache either (see above)
+    expect(isCached(v, schema)).toBe(false);
   });
 
   it('treats a self-referencing $ref as its own keywords and builds no fast validator', () => {
@@ -83,8 +92,11 @@ describe.each(VERSIONS)('legacy $ref chain (%s)', (version) => {
     const v = ZSchema.create({ ...options, safe: true });
     const first = v.validate(1, schema);
     const second = v.validate(1, schema);
+    expect(first.valid).toBe(false);
+    expect(codes(first)).toEqual(['INVALID_TYPE']);
     expect(second.valid).toBe(first.valid);
     expect(codes(second)).toEqual(codes(first));
+    expect(isCached(v, schema as JsonSchema)).toBe(true);
     expect(buildFastFor(v, schema as JsonSchema)).toBeUndefined();
   });
 });
@@ -106,7 +118,7 @@ describe('legacy $ref to a boolean schema (draft-07)', () => {
       expect(codes(r)).toEqual(codes(fresh));
     }
     expect(buildFastFor(v, schema)).toBeUndefined();
-    // recorded below
+    // the pinned answers are in PINNED above
     expect({ valid: fresh.valid, codes: codes(fresh) }).toEqual(PINNED[String(def)]);
   });
 });
