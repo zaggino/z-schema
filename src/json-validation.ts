@@ -350,7 +350,10 @@ function recurseArray(ctx: ZSchemaBase, report: Report, schema: JsonSchemaIntern
     for (let idx = 0; idx < json.length; idx++) {
       if (idx < prefixItems.length) {
         report.path.push(idx);
+        report.schemaPath.push('prefixItems', idx);
         validate(ctx, report, prefixItems[idx], json[idx]);
+        report.schemaPath.pop();
+        report.schemaPath.pop();
         report.path.pop();
       } else if (schema.items !== undefined && !Array.isArray(schema.items)) {
         report.path.push(idx);
@@ -372,12 +375,17 @@ function recurseArray(ctx: ZSchemaBase, report: Report, schema: JsonSchemaIntern
       // equal to doesn't make sense here
       if (idx < schema.items.length) {
         report.path.push(idx);
+        report.schemaPath.push('items', idx);
         validate(ctx, report, schema.items[idx], json[idx]);
+        report.schemaPath.pop();
+        report.schemaPath.pop();
         report.path.pop();
       } else if (typeof schema.additionalItems === 'object') {
         // might be boolean, so check that it's an object
         report.path.push(idx);
+        report.schemaPath.push('additionalItems');
         validate(ctx, report, schema.additionalItems, json[idx]);
+        report.schemaPath.pop();
         report.path.pop();
       }
     }
@@ -418,62 +426,71 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
   // m - The property name of the child.
   const keys = Object.keys(json);
 
-  // Precompile patternProperties regexes once before the per-key loop
-  const ppCompiled: Array<{ key: string; re: RegExp }> = [];
+  // Precompile patternProperties regexes once before the per-key loop. `matches` / `schema` are per-key scratch
+  // fields, reused across keys so that no array of matching schemas is allocated for every key.
+  const ppCompiled: Array<{
+    key: string;
+    re: RegExp;
+    matches: boolean;
+    schema: NonNullable<JsonSchemaInternal['patternProperties']>[string] | undefined;
+  }> = [];
   for (let i = 0; i < pp.length; i++) {
     const r = compileSchemaRegex(pp[i]);
     if (r.ok) {
-      ppCompiled.push({ key: pp[i], re: r.value });
+      ppCompiled.push({ key: pp[i], re: r.value, matches: false, schema: undefined });
     }
   }
 
   for (const m of keys) {
     const propertyValue = json[m];
 
-    // Hoist membership check: compute once per key
+    // Read every schema that applies to "m" before validating against any of them: validating one may run a
+    // customValidator that replaces another, and the set must be the one present when the key was reached.
+
+    // 1. If set "p" contains value "m", the corresponding schema in "properties" applies.
     const isProp = p.includes(m);
+    const propSchema = isProp ? schema.properties![m] : undefined;
 
-    // s - The set of schemas for the child instance.
-    const s = [];
-
-    // 1. If set "p" contains value "m", then the corresponding schema in "properties" is added to "s".
-    if (isProp) {
-      s.push(schema.properties![m]);
-    }
-
-    // 2. For each regex in "pp", if it matches "m" successfully, the corresponding schema in "patternProperties" is added to "s".
+    // 2. For each regex in "pp", if it matches "m" successfully, the corresponding schema in "patternProperties" applies.
+    let matched = isProp;
     for (let i = 0; i < ppCompiled.length; i++) {
-      if (ppCompiled[i].re.test(m)) {
-        s.push(schema.patternProperties![ppCompiled[i].key]);
+      const entry = ppCompiled[i];
+      entry.matches = entry.re.test(m);
+      if (entry.matches) {
+        entry.schema = schema.patternProperties![entry.key];
+        matched = true;
       }
     }
 
-    // 3. The schema defined by "additionalProperties" is added to "s" if and only if, at this stage, "s" is empty.
-    if (s.length === 0 && additionalProperties !== false) {
-      s.push(additionalProperties);
-    }
-
-    // we are passing tests even without this assert because this is covered by properties check
-    // if s is empty in this stage, no additionalProperties are allowed
-    // report.expect(s.length !== 0, 'E001', m);
-
-    // Instance property value must pass all schemas from s
-    for (const schema_s of s) {
+    // Instance property value must pass every schema that applies, each reported under its own keyword.
+    if (isProp) {
       report.path.push(m);
-      // Track schema path for properties validation
-      if (isProp) {
-        // This is a defined property
-        report.schemaPath.push('properties', m);
-      } else {
-        // This is additionalProperties or patternProperties
-        report.schemaPath.push('additionalProperties');
-      }
-      validate(ctx, report, schema_s, propertyValue);
+      report.schemaPath.push('properties', m);
+      validate(ctx, report, propSchema!, propertyValue);
       report.path.pop();
       report.schemaPath.pop();
-      if (isProp) {
-        report.schemaPath.pop(); // pop the property name for defined properties
+      report.schemaPath.pop();
+    }
+
+    for (let i = 0; i < ppCompiled.length; i++) {
+      const entry = ppCompiled[i];
+      if (entry.matches) {
+        report.path.push(m);
+        report.schemaPath.push('patternProperties', entry.key);
+        validate(ctx, report, entry.schema!, propertyValue);
+        report.path.pop();
+        report.schemaPath.pop();
+        report.schemaPath.pop();
       }
+    }
+
+    // 3. The schema defined by "additionalProperties" applies if and only if nothing matched above.
+    if (!matched && additionalProperties !== false) {
+      report.path.push(m);
+      report.schemaPath.push('additionalProperties');
+      validate(ctx, report, additionalProperties, propertyValue);
+      report.path.pop();
+      report.schemaPath.pop();
     }
   }
 }
@@ -558,6 +575,9 @@ export function validate(
     pushedRecursiveAnchor = true;
   }
 
+  // the legacy $ref branch resets the schema path; the caller's path is restored on every exit
+  let savedSchemaPath: Array<string | number> | undefined;
+
   // follow schema.$ref keys
   if (schema.$ref !== undefined) {
     const applySiblingKeywordsWithRef = isModernDraft(ctx.options.version);
@@ -587,6 +607,7 @@ export function validate(
         throw new Error('Circular dependency by $ref references!');
       }
       // Reset schema path for referenced schema - paths are relative to the referenced schema
+      savedSchemaPath = report.schemaPath;
       report.schemaPath = [];
     }
   }
@@ -630,6 +651,9 @@ export function validate(
     JsonValidators.type(ctx, report, schema, json);
     report.schemaPath.pop();
     if (report.errors.length && ctx.options.breakOnFirstError) {
+      if (savedSchemaPath !== undefined) {
+        report.schemaPath = savedSchemaPath;
+      }
       if (pushedRecursiveAnchor) {
         recursiveAnchorStack.pop();
       }
@@ -714,6 +738,9 @@ export function validate(
     }
   }
 
+  if (savedSchemaPath !== undefined) {
+    report.schemaPath = savedSchemaPath;
+  }
   if (pushedRecursiveAnchor) {
     recursiveAnchorStack.pop();
   }

@@ -105,3 +105,50 @@ jobs:
           git add docs/test-coverage.md README.md
           git commit --no-verify -m "chore(ci): update coverage artifacts"
           git push origin "HEAD:$HEAD_REF"
+
+  benchmark:
+    # Informational only: compares the PR against its base on a shared runner.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    concurrency:
+      group: benchmark-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    steps:
+      # persist-credentials: false — this job runs the PR's own scripts and never pushes.
+      - name: Checkout head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Checkout base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          persist-credentials: false
+      - name: Use Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: 'npm'
+      - name: Build head
+        run: |
+          git submodule update --init
+          npm ci
+          npm run build
+      - name: Build base
+        working-directory: base
+        run: |
+          git submodule update --init
+          npm ci
+          npm run build
+      - name: Benchmark base
+        run: node bench/run.mts --lib base/dist/index.js --json base.json
+      - name: Benchmark head
+        run: node bench/run.mts --json head.json
+      - name: Compare
+        run: node bench/compare.mts base.json head.json >> "$GITHUB_STEP_SUMMARY"
