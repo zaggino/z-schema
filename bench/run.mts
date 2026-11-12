@@ -9,6 +9,7 @@ import { cases } from './cases.mts';
 
 interface ValidateResult {
   valid: boolean;
+  err?: { details?: unknown[] };
 }
 
 interface SafeValidator {
@@ -17,7 +18,7 @@ interface SafeValidator {
 }
 
 interface LibModule {
-  default: { create: (options: Record<string, unknown>) => SafeValidator };
+  default?: { create?: (options: Record<string, unknown>) => SafeValidator };
 }
 
 const { values } = parseArgs({
@@ -44,6 +45,11 @@ if (!Number.isFinite(time) || time <= 0) {
 }
 
 const lib = (await import(pathToFileURL(libPath).href)) as LibModule;
+const create = lib.default?.create;
+if (typeof create !== 'function') {
+  console.error(`${libPath} does not look like a z-schema build: its default export has no create().`);
+  process.exit(1);
+}
 const selected = cases.filter((c) => !values.filter || c.name.includes(values.filter));
 if (selected.length === 0) {
   console.error(`No benchmark case matches --filter ${values.filter}`);
@@ -53,13 +59,22 @@ if (selected.length === 0) {
 const bench = new Bench({ time, warmupTime: Math.min(100, time), throws: true });
 
 for (const benchCase of selected) {
-  const validator = lib.default.create({ safe: true, ...benchCase.options });
+  // `safe` comes last so a case cannot switch the validator to a throwing variant.
+  const validator = create({ ...benchCase.options, safe: true });
   const { schema, data } = benchCase;
-  const run = benchCase.mode === 'schema-object' ? () => validator.validate(data, schema) : validator.compile(schema);
+  const run =
+    benchCase.mode === 'schema-object'
+      ? (json: unknown) => validator.validate(json, schema)
+      : validator.compile(schema);
   const expected = benchCase.expectValid ?? true;
-  const actual = run(data).valid;
-  if (actual !== expected) {
-    console.error(`Case "${benchCase.name}": expected valid=${expected} but got valid=${actual}`);
+  const probe = run(data);
+  if (probe.valid !== expected) {
+    console.error(`Case "${benchCase.name}": expected valid=${expected} but got valid=${probe.valid}`);
+    process.exit(1);
+  }
+  const errorCount = probe.err?.details?.length ?? 0;
+  if (benchCase.expectErrors !== undefined && errorCount !== benchCase.expectErrors) {
+    console.error(`Case "${benchCase.name}": expected ${benchCase.expectErrors} errors but got ${errorCount}`);
     process.exit(1);
   }
   bench.add(benchCase.name, () => {
@@ -79,7 +94,8 @@ for (const task of bench.tasks) {
   }
   const hz = result.throughput.mean;
   const mean = result.latency.mean * 1000;
-  const { rme } = result.latency;
+  // The margin must belong to the reported statistic: ops/sec is the throughput mean.
+  const { rme } = result.throughput;
   results[task.name] = { hz, mean, rme, samples: result.latency.samplesCount };
   rows.push([task.name, Math.round(hz).toLocaleString('en-US'), mean.toFixed(2), rme.toFixed(2)]);
 }

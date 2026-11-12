@@ -3,10 +3,16 @@ export interface BenchCase {
   options?: Record<string, unknown>;
   schema: Record<string, unknown>;
   data: unknown;
-  /** `compiled` (default) measures the function returned by `compile()`; `schema-object` calls `validate(data, schema)`. */
+  /**
+   * `compiled` (default) measures the function returned by `compile()`. `schema-object` calls
+   * `validate(data, schema)`: after the first call that is the per-call schema keying plus a
+   * compiled-cache hit, not a cold compile.
+   */
   mode?: 'compiled' | 'schema-object';
   /** Defaults to `true`. The runner asserts it before measuring. */
   expectValid?: boolean;
+  /** Number of error details the instance must produce. The runner asserts it before measuring. */
+  expectErrors?: number;
 }
 
 const range = (count: number): number[] => {
@@ -268,6 +274,7 @@ export const cases: BenchCase[] = [
     schema: flatSchema,
     data: flatInvalid,
     expectValid: false,
+    expectErrors: 5,
   },
   { name: 'schema-object-validate', mode: 'schema-object', schema: flatSchema, data: flatValid },
 ];
