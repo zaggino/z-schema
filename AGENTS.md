@@ -38,7 +38,7 @@ src/                  # Library source (TypeScript, ESM)
   json-validation.ts  # JSON validation orchestration (validate, recurse*)
   schema-cache.ts     # Schema caching by URI/id
   compiled-schema-cache.ts # Per-instance cache of compiled object schemas (keyed by JSON.stringify)
-  fast-validator.ts   # Boolean-only closure validator tried before the interpreter on compiled-cache hits (valid data, supported schemas only)
+  fast-validator.ts   # Boolean-only closure validator tried before the interpreter on compiled-cache hits; keyword table and driver (keyword compilers live in validation/*.ts)
   errors.ts           # Error codes (Errors enum) and ValidateError class
   format-validators.ts# Built-in & custom format validators
   report.ts           # Validation report (error accumulation, SchemaErrorDetail)
@@ -46,8 +46,9 @@ src/                  # Library source (TypeScript, ESM)
   json-schema.ts      # Shared/common JSON Schema definitions + helpers
   json-schema-versions.ts # Draft-specific schema unions and version mappings
   z-schema-versions.ts # Registers bundled draft meta-schemas into global cache
-  validation/         # Keyword validators split by category
-    shared.ts         # Shared types (JsonValidatorFn), vocab helpers, caching utilities
+  validation/         # Keyword validators and their fast-validator compilers, split by category
+    shared.ts         # Shared types (JsonValidatorFn), vocab helpers, policy predicates shared by the interpreter and the fast validator, caching utilities
+    fast-shared.ts    # Types and helpers shared by the fast-validator keyword compilers (BuildState, ALWAYS_TRUE, unsupported())
     type.ts           # type, enum, const validators
     numeric.ts        # multipleOf, minimum, maximum, exclusiveMin/Max validators
     string.ts         # minLength, maxLength, pattern, format, content* validators

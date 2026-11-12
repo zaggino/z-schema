@@ -52,6 +52,8 @@ import {
   runAfterPending,
   isModernDraft,
   isValidationVocabularyEnabled,
+  MAX_LEGACY_REF_HOPS,
+  honouredPrefixItems,
   VALIDATION_VOCAB_KEYWORDS,
 } from './validation/shared.js';
 import {
@@ -340,11 +342,7 @@ function getVocabDisabledKeys(plan: KeywordPlan): ReadonlyArray<keyof JsonSchema
 function recurseArray(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown[]) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.2
 
-  const schemaUri = typeof schema.$schema === 'string' ? schema.$schema : undefined;
-  const isDraft202012Schema =
-    schemaUri === 'https://json-schema.org/draft/2020-12/schema' ||
-    (!schemaUri && ctx.options.version === 'draft2020-12');
-  const prefixItems = isDraft202012Schema && Array.isArray(schema.prefixItems) ? schema.prefixItems : undefined;
+  const prefixItems = honouredPrefixItems(schema, ctx.options.version);
 
   if (prefixItems) {
     for (let idx = 0; idx < json.length; idx++) {
@@ -604,7 +602,7 @@ export function validate(
       }
     } else {
       // avoid infinite loop with maxRefs
-      let maxRefs = 99;
+      let maxRefs = MAX_LEGACY_REF_HOPS;
       while (schema.$ref && maxRefs > 0) {
         if (!schema.__$refResolved) {
           report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
