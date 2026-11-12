@@ -1,3 +1,6 @@
+import type { JsonSchema } from '../../src/json-schema-versions.ts';
+import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
+
 import { ZSchema } from '../../src/z-schema.ts';
 
 const schema = {
@@ -79,10 +82,10 @@ describe('Using path to schema as a third argument', () => {
   });
 });
 
-const pathsOf = (version: any, testSchema: any, data: unknown) => {
+const pathsOf = (version: ZSchemaOptions['version'], testSchema: JsonSchema, data: unknown) => {
   const validator = ZSchema.create({ reportPathAsArray: true, breakOnFirstError: false, version });
   const result = validator.validateSafe(data, testSchema);
-  return (result.err?.details ?? []).map((d: any) => ({ code: d.code, path: d.path, schemaPath: d.schemaPath }));
+  return (result.err?.details ?? []).map((d) => ({ code: d.code, path: d.path, schemaPath: d.schemaPath }));
 };
 
 describe('Schema path accuracy across applicators', () => {
@@ -269,5 +272,57 @@ describe('Schema path tracking in validation errors', () => {
       expect(error.details[0].path).toEqual(['user', 'age']);
       expect(error.details[0].schemaPath).toEqual(['properties', 'user', 'properties', 'age', 'type']);
     }
+  });
+});
+
+describe('Schema path with breakOnFirstError and several applicable schemas', () => {
+  it('restores the prefix after a legacy $ref that stops at its type check', () => {
+    const validator = ZSchema.create({ reportPathAsArray: true, breakOnFirstError: true, version: 'draft-07' });
+    const result = validator.validateSafe(
+      { outer: { a: 1, b: 1 } },
+      {
+        definitions: { s: { type: 'string' } },
+        properties: { outer: { properties: { a: { $ref: '#/definitions/s' }, b: { type: 'string' } } } },
+      }
+    );
+    const details = result.err?.details ?? [];
+    expect(details.map((d) => d.path)).toEqual([
+      ['outer', 'a'],
+      ['outer', 'b'],
+    ]);
+    expect(details[0].schemaPath).toEqual(['type']);
+    expect(details[1].schemaPath).toEqual(['properties', 'outer', 'properties', 'b', 'type']);
+  });
+
+  it('reports properties first, then every matching pattern in declaration order', () => {
+    const details = pathsOf(
+      undefined,
+      {
+        properties: { xa: { type: 'string' } },
+        patternProperties: { '^x': { minimum: 5 }, a$: { multipleOf: 2 }, '^y': { type: 'null' } },
+      },
+      { xa: 1 }
+    );
+    expect(details.map((d) => [d.code, d.schemaPath])).toEqual([
+      ['INVALID_TYPE', ['properties', 'xa', 'type']],
+      ['MINIMUM', ['patternProperties', '^x']],
+      ['MULTIPLE_OF', ['patternProperties', 'a$']],
+    ]);
+  });
+
+  it('validates against the schemas present when the key was reached, even if a customValidator replaces one', () => {
+    const validator = ZSchema.create({
+      customValidator(report, node) {
+        const root = report.rootSchema as { patternProperties?: Record<string, unknown> } | undefined;
+        if ((node as { title?: string }).title === 'declared' && root?.patternProperties) {
+          root.patternProperties['^x'] = { type: 'number' };
+        }
+      },
+    });
+    const result = validator.validateSafe(
+      { x: 'ok' },
+      { properties: { x: { title: 'declared' } }, patternProperties: { '^x': { type: 'string' } } }
+    );
+    expect(result.valid).toBe(true);
   });
 });

@@ -426,39 +426,58 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
   // m - The property name of the child.
   const keys = Object.keys(json);
 
-  // Precompile patternProperties regexes once before the per-key loop
-  const ppCompiled: Array<{ key: string; re: RegExp }> = [];
+  // Precompile patternProperties regexes once before the per-key loop. `matches` / `schema` are per-key scratch
+  // fields, reused across keys so that no array of matching schemas is allocated for every key.
+  const ppCompiled: Array<{
+    key: string;
+    re: RegExp;
+    matches: boolean;
+    schema: NonNullable<JsonSchemaInternal['patternProperties']>[string] | undefined;
+  }> = [];
   for (let i = 0; i < pp.length; i++) {
     const r = compileSchemaRegex(pp[i]);
     if (r.ok) {
-      ppCompiled.push({ key: pp[i], re: r.value });
+      ppCompiled.push({ key: pp[i], re: r.value, matches: false, schema: undefined });
     }
   }
 
   for (const m of keys) {
     const propertyValue = json[m];
 
-    // Instance property value must pass every matching schema; "additionalProperties" only applies when none matched.
-    let matched = false;
+    // Read every schema that applies to "m" before validating against any of them: validating one may run a
+    // customValidator that replaces another, and the set must be the one present when the key was reached.
 
     // 1. If set "p" contains value "m", the corresponding schema in "properties" applies.
-    if (p.includes(m)) {
-      matched = true;
+    const isProp = p.includes(m);
+    const propSchema = isProp ? schema.properties![m] : undefined;
+
+    // 2. For each regex in "pp", if it matches "m" successfully, the corresponding schema in "patternProperties" applies.
+    let matched = isProp;
+    for (let i = 0; i < ppCompiled.length; i++) {
+      const entry = ppCompiled[i];
+      entry.matches = entry.re.test(m);
+      if (entry.matches) {
+        entry.schema = schema.patternProperties![entry.key];
+        matched = true;
+      }
+    }
+
+    // Instance property value must pass every schema that applies, each reported under its own keyword.
+    if (isProp) {
       report.path.push(m);
       report.schemaPath.push('properties', m);
-      validate(ctx, report, schema.properties![m], propertyValue);
+      validate(ctx, report, propSchema!, propertyValue);
       report.path.pop();
       report.schemaPath.pop();
       report.schemaPath.pop();
     }
 
-    // 2. For each regex in "pp", if it matches "m" successfully, the corresponding schema in "patternProperties" applies.
     for (let i = 0; i < ppCompiled.length; i++) {
-      if (ppCompiled[i].re.test(m)) {
-        matched = true;
+      const entry = ppCompiled[i];
+      if (entry.matches) {
         report.path.push(m);
-        report.schemaPath.push('patternProperties', ppCompiled[i].key);
-        validate(ctx, report, schema.patternProperties![ppCompiled[i].key], propertyValue);
+        report.schemaPath.push('patternProperties', entry.key);
+        validate(ctx, report, entry.schema!, propertyValue);
         report.path.pop();
         report.schemaPath.pop();
         report.schemaPath.pop();
