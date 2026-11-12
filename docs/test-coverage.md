@@ -9,7 +9,7 @@ Line coverage status: **high**
 | src/async-tasks.ts            |     95% |         95% |       100% |      92% |
 | src/compiled-schema-cache.ts  |     94% |         94% |        94% |      91% |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
-| src/format-validators.ts      |     96% |         96% |        93% |      94% |
+| src/format-validators.ts      |     95% |         95% |        93% |      93% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
 | src/json-validation.ts        |     94% |         94% |        82% |      92% |
@@ -39,7 +39,7 @@ Line coverage status: **high**
 | src/validation/numeric.ts     |     90% |         90% |       100% |      91% |
 | src/validation/object.ts      |     89% |         90% |       100% |      86% |
 | src/validation/ref.ts         |     97% |         97% |       100% |      94% |
-| src/validation/shared.ts      |     94% |         94% |       100% |      88% |
+| src/validation/shared.ts      |     96% |         96% |       100% |      91% |
 | src/validation/string.ts      |     89% |         89% |       100% |      89% |
 | src/validation/type.ts        |    100% |        100% |       100% |      96% |
 | src/validation/unevaluated.ts |     90% |         91% |        83% |      90% |
