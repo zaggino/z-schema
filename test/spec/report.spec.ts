@@ -1,4 +1,33 @@
 import { Report } from '../../src/report.ts';
+import { jsonSymbol } from '../../src/utils/symbols.ts';
+import { ZSchema } from '../../src/z-schema.ts';
+
+describe('Report schemaId and root json', () => {
+  it('reports schemaId from $id', () => {
+    const validator = ZSchema.create();
+    const result = validator.validateSafe(1, { $id: 'https://example.com/root', type: 'string' });
+    expect(result.valid).toBe(false);
+    expect(result.err?.details?.[0].schemaId).toBe('https://example.com/root');
+  });
+
+  it('reports schemaId from id on draft-04', () => {
+    const validator = ZSchema.create({ version: 'draft-04' });
+    const result = validator.validateSafe(1, { id: 'http://example.com/root', type: 'string' });
+    expect(result.valid).toBe(false);
+    expect(result.err?.details?.[0].schemaId).toBe('http://example.com/root');
+  });
+
+  it.each([0, '', false, null])('returns a falsy root json (%j) from getJson', (value) => {
+    const parent = new Report({});
+    parent.json = value;
+    expect(parent.getJson()).toBe(value);
+    expect(new Report(parent).getJson()).toBe(value);
+
+    parent.addError('INVALID_TYPE', ['string', 'number']);
+    const detail = parent.errors[0] as unknown as Record<symbol, unknown>;
+    expect(detail[jsonSymbol]).toBe(value);
+  });
+});
 
 describe('Report schema path tracking', () => {
   it('should initialize with empty schema path', () => {

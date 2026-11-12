@@ -6,6 +6,7 @@ import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { deferToTimer, drainTasks } from './async-tasks.js';
 import { Errors, getValidateError, toValidateError } from './errors.js';
+import { getId } from './json-schema.js';
 import { shallowClone } from './utils/clone.js';
 import { get } from './utils/json.js';
 import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
@@ -81,19 +82,28 @@ function pathToString(path: Array<string | number>): string {
 
 /**
  * Finds the closest `id` along `path` (consumed destructively) in `rootSchema`.
+ * With `honourDollarId`, `$id` counts too (via `getId`); without it only `id` is read, which keeps the
+ * compile-time ancestor lookup (`getSchemaId` / `getAncestor`) unchanged.
  */
-function findSchemaId(rootSchema: JsonSchemaInternal, path: Array<string | number>): string | undefined {
+function findSchemaId(
+  rootSchema: JsonSchemaInternal,
+  path: Array<string | number>,
+  honourDollarId: boolean
+): string | undefined {
   // try to find id in the error path
   while (path.length > 0) {
     const obj = get(rootSchema, path);
-    if (isObject(obj) && typeof obj.id === 'string') {
-      return obj.id;
+    if (isObject(obj)) {
+      const id: unknown = honourDollarId ? getId(obj as JsonSchemaInternal) : obj.id;
+      if (typeof id === 'string') {
+        return id;
+      }
     }
     path.pop();
   }
 
   // return id of the root
-  return rootSchema.id;
+  return honourDollarId ? getId(rootSchema) : rootSchema.id;
 }
 
 /**
@@ -200,7 +210,7 @@ class PendingError implements SchemaErrorDetail {
       message: errorMessage,
       path: this.pathAsArray ? this.dataPath : pathToString(this.dataPath),
       schemaPath: this.snapshotSchemaPath,
-      schemaId: this.rootSchema ? findSchemaId(this.rootSchema, this.dataPath.slice()) : undefined,
+      schemaId: this.rootSchema ? findSchemaId(this.rootSchema, this.dataPath.slice(), true) : undefined,
       keyword: this.keyword,
       [schemaSymbol]: schema,
       [jsonSymbol]: this.report.getJson(),
@@ -479,7 +489,8 @@ export class Report {
     // get the error path as an array
     return findSchemaId(
       this.rootSchema,
-      this.parentReport ? this.parentReport.path.concat(this.path) : this.path.slice()
+      this.parentReport ? this.parentReport.path.concat(this.path) : this.path.slice(),
+      false
     );
   }
 
@@ -520,7 +531,7 @@ export class Report {
 
   // this returns the root object being validated (the one passed into validator.validate)
   getJson(): unknown {
-    if (this.json) {
+    if (this.json !== undefined) {
       return this.json;
     }
     if (this.parentReport) {
