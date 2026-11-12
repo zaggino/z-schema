@@ -73,7 +73,7 @@ The suite is one set of files shared by every draft. `test/lib/json-schema-test-
 
 ## Test Setup
 
-`test/vitest.setup.ts` runs `createManifest()` from `test/lib/create-manifest.ts` as a global setup — this generates a manifest of available test suite files before tests run.
+`test/vitest.setup.ts` runs `createManifest()` from `test/lib/create-manifest.ts` as a global setup — this lists the `.json` files under `test/public` and provides the list to the tests, which read it with `inject('publicFiles')`. Nothing is written to disk.
 
 ## Writing Tests
 

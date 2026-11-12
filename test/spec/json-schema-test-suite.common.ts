@@ -2,6 +2,8 @@
 
 import type { SuiteFile } from '../lib/json-schema-test-suite.ts';
 
+import { inject } from 'vitest';
+
 import {
   createCaseValidator,
   selectCases,
@@ -13,7 +15,7 @@ import {
 } from '../lib/json-schema-test-suite.ts';
 
 export async function runTests({ reader }: { reader: <T>(testFilePath: string) => Promise<T> }) {
-  const manifest = await reader<string[]>('/manifest.json');
+  const manifest = inject('publicFiles');
   const testsPath = `/json-schema-test-suite/${SUITE_TESTS_DIR}/`;
 
   // every dialect reads the same files, so they are loaded once, up front

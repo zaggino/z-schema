@@ -26,7 +26,6 @@
 /test/dist
 /test/node_modules/
 /test/package-lock.json
-/test/public/manifest.json
 /umd
 build/
 skills-lock.json
