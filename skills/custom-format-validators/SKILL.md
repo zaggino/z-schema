@@ -120,7 +120,7 @@ The JSON Schema spec changed how `format` works in newer drafts:
 | -------------- | ---------------------------------- | ----------------------------------------- |
 | draft-04/06/07 | Always asserts (fails on mismatch) | Always asserts                            |
 | draft-2019-09  | Always asserts (z-schema default)  | Annotation-only unless vocabulary enabled |
-| draft-2020-12  | Always asserts (z-schema default)  | Annotation-only unless vocabulary enabled |
+| draft-2020-12  | Always asserts (z-schema default)  | Annotation-only unless vocabulary listed  |
 
 z-schema defaults to `formatAssertions: null` (legacy — always assert). To respect the spec's vocabulary-aware behavior for modern drafts:
 

@@ -103,7 +103,7 @@ export const isValidationVocabularyEnabled = (
 /**
  * Checks whether the format-assertion vocabulary is enabled in the meta-schema.
  * For draft 2019-09: checks if the format vocabulary is set to true.
- * For draft 2020-12: checks if the format-assertion vocabulary is present and true.
+ * For draft 2020-12: checks if the format-assertion vocabulary is listed, with either value.
  * Returns true for older drafts (format was always an assertion).
  */
 export const isFormatAssertionVocabEnabled = (
@@ -126,9 +126,11 @@ export const isFormatAssertionVocabEnabled = (
 
   const vocabulary = metaSchema.$vocabulary;
 
-  // For draft 2020-12, only the format-assertion vocabulary enables format as assertion
+  // For draft 2020-12, only the format-assertion vocabulary enables format as assertion.
+  // Its boolean does not switch it off: `false` lets an implementation that does not
+  // know the vocabulary process the schema anyway, and this one knows it.
   if (Object.hasOwn(vocabulary, VOCAB_FORMAT_ASSERTION_2020_12)) {
-    return vocabulary[VOCAB_FORMAT_ASSERTION_2020_12];
+    return true;
   }
 
   // For draft 2019-09, check if the format vocabulary is enabled (true)
