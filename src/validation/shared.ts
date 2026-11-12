@@ -105,10 +105,13 @@ export const isValidationVocabularyEnabled = (
  * For draft 2019-09: checks if the format vocabulary is set to true.
  * For draft 2020-12: checks if the format-assertion vocabulary is listed, with either value.
  * Returns true for older drafts (format was always an assertion).
+ *
+ * The meta-schema is the one `schema` names itself, else the one `rootSchema` names:
+ * a subschema without its own `$schema` is governed by the root's.
  */
 export const isFormatAssertionVocabEnabled = (
   schema: JsonSchemaInternal,
-  report: Report,
+  rootSchema: JsonSchemaInternal | boolean | undefined,
   version: JsonSchemaVersion | 'none' | undefined
 ): boolean => {
   if (version !== 'draft2019-09' && version !== 'draft2020-12') {
@@ -116,8 +119,7 @@ export const isFormatAssertionVocabEnabled = (
   }
 
   const currentSchemaMeta = schema.__$schemaResolved;
-  const rootSchemaMeta =
-    report.rootSchema && typeof report.rootSchema !== 'boolean' ? report.rootSchema.__$schemaResolved : undefined;
+  const rootSchemaMeta = rootSchema && typeof rootSchema !== 'boolean' ? rootSchema.__$schemaResolved : undefined;
   const metaSchema = (currentSchemaMeta || rootSchemaMeta) as JsonSchemaInternal | boolean | undefined;
 
   if (!metaSchema || typeof metaSchema !== 'object' || !isObject(metaSchema.$vocabulary)) {

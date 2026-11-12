@@ -642,7 +642,8 @@ const SchemaValidators = {
       !isFormatSupported(schema.format, this.options.customFormats) &&
       this.options.ignoreUnknownFormats !== true &&
       (!isModernDraft(this.options.version) ||
-        (this.options.formatAssertions === true && isFormatAssertionVocabEnabled(schema, report, this.options.version)))
+        (this.options.formatAssertions === true &&
+          isFormatAssertionVocabEnabled(schema, this.rootSchema, this.options.version)))
     ) {
       report.addError('UNKNOWN_FORMAT', [schema.format], undefined, schema, 'format');
     }
@@ -691,6 +692,10 @@ const SchemaValidators = {
 
 export class SchemaValidator {
   private readonly validator: ZSchemaBase;
+  // The schema the outermost validateSchema call was given, and that call's report.
+  // A subschema without its own `$schema` is governed by this schema's meta-schema.
+  rootSchema: JsonSchemaInternal | undefined;
+  private rootReport: Report | undefined;
 
   constructor(validator: ZSchemaBase) {
     this.validator = validator;
@@ -724,6 +729,25 @@ export class SchemaValidator {
       return true;
     }
 
+    // a subschema of the schema being validated: same report, same root
+    if (this.rootReport === report) {
+      return this.validateSchemaObject(report, schema);
+    }
+    // Otherwise this schema is a root. That includes a remote schema validated,
+    // under its own report, while another schema's validation is still running.
+    const outerSchema = this.rootSchema;
+    const outerReport = this.rootReport;
+    this.rootSchema = schema;
+    this.rootReport = report;
+    try {
+      return this.validateSchemaObject(report, schema);
+    } finally {
+      this.rootSchema = outerSchema;
+      this.rootReport = outerReport;
+    }
+  }
+
+  private validateSchemaObject(report: Report, schema: JsonSchemaInternal): boolean {
     // if $schema is present, this schema should validate against that $schema
     const hasParentSchema = schema.$schema && getId(schema) !== schema.$schema;
     if (hasParentSchema) {

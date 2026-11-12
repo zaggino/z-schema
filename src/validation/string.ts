@@ -84,7 +84,10 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
   // When formatAssertions is explicitly true, respect the meta-schema vocabulary:
   // for draft 2019-09/2020-12, format is annotation-only unless the format-assertion
   // vocabulary is enabled in the meta-schema.
-  if (ctx.options.formatAssertions === true && !isFormatAssertionVocabEnabled(schema, report, ctx.options.version)) {
+  if (
+    ctx.options.formatAssertions === true &&
+    !isFormatAssertionVocabEnabled(schema, report.rootSchema, ctx.options.version)
+  ) {
     return;
   }
 

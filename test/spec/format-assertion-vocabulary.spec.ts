@@ -184,13 +184,58 @@ describe('unknown format names', () => {
       expect(errorCodes(result.err?.details)).toContain('UNKNOWN_FORMAT');
     });
 
+    // the schema alone decides, whichever parts of it the data reaches
+    it.each([
+      ['draft2020-12', asserting2020],
+      ['draft2019-09', { [CORE_2019]: true, [FORMAT_2019]: true }],
+    ] as const)('%s: are an error in a subschema the data does not reach', (version, $vocabulary) => {
+      const schema: JsonSchema = { $schema: META_URI, properties: { a: { format: 'no-such-format' } } };
+      const forSchema = createValidator(version, $vocabulary, options).validateSchema(schema);
+      expect(forSchema.valid).toBe(false);
+      expect(errorCodes(forSchema.err?.details).filter((code) => code === 'UNKNOWN_FORMAT')).toHaveLength(1);
+
+      const forData = createValidator(version, $vocabulary, options).validate({}, schema);
+      expect(forData.valid).toBe(false);
+      expect(errorCodes(forData.err?.details).filter((code) => code === 'UNKNOWN_FORMAT')).toHaveLength(1);
+    });
+
+    it('are an error in a referenced definition', () => {
+      const schema: JsonSchema = { $schema: META_URI, $defs: { d: { format: 'no-such-format' } }, $ref: '#/$defs/d' };
+      expect(createValidator('draft2020-12', asserting2020, options).validateSchema(schema).valid).toBe(false);
+    });
+
+    it('are ignored in a subschema when the meta-schema does not opt in', () => {
+      const validator = createValidator('draft2020-12', { [CORE_2020]: true }, options);
+      const schema: JsonSchema = { $schema: META_URI, properties: { a: { format: 'no-such-format' } } };
+      expect(validator.validateSchema(schema).valid).toBe(true);
+      expect(validator.validate({ a: 'anything' }, schema).valid).toBe(true);
+    });
+
+    it('are ignored in a subschema with ignoreUnknownFormats', () => {
+      const validator = createValidator('draft2020-12', asserting2020, { ...options, ignoreUnknownFormats: true });
+      const schema: JsonSchema = { $schema: META_URI, properties: { a: { format: 'no-such-format' } } };
+      expect(validator.validateSchema(schema).valid).toBe(true);
+      expect(validator.validate({ a: 'anything' }, schema).valid).toBe(true);
+    });
+
+    it('leave out a format registered globally', () => {
+      ZSchema.registerFormat('format-vocabulary-spec-global', () => true);
+      try {
+        const validator = createValidator('draft2020-12', asserting2020, options);
+        const schema: JsonSchema = { $schema: META_URI, format: 'format-vocabulary-spec-global' };
+        expect(validator.validate('anything', schema).valid).toBe(true);
+      } finally {
+        ZSchema.unregisterFormat('format-vocabulary-spec-global');
+      }
+    });
+
     it('are ignored with ignoreUnknownFormats', () => {
       const validator = createValidator('draft2020-12', asserting2020, { ...options, ignoreUnknownFormats: true });
       expect(validator.validate('anything', unknown).valid).toBe(true);
       expect(validator.validateSchema(unknown).valid).toBe(true);
     });
 
-    it('do not include a format registered on the validator', () => {
+    it('leave out a format registered on the validator', () => {
       const validator = createValidator('draft2020-12', asserting2020, options);
       validator.registerFormat('no-such-format', (value: unknown) => value === 'ok');
       expect(validator.validate('ok', unknown).valid).toBe(true);
@@ -202,6 +247,19 @@ describe('unknown format names', () => {
     expect(createValidator('draft2020-12', asserting2020).validate('anything', unknown).valid).toBe(true);
     const vocabulary2019 = { [CORE_2019]: true, [FORMAT_2019]: true };
     expect(createValidator('draft2019-09', vocabulary2019).validate('anything', unknown).valid).toBe(true);
+  });
+
+  // these drafts always reported them, with every formatAssertions setting but false
+  it.each(['draft-04', 'draft-06', 'draft-07'] as const)('%s: are an error as before', (version) => {
+    for (const formatAssertions of [null, true] as const) {
+      const strict = ZSchema.create({ version, formatAssertions, safe: true });
+      const result = strict.validate('anything', { format: 'no-such-format' });
+      expect(result.valid).toBe(false);
+      expect(errorCodes(result.err?.details)).toContain('UNKNOWN_FORMAT');
+
+      const lenient = ZSchema.create({ version, formatAssertions, ignoreUnknownFormats: true, safe: true });
+      expect(lenient.validate('anything', { format: 'no-such-format' }).valid).toBe(true);
+    }
   });
 
   it('are ignored with formatAssertions: false', () => {
