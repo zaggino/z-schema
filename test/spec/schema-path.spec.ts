@@ -326,3 +326,82 @@ describe('Schema path with breakOnFirstError and several applicable schemas', ()
     expect(result.valid).toBe(true);
   });
 });
+
+const hookCalls = (testSchema: JsonSchema, data: unknown) => {
+  // Validating the schema against its meta-schema also runs the hook; only calls on values of `data` are kept.
+  const instanceValues = new Set<unknown>([data, ...Object.values(data as Record<string, unknown>)]);
+  const calls: Array<[string | undefined, unknown]> = [];
+  const validator = ZSchema.create({
+    reportPathAsArray: true,
+    customValidator(_report, node, json) {
+      if (instanceValues.has(json)) {
+        calls.push([(node as { title?: string }).title, json]);
+      }
+    },
+  });
+  const result = validator.validateSafe(data, testSchema);
+  return { calls, result };
+};
+
+describe('recurseObject equivalence', () => {
+  it('does not visit unknown keys when additionalProperties is absent', () => {
+    const { calls, result } = hookCalls(
+      { title: 'root', properties: { a: { title: 'a', type: 'string' } } },
+      { a: 'x-val', b: 7001, c: 7002 }
+    );
+    expect(result.valid).toBe(true);
+    expect(calls.map(([title]) => title)).toEqual(['a', 'root']);
+  });
+
+  it('treats additionalProperties: true like an absent keyword', () => {
+    const { calls, result } = hookCalls(
+      { title: 'root', properties: { a: { title: 'a', type: 'string' } }, additionalProperties: true },
+      { a: 'x-val', b: 7001, c: 7002 }
+    );
+    expect(result.valid).toBe(true);
+    expect(calls.map(([title]) => title)).toEqual(['a', 'root']);
+  });
+
+  it('still validates an explicit empty additionalProperties schema', () => {
+    const { calls, result } = hookCalls(
+      { title: 'root', properties: { a: { title: 'a' } }, additionalProperties: {} },
+      { a: 'x-val', b: 7001 }
+    );
+    expect(result.valid).toBe(true);
+    expect(calls.length).toBeGreaterThan(0);
+  });
+
+  it('still validates additionalProperties schemas', () => {
+    const details = pathsOf(
+      undefined,
+      { properties: { a: {} }, additionalProperties: { type: 'string' } },
+      { a: 1, b: 2, c: 'ok' }
+    );
+    expect(details.map((d) => [d.code, d.path, d.schemaPath])).toEqual([
+      ['INVALID_TYPE', ['b'], ['additionalProperties', 'type']],
+    ]);
+  });
+
+  it('matches only own enumerable keys of properties', () => {
+    const data = JSON.parse('{"__proto__": 1, "constructor": 2, "toString": 3}') as unknown;
+    const details = pathsOf(undefined, { properties: { known: {} }, additionalProperties: { type: 'string' } }, data);
+    expect(details.map((d) => [d.code, d.schemaPath])).toEqual([
+      ['INVALID_TYPE', ['additionalProperties', 'type']],
+      ['INVALID_TYPE', ['additionalProperties', 'type']],
+      ['INVALID_TYPE', ['additionalProperties', 'type']],
+    ]);
+  });
+
+  it('keeps the set of properties fixed when a customValidator adds one mid-object', () => {
+    const validator = ZSchema.create({
+      customValidator(report, node) {
+        const root = report.rootSchema as { properties?: Record<string, unknown> } | undefined;
+        if ((node as { title?: string }).title === 'a' && root?.properties) {
+          root.properties.b = { type: 'string' };
+        }
+      },
+    });
+    const result = validator.validateSafe({ a: 1, b: 2 }, { properties: { a: { title: 'a' } } });
+    expect(result.valid).toBe(true);
+  });
+});
