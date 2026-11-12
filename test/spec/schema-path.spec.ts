@@ -327,9 +327,9 @@ describe('Schema path with breakOnFirstError and several applicable schemas', ()
   });
 });
 
-const hookCalls = (testSchema: JsonSchema, data: unknown) => {
+const hookCalls = (testSchema: JsonSchema, data: Record<string, unknown>) => {
   // Validating the schema against its meta-schema also runs the hook; only calls on values of `data` are kept.
-  const instanceValues = new Set<unknown>([data, ...Object.values(data as Record<string, unknown>)]);
+  const instanceValues = new Set<unknown>([data, ...Object.values(data)]);
   const calls: Array<[string | undefined, unknown]> = [];
   const validator = ZSchema.create({
     reportPathAsArray: true,
@@ -368,7 +368,12 @@ describe('recurseObject equivalence', () => {
       { a: 'x-val', b: 7001 }
     );
     expect(result.valid).toBe(true);
-    expect(calls.length).toBeGreaterThan(0);
+    // unlike an absent keyword, the explicit schema is a real node: the hook runs for "b" against it
+    expect(calls).toEqual([
+      ['a', 'x-val'],
+      [undefined, 7001],
+      ['root', { a: 'x-val', b: 7001 }],
+    ]);
   });
 
   it('still validates additionalProperties schemas', () => {
@@ -403,5 +408,49 @@ describe('recurseObject equivalence', () => {
     });
     const result = validator.validateSafe({ a: 1, b: 2 }, { properties: { a: { title: 'a' } } });
     expect(result.valid).toBe(true);
+  });
+
+  it('reads the schema of a declared property live when a customValidator replaces properties mid-object', () => {
+    const validator = ZSchema.create({
+      customValidator(report, node) {
+        const root = report.rootSchema as { properties?: Record<string, unknown> } | undefined;
+        if ((node as { title?: string }).title === 'a' && root) {
+          root.properties = { a: {}, b: { type: 'number' } };
+        }
+      },
+    });
+    const result = validator.validateSafe({ a: 1, b: 2 }, { properties: { a: { title: 'a' }, b: { type: 'string' } } });
+    expect(result.valid).toBe(true);
+  });
+
+  it('resets the summary message for an unknown key after a customValidator replaced it', () => {
+    const validator = ZSchema.create({
+      breakOnFirstError: false,
+      customValidator(report, node) {
+        if ((node as { title?: string }).title === 'a') {
+          report.commonErrorMessage = 'REPLACED_BY_HOOK';
+        }
+      },
+    });
+    const result = validator.validateSafe({ a: 1, b: 2 }, { properties: { a: { title: 'a', type: 'string' } } });
+    expect(result.valid).toBe(false);
+    expect(result.err?.message).toBe('JSON_OBJECT_VALIDATION_FAILED');
+  });
+
+  it('keeps the summary message a customValidator set when additionalProperties is false', () => {
+    const validator = ZSchema.create({
+      breakOnFirstError: false,
+      customValidator(report, node) {
+        if ((node as { title?: string }).title === 'a') {
+          report.commonErrorMessage = 'REPLACED_BY_HOOK';
+        }
+      },
+    });
+    const result = validator.validateSafe(
+      { a: 1 },
+      { properties: { a: { title: 'a', type: 'string' } }, additionalProperties: false }
+    );
+    expect(result.valid).toBe(false);
+    expect(result.err?.message).toBe('REPLACED_BY_HOOK');
   });
 });

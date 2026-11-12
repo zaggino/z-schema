@@ -413,19 +413,14 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
   // If "additionalProperties" is absent, it is considered present with an empty schema as a value.
   // In addition, boolean value true is considered equivalent to an empty schema.
   // The empty schema: every value is valid against it, and validate() returns before running any keyword or the
-  // customValidator hook, so those keys need no call at all.
+  // customValidator hook, so no call is made for those keys (see the last step of the loop).
   const { additionalProperties } = schema;
   const checkAdditional =
     additionalProperties !== undefined && additionalProperties !== true && additionalProperties !== false;
 
-  // p - The property set from "properties".
-  const { properties } = schema;
-  // A customValidator may add or remove properties while this object is traversed; the snapshot keeps the set fixed
-  // for the whole object, as it always was. Without a hook nothing can change it, so test membership directly:
-  // schema validation only lets a plain object through as "properties", and a compiled schema is a clone holding
-  // enumerable own keys only, so Object.hasOwn answers exactly what the key list would.
-  const propertyNames =
-    properties && typeof ctx.options.customValidator === 'function' ? Object.keys(properties) : undefined;
+  // p - The property set from "properties", fixed for the whole object: a customValidator may add or remove
+  // properties while it is traversed.
+  const p = schema.properties ? Object.keys(schema.properties) : undefined;
 
   // m - The property name of the child.
   const keys = Object.keys(json);
@@ -461,11 +456,8 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
     // customValidator that replaces another, and the set must be the one present when the key was reached.
 
     // 1. If set "p" contains value "m", the corresponding schema in "properties" applies.
-    let isProp = false;
-    if (properties) {
-      isProp = propertyNames === undefined ? Object.hasOwn(properties, m) : propertyNames.includes(m);
-    }
-    const propSchema = isProp ? properties![m] : undefined;
+    const isProp = p !== undefined && p.includes(m);
+    const propSchema = isProp ? schema.properties![m] : undefined;
 
     // 2. For each regex in "pp", if it matches "m" successfully, the corresponding schema in "patternProperties" applies.
     let matched = isProp;
@@ -501,12 +493,18 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
     }
 
     // 3. The schema defined by "additionalProperties" applies if and only if nothing matched above.
-    if (!matched && checkAdditional) {
-      report.path.push(m);
-      report.schemaPath.push('additionalProperties');
-      validate(ctx, report, additionalProperties, propertyValue);
-      report.path.pop();
-      report.schemaPath.pop();
+    if (!matched) {
+      if (checkAdditional) {
+        report.path.push(m);
+        report.schemaPath.push('additionalProperties');
+        validate(ctx, report, additionalProperties, propertyValue);
+        report.path.pop();
+        report.schemaPath.pop();
+      } else if (additionalProperties !== false) {
+        // The skipped validate() against the empty schema did one observable thing: it reset the summary message,
+        // which a customValidator run for an earlier key may have replaced.
+        report.commonErrorMessage = 'JSON_OBJECT_VALIDATION_FAILED';
+      }
     }
   }
 }
