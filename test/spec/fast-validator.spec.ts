@@ -6,8 +6,12 @@ import type { ZSchemaSafe } from '../../src/z-schema.ts';
 import { vi } from 'vitest';
 
 import { buildFastValidator } from '../../src/fast-validator.ts';
+import { Report } from '../../src/report.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 import { buildFastFor } from '../lib/fast-validator.ts';
+
+// The interpreter path always ends by asking its Report whether it is valid; the fast path has no Report.
+const spyOnInterpreter = () => vi.spyOn(Report.prototype, 'isValid');
 
 const lone = String.fromCharCode(0xd8_3d);
 const astral = String.fromCharCode(0xd8_3d, 0xde_00);
@@ -895,10 +899,14 @@ describe('fast validator', () => {
   });
 
   describe('the fast path is taken', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
     it('skips the interpreter for valid data on a supported schema', () => {
       const v = ZSchema.create({ safe: true });
       const fn = v.compile({ type: 'string', minLength: 2 });
-      const spy = vi.spyOn(v, '_validate');
+      const spy = spyOnInterpreter();
       expect(fn('abc').valid).toBe(true);
       expect(spy).not.toHaveBeenCalled();
       expect(fn(1).valid).toBe(false);
@@ -908,7 +916,7 @@ describe('fast validator', () => {
     it('runs the interpreter for an unsupported schema', () => {
       const v = ZSchema.create({ safe: true });
       const fn = v.compile({ unevaluatedProperties: false, properties: { a: {} } });
-      const spy = vi.spyOn(v, '_validate');
+      const spy = spyOnInterpreter();
       expect(fn({ a: 1 }).valid).toBe(true);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -920,11 +928,64 @@ describe('fast validator', () => {
         required: ['a'],
         properties: { a: { type: 'array', items: { type: 'integer' } } },
       });
-      const spy = vi.spyOn(v, '_validate');
+      const spy = spyOnInterpreter();
       expect(fn({ a: [1, 2] }).valid).toBe(true);
       expect(spy).not.toHaveBeenCalled();
       expect(fn({ a: [1, 'x'] }).valid).toBe(false);
       expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('validate(data, schemaObject) takes the fast path once the schema is cached', () => {
+      const v = ZSchema.create({ safe: true });
+      const schema: JsonSchema = { type: 'object', properties: { a: { type: 'integer' } } };
+      // first call compiles, meta-validates and caches the schema through the interpreter
+      expect(v.validate({ a: 1 }, schema).valid).toBe(true);
+      const spy = spyOnInterpreter();
+      // a structurally equal schema object hits the cache entry and its fast validator
+      expect(v.validate({ a: 2 }, { type: 'object', properties: { a: { type: 'integer' } } }).valid).toBe(true);
+      expect(spy).not.toHaveBeenCalled();
+      expect(v.validate({ a: 'x' }, schema).valid).toBe(false);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('includeErrors and excludeErrors do not disable it, schemaPath does', () => {
+      const v = ZSchema.create({ safe: true });
+      const schema: JsonSchema = { type: 'object', properties: { a: { type: 'integer' } } };
+      const fn = v.compile(schema);
+      const spy = spyOnInterpreter();
+      expect(fn({ a: 1 }, { excludeErrors: ['INVALID_TYPE'] }).valid).toBe(true);
+      expect(fn({ a: 1 }, { includeErrors: ['INVALID_TYPE'] }).valid).toBe(true);
+      expect(spy).not.toHaveBeenCalled();
+      // the sub-schema is what gets validated, so the root's fast validator must not answer
+      expect(fn('x', { schemaPath: 'properties.a' }).valid).toBe(false);
+      expect(fn(1, { schemaPath: 'properties.a' }).valid).toBe(true);
+      expect(spy).toHaveBeenCalledTimes(2);
+    });
+
+    it('filtered calls agree with validate() on invalid data', () => {
+      const ref = ZSchema.create({ safe: true });
+      const v = ZSchema.create({ safe: true });
+      const schema: JsonSchema = { type: 'object', properties: { a: { type: 'integer', minimum: 5 } } };
+      const fn = v.compile(schema);
+      const optionSets: ValidateOptions[] = [
+        { excludeErrors: ['INVALID_TYPE'] },
+        { includeErrors: ['MINIMUM'] },
+        { excludeErrors: ['MINIMUM'] },
+      ];
+      for (const options of optionSets) {
+        for (const data of [{ a: 'x' }, { a: 1 }, { a: 7 }, 'nope']) {
+          expect(fn(data, options).valid).toBe(ref.validate(data, schema, options).valid);
+        }
+      }
+    });
+
+    it('async variants resolve through the fast path', async () => {
+      const v = ZSchema.create({ async: true });
+      const fn = v.compile({ type: 'string' });
+      const spy = spyOnInterpreter();
+      await expect(fn('abc')).resolves.toBe(true);
+      expect(spy).not.toHaveBeenCalled();
+      await expect(fn(1)).rejects.toBeInstanceOf(Error);
     });
   });
 });

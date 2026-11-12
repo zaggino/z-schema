@@ -206,8 +206,9 @@ export class ZSchema extends ZSchemaBase {
    * skips the per-call serialization that keys an object schema in the compiled-schema cache, so it is
    * faster on hot paths.
    *
-   * For a supported schema, valid data is accepted by a boolean check that builds no validation report;
-   * everything else runs the normal validation, so results and errors are unchanged.
+   * As with `validate()` on a cached object schema, valid data on a supported schema is accepted by a
+   * boolean check that builds no validation report; everything else runs the normal validation, so
+   * results and errors are unchanged.
    *
    * Boolean schemas are supported (`false` always fails with `SCHEMA_IS_FALSE`).
    * @param schema - The schema to compile.
@@ -224,8 +225,7 @@ export class ZSchema extends ZSchemaBase {
    */
   compile(schema: JsonSchema | boolean): (json: unknown, options?: ValidateOptions) => true {
     const target = this._compileTarget(schema);
-    return (json, options) =>
-      options === undefined && this._fastValidate(target, json) ? true : this.validate(json, target, options);
+    return (json, options) => this.validate(json, target, options);
   }
 
   /**
@@ -286,10 +286,7 @@ export class ZSchemaSafe extends ZSchemaBase {
    */
   compile(schema: JsonSchema | boolean): (json: unknown, options?: ValidateOptions) => ValidateResponse {
     const target = this._compileTarget(schema);
-    return (json, options) =>
-      options === undefined && this._fastValidate(target, json)
-        ? { valid: true }
-        : this.validate(json, target, options);
+    return (json, options) => this.validate(json, target, options);
   }
 
   /**
@@ -344,10 +341,7 @@ export class ZSchemaAsync extends ZSchemaBase {
    */
   compile(schema: JsonSchema | boolean): (json: unknown, options?: ValidateOptions) => Promise<true> {
     const target = this._compileTarget(schema);
-    return (json, options) =>
-      options === undefined && this._fastValidate(target, json)
-        ? Promise.resolve(true)
-        : this.validate(json, target, options);
+    return (json, options) => this.validate(json, target, options);
   }
 
   /**
@@ -398,10 +392,7 @@ export class ZSchemaAsyncSafe extends ZSchemaBase {
    */
   compile(schema: JsonSchema | boolean): (json: unknown, options?: ValidateOptions) => Promise<ValidateResponse> {
     const target = this._compileTarget(schema);
-    return (json, options) =>
-      options === undefined && this._fastValidate(target, json)
-        ? Promise.resolve({ valid: true })
-        : this.validate(json, target, options);
+    return (json, options) => this.validate(json, target, options);
   }
 
   /**
