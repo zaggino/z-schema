@@ -1,14 +1,79 @@
 #!/usr/bin/env node
 
-// set default exitCode for node 0.10
 process.exitCode = 0;
 
+import dns from 'dns';
 import fs from 'fs';
+import net from 'net';
 import path from 'path';
-import { program } from 'commander';
 import { request } from 'https';
 import pkg from '../package.json' with { type: 'json' };
 import ZSchema from '../dist/index.js';
+
+var program;
+var Option;
+try {
+  ({ program, Option } = await import('commander'));
+} catch (e) {
+  if (e && e.code === 'ERR_MODULE_NOT_FOUND') {
+    console.error('z-schema CLI requires the optional dependency "commander". Install it with: npm install commander');
+    process.exit(1);
+  }
+  throw e;
+}
+
+var DRAFT_CHOICES = ['draft-04', 'draft-06', 'draft-07', 'draft2019-09', 'draft2020-12'];
+
+// Addresses that remote $ref downloads must never connect to (CWE-918).
+// BlockList also matches IPv4-mapped IPv6 addresses (::ffff:a.b.c.d) against the IPv4 rules,
+// so no explicit ::ffff:0:0/96 entry is needed (it would block every mapped address).
+var blockedAddresses = new net.BlockList();
+[
+  ['127.0.0.0', 8],
+  ['10.0.0.0', 8],
+  ['172.16.0.0', 12],
+  ['192.168.0.0', 16],
+  ['169.254.0.0', 16],
+  ['0.0.0.0', 8],
+  ['100.64.0.0', 10],
+].forEach(function (entry) {
+  blockedAddresses.addSubnet(entry[0], entry[1], 'ipv4');
+});
+blockedAddresses.addAddress('::1', 'ipv6');
+blockedAddresses.addAddress('::', 'ipv6');
+blockedAddresses.addSubnet('fc00::', 7, 'ipv6');
+blockedAddresses.addSubnet('fe80::', 10, 'ipv6');
+
+function isBlockedAddress(address, family) {
+  var type = family === 6 || family === 'IPv6' ? 'ipv6' : 'ipv4';
+  return blockedAddresses.check(address, type);
+}
+
+function blockedAddressError(address) {
+  return new Error('Requests to private/internal addresses are not allowed: ' + address);
+}
+
+// dns.lookup wrapper that rejects blocked addresses, so the checked address is the one connected to
+function guardedLookup(hostname, lookupOptions, callback) {
+  dns.lookup(hostname, lookupOptions, function (err, address, family) {
+    if (err) {
+      callback(err, address, family);
+      return;
+    }
+    if (Array.isArray(address)) {
+      for (var i = 0; i < address.length; i++) {
+        if (isBlockedAddress(address[i].address, address[i].family)) {
+          callback(blockedAddressError(address[i].address));
+          return;
+        }
+      }
+    } else if (isBlockedAddress(address, family)) {
+      callback(blockedAddressError(address));
+      return;
+    }
+    callback(null, address, family);
+  });
+}
 
 program
   .version(pkg.version)
@@ -39,17 +104,21 @@ program
   .option('--breakOnFirstError', 'stops validation as soon as an error is found, true by default but can be turned off')
   .option('--pedanticCheck', 'check if schema follow best practices and common sence')
   .option('--ignoreUnknownFormats', 'ignore unknown formats (do not report them as an error)')
+  .addOption(new Option('--draft <version>', 'JSON Schema draft to validate against').choices(DRAFT_CHOICES))
   .allowExcessArguments()
   .parse(process.argv);
 
 var options = {};
 var defaultOptions = ZSchema.getDefaultOptions();
-var programOptions = program._optionValues; // { breakOnFirstError: true }
+var programOptions = program.opts(); // { breakOnFirstError: true }
 
 for (var key in defaultOptions) {
   if (programOptions[key] != null) {
     options[key] = programOptions[key];
   }
+}
+if (programOptions.draft) {
+  options.version = programOptions.draft;
 }
 
 if (!program.args.length) {
@@ -76,7 +145,13 @@ function readJson(fileName) {
 var validator = ZSchema.create(options);
 var schemaFilePath = program.args.shift();
 var schema = readJson(schemaFilePath);
-schema.id = schemaFilePath;
+// Anchor relative file $refs to the schema file, unless the schema declares its own id
+if (schema !== null && typeof schema === 'object' && !Array.isArray(schema)) {
+  if (typeof schema.$id !== 'string' && typeof schema.id !== 'string') {
+    var effectiveVersion = options.version || defaultOptions.version;
+    schema[effectiveVersion === 'draft-04' ? 'id' : '$id'] = schemaFilePath;
+  }
+}
 
 function validateWithAutomaticDownloads(filePath, data, schema, callback) {
   var lastResult;
@@ -117,21 +192,17 @@ function validateWithAutomaticDownloads(filePath, data, schema, callback) {
             process.exit(1);
           }
           var hostname = parsedUrl.hostname;
+          var literalHost = hostname.charAt(0) === '[' ? hostname.slice(1, -1) : hostname;
+          var literalFamily = net.isIP(literalHost);
           if (
             hostname === 'localhost' ||
-            hostname === '127.0.0.1' ||
-            hostname === '::1' ||
-            hostname === '0.0.0.0' ||
             hostname.endsWith('.local') ||
-            hostname.startsWith('10.') ||
-            hostname.startsWith('192.168.') ||
-            /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) ||
-            hostname.startsWith('169.254.')
+            (literalFamily !== 0 && isBlockedAddress(literalHost, literalFamily))
           ) {
             console.error('Requests to private/internal addresses are not allowed: ' + url);
             process.exit(1);
           }
-          request(parsedUrl, { maxRedirects: 0 }, function (response) {
+          request(parsedUrl, { lookup: guardedLookup }, function (response) {
             // Reject redirects to prevent SSRF via open redirect (CWE-918)
             if (response.statusCode >= 300 && response.statusCode < 400) {
               console.error('Redirects are not followed for security reasons: ' + url);
@@ -156,8 +227,8 @@ function validateWithAutomaticDownloads(filePath, data, schema, callback) {
             process.exit(1);
           });
         } else {
-          // FUTURE: maybe else if (isFile(url)) later
-          var referencePath = path.resolve(process.cwd(), path.dirname(filePath), url);
+          // url is already resolved against the schema id (the schema's path), so do not join its dirname again
+          var referencePath = path.resolve(process.cwd(), url);
           var reference = readJson(referencePath);
           validator.setRemoteReference(url, reference);
           finished++;

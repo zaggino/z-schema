@@ -369,7 +369,15 @@ z-schema mySchema.json myData.json
 
 # With strict mode
 z-schema --strictMode mySchema.json myData.json
+
+# Pick the draft (draft-04, draft-06, draft-07, draft2019-09, draft2020-12)
+z-schema --draft draft-07 mySchema.json myData.json
 ```
+
+- `--draft <version>` sets the `version` option (default: `draft2020-12`).
+- The schema's id is only set from the file path when it has neither `$id` nor `id` (`id` for draft-04, `$id` otherwise).
+- Relative file `$ref`s are resolved against the schema file's location.
+- Remote references are https-only, redirects are not followed, and private/internal addresses are refused.
 
 ## TypeScript Types
 
