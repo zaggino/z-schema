@@ -200,7 +200,7 @@ class PendingError implements SchemaErrorDetail {
     let { errorMessage } = this;
     for (let idx = 0; idx < params.length; idx++) {
       const param = params[idx] === null || isObject(params[idx]) ? JSON.stringify(params[idx]) : params[idx];
-      errorMessage = errorMessage.replace(`{${idx}}`, param.toString());
+      errorMessage = errorMessage.replace(`{${idx}}`, String(param));
     }
 
     const { schema } = this;

@@ -2,7 +2,6 @@ import type { SchemaErrorDetail } from '../../src/report.ts';
 import type { ValidateOptions } from '../../src/z-schema-base.ts';
 import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 
-import { ValidateError } from '../../src/errors.ts';
 import { Report } from '../../src/report.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 import { expectSameThrown, runBothModes, settle, shapeOf, withEagerSubReports } from '../lib/deferred-errors.ts';
@@ -366,6 +365,8 @@ describe('deferred sub-report errors: reportPathAsArray flipped mid-run (C2)', (
 const undefinedParamRepro = () => ZSchema.create().validateSafe(undefined, { anyOf: [{ enum: ['x'] }, true] } as never);
 const excludedUndefinedParam = () =>
   ZSchema.create().validateSafe(undefined, { enum: ['x'] }, { excludeErrors: ['ENUM_MISMATCH'] });
+const failingUndefinedParam = () =>
+  ZSchema.create().validateSafe(undefined, { anyOf: [{ enum: ['x'] }, { const: 1 }] });
 const objectParam = () =>
   ZSchema.create().validateSafe({ k: 1 }, { anyOf: [{ enum: [{ k: 2 }] }, { type: 'string' }] });
 
@@ -378,24 +379,30 @@ const expectSameResult = (d: ReturnType<typeof undefinedParamRepro>, e: ReturnTy
 };
 
 describe('deferred sub-report errors: message construction exceptions (C3)', () => {
-  it('surfaces the same TypeError (as ValidateError cause) for an undefined param inside anyOf', () => {
+  it('formats an undefined param instead of throwing, when the failing branch does not decide the result', () => {
     const deferred = settle(undefinedParamRepro);
     const eager = settle(() => withEagerSubReports(undefinedParamRepro));
-    expect(!eager.threw && eager.value.err instanceof ValidateError && eager.value.err.cause instanceof TypeError).toBe(
-      true
-    );
+    expect(!eager.threw && eager.value.valid).toBe(true);
     if (expectSameThrown(deferred, eager) && !eager.threw) {
       expectSameResult(deferred.value, eager.value);
     }
   });
 
+  it('formats an undefined param in the inner error of a failing anyOf', () => {
+    const deferred = settle(failingUndefinedParam);
+    const eager = settle(() => withEagerSubReports(failingUndefinedParam));
+    expect(eager.threw).toBe(false);
+    if (expectSameThrown(deferred, eager) && !eager.threw) {
+      expectSameResult(deferred.value, eager.value);
+      const inner = eager.value.err?.details?.[0].inner ?? [];
+      expect(inner.some((e) => e.code === 'ENUM_MISMATCH' && e.message === 'No enum match for: undefined')).toBe(true);
+    }
+  });
+
   it('matches for an excluded code with an undefined param', () => {
-    // main builds the message (failing on the undefined param) before the excludeErrors check
     const deferred = settle(excludedUndefinedParam);
     const eager = settle(() => withEagerSubReports(excludedUndefinedParam));
-    expect(!eager.threw && eager.value.err instanceof ValidateError && eager.value.err.cause instanceof TypeError).toBe(
-      true
-    );
+    expect(!eager.threw && eager.value.valid).toBe(true);
     if (expectSameThrown(deferred, eager) && !eager.threw) {
       expectSameResult(deferred.value, eager.value);
     }
