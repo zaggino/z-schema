@@ -83,12 +83,8 @@ const EXCLUSIONS: Exclusion[] = [
     versions: ['draft-04', 'draft-06', 'draft-07'],
   },
   {
-    file: 'optional/float-overflow.json',
-    reason: "as far as I'm aware, this can't be fixed without custom json parser",
-  },
-  {
     file: 'optional/zero-terminated-floats.json',
-    reason: "as far as I'm aware, this can't be fixed without custom json parser",
+    reason: "as far as I'm aware, this can't be fixed without custom json parser (#539)",
     versions: ['draft-04'],
   },
   {
@@ -100,7 +96,7 @@ const EXCLUSIONS: Exclusion[] = [
     file: 'optional/bignum.json',
     reason:
       'these numbers lose their precision in JSON.parse, before the validator sees them; ' +
-      'as with float-overflow, that takes a custom json parser',
+      'that takes a custom json parser (#539)',
     tests: [
       'maximum integer comparison just above the maximum is invalid',
       'minimum integer comparison just below the minimum is invalid',
@@ -116,18 +112,6 @@ const EXCLUSIONS: Exclusion[] = [
       'uniqueItems comparison with high precision arrays containing distinct decimals are unique',
       'uniqueItems comparison with high precision objects containing distinct decimals are unique',
     ],
-  },
-  {
-    file: 'optional/bignum.json',
-    reason: 'the same case as the excluded optional/float-overflow.json',
-    tests: [
-      'all integers are multiples of 0.5, if overflow is handled valid if optional overflow handling is implemented',
-    ],
-  },
-  {
-    file: 'optional/bignum.json',
-    reason: 'multipleOf divides and checks the quotient, which rounds to an integer above 2^53; not supported for now',
-    tests: ['multipleOf with integers above 2^53 1e20 is not multiple of 3'],
   },
 ];
 

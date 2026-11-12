@@ -36,7 +36,7 @@ Line coverage status: **high**
 | src/utils/what-is.ts          |     81% |         81% |       100% |      85% |
 | src/validation/array.ts       |     92% |         93% |        60% |      91% |
 | src/validation/combinators.ts |     97% |         97% |        82% |      95% |
-| src/validation/numeric.ts     |     90% |         90% |       100% |      91% |
+| src/validation/numeric.ts     |     91% |         91% |       100% |      93% |
 | src/validation/object.ts      |     89% |         90% |       100% |      86% |
 | src/validation/ref.ts         |     97% |         97% |       100% |      94% |
 | src/validation/shared.ts      |     94% |         94% |       100% |      88% |
