@@ -53,7 +53,7 @@ import {
   isModernDraft,
   isValidationVocabularyEnabled,
   MAX_LEGACY_REF_HOPS,
-  usesPrefixItems,
+  honouredPrefixItems,
   VALIDATION_VOCAB_KEYWORDS,
 } from './validation/shared.js';
 import {
@@ -342,7 +342,7 @@ function getVocabDisabledKeys(plan: KeywordPlan): ReadonlyArray<keyof JsonSchema
 function recurseArray(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown[]) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.2
 
-  const prefixItems = usesPrefixItems(schema, ctx.options.version) ? schema.prefixItems! : undefined;
+  const prefixItems = honouredPrefixItems(schema, ctx.options.version);
 
   if (prefixItems) {
     for (let idx = 0; idx < json.length; idx++) {

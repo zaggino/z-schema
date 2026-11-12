@@ -8,7 +8,7 @@ import { decodeBase64, isValidBase64 } from '../utils/base64.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { unicodeLength } from '../utils/unicode.js';
 import { whatIs } from '../utils/what-is.js';
-import { ALWAYS_FALSE, num, unsupported } from './fast-shared.js';
+import { ALWAYS_FALSE, expectNumber, unsupported } from './fast-shared.js';
 import { assertsContent, isFormatAsserted, shouldSkipValidate, unknownFormatFails } from './shared.js';
 
 // ---------------------------------------------------------------------------
@@ -28,6 +28,11 @@ export function minLengthValidator(ctx: ZSchemaBase, report: Report, schema: Jso
   }
 }
 
+export function compileMinLength(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const minLength = expectNumber(node.minLength);
+  checks.push((json) => typeof json !== 'string' || !(unicodeLength(json) < minLength));
+}
+
 // ---------------------------------------------------------------------------
 // maxLength
 // ---------------------------------------------------------------------------
@@ -43,6 +48,11 @@ export function maxLengthValidator(ctx: ZSchemaBase, report: Report, schema: Jso
   if (unicodeLength(json) > schema.maxLength!) {
     report.addError('MAX_LENGTH', [json.length, schema.maxLength!], undefined, schema, 'maxLength');
   }
+}
+
+export function compileMaxLength(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const maxLength = expectNumber(node.maxLength);
+  checks.push((json) => typeof json !== 'string' || !(unicodeLength(json) > maxLength));
 }
 
 // ---------------------------------------------------------------------------
@@ -66,6 +76,19 @@ export function patternValidator(ctx: ZSchemaBase, report: Report, schema: JsonS
   if (!result.value.test(json)) {
     report.addError('PATTERN', [schema.pattern!, json], undefined, schema, 'pattern');
   }
+}
+
+export function compilePattern(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const { pattern } = node;
+  if (typeof pattern !== 'string') {
+    unsupported();
+  }
+  const result = compileSchemaRegex(pattern);
+  if (!result.ok) {
+    unsupported();
+  }
+  const re = result.value;
+  checks.push((json) => typeof json !== 'string' || re.test(json));
 }
 
 // ---------------------------------------------------------------------------
@@ -127,6 +150,30 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
     }
   } else if (unknownFormatFails(ctx.options)) {
     report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
+  }
+}
+
+export function compileFormat(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const { ctx, root } = state;
+  const { options } = ctx;
+  const { format } = node;
+  if (typeof format !== 'string') {
+    unsupported();
+  }
+  if (!isFormatAsserted(node, root, options)) {
+    return;
+  }
+  const fn = resolveFormatValidator(format, options);
+  if (typeof fn === 'function') {
+    // A custom validator may be async (callback or promise based): only built-ins are known sync.
+    if (!isSyncBuiltInFormatValidator(fn)) {
+      unsupported();
+    }
+    checks.push((json) => !!fn.call(ctx, json));
+    return;
+  }
+  if (unknownFormatFails(options)) {
+    checks.push(ALWAYS_FALSE);
   }
 }
 
@@ -201,57 +248,6 @@ export function contentMediaTypeValidator(ctx: ZSchemaBase, report: Report, sche
       schema,
       'contentMediaType'
     );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// fast-validator compilers
-// ---------------------------------------------------------------------------
-
-export function compileMinLength(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const minLength = num(node.minLength);
-  checks.push((json) => typeof json !== 'string' || !(unicodeLength(json) < minLength));
-}
-
-export function compileMaxLength(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const maxLength = num(node.maxLength);
-  checks.push((json) => typeof json !== 'string' || !(unicodeLength(json) > maxLength));
-}
-
-export function compilePattern(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const { pattern } = node;
-  if (typeof pattern !== 'string') {
-    unsupported();
-  }
-  const result = compileSchemaRegex(pattern);
-  if (!result.ok) {
-    unsupported();
-  }
-  const re = result.value;
-  checks.push((json) => typeof json !== 'string' || re.test(json));
-}
-
-export function compileFormat(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const { ctx, root } = state;
-  const { options } = ctx;
-  const { format } = node;
-  if (typeof format !== 'string') {
-    unsupported();
-  }
-  if (!isFormatAsserted(node, root, options)) {
-    return;
-  }
-  const fn = resolveFormatValidator(format, options);
-  if (typeof fn === 'function') {
-    // A custom validator may be async (callback or promise based): only built-ins are known sync.
-    if (!isSyncBuiltInFormatValidator(fn)) {
-      unsupported();
-    }
-    checks.push((json) => !!fn.call(ctx, json));
-    return;
-  }
-  if (unknownFormatFails(options)) {
-    checks.push(ALWAYS_FALSE);
   }
 }
 

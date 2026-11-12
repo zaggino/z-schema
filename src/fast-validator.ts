@@ -170,7 +170,12 @@ function combine(checks: Check[]): FastValidator {
   };
 }
 
-function compileNode(state: BuildState, node: unknown, isRoot: boolean): FastValidator {
+/** Build state of the driver: the keyword compilers' view plus the memo of compiled nodes. */
+interface DriverState extends BuildState {
+  readonly memo: Map<object, FastValidator>;
+}
+
+function compileNode(state: DriverState, node: unknown): FastValidator {
   if (node === true) {
     return ALWAYS_TRUE;
   }
@@ -190,7 +195,7 @@ function compileNode(state: BuildState, node: unknown, isRoot: boolean): FastVal
   state.memo.set(schema, (json) => slot.fn(json));
 
   // The interpreter evaluates the vocabulary per node against the validation's root schema.
-  if (!isRoot && !isValidationVocabularyEnabled(schema, state.root, state.ctx.options.version)) {
+  if (!isValidationVocabularyEnabled(schema, state.root, state.ctx.options.version)) {
     return unsupported();
   }
 
@@ -214,8 +219,8 @@ function compileNode(state: BuildState, node: unknown, isRoot: boolean): FastVal
     if (isInternalKey(key) || !Object.hasOwn(KEYWORD_COMPILERS, key)) {
       continue; // internal bookkeeping, or an unknown keyword (ignored by the interpreter too)
     }
-    // a non-root node may declare only the root's own dialect (e.g. a remote schema stamped on compile)
-    if (key === '$schema' && !isRoot && schema.$schema !== state.root.$schema) {
+    // a node may declare only the root's own dialect (e.g. a remote schema stamped on compile)
+    if (key === '$schema' && schema.$schema !== state.root.$schema) {
       return unsupported();
     }
     const compile = KEYWORD_COMPILERS[key as keyof JsonSchemaAll];
@@ -243,18 +248,14 @@ export function buildFastValidator(schema: JsonSchemaInternal, ctx: ZSchemaBase)
   if (typeof ctx.options.customValidator === 'function') {
     return undefined;
   }
-  if (!isValidationVocabularyEnabled(schema, schema, ctx.options.version)) {
-    return undefined;
-  }
-  const state: BuildState = {
+  const state: DriverState = {
     ctx,
     root: schema,
     memo: new Map<object, FastValidator>(),
-    eqOpts: { maxDepth: ctx.options.maxRecursionDepth },
-    compileChild: (child) => compileNode(state, child, false),
+    compileChild: (child) => compileNode(state, child),
   };
   try {
-    return compileNode(state, schema, true);
+    return compileNode(state, schema);
   } catch {
     // The sentinel thrown by unsupported(), or anything unexpected (e.g. a stack overflow on a very deep
     // schema): either way there is no fast validator and the interpreter handles the schema.

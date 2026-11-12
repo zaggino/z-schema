@@ -4,13 +4,13 @@ import type { BuildState, Check, RawNode } from './fast-shared.js';
 
 import { Report } from '../report.js';
 import { isUniqueArray } from '../utils/array.js';
-import { ALWAYS_TRUE, num } from './fast-shared.js';
+import { ALWAYS_TRUE, expectNumber } from './fast-shared.js';
 import {
   cacheValidationResult,
   deferOrRunSync,
+  honouredPrefixItems,
   shouldSkipValidate,
   supportsContainsBounds,
-  usesPrefixItems,
 } from './shared.js';
 
 // ---------------------------------------------------------------------------
@@ -66,6 +66,11 @@ export function maxItemsValidator(ctx: ZSchemaBase, report: Report, schema: Json
   }
 }
 
+export function compileMaxItems(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const maxItems = expectNumber(node.maxItems);
+  checks.push((json) => !Array.isArray(json) || !(json.length > maxItems));
+}
+
 // ---------------------------------------------------------------------------
 // minItems
 // ---------------------------------------------------------------------------
@@ -81,6 +86,11 @@ export function minItemsValidator(ctx: ZSchemaBase, report: Report, schema: Json
   if (json.length < schema.minItems!) {
     report.addError('ARRAY_LENGTH_SHORT', [json.length, schema.minItems!], undefined, schema, 'minItems');
   }
+}
+
+export function compileMinItems(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const minItems = expectNumber(node.minItems);
+  checks.push((json) => !Array.isArray(json) || !(json.length < minItems));
 }
 
 // ---------------------------------------------------------------------------
@@ -101,6 +111,14 @@ export function uniqueItemsValidator(ctx: ZSchemaBase, report: Report, schema: J
       report.addError('ARRAY_UNIQUE', matches, undefined, schema, 'uniqueItems');
     }
   }
+}
+
+export function compileUniqueItems(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  if (node.uniqueItems !== true) {
+    return;
+  }
+  const maxDepth = state.ctx.options.maxRecursionDepth;
+  checks.push((json) => !Array.isArray(json) || isUniqueArray(json, undefined, maxDepth));
 }
 
 // ---------------------------------------------------------------------------
@@ -153,6 +171,54 @@ export function containsValidator(ctx: ZSchemaBase, report: Report, schema: Json
   deferOrRunSync(ctx, report, subReports, addContainsErrorIfNeeded);
 }
 
+// contains, with minContains / maxContains (honoured on 2019-09 and later only)
+export function compileContains(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const raw = node as unknown as RawNode;
+  if (raw.contains === undefined) {
+    return;
+  }
+  const each = state.compileChild(raw.contains);
+  const { version } = state.ctx.options;
+  const supportsBounds = supportsContainsBounds(version);
+  const min = supportsBounds && typeof raw.minContains === 'number' ? raw.minContains : 1;
+  const max = supportsBounds && typeof raw.maxContains === 'number' ? raw.maxContains : undefined;
+
+  if (max === undefined) {
+    if (min <= 0) {
+      // always satisfied; the sub-schema was still compiled so an unsupported one rejects the build
+      return;
+    }
+    checks.push((json) => {
+      if (!Array.isArray(json)) {
+        return true;
+      }
+      let matches = 0;
+      for (let i = 0; i < json.length; i++) {
+        if (each(json[i]) && ++matches >= min) {
+          return true;
+        }
+      }
+      return false;
+    });
+    return;
+  }
+  checks.push((json) => {
+    if (!Array.isArray(json)) {
+      return true;
+    }
+    let matches = 0;
+    for (let i = 0; i < json.length; i++) {
+      if (each(json[i])) {
+        matches++;
+        if (matches > max) {
+          return false;
+        }
+      }
+    }
+    return matches >= min;
+  });
+}
+
 // ---------------------------------------------------------------------------
 // maxContains / minContains  (no-op — handled inside contains)
 // ---------------------------------------------------------------------------
@@ -165,28 +231,11 @@ export function minContainsValidator() {
 }
 
 // ---------------------------------------------------------------------------
-// fast-validator compilers
+// fast-validator compiler: items / prefixItems / additionalItems
 // ---------------------------------------------------------------------------
 
-export function compileMinItems(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const minItems = num(node.minItems);
-  checks.push((json) => !Array.isArray(json) || !(json.length < minItems));
-}
-
-export function compileMaxItems(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const maxItems = num(node.maxItems);
-  checks.push((json) => !Array.isArray(json) || !(json.length > maxItems));
-}
-
-export function compileUniqueItems(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  if (node.uniqueItems !== true) {
-    return;
-  }
-  const maxDepth = state.ctx.options.maxRecursionDepth;
-  checks.push((json) => !Array.isArray(json) || isUniqueArray(json, undefined, maxDepth));
-}
-
-// items / prefixItems / additionalItems, compiled together: they select the child schema per index
+// Compiled together because they select the child schema per index. Must agree with `recurseArray`
+// (json-validation.ts) and `additionalItemsValidator`.
 export function compileItemKeywords(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
   const raw = node as unknown as RawNode;
   const { items, additionalItems } = raw;
@@ -198,8 +247,9 @@ export function compileItemKeywords(state: BuildState, node: JsonSchemaInternal,
 
   let head: unknown[] | undefined;
   let tail: unknown;
-  if (usesPrefixItems(node, state.ctx.options.version)) {
-    head = raw.prefixItems as unknown[];
+  const prefixItems = honouredPrefixItems(node, state.ctx.options.version);
+  if (prefixItems !== undefined) {
+    head = prefixItems;
     if (items !== undefined && !Array.isArray(items)) {
       tail = items;
     }
@@ -265,53 +315,5 @@ export function compileItemKeywords(state: BuildState, node: JsonSchemaInternal,
       }
     }
     return true;
-  });
-}
-
-// contains, with minContains / maxContains (honoured on 2019-09 and later only)
-export function compileContains(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const raw = node as unknown as RawNode;
-  if (raw.contains === undefined) {
-    return;
-  }
-  const each = state.compileChild(raw.contains);
-  const { version } = state.ctx.options;
-  const supportsBounds = supportsContainsBounds(version);
-  const min = supportsBounds && typeof raw.minContains === 'number' ? raw.minContains : 1;
-  const max = supportsBounds && typeof raw.maxContains === 'number' ? raw.maxContains : undefined;
-
-  if (max === undefined) {
-    if (min <= 0) {
-      // always satisfied; the sub-schema was still compiled so an unsupported one rejects the build
-      return;
-    }
-    checks.push((json) => {
-      if (!Array.isArray(json)) {
-        return true;
-      }
-      let matches = 0;
-      for (let i = 0; i < json.length; i++) {
-        if (each(json[i]) && ++matches >= min) {
-          return true;
-        }
-      }
-      return false;
-    });
-    return;
-  }
-  checks.push((json) => {
-    if (!Array.isArray(json)) {
-      return true;
-    }
-    let matches = 0;
-    for (let i = 0; i < json.length; i++) {
-      if (each(json[i])) {
-        matches++;
-        if (matches > max) {
-          return false;
-        }
-      }
-    }
-    return matches >= min;
   });
 }

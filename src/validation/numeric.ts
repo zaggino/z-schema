@@ -3,7 +3,7 @@ import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 import type { BuildState, Check } from './fast-shared.js';
 
-import { num } from './fast-shared.js';
+import { expectNumber } from './fast-shared.js';
 import { shouldSkipValidate } from './shared.js';
 
 // ---------------------------------------------------------------------------
@@ -53,6 +53,11 @@ export function multipleOfValidator(ctx: ZSchemaBase, report: Report, schema: Js
   }
 }
 
+export function compileMultipleOf(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const multipleOf = expectNumber(node.multipleOf);
+  checks.push((json) => typeof json !== 'number' || isMultipleOf(json, multipleOf));
+}
+
 // ---------------------------------------------------------------------------
 // maximum
 // ---------------------------------------------------------------------------
@@ -71,6 +76,15 @@ export function maximumValidator(ctx: ZSchemaBase, report: Report, schema: JsonS
     }
   } else if (json >= schema.maximum!) {
     report.addError('MAXIMUM_EXCLUSIVE', [json, schema.maximum!], undefined, schema, 'maximum');
+  }
+}
+
+export function compileMaximum(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const maximum = expectNumber(node.maximum);
+  if (node.exclusiveMaximum === true) {
+    checks.push((json) => typeof json !== 'number' || !(json >= maximum));
+  } else {
+    checks.push((json) => typeof json !== 'number' || !(json > maximum));
   }
 }
 
@@ -94,6 +108,13 @@ export function exclusiveMaximumValidator(ctx: ZSchemaBase, report: Report, sche
   // In draft-04, exclusiveMaximum is a boolean handled inside the `maximum` validator
 }
 
+export function compileExclusiveMaximum(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const bound = node.exclusiveMaximum;
+  if (typeof bound === 'number') {
+    checks.push((json) => typeof json !== 'number' || !(json >= bound));
+  }
+}
+
 // ---------------------------------------------------------------------------
 // minimum
 // ---------------------------------------------------------------------------
@@ -112,6 +133,16 @@ export function minimumValidator(ctx: ZSchemaBase, report: Report, schema: JsonS
     }
   } else if (json <= schema.minimum!) {
     report.addError('MINIMUM_EXCLUSIVE', [json, schema.minimum!], undefined, schema, 'minimum');
+  }
+}
+
+export function compileMinimum(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const minimum = expectNumber(node.minimum);
+  // Negated comparisons, exactly as the interpreter's error conditions, so NaN passes in both.
+  if (node.exclusiveMinimum === true) {
+    checks.push((json) => typeof json !== 'number' || !(json <= minimum));
+  } else {
+    checks.push((json) => typeof json !== 'number' || !(json < minimum));
   }
 }
 
@@ -135,45 +166,10 @@ export function exclusiveMinimumValidator(ctx: ZSchemaBase, report: Report, sche
   // In draft-04, exclusiveMinimum is a boolean handled inside the `minimum` validator
 }
 
-// ---------------------------------------------------------------------------
-// fast-validator compilers
-// ---------------------------------------------------------------------------
-
-export function compileMinimum(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const minimum = num(node.minimum);
-  // Negated comparisons, exactly as the interpreter's error conditions, so NaN passes in both.
-  if (node.exclusiveMinimum === true) {
-    checks.push((json) => typeof json !== 'number' || !(json <= minimum));
-  } else {
-    checks.push((json) => typeof json !== 'number' || !(json < minimum));
-  }
-}
-
-export function compileMaximum(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const maximum = num(node.maximum);
-  if (node.exclusiveMaximum === true) {
-    checks.push((json) => typeof json !== 'number' || !(json >= maximum));
-  } else {
-    checks.push((json) => typeof json !== 'number' || !(json > maximum));
-  }
-}
-
 // draft-06+ standalone numeric form; the draft-04 boolean form is handled by minimum/maximum
 export function compileExclusiveMinimum(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
   const bound = node.exclusiveMinimum;
   if (typeof bound === 'number') {
     checks.push((json) => typeof json !== 'number' || !(json <= bound));
   }
-}
-
-export function compileExclusiveMaximum(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const bound = node.exclusiveMaximum;
-  if (typeof bound === 'number') {
-    checks.push((json) => typeof json !== 'number' || !(json >= bound));
-  }
-}
-
-export function compileMultipleOf(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const multipleOf = num(node.multipleOf);
-  checks.push((json) => typeof json !== 'number' || isMultipleOf(json, multipleOf));
 }

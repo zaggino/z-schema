@@ -46,8 +46,8 @@ src/                  # Library source (TypeScript, ESM)
   json-schema.ts      # Shared/common JSON Schema definitions + helpers
   json-schema-versions.ts # Draft-specific schema unions and version mappings
   z-schema-versions.ts # Registers bundled draft meta-schemas into global cache
-  validation/         # Keyword validators split by category
-    shared.ts         # Shared types (JsonValidatorFn), vocab helpers, caching utilities
+  validation/         # Keyword validators and their fast-validator compilers, split by category
+    shared.ts         # Shared types (JsonValidatorFn), vocab helpers, policy predicates shared by the interpreter and the fast validator, caching utilities
     fast-shared.ts    # Types and helpers shared by the fast-validator keyword compilers (BuildState, ALWAYS_TRUE, unsupported())
     type.ts           # type, enum, const validators
     numeric.ts        # multipleOf, minimum, maximum, exclusiveMin/Max validators

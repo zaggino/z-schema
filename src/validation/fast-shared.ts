@@ -1,3 +1,9 @@
+// Conventions for the keyword compilers (`compileXxx`) that `buildFastValidator` runs at build time:
+// - a compiler pushes zero or more checks onto `checks`; they are ANDed, so `ALWAYS_TRUE` results may be elided;
+// - a child schema must be compiled even when its check is discarded, so an unsupported child rejects the whole build;
+// - `unsupported()` throws and is caught once, in `buildFastValidator`;
+// - the returned closures run on the validation hot path: indexed loops, no per-call allocation.
+
 import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 
@@ -17,8 +23,6 @@ export const ALWAYS_FALSE: FastValidator = () => false;
 export interface BuildState {
   readonly ctx: ZSchemaBase;
   readonly root: JsonSchemaInternal;
-  readonly memo: Map<object, FastValidator>;
-  readonly eqOpts: { maxDepth: number | undefined };
   /** Compiles a child schema; a child that cannot be compiled makes the whole build unsupported. */
   readonly compileChild: (child: unknown) => FastValidator;
 }
@@ -33,7 +37,7 @@ export function unsupported(): never {
 }
 
 /** A numeric keyword value, or the build is unsupported. */
-export function num(value: unknown): number {
+export function expectNumber(value: unknown): number {
   if (typeof value !== 'number') {
     unsupported();
   }
@@ -41,7 +45,7 @@ export function num(value: unknown): number {
 }
 
 /** An array keyword value, or the build is unsupported. */
-export function list(value: unknown): unknown[] {
+export function expectArray(value: unknown): unknown[] {
   if (!Array.isArray(value)) {
     unsupported();
   }
@@ -49,8 +53,8 @@ export function list(value: unknown): unknown[] {
 }
 
 /** An array of strings, or the build is unsupported. */
-export function stringArray(value: unknown): string[] {
-  const items = list(value);
+export function expectStringArray(value: unknown): string[] {
+  const items = expectArray(value);
   for (let i = 0; i < items.length; i++) {
     if (typeof items[i] !== 'string') {
       unsupported();
@@ -60,7 +64,7 @@ export function stringArray(value: unknown): string[] {
 }
 
 /** A plain-object keyword value, or the build is unsupported. */
-export function record(value: unknown): Record<string, unknown> {
+export function expectRecord(value: unknown): Record<string, unknown> {
   if (!isObject(value)) {
     unsupported();
   }

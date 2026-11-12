@@ -5,6 +5,7 @@ import type { Report } from '../report.js';
 import type { ValidateOptions, ZSchemaBase } from '../z-schema-base.js';
 
 import { drainTasks } from '../async-tasks.js';
+import { VERSION_SCHEMA_URL_MAPPING } from '../json-schema-versions.js';
 import { isObject } from '../utils/what-is.js';
 
 // ---------------------------------------------------------------------------
@@ -36,23 +37,26 @@ export const supportsDependentKeywords = (
   return !(version === 'draft-04' || version === 'draft-06' || version === 'draft-07');
 };
 
-const DRAFT_2020_12_SCHEMA_URI = 'https://json-schema.org/draft/2020-12/schema';
+const DRAFT_2020_12_SCHEMA_URI = VERSION_SCHEMA_URL_MAPPING['draft2020-12'];
 
 /** Maximum number of `$ref` hops followed on legacy drafts before the chain is rejected. */
 export const MAX_LEGACY_REF_HOPS = 99;
 
-/** True when `prefixItems` is honoured on this node: a 2020-12 node (by `$schema` or default version) with an array value. */
-export const usesPrefixItems = (schema: JsonSchemaInternal, version: JsonSchemaVersion | 'none' | undefined) => {
+/** The `prefixItems` array when it is honoured on this node (a 2020-12 node, by `$schema` or default version, with an array value), else `undefined`. */
+export const honouredPrefixItems = (
+  schema: JsonSchemaInternal,
+  version: JsonSchemaVersion | 'none' | undefined
+): JsonSchemaInternal['prefixItems'] => {
   const schemaUri = typeof schema.$schema === 'string' ? schema.$schema : undefined;
-  return (
-    (schemaUri === DRAFT_2020_12_SCHEMA_URI || (!schemaUri && version === 'draft2020-12')) &&
-    Array.isArray(schema.prefixItems)
-  );
+  if (schemaUri === DRAFT_2020_12_SCHEMA_URI || (!schemaUri && version === 'draft2020-12')) {
+    const { prefixItems } = schema;
+    return Array.isArray(prefixItems) ? prefixItems : undefined;
+  }
+  return undefined;
 };
 
 /** True when `minContains` / `maxContains` are honoured for this version. */
-export const supportsContainsBounds = (version: JsonSchemaVersion | 'none' | undefined) =>
-  version === 'draft2019-09' || version === 'draft2020-12';
+export const supportsContainsBounds = isModernDraft;
 
 /** True when `if` / `then` / `else` are evaluated for this version. */
 export const supportsIfThenElse = (version: JsonSchemaVersion | 'none' | undefined) =>
@@ -61,11 +65,14 @@ export const supportsIfThenElse = (version: JsonSchemaVersion | 'none' | undefin
 /** True when `contentEncoding` / `contentMediaType` assert for this version. */
 export const assertsContent = (version: JsonSchemaVersion | 'none' | undefined) => version === 'draft-07';
 
-/** True when an unknown `format` is an error under these options. */
+/**
+ * True when an unknown `format` is an error under these options. Only meaningful after `isFormatAsserted(...)`
+ * returned true and no validator was found for the format.
+ */
 export const unknownFormatFails = (options: ZSchemaBase['options']) =>
   options.ignoreUnknownFormats !== true &&
   // From 2019-09 on an unknown format is ignored, unless format asserts because the
-  // meta-schema says so: getting here with formatAssertions true means it does.
+  // meta-schema says so: once isFormatAsserted passed, formatAssertions true means it does.
   (options.formatAssertions === true || !isModernDraft(options.version));
 
 // ---------------------------------------------------------------------------
@@ -181,12 +188,9 @@ export const isFormatAsserted = (
   schema: JsonSchemaInternal,
   rootSchema: JsonSchemaInternal | boolean | undefined,
   options: ZSchemaBase['options']
-) => {
-  if (options.formatAssertions === false) {
-    return false;
-  }
-  return !(options.formatAssertions === true && !isFormatAssertionVocabEnabled(schema, rootSchema, options.version));
-};
+) =>
+  options.formatAssertions !== false &&
+  (options.formatAssertions !== true || isFormatAssertionVocabEnabled(schema, rootSchema, options.version));
 
 // ---------------------------------------------------------------------------
 // Validation result caching

@@ -6,7 +6,7 @@ import { Report } from '../report.js';
 import { difference } from '../utils/array.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { isObject } from '../utils/what-is.js';
-import { ALWAYS_TRUE, num, record, stringArray } from './fast-shared.js';
+import { ALWAYS_TRUE, expectNumber, expectRecord, expectStringArray } from './fast-shared.js';
 import { deferOrRunSync, shouldSkipValidate, supportsDependentKeywords } from './shared.js';
 
 // ---------------------------------------------------------------------------
@@ -314,23 +314,28 @@ export function propertyNamesValidator(ctx: ZSchemaBase, report: Report, schema:
 }
 
 // ---------------------------------------------------------------------------
-// fast-validator compilers
+// fast-validator compiler: object keywords
 // ---------------------------------------------------------------------------
 
+// Compiled together into one check so `Object.keys(json)` is computed once. Must agree with `recurseObject`
+// (json-validation.ts) and the object validators above: `maxPropertiesValidator`, `minPropertiesValidator`,
+// `requiredValidator`, `additionalPropertiesValidator`, `patternPropertiesValidator`, `propertiesValidator`,
+// `dependenciesValidator`, `dependentSchemasValidator`, `dependentRequiredValidator`, `propertyNamesValidator`.
+
 type ObjectInstance = Record<string, unknown>;
+/** A check on an object instance; the caller has established it is a non-null, non-array object. */
+type ObjectCheck = (json: ObjectInstance) => boolean;
 /** A check on an object instance that also receives its `Object.keys`, computed once per node visit. */
 type KeysCheck = (json: ObjectInstance, keys: string[]) => boolean;
 
-// Object checks receive `json` only after the caller has established it is a non-null, non-array object.
-
 /** If `name` is present, every name in `names` must be present. */
-function requiresAll(name: string, names: string[]): Check {
+function requiresAll(name: string, names: string[]): ObjectCheck {
   return (json) => {
-    if (!Object.hasOwn(json as object, name)) {
+    if (!Object.hasOwn(json, name)) {
       return true;
     }
     for (let i = 0; i < names.length; i++) {
-      if (!Object.hasOwn(json as object, names[i])) {
+      if (!Object.hasOwn(json, names[i])) {
         return false;
       }
     }
@@ -339,23 +344,23 @@ function requiresAll(name: string, names: string[]): Check {
 }
 
 /** If `name` is present, `check` must pass on the whole object. */
-function whenPresent(name: string, check: Check): Check {
-  return (json) => !Object.hasOwn(json as object, name) || check(json);
+function whenPresent(name: string, check: ObjectCheck): ObjectCheck {
+  return (json) => !Object.hasOwn(json, name) || check(json);
 }
 
-function compileRequiredCheck(node: RawNode, plain: Check[]): void {
+function compileRequiredCheck(node: RawNode, plain: ObjectCheck[]): void {
   const { required } = node;
   if (required === undefined) {
     return;
   }
-  const names = stringArray(required);
+  const names = expectStringArray(required);
   const count = names.length;
   if (count === 0) {
     return;
   }
   plain.push((json) => {
     for (let i = 0; i < count; i++) {
-      if (!Object.hasOwn(json as object, names[i])) {
+      if (!Object.hasOwn(json, names[i])) {
         return false;
       }
     }
@@ -365,11 +370,11 @@ function compileRequiredCheck(node: RawNode, plain: Check[]): void {
 
 function compilePropertyCounts(node: RawNode, withKeys: KeysCheck[]): void {
   if (node.minProperties !== undefined) {
-    const min = num(node.minProperties);
+    const min = expectNumber(node.minProperties);
     withKeys.push((_json, keys) => !(keys.length < min));
   }
   if (node.maxProperties !== undefined) {
-    const max = num(node.maxProperties);
+    const max = expectNumber(node.maxProperties);
     withKeys.push((_json, keys) => !(keys.length > max));
   }
 }
@@ -390,7 +395,7 @@ function compilePropertyTraversal(state: BuildState, node: RawNode, withKeys: Ke
 
   let propertyChecks: Map<string, Check> | undefined;
   if (properties !== undefined) {
-    const props = record(properties);
+    const props = expectRecord(properties);
     const names = Object.keys(props);
     for (let i = 0; i < names.length; i++) {
       const built = state.compileChild(props[names[i]]);
@@ -404,7 +409,7 @@ function compilePropertyTraversal(state: BuildState, node: RawNode, withKeys: Ke
   const patterns: RegExp[] = [];
   const patternChecks: Check[] = [];
   if (patternProperties !== undefined) {
-    const patternSchemas = record(patternProperties);
+    const patternSchemas = expectRecord(patternProperties);
     const sources = Object.keys(patternSchemas);
     for (let i = 0; i < sources.length; i++) {
       const compiled = compileSchemaRegex(sources[i]);
@@ -464,25 +469,25 @@ function compilePropertyTraversal(state: BuildState, node: RawNode, withKeys: Ke
   });
 }
 
-function compileDependencies(state: BuildState, node: RawNode, plain: Check[]): void {
+function compileDependencies(state: BuildState, node: RawNode, plain: ObjectCheck[]): void {
   const { dependencies } = node;
   if (dependencies === undefined) {
     return;
   }
-  const definitions = record(dependencies);
+  const definitions = expectRecord(dependencies);
   const names = Object.keys(definitions);
   for (let i = 0; i < names.length; i++) {
     const name = names[i];
     const definition = definitions[name];
     plain.push(
       Array.isArray(definition)
-        ? requiresAll(name, stringArray(definition))
+        ? requiresAll(name, expectStringArray(definition))
         : whenPresent(name, state.compileChild(definition))
     );
   }
 }
 
-function compileDependentKeywords(state: BuildState, node: RawNode, plain: Check[]): void {
+function compileDependentKeywords(state: BuildState, node: RawNode, plain: ObjectCheck[]): void {
   if (!supportsDependentKeywords(node, state.ctx.options.version)) {
     return;
   }
@@ -493,7 +498,7 @@ function compileDependentKeywords(state: BuildState, node: RawNode, plain: Check
       const required = dependentRequired[names[i]] as unknown;
       // like the interpreter, a value that is not an array is skipped
       if (Array.isArray(required)) {
-        plain.push(requiresAll(names[i], stringArray(required)));
+        plain.push(requiresAll(names[i], expectStringArray(required)));
       }
     }
   }
@@ -526,7 +531,7 @@ function compilePropertyNames(state: BuildState, node: RawNode, withKeys: KeysCh
 // Every object keyword of a node, folded into one check so `Object.keys(json)` is computed once.
 export function compileObjectKeywords(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
   const raw = node as unknown as RawNode;
-  const plain: Check[] = [];
+  const plain: ObjectCheck[] = [];
   const withKeys: KeysCheck[] = [];
   compileRequiredCheck(raw, plain);
   compileDependencies(state, raw, plain);
