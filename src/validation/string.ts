@@ -1,3 +1,4 @@
+import type { FormatValidatorFn } from '../format-validators.js';
 import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
@@ -9,7 +10,7 @@ import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { unicodeLength } from '../utils/unicode.js';
 import { whatIs } from '../utils/what-is.js';
 import { ALWAYS_FALSE, disableFastValidator, expectNumber, unsupported } from './fast-shared.js';
-import { assertsContent, isFormatAsserted, shouldSkipValidate, unknownFormatFails } from './shared.js';
+import { assertsContent, isFormatAssertionVocabEnabled, isModernDraft, shouldSkipValidate } from './shared.js';
 
 // ---------------------------------------------------------------------------
 // minLength
@@ -100,16 +101,58 @@ function toFalse(): unknown {
   return false;
 }
 
+/** True when `format` is asserted on this node under these options (before any lookup of the format itself). */
+const isFormatAsserted = (
+  schema: JsonSchemaInternal,
+  rootSchema: JsonSchemaInternal | boolean | undefined,
+  options: ZSchemaBase['options']
+) =>
+  options.formatAssertions !== false &&
+  (options.formatAssertions !== true || isFormatAssertionVocabEnabled(schema, rootSchema, options.version));
+
+/**
+ * True when an unknown `format` is an error under these options. Only meaningful after `isFormatAsserted(...)`
+ * returned true and no validator was found for the format.
+ */
+const unknownFormatFails = (options: ZSchemaBase['options']) =>
+  options.ignoreUnknownFormats !== true &&
+  // From 2019-09 on an unknown format is ignored, unless format asserts because the
+  // meta-schema says so: once isFormatAsserted passed, formatAssertions true means it does.
+  (options.formatAssertions === true || !isModernDraft(options.version));
+
+/** Marker returned by `decideFormat`: the format is asserted, unknown, and that is an error. */
+const UNKNOWN_FORMAT_FAILS = Symbol('unknownFormatFails');
+
+/**
+ * The format decision shared by the interpreter and the fast validator: the validator function to run,
+ * `UNKNOWN_FORMAT_FAILS` when the format is unknown and that is an error, or `undefined` when nothing is
+ * checked (not asserted, or unknown and ignored).
+ */
+function decideFormat(
+  format: string,
+  schema: JsonSchemaInternal,
+  rootSchema: JsonSchemaInternal | boolean | undefined,
+  options: ZSchemaBase['options']
+): FormatValidatorFn | typeof UNKNOWN_FORMAT_FAILS | undefined {
+  if (!isFormatAsserted(schema, rootSchema, options)) {
+    return undefined;
+  }
+  const fn = resolveFormatValidator(format, options);
+  if (typeof fn === 'function') {
+    return fn;
+  }
+  return unknownFormatFails(options) ? UNKNOWN_FORMAT_FAILS : undefined;
+}
+
 export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
   // formatAssertions false: never asserted. formatAssertions true: respect the meta-schema
   // vocabulary (for draft 2019-09/2020-12, format is annotation-only unless the
   // format-assertion vocabulary is enabled in the meta-schema).
-  if (!isFormatAsserted(schema, report.rootSchema, ctx.options)) {
+  const formatValidatorFn = decideFormat(schema.format!, schema, report.rootSchema, ctx.options);
+  if (formatValidatorFn === undefined) {
     return;
   }
-
-  const formatValidatorFn = resolveFormatValidator(schema.format!, ctx.options);
   if (typeof formatValidatorFn === 'function') {
     if (shouldSkipValidate(ctx.validateOptions, ['INVALID_FORMAT'])) {
       return;
@@ -148,7 +191,7 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
         report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
       }
     }
-  } else if (unknownFormatFails(ctx.options)) {
+  } else {
     report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
   }
 }
@@ -160,10 +203,10 @@ export function compileFormat(state: BuildState, node: JsonSchemaInternal, check
   if (typeof format !== 'string') {
     unsupported();
   }
-  if (!isFormatAsserted(node, root, options)) {
+  const fn = decideFormat(format, node, root, options);
+  if (fn === undefined) {
     return;
   }
-  const fn = resolveFormatValidator(format, options);
   if (typeof fn === 'function') {
     if (isSyncBuiltInFormatValidator(fn)) {
       checks.push((json) => !!fn.call(ctx, json));
@@ -190,9 +233,7 @@ export function compileFormat(state: BuildState, node: JsonSchemaInternal, check
     });
     return;
   }
-  if (unknownFormatFails(options)) {
-    checks.push(ALWAYS_FALSE);
-  }
+  checks.push(ALWAYS_FALSE);
 }
 
 // ---------------------------------------------------------------------------

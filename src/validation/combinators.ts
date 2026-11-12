@@ -1,6 +1,6 @@
 import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
-import type { BuildState, Check, RawNode } from './fast-shared.js';
+import type { BuildState, Check } from './fast-shared.js';
 
 import { Report } from '../report.js';
 import { ALWAYS_FALSE, ALWAYS_TRUE, expectArray } from './fast-shared.js';
@@ -227,12 +227,11 @@ export function compileIf(state: BuildState, node: JsonSchemaInternal, checks: C
   if (!supportsIfThenElse(version)) {
     return;
   }
-  const raw = node as unknown as RawNode;
-  const { then: thenSchema, else: elseSchema } = raw;
-  if (raw.if === undefined || (thenSchema === undefined && elseSchema === undefined)) {
+  const { then: thenSchema, else: elseSchema } = node;
+  if (node.if === undefined || (thenSchema === undefined && elseSchema === undefined)) {
     return;
   }
-  const condition = state.compileChild(raw.if);
+  const condition = state.compileChild(node.if);
   const onThen = thenSchema === undefined ? ALWAYS_TRUE : state.compileChild(thenSchema);
   const onElse = elseSchema === undefined ? ALWAYS_TRUE : state.compileChild(elseSchema);
   checks.push((json) => (condition(json) ? onThen(json) : onElse(json)));

@@ -1,6 +1,6 @@
 import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
-import type { BuildState, Check, RawNode } from './fast-shared.js';
+import type { BuildState, Check } from './fast-shared.js';
 
 import { Report } from '../report.js';
 import { difference } from '../utils/array.js';
@@ -348,7 +348,7 @@ function whenPresent(name: string, check: ObjectCheck): ObjectCheck {
   return (json) => !Object.hasOwn(json, name) || check(json);
 }
 
-function compileRequiredCheck(node: RawNode, plain: ObjectCheck[]): void {
+function compileRequiredCheck(node: JsonSchemaInternal, plain: ObjectCheck[]): void {
   const { required } = node;
   if (required === undefined) {
     return;
@@ -368,7 +368,7 @@ function compileRequiredCheck(node: RawNode, plain: ObjectCheck[]): void {
   });
 }
 
-function compilePropertyCounts(node: RawNode, withKeys: KeysCheck[]): void {
+function compilePropertyCounts(node: JsonSchemaInternal, withKeys: KeysCheck[]): void {
   if (node.minProperties !== undefined) {
     const min = expectNumber(node.minProperties);
     withKeys.push((_json, keys) => !(keys.length < min));
@@ -380,7 +380,7 @@ function compilePropertyCounts(node: RawNode, withKeys: KeysCheck[]): void {
 }
 
 // properties / patternProperties / additionalProperties: child traversal and the additionalProperties false rule
-function compilePropertyTraversal(state: BuildState, node: RawNode, withKeys: KeysCheck[]): void {
+function compilePropertyTraversal(state: BuildState, node: JsonSchemaInternal, withKeys: KeysCheck[]): void {
   const { properties, patternProperties, additionalProperties } = node;
   const forbidAdditional = additionalProperties === false;
   let additional: Check | undefined;
@@ -469,7 +469,7 @@ function compilePropertyTraversal(state: BuildState, node: RawNode, withKeys: Ke
   });
 }
 
-function compileDependencies(state: BuildState, node: RawNode, plain: ObjectCheck[]): void {
+function compileDependencies(state: BuildState, node: JsonSchemaInternal, plain: ObjectCheck[]): void {
   const { dependencies } = node;
   if (dependencies === undefined) {
     return;
@@ -487,7 +487,7 @@ function compileDependencies(state: BuildState, node: RawNode, plain: ObjectChec
   }
 }
 
-function compileDependentKeywords(state: BuildState, node: RawNode, plain: ObjectCheck[]): void {
+function compileDependentKeywords(state: BuildState, node: JsonSchemaInternal, plain: ObjectCheck[]): void {
   if (!supportsDependentKeywords(node, state.ctx.options.version)) {
     return;
   }
@@ -510,7 +510,7 @@ function compileDependentKeywords(state: BuildState, node: RawNode, plain: Objec
   }
 }
 
-function compilePropertyNames(state: BuildState, node: RawNode, withKeys: KeysCheck[]): void {
+function compilePropertyNames(state: BuildState, node: JsonSchemaInternal, withKeys: KeysCheck[]): void {
   if (node.propertyNames === undefined) {
     return;
   }
@@ -530,15 +530,14 @@ function compilePropertyNames(state: BuildState, node: RawNode, withKeys: KeysCh
 
 // Every object keyword of a node, folded into one check so `Object.keys(json)` is computed once.
 export function compileObjectKeywords(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const raw = node as unknown as RawNode;
   const plain: ObjectCheck[] = [];
   const withKeys: KeysCheck[] = [];
-  compileRequiredCheck(raw, plain);
-  compileDependencies(state, raw, plain);
-  compileDependentKeywords(state, raw, plain);
-  compilePropertyCounts(raw, withKeys);
-  compilePropertyTraversal(state, raw, withKeys);
-  compilePropertyNames(state, raw, withKeys);
+  compileRequiredCheck(node, plain);
+  compileDependencies(state, node, plain);
+  compileDependentKeywords(state, node, plain);
+  compilePropertyCounts(node, withKeys);
+  compilePropertyTraversal(state, node, withKeys);
+  compilePropertyNames(state, node, withKeys);
   const plainCount = plain.length;
   const keyedCount = withKeys.length;
   if (plainCount === 0 && keyedCount === 0) {

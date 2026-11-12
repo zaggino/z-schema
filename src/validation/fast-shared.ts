@@ -18,8 +18,6 @@ export type FastValidator = (json: unknown) => boolean;
 
 export type Check = FastValidator;
 
-export type RawNode = Record<string, unknown>;
-
 export const ALWAYS_TRUE: FastValidator = () => true;
 export const ALWAYS_FALSE: FastValidator = () => false;
 

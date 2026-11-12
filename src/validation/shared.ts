@@ -39,9 +39,6 @@ export const supportsDependentKeywords = (
 
 const DRAFT_2020_12_SCHEMA_URI = VERSION_SCHEMA_URL_MAPPING['draft2020-12'];
 
-/** Maximum number of `$ref` hops followed on legacy drafts before the chain is rejected. */
-export const MAX_LEGACY_REF_HOPS = 99;
-
 /** The `prefixItems` array when it is honoured on this node (a 2020-12 node, by `$schema` or default version, with an array value), else `undefined`. */
 export const honouredPrefixItems = (
   schema: JsonSchemaInternal,
@@ -56,7 +53,18 @@ export const honouredPrefixItems = (
 };
 
 /** True when `minContains` / `maxContains` are honoured for this version. */
-export const supportsContainsBounds = isModernDraft;
+const supportsContainsBounds = isModernDraft;
+
+/** The `minContains` that applies to `schema` under `version` (1 when absent or not honoured). */
+export const minContainsOf = (schema: JsonSchemaInternal, version: JsonSchemaVersion | 'none' | undefined): number =>
+  supportsContainsBounds(version) && typeof schema.minContains === 'number' ? schema.minContains : 1;
+
+/** The `maxContains` that applies to `schema` under `version`, or `undefined` when absent or not honoured. */
+export const maxContainsOf = (
+  schema: JsonSchemaInternal,
+  version: JsonSchemaVersion | 'none' | undefined
+): number | undefined =>
+  supportsContainsBounds(version) && typeof schema.maxContains === 'number' ? schema.maxContains : undefined;
 
 /** True when `if` / `then` / `else` are evaluated for this version. */
 export const supportsIfThenElse = (version: JsonSchemaVersion | 'none' | undefined) =>
@@ -64,16 +72,6 @@ export const supportsIfThenElse = (version: JsonSchemaVersion | 'none' | undefin
 
 /** True when `contentEncoding` / `contentMediaType` assert for this version. */
 export const assertsContent = (version: JsonSchemaVersion | 'none' | undefined) => version === 'draft-07';
-
-/**
- * True when an unknown `format` is an error under these options. Only meaningful after `isFormatAsserted(...)`
- * returned true and no validator was found for the format.
- */
-export const unknownFormatFails = (options: ZSchemaBase['options']) =>
-  options.ignoreUnknownFormats !== true &&
-  // From 2019-09 on an unknown format is ignored, unless format asserts because the
-  // meta-schema says so: once isFormatAsserted passed, formatAssertions true means it does.
-  (options.formatAssertions === true || !isModernDraft(options.version));
 
 // ---------------------------------------------------------------------------
 // Vocabulary constants
@@ -182,15 +180,6 @@ export const isFormatAssertionVocabEnabled = (
 
   return false; // default to annotation-only for modern drafts
 };
-
-/** True when `format` is asserted on this node under these options (before any lookup of the format itself). */
-export const isFormatAsserted = (
-  schema: JsonSchemaInternal,
-  rootSchema: JsonSchemaInternal | boolean | undefined,
-  options: ZSchemaBase['options']
-) =>
-  options.formatAssertions !== false &&
-  (options.formatAssertions !== true || isFormatAssertionVocabEnabled(schema, rootSchema, options.version));
 
 // ---------------------------------------------------------------------------
 // Validation result caching

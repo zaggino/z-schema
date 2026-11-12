@@ -21,7 +21,8 @@ import {
   compileMultipleOf,
 } from './validation/numeric.js';
 import { compileObjectKeywords } from './validation/object.js';
-import { isModernDraft, isValidationVocabularyEnabled, MAX_LEGACY_REF_HOPS } from './validation/shared.js';
+import { walkLegacyRef } from './validation/ref.js';
+import { isModernDraft, isValidationVocabularyEnabled } from './validation/shared.js';
 import {
   compileContent,
   compileFormat,
@@ -136,24 +137,6 @@ const KEYWORD_COMPILERS: Record<keyof JsonSchemaAll, KeywordCompiler> = {
   contentMediaType: compileContent,
 };
 
-/**
- * Legacy drafts: follows the `$ref` chain like the interpreter and returns the final target, whose keywords alone
- * apply. `undefined` when the chain is unresolved, self-referential, too long or ends in a non-object.
- */
-function followLegacyRef(node: JsonSchemaInternal): JsonSchemaInternal | undefined {
-  let current = node;
-  let hops = 0;
-  while (current.$ref) {
-    const next = current.__$refResolved as unknown;
-    if (!isObject(next) || next === current || hops + 1 >= MAX_LEGACY_REF_HOPS) {
-      return undefined;
-    }
-    current = next as JsonSchemaInternal;
-    hops++;
-  }
-  return current;
-}
-
 function combine(checks: Check[]): FastValidator {
   const count = checks.length;
   if (count === 0) {
@@ -203,11 +186,12 @@ function compileNode(state: DriverState, node: unknown): FastValidator {
 
   if (schema.$ref && !isModernDraft(state.ctx.options.version)) {
     // siblings of a legacy $ref are ignored: only the final target of the chain is validated
-    const target = followLegacyRef(schema);
-    if (target === undefined) {
+    // the final target must be a resolved object: a hop limit, an unresolved or self reference and a boolean are rejected
+    const target = walkLegacyRef(schema);
+    if (!isObject(target) || (target as JsonSchemaInternal).$ref) {
       return unsupported();
     }
-    const built = state.compileChild(target);
+    const built = state.compileChild(target as JsonSchemaInternal);
     slot.fn = built;
     state.memo.set(schema, built);
     return built;

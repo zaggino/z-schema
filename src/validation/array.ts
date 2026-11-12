@@ -1,6 +1,6 @@
 import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
-import type { BuildState, Check, RawNode } from './fast-shared.js';
+import type { BuildState, Check } from './fast-shared.js';
 
 import { Report } from '../report.js';
 import { isUniqueArray } from '../utils/array.js';
@@ -10,7 +10,8 @@ import {
   deferOrRunSync,
   honouredPrefixItems,
   shouldSkipValidate,
-  supportsContainsBounds,
+  minContainsOf,
+  maxContainsOf,
 } from './shared.js';
 
 // ---------------------------------------------------------------------------
@@ -155,10 +156,8 @@ export function containsValidator(ctx: ZSchemaBase, report: Report, schema: Json
       }
     }
 
-    const boundsHonoured = supportsContainsBounds(ctx.options.version);
-    const minContains: number =
-      boundsHonoured && typeof schema.minContains === 'number' ? (schema.minContains ?? 1) : 1;
-    const maxContains = boundsHonoured && typeof schema.maxContains === 'number' ? schema.maxContains : undefined;
+    const minContains = minContainsOf(schema, ctx.options.version);
+    const maxContains = maxContainsOf(schema, ctx.options.version);
 
     const hasEnoughMatches = matchingItems >= minContains;
     const notTooManyMatches = maxContains === undefined || matchingItems <= maxContains;
@@ -173,15 +172,13 @@ export function containsValidator(ctx: ZSchemaBase, report: Report, schema: Json
 
 // contains, with minContains / maxContains (honoured on 2019-09 and later only)
 export function compileContains(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const raw = node as unknown as RawNode;
-  if (raw.contains === undefined) {
+  if (node.contains === undefined) {
     return;
   }
-  const each = state.compileChild(raw.contains);
+  const each = state.compileChild(node.contains);
   const { version } = state.ctx.options;
-  const supportsBounds = supportsContainsBounds(version);
-  const min = supportsBounds && typeof raw.minContains === 'number' ? raw.minContains : 1;
-  const max = supportsBounds && typeof raw.maxContains === 'number' ? raw.maxContains : undefined;
+  const min = minContainsOf(node, version);
+  const max = maxContainsOf(node, version);
 
   if (max === undefined) {
     if (min <= 0) {
@@ -237,8 +234,7 @@ export function minContainsValidator() {
 // Compiled together because they select the child schema per index. Must agree with `recurseArray`
 // (json-validation.ts) and `additionalItemsValidator`.
 export function compileItemKeywords(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const raw = node as unknown as RawNode;
-  const { items, additionalItems } = raw;
+  const { items, additionalItems } = node;
 
   if (additionalItems === false && Array.isArray(items)) {
     const tupleLength = items.length;
