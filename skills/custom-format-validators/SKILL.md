@@ -136,9 +136,9 @@ const validator = ZSchema.create({ formatAssertions: false });
 
 ## Unknown formats
 
-By default, z-schema reports `UNKNOWN_FORMAT` for unrecognized format names in draft-04/06/07. Modern drafts (2019-09, 2020-12) always silently ignore unknown formats.
+By default, z-schema reports `UNKNOWN_FORMAT` for unrecognized format names in draft-04/06/07. Modern drafts (2019-09, 2020-12) silently ignore unknown formats, except with `formatAssertions: true` under a meta-schema that opts in to format assertion, where they are reported too.
 
-To suppress unknown format errors in older drafts:
+To suppress unknown format errors:
 
 ```typescript
 const validator = ZSchema.create({ ignoreUnknownFormats: true });

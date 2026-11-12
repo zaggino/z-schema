@@ -78,10 +78,10 @@ noExtraKeywords, noTypeless, noEmptyStrings, noEmptyArrays
 
 ## Format handling
 
-| Option                 | Type              | Default | Effect                                                                                                                                                    |
-| ---------------------- | ----------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ignoreUnknownFormats` | `boolean`         | `false` | Suppress `UNKNOWN_FORMAT` errors for unrecognized formats. Modern drafts (2019-09, 2020-12) always ignore unknown formats regardless.                     |
-| `formatAssertions`     | `null \| boolean` | `null`  | `null`=always assert (legacy), `true`=respect vocabulary (2019-09/2020-12 assert only if the meta-schema opts in), `false`=annotation-only for all drafts |
+| Option                 | Type              | Default | Effect                                                                                                                                                                                                |
+| ---------------------- | ----------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ignoreUnknownFormats` | `boolean`         | `false` | Suppress `UNKNOWN_FORMAT` errors for unrecognized formats. Modern drafts (2019-09, 2020-12) ignore unknown formats regardless, except with `formatAssertions: true` under a meta-schema that opts in. |
+| `formatAssertions`     | `null \| boolean` | `null`  | `null`=always assert (legacy), `true`=respect vocabulary (2019-09/2020-12 assert only if the meta-schema opts in), `false`=annotation-only for all drafts                                             |
 
 ## Reference handling
 

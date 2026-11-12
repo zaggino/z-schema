@@ -9,6 +9,7 @@ import { isUniqueArray } from './utils/array.js';
 import { shallowClone } from './utils/clone.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
 import { isInteger, isObject } from './utils/what-is.js';
+import { isFormatAssertionVocabEnabled, isModernDraft } from './validation/shared.js';
 
 const PRIMITIVE_TYPES = ['array', 'boolean', 'integer', 'number', 'null', 'object', 'string'] as const;
 const PRIMITIVE_TYPE_STR = PRIMITIVE_TYPES.join(',');
@@ -635,11 +636,13 @@ const SchemaValidators = {
       report.addError('KEYWORD_TYPE_EXPECTED', ['format', 'string'], undefined, schema, 'format');
       return;
     }
-    const isModernDraft = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+    // From 2019-09 on an unknown format is ignored, unless format asserts because the
+    // meta-schema says so, which only formatAssertions true looks at.
     if (
       !isFormatSupported(schema.format, this.options.customFormats) &&
       this.options.ignoreUnknownFormats !== true &&
-      !isModernDraft
+      (!isModernDraft(this.options.version) ||
+        (this.options.formatAssertions === true && isFormatAssertionVocabEnabled(schema, report, this.options.version)))
     ) {
       report.addError('UNKNOWN_FORMAT', [schema.format], undefined, schema, 'format');
     }

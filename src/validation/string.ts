@@ -127,7 +127,12 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
         report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
       }
     }
-  } else if (ctx.options.ignoreUnknownFormats !== true && !isModernDraft(ctx.options.version)) {
+  } else if (
+    ctx.options.ignoreUnknownFormats !== true &&
+    // From 2019-09 on an unknown format is ignored, unless format asserts because the
+    // meta-schema says so: getting here with formatAssertions true means it does.
+    (ctx.options.formatAssertions === true || !isModernDraft(ctx.options.version))
+  ) {
     report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
   }
 }
