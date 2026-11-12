@@ -117,6 +117,29 @@ export const interpreterOutcome = (
   setup?: (v: ZSchemaSafe) => void
 ): Outcome => outcome(() => interpreterRun(options, schema, data, setup));
 
+/**
+ * Interpreter verdicts for `schema` from one validator: each schema is compiled once instead of once per sample.
+ * After every call the cache entry's fast validator is set to `null` ("unsupported"), so a later call on the
+ * cached schema still runs the interpreter; the guard checks that before each call.
+ */
+const interpreterReference = (options: ZSchemaOptions, schema: JsonSchema) => {
+  const v = ZSchema.create({ ...options, safe: true });
+  const entryOf = () => {
+    const key = v.compiledSchemaCache.keyOf(schema);
+    return key === undefined ? undefined : v.compiledSchemaCache.getEntry(key, v.options);
+  };
+  return (data: unknown): boolean => {
+    const before = entryOf();
+    expect(before === undefined || before.fast === null).toBe(true);
+    const { valid } = v.validate(data, schema);
+    const after = entryOf();
+    if (after !== undefined) {
+      after.fast = null;
+    }
+    return valid;
+  };
+};
+
 /** Compiles `schema` on a fresh validator and returns the fast validator built for the compiled clone. */
 export const fastFor = (schema: JsonSchema, opts: ZSchemaOptions = {}, setup?: (v: ZSchemaSafe) => void) => {
   const v = ZSchema.create({ safe: true, ...opts });
@@ -127,8 +150,13 @@ export const fastFor = (schema: JsonSchema, opts: ZSchemaOptions = {}, setup?: (
   return {
     v,
     fast: buildFastFor(v, schema),
-    /** Interpreter verdict from a fresh validator with the same options and setup. */
-    reference: (data: unknown) => interpreterRun(opts, schema, data, setup).valid,
+    /**
+     * Interpreter verdict with the same options and setup. A `setup` may register stateful formats, so it gets
+     * a fresh validator per call; without one, a single validator pinned to the interpreter is reused.
+     */
+    reference: setup
+      ? (data: unknown) => interpreterRun(opts, schema, data, setup).valid
+      : interpreterReference(opts, schema),
   };
 };
 
