@@ -1,8 +1,10 @@
 import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
+import type { BuildState, Check, RawNode } from './fast-shared.js';
 
 import { Report } from '../report.js';
-import { cacheValidationResult, deferOrRunSync, isModernDraft } from './shared.js';
+import { ALWAYS_FALSE, ALWAYS_TRUE, list } from './fast-shared.js';
+import { cacheValidationResult, deferOrRunSync, isModernDraft, supportsIfThenElse } from './shared.js';
 
 // ---------------------------------------------------------------------------
 // allOf
@@ -108,7 +110,7 @@ export function notValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchem
 // ---------------------------------------------------------------------------
 
 export function ifValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
-  if (ctx.options.version === 'draft-04' || ctx.options.version === 'draft-06') {
+  if (!supportsIfThenElse(ctx.options.version)) {
     return;
   }
 
@@ -154,4 +156,96 @@ export function thenValidator() {
 
 export function elseValidator() {
   // handled by if
+}
+
+// ---------------------------------------------------------------------------
+// fast-validator compilers
+// ---------------------------------------------------------------------------
+
+/** Compiles every member of a combinator array; the build is unsupported when the value is not an array. */
+function compileMembers(state: BuildState, value: unknown): Check[] {
+  const schemas = list(value);
+  const members: Check[] = [];
+  for (let i = 0; i < schemas.length; i++) {
+    members.push(state.compileChild(schemas[i]));
+  }
+  return members;
+}
+
+export function compileAllOf(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const members = compileMembers(state, node.allOf);
+  for (let i = 0; i < members.length; i++) {
+    if (members[i] !== ALWAYS_TRUE) {
+      checks.push(members[i]);
+    }
+  }
+}
+
+export function compileAnyOf(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const members = compileMembers(state, node.anyOf);
+  const count = members.length;
+  if (count === 0) {
+    checks.push(ALWAYS_FALSE);
+    return;
+  }
+  for (let i = 0; i < count; i++) {
+    if (members[i] === ALWAYS_TRUE) {
+      return;
+    }
+  }
+  if (count === 1) {
+    checks.push(members[0]);
+    return;
+  }
+  checks.push((json) => {
+    for (let i = 0; i < count; i++) {
+      if (members[i](json)) {
+        return true;
+      }
+    }
+    return false;
+  });
+}
+
+export function compileOneOf(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const members = compileMembers(state, node.oneOf);
+  const count = members.length;
+  if (count === 0) {
+    checks.push(ALWAYS_FALSE);
+    return;
+  }
+  if (count === 1) {
+    checks.push(members[0]);
+    return;
+  }
+  checks.push((json) => {
+    let passes = 0;
+    for (let i = 0; i < count; i++) {
+      if (members[i](json) && ++passes > 1) {
+        return false;
+      }
+    }
+    return passes === 1;
+  });
+}
+
+export function compileNot(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const inner = state.compileChild(node.not);
+  checks.push((json) => !inner(json));
+}
+
+export function compileIf(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const { version } = state.ctx.options;
+  if (!supportsIfThenElse(version)) {
+    return;
+  }
+  const raw = node as unknown as RawNode;
+  const { then: thenSchema, else: elseSchema } = raw;
+  if (raw.if === undefined || (thenSchema === undefined && elseSchema === undefined)) {
+    return;
+  }
+  const condition = state.compileChild(raw.if);
+  const onThen = thenSchema === undefined ? ALWAYS_TRUE : state.compileChild(thenSchema);
+  const onElse = elseSchema === undefined ? ALWAYS_TRUE : state.compileChild(elseSchema);
+  checks.push((json) => (condition(json) ? onThen(json) : onElse(json)));
 }

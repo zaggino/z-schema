@@ -36,6 +36,38 @@ export const supportsDependentKeywords = (
   return !(version === 'draft-04' || version === 'draft-06' || version === 'draft-07');
 };
 
+const DRAFT_2020_12_SCHEMA_URI = 'https://json-schema.org/draft/2020-12/schema';
+
+/** Maximum number of `$ref` hops followed on legacy drafts before the chain is rejected. */
+export const MAX_LEGACY_REF_HOPS = 99;
+
+/** True when `prefixItems` is honoured on this node: a 2020-12 node (by `$schema` or default version) with an array value. */
+export const usesPrefixItems = (schema: JsonSchemaInternal, version: JsonSchemaVersion | 'none' | undefined) => {
+  const schemaUri = typeof schema.$schema === 'string' ? schema.$schema : undefined;
+  return (
+    (schemaUri === DRAFT_2020_12_SCHEMA_URI || (!schemaUri && version === 'draft2020-12')) &&
+    Array.isArray(schema.prefixItems)
+  );
+};
+
+/** True when `minContains` / `maxContains` are honoured for this version. */
+export const supportsContainsBounds = (version: JsonSchemaVersion | 'none' | undefined) =>
+  version === 'draft2019-09' || version === 'draft2020-12';
+
+/** True when `if` / `then` / `else` are evaluated for this version. */
+export const supportsIfThenElse = (version: JsonSchemaVersion | 'none' | undefined) =>
+  version !== 'draft-04' && version !== 'draft-06';
+
+/** True when `contentEncoding` / `contentMediaType` assert for this version. */
+export const assertsContent = (version: JsonSchemaVersion | 'none' | undefined) => version === 'draft-07';
+
+/** True when an unknown `format` is an error under these options. */
+export const unknownFormatFails = (options: ZSchemaBase['options']) =>
+  options.ignoreUnknownFormats !== true &&
+  // From 2019-09 on an unknown format is ignored, unless format asserts because the
+  // meta-schema says so: getting here with formatAssertions true means it does.
+  (options.formatAssertions === true || !isModernDraft(options.version));
+
 // ---------------------------------------------------------------------------
 // Vocabulary constants
 // ---------------------------------------------------------------------------
@@ -142,6 +174,18 @@ export const isFormatAssertionVocabEnabled = (
   }
 
   return false; // default to annotation-only for modern drafts
+};
+
+/** True when `format` is asserted on this node under these options (before any lookup of the format itself). */
+export const isFormatAsserted = (
+  schema: JsonSchemaInternal,
+  rootSchema: JsonSchemaInternal | boolean | undefined,
+  options: ZSchemaBase['options']
+) => {
+  if (options.formatAssertions === false) {
+    return false;
+  }
+  return !(options.formatAssertions === true && !isFormatAssertionVocabEnabled(schema, rootSchema, options.version));
 };
 
 // ---------------------------------------------------------------------------

@@ -1,13 +1,15 @@
 import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
+import type { BuildState, Check } from './fast-shared.js';
 
-import { resolveFormatValidator } from '../format-validators.js';
+import { isSyncBuiltInFormatValidator, resolveFormatValidator } from '../format-validators.js';
 import { decodeBase64, isValidBase64 } from '../utils/base64.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { unicodeLength } from '../utils/unicode.js';
 import { whatIs } from '../utils/what-is.js';
-import { isFormatAssertionVocabEnabled, isModernDraft, shouldSkipValidate } from './shared.js';
+import { ALWAYS_FALSE, num, unsupported } from './fast-shared.js';
+import { assertsContent, isFormatAsserted, shouldSkipValidate, unknownFormatFails } from './shared.js';
 
 // ---------------------------------------------------------------------------
 // minLength
@@ -77,17 +79,10 @@ function toFalse(): unknown {
 
 export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
-  if (ctx.options.formatAssertions === false) {
-    return;
-  }
-
-  // When formatAssertions is explicitly true, respect the meta-schema vocabulary:
-  // for draft 2019-09/2020-12, format is annotation-only unless the format-assertion
-  // vocabulary is enabled in the meta-schema.
-  if (
-    ctx.options.formatAssertions === true &&
-    !isFormatAssertionVocabEnabled(schema, report.rootSchema, ctx.options.version)
-  ) {
+  // formatAssertions false: never asserted. formatAssertions true: respect the meta-schema
+  // vocabulary (for draft 2019-09/2020-12, format is annotation-only unless the
+  // format-assertion vocabulary is enabled in the meta-schema).
+  if (!isFormatAsserted(schema, report.rootSchema, ctx.options)) {
     return;
   }
 
@@ -130,12 +125,7 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
         report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
       }
     }
-  } else if (
-    ctx.options.ignoreUnknownFormats !== true &&
-    // From 2019-09 on an unknown format is ignored, unless format asserts because the
-    // meta-schema says so: getting here with formatAssertions true means it does.
-    (ctx.options.formatAssertions === true || !isModernDraft(ctx.options.version))
-  ) {
+  } else if (unknownFormatFails(ctx.options)) {
     report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
   }
 }
@@ -145,7 +135,7 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
 // ---------------------------------------------------------------------------
 
 export function contentEncodingValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
-  if (ctx.options.version !== 'draft-07') {
+  if (!assertsContent(ctx.options.version)) {
     return;
   }
   if (typeof json !== 'string') {
@@ -173,7 +163,7 @@ export function contentEncodingValidator(ctx: ZSchemaBase, report: Report, schem
 // ---------------------------------------------------------------------------
 
 export function contentMediaTypeValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
-  if (ctx.options.version !== 'draft-07') {
+  if (!assertsContent(ctx.options.version)) {
     return;
   }
   if (typeof json !== 'string') {
@@ -211,5 +201,63 @@ export function contentMediaTypeValidator(ctx: ZSchemaBase, report: Report, sche
       schema,
       'contentMediaType'
     );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// fast-validator compilers
+// ---------------------------------------------------------------------------
+
+export function compileMinLength(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const minLength = num(node.minLength);
+  checks.push((json) => typeof json !== 'string' || !(unicodeLength(json) < minLength));
+}
+
+export function compileMaxLength(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const maxLength = num(node.maxLength);
+  checks.push((json) => typeof json !== 'string' || !(unicodeLength(json) > maxLength));
+}
+
+export function compilePattern(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const { pattern } = node;
+  if (typeof pattern !== 'string') {
+    unsupported();
+  }
+  const result = compileSchemaRegex(pattern);
+  if (!result.ok) {
+    unsupported();
+  }
+  const re = result.value;
+  checks.push((json) => typeof json !== 'string' || re.test(json));
+}
+
+export function compileFormat(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const { ctx, root } = state;
+  const { options } = ctx;
+  const { format } = node;
+  if (typeof format !== 'string') {
+    unsupported();
+  }
+  if (!isFormatAsserted(node, root, options)) {
+    return;
+  }
+  const fn = resolveFormatValidator(format, options);
+  if (typeof fn === 'function') {
+    // A custom validator may be async (callback or promise based): only built-ins are known sync.
+    if (!isSyncBuiltInFormatValidator(fn)) {
+      unsupported();
+    }
+    checks.push((json) => !!fn.call(ctx, json));
+    return;
+  }
+  if (unknownFormatFails(options)) {
+    checks.push(ALWAYS_FALSE);
+  }
+}
+
+// contentEncoding / contentMediaType only assert on draft-07
+export function compileContent(state: BuildState): void {
+  if (assertsContent(state.ctx.options.version)) {
+    unsupported();
   }
 }

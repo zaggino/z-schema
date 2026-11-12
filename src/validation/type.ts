@@ -1,9 +1,11 @@
 import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
+import type { BuildState, Check } from './fast-shared.js';
 
 import { areEqual } from '../utils/json.js';
 import { whatIs } from '../utils/what-is.js';
+import { list, unsupported } from './fast-shared.js';
 import { shouldSkipValidate } from './shared.js';
 
 // ---------------------------------------------------------------------------
@@ -63,4 +65,51 @@ export function constValidator(ctx: ZSchemaBase, report: Report, schema: JsonSch
   if (!areEqual(json, constValue, { maxDepth: ctx.options.maxRecursionDepth })) {
     report.addError('CONST', [JSON.stringify(constValue)], undefined, schema);
   }
+}
+
+// ---------------------------------------------------------------------------
+// fast-validator compilers
+// ---------------------------------------------------------------------------
+
+export function compileType(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const { type } = node;
+  if (typeof type === 'string') {
+    if (type === 'number') {
+      // an integer is also a number
+      checks.push((json) => {
+        const jsonType = whatIs(json);
+        return jsonType === 'number' || jsonType === 'integer';
+      });
+    } else {
+      checks.push((json) => whatIs(json) === type);
+    }
+  } else if (Array.isArray(type)) {
+    const types = type as unknown[];
+    const allowsNumber = types.includes('number');
+    checks.push((json) => {
+      const jsonType = whatIs(json);
+      return types.includes(jsonType) || (jsonType === 'integer' && allowsNumber);
+    });
+  } else {
+    unsupported();
+  }
+}
+
+export function compileEnum(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const values = list(node.enum);
+  const { eqOpts } = state;
+  checks.push((json) => {
+    for (let i = 0; i < values.length; i++) {
+      if (areEqual(json, values[i], eqOpts)) {
+        return true;
+      }
+    }
+    return false;
+  });
+}
+
+export function compileConst(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const constValue = node.const;
+  const { eqOpts } = state;
+  checks.push((json) => areEqual(json, constValue, eqOpts));
 }
