@@ -126,6 +126,27 @@ interface SchemaErrorDetail {
 }
 ```
 
+## Benchmarks
+
+The benchmark harness lives in `bench/` and runs on [tinybench](https://github.com/tinylibs/tinybench) as plain Node scripts. It measures the **built** library, so build first:
+
+```bash
+npm run build
+npm run bench
+```
+
+Options (pass after `--`): `--filter <substring>` selects cases, `--time <ms>` sets the measuring time per case (default 500), `--json <file>` writes results, `--lib <path-to-index.js>` benchmarks another build. Each case is run once before measuring and must produce the expected validity.
+
+To compare two builds, build the baseline in a separate checkout and run the same harness against both:
+
+```bash
+npm run bench -- --lib ../z-schema-base/dist/index.js --json base.json
+npm run bench -- --json head.json
+npm run bench:compare -- base.json head.json
+```
+
+Cases are defined in `bench/cases.mts`. Pull requests run a non-blocking `benchmark` CI job that builds the PR and its base, runs both, and writes the comparison to the job summary. Shared runners are noisy: treat differences inside the reported rme as noise.
+
 ## Coverage
 
 ```bash
