@@ -1,12 +1,5 @@
 import { expectSameThrown, settle, shapeOf, withEagerSubReports } from '../lib/deferred-errors.ts';
-import {
-  createCaseValidator,
-  loadSuiteFiles,
-  selectCases,
-  suiteFileLabel,
-  TESTED_VERSIONS,
-  withDialect,
-} from '../lib/json-schema-test-suite.ts';
+import { loadSuiteFiles, suiteRuns, TESTED_VERSIONS } from '../lib/json-schema-test-suite.ts';
 import { readPublicJson } from '../lib/read-public-json.ts';
 
 const suiteFiles = await loadSuiteFiles(readPublicJson);
@@ -16,12 +9,10 @@ describe('deferred sub-report errors: JSON-Schema-Test-Suite differential', () =
     it(`${version}: every case yields identical error details`, () => {
       let compared = 0;
       let invalidCompared = 0;
-      for (const { file, suiteFile } of suiteFiles) {
-        const rel = suiteFileLabel(file, version);
-        for (const group of selectCases(suiteFile, file, version)) {
+      for (const { label: rel, cases } of suiteRuns(suiteFiles, version)) {
+        for (const group of cases) {
           for (const test of group.tests) {
-            const run = () =>
-              createCaseValidator(group, version).validateSafe(test.data, withDialect(group.schema, version));
+            const run = () => group.createValidator().validateSafe(test.data, group.schema);
             const deferredOutcome = settle(run);
             const eagerOutcome = settle(() => withEagerSubReports(run));
             const label = `${rel} :: ${group.description} :: ${test.description}`;

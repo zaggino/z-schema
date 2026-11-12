@@ -44,6 +44,32 @@ export interface LoadedSuiteFile {
   suiteFile: SuiteFile;
 }
 
+/** One test of a {@link SuiteRunCase}. */
+export interface SuiteRunTest extends SuiteTest {
+  /** The name the test runs under: its case's description, then its own. */
+  title: string;
+}
+
+/** A test case prepared for one dialect. */
+export interface SuiteRunCase {
+  description: string;
+  /** The case's schema, naming the dialect in `$schema`. */
+  schema: JsonSchema;
+  tests: SuiteRunTest[];
+  /**
+   * A new validator for the case: the dialect, the options its tags call for, and
+   * its external schemas, registered on the instance so they never reach another case.
+   */
+  createValidator: () => ZSchema;
+}
+
+/** What one suite file runs for one dialect. */
+export interface SuiteRun {
+  /** The name the file runs under, e.g. `draft4/optional/bignum.json`. */
+  label: string;
+  cases: SuiteRunCase[];
+}
+
 interface Draft {
   /** The number the suite's `compatibility` property uses for this dialect. */
   release: number;
@@ -70,7 +96,7 @@ interface Exclusion {
   reason: string;
   /** Dialects the exclusion applies to. Absent means all. */
   versions?: JsonSchemaVersion[];
-  /** Tests to skip, by {@link suiteTestTitle}. Absent means the whole file. */
+  /** Tests to skip, each as `<case description> <test description>`. Absent means the whole file. */
   tests?: string[];
 }
 
@@ -116,11 +142,11 @@ const EXCLUSIONS: Exclusion[] = [
 ];
 
 /** The name a test runs under: its case's description, then its own. */
-export const suiteTestTitle = (suiteCase: SuiteCase, test: SuiteTest): string =>
+const suiteTestTitle = (suiteCase: SuiteCase, test: SuiteTest): string =>
   `${suiteCase.description} ${test.description}`;
 
 /** The name a suite file runs under for a dialect, e.g. `draft4/optional/bignum.json`. */
-export const suiteFileLabel = (file: string, version: JsonSchemaVersion): string => `${DRAFTS[version].label}/${file}`;
+const suiteFileLabel = (file: string, version: JsonSchemaVersion): string => `${DRAFTS[version].label}/${file}`;
 
 /**
  * Every file of the suite, parsed. The file list comes from the global setup
@@ -183,7 +209,7 @@ const compatibleCases = (suiteFile: SuiteFile, version: JsonSchemaVersion): Suit
  * not excluded. `file` is the path relative to the suite's `validation/tests`. An
  * excluded test is dropped from its case; a case left without tests is dropped too.
  */
-export const selectCases = (suiteFile: SuiteFile, file: string, version: JsonSchemaVersion): SuiteCase[] => {
+const selectCases = (suiteFile: SuiteFile, file: string, version: JsonSchemaVersion): SuiteCase[] => {
   const exclusions = exclusionsFor(file, version);
   if (exclusions.some((exclusion) => !exclusion.tests)) {
     return [];
@@ -234,7 +260,7 @@ export const findUnusedExclusions = (suiteFiles: LoadedSuiteFile[]): string[] =>
 };
 
 /** A copy of `schema` that names the dialect in `$schema`, unless it already names one. */
-export const withDialect = (schema: JsonSchema, version: JsonSchemaVersion): JsonSchema => {
+const withDialect = (schema: JsonSchema, version: JsonSchemaVersion): JsonSchema => {
   const copy = structuredClone(schema);
   if (typeof copy !== 'boolean' && !copy.$schema) {
     copy.$schema = VERSION_SCHEMA_URL_MAPPING[version];
@@ -270,10 +296,31 @@ const tagOptions = (suiteCase: SuiteCase, version: JsonSchemaVersion): ZSchemaOp
  * A validator for one test case, with the case's external schemas registered on the
  * instance, so that they never leak into another case.
  */
-export const createCaseValidator = (suiteCase: SuiteCase, version: JsonSchemaVersion) => {
+const createCaseValidator = (suiteCase: SuiteCase, version: JsonSchemaVersion) => {
   const validator = ZSchema.create({ version, ...tagOptions(suiteCase, version) });
   for (const [uri, schema] of Object.entries(suiteCase.externalSchemas ?? {})) {
     validator.setRemoteReference(uri, withDialect(schema, version));
   }
   return validator;
+};
+
+/**
+ * What the suite runs for a dialect, file by file: the cases that are compatible
+ * with it and not excluded, each ready to run. A file with nothing for the dialect
+ * is left out.
+ */
+export const suiteRuns = (suiteFiles: LoadedSuiteFile[], version: JsonSchemaVersion): SuiteRun[] => {
+  const runs: SuiteRun[] = [];
+  for (const { file, suiteFile } of suiteFiles) {
+    const cases = selectCases(suiteFile, file, version).map((suiteCase): SuiteRunCase => ({
+      description: suiteCase.description,
+      schema: withDialect(suiteCase.schema, version),
+      tests: suiteCase.tests.map((test) => ({ ...test, title: suiteTestTitle(suiteCase, test) })),
+      createValidator: () => createCaseValidator(suiteCase, version),
+    }));
+    if (cases.length > 0) {
+      runs.push({ label: suiteFileLabel(file, version), cases });
+    }
+  }
+  return runs;
 };
