@@ -4,7 +4,7 @@ import {
   findUnusedExclusions,
   isCompatible,
   loadSuiteFiles,
-  selectCases,
+  suiteRuns,
   TESTED_VERSIONS,
 } from '../lib/json-schema-test-suite.ts';
 import { readPublicJson } from '../lib/read-public-json.ts';
@@ -43,8 +43,8 @@ describe('JSON-Schema-Test-Suite case selection', () => {
     ['draft2020-12', 2150],
   ])('%s runs at least %d tests', (version, floor) => {
     let count = 0;
-    for (const { file, suiteFile } of suiteFiles) {
-      for (const suiteCase of selectCases(suiteFile, file, version)) {
+    for (const { cases } of suiteRuns(suiteFiles, version)) {
+      for (const suiteCase of cases) {
         count += suiteCase.tests.length;
       }
     }
