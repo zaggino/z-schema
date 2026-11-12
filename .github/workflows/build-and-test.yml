@@ -45,7 +45,8 @@ jobs:
         run: npm run check
       - name: Build
         run: npm run build
-      # Browser projects run on the 22.x leg only: they are independent of the Node version.
+      # Browser projects run on the 22.x leg only (its coverage run covers node + browsers): they are independent
+      # of the Node version, so the other legs run the node project alone.
       - if: matrix.node-version != '22.x'
         name: Tests (node project)
         run: npx vitest run --project node
@@ -72,6 +73,13 @@ jobs:
             echo "Bot actor — skipping coverage commit."
             exit 0
           fi
+          # git would read a branch name starting with "-" as an option
+          case "$HEAD_REF" in
+            -*)
+              echo "Branch name starts with '-' — skipping coverage commit."
+              exit 0
+              ;;
+          esac
 
           # Save artifacts generated on the merge commit
           cp docs/test-coverage.md /tmp/test-coverage.md
