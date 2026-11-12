@@ -1,5 +1,5 @@
 import type { JsonSchema } from '../../src/json-schema-versions.ts';
-import type { ValidateOptions, ValidateResponse } from '../../src/z-schema-base.ts';
+import type { ValidateOptions } from '../../src/z-schema-base.ts';
 import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 import type { ZSchemaSafe } from '../../src/z-schema.ts';
 
@@ -9,58 +9,19 @@ import { ValidateError } from '../../src/errors.ts';
 import { buildFastValidator } from '../../src/fast-validator.ts';
 import { Report } from '../../src/report.ts';
 import { ZSchema } from '../../src/z-schema.ts';
-import { buildFastFor } from '../lib/fast-validator.ts';
+import {
+  codesOf,
+  expectAgrees,
+  fastFor,
+  interpreterOutcome,
+  interpreterRun,
+  outcome,
+  SAMPLES,
+} from '../lib/fast-validator.ts';
 
 // The interpreter path always ends by asking its Report whether it is valid; the fast path has no Report.
 const spyOnInterpreter = () => vi.spyOn(Report.prototype, 'isValid');
 
-const lone = String.fromCharCode(0xd8_3d);
-const astral = String.fromCharCode(0xd8_3d, 0xde_00);
-
-const SAMPLES: unknown[] = [
-  undefined,
-  null,
-  true,
-  false,
-  Number.NaN,
-  Number.POSITIVE_INFINITY,
-  Number.NEGATIVE_INFINITY,
-  -0,
-  0,
-  1,
-  1.5,
-  -3,
-  10,
-  0.1,
-  0.3,
-  1e21,
-  Number.MAX_SAFE_INTEGER,
-  1n,
-  () => 1,
-  [],
-  [1],
-  [1, 2],
-  {},
-  { a: 1 },
-  new Date(0),
-  '',
-  'a',
-  'abc',
-  'abcdef',
-  'aa',
-  'foo',
-  'foo-bar',
-  '2020-01-01',
-  'not a date',
-  'a@b.co',
-  astral,
-  astral + astral,
-  lone,
-  `${lone}${lone}`,
-  `a${astral}`,
-];
-
-const codesOf = (res: ValidateResponse): string[] => (res.err?.details ?? []).map((d) => d.code);
 const depth = (n: number, leaf: unknown): unknown => {
   let node: unknown = leaf;
   for (let i = 0; i < n; i++) {
@@ -75,33 +36,11 @@ const lookups = (v: ZSchemaSafe) => {
   return () => getEntry.mock.calls.length + get.mock.calls.length;
 };
 
-const outcome = (run: () => ValidateResponse): { valid: boolean; codes: string[] } | { thrown: string } => {
-  try {
-    const res = run();
-    return { valid: res.valid, codes: codesOf(res) };
-  } catch (error) {
-    return { thrown: (error as Error).message };
-  }
+const registerFalse = (z: ZSchemaSafe) => {
+  z.registerFormat('date', () => false);
 };
-
-/** Compiles `schema` on a fresh validator and returns the fast validator built for the compiled clone. */
-const fastFor = (schema: JsonSchema, opts: ZSchemaOptions = {}, setup?: (v: ZSchemaSafe) => void) => {
-  const v = ZSchema.create({ safe: true, ...opts });
-  setup?.(v);
-  const compiled = v.compile(schema);
-  compiled(1);
-  v.validate(1, schema);
-  return { v, fast: buildFastFor(v, schema) };
-};
-
-const expectAgrees = (schema: JsonSchema, opts: ZSchemaOptions = {}, samples: unknown[] = SAMPLES) => {
-  const { v, fast } = fastFor(schema, opts);
-  expect(fast).toBeDefined();
-  for (const sample of samples) {
-    expect(fast!(sample), `${Object.prototype.toString.call(sample)} against ${JSON.stringify(schema)}`).toBe(
-      v.validate(sample, schema).valid
-    );
-  }
+const addOtherRemote = (z: ZSchemaSafe) => {
+  z.setRemoteReference('http://example.com/other.json', { type: 'number' });
 };
 
 describe('fast validator', () => {
@@ -378,7 +317,9 @@ describe('fast validator', () => {
     });
 
     it('does not read schema property names off the instance', () => {
-      const { v, fast } = fastFor({ properties: { constructor: { type: 'integer' }, toString: { type: 'string' } } });
+      const { fast, reference } = fastFor({
+        properties: { constructor: { type: 'integer' }, toString: { type: 'string' } },
+      });
       for (const sample of [
         {},
         { constructor: 1 },
@@ -386,9 +327,7 @@ describe('fast validator', () => {
         { toString: 1 },
         Object.create({ toString: 1 }),
       ]) {
-        expect(fast!(sample)).toBe(
-          v.validate(sample, { properties: { constructor: { type: 'integer' }, toString: { type: 'string' } } }).valid
-        );
+        expect(fast!(sample)).toBe(reference(sample));
       }
     });
 
@@ -401,9 +340,9 @@ describe('fast validator', () => {
     });
 
     it('counts a __proto__ own key as a property', () => {
-      const { v, fast } = fastFor({ maxProperties: 0 });
+      const { fast, reference } = fastFor({ maxProperties: 0 });
       expect(fast!(protoKey)).toBe(false);
-      expect(fast!(protoKey)).toBe(v.validate(protoKey, { maxProperties: 0 }).valid);
+      expect(fast!(protoKey)).toBe(reference(protoKey));
     });
 
     it('recursive schemas without $ref are not applicable, deep trees agree', () => {
@@ -414,64 +353,6 @@ describe('fast validator', () => {
         value = { n: value };
       }
       expectAgrees(schema, {}, [value, { n: value }, {}]);
-    });
-  });
-
-  describe('format', () => {
-    it('built-in format gets a validator under formatAssertions null', () => {
-      const { fast } = fastFor({ format: 'date' }, { formatAssertions: null });
-      expect(fast).toBeDefined();
-      expect(fast!('2020-01-01')).toBe(true);
-      expect(fast!('nope')).toBe(false);
-    });
-
-    it('formatAssertions false drops the check', () => {
-      const { fast } = fastFor({ format: 'date' }, { formatAssertions: false });
-      expect(fast!('nope')).toBe(true);
-    });
-
-    it('formatAssertions true without the format-assertion vocabulary drops the check', () => {
-      expectAgrees({ format: 'date' }, { formatAssertions: true });
-    });
-
-    it('custom format registered on the instance has no fast validator', () => {
-      const { fast } = fastFor({ format: 'mine' }, { formatAssertions: null }, (v) => {
-        v.registerFormat('mine', () => true);
-      });
-      expect(fast).toBeUndefined();
-    });
-
-    it('a custom format overriding a built-in one has no fast validator', () => {
-      const { fast } = fastFor({ format: 'date' }, { formatAssertions: null }, (v) => {
-        v.registerFormat('date', () => true);
-      });
-      expect(fast).toBeUndefined();
-    });
-
-    describe('with a globally registered format', () => {
-      afterEach(() => {
-        ZSchema.unregisterFormat('global-mine');
-      });
-      it('has no fast validator', () => {
-        ZSchema.registerFormat('global-mine', () => true);
-        const { fast } = fastFor({ format: 'global-mine' }, { formatAssertions: null });
-        expect(fast).toBeUndefined();
-      });
-    });
-
-    it('unknown format on draft-07 fails at compile time, so no fast validator is ever built', () => {
-      const v = ZSchema.create({ safe: true, version: 'draft-07' });
-      expect(() => v.compile({ format: 'nope-format' })).toThrow(/SCHEMA_VALIDATION_FAILED/);
-    });
-
-    it('unknown format on the default version is ignored', () => {
-      const { fast } = fastFor({ format: 'nope-format' });
-      expect(fast!('x')).toBe(true);
-    });
-
-    it('ignoreUnknownFormats true ignores an unknown format', () => {
-      const { fast } = fastFor({ format: 'nope-format' }, { version: 'draft-07', ignoreUnknownFormats: true });
-      expect(fast!('x')).toBe(true);
     });
   });
 
@@ -637,25 +518,25 @@ describe('fast validator', () => {
         properties: { value: { type: 'integer' }, children: { type: 'array', items: { $ref: '#' } } },
       };
       expectAgrees(schema, {}, treeSamples);
-      const { v, fast } = fastFor(schema);
+      const { fast, reference } = fastFor(schema);
       expect(fast).toBeDefined();
       const deepValid = depth(200, { value: 1 });
       const deepInvalid = depth(200, { value: 'x' });
       expect(fast!(deepValid)).toBe(true);
       expect(fast!(deepInvalid)).toBe(false);
-      expect(fast!(deepValid)).toBe(v.validate(deepValid, schema).valid);
-      expect(fast!(deepInvalid)).toBe(v.validate(deepInvalid, schema).valid);
+      expect(fast!(deepValid)).toBe(reference(deepValid));
+      expect(fast!(deepInvalid)).toBe(reference(deepInvalid));
     });
 
     it('$ref to a schema registered with setRemoteReference', () => {
       const remote: JsonSchema = { type: 'string', minLength: 2 };
       const schema: JsonSchema = { properties: { a: { $ref: 'http://example.com/remote.json' } } };
-      const { v, fast } = fastFor(schema, {}, (zs) => {
+      const { fast, reference } = fastFor(schema, {}, (zs) => {
         zs.setRemoteReference('http://example.com/remote.json', remote);
       });
       expect(fast).toBeDefined();
       for (const sample of [{ a: 'ab' }, { a: 'a' }, { a: 1 }, {}, 1]) {
-        expect(fast!(sample)).toBe(v.validate(sample, schema).valid);
+        expect(fast!(sample)).toBe(reference(sample));
       }
     });
 
@@ -674,19 +555,16 @@ describe('fast validator', () => {
 
   describe('fallback', () => {
     const unsupported: Array<[string, JsonSchema, ZSchemaOptions?]> = [
-      ['properties with an unsupported child', { properties: { a: { unevaluatedProperties: false } } }],
-      ['items with an unsupported child', { items: { unevaluatedItems: false } }],
-      ['contains with an unsupported child', { contains: { unevaluatedItems: false } }],
-      ['propertyNames with an unsupported child', { propertyNames: { unevaluatedProperties: false } }],
-      ['dependencies with an unsupported child', { dependencies: { a: { unevaluatedProperties: false } } }],
-      ['allOf with an unsupported member', { allOf: [{ unevaluatedProperties: false }] }],
-      ['not with an unsupported child', { not: { unevaluatedItems: false } }],
-      ['unevaluatedProperties', { unevaluatedProperties: false }],
-      ['unevaluatedItems', { unevaluatedItems: false }],
+      ['properties with an unsupported child', { properties: { a: { $dynamicRef: '#x', $dynamicAnchor: 'x' } } }],
+      ['items with an unsupported child', { items: { $dynamicRef: '#x', $dynamicAnchor: 'x' } }],
+      ['contains with an unsupported child', { contains: { $dynamicRef: '#x', $dynamicAnchor: 'x' } }],
+      ['propertyNames with an unsupported child', { propertyNames: { $dynamicRef: '#x', $dynamicAnchor: 'x' } }],
+      ['dependencies with an unsupported child', { dependencies: { a: { $dynamicRef: '#x', $dynamicAnchor: 'x' } } }],
+      ['allOf with an unsupported member', { allOf: [{ $dynamicRef: '#x', $dynamicAnchor: 'x' }] }],
+      ['not with an unsupported child', { not: { $dynamicRef: '#x', $dynamicAnchor: 'x' } }],
+      ['unevaluatedItems with an unsupported child', { unevaluatedItems: { $dynamicRef: '#x', $dynamicAnchor: 'x' } }],
       ['$dynamicRef', { $dynamicRef: '#x', $dynamicAnchor: 'x' }],
       ['$recursiveRef', { $recursiveRef: '#', $recursiveAnchor: true }, { version: 'draft2019-09' }],
-      ['contentEncoding on draft-07', { contentEncoding: 'base64' }, { version: 'draft-07' }],
-      ['contentMediaType on draft-07', { contentMediaType: 'application/json' }, { version: 'draft-07' }],
       ['self-referential legacy $ref', { $ref: '#' }, { version: 'draft-07' }],
     ];
     it.each(unsupported)('%s has no fast validator', (_name, schema, opts) => {
@@ -725,7 +603,7 @@ describe('fast validator', () => {
       const b = fn('abc');
       expect(a).toEqual({ valid: true });
       expect(a).not.toBe(b);
-      expect(codesOf(fn(1))).toEqual(codesOf(v.validate(1, schema)));
+      expect(codesOf(fn(1))).toEqual(codesOf(interpreterRun({}, schema, 1)));
       expect(codesOf(fn('a'))).toEqual(['MIN_LENGTH']);
     });
 
@@ -750,11 +628,11 @@ describe('fast validator', () => {
       const v = ZSchema.create({ safe: true });
       const fn = v.compile(schema);
       for (const data of ['abc', 'a', 1]) {
-        const expected = v.validate(data, schema);
+        const expected = interpreterRun({}, schema, data);
         const optionVariants: Array<ValidateOptions | undefined> = [undefined, {}, { excludeErrors: ['MIN_LENGTH'] }];
         for (const options of optionVariants) {
           const actual = fn(data, options);
-          expect(actual.valid).toBe(v.validate(data, schema, options ?? {}).valid);
+          expect(actual.valid).toBe(interpreterRun({}, schema, data, undefined, options ?? {}).valid);
           if (options === undefined || Object.keys(options).length === 0) {
             expect(codesOf(actual)).toEqual(codesOf(expected));
           }
@@ -764,10 +642,15 @@ describe('fast validator', () => {
 
     it('a schema with unsupported keywords still validates correctly', () => {
       const v = ZSchema.create({ safe: true });
-      const unsupportedSchema: JsonSchema = { type: 'object', unevaluatedProperties: false, properties: { a: {} } };
+      const unsupportedSchema: JsonSchema = {
+        type: 'object',
+        additionalProperties: false,
+        properties: { a: { $dynamicRef: '#x' } },
+        $defs: { x: { $dynamicAnchor: 'x' } },
+      };
       const fn = v.compile(unsupportedSchema);
       expect(fn({ a: 1 }).valid).toBe(true);
-      expect(codesOf(fn({ b: 1 }))).toEqual(codesOf(v.validate({ b: 1 }, unsupportedSchema)));
+      expect(codesOf(fn({ b: 1 }))).toEqual(codesOf(interpreterRun({}, unsupportedSchema, { b: 1 })));
       expect(codesOf(fn({ b: 1 }))).not.toEqual([]);
     });
 
@@ -786,7 +669,7 @@ describe('fast validator', () => {
       const fn = v.compile(schema);
       expect(fn({ x: 1 }).valid).toBe(true);
       assumeAdditional.splice(0, 1);
-      const expected = v.validate({ x: 1 }, schema).valid;
+      const expected = interpreterRun({ assumeAdditional }, schema, { x: 1 }).valid;
       expect(expected).toBe(false);
       expect(fn({ x: 1 }).valid).toBe(expected);
     });
@@ -803,7 +686,7 @@ describe('fast validator', () => {
 
     it('an unsupported schema costs one cache lookup', () => {
       const v = ZSchema.create({ safe: true });
-      const fn = v.compile({ unevaluatedProperties: false, properties: { a: {} } });
+      const fn = v.compile({ properties: { a: { $dynamicRef: '#x' } }, $defs: { x: { $dynamicAnchor: 'x' } } });
       const count = lookups(v);
       expect(fn({ a: 1 }).valid).toBe(true);
       expect(count()).toBe(1);
@@ -816,8 +699,9 @@ describe('fast validator', () => {
       expect(fn(1).valid).toBe(false);
       v.registerFormat('date', () => false);
       expect(fn('2020-01-01').valid).toBe(false);
-      expect(fn('2020-01-01').valid).toBe(v.validate('2020-01-01', schema).valid);
-      expect(codesOf(fn('2020-01-01'))).toEqual(codesOf(v.validate('2020-01-01', schema)));
+      const options: ZSchemaOptions = { formatAssertions: null };
+      expect(fn('2020-01-01').valid).toBe(interpreterRun(options, schema, '2020-01-01', registerFalse).valid);
+      expect(codesOf(fn('2020-01-01'))).toEqual(codesOf(interpreterRun(options, schema, '2020-01-01', registerFalse)));
     });
 
     it('setRemoteReference after a failed call is honoured', () => {
@@ -827,8 +711,8 @@ describe('fast validator', () => {
       expect(fn(1).valid).toBe(false);
       v.setRemoteReference('http://example.com/other.json', { type: 'number' });
       for (const data of ['a', 1]) {
-        expect(fn(data).valid).toBe(v.validate(data, schema).valid);
-        expect(codesOf(fn(data))).toEqual(codesOf(v.validate(data, schema)));
+        expect(fn(data).valid).toBe(interpreterRun({}, schema, data, addOtherRemote).valid);
+        expect(codesOf(fn(data))).toEqual(codesOf(interpreterRun({}, schema, data, addOtherRemote)));
       }
     });
 
@@ -861,7 +745,7 @@ describe('fast validator', () => {
       const fn = v.compile(schema);
       expect(fast).toBeDefined();
       expect(() => fast!(data)).toThrow(/.+/);
-      expect(outcome(() => fn(data))).toEqual(outcome(() => v.validate(data, schema)));
+      expect(outcome(() => fn(data))).toEqual(interpreterOutcome({ maxRecursionDepth: 10 }, schema, data));
     });
   });
 
@@ -872,7 +756,11 @@ describe('fast validator', () => {
       const fn = v.compile(schema);
       expect(fn('2020-01-01').valid).toBe(true);
       v.registerFormat('date', () => false);
-      expect(fn('2020-01-01').valid).toBe(v.validate('2020-01-01', schema).valid);
+      expect(fn('2020-01-01').valid).toBe(
+        interpreterRun({ formatAssertions: null }, schema, '2020-01-01', (z) => {
+          z.registerFormat('date', () => false);
+        }).valid
+      );
       expect(fn('2020-01-01').valid).toBe(false);
     });
 
@@ -882,8 +770,8 @@ describe('fast validator', () => {
       const fn = v.compile(schema);
       expect(fn('a').valid).toBe(true);
       v.setRemoteReference('http://example.com/other.json', { type: 'number' });
-      expect(fn('a').valid).toBe(v.validate('a', schema).valid);
-      expect(fn(1).valid).toBe(v.validate(1, schema).valid);
+      expect(fn('a').valid).toBe(interpreterRun({}, schema, 'a', addOtherRemote).valid);
+      expect(fn(1).valid).toBe(interpreterRun({}, schema, 1, addOtherRemote).valid);
     });
 
     it('mutating options after compile is honoured', () => {
@@ -892,7 +780,7 @@ describe('fast validator', () => {
       const fn = v.compile(schema);
       expect(fn('nope').valid).toBe(false);
       v.options.formatAssertions = false;
-      expect(fn('nope').valid).toBe(v.validate('nope', schema).valid);
+      expect(fn('nope').valid).toBe(interpreterRun({ formatAssertions: false }, schema, 'nope').valid);
       expect(fn('nope').valid).toBe(true);
       v.options.formatAssertions = null;
       expect(fn('nope').valid).toBe(false);
@@ -916,7 +804,7 @@ describe('fast validator', () => {
 
     it('runs the interpreter for an unsupported schema', () => {
       const v = ZSchema.create({ safe: true });
-      const fn = v.compile({ unevaluatedProperties: false, properties: { a: {} } });
+      const fn = v.compile({ properties: { a: { $dynamicRef: '#x' } }, $defs: { x: { $dynamicAnchor: 'x' } } });
       const spy = spyOnInterpreter();
       expect(fn({ a: 1 }).valid).toBe(true);
       expect(spy).toHaveBeenCalledTimes(1);
@@ -967,7 +855,6 @@ describe('fast validator', () => {
     });
 
     it('filtered calls agree with validate() on invalid data', () => {
-      const ref = ZSchema.create({ safe: true });
       const v = ZSchema.create({ safe: true });
       const schema: JsonSchema = { type: 'object', properties: { a: { type: 'integer', minimum: 5 } } };
       const fn = v.compile(schema);
@@ -978,7 +865,7 @@ describe('fast validator', () => {
       ];
       for (const options of optionSets) {
         for (const data of [{ a: 'x' }, { a: 1 }, { a: 7 }, 'nope']) {
-          expect(fn(data, options).valid).toBe(ref.validate(data, schema, options).valid);
+          expect(fn(data, options).valid).toBe(interpreterRun({}, schema, data, undefined, options).valid);
         }
       }
     });

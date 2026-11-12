@@ -239,6 +239,15 @@ export const cases: BenchCase[] = [
     data: { a: 1, b: 'two', c: true, d: 4.5 },
   },
   {
+    name: 'unevaluated-items',
+    schema: {
+      type: 'array',
+      prefixItems: [{ type: 'integer' }, { type: 'string' }],
+      unevaluatedItems: false,
+    },
+    data: [1, 'two'],
+  },
+  {
     // Default options on purpose: with formatAssertions: true, draft 2020-12 treats format as annotation-only.
     name: 'formats',
     schema: {
@@ -278,9 +287,13 @@ export const cases: BenchCase[] = [
   },
   { name: 'schema-object-validate', mode: 'schema-object', schema: flatSchema, data: flatValid },
   {
-    // unevaluatedProperties has no fast-path support, so compile() keeps the interpreter for this schema.
+    // $dynamicRef has no fast-path support, so compile() keeps the interpreter for this schema.
     name: 'fast-path-fallback-flat',
-    schema: { ...flatSchema, unevaluatedProperties: false },
+    schema: {
+      ...flatSchema,
+      $defs: { any: {} },
+      properties: { ...flatSchema.properties, extra: { $dynamicRef: '#/$defs/any' } },
+    },
     data: flatValid,
   },
 ];

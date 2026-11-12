@@ -30,8 +30,10 @@ import {
   compilePattern,
 } from './validation/string.js';
 import { compileConst, compileEnum, compileType } from './validation/type.js';
+import { compileUnevaluatedItems, compileUnevaluatedProperties } from './validation/unevaluated.js';
 
 export type { FastValidator } from './validation/fast-shared.js';
+export { isFastValidatorDisabled } from './validation/fast-shared.js';
 
 // ---------------------------------------------------------------------------
 // $ref
@@ -92,9 +94,9 @@ const KEYWORD_COMPILERS: Record<keyof JsonSchemaAll, KeywordCompiler> = {
   // not implemented
   $dynamicRef: unsupportedKeyword,
   $recursiveRef: unsupportedKeyword,
-  unevaluatedItems: unsupportedKeyword,
-  unevaluatedProperties: unsupportedKeyword,
   // implemented
+  unevaluatedItems: compileUnevaluatedItems,
+  unevaluatedProperties: compileUnevaluatedProperties,
   type: compileType,
   enum: compileEnum,
   const: compileConst,
@@ -251,11 +253,14 @@ export function buildFastValidator(schema: JsonSchemaInternal, ctx: ZSchemaBase)
   const state: DriverState = {
     ctx,
     root: schema,
+    notes: { customFormat: false, rechecks: false },
     memo: new Map<object, FastValidator>(),
     compileChild: (child) => compileNode(state, child),
   };
   try {
-    return compileNode(state, schema);
+    const built = compileNode(state, schema);
+    // A collector would evaluate an impure (custom) check twice, where the interpreter reuses its first result.
+    return state.notes.customFormat && state.notes.rechecks ? undefined : built;
   } catch {
     // The sentinel thrown by unsupported(), or anything unexpected (e.g. a stack overflow on a very deep
     // schema): either way there is no fast validator and the interpreter handles the schema.

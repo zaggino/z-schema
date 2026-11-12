@@ -8,7 +8,7 @@ import { decodeBase64, isValidBase64 } from '../utils/base64.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { unicodeLength } from '../utils/unicode.js';
 import { whatIs } from '../utils/what-is.js';
-import { ALWAYS_FALSE, expectNumber, unsupported } from './fast-shared.js';
+import { ALWAYS_FALSE, disableFastValidator, expectNumber, unsupported } from './fast-shared.js';
 import { assertsContent, isFormatAsserted, shouldSkipValidate, unknownFormatFails } from './shared.js';
 
 // ---------------------------------------------------------------------------
@@ -165,11 +165,29 @@ export function compileFormat(state: BuildState, node: JsonSchemaInternal, check
   }
   const fn = resolveFormatValidator(format, options);
   if (typeof fn === 'function') {
-    // A custom validator may be async (callback or promise based): only built-ins are known sync.
-    if (!isSyncBuiltInFormatValidator(fn)) {
+    if (isSyncBuiltInFormatValidator(fn)) {
+      checks.push((json) => !!fn.call(ctx, json));
+      return;
+    }
+    // callback-based validators are async by construction
+    if (fn.length === 2) {
       unsupported();
     }
-    checks.push((json) => !!fn.call(ctx, json));
+    // an async function is known to return a promise: never invoke it an extra time
+    if (fn.constructor.name === 'AsyncFunction') {
+      unsupported();
+    }
+    state.notes.customFormat = true;
+    // A plain function may still return a promise: that is only known per call, and then the
+    // interpreter has to decide (it also owns the async task bookkeeping).
+    checks.push((json) => {
+      const result: unknown = fn.call(ctx, json);
+      if (result instanceof Promise) {
+        void result.catch(toFalse);
+        return disableFastValidator();
+      }
+      return !!result;
+    });
     return;
   }
   if (unknownFormatFails(options)) {
@@ -251,9 +269,34 @@ export function contentMediaTypeValidator(ctx: ZSchemaBase, report: Report, sche
   }
 }
 
+const parsesAsJson = (text: string): boolean => {
+  try {
+    JSON.parse(text);
+    return true;
+  } catch {
+    return false;
+  }
+};
+const IS_BASE64: Check = (json) => typeof json !== 'string' || isValidBase64(json);
+const IS_JSON: Check = (json) => typeof json !== 'string' || parsesAsJson(json);
+const IS_BASE64_JSON: Check = (json) => {
+  if (typeof json !== 'string') {
+    return true;
+  }
+  const decoded = decodeBase64(json);
+  return decoded !== undefined && parsesAsJson(decoded);
+};
+
 // contentEncoding / contentMediaType only assert on draft-07
-export function compileContent(state: BuildState): void {
-  if (assertsContent(state.ctx.options.version)) {
-    unsupported();
+export function compileContent(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  if (!assertsContent(state.ctx.options.version)) {
+    return;
+  }
+  const isBase64 = node.contentEncoding === 'base64';
+  const isJson = node.contentMediaType === 'application/json';
+  if (isBase64) {
+    checks.push(isJson ? IS_BASE64_JSON : IS_BASE64);
+  } else if (isJson) {
+    checks.push(IS_JSON);
   }
 }

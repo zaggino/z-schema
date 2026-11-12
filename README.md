@@ -4,7 +4,7 @@ Fast, lightweight JSON Schema validator for Node.js and browsers with **full sup
 
 [![NPM](https://nodei.co/npm/z-schema.png?downloads=true&downloadRank=true)](https://www.npmjs.com/package/z-schema)
 
-[![Coverage 93%](https://img.shields.io/badge/coverage-93%25-brightgreen)](docs/test-coverage.md)
+[![Coverage 94%](https://img.shields.io/badge/coverage-94%25-brightgreen)](docs/test-coverage.md)
 
 ## Install
 
