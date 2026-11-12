@@ -1,126 +1,56 @@
 /* eslint-disable vitest/valid-title */
 
-import type { JsonSchema, JsonSchemaVersion } from '../../src/json-schema-versions.ts';
-import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
+import type { SuiteFile } from '../lib/json-schema-test-suite.ts';
 
-import { ZSchema } from '../../src/z-schema.ts';
-
-interface TestSuite {
-  description: string;
-  schema: JsonSchema;
-  tests: Array<{
-    description: string;
-    data: unknown;
-    valid: boolean;
-  }>;
-}
-
-type JSONSchemaTestSuiteTestFolder = 'draft4' | 'draft6' | 'draft7' | 'draft2019-09' | 'draft2020-12';
-
-const VERSION_FOLDER_MAPPING: Partial<Record<JsonSchemaVersion, JSONSchemaTestSuiteTestFolder>> = {
-  'draft-04': 'draft4',
-  'draft-06': 'draft6',
-  'draft-07': 'draft7',
-  'draft2019-09': 'draft2019-09',
-  'draft2020-12': 'draft2020-12',
-};
-
-const excludedDirs: string[] = [];
-const excludedFiles: string[] = [
-  // unknown formats are reported as an error by default
-  // there's ignoreUnknownFormats option that can change this
-  'draft4/optional/format/unknown.json',
-  'draft6/optional/format/unknown.json',
-  'draft7/optional/format/unknown.json',
-  // as far as I'm aware, this can't be fixed without custom json parser
-  'draft4/optional/float-overflow.json',
-  'draft6/optional/float-overflow.json',
-  'draft7/optional/float-overflow.json',
-  'draft2019-09/optional/float-overflow.json',
-  'draft2020-12/optional/float-overflow.json',
-  'draft4/optional/zeroTerminatedFloats.json',
-  // decided to not support this for now, using unsupported drafts should fail
-  'draft7/optional/cross-draft.json',
-];
-const excludedTests: string[] = [];
+import {
+  createCaseValidator,
+  selectCases,
+  suiteFileLabel,
+  suiteTestTitle,
+  SUITE_TESTS_DIR,
+  TESTED_VERSIONS,
+  withDialect,
+} from '../lib/json-schema-test-suite.ts';
 
 export async function runTests({ reader }: { reader: <T>(testFilePath: string) => Promise<T> }) {
   const manifest = await reader<string[]>('/manifest.json');
-  const testsPath = '/json-schema-test-suite/tests';
+  const testsPath = `/json-schema-test-suite/${SUITE_TESTS_DIR}/`;
 
-  const remoteFiles = manifest.filter((f) => f.startsWith('/json-schema-test-suite/remotes'));
-  await Promise.all(
-    remoteFiles.map(async (file) => {
-      // desired serverPath example: http://localhost:1234/draft4/locationIndependentIdentifier.json
-      const serverPath = `http://localhost:1234/${file.slice('/json-schema-test-suite/remotes/'.length)}`;
-      const schema = await reader<JsonSchema>(file);
-      ZSchema.setRemoteReference(serverPath, schema);
-    })
+  // every dialect reads the same files, so they are loaded once, up front
+  const suiteFiles = await Promise.all(
+    manifest
+      .filter((f) => f.startsWith(testsPath))
+      .map(async (testFilePath) => ({
+        file: testFilePath.slice(testsPath.length),
+        suiteFile: await reader<SuiteFile>(testFilePath),
+      }))
   );
 
-  const versionsTested = Object.keys(VERSION_FOLDER_MAPPING) as JsonSchemaVersion[];
-  for (const version of versionsTested) {
+  for (const version of TESTED_VERSIONS) {
     describe(version, () => {
-      const draftPath = `${testsPath}/${VERSION_FOLDER_MAPPING[version]}`;
-      const testFiles = manifest.filter((f) => f.startsWith(draftPath));
-      testFiles.forEach((testFilePath) => {
-        // excludedDirs
-        const file = testFilePath.slice('/json-schema-test-suite/tests/'.length);
-        const fileDir = file.replace(/\/[^/]+$/, '');
-        if (excludedDirs.some((d) => d === fileDir)) {
-          console.warn(`excluded by dir: ${testFilePath}`);
-          return;
+      for (const { file, suiteFile } of suiteFiles) {
+        const suiteCases = selectCases(suiteFile, file, version);
+        // a file may hold nothing for this dialect, and vitest rejects an empty suite
+        if (suiteCases.length === 0) {
+          continue;
         }
 
-        // excludedFiles
-        if (excludedFiles.some((f) => f === file)) {
-          console.warn(`excluded by file: ${testFilePath}`);
-          return;
-        }
-
-        describe(file, async () => {
-          const testSuites = await reader<TestSuite[]>(testFilePath);
-          testSuites.forEach((testSuite) => {
-            const { schema } = testSuite;
-            if (typeof schema !== 'boolean' && !schema.$schema) {
-              if (draftPath.endsWith('/draft4')) {
-                schema.$schema = 'http://json-schema.org/draft-04/schema#';
-              } else if (draftPath.endsWith('/draft6')) {
-                schema.$schema = 'http://json-schema.org/draft-06/schema#';
-              } else if (draftPath.endsWith('/draft7')) {
-                schema.$schema = 'http://json-schema.org/draft-07/schema#';
-              } else if (draftPath.endsWith('/draft2019-09')) {
-                schema.$schema = 'https://json-schema.org/draft/2019-09/schema';
-              } else if (draftPath.endsWith('/draft2020-12')) {
-                schema.$schema = 'https://json-schema.org/draft/2020-12/schema';
-              } else {
-                throw new Error(`no $schema for draft: ${draftPath}`);
-              }
-            }
-            testSuite.tests.forEach((test) => {
-              if (excludedTests.some((t) => t === test.description)) {
-                console.warn(`excluded by test description: ${test.description}`);
-                return;
-              }
-              it([testSuite.description, test.description].join(' '), () => {
-                const validatorOptions: ZSchemaOptions = { version };
-
-                const isModernFormatSuite = file === 'draft2019-09/format.json' || file === 'draft2020-12/format.json';
-                if (isModernFormatSuite) {
-                  validatorOptions.formatAssertions = true;
-                }
-
-                const validator = ZSchema.create(validatorOptions);
+        describe(suiteFileLabel(file, version), () => {
+          for (const suiteCase of suiteCases) {
+            const schema = withDialect(suiteCase.schema, version);
+            for (const test of suiteCase.tests) {
+              it(suiteTestTitle(suiteCase, test), () => {
+                const validator = createCaseValidator(suiteCase, version);
                 const { valid, err } = validator.validateSafe(test.data, schema);
                 expect.soft(valid).toBe(test.valid);
                 if (valid !== test.valid && !valid) {
                   expect(err!.details).toBe(null);
                 }
               });
-            });
-          });
+            }
+          }
         });
-      });
+      }
     });
   }
 }

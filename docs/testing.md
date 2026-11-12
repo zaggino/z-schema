@@ -56,9 +56,15 @@ import { describe, expect, it } from 'vitest';
 
 ## JSON Schema Test Suite
 
-The official [JSON Schema Test Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) is used via `test/spec/json-schema-test-suite.common.ts`. It dynamically loads test cases from `test/public/json-schema-test-suite/`.
+The official [JSON Schema Test Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) is used via `test/spec/json-schema-test-suite.common.ts`. It dynamically loads test cases from `test/public/json-schema-test-suite/validation/tests/`.
 
-- Known-failing or unsupported tests are listed in `excludedFiles` and `excludedTests` arrays in `json-schema-test-suite.common.ts`.
+The suite is one set of files shared by every draft. `test/lib/json-schema-test-suite.ts` turns it into per-draft tests:
+
+- A test case's `compatibility` property says which drafts it applies to; the case runs once for each tested draft it covers. The draft's `$schema` is added to the schema, which the suite leaves out.
+- A test case's `externalSchemas` are registered on the validator created for that test, never globally: the same URI can name different schemas in different cases.
+- A test case tagged `format-assertion` runs with `formatAssertions: null`; one tagged `format-annotation` runs with `formatAssertions: true` on draft 2019-09 / 2020-12 and `false` on older drafts. Untagged cases use the default options.
+- A file is reported per draft as `<draft>/<file>`, e.g. `draft4/type.json` or `draft2020-12/optional/bignum.json`.
+- Known-failing or unsupported tests are listed in `excludedDirs`, `excludedFiles` (by `<draft>/<file>`) and `excludedTests` (by `<case description> <test description>`) in `test/lib/json-schema-test-suite.ts`.
 - When implementing a new draft feature, remove the corresponding entries from these exclusion lists and ensure the tests pass.
 
 ## Legacy Z-Schema Test Suite
