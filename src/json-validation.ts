@@ -656,7 +656,7 @@ export function validate(
     }
   }
 
-  const validationVocabularyEnabled = isValidationVocabularyEnabled(schema, report, ctx.options.version);
+  const validationVocabularyEnabled = isValidationVocabularyEnabled(schema, report.rootSchema, ctx.options.version);
   const keys = validationVocabularyEnabled ? plan.keys : getVocabDisabledKeys(plan);
 
   // type checking first

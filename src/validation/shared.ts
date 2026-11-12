@@ -73,7 +73,7 @@ export const VALIDATION_VOCAB_KEYWORDS = new Set<keyof JsonSchemaAll>([
 
 export const isValidationVocabularyEnabled = (
   schema: JsonSchemaInternal,
-  report: Report,
+  rootSchema: JsonSchemaInternal | boolean | undefined,
   version: JsonSchemaVersion | 'none' | undefined
 ) => {
   if (version !== 'draft2019-09' && version !== 'draft2020-12') {
@@ -81,8 +81,7 @@ export const isValidationVocabularyEnabled = (
   }
 
   const currentSchemaMeta = schema.__$schemaResolved;
-  const rootSchemaMeta =
-    report.rootSchema && typeof report.rootSchema !== 'boolean' ? report.rootSchema.__$schemaResolved : undefined;
+  const rootSchemaMeta = rootSchema && typeof rootSchema !== 'boolean' ? rootSchema.__$schemaResolved : undefined;
   const metaSchema = (currentSchemaMeta || rootSchemaMeta) as JsonSchemaInternal | boolean | undefined;
 
   if (!metaSchema || typeof metaSchema !== 'object' || !isObject(metaSchema.$vocabulary)) {

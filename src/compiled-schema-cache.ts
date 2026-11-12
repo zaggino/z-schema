@@ -1,3 +1,4 @@
+import type { FastValidator } from './fast-validator.js';
 import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
@@ -152,8 +153,11 @@ function sameOptions(snapshot: OptionsSnapshot, snapshotKeyCount: number, option
   return true;
 }
 
-interface CompiledSchemaEntry {
+/** A compiled schema plus the bookkeeping that decides when it is stale. */
+export interface CompiledSchemaEntry {
   schema: JsonSchemaInternal;
+  /** Boolean fast validator: `undefined` = not built yet, `null` = the schema is not supported. */
+  fast?: FastValidator | null;
   generation: number;
   options: OptionsSnapshot;
   optionsKeyCount: number;
@@ -235,6 +239,11 @@ export class CompiledSchemaCache {
    * instance options differ from those at store time) are dropped.
    */
   get(key: string, options: ZSchemaOptions): JsonSchemaInternal | undefined {
+    return this.getEntry(key, options)?.schema;
+  }
+
+  /** Like {@link get}, but returns the whole entry (including the lazily built fast validator). */
+  getEntry(key: string, options: ZSchemaOptions): CompiledSchemaEntry | undefined {
     const entry = this.entries.get(key);
     if (entry === undefined) {
       return undefined;
@@ -243,7 +252,7 @@ export class CompiledSchemaCache {
       entry.generation === globalSchemaStateGeneration &&
       sameOptions(entry.options, entry.optionsKeyCount, options)
     ) {
-      return entry.schema;
+      return entry;
     }
     this.delete(key);
     return undefined;

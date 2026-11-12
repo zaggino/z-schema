@@ -4,7 +4,7 @@ Fast, lightweight JSON Schema validator for Node.js and browsers with **full sup
 
 [![NPM](https://nodei.co/npm/z-schema.png?downloads=true&downloadRank=true)](https://www.npmjs.com/package/z-schema)
 
-[![Coverage 92%](https://img.shields.io/badge/coverage-92%25-brightgreen)](docs/test-coverage.md)
+[![Coverage 93%](https://img.shields.io/badge/coverage-93%25-brightgreen)](docs/test-coverage.md)
 
 ## Install
 
@@ -159,7 +159,7 @@ const validateUser = validator.compile({ type: 'object', required: ['name'] });
 validateUser({ name: 'Alice' }); // true, or throws ValidateError
 ```
 
-See [features](docs/features.md#compile-a-schema-to-a-reusable-function) for details.
+Valid data on supported schemas takes a fast path; results are identical to `validate()`. See [features](docs/features.md#compile-a-schema-to-a-reusable-function) for details.
 
 ### Custom Format Validators
 

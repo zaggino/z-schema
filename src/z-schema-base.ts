@@ -1,3 +1,4 @@
+import type { CompiledSchemaEntry } from './compiled-schema-cache.js';
 import type { Errors } from './errors.js';
 import type { FormatValidatorFn } from './format-validators.js';
 import type { JsonSchema, JsonSchemaInternal, JsonSchemaVersion } from './json-schema-versions.js';
@@ -6,6 +7,7 @@ import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { CompiledSchemaCache, hasUnresolvedRef } from './compiled-schema-cache.js';
 import { getValidateError, toValidateError, ValidateError } from './errors.js';
+import { buildFastValidator } from './fast-validator.js';
 import { getSupportedFormats } from './format-validators.js';
 import { VERSION_SCHEMA_URL_MAPPING } from './json-schema-versions.js';
 import { isInternalKey } from './json-schema.js';
@@ -138,13 +140,39 @@ export class ZSchemaBase {
       throw e;
     }
 
+    // Object schemas: look the compiled schema up before anything is allocated, so data the fast
+    // validator accepts returns without a Report.
+    // A customValidator receives the compiled schema and may mutate it; the uncached path hands
+    // every call a fresh clone, so a shared cached clone would leak mutations. Bypass the cache.
+    let cacheKey: string | undefined;
+    let cached: JsonSchemaInternal | undefined;
+    if (
+      typeof schema !== 'string' &&
+      typeof schema !== 'boolean' &&
+      typeof this.options.customValidator !== 'function'
+    ) {
+      cacheKey = this.compiledSchemaCache.keyOf(schema);
+      const entry = cacheKey === undefined ? undefined : this.compiledSchemaCache.getEntry(cacheKey, this.options);
+      if (entry !== undefined) {
+        // schemaPath validates against a sub-schema, which the root's fast validator says nothing about
+        if (!options.schemaPath && this._fastAccepts(entry, json)) {
+          if (callback === undefined) {
+            return true;
+          }
+          // same completion path, and so the same callback timing, as a validation without errors
+          new Report(this.options, options).processAsyncTasks(this.options.asyncTimeout, callback);
+          return;
+        }
+        cached = entry.schema;
+      }
+    }
+
     let foundError = false;
     const report = new Report(this.options, options);
     report.json = json;
 
     let _schema: JsonSchemaInternal;
     let validated = false;
-    let cacheKey: string | undefined;
     if (typeof schema === 'string') {
       const schemaName = schema;
       _schema = this.scache.getSchema(report, schemaName)!;
@@ -160,19 +188,11 @@ export class ZSchemaBase {
       }
     } else if (typeof schema === 'boolean') {
       _schema = this.scache.getSchema(report, schema)!;
+    } else if (cached) {
+      _schema = cached;
+      validated = true;
     } else {
-      // A customValidator receives the compiled schema and may mutate it; the uncached path hands
-      // every call a fresh clone, so a shared cached clone would leak mutations. Bypass the cache.
-      if (typeof this.options.customValidator !== 'function') {
-        cacheKey = this.compiledSchemaCache.keyOf(schema);
-      }
-      const cached = cacheKey === undefined ? undefined : this.compiledSchemaCache.get(cacheKey, this.options);
-      if (cached) {
-        _schema = cached;
-        validated = true;
-      } else {
-        _schema = this.scache.getSchema(report, schema)!;
-      }
+      _schema = this.scache.getSchema(report, schema)!;
     }
 
     if (!validated && !this._compileAndValidate(report, _schema, cacheKey, options)) {
@@ -304,6 +324,28 @@ export class ZSchemaBase {
       return this._compileSnapshot(schema);
     } catch (error) {
       throw toValidateError(error);
+    }
+  }
+
+  /**
+   * Runs the fast validator of a verified compiled-schema cache entry, building it on first use.
+   * Returns `true` only when it exists and accepts `json`; `false` means "run the interpreter"
+   * (unsupported schema, invalid data, or the fast validator threw).
+   */
+  private _fastAccepts(entry: CompiledSchemaEntry, json: unknown): boolean {
+    let { fast } = entry;
+    if (fast === undefined) {
+      fast = buildFastValidator(entry.schema, this) ?? null;
+      entry.fast = fast;
+    }
+    if (fast === null) {
+      return false;
+    }
+    try {
+      return fast(json);
+    } catch {
+      // the interpreter decides, and reproduces the throw if it is a real one
+      return false;
     }
   }
 
