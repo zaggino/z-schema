@@ -44,7 +44,7 @@ Line coverage status: **high**
 | src/validation/string.ts      |     89% |         89% |       100% |      89% |
 | src/validation/type.ts        |    100% |        100% |       100% |      96% |
 | src/validation/unevaluated.ts |     90% |         91% |        83% |      90% |
-| src/z-schema-base.ts          |     98% |         98% |       100% |      93% |
+| src/z-schema-base.ts          |     98% |         98% |       100% |      94% |
 | src/z-schema-options.ts       |     96% |         96% |       100% |      83% |
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
