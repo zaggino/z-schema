@@ -132,8 +132,7 @@ export class ZSchemaBase {
   ): true | void {
     this.validateOptions = options;
     // Consumed (and always cleared) here, so a hand-off never outlives the validation it was made for.
-    const verified =
-      this.handoffTarget !== undefined && this.handoffTarget === schema ? this.handoffCompiled : undefined;
+    const verified = this.handoffTarget === schema ? this.handoffCompiled : undefined;
     this.handoffTarget = undefined;
     this.handoffCompiled = undefined;
 

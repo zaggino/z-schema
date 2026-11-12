@@ -1,10 +1,8 @@
-import type { JsonSchemaInternal } from './json-schema-versions.js';
-import type { Report } from './report.js';
+import type { JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
-import { isInbuiltFormatValidator, resolveFormatValidator } from './format-validators.js';
+import { isSyncBuiltInFormatValidator, resolveFormatValidator } from './format-validators.js';
 import { isInternalKey } from './json-schema.js';
-import { JsonValidators } from './json-validation.js';
 import { isUniqueArray } from './utils/array.js';
 import { areEqual } from './utils/json.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
@@ -23,46 +21,66 @@ export type FastValidator = (json: unknown) => boolean;
 
 type Check = FastValidator;
 
-/** Keywords the interpreter treats as no-ops (annotations, identifiers, containers that are never traversed). */
-const IGNORABLE_KEYWORDS = new Set<string>([
-  'id',
-  '$id',
-  '$schema',
-  '$anchor',
-  '$defs',
-  'definitions',
-  '$vocabulary',
-  '$dynamicAnchor',
-  'examples',
-  'title',
-  'description',
-  'default',
-  '$recursiveAnchor',
-]);
-
 const ALWAYS_TRUE: FastValidator = () => true;
 const ALWAYS_FALSE: FastValidator = () => false;
 
-/** Everything a keyword compiler needs; `ok` flips to false when a node uses something unsupported. */
+/** Everything a keyword compiler needs. */
 interface BuildState {
   readonly ctx: ZSchemaBase;
   readonly root: JsonSchemaInternal;
   readonly memo: Map<object, FastValidator>;
   readonly eqOpts: { maxDepth: number | undefined };
-  ok: boolean;
 }
 
 type KeywordCompiler = (state: BuildState, node: JsonSchemaInternal, checks: Check[]) => void;
 
-function unsupported(state: BuildState): void {
-  state.ok = false;
+/** Thrown (and caught once, in `buildFastValidator`) when the schema uses anything the builder does not implement. */
+const UNSUPPORTED = new Error('unsupported by the fast validator');
+
+function unsupported(): never {
+  throw UNSUPPORTED;
+}
+
+/** A numeric keyword value, or the build is unsupported. */
+function num(value: unknown): number {
+  if (typeof value !== 'number') {
+    unsupported();
+  }
+  return value;
+}
+
+/** An array keyword value, or the build is unsupported. */
+function list(value: unknown): unknown[] {
+  if (!Array.isArray(value)) {
+    unsupported();
+  }
+  return value;
+}
+
+/** An array of strings, or the build is unsupported. */
+function stringArray(value: unknown): string[] {
+  const items = list(value);
+  for (let i = 0; i < items.length; i++) {
+    if (typeof items[i] !== 'string') {
+      unsupported();
+    }
+  }
+  return items as string[];
+}
+
+/** A plain-object keyword value, or the build is unsupported. */
+function record(value: unknown): Record<string, unknown> {
+  if (!isObject(value)) {
+    unsupported();
+  }
+  return value as Record<string, unknown>;
 }
 
 // ---------------------------------------------------------------------------
 // type / enum / const
 // ---------------------------------------------------------------------------
 
-function compileType(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+function compileType(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
   const { type } = node;
   if (typeof type === 'string') {
     if (type === 'number') {
@@ -82,16 +100,12 @@ function compileType(state: BuildState, node: JsonSchemaInternal, checks: Check[
       return types.includes(jsonType) || (jsonType === 'integer' && allowsNumber);
     });
   } else {
-    unsupported(state);
+    unsupported();
   }
 }
 
 function compileEnum(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const values = node.enum as unknown;
-  if (!Array.isArray(values)) {
-    unsupported(state);
-    return;
-  }
+  const values = list(node.enum);
   const { eqOpts } = state;
   checks.push((json) => {
     for (let i = 0; i < values.length; i++) {
@@ -113,12 +127,8 @@ function compileConst(state: BuildState, node: JsonSchemaInternal, checks: Check
 // numeric
 // ---------------------------------------------------------------------------
 
-function compileMinimum(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const { minimum } = node;
-  if (typeof minimum !== 'number') {
-    unsupported(state);
-    return;
-  }
+function compileMinimum(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const minimum = num(node.minimum);
   // Negated comparisons, exactly as the interpreter's error conditions, so NaN passes in both.
   if (node.exclusiveMinimum === true) {
     checks.push((json) => typeof json !== 'number' || !(json <= minimum));
@@ -127,12 +137,8 @@ function compileMinimum(state: BuildState, node: JsonSchemaInternal, checks: Che
   }
 }
 
-function compileMaximum(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const { maximum } = node;
-  if (typeof maximum !== 'number') {
-    unsupported(state);
-    return;
-  }
+function compileMaximum(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const maximum = num(node.maximum);
   if (node.exclusiveMaximum === true) {
     checks.push((json) => typeof json !== 'number' || !(json >= maximum));
   } else {
@@ -155,12 +161,8 @@ function compileExclusiveMaximum(_state: BuildState, node: JsonSchemaInternal, c
   }
 }
 
-function compileMultipleOf(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const { multipleOf } = node;
-  if (typeof multipleOf !== 'number') {
-    unsupported(state);
-    return;
-  }
+function compileMultipleOf(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const multipleOf = num(node.multipleOf);
   checks.push((json) => typeof json !== 'number' || isMultipleOf(json, multipleOf));
 }
 
@@ -168,34 +170,24 @@ function compileMultipleOf(state: BuildState, node: JsonSchemaInternal, checks: 
 // string
 // ---------------------------------------------------------------------------
 
-function compileMinLength(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const { minLength } = node;
-  if (typeof minLength !== 'number') {
-    unsupported(state);
-    return;
-  }
+function compileMinLength(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const minLength = num(node.minLength);
   checks.push((json) => typeof json !== 'string' || !(unicodeLength(json) < minLength));
 }
 
-function compileMaxLength(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const { maxLength } = node;
-  if (typeof maxLength !== 'number') {
-    unsupported(state);
-    return;
-  }
+function compileMaxLength(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const maxLength = num(node.maxLength);
   checks.push((json) => typeof json !== 'string' || !(unicodeLength(json) > maxLength));
 }
 
-function compilePattern(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+function compilePattern(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
   const { pattern } = node;
   if (typeof pattern !== 'string') {
-    unsupported(state);
-    return;
+    unsupported();
   }
   const result = compileSchemaRegex(pattern);
   if (!result.ok) {
-    unsupported(state);
-    return;
+    unsupported();
   }
   const re = result.value;
   checks.push((json) => typeof json !== 'string' || re.test(json));
@@ -206,8 +198,7 @@ function compileFormat(state: BuildState, node: JsonSchemaInternal, checks: Chec
   const { options } = ctx;
   const { format } = node;
   if (typeof format !== 'string') {
-    unsupported(state);
-    return;
+    unsupported();
   }
   if (options.formatAssertions === false) {
     return;
@@ -218,9 +209,8 @@ function compileFormat(state: BuildState, node: JsonSchemaInternal, checks: Chec
   const fn = resolveFormatValidator(format, options);
   if (typeof fn === 'function') {
     // A custom validator may be async (callback or promise based): only built-ins are known sync.
-    if (!isInbuiltFormatValidator(fn)) {
-      unsupported(state);
-      return;
+    if (!isSyncBuiltInFormatValidator(fn)) {
+      unsupported();
     }
     checks.push((json) => !!fn.call(ctx, json));
     return;
@@ -237,36 +227,8 @@ function compileFormat(state: BuildState, node: JsonSchemaInternal, checks: Chec
 type RawNode = Record<string, unknown>;
 
 /** Compiles a child schema; a child that cannot be compiled makes the whole build unsupported. */
-function compileChild(state: BuildState, child: unknown): FastValidator | undefined {
-  const built = compileNode(state, child, false);
-  if (built === undefined) {
-    state.ok = false;
-  }
-  return built;
-}
-
-/** Keywords that are no-ops on their own because a sibling keyword's compiler already covers them. */
-function compileHandled(): void {
-  // intentionally empty
-}
-
-/** True when `key` is the first key of `node` that belongs to `group`, so a group compiles once per node. */
-function isFirstOfGroup(node: JsonSchemaInternal, group: ReadonlySet<string>, key: string): boolean {
-  const keys = Object.keys(node);
-  for (let i = 0; i < keys.length; i++) {
-    if (group.has(keys[i])) {
-      return keys[i] === key;
-    }
-  }
-  return false;
-}
-
-function once(group: ReadonlySet<string>, key: string, compile: KeywordCompiler): KeywordCompiler {
-  return (state, node, checks) => {
-    if (isFirstOfGroup(node, group, key)) {
-      compile(state, node, checks);
-    }
-  };
+function compileChild(state: BuildState, child: unknown): FastValidator {
+  return compileNode(state, child, false);
 }
 
 // ---------------------------------------------------------------------------
@@ -274,23 +236,14 @@ function once(group: ReadonlySet<string>, key: string, compile: KeywordCompiler)
 // ---------------------------------------------------------------------------
 
 const DRAFT_2020_12_SCHEMA_URI = 'https://json-schema.org/draft/2020-12/schema';
-const ARRAY_ITEM_KEYS: ReadonlySet<string> = new Set(['items', 'prefixItems', 'additionalItems']);
 
-function compileMinItems(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const { minItems } = node;
-  if (typeof minItems !== 'number') {
-    unsupported(state);
-    return;
-  }
+function compileMinItems(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const minItems = num(node.minItems);
   checks.push((json) => !Array.isArray(json) || !(json.length < minItems));
 }
 
-function compileMaxItems(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const { maxItems } = node;
-  if (typeof maxItems !== 'number') {
-    unsupported(state);
-    return;
-  }
+function compileMaxItems(_state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const maxItems = num(node.maxItems);
   checks.push((json) => !Array.isArray(json) || !(json.length > maxItems));
 }
 
@@ -336,19 +289,12 @@ function compileItemKeywords(state: BuildState, node: JsonSchemaInternal, checks
   const headChecks: Check[] = [];
   if (head !== undefined) {
     for (let i = 0; i < head.length; i++) {
-      const built = compileChild(state, head[i]);
-      if (built === undefined) {
-        return;
-      }
-      headChecks.push(built);
+      headChecks.push(compileChild(state, head[i]));
     }
   }
   let tailCheck: Check | undefined;
   if (tail !== undefined) {
     tailCheck = compileChild(state, tail);
-    if (tailCheck === undefined) {
-      return;
-    }
     if (tailCheck === ALWAYS_TRUE) {
       tailCheck = undefined;
     }
@@ -403,9 +349,6 @@ function compileContains(state: BuildState, node: JsonSchemaInternal, checks: Ch
     return;
   }
   const each = compileChild(state, raw.contains);
-  if (each === undefined) {
-    return;
-  }
   const { version } = state.ctx.options;
   const supportsBounds = version === 'draft2019-09' || version === 'draft2020-12';
   const min = supportsBounds && typeof raw.minContains === 'number' ? raw.minContains : 1;
@@ -455,29 +398,34 @@ type ObjectInstance = Record<string, unknown>;
 /** A check on an object instance that also receives its `Object.keys`, computed once per node visit. */
 type KeysCheck = (json: ObjectInstance, keys: string[]) => boolean;
 
-const OBJECT_KEYS: ReadonlySet<string> = new Set([
-  'properties',
-  'patternProperties',
-  'additionalProperties',
-  'required',
-  'minProperties',
-  'maxProperties',
-  'dependencies',
-  'dependentRequired',
-  'dependentSchemas',
-  'propertyNames',
-]);
+// Object checks receive `json` only after the caller has established it is a non-null, non-array object.
 
-function compileRequiredCheck(state: BuildState, node: RawNode, plain: Check[]): void {
+/** If `name` is present, every name in `names` must be present. */
+function requiresAll(name: string, names: string[]): Check {
+  return (json) => {
+    if (!Object.hasOwn(json as object, name)) {
+      return true;
+    }
+    for (let i = 0; i < names.length; i++) {
+      if (!Object.hasOwn(json as object, names[i])) {
+        return false;
+      }
+    }
+    return true;
+  };
+}
+
+/** If `name` is present, `check` must pass on the whole object. */
+function whenPresent(name: string, check: Check): Check {
+  return (json) => !Object.hasOwn(json as object, name) || check(json);
+}
+
+function compileRequiredCheck(node: RawNode, plain: Check[]): void {
   const { required } = node;
   if (required === undefined) {
     return;
   }
-  if (!Array.isArray(required)) {
-    unsupported(state);
-    return;
-  }
-  const names = required as string[];
+  const names = stringArray(required);
   const count = names.length;
   if (count === 0) {
     return;
@@ -492,21 +440,14 @@ function compileRequiredCheck(state: BuildState, node: RawNode, plain: Check[]):
   });
 }
 
-function compilePropertyCounts(state: BuildState, node: RawNode, withKeys: KeysCheck[]): void {
-  const { minProperties, maxProperties } = node;
-  if (minProperties !== undefined) {
-    if (typeof minProperties !== 'number') {
-      unsupported(state);
-      return;
-    }
-    withKeys.push((_json, keys) => !(keys.length < minProperties));
+function compilePropertyCounts(node: RawNode, withKeys: KeysCheck[]): void {
+  if (node.minProperties !== undefined) {
+    const min = num(node.minProperties);
+    withKeys.push((_json, keys) => !(keys.length < min));
   }
-  if (maxProperties !== undefined) {
-    if (typeof maxProperties !== 'number') {
-      unsupported(state);
-      return;
-    }
-    withKeys.push((_json, keys) => !(keys.length > maxProperties));
+  if (node.maxProperties !== undefined) {
+    const max = num(node.maxProperties);
+    withKeys.push((_json, keys) => !(keys.length > max));
   }
 }
 
@@ -517,9 +458,6 @@ function compilePropertyTraversal(state: BuildState, node: RawNode, withKeys: Ke
   let additional: Check | undefined;
   if (additionalProperties !== undefined && additionalProperties !== true && additionalProperties !== false) {
     additional = compileChild(state, additionalProperties);
-    if (additional === undefined) {
-      return;
-    }
     if (additional === ALWAYS_TRUE) {
       additional = undefined;
     }
@@ -529,16 +467,10 @@ function compilePropertyTraversal(state: BuildState, node: RawNode, withKeys: Ke
 
   let propertyChecks: Map<string, Check> | undefined;
   if (properties !== undefined) {
-    if (!isObject(properties)) {
-      unsupported(state);
-      return;
-    }
-    const names = Object.keys(properties);
+    const props = record(properties);
+    const names = Object.keys(props);
     for (let i = 0; i < names.length; i++) {
-      const built = compileChild(state, properties[names[i]]);
-      if (built === undefined) {
-        return;
-      }
+      const built = compileChild(state, props[names[i]]);
       if (built !== ALWAYS_TRUE || needsUnmatched) {
         propertyChecks ??= new Map<string, Check>();
         propertyChecks.set(names[i], built);
@@ -549,20 +481,14 @@ function compilePropertyTraversal(state: BuildState, node: RawNode, withKeys: Ke
   const patterns: RegExp[] = [];
   const patternChecks: Check[] = [];
   if (patternProperties !== undefined) {
-    if (!isObject(patternProperties)) {
-      unsupported(state);
-      return;
-    }
-    const sources = Object.keys(patternProperties);
+    const patternSchemas = record(patternProperties);
+    const sources = Object.keys(patternSchemas);
     for (let i = 0; i < sources.length; i++) {
       const compiled = compileSchemaRegex(sources[i]);
       if (!compiled.ok) {
         continue; // skipped by the interpreter too
       }
-      const built = compileChild(state, patternProperties[sources[i]]);
-      if (built === undefined) {
-        return;
-      }
+      const built = compileChild(state, patternSchemas[sources[i]]);
       if (built !== ALWAYS_TRUE || needsUnmatched) {
         patterns.push(compiled.value);
         patternChecks.push(built);
@@ -570,11 +496,8 @@ function compilePropertyTraversal(state: BuildState, node: RawNode, withKeys: Ke
     }
   }
 
-  const { assumeAdditional } = state.ctx.options;
-  const assumed =
-    forbidAdditional && Array.isArray(assumeAdditional) && assumeAdditional.length > 0
-      ? new Set<unknown>(assumeAdditional)
-      : undefined;
+  // The options object is read at call time, like the interpreter does, so in-place edits of the array are honoured.
+  const { options } = state.ctx;
   const patternCount = patterns.length;
   if (propertyChecks === undefined && patternCount === 0 && !needsUnmatched) {
     return;
@@ -606,8 +529,11 @@ function compilePropertyTraversal(state: BuildState, node: RawNode, withKeys: Ke
           if (!additional(value)) {
             return false;
           }
-        } else if (forbidAdditional && (assumed === undefined || !assumed.has(key))) {
-          return false;
+        } else if (forbidAdditional) {
+          const assumed = options.assumeAdditional;
+          if (!Array.isArray(assumed) || !assumed.includes(key)) {
+            return false;
+          }
         }
       }
     }
@@ -620,34 +546,16 @@ function compileDependencies(state: BuildState, node: RawNode, plain: Check[]): 
   if (dependencies === undefined) {
     return;
   }
-  if (!isObject(dependencies)) {
-    unsupported(state);
-    return;
-  }
-  const names = Object.keys(dependencies);
+  const definitions = record(dependencies);
+  const names = Object.keys(definitions);
   for (let i = 0; i < names.length; i++) {
     const name = names[i];
-    const definition = dependencies[name] as unknown;
-    if (Array.isArray(definition)) {
-      const required = definition as string[];
-      plain.push((json) => {
-        if (!Object.hasOwn(json as object, name)) {
-          return true;
-        }
-        for (let j = 0; j < required.length; j++) {
-          if (!Object.hasOwn(json as object, required[j])) {
-            return false;
-          }
-        }
-        return true;
-      });
-    } else {
-      const built = compileChild(state, definition);
-      if (built === undefined) {
-        return;
-      }
-      plain.push((json) => !Object.hasOwn(json as object, name) || built(json));
-    }
+    const definition = definitions[name];
+    plain.push(
+      Array.isArray(definition)
+        ? requiresAll(name, stringArray(definition))
+        : whenPresent(name, compileChild(state, definition))
+    );
   }
 }
 
@@ -659,34 +567,17 @@ function compileDependentKeywords(state: BuildState, node: RawNode, plain: Check
   if (isObject(dependentRequired)) {
     const names = Object.keys(dependentRequired);
     for (let i = 0; i < names.length; i++) {
-      const name = names[i];
-      const required = dependentRequired[name] as unknown;
-      if (!Array.isArray(required)) {
-        continue;
+      const required = dependentRequired[names[i]] as unknown;
+      // like the interpreter, a value that is not an array is skipped
+      if (Array.isArray(required)) {
+        plain.push(requiresAll(names[i], stringArray(required)));
       }
-      const list = required as string[];
-      plain.push((json) => {
-        if (!Object.hasOwn(json as object, name)) {
-          return true;
-        }
-        for (let j = 0; j < list.length; j++) {
-          if (!Object.hasOwn(json as object, list[j])) {
-            return false;
-          }
-        }
-        return true;
-      });
     }
   }
   if (isObject(dependentSchemas)) {
     const names = Object.keys(dependentSchemas);
     for (let i = 0; i < names.length; i++) {
-      const name = names[i];
-      const built = compileChild(state, dependentSchemas[name]);
-      if (built === undefined) {
-        return;
-      }
-      plain.push((json) => !Object.hasOwn(json as object, name) || built(json));
+      plain.push(whenPresent(names[i], compileChild(state, dependentSchemas[names[i]])));
     }
   }
 }
@@ -696,7 +587,7 @@ function compilePropertyNames(state: BuildState, node: RawNode, withKeys: KeysCh
     return;
   }
   const each = compileChild(state, node.propertyNames);
-  if (each === undefined || each === ALWAYS_TRUE) {
+  if (each === ALWAYS_TRUE) {
     return;
   }
   withKeys.push((_json, keys) => {
@@ -714,15 +605,12 @@ function compileObjectKeywords(state: BuildState, node: JsonSchemaInternal, chec
   const raw = node as unknown as RawNode;
   const plain: Check[] = [];
   const withKeys: KeysCheck[] = [];
-  compileRequiredCheck(state, raw, plain);
+  compileRequiredCheck(raw, plain);
   compileDependencies(state, raw, plain);
   compileDependentKeywords(state, raw, plain);
-  compilePropertyCounts(state, raw, withKeys);
+  compilePropertyCounts(raw, withKeys);
   compilePropertyTraversal(state, raw, withKeys);
   compilePropertyNames(state, raw, withKeys);
-  if (!state.ok) {
-    return;
-  }
   const plainCount = plain.length;
   const keyedCount = withKeys.length;
   if (plainCount === 0 && keyedCount === 0) {
@@ -765,28 +653,18 @@ function compileObjectKeywords(state: BuildState, node: JsonSchemaInternal, chec
 // combinators
 // ---------------------------------------------------------------------------
 
-/** Compiles every member of a combinator array; `undefined` when it is not an array or a member is unsupported. */
-function compileMembers(state: BuildState, list: unknown): Check[] | undefined {
-  if (!Array.isArray(list)) {
-    unsupported(state);
-    return undefined;
-  }
+/** Compiles every member of a combinator array; the build is unsupported when the value is not an array. */
+function compileMembers(state: BuildState, value: unknown): Check[] {
+  const schemas = list(value);
   const members: Check[] = [];
-  for (let i = 0; i < list.length; i++) {
-    const built = compileChild(state, list[i]);
-    if (built === undefined) {
-      return undefined;
-    }
-    members.push(built);
+  for (let i = 0; i < schemas.length; i++) {
+    members.push(compileChild(state, schemas[i]));
   }
   return members;
 }
 
 function compileAllOf(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
   const members = compileMembers(state, node.allOf);
-  if (members === undefined) {
-    return;
-  }
   for (let i = 0; i < members.length; i++) {
     if (members[i] !== ALWAYS_TRUE) {
       checks.push(members[i]);
@@ -796,9 +674,6 @@ function compileAllOf(state: BuildState, node: JsonSchemaInternal, checks: Check
 
 function compileAnyOf(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
   const members = compileMembers(state, node.anyOf);
-  if (members === undefined) {
-    return;
-  }
   const count = members.length;
   if (count === 0) {
     checks.push(ALWAYS_FALSE);
@@ -825,9 +700,6 @@ function compileAnyOf(state: BuildState, node: JsonSchemaInternal, checks: Check
 
 function compileOneOf(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
   const members = compileMembers(state, node.oneOf);
-  if (members === undefined) {
-    return;
-  }
   const count = members.length;
   if (count === 0) {
     checks.push(ALWAYS_FALSE);
@@ -850,9 +722,6 @@ function compileOneOf(state: BuildState, node: JsonSchemaInternal, checks: Check
 
 function compileNot(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
   const inner = compileChild(state, node.not);
-  if (inner === undefined) {
-    return;
-  }
   checks.push((json) => !inner(json));
 }
 
@@ -867,14 +736,8 @@ function compileIf(state: BuildState, node: JsonSchemaInternal, checks: Check[])
     return;
   }
   const condition = compileChild(state, raw.if);
-  if (condition === undefined) {
-    return;
-  }
   const onThen = thenSchema === undefined ? ALWAYS_TRUE : compileChild(state, thenSchema);
   const onElse = elseSchema === undefined ? ALWAYS_TRUE : compileChild(state, elseSchema);
-  if (onThen === undefined || onElse === undefined) {
-    return;
-  }
   checks.push((json) => (condition(json) ? onThen(json) : onElse(json)));
 }
 
@@ -889,11 +752,10 @@ function compileRef(state: BuildState, node: JsonSchemaInternal, checks: Check[]
   }
   const target = node.__$refResolved as unknown;
   if (target === undefined) {
-    unsupported(state);
-    return;
+    unsupported();
   }
   const built = compileChild(state, target);
-  if (built !== undefined && built !== ALWAYS_TRUE) {
+  if (built !== ALWAYS_TRUE) {
     checks.push(built);
   }
 }
@@ -901,7 +763,7 @@ function compileRef(state: BuildState, node: JsonSchemaInternal, checks: Check[]
 // contentEncoding / contentMediaType only assert on draft-07
 function compileContent(state: BuildState): void {
   if (state.ctx.options.version === 'draft-07') {
-    unsupported(state);
+    unsupported();
   }
 }
 
@@ -909,8 +771,45 @@ function compileContent(state: BuildState): void {
 // keyword table
 // ---------------------------------------------------------------------------
 
-/** Keywords this builder implements. Any other validator-bearing keyword makes the whole schema unsupported. */
-const KEYWORD_COMPILERS: Record<string, KeywordCompiler> = {
+/** Keywords the interpreter treats as no-ops, or that a sibling keyword's compiler already covers. */
+const ignored: KeywordCompiler = () => {
+  // intentionally empty
+};
+
+/** Keywords the builder does not implement: a schema using one has no fast validator. */
+const unsupportedKeyword: KeywordCompiler = () => unsupported();
+
+/**
+ * Every keyword of the schema type and how the builder treats it; the source of truth for what is supported.
+ * Exhaustive on purpose: a keyword added to the schema type must be classified here. Keywords of one group share
+ * a compiler, which `compileNode` runs once per node.
+ */
+const KEYWORD_COMPILERS: Record<keyof JsonSchemaAll, KeywordCompiler> = {
+  // identifiers, annotations and containers that are never traversed
+  id: ignored,
+  $id: ignored,
+  $schema: ignored,
+  $anchor: ignored,
+  $defs: ignored,
+  definitions: ignored,
+  $vocabulary: ignored,
+  $dynamicAnchor: ignored,
+  $recursiveAnchor: ignored,
+  examples: ignored,
+  title: ignored,
+  description: ignored,
+  default: ignored,
+  // covered by their sibling keywords
+  minContains: ignored,
+  maxContains: ignored,
+  then: ignored,
+  else: ignored,
+  // not implemented
+  $dynamicRef: unsupportedKeyword,
+  $recursiveRef: unsupportedKeyword,
+  unevaluatedItems: unsupportedKeyword,
+  unevaluatedProperties: unsupportedKeyword,
+  // implemented
   type: compileType,
   enum: compileEnum,
   const: compileConst,
@@ -926,29 +825,25 @@ const KEYWORD_COMPILERS: Record<string, KeywordCompiler> = {
   minItems: compileMinItems,
   maxItems: compileMaxItems,
   uniqueItems: compileUniqueItems,
-  items: once(ARRAY_ITEM_KEYS, 'items', compileItemKeywords),
-  prefixItems: once(ARRAY_ITEM_KEYS, 'prefixItems', compileItemKeywords),
-  additionalItems: once(ARRAY_ITEM_KEYS, 'additionalItems', compileItemKeywords),
+  items: compileItemKeywords,
+  prefixItems: compileItemKeywords,
+  additionalItems: compileItemKeywords,
   contains: compileContains,
-  minContains: compileHandled,
-  maxContains: compileHandled,
-  properties: once(OBJECT_KEYS, 'properties', compileObjectKeywords),
-  patternProperties: once(OBJECT_KEYS, 'patternProperties', compileObjectKeywords),
-  additionalProperties: once(OBJECT_KEYS, 'additionalProperties', compileObjectKeywords),
-  required: once(OBJECT_KEYS, 'required', compileObjectKeywords),
-  minProperties: once(OBJECT_KEYS, 'minProperties', compileObjectKeywords),
-  maxProperties: once(OBJECT_KEYS, 'maxProperties', compileObjectKeywords),
-  dependencies: once(OBJECT_KEYS, 'dependencies', compileObjectKeywords),
-  dependentRequired: once(OBJECT_KEYS, 'dependentRequired', compileObjectKeywords),
-  dependentSchemas: once(OBJECT_KEYS, 'dependentSchemas', compileObjectKeywords),
-  propertyNames: once(OBJECT_KEYS, 'propertyNames', compileObjectKeywords),
+  properties: compileObjectKeywords,
+  patternProperties: compileObjectKeywords,
+  additionalProperties: compileObjectKeywords,
+  required: compileObjectKeywords,
+  minProperties: compileObjectKeywords,
+  maxProperties: compileObjectKeywords,
+  dependencies: compileObjectKeywords,
+  dependentRequired: compileObjectKeywords,
+  dependentSchemas: compileObjectKeywords,
+  propertyNames: compileObjectKeywords,
   allOf: compileAllOf,
   anyOf: compileAnyOf,
   oneOf: compileOneOf,
   not: compileNot,
   if: compileIf,
-  then: compileHandled,
-  else: compileHandled,
   $ref: compileRef,
   contentEncoding: compileContent,
   contentMediaType: compileContent,
@@ -992,7 +887,7 @@ function combine(checks: Check[]): FastValidator {
   };
 }
 
-function compileNode(state: BuildState, node: unknown, isRoot: boolean): FastValidator | undefined {
+function compileNode(state: BuildState, node: unknown, isRoot: boolean): FastValidator {
   if (node === true) {
     return ALWAYS_TRUE;
   }
@@ -1000,7 +895,7 @@ function compileNode(state: BuildState, node: unknown, isRoot: boolean): FastVal
     return ALWAYS_FALSE;
   }
   if (typeof node !== 'object' || node === null || Array.isArray(node)) {
-    return undefined;
+    return unsupported();
   }
   const schema = node as JsonSchemaInternal;
   const known = state.memo.get(schema);
@@ -1012,47 +907,40 @@ function compileNode(state: BuildState, node: unknown, isRoot: boolean): FastVal
   state.memo.set(schema, (json) => slot.fn(json));
 
   // The interpreter evaluates the vocabulary per node against the validation's root schema.
-  if (
-    !isRoot &&
-    !isValidationVocabularyEnabled(schema, { rootSchema: state.root } as Report, state.ctx.options.version)
-  ) {
-    state.ok = false;
-    return undefined;
+  if (!isRoot && !isValidationVocabularyEnabled(schema, state.root, state.ctx.options.version)) {
+    return unsupported();
   }
 
   if (schema.$ref && !isModernDraft(state.ctx.options.version)) {
     // siblings of a legacy $ref are ignored: only the final target of the chain is validated
     const target = followLegacyRef(schema);
-    const built = target === undefined ? undefined : compileChild(state, target);
-    if (built === undefined) {
-      state.ok = false;
-      return undefined;
+    if (target === undefined) {
+      return unsupported();
     }
+    const built = compileChild(state, target);
     slot.fn = built;
     state.memo.set(schema, built);
     return built;
   }
 
   const checks: Check[] = [];
+  const compiled: KeywordCompiler[] = [];
   const keys = Object.keys(schema);
-  for (let i = 0; i < keys.length && state.ok; i++) {
+  for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    if (isInternalKey(key) || !Object.hasOwn(JsonValidators, key)) {
+    if (isInternalKey(key) || !Object.hasOwn(KEYWORD_COMPILERS, key)) {
       continue; // internal bookkeeping, or an unknown keyword (ignored by the interpreter too)
     }
     // a non-root node may declare only the root's own dialect (e.g. a remote schema stamped on compile)
     if (key === '$schema' && !isRoot && schema.$schema !== state.root.$schema) {
-      state.ok = false;
-    } else if (IGNORABLE_KEYWORDS.has(key)) {
-      continue;
-    } else if (Object.hasOwn(KEYWORD_COMPILERS, key)) {
-      KEYWORD_COMPILERS[key](state, schema, checks);
-    } else {
-      state.ok = false;
+      return unsupported();
     }
-  }
-  if (!state.ok) {
-    return undefined;
+    const compile = KEYWORD_COMPILERS[key as keyof JsonSchemaAll];
+    // keywords of one group share a compiler; checks are ANDed and pure, so each runs once, in any order
+    if (compile !== ignored && !compiled.includes(compile)) {
+      compiled.push(compile);
+      compile(state, schema, checks);
+    }
   }
   const built = combine(checks);
   slot.fn = built;
@@ -1065,13 +953,14 @@ function compileNode(state: BuildState, node: unknown, isRoot: boolean): FastVal
  * uses anything the builder does not implement. For a schema it accepts, the result agrees with the
  * interpreter's validity for every input; it never produces error details.
  * @param schema - The compiled schema root held by the compiled-schema cache.
- * @param ctx - The validator whose options (read at build time only) the schema was compiled under.
+ * @param ctx - The validator whose options the schema was compiled under. Options are read at build time,
+ * except `assumeAdditional`, which is read on every call.
  */
 export function buildFastValidator(schema: JsonSchemaInternal, ctx: ZSchemaBase): FastValidator | undefined {
   if (typeof ctx.options.customValidator === 'function') {
     return undefined;
   }
-  if (!isValidationVocabularyEnabled(schema, { rootSchema: schema } as Report, ctx.options.version)) {
+  if (!isValidationVocabularyEnabled(schema, schema, ctx.options.version)) {
     return undefined;
   }
   const state: BuildState = {
@@ -1079,7 +968,12 @@ export function buildFastValidator(schema: JsonSchemaInternal, ctx: ZSchemaBase)
     root: schema,
     memo: new Map<object, FastValidator>(),
     eqOpts: { maxDepth: ctx.options.maxRecursionDepth },
-    ok: true,
   };
-  return compileNode(state, schema, true);
+  try {
+    return compileNode(state, schema, true);
+  } catch {
+    // The sentinel thrown by unsupported(), or anything unexpected (e.g. a stack overflow on a very deep
+    // schema): either way there is no fast validator and the interpreter handles the schema.
+    return undefined;
+  }
 }

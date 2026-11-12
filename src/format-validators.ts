@@ -372,8 +372,8 @@ const inbuiltValidators: Record<string, FormatValidatorFn> = {
 
 const inbuiltValidatorFns = new Set<FormatValidatorFn>(Object.values(inbuiltValidators));
 
-/** Returns true if `fn` is one of the built-in (synchronous) format validators. */
-export function isInbuiltFormatValidator(fn: FormatValidatorFn): boolean {
+/** Returns true if `fn` is a known synchronous validator, i.e. one of the built-in format validators. */
+export function isSyncBuiltInFormatValidator(fn: FormatValidatorFn): boolean {
   return inbuiltValidatorFns.has(fn);
 }
 

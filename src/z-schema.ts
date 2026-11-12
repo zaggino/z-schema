@@ -204,8 +204,12 @@ export class ZSchema extends ZSchemaBase {
    * meta-validated eagerly. Calling the returned function is equivalent to
    * `validate(json, snapshot, options)` — same results, `$ref` resolution and cache invalidation — but
    * skips the per-call serialization that keys an object schema in the compiled-schema cache, so it is
-   * faster on hot paths. Valid data may be accepted by a specialised check that skips the full validation;
-   * anything else runs the normal validation, so results and errors are unchanged. Boolean schemas are supported (`false` always fails with `SCHEMA_IS_FALSE`).
+   * faster on hot paths.
+   *
+   * For a supported schema, valid data is accepted by a boolean check that builds no validation report;
+   * everything else runs the normal validation, so results and errors are unchanged.
+   *
+   * Boolean schemas are supported (`false` always fails with `SCHEMA_IS_FALSE`).
    * @param schema - The schema to compile.
    * @returns A function `(json, options?)` that returns `true` or throws {@link ValidateError}.
    * @throws {@link ValidateError} if the schema is invalid. Every variant throws here, including the safe
