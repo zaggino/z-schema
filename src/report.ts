@@ -185,8 +185,8 @@ class PendingError implements SchemaErrorDetail {
   }
 
   /**
-   * Builds (once) the plain error detail. May throw while formatting params, exactly as the
-   * pre-deferral eager construction did.
+   * Builds (once) the plain error detail. May throw while formatting params (circular objects,
+   * BigInt inside an object), exactly as the pre-deferral eager construction did.
    */
   materialize(): SchemaErrorDetail {
     if (this.detail === undefined) {
@@ -200,7 +200,7 @@ class PendingError implements SchemaErrorDetail {
     let { errorMessage } = this;
     for (let idx = 0; idx < params.length; idx++) {
       const param = params[idx] === null || isObject(params[idx]) ? JSON.stringify(params[idx]) : params[idx];
-      errorMessage = errorMessage.replace(`{${idx}}`, param.toString());
+      errorMessage = errorMessage.replace(`{${idx}}`, param === undefined ? 'undefined' : param.toString());
     }
 
     const { schema } = this;
@@ -255,12 +255,12 @@ function materializeEntries(entries: SchemaErrorDetail[]): SchemaErrorDetail[] {
 }
 
 /**
- * True when formatting `params` into a message cannot throw (string, number, boolean, null).
+ * True when formatting `params` into a message cannot throw (string, number, boolean, null, undefined).
  */
 function areParamsSafe(params: ErrorParam[]): boolean {
   for (let i = 0; i < params.length; i++) {
     const p = params[i] as unknown;
-    if (p !== null && typeof p !== 'string' && typeof p !== 'number' && typeof p !== 'boolean') {
+    if (p !== null && p !== undefined && typeof p !== 'string' && typeof p !== 'number' && typeof p !== 'boolean') {
       return false;
     }
   }
@@ -558,8 +558,8 @@ export class Report {
 
     params ||= [];
 
-    // Formatting params into the message can throw for exotic values (undefined, circular objects,
-    // BigInt, symbols). Eager reports always threw at that point, before the excludeErrors check,
+    // Formatting params into the message can throw for exotic values (circular objects, BigInt,
+    // values with a throwing toString). Eager reports always threw at that point, before the excludeErrors check,
     // so keep that order whenever formatting could throw; with safe params the order is unobservable.
     const safeParams = areParamsSafe(params);
     const excluded =
