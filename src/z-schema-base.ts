@@ -22,6 +22,7 @@ import { get, sortedKeys } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
 import { getRemotePath } from './utils/uri.js';
 import { isObject, whatIs } from './utils/what-is.js';
+import { FAST_VALIDATOR_DISABLED } from './validation/fast-shared.js';
 import { defaultOptions, normalizeOptions } from './z-schema-options.js';
 
 export interface ValidateOptions {
@@ -353,7 +354,10 @@ export class ZSchemaBase {
     }
     try {
       return fast(json);
-    } catch {
+    } catch (error) {
+      if (error === FAST_VALIDATOR_DISABLED) {
+        entry.fast = null;
+      }
       // the interpreter decides, and reproduces the throw if it is a real one
       return false;
     }

@@ -32,6 +32,12 @@ export type KeywordCompiler = (state: BuildState, node: JsonSchemaInternal, chec
 /** Thrown (and caught once, in `buildFastValidator`) when the schema uses anything the builder does not implement. */
 const UNSUPPORTED = new Error('unsupported by the fast validator');
 
+/**
+ * Thrown by a compiled check that learns at run time that the fast validator cannot decide this schema
+ * (e.g. a custom format validator returned a promise); `_fastAccepts` then stops using it for the schema.
+ */
+export const FAST_VALIDATOR_DISABLED = new Error('fast validator disabled for this schema');
+
 export function unsupported(): never {
   throw UNSUPPORTED;
 }

@@ -60,6 +60,24 @@ const SAMPLES: unknown[] = [
   `a${astral}`,
 ];
 
+const sparseArray = (length: number, entries: Record<number, unknown>): unknown[] => {
+  const arr: unknown[] = [];
+  arr.length = length;
+  for (const key of Object.keys(entries)) {
+    arr[Number(key)] = entries[Number(key)];
+  }
+  return arr;
+};
+
+const makeAsyncFormat = (impl: (value: unknown) => Promise<boolean>) => {
+  const v = ZSchema.create({ async: true, safe: true, formatAssertions: null });
+  const fn = vi.fn<(value: unknown) => Promise<boolean>>(impl);
+  v.registerFormat('mine', fn);
+  return { v, fn };
+};
+const isOkAsync = (value: unknown) => Promise.resolve(value === 'ok');
+const b64 = (text: string) => Buffer.from(text).toString('base64');
+
 const codesOf = (res: ValidateResponse): string[] => (res.err?.details ?? []).map((d) => d.code);
 const depth = (n: number, leaf: unknown): unknown => {
   let node: unknown = leaf;
@@ -102,6 +120,50 @@ const expectAgrees = (schema: JsonSchema, opts: ZSchemaOptions = {}, samples: un
       v.validate(sample, schema).valid
     );
   }
+};
+
+const suites = (
+  title: string,
+  schemas: Array<[string, JsonSchema]>,
+  samples: unknown[],
+  drafts: ReadonlyArray<ZSchemaOptions['version']>
+) => {
+  describe(title, () => {
+    for (const version of drafts) {
+      for (const [name, schema] of schemas) {
+        it(`${version}: ${name} has a fast validator`, () => {
+          expect(fastFor(schema, { version }).fast).toBeDefined();
+        });
+        it(`${version}: ${name} agrees with the interpreter`, () => {
+          const { v, fast } = fastFor(schema, { version });
+          if (fast === undefined) {
+            return;
+          }
+          for (const sample of samples) {
+            expect(fast(sample), `${JSON.stringify(sample)} against ${JSON.stringify(schema)}`).toBe(
+              v.validate(sample, schema).valid
+            );
+          }
+        });
+      }
+    }
+  });
+};
+
+// a $ref chain nine hops long: the collector's depth passes the limit of 6 on the way to the last target
+const chainOf = (last: JsonSchema, keyword: 'unevaluatedItems' | 'unevaluatedProperties'): JsonSchema => {
+  const defs: Record<string, JsonSchema> = { r8: last };
+  for (let i = 7; i >= 0; i--) {
+    defs[`r${i}`] = { $ref: `#/$defs/r${i + 1}` };
+  }
+  return { $ref: '#/$defs/r0', $defs: defs, [keyword]: false };
+};
+const nest = (n: number): unknown => {
+  let node: unknown = { a: 1 };
+  for (let i = 0; i < n; i++) {
+    node = { child: node, a: 1 };
+  }
+  return node;
 };
 
 describe('fast validator', () => {
@@ -434,44 +496,151 @@ describe('fast validator', () => {
       expectAgrees({ format: 'date' }, { formatAssertions: true });
     });
 
-    it('custom format registered on the instance has no fast validator', () => {
+    it('a sync custom format registered on the instance builds a fast validator', () => {
+      const schema: JsonSchema = { format: 'mine' };
+      const { v, fast } = fastFor(schema, { formatAssertions: null }, (z) => {
+        z.registerFormat('mine', (value) => value === 'ok');
+      });
+      expect(fast).toBeDefined();
+      for (const sample of SAMPLES.concat(['ok'])) {
+        expect(fast!(sample)).toBe(v.validate(sample, schema).valid);
+      }
+    });
+
+    it('a truthy non-boolean return is valid on both paths', () => {
+      const schema: JsonSchema = { format: 'mine' };
+      const { v, fast } = fastFor(schema, { formatAssertions: null }, (z) => {
+        z.registerFormat('mine', (() => 1) as unknown as () => boolean);
+      });
+      expect(fast).toBeDefined();
+      expect(fast!('x')).toBe(true);
+      expect(v.validate('x', schema).valid).toBe(true);
+    });
+
+    it('a sync custom format overriding a built-in one builds a fast validator', () => {
+      const schema: JsonSchema = { format: 'date' };
+      const { v, fast } = fastFor(schema, { formatAssertions: null }, (z) => {
+        z.registerFormat('date', (value) => value === 'anything');
+      });
+      expect(fast).toBeDefined();
+      for (const sample of ['anything', '2020-01-01', 1]) {
+        expect(fast!(sample)).toBe(v.validate(sample, schema).valid);
+      }
+    });
+
+    it('a callback-style custom format has no fast validator', () => {
       const { fast } = fastFor({ format: 'mine' }, { formatAssertions: null }, (v) => {
-        v.registerFormat('mine', () => true);
+        v.registerFormat('mine', ((_value: unknown, callback: (result: boolean) => void) => {
+          callback(true);
+        }) as unknown as () => boolean);
       });
       expect(fast).toBeUndefined();
     });
 
-    it('a custom format overriding a built-in one has no fast validator', () => {
-      const { fast } = fastFor({ format: 'date' }, { formatAssertions: null }, (v) => {
-        v.registerFormat('date', () => true);
+    it('a throwing sync custom format gives the same outcome on both paths', () => {
+      const schema: JsonSchema = { format: 'mine' };
+      const { v, fast } = fastFor(schema, { formatAssertions: null }, (z) => {
+        z.registerFormat('mine', (value) => {
+          if (value === 'boom') {
+            throw new Error('boom');
+          }
+          return value === 'ok';
+        });
       });
-      expect(fast).toBeUndefined();
+      expect(fast).toBeDefined();
+      expect(() => fast!('boom')).toThrow('boom');
+      expect(fast!('ok')).toBe(true);
+      expect(fast!('no')).toBe(false);
+      // the compiled path hands the throw to the interpreter, which reproduces it exactly as v.validate does
+      const compiled = v.compile(schema);
+      expect(outcome(() => compiled('boom') as never)).toEqual(outcome(() => v.validate('boom', schema)));
+    });
+
+    describe('with a promise-returning custom format', () => {
+      const schema: JsonSchema = { format: 'mine' };
+
+      it('disables the fast validator after the first hit and calls the format one extra time in total', async () => {
+        const { v, fn } = makeAsyncFormat(isOkAsync);
+        const first = await v.validate('ok', schema);
+        const second = await v.validate('no', schema);
+        const third = await v.validate('ok', schema);
+        const freshOk = await makeAsyncFormat(isOkAsync).v.validate('ok', schema);
+        const freshNo = await makeAsyncFormat(isOkAsync).v.validate('no', schema);
+        expect([first.valid, second.valid, third.valid]).toEqual([freshOk.valid, freshNo.valid, freshOk.valid]);
+        expect([first.valid, second.valid, third.valid]).toEqual([true, false, true]);
+        const entry = v.compiledSchemaCache.getEntry(v.compiledSchemaCache.keyOf(schema)!, v.options);
+        expect(entry?.fast).toBeNull();
+        expect(fn).toHaveBeenCalledTimes(4);
+      });
+
+      it('a rejecting promise is invalid and does not surface as an unhandled rejection', async () => {
+        const { v } = makeAsyncFormat(() => Promise.reject(new Error('nope')));
+        const unhandled = vi.fn<(reason: unknown) => void>();
+        process.on('unhandledRejection', unhandled);
+        try {
+          const first = await v.validate('x', schema);
+          const second = await v.validate('x', schema);
+          const third = await v.validate('x', schema);
+          expect([first.valid, second.valid, third.valid]).toEqual([false, false, false]);
+          await new Promise<void>((resolve) => {
+            setTimeout(resolve, 10);
+          });
+        } finally {
+          process.off('unhandledRejection', unhandled);
+        }
+        expect(unhandled).not.toHaveBeenCalled();
+      });
     });
 
     describe('with a globally registered format', () => {
       afterEach(() => {
         ZSchema.unregisterFormat('global-mine');
       });
-      it('has no fast validator', () => {
-        ZSchema.registerFormat('global-mine', () => true);
-        const { fast } = fastFor({ format: 'global-mine' }, { formatAssertions: null });
-        expect(fast).toBeUndefined();
+      it('builds a fast validator for a sync one', () => {
+        ZSchema.registerFormat('global-mine', (value) => value === 'ok');
+        const { v, fast } = fastFor({ format: 'global-mine' }, { formatAssertions: null });
+        expect(fast).toBeDefined();
+        expect(fast!('ok')).toBe(true);
+        expect(fast!('no')).toBe(v.validate('no', { format: 'global-mine' }).valid);
       });
     });
+  });
 
-    it('unknown format on draft-07 fails at compile time, so no fast validator is ever built', () => {
-      const v = ZSchema.create({ safe: true, version: 'draft-07' });
-      expect(() => v.compile({ format: 'nope-format' })).toThrow(/SCHEMA_VALIDATION_FAILED/);
+  describe('contentEncoding and contentMediaType on draft-07', () => {
+    const inputs: unknown[] = [
+      'aGVsbG8=',
+      'not base64!!',
+      '',
+      'a',
+      1,
+      null,
+      {},
+      [],
+      '{"a":1}',
+      '{bad json',
+      b64('{"a":1}'),
+      b64('{bad json'),
+      b64('hello'),
+      'e30=',
+      'e30',
+    ];
+    const cases: Array<[string, JsonSchema]> = [
+      ['base64', { contentEncoding: 'base64' }],
+      ['application/json', { contentMediaType: 'application/json' }],
+      ['base64 and application/json', { contentEncoding: 'base64', contentMediaType: 'application/json' }],
+      ['unknown encoding', { contentEncoding: '7bit' }],
+      ['unknown media type', { contentMediaType: 'text/plain' }],
+      ['unknown encoding with application/json', { contentEncoding: '7bit', contentMediaType: 'application/json' }],
+      ['base64 with unknown media type', { contentEncoding: 'base64', contentMediaType: 'text/plain' }],
+    ];
+    it.each(cases)('%s agrees with the interpreter', (_name, schema) => {
+      expectAgrees(schema, { version: 'draft-07' }, inputs);
     });
 
-    it('unknown format on the default version is ignored', () => {
-      const { fast } = fastFor({ format: 'nope-format' });
-      expect(fast!('x')).toBe(true);
-    });
-
-    it('ignoreUnknownFormats true ignores an unknown format', () => {
-      const { fast } = fastFor({ format: 'nope-format' }, { version: 'draft-07', ignoreUnknownFormats: true });
-      expect(fast!('x')).toBe(true);
+    it('is ignored on draft2020-12 and a fast validator is built', () => {
+      const { fast } = fastFor({ contentEncoding: 'base64', contentMediaType: 'application/json' });
+      expect(fast).toBeDefined();
+      expect(fast!('not base64!!')).toBe(true);
     });
   });
 
@@ -672,21 +841,304 @@ describe('fast validator', () => {
     });
   });
 
+  describe('unevaluatedProperties and unevaluatedItems', () => {
+    const OBJECT_SAMPLES: unknown[] = [
+      undefined,
+      null,
+      true,
+      1,
+      'a',
+      [],
+      [1],
+      {},
+      { a: 1 },
+      { a: 'x' },
+      { b: 2 },
+      { b: 'x' },
+      { a: 1, b: 2 },
+      { a: 1, b: 'x' },
+      { c: 1 },
+      { foo: 1 },
+      { x1: 1 },
+      { x1: 'x' },
+      { a: 1, x1: 1, z: 3 },
+      { kind: 'a' },
+      { kind: 'a', a: 1 },
+      { kind: 'a', b: 1 },
+      { kind: 'b', b: 1 },
+      { kind: 'b', a: 1 },
+      { a: 1, child: { a: 1 } },
+      { a: 1, child: { a: 1, z: 1 } },
+      { child: { child: { a: 1 } } },
+      { child: { child: { z: 1 } } },
+      Object.create({ a: 1 }) as unknown,
+      Object.create({ z: 1 }) as unknown,
+      Object.defineProperty({ a: 1 }, 'z', { value: 1, enumerable: false }),
+      Object.defineProperty({}, 'z', { value: 1, enumerable: false }),
+    ];
+    const ARRAY_SAMPLES: unknown[] = [
+      undefined,
+      null,
+      1,
+      'a',
+      {},
+      { 0: 1, length: 1 },
+      [],
+      [1],
+      ['a'],
+      [1, 'a'],
+      ['a', 1],
+      [1, 2],
+      [1, 2, 3],
+      [1, 'a', 3],
+      ['a', 'b'],
+      ['a', 'b', 'c'],
+      [[1, 'a']],
+      [1, [1, 'a']],
+      [1, [1, ['x']]],
+      [1, [1, [1, 2]]],
+      [null],
+      [1, null],
+      sparseArray(3, {}),
+      sparseArray(3, { 0: 1, 2: 3 }),
+      sparseArray(2, { 1: 'a' }),
+    ];
+
+    const PROPERTY_SCHEMAS: Array<[string, JsonSchema]> = [
+      ['alone', { unevaluatedProperties: false }],
+      ['properties', { properties: { a: {} }, unevaluatedProperties: false }],
+      ['patternProperties', { patternProperties: { '^x': {} }, unevaluatedProperties: false }],
+      ['additionalProperties', { additionalProperties: { type: 'number' }, unevaluatedProperties: false }],
+      [
+        'properties and patternProperties',
+        { properties: { a: {} }, patternProperties: { '^x': {} }, unevaluatedProperties: false },
+      ],
+      [
+        'all three object keywords',
+        {
+          properties: { a: {} },
+          patternProperties: { '^x': {} },
+          additionalProperties: { type: 'string' },
+          unevaluatedProperties: false,
+        },
+      ],
+      ['allOf', { allOf: [{ properties: { a: {} } }, { properties: { b: {} } }], unevaluatedProperties: false }],
+      [
+        'anyOf',
+        {
+          anyOf: [{ properties: { a: { type: 'number' } } }, { properties: { b: { type: 'string' } } }],
+          unevaluatedProperties: false,
+        },
+      ],
+      [
+        'oneOf',
+        {
+          oneOf: [{ properties: { a: { type: 'number' } } }, { properties: { b: { type: 'number' } } }],
+          unevaluatedProperties: false,
+        },
+      ],
+      [
+        'if then else',
+        {
+          if: { properties: { kind: { const: 'a' } }, required: ['kind'] },
+          then: { properties: { a: {} } },
+          else: { properties: { b: {} } },
+          unevaluatedProperties: false,
+        },
+      ],
+      ['a lone if', { if: { properties: { a: {} }, required: ['a'] }, unevaluatedProperties: false }],
+      [
+        'if and then',
+        { if: { properties: { kind: { const: 'a' } } }, then: { properties: { a: {} } }, unevaluatedProperties: false },
+      ],
+      [
+        'dependentSchemas',
+        {
+          properties: { a: {} },
+          dependentSchemas: { a: { properties: { b: {} } }, kind: { properties: { c: {} } } },
+          unevaluatedProperties: false,
+        },
+      ],
+      [
+        '$ref to $defs',
+        { $ref: '#/$defs/base', $defs: { base: { properties: { a: {} } } }, unevaluatedProperties: false },
+      ],
+      ['a recursive $ref', { properties: { a: {}, child: { $ref: '#' } }, unevaluatedProperties: false }],
+      [
+        'a recursive allOf $ref',
+        { allOf: [{ properties: { child: { $ref: '#' } } }], properties: { a: {} }, unevaluatedProperties: false },
+      ],
+      [
+        'a nested unevaluatedProperties true',
+        { allOf: [{ unevaluatedProperties: true }], unevaluatedProperties: false },
+      ],
+      [
+        'a nested unevaluatedProperties false',
+        { allOf: [{ properties: { a: {} }, unevaluatedProperties: false }], unevaluatedProperties: false },
+      ],
+      ['a schema', { properties: { a: {} }, unevaluatedProperties: { type: 'number' } }],
+      ['a schema over combinators', { allOf: [{ properties: { a: {} } }], unevaluatedProperties: { type: 'string' } }],
+      ['true', { properties: { a: {} }, unevaluatedProperties: true }],
+      ['not contributes nothing', { not: { properties: { a: {} } }, unevaluatedProperties: false }],
+      ['not with a property', { not: { required: ['z'] }, properties: { a: {} }, unevaluatedProperties: false }],
+      ['a nested instance', { properties: { child: { properties: { a: {} }, unevaluatedProperties: false } } }],
+      [
+        'type and required alongside',
+        { type: 'object', required: ['a'], properties: { a: {} }, unevaluatedProperties: false },
+      ],
+    ];
+
+    const ITEM_SCHEMAS: Array<[string, JsonSchema]> = [
+      ['alone', { unevaluatedItems: false }],
+      ['prefixItems', { prefixItems: [{ type: 'number' }, { type: 'string' }], unevaluatedItems: false }],
+      ['additionalItems without array items', { additionalItems: {}, unevaluatedItems: false }],
+      ['schema-form items', { items: { type: 'number' }, unevaluatedItems: false }],
+      ['items false', { items: false, unevaluatedItems: false }],
+      ['contains', { contains: { type: 'number' }, unevaluatedItems: false }],
+      ['contains false', { contains: false, unevaluatedItems: false } as JsonSchema],
+      [
+        'prefixItems and contains',
+        { prefixItems: [{ type: 'number' }], contains: { type: 'string' }, unevaluatedItems: false },
+      ],
+      ['allOf', { allOf: [{ prefixItems: [{}] }, { prefixItems: [{}, {}] }], unevaluatedItems: false }],
+      [
+        'anyOf',
+        {
+          anyOf: [{ prefixItems: [{ type: 'number' }] }, { prefixItems: [{ type: 'string' }, {}] }],
+          unevaluatedItems: false,
+        },
+      ],
+      [
+        'oneOf',
+        {
+          oneOf: [{ prefixItems: [{ type: 'number' }] }, { prefixItems: [{ type: 'string' }, {}] }],
+          unevaluatedItems: false,
+        },
+      ],
+      [
+        'if then else',
+        {
+          if: { prefixItems: [{ const: 1 }] },
+          then: { prefixItems: [{}, {}] },
+          else: { prefixItems: [{}] },
+          unevaluatedItems: false,
+        },
+      ],
+      ['a lone if', { if: { prefixItems: [{ type: 'number' }] }, unevaluatedItems: false }],
+      ['$ref to $defs', { $ref: '#/$defs/base', $defs: { base: { prefixItems: [{}, {}] } }, unevaluatedItems: false }],
+      ['a recursive $ref', { prefixItems: [{}, { $ref: '#' }], unevaluatedItems: false }],
+      ['a nested unevaluatedItems true', { allOf: [{ unevaluatedItems: true }], unevaluatedItems: false }],
+      [
+        'a nested unevaluatedItems false',
+        { allOf: [{ prefixItems: [{}], unevaluatedItems: false }], unevaluatedItems: false },
+      ],
+      ['a schema', { prefixItems: [{}], unevaluatedItems: { type: 'number' } }],
+      ['a schema over contains', { contains: { type: 'string' }, unevaluatedItems: { type: 'number' } }],
+      ['true', { prefixItems: [{}], unevaluatedItems: true }],
+      ['not contributes nothing', { not: { prefixItems: [{}] }, unevaluatedItems: false }],
+      ['type alongside', { type: 'array', prefixItems: [{}], unevaluatedItems: false }],
+    ];
+
+    // array-form items is a 2019-09 / draft-07 construct
+    const TUPLE_ITEM_SCHEMAS: Array<[string, JsonSchema]> = [
+      ['array-form items', { items: [{ type: 'number' }, { type: 'string' }], unevaluatedItems: false }],
+      [
+        'array-form items and additionalItems',
+        { items: [{ type: 'number' }], additionalItems: { type: 'string' }, unevaluatedItems: false },
+      ],
+      [
+        'array-form items and additionalItems false',
+        { items: [{ type: 'number' }], additionalItems: false, unevaluatedItems: false },
+      ],
+    ];
+
+    const DRAFTS = ['draft2020-12', 'draft2019-09'] as const;
+    suites('unevaluatedProperties', PROPERTY_SCHEMAS, OBJECT_SAMPLES, DRAFTS);
+    suites('unevaluatedItems', ITEM_SCHEMAS, ARRAY_SAMPLES, DRAFTS);
+
+    // The interpreter runs both keywords on every version; only the keywords the version knows contribute.
+    suites('unevaluatedProperties on draft-07', PROPERTY_SCHEMAS, OBJECT_SAMPLES, ['draft-07']);
+    suites('unevaluatedItems on draft-07', ITEM_SCHEMAS, ARRAY_SAMPLES, ['draft-07']);
+    suites('unevaluatedItems with array-form items', TUPLE_ITEM_SCHEMAS, ARRAY_SAMPLES, ['draft2019-09', 'draft-07']);
+
+    it('agrees on a keyword value the schema also sees as an instance', () => {
+      expectAgrees({ properties: { a: {} }, unevaluatedProperties: false }, {}, [
+        { properties: 1, unevaluatedProperties: 2 },
+        { a: { a: 1 } },
+      ]);
+    });
+
+    describe('fallback', () => {
+      const dynamic = { $dynamicRef: '#x', $defs: { x: { $dynamicAnchor: 'x' } } } as JsonSchema;
+      it.each([
+        ['a $dynamicRef member', { allOf: [dynamic], unevaluatedProperties: false }, {}],
+        ['a $dynamicRef member for items', { allOf: [dynamic], unevaluatedItems: false }, {}],
+        [
+          'a $dynamicRef in a ref target',
+          { $ref: '#/$defs/t', $defs: { t: dynamic }, unevaluatedProperties: false },
+          {},
+        ],
+        [
+          'a $recursiveRef member',
+          { allOf: [{ $recursiveRef: '#' }], $recursiveAnchor: true, unevaluatedProperties: false },
+          { version: 'draft2019-09' },
+        ],
+      ] as Array<[string, JsonSchema, ZSchemaOptions]>)('%s has no fast validator', (_name, schema, opts) => {
+        expect(fastFor(schema, opts).fast).toBeUndefined();
+      });
+    });
+
+    describe('recursion depth', () => {
+      const chain = chainOf({ properties: { a: {} } }, 'unevaluatedProperties');
+      const items = chainOf({ prefixItems: [{}] }, 'unevaluatedItems');
+      const recursive: JsonSchema = {
+        allOf: [{ properties: { child: { $ref: '#' } } }],
+        properties: { a: {} },
+        unevaluatedProperties: false,
+      };
+
+      it.each([
+        ['a $ref chain deeper than the limit', chain, { a: 1 }, [6, 100]],
+        ['a $ref chain deeper than the limit (items)', items, [1], [6, 100]],
+        ['a recursive schema and deep data', recursive, nest(6), [8, 100]],
+        ['a recursive schema and shallow data', recursive, nest(1), [8, 100]],
+        ['a $ref chain within the limit', chain, {}, [6, 100]],
+      ] as Array<[string, JsonSchema, unknown, number[]]>)(
+        '%s: the compiled function equals validate',
+        (_name, schema, data, limits) => {
+          for (const limit of limits) {
+            const { v, fast } = fastFor(schema, { maxRecursionDepth: limit });
+            const fn = v.compile(schema);
+            const expected = outcome(() => v.validate(data, schema));
+            expect(outcome(() => fn(data))).toEqual(expected);
+            if (fast !== undefined) {
+              let result: unknown;
+              try {
+                result = fast(data);
+              } catch {
+                result = 'threw';
+              }
+              // never `true` for an instance the interpreter rejects, and `true` for every one it accepts
+              expect(result === true).toBe('valid' in expected && expected.valid);
+            }
+          }
+        }
+      );
+    });
+  });
+
   describe('fallback', () => {
     const unsupported: Array<[string, JsonSchema, ZSchemaOptions?]> = [
-      ['properties with an unsupported child', { properties: { a: { unevaluatedProperties: false } } }],
-      ['items with an unsupported child', { items: { unevaluatedItems: false } }],
-      ['contains with an unsupported child', { contains: { unevaluatedItems: false } }],
-      ['propertyNames with an unsupported child', { propertyNames: { unevaluatedProperties: false } }],
-      ['dependencies with an unsupported child', { dependencies: { a: { unevaluatedProperties: false } } }],
-      ['allOf with an unsupported member', { allOf: [{ unevaluatedProperties: false }] }],
-      ['not with an unsupported child', { not: { unevaluatedItems: false } }],
-      ['unevaluatedProperties', { unevaluatedProperties: false }],
-      ['unevaluatedItems', { unevaluatedItems: false }],
+      ['properties with an unsupported child', { properties: { a: { $dynamicRef: '#x', $dynamicAnchor: 'x' } } }],
+      ['items with an unsupported child', { items: { $dynamicRef: '#x', $dynamicAnchor: 'x' } }],
+      ['contains with an unsupported child', { contains: { $dynamicRef: '#x', $dynamicAnchor: 'x' } }],
+      ['propertyNames with an unsupported child', { propertyNames: { $dynamicRef: '#x', $dynamicAnchor: 'x' } }],
+      ['dependencies with an unsupported child', { dependencies: { a: { $dynamicRef: '#x', $dynamicAnchor: 'x' } } }],
+      ['allOf with an unsupported member', { allOf: [{ $dynamicRef: '#x', $dynamicAnchor: 'x' }] }],
+      ['not with an unsupported child', { not: { $dynamicRef: '#x', $dynamicAnchor: 'x' } }],
+      ['unevaluatedItems with an unsupported child', { unevaluatedItems: { $dynamicRef: '#x', $dynamicAnchor: 'x' } }],
       ['$dynamicRef', { $dynamicRef: '#x', $dynamicAnchor: 'x' }],
       ['$recursiveRef', { $recursiveRef: '#', $recursiveAnchor: true }, { version: 'draft2019-09' }],
-      ['contentEncoding on draft-07', { contentEncoding: 'base64' }, { version: 'draft-07' }],
-      ['contentMediaType on draft-07', { contentMediaType: 'application/json' }, { version: 'draft-07' }],
       ['self-referential legacy $ref', { $ref: '#' }, { version: 'draft-07' }],
     ];
     it.each(unsupported)('%s has no fast validator', (_name, schema, opts) => {
@@ -764,7 +1216,12 @@ describe('fast validator', () => {
 
     it('a schema with unsupported keywords still validates correctly', () => {
       const v = ZSchema.create({ safe: true });
-      const unsupportedSchema: JsonSchema = { type: 'object', unevaluatedProperties: false, properties: { a: {} } };
+      const unsupportedSchema: JsonSchema = {
+        type: 'object',
+        additionalProperties: false,
+        properties: { a: { $dynamicRef: '#x' } },
+        $defs: { x: { $dynamicAnchor: 'x' } },
+      };
       const fn = v.compile(unsupportedSchema);
       expect(fn({ a: 1 }).valid).toBe(true);
       expect(codesOf(fn({ b: 1 }))).toEqual(codesOf(v.validate({ b: 1 }, unsupportedSchema)));
@@ -803,7 +1260,7 @@ describe('fast validator', () => {
 
     it('an unsupported schema costs one cache lookup', () => {
       const v = ZSchema.create({ safe: true });
-      const fn = v.compile({ unevaluatedProperties: false, properties: { a: {} } });
+      const fn = v.compile({ properties: { a: { $dynamicRef: '#x' } }, $defs: { x: { $dynamicAnchor: 'x' } } });
       const count = lookups(v);
       expect(fn({ a: 1 }).valid).toBe(true);
       expect(count()).toBe(1);
@@ -916,7 +1373,7 @@ describe('fast validator', () => {
 
     it('runs the interpreter for an unsupported schema', () => {
       const v = ZSchema.create({ safe: true });
-      const fn = v.compile({ unevaluatedProperties: false, properties: { a: {} } });
+      const fn = v.compile({ properties: { a: { $dynamicRef: '#x' } }, $defs: { x: { $dynamicAnchor: 'x' } } });
       const spy = spyOnInterpreter();
       expect(fn({ a: 1 }).valid).toBe(true);
       expect(spy).toHaveBeenCalledTimes(1);

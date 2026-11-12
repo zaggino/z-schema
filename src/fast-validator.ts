@@ -30,6 +30,7 @@ import {
   compilePattern,
 } from './validation/string.js';
 import { compileConst, compileEnum, compileType } from './validation/type.js';
+import { compileUnevaluatedItems, compileUnevaluatedProperties } from './validation/unevaluated.js';
 
 export type { FastValidator } from './validation/fast-shared.js';
 
@@ -92,9 +93,9 @@ const KEYWORD_COMPILERS: Record<keyof JsonSchemaAll, KeywordCompiler> = {
   // not implemented
   $dynamicRef: unsupportedKeyword,
   $recursiveRef: unsupportedKeyword,
-  unevaluatedItems: unsupportedKeyword,
-  unevaluatedProperties: unsupportedKeyword,
   // implemented
+  unevaluatedItems: compileUnevaluatedItems,
+  unevaluatedProperties: compileUnevaluatedProperties,
   type: compileType,
   enum: compileEnum,
   const: compileConst,

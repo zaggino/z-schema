@@ -10,13 +10,11 @@ const suiteFiles = await loadSuiteFiles(readPublicJson);
 // keyword silently dropping out of the builder fails the file that exercises it.
 const PARTIALLY_BUILT: Record<string, readonly string[]> = {
   'draft-06': ['draft6/ref-legacy.json'],
-  'draft-07': ['draft7/optional/content.json', 'draft7/ref-legacy.json'],
+  'draft-07': ['draft7/ref-legacy.json'],
   'draft2019-09': [
     'draft2019-09/enum.json',
-    'draft2019-09/not.json',
     'draft2019-09/optional/cross-draft.json',
     'draft2019-09/recursiveRef.json',
-    'draft2019-09/ref.json',
     'draft2019-09/unevaluatedItems.json',
     'draft2019-09/unevaluatedProperties.json',
     'draft2019-09/vocabulary.json',
@@ -24,11 +22,9 @@ const PARTIALLY_BUILT: Record<string, readonly string[]> = {
   'draft2020-12': [
     'draft2020-12/dynamicRef.json',
     'draft2020-12/enum.json',
-    'draft2020-12/not.json',
     'draft2020-12/optional/cross-draft.json',
     'draft2020-12/optional/dynamicRef.json',
     'draft2020-12/optional/format-assertion.json',
-    'draft2020-12/ref.json',
     'draft2020-12/unevaluatedItems.json',
     'draft2020-12/unevaluatedProperties.json',
     'draft2020-12/vocabulary.json',

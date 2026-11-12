@@ -8,7 +8,7 @@ import { decodeBase64, isValidBase64 } from '../utils/base64.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { unicodeLength } from '../utils/unicode.js';
 import { whatIs } from '../utils/what-is.js';
-import { ALWAYS_FALSE, expectNumber, unsupported } from './fast-shared.js';
+import { ALWAYS_FALSE, expectNumber, FAST_VALIDATOR_DISABLED, unsupported } from './fast-shared.js';
 import { assertsContent, isFormatAsserted, shouldSkipValidate, unknownFormatFails } from './shared.js';
 
 // ---------------------------------------------------------------------------
@@ -165,11 +165,24 @@ export function compileFormat(state: BuildState, node: JsonSchemaInternal, check
   }
   const fn = resolveFormatValidator(format, options);
   if (typeof fn === 'function') {
-    // A custom validator may be async (callback or promise based): only built-ins are known sync.
-    if (!isSyncBuiltInFormatValidator(fn)) {
+    if (isSyncBuiltInFormatValidator(fn)) {
+      checks.push((json) => !!fn.call(ctx, json));
+      return;
+    }
+    // callback-based validators are async by construction
+    if (fn.length === 2) {
       unsupported();
     }
-    checks.push((json) => !!fn.call(ctx, json));
+    // A custom validator may still return a promise: that is only known per call, and then the
+    // interpreter has to decide (it also owns the async task bookkeeping).
+    checks.push((json) => {
+      const result: unknown = fn.call(ctx, json);
+      if (result instanceof Promise) {
+        result.catch(toFalse);
+        throw FAST_VALIDATOR_DISABLED;
+      }
+      return !!result;
+    });
     return;
   }
   if (unknownFormatFails(options)) {
@@ -252,8 +265,46 @@ export function contentMediaTypeValidator(ctx: ZSchemaBase, report: Report, sche
 }
 
 // contentEncoding / contentMediaType only assert on draft-07
-export function compileContent(state: BuildState): void {
-  if (assertsContent(state.ctx.options.version)) {
-    unsupported();
+export function compileContent(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  if (!assertsContent(state.ctx.options.version)) {
+    return;
+  }
+  const isBase64 = node.contentEncoding === 'base64';
+  if (node.contentMediaType === 'application/json') {
+    if (isBase64) {
+      checks.push((json) => {
+        if (typeof json !== 'string') {
+          return true;
+        }
+        const decoded = decodeBase64(json);
+        if (decoded === undefined) {
+          return false;
+        }
+        try {
+          JSON.parse(decoded);
+        } catch {
+          return false;
+        }
+        return true;
+      });
+    } else {
+      checks.push((json) => {
+        if (typeof json !== 'string') {
+          return true;
+        }
+        try {
+          JSON.parse(json);
+        } catch {
+          return false;
+        }
+        return true;
+      });
+    }
+    if (!isBase64) {
+      return;
+    }
+  }
+  if (isBase64) {
+    checks.push((json) => typeof json !== 'string' || isValidBase64(json));
   }
 }
