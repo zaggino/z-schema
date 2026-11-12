@@ -412,49 +412,57 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
 
   // If "additionalProperties" is absent, it is considered present with an empty schema as a value.
   // In addition, boolean value true is considered equivalent to an empty schema.
-  let { additionalProperties } = schema;
-  if (additionalProperties === true || additionalProperties === undefined) {
-    additionalProperties = {};
-  }
+  // The empty schema: every value is valid against it, and validate() returns before running any keyword or the
+  // customValidator hook, so no call is made for those keys (see the last step of the loop).
+  const { additionalProperties } = schema;
+  const checkAdditional =
+    additionalProperties !== undefined && additionalProperties !== true && additionalProperties !== false;
 
-  // p - The property set from "properties".
-  const p = schema.properties ? Object.keys(schema.properties) : [];
-
-  // pp - The property set from "patternProperties". Elements of this set will be called regexes for convenience.
-  const pp = schema.patternProperties ? Object.keys(schema.patternProperties) : [];
+  // p - The property set from "properties", fixed for the whole object: a customValidator may add or remove
+  // properties while it is traversed.
+  const p = schema.properties ? Object.keys(schema.properties) : undefined;
 
   // m - The property name of the child.
   const keys = Object.keys(json);
 
+  // pp - The property set from "patternProperties". Elements of this set will be called regexes for convenience.
   // Precompile patternProperties regexes once before the per-key loop. `matches` / `schema` are per-key scratch
   // fields, reused across keys so that no array of matching schemas is allocated for every key.
-  const ppCompiled: Array<{
-    key: string;
-    re: RegExp;
-    matches: boolean;
-    schema: NonNullable<JsonSchemaInternal['patternProperties']>[string] | undefined;
-  }> = [];
-  for (let i = 0; i < pp.length; i++) {
-    const r = compileSchemaRegex(pp[i]);
-    if (r.ok) {
-      ppCompiled.push({ key: pp[i], re: r.value, matches: false, schema: undefined });
+  let ppCompiled:
+    | Array<{
+        key: string;
+        re: RegExp;
+        matches: boolean;
+        schema: NonNullable<JsonSchemaInternal['patternProperties']>[string] | undefined;
+      }>
+    | undefined;
+  if (schema.patternProperties) {
+    ppCompiled = [];
+    const pp = Object.keys(schema.patternProperties);
+    for (let i = 0; i < pp.length; i++) {
+      const r = compileSchemaRegex(pp[i]);
+      if (r.ok) {
+        ppCompiled.push({ key: pp[i], re: r.value, matches: false, schema: undefined });
+      }
     }
   }
+  const ppCount = ppCompiled === undefined ? 0 : ppCompiled.length;
 
-  for (const m of keys) {
+  for (let k = 0; k < keys.length; k++) {
+    const m = keys[k];
     const propertyValue = json[m];
 
     // Read every schema that applies to "m" before validating against any of them: validating one may run a
     // customValidator that replaces another, and the set must be the one present when the key was reached.
 
     // 1. If set "p" contains value "m", the corresponding schema in "properties" applies.
-    const isProp = p.includes(m);
+    const isProp = p !== undefined && p.includes(m);
     const propSchema = isProp ? schema.properties![m] : undefined;
 
     // 2. For each regex in "pp", if it matches "m" successfully, the corresponding schema in "patternProperties" applies.
     let matched = isProp;
-    for (let i = 0; i < ppCompiled.length; i++) {
-      const entry = ppCompiled[i];
+    for (let i = 0; i < ppCount; i++) {
+      const entry = ppCompiled![i];
       entry.matches = entry.re.test(m);
       if (entry.matches) {
         entry.schema = schema.patternProperties![entry.key];
@@ -472,8 +480,8 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
       report.schemaPath.pop();
     }
 
-    for (let i = 0; i < ppCompiled.length; i++) {
-      const entry = ppCompiled[i];
+    for (let i = 0; i < ppCount; i++) {
+      const entry = ppCompiled![i];
       if (entry.matches) {
         report.path.push(m);
         report.schemaPath.push('patternProperties', entry.key);
@@ -485,12 +493,18 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
     }
 
     // 3. The schema defined by "additionalProperties" applies if and only if nothing matched above.
-    if (!matched && additionalProperties !== false) {
-      report.path.push(m);
-      report.schemaPath.push('additionalProperties');
-      validate(ctx, report, additionalProperties, propertyValue);
-      report.path.pop();
-      report.schemaPath.pop();
+    if (!matched) {
+      if (checkAdditional) {
+        report.path.push(m);
+        report.schemaPath.push('additionalProperties');
+        validate(ctx, report, additionalProperties, propertyValue);
+        report.path.pop();
+        report.schemaPath.pop();
+      } else if (additionalProperties !== false) {
+        // The skipped validate() against the empty schema did one observable thing: it reset the summary message,
+        // which a customValidator run for an earlier key may have replaced.
+        report.commonErrorMessage = 'JSON_OBJECT_VALIDATION_FAILED';
+      }
     }
   }
 }
