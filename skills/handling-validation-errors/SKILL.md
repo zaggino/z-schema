@@ -25,18 +25,18 @@ import { ValidateError } from 'z-schema';
 
 Each `SchemaErrorDetail`:
 
-| Field         | Type                                | Description                                                              |
-| ------------- | ----------------------------------- | ------------------------------------------------------------------------ |
-| `message`     | `string`                            | Human-readable text, e.g. `"Expected type string but found type number"` |
-| `code`        | `string`                            | Machine-readable code, e.g. `"INVALID_TYPE"`                             |
-| `params`      | `(string \| number \| Array)[]`     | Values filling the message template placeholders                         |
-| `path`        | `string \| Array<string \| number>` | JSON Pointer to the failing value (`"#/age"` or `["age"]`)               |
-| `keyword`     | `string?`                           | Schema keyword that caused the error (`"type"`, `"required"`, etc.)      |
-| `inner`       | `SchemaErrorDetail[]?`              | Sub-errors from combinators (`anyOf`, `oneOf`, `not`)                    |
-| `schemaPath`  | `Array<string \| number>?`          | Path within the schema to the constraint                                 |
-| `schemaId`    | `string?`                           | Schema ID if present                                                     |
-| `title`       | `string?`                           | Schema `title` if present                                                |
-| `description` | `string?`                           | Schema `description` if present                                          |
+| Field         | Type                                | Description                                                                                                                                    |
+| ------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `message`     | `string`                            | Human-readable text, e.g. `"Expected type string but found type number"`                                                                       |
+| `code`        | `string`                            | Machine-readable code, e.g. `"INVALID_TYPE"`                                                                                                   |
+| `params`      | `(string \| number \| Array)[]`     | Values filling the message template placeholders                                                                                               |
+| `path`        | `string \| Array<string \| number>` | JSON Pointer to the failing value (`"#/age"` or `["age"]`)                                                                                     |
+| `keyword`     | `string?`                           | Schema keyword that caused the error (`"type"`, `"required"`, etc.)                                                                            |
+| `inner`       | `SchemaErrorDetail[]?`              | Sub-errors from combinators (`anyOf`, `oneOf`, `not`)                                                                                          |
+| `schemaPath`  | `Array<string \| number>?`          | Path within the schema (`properties`, `patternProperties`, `additionalProperties`, `items`, `prefixItems`, `additionalItems`, trailing `type`) |
+| `schemaId`    | `string?`                           | Schema ID if present                                                                                                                           |
+| `title`       | `string?`                           | Schema `title` if present                                                                                                                      |
+| `description` | `string?`                           | Schema `description` if present                                                                                                                |
 
 ## Capturing errors
 

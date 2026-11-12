@@ -185,6 +185,8 @@ interface SchemaErrorDetail {
 }
 ```
 
+`schemaPath` tracks the `properties`, `patternProperties`, `additionalProperties`, `items`, `prefixItems` and `additionalItems` segments (with the property name, pattern or index), and a trailing `type` for type errors. In draft-04, draft-06 and draft-07, errors inside a `$ref` target carry a `schemaPath` relative to that target. `schemaId` is looked up by applying the failing data path to the root schema and taking the `$id` (or `id`) of the closest object found there, falling back to the root schema's; it is reliable for the root id, not for ids of nested subschemas.
+
 ### Error Codes
 
 Common error codes (defined in `src/errors.ts`):
