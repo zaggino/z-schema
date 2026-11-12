@@ -5,6 +5,7 @@ import type { ZSchemaSafe } from '../../src/z-schema.ts';
 
 import { vi } from 'vitest';
 
+import { ValidateError } from '../../src/errors.ts';
 import { buildFastValidator } from '../../src/fast-validator.ts';
 import { Report } from '../../src/report.ts';
 import { ZSchema } from '../../src/z-schema.ts';
@@ -948,14 +949,17 @@ describe('fast validator', () => {
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
-    it('includeErrors and excludeErrors do not disable it, schemaPath does', () => {
+    it('an error filter or a schemaPath disables it, empty filters do not', () => {
       const v = ZSchema.create({ safe: true });
       const schema: JsonSchema = { type: 'object', properties: { a: { type: 'integer' } } };
       const fn = v.compile(schema);
       const spy = spyOnInterpreter();
+      expect(fn({ a: 1 }, { includeErrors: [], excludeErrors: [] }).valid).toBe(true);
+      expect(spy).not.toHaveBeenCalled();
       expect(fn({ a: 1 }, { excludeErrors: ['INVALID_TYPE'] }).valid).toBe(true);
       expect(fn({ a: 1 }, { includeErrors: ['INVALID_TYPE'] }).valid).toBe(true);
-      expect(spy).not.toHaveBeenCalled();
+      expect(spy).toHaveBeenCalledTimes(2);
+      spy.mockClear();
       // the sub-schema is what gets validated, so the root's fast validator must not answer
       expect(fn('x', { schemaPath: 'properties.a' }).valid).toBe(false);
       expect(fn(1, { schemaPath: 'properties.a' }).valid).toBe(true);
@@ -982,10 +986,46 @@ describe('fast validator', () => {
     it('async variants resolve through the fast path', async () => {
       const v = ZSchema.create({ async: true });
       const fn = v.compile({ type: 'string' });
-      const spy = spyOnInterpreter();
+      // callback mode never calls isValid: the interpreter path completes through processAsyncTasks
+      const spy = vi.spyOn(Report.prototype, 'processAsyncTasks');
       await expect(fn('abc')).resolves.toBe(true);
       expect(spy).not.toHaveBeenCalled();
-      await expect(fn(1)).rejects.toBeInstanceOf(Error);
+      await expect(fn(1)).rejects.toBeInstanceOf(ValidateError);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('callback mode completes on a later task, like a validation that ran the interpreter', async () => {
+      const v = ZSchema.create({ async: true });
+      const schema: JsonSchema = { type: 'string' };
+      await v.validate('warm', schema);
+      const spy = vi.spyOn(Report.prototype, 'processAsyncTasks');
+      const order: string[] = [];
+      const done = new Promise<void>((resolve) => {
+        v._validate('abc', schema, (err, valid) => {
+          order.push(`callback ${String(err)} ${String(valid)}`);
+          resolve();
+        });
+      });
+      order.push('returned');
+      await Promise.resolve();
+      order.push('microtask');
+      await done;
+      expect(order).toEqual(['returned', 'microtask', 'callback undefined true']);
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('a filtered call on a cached schema returns what an uncached validator returns', () => {
+      const schema: JsonSchema = { oneOf: [{ type: 'string' }, { type: 'number' }] };
+      const filters: ValidateOptions[] = [{ excludeErrors: ['INVALID_TYPE'] }, { includeErrors: ['MINIMUM'] }];
+      for (const filter of filters) {
+        const warm = ZSchema.create({ safe: true });
+        expect(warm.validate('x', schema).valid).toBe(true);
+        const cold = ZSchema.create({ safe: true }).validate('x', schema, filter);
+        // with INVALID_TYPE filtered out both branches count as passing
+        expect(cold.valid).toBe(false);
+        expect(warm.validate('x', schema, filter).valid).toBe(false);
+        expect(warm.compile(schema)('x', filter).valid).toBe(false);
+      }
     });
   });
 });

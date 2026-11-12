@@ -114,7 +114,7 @@ await validateAsync(1);
 - Boolean schemas are supported; `compile(false)` always fails with `SCHEMA_IS_FALSE`.
 - `compile()` takes a private snapshot of the schema: later changes to the object you passed have no effect, and that object is never mutated.
 - Calling the returned function behaves exactly like `validate(data, snapshot)`: same results, `$ref` resolution, `customValidator` handling and invalidation when remote references, formats or options change. It goes through the same [compiled-schema cache](architecture.md#compiled-schema-cache), but its cache key is computed once at compile time instead of serializing the schema on every call, so it is faster on hot paths.
-- Valid data against a supported schema takes a fast boolean path that creates no error report; invalid data, calls passing `schemaPath` and schemas using unsupported keywords (for example `unevaluatedProperties`, `$dynamicRef`) use the regular validator. Results are identical either way.
+- Valid data against a supported schema takes a fast boolean path that creates no error report; invalid data, calls passing `schemaPath` or a non-empty `includeErrors`/`excludeErrors`, and schemas using unsupported keywords (for example `unevaluatedProperties`, `$dynamicRef`) use the regular validator. Validity and errors are the same either way; the one difference is that an exception the regular validator would raise in a branch that does not decide the result is not raised on the fast path.
 - Compile once (for example at startup) and reuse the function. The cache is bounded, so an evicted schema is transparently recompiled on its next call.
 
 ## Built-in formats
