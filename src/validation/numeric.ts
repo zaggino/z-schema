@@ -17,9 +17,25 @@ export function multipleOfValidator(ctx: ZSchemaBase, report: Report, schema: Js
     return;
   }
 
-  const result = json / schema.multipleOf!;
+  const multipleOf = schema.multipleOf!;
+  // Beyond the safe integers the quotient can't decide: divided by an integer it
+  // always rounds to an integer, and it can overflow. The remainder of two doubles
+  // is exact at any magnitude, but costs more than the division, so only these
+  // values take it.
+  if (json > Number.MAX_SAFE_INTEGER || json < -Number.MAX_SAFE_INTEGER) {
+    if (json % multipleOf === 0) {
+      return;
+    }
+    if (Number.isInteger(multipleOf)) {
+      report.addError('MULTIPLE_OF', [json, multipleOf], undefined, schema, 'multipleOf');
+      return;
+    }
+    // a decimal divisor is rarely exact as a double, so it keeps the tolerance below
+  }
+
+  const result = json / multipleOf;
   if (!Number.isFinite(result) || Math.abs(result - Math.round(result)) >= 1e-10) {
-    report.addError('MULTIPLE_OF', [json, schema.multipleOf!], undefined, schema, 'multipleOf');
+    report.addError('MULTIPLE_OF', [json, multipleOf], undefined, schema, 'multipleOf');
   }
 }
 
