@@ -1,41 +1,20 @@
 import type { JsonSchemaVersion } from '../../src/json-schema-versions.ts';
-import type { SuiteFile } from '../lib/json-schema-test-suite.ts';
-
-import { readdirSync, readFileSync, statSync } from 'node:fs';
-import path from 'node:path';
 
 import { expectSameThrown, settle, shapeOf, withEagerSubReports } from '../lib/deferred-errors.ts';
 import {
   createCaseValidator,
+  loadSuiteFiles,
   selectCases,
   suiteFileLabel,
-  SUITE_TESTS_DIR,
   withDialect,
 } from '../lib/json-schema-test-suite.ts';
-
-const testsRoot = path.join(import.meta.dirname, '..', 'public', 'json-schema-test-suite', SUITE_TESTS_DIR);
-
-function listJsonFiles(dir: string): string[] {
-  const out: string[] = [];
-  for (const name of readdirSync(dir)) {
-    const full = path.join(dir, name);
-    if (statSync(full).isDirectory()) {
-      out.push(...listJsonFiles(full));
-    } else if (name.endsWith('.json')) {
-      out.push(full);
-    }
-  }
-  return out;
-}
+import { readPublicJson } from '../lib/read-public-json.ts';
 
 const versions: JsonSchemaVersion[] = ['draft2019-09', 'draft2020-12', 'draft-07', 'draft-04'];
 
-describe('deferred sub-report errors: JSON-Schema-Test-Suite differential', () => {
-  const suiteFiles = listJsonFiles(testsRoot).map((file) => ({
-    file: path.relative(testsRoot, file).split(path.sep).join('/'),
-    suiteFile: JSON.parse(readFileSync(file, 'utf-8')) as SuiteFile,
-  }));
+const suiteFiles = await loadSuiteFiles(readPublicJson);
 
+describe('deferred sub-report errors: JSON-Schema-Test-Suite differential', () => {
   for (const version of versions) {
     it(`${version}: every case yields identical error details`, () => {
       let compared = 0;

@@ -69,7 +69,7 @@ Append `!` after the type/scope for breaking changes, or include a `BREAKING CHA
 1. Implement the feature in the appropriate `src/` file.
 2. Export any new public types/values through `src/index.ts`.
 3. Write tests in `test/spec/` using the correct suffix (`.spec.ts` for both environments, `.node-spec.ts` for node-only, `.browser-spec.ts` for browser-only).
-4. If the feature relates to a JSON Schema keyword from the test suite, remove the relevant entries from `excludedFiles` / `excludedTests` in `test/lib/json-schema-test-suite.ts` and confirm tests pass.
+4. If the feature relates to a JSON Schema keyword from the test suite, remove the relevant entries from `EXCLUSIONS` in `test/lib/json-schema-test-suite.ts` and confirm tests pass.
 5. Update documentation in `docs/` if the feature affects the public API.
 
 ### Adding a New Error Code

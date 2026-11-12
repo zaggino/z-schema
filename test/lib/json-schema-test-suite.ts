@@ -1,8 +1,3 @@
-import type { JsonSchema, JsonSchemaVersion } from '../../src/json-schema-versions.ts';
-import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
-
-import { ZSchema } from '../../src/z-schema.ts';
-
 /**
  * Helpers for running the official JSON-Schema-Test-Suite in its unified layout
  * (`validation/tests/**.json`), where one file serves every dialect and each test
@@ -10,6 +5,15 @@ import { ZSchema } from '../../src/z-schema.ts';
  *
  * No `node:` imports: the browser spec uses this module too.
  */
+
+import type { JsonSchema, JsonSchemaVersion } from '../../src/json-schema-versions.ts';
+import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
+
+import { inject } from 'vitest';
+
+import { VERSION_SCHEMA_URL_MAPPING } from '../../src/json-schema-versions.ts';
+import { isModernDraft } from '../../src/validation/shared.ts';
+import { ZSchema } from '../../src/z-schema.ts';
 
 export interface SuiteTest {
   description: string;
@@ -21,7 +25,8 @@ export interface SuiteCase {
   description: string;
   /** Dialects the case applies to, e.g. `"6"`, `"<=2019"`, `"6,<=2019"`. Absent means all. */
   compatibility?: string;
-  tags?: Array<'format-assertion' | 'format-annotation'>;
+  /** Behaviors the case depends on. Upstream may add tags this harness does not know. */
+  tags?: string[];
   schema: JsonSchema;
   /** Retrieval URI → schema. Not unique across cases, so always registered per validator. */
   externalSchemas?: Record<string, JsonSchema>;
@@ -33,90 +38,119 @@ export interface SuiteFile {
   tests: SuiteCase[];
 }
 
+/** A suite file with its path relative to the suite's `validation/tests` directory. */
+export interface LoadedSuiteFile {
+  file: string;
+  suiteFile: SuiteFile;
+}
+
 interface Draft {
   /** The number the suite's `compatibility` property uses for this dialect. */
   release: number;
-  /** Prefix of the label a suite file gets for this dialect, e.g. `draft4/type.json`. */
+  /** Display prefix of a suite file run for this dialect, e.g. `draft4/type.json`. */
   label: string;
-  $schema: string;
 }
 
-export const DRAFTS: Partial<Record<JsonSchemaVersion, Draft>> = {
-  'draft-04': { release: 4, label: 'draft4', $schema: 'http://json-schema.org/draft-04/schema#' },
-  'draft-06': { release: 6, label: 'draft6', $schema: 'http://json-schema.org/draft-06/schema#' },
-  'draft-07': { release: 7, label: 'draft7', $schema: 'http://json-schema.org/draft-07/schema#' },
-  'draft2019-09': { release: 2019, label: 'draft2019-09', $schema: 'https://json-schema.org/draft/2019-09/schema' },
-  'draft2020-12': { release: 2020, label: 'draft2020-12', $schema: 'https://json-schema.org/draft/2020-12/schema' },
+const DRAFTS: Record<JsonSchemaVersion, Draft> = {
+  'draft-04': { release: 4, label: 'draft4' },
+  'draft-06': { release: 6, label: 'draft6' },
+  'draft-07': { release: 7, label: 'draft7' },
+  'draft2019-09': { release: 2019, label: 'draft2019-09' },
+  'draft2020-12': { release: 2020, label: 'draft2020-12' },
 };
 
 export const TESTED_VERSIONS = Object.keys(DRAFTS) as JsonSchemaVersion[];
 
-/** Path of the suite's test files, relative to the submodule root. */
-export const SUITE_TESTS_DIR = 'validation/tests';
+/** The suite's test files, by the path `test/public` serves them at. */
+const SUITE_TESTS_PATH = '/json-schema-test-suite/validation/tests/';
 
-// Directories, relative to SUITE_TESTS_DIR, skipped for every dialect.
-const excludedDirs: string[] = [
-  // proposals are not part of any released dialect
-  'proposals',
+interface Exclusion {
+  /** Path of the suite file, relative to its `validation/tests` directory. */
+  file: string;
+  reason: string;
+  /** Dialects the exclusion applies to. Absent means all. */
+  versions?: JsonSchemaVersion[];
+  /** Tests to skip, by {@link suiteTestTitle}. Absent means the whole file. */
+  tests?: string[];
+}
+
+// Known-failing or unsupported tests. `findUnusedExclusions` reports an entry that
+// no longer matches anything, e.g. after upstream renames a file or a test.
+const EXCLUSIONS: Exclusion[] = [
+  {
+    file: 'format-unknown.json',
+    reason: 'unknown formats are reported as an error by default; the ignoreUnknownFormats option changes this',
+    versions: ['draft-04', 'draft-06', 'draft-07'],
+  },
+  {
+    file: 'optional/float-overflow.json',
+    reason: "as far as I'm aware, this can't be fixed without custom json parser",
+  },
+  {
+    file: 'optional/zero-terminated-floats.json',
+    reason: "as far as I'm aware, this can't be fixed without custom json parser",
+    versions: ['draft-04'],
+  },
+  {
+    file: 'optional/cross-draft.json',
+    reason: 'decided to not support this for now, using unsupported drafts should fail',
+    versions: ['draft-07'],
+  },
+  {
+    file: 'optional/bignum.json',
+    reason:
+      'these numbers lose their precision in JSON.parse, before the validator sees them; ' +
+      'as with float-overflow, that takes a custom json parser',
+    tests: [
+      'maximum integer comparison just above the maximum is invalid',
+      'minimum integer comparison just below the minimum is invalid',
+      'float comparison with high precision (boolean) below the exclusive maximum is valid',
+      'float comparison with high precision below the exclusive maximum is valid',
+      'float comparison with high precision on negative numbers (boolean) above the exclusive minimum is valid',
+      'float comparison with high precision on negative numbers above the exclusive minimum is valid',
+      'enum comparison with high precision a slightly smaller decimal is invalid',
+      'enum comparison with high precision a slightly larger decimal is invalid',
+      'const comparison with high precision a slightly smaller decimal is invalid',
+      'const comparison with high precision a slightly larger decimal is invalid',
+      'uniqueItems comparison with high precision distinct high-precision decimals are unique',
+      'uniqueItems comparison with high precision arrays containing distinct decimals are unique',
+      'uniqueItems comparison with high precision objects containing distinct decimals are unique',
+    ],
+  },
+  {
+    file: 'optional/bignum.json',
+    reason: 'the same case as the excluded optional/float-overflow.json',
+    tests: [
+      'all integers are multiples of 0.5, if overflow is handled valid if optional overflow handling is implemented',
+    ],
+  },
+  {
+    file: 'optional/bignum.json',
+    reason: 'multipleOf divides and checks the quotient, which rounds to an integer above 2^53; not supported for now',
+    tests: ['multipleOf with integers above 2^53 1e20 is not multiple of 3'],
+  },
 ];
-
-// Files skipped for one dialect, as `<draft label>/<path relative to SUITE_TESTS_DIR>`.
-const excludedFiles = new Set<string>([
-  // unknown formats are reported as an error by default
-  // there's ignoreUnknownFormats option that can change this
-  'draft4/format-unknown.json',
-  'draft6/format-unknown.json',
-  'draft7/format-unknown.json',
-  // as far as I'm aware, this can't be fixed without custom json parser
-  'draft4/optional/float-overflow.json',
-  'draft6/optional/float-overflow.json',
-  'draft7/optional/float-overflow.json',
-  'draft2019-09/optional/float-overflow.json',
-  'draft2020-12/optional/float-overflow.json',
-  'draft4/optional/zero-terminated-floats.json',
-  // decided to not support this for now, using unsupported drafts should fail
-  'draft7/optional/cross-draft.json',
-]);
-
-// Single tests skipped for every dialect, as `<case description> <test description>`.
-const excludedTests = new Set<string>([
-  // optional/bignum.json: these numbers lose their precision in JSON.parse, before
-  // the validator sees them; as with float-overflow, that takes a custom json parser
-  'maximum integer comparison just above the maximum is invalid',
-  'minimum integer comparison just below the minimum is invalid',
-  'float comparison with high precision (boolean) below the exclusive maximum is valid',
-  'float comparison with high precision below the exclusive maximum is valid',
-  'float comparison with high precision on negative numbers (boolean) above the exclusive minimum is valid',
-  'float comparison with high precision on negative numbers above the exclusive minimum is valid',
-  'enum comparison with high precision a slightly smaller decimal is invalid',
-  'enum comparison with high precision a slightly larger decimal is invalid',
-  'const comparison with high precision a slightly smaller decimal is invalid',
-  'const comparison with high precision a slightly larger decimal is invalid',
-  'uniqueItems comparison with high precision distinct high-precision decimals are unique',
-  'uniqueItems comparison with high precision arrays containing distinct decimals are unique',
-  'uniqueItems comparison with high precision objects containing distinct decimals are unique',
-  // optional/bignum.json: the same case as the excluded optional/float-overflow.json
-  'all integers are multiples of 0.5, if overflow is handled valid if optional overflow handling is implemented',
-  // optional/bignum.json: multipleOf divides and checks the quotient, which rounds
-  // to an integer above 2^53; not supported for now
-  'multipleOf with integers above 2^53 1e20 is not multiple of 3',
-]);
 
 /** The name a test runs under: its case's description, then its own. */
 export const suiteTestTitle = (suiteCase: SuiteCase, test: SuiteTest): string =>
   `${suiteCase.description} ${test.description}`;
 
-const getDraft = (version: JsonSchemaVersion): Draft => {
-  const draft = DRAFTS[version];
-  if (!draft) {
-    throw new Error(`JSON-Schema-Test-Suite is not run for version: ${version}`);
-  }
-  return draft;
-};
+/** The name a suite file runs under for a dialect, e.g. `draft4/optional/bignum.json`. */
+export const suiteFileLabel = (file: string, version: JsonSchemaVersion): string => `${DRAFTS[version].label}/${file}`;
 
-/** The label a suite file is reported under for a dialect, e.g. `draft4/optional/bignum.json`. */
-export const suiteFileLabel = (file: string, version: JsonSchemaVersion): string =>
-  `${getDraft(version).label}/${file}`;
+/**
+ * Every file of the suite, parsed. The file list comes from the global setup
+ * (`test/vitest.setup.ts`); `reader` reads one of them in the caller's environment.
+ */
+export const loadSuiteFiles = async (reader: <T>(publicPath: string) => Promise<T>): Promise<LoadedSuiteFile[]> =>
+  await Promise.all(
+    inject('publicFiles')
+      .filter((publicPath) => publicPath.startsWith(SUITE_TESTS_PATH))
+      .map(async (publicPath) => ({
+        file: publicPath.slice(SUITE_TESTS_PATH.length),
+        suiteFile: await reader<SuiteFile>(publicPath),
+      }))
+  );
 
 // One comma-separated part of a `compatibility` value: `7`, `<=2019` or `=2020`.
 const CONSTRAINT = /^(?<operator><=|=)?(?<release>\d+)$/;
@@ -152,25 +186,28 @@ export const isCompatible = (compatibility: string | undefined, release: number)
   return compatible;
 };
 
+const exclusionsFor = (file: string, version: JsonSchemaVersion): Exclusion[] =>
+  EXCLUSIONS.filter(
+    (exclusion) => exclusion.file === file && (!exclusion.versions || exclusion.versions.includes(version))
+  );
+
+const compatibleCases = (suiteFile: SuiteFile, version: JsonSchemaVersion): SuiteCase[] =>
+  suiteFile.tests.filter((suiteCase) => isCompatible(suiteCase.compatibility, DRAFTS[version].release));
+
 /**
  * The test cases of one suite file that run for a dialect: compatible with it and
- * not excluded. `file` is the path relative to {@link SUITE_TESTS_DIR}. An excluded
- * test is dropped from its case; a case left without tests is dropped too.
+ * not excluded. `file` is the path relative to the suite's `validation/tests`. An
+ * excluded test is dropped from its case; a case left without tests is dropped too.
  */
 export const selectCases = (suiteFile: SuiteFile, file: string, version: JsonSchemaVersion): SuiteCase[] => {
-  if (excludedDirs.some((dir) => file.startsWith(`${dir}/`))) {
+  const exclusions = exclusionsFor(file, version);
+  if (exclusions.some((exclusion) => !exclusion.tests)) {
     return [];
   }
-  if (excludedFiles.has(suiteFileLabel(file, version))) {
-    return [];
-  }
-  const { release } = getDraft(version);
+  const excludedTitles = new Set(exclusions.flatMap((exclusion) => exclusion.tests ?? []));
   const selected: SuiteCase[] = [];
-  for (const suiteCase of suiteFile.tests) {
-    if (!isCompatible(suiteCase.compatibility, release)) {
-      continue;
-    }
-    const tests = suiteCase.tests.filter((test) => !excludedTests.has(suiteTestTitle(suiteCase, test)));
+  for (const suiteCase of compatibleCases(suiteFile, version)) {
+    const tests = suiteCase.tests.filter((test) => !excludedTitles.has(suiteTestTitle(suiteCase, test)));
     if (tests.length > 0) {
       selected.push(tests.length === suiteCase.tests.length ? suiteCase : { ...suiteCase, tests });
     }
@@ -178,31 +215,69 @@ export const selectCases = (suiteFile: SuiteFile, file: string, version: JsonSch
   return selected;
 };
 
+/**
+ * The exclusions that exclude nothing: the file is gone, holds no case for any of
+ * the exclusion's dialects, or lacks one of the named tests. Each is described by
+ * its file and what it failed to match.
+ */
+export const findUnusedExclusions = (suiteFiles: LoadedSuiteFile[]): string[] => {
+  const unused: string[] = [];
+  for (const exclusion of EXCLUSIONS) {
+    const suiteFile = suiteFiles.find((loaded) => loaded.file === exclusion.file)?.suiteFile;
+    const titles = new Set<string>();
+    if (suiteFile) {
+      for (const version of exclusion.versions ?? TESTED_VERSIONS) {
+        for (const suiteCase of compatibleCases(suiteFile, version)) {
+          for (const test of suiteCase.tests) {
+            titles.add(suiteTestTitle(suiteCase, test));
+          }
+        }
+      }
+    }
+    if (!exclusion.tests) {
+      if (titles.size === 0) {
+        unused.push(`${exclusion.file}: no test to exclude`);
+      }
+      continue;
+    }
+    for (const title of exclusion.tests) {
+      if (!titles.has(title)) {
+        unused.push(`${exclusion.file}: ${title}`);
+      }
+    }
+  }
+  return unused;
+};
+
 /** A copy of `schema` that names the dialect in `$schema`, unless it already names one. */
 export const withDialect = (schema: JsonSchema, version: JsonSchemaVersion): JsonSchema => {
   const copy = structuredClone(schema);
   if (typeof copy !== 'boolean' && !copy.$schema) {
-    copy.$schema = getDraft(version).$schema;
+    copy.$schema = VERSION_SCHEMA_URL_MAPPING[version];
   }
   return copy;
 };
 
-const isModernDraft = (version: JsonSchemaVersion) => version === 'draft2019-09' || version === 'draft2020-12';
-
 /**
- * `formatAssertions` for a case, undefined when the default applies. Only a tagged
- * case depends on which `format` behavior is in effect.
+ * The options a case's tags call for. A tag says which `format` behavior the case
+ * expects; an untagged case runs with the defaults. An unknown tag throws: it names
+ * a behavior this harness has not been taught to provide or to skip.
  */
-const formatAssertionsFor = (suiteCase: SuiteCase, version: JsonSchemaVersion): ZSchemaOptions['formatAssertions'] => {
-  if (suiteCase.tags?.includes('format-assertion')) {
-    return null;
+const tagOptions = (suiteCase: SuiteCase, version: JsonSchemaVersion): ZSchemaOptions => {
+  const options: ZSchemaOptions = {};
+  for (const tag of suiteCase.tags ?? []) {
+    if (tag === 'format-assertion') {
+      // null always asserts, in every dialect
+      options.formatAssertions = null;
+    } else if (tag === 'format-annotation') {
+      // from 2019-09 on, `true` follows the meta-schema's vocabulary, which leaves
+      // format an annotation; before that `true` still asserts, so it takes `false`
+      options.formatAssertions = isModernDraft(version);
+    } else {
+      throw new Error(`unsupported tag "${tag}" in test case: ${suiteCase.description}`);
+    }
   }
-  if (suiteCase.tags?.includes('format-annotation')) {
-    // from 2019-09 on, `true` follows the meta-schema's vocabulary, which leaves
-    // format an annotation; before that `true` still asserts, so it takes `false`
-    return isModernDraft(version);
-  }
-  return undefined;
+  return options;
 };
 
 /**
@@ -210,16 +285,9 @@ const formatAssertionsFor = (suiteCase: SuiteCase, version: JsonSchemaVersion): 
  * instance, so that they never leak into another case.
  */
 export const createCaseValidator = (suiteCase: SuiteCase, version: JsonSchemaVersion) => {
-  const options: ZSchemaOptions = { version };
-  const formatAssertions = formatAssertionsFor(suiteCase, version);
-  if (formatAssertions !== undefined) {
-    options.formatAssertions = formatAssertions;
-  }
-  const validator = ZSchema.create(options);
-  if (suiteCase.externalSchemas) {
-    for (const uri of Object.keys(suiteCase.externalSchemas)) {
-      validator.setRemoteReference(uri, withDialect(suiteCase.externalSchemas[uri], version));
-    }
+  const validator = ZSchema.create({ version, ...tagOptions(suiteCase, version) });
+  for (const [uri, schema] of Object.entries(suiteCase.externalSchemas ?? {})) {
+    validator.setRemoteReference(uri, withDialect(schema, version));
   }
   return validator;
 };

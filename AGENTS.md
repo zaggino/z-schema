@@ -71,7 +71,7 @@ src/                  # Library source (TypeScript, ESM)
 test/
   spec/               # Test files (*.spec.ts, *.node-spec.ts, *.browser-spec.ts)
   fixtures/           # Test fixture data (sample schemas and JSON)
-  lib/                # Test helpers (create-manifest.ts, deferred-errors.ts, json-schema-test-suite.ts)
+  lib/                # Test helpers (create-manifest.ts, deferred-errors.ts, json-schema-test-suite.ts, read-public-json.ts)
   public/             # Browser test assets (served by Vitest browser)
   ZSchemaTestSuite/   # Legacy z-schema-specific test suite (JS files)
 json-schema-spec/     # Git submodule — official JSON Schema specifications

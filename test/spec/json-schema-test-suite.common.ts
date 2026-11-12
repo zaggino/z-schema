@@ -1,32 +1,18 @@
 /* eslint-disable vitest/valid-title */
 
-import type { SuiteFile } from '../lib/json-schema-test-suite.ts';
-
-import { inject } from 'vitest';
-
 import {
   createCaseValidator,
+  loadSuiteFiles,
   selectCases,
   suiteFileLabel,
   suiteTestTitle,
-  SUITE_TESTS_DIR,
   TESTED_VERSIONS,
   withDialect,
 } from '../lib/json-schema-test-suite.ts';
 
 export async function runTests({ reader }: { reader: <T>(testFilePath: string) => Promise<T> }) {
-  const manifest = inject('publicFiles');
-  const testsPath = `/json-schema-test-suite/${SUITE_TESTS_DIR}/`;
-
   // every dialect reads the same files, so they are loaded once, up front
-  const suiteFiles = await Promise.all(
-    manifest
-      .filter((f) => f.startsWith(testsPath))
-      .map(async (testFilePath) => ({
-        file: testFilePath.slice(testsPath.length),
-        suiteFile: await reader<SuiteFile>(testFilePath),
-      }))
-  );
+  const suiteFiles = await loadSuiteFiles(reader);
 
   for (const version of TESTED_VERSIONS) {
     describe(version, () => {
