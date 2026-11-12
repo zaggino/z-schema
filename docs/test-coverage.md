@@ -9,7 +9,7 @@ Line coverage status: **high**
 | src/async-tasks.ts            |     95% |         95% |       100% |      92% |
 | src/compiled-schema-cache.ts  |     95% |         95% |        94% |      95% |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
-| src/fast-validator.ts         |     96% |         96% |        90% |      95% |
+| src/fast-validator.ts         |     97% |         98% |        90% |      96% |
 | src/format-validators.ts      |     95% |         95% |        94% |      93% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
