@@ -276,7 +276,7 @@ For a feature comparison across drafts, see [references/draft-comparison.md](ref
 | `noEmptyStrings`       | `false` | Reject empty strings as type `string`                                    |
 | `noEmptyArrays`        | `false` | Reject empty arrays as type `array`                                      |
 | `strictMode`           | `false` | Enable all strict checks at once                                         |
-| `ignoreUnknownFormats` | `false` | Suppress unknown format errors (modern drafts always ignore)             |
+| `ignoreUnknownFormats` | `false` | Suppress unknown format errors (modern drafts ignore them by default)    |
 | `formatAssertions`     | `null`  | `null`=always assert, `true`=respect vocabulary, `false`=annotation-only |
 | `reportPathAsArray`    | `false` | Report error paths as arrays instead of JSON Pointer strings             |
 

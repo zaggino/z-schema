@@ -9,6 +9,7 @@ import { isUniqueArray } from './utils/array.js';
 import { shallowClone } from './utils/clone.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
 import { isInteger, isObject } from './utils/what-is.js';
+import { isFormatAssertionVocabEnabled, isModernDraft } from './validation/shared.js';
 
 const PRIMITIVE_TYPES = ['array', 'boolean', 'integer', 'number', 'null', 'object', 'string'] as const;
 const PRIMITIVE_TYPE_STR = PRIMITIVE_TYPES.join(',');
@@ -635,11 +636,14 @@ const SchemaValidators = {
       report.addError('KEYWORD_TYPE_EXPECTED', ['format', 'string'], undefined, schema, 'format');
       return;
     }
-    const isModernDraft = this.options.version === 'draft2019-09' || this.options.version === 'draft2020-12';
+    // From 2019-09 on an unknown format is ignored, unless format asserts because the
+    // meta-schema says so, which only formatAssertions true looks at.
     if (
       !isFormatSupported(schema.format, this.options.customFormats) &&
       this.options.ignoreUnknownFormats !== true &&
-      !isModernDraft
+      (!isModernDraft(this.options.version) ||
+        (this.options.formatAssertions === true &&
+          isFormatAssertionVocabEnabled(schema, this.rootSchema, this.options.version)))
     ) {
       report.addError('UNKNOWN_FORMAT', [schema.format], undefined, schema, 'format');
     }
@@ -688,6 +692,10 @@ const SchemaValidators = {
 
 export class SchemaValidator {
   private readonly validator: ZSchemaBase;
+  // The schema the outermost validateSchema call was given, and that call's report.
+  // A subschema without its own `$schema` is governed by this schema's meta-schema.
+  rootSchema: JsonSchemaInternal | undefined;
+  private rootReport: Report | undefined;
 
   constructor(validator: ZSchemaBase) {
     this.validator = validator;
@@ -721,6 +729,25 @@ export class SchemaValidator {
       return true;
     }
 
+    // a subschema of the schema being validated: same report, same root
+    if (this.rootReport === report) {
+      return this.validateSchemaObject(report, schema);
+    }
+    // Otherwise this schema is a root. That includes a remote schema validated,
+    // under its own report, while another schema's validation is still running.
+    const outerSchema = this.rootSchema;
+    const outerReport = this.rootReport;
+    this.rootSchema = schema;
+    this.rootReport = report;
+    try {
+      return this.validateSchemaObject(report, schema);
+    } finally {
+      this.rootSchema = outerSchema;
+      this.rootReport = outerReport;
+    }
+  }
+
+  private validateSchemaObject(report: Report, schema: JsonSchemaInternal): boolean {
     // if $schema is present, this schema should validate against that $schema
     const hasParentSchema = schema.$schema && getId(schema) !== schema.$schema;
     if (hasParentSchema) {

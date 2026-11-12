@@ -244,11 +244,13 @@ export const withDialect = (schema: JsonSchema, version: JsonSchemaVersion): Jso
 
 /**
  * The options a case's tags call for. A tag says which `format` behavior the case
- * expects; an untagged case runs with the defaults. An unknown tag throws: it names
+ * expects. An untagged case gets the dialect's own: from 2019-09 on that is the
+ * meta-schema's vocabulary (`formatAssertions: true`), which a case with its own
+ * meta-schema relies on; before that, the defaults. An unknown tag throws: it names
  * a behavior this harness has not been taught to provide or to skip.
  */
 const tagOptions = (suiteCase: SuiteCase, version: JsonSchemaVersion): ZSchemaOptions => {
-  const options: ZSchemaOptions = {};
+  const options: ZSchemaOptions = isModernDraft(version) ? { formatAssertions: true } : {};
   for (const tag of suiteCase.tags ?? []) {
     if (tag === 'format-assertion') {
       // null always asserts, in every dialect

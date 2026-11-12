@@ -103,12 +103,15 @@ export const isValidationVocabularyEnabled = (
 /**
  * Checks whether the format-assertion vocabulary is enabled in the meta-schema.
  * For draft 2019-09: checks if the format vocabulary is set to true.
- * For draft 2020-12: checks if the format-assertion vocabulary is present and true.
+ * For draft 2020-12: checks if the format-assertion vocabulary is listed, with either value.
  * Returns true for older drafts (format was always an assertion).
+ *
+ * The meta-schema is the one `schema` names itself, else the one `rootSchema` names:
+ * a subschema without its own `$schema` is governed by the root's.
  */
 export const isFormatAssertionVocabEnabled = (
   schema: JsonSchemaInternal,
-  report: Report,
+  rootSchema: JsonSchemaInternal | boolean | undefined,
   version: JsonSchemaVersion | 'none' | undefined
 ): boolean => {
   if (version !== 'draft2019-09' && version !== 'draft2020-12') {
@@ -116,8 +119,7 @@ export const isFormatAssertionVocabEnabled = (
   }
 
   const currentSchemaMeta = schema.__$schemaResolved;
-  const rootSchemaMeta =
-    report.rootSchema && typeof report.rootSchema !== 'boolean' ? report.rootSchema.__$schemaResolved : undefined;
+  const rootSchemaMeta = rootSchema && typeof rootSchema !== 'boolean' ? rootSchema.__$schemaResolved : undefined;
   const metaSchema = (currentSchemaMeta || rootSchemaMeta) as JsonSchemaInternal | boolean | undefined;
 
   if (!metaSchema || typeof metaSchema !== 'object' || !isObject(metaSchema.$vocabulary)) {
@@ -126,12 +128,16 @@ export const isFormatAssertionVocabEnabled = (
 
   const vocabulary = metaSchema.$vocabulary;
 
-  // For draft 2020-12, only the format-assertion vocabulary enables format as assertion
+  // For draft 2020-12, only the format-assertion vocabulary enables format as assertion.
+  // Its boolean does not switch it off: `false` lets an implementation that does not
+  // know the vocabulary process the schema anyway, and this one knows it.
   if (Object.hasOwn(vocabulary, VOCAB_FORMAT_ASSERTION_2020_12)) {
-    return vocabulary[VOCAB_FORMAT_ASSERTION_2020_12];
+    return true;
   }
 
-  // For draft 2019-09, check if the format vocabulary is enabled (true)
+  // For draft 2019-09, check if the format vocabulary is enabled (true). Here the
+  // boolean does decide: the draft has one format vocabulary for both behaviors, and
+  // its standard meta-schema lists it as `false`, which must stay annotation-only.
   if (Object.hasOwn(vocabulary, VOCAB_FORMAT_2019_09)) {
     return vocabulary[VOCAB_FORMAT_2019_09];
   }

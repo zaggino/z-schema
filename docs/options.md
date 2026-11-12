@@ -339,7 +339,7 @@ const validator = ZSchema.create({
 
 When true, unknown format names (not registered and not built-in) are silently ignored instead of reported as errors. The [JSON Schema specification](http://json-schema.org/latest/json-schema-validation.html#anchor106) recommends offering an option to disable format validation.
 
-> **Note:** For draft 2019-09 and draft 2020-12, unknown formats are always silently ignored regardless of this setting, since format is annotation-only by default in these drafts.
+> **Note:** For draft 2019-09 and draft 2020-12, unknown formats are silently ignored regardless of this setting, since format is annotation-only by default in these drafts. The one exception is `formatAssertions: true` with a meta-schema that opts in to format assertion (see [formatAssertions](#formatassertions)): an unknown format is then reported as `UNKNOWN_FORMAT`, unless this option is `true`.
 
 Default: `false`
 
@@ -354,7 +354,7 @@ const validator = ZSchema.create({
 Controls whether `format` is treated as an assertion during validation.
 
 - `null` (default): legacy behavior — always assert format validation (built-in/custom format validators are enforced and report `INVALID_FORMAT` on mismatch).
-- `true`: respect the meta-schema `$vocabulary` — for draft 2019-09 and draft 2020-12, format is treated as annotation-only unless the format-assertion vocabulary is enabled in the meta-schema. For older drafts (draft-04/06/07), format is always asserted.
+- `true`: respect the meta-schema `$vocabulary` — for draft 2019-09 and draft 2020-12, format is annotation-only unless the meta-schema opts in to assertion. In draft 2020-12 it opts in by listing the format-assertion vocabulary in `$vocabulary`, as `true` or as `false`: the value only tells implementations that do not know the vocabulary whether they may process the schema anyway. In draft 2019-09 it opts in by setting the format vocabulary to `true`; the standard meta-schema sets it to `false`. Under a meta-schema that opts in, an unknown format name is an `UNKNOWN_FORMAT` error unless `ignoreUnknownFormats` is `true`. For older drafts (draft-04/06/07), format is always asserted.
 - `false`: treat `format` as annotation-only (no assertion failures for format checks in any draft).
 
 Default: `null`
