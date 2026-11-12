@@ -39,8 +39,8 @@ Line coverage status: **high**
 | src/validation/numeric.ts     |     90% |         90% |       100% |      91% |
 | src/validation/object.ts      |     89% |         90% |       100% |      86% |
 | src/validation/ref.ts         |     97% |         97% |       100% |      94% |
-| src/validation/shared.ts      |     96% |         96% |       100% |      91% |
-| src/validation/string.ts      |     89% |         89% |       100% |      89% |
+| src/validation/shared.ts      |     96% |         96% |       100% |      93% |
+| src/validation/string.ts      |     91% |         91% |       100% |      91% |
 | src/validation/type.ts        |    100% |        100% |       100% |      96% |
 | src/validation/unevaluated.ts |     90% |         91% |        83% |      90% |
 | src/z-schema-base.ts          |     98% |         98% |       100% |      93% |
