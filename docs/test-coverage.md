@@ -7,9 +7,9 @@ Line coverage status: **high**
 | File                          |  Line % | Statement % | Function % | Branch % |
 | ----------------------------- | ------: | ----------: | ---------: | -------: |
 | src/async-tasks.ts            |     95% |         95% |       100% |      92% |
-| src/compiled-schema-cache.ts  |     94% |         94% |        94% |      91% |
+| src/compiled-schema-cache.ts  |     95% |         95% |        94% |      93% |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
-| src/fast-validator.ts         |     90% |         91% |       100% |      93% |
+| src/fast-validator.ts         |     96% |         96% |        99% |      95% |
 | src/format-validators.ts      |     95% |         95% |        94% |      93% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
@@ -24,7 +24,7 @@ Line coverage status: **high**
 | src/utils/constants.ts        |    100% |        100% |       100% |     100% |
 | src/utils/date.ts             |    100% |        100% |       100% |     100% |
 | src/utils/hostname.ts         |     97% |         98% |       100% |      99% |
-| src/utils/json.ts             |     98% |         98% |       100% |      97% |
+| src/utils/json.ts             |    100% |        100% |       100% |     100% |
 | src/utils/properties.ts       |    100% |        100% |       100% |      75% |
 | src/utils/rfc-3986.ts         |    100% |        100% |       100% |     100% |
 | src/utils/rfc-3987.ts         |    100% |        100% |       100% |     100% |
@@ -49,4 +49,4 @@ Line coverage status: **high**
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
 | src/z-schema.ts               |     92% |         92% |        94% |      96% |
-| **Total**                     | **92%** |     **93%** |    **94%** |  **91%** |
+| **Total**                     | **93%** |     **93%** |    **94%** |  **91%** |
