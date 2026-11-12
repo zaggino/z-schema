@@ -3,9 +3,10 @@ import type { ZSchemaBase } from '../z-schema-base.js';
 import type { BuildState, Check, FastValidator } from './fast-shared.js';
 
 import { Report } from '../report.js';
+import { DEFAULT_MAX_RECURSION_DEPTH } from '../utils/constants.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { isObject } from '../utils/what-is.js';
-import { unsupported } from './fast-shared.js';
+import { deferToInterpreter, unsupported } from './fast-shared.js';
 import { resolveDynamicRef, resolveRecursiveRef } from './ref.js';
 import { deferOrRunSync, getCachedValidationResult } from './shared.js';
 
@@ -13,10 +14,97 @@ import { deferOrRunSync, getCachedValidationResult } from './shared.js';
 // collectEvaluated — unified traversal for unevaluatedItems / unevaluatedProperties
 // ---------------------------------------------------------------------------
 
+const NO_KEYS: readonly string[] = Object.freeze([]);
+
+/** Adds the first `min(count, length)` indices. */
+function addLeadingIndices(evaluated: Set<number | string>, count: number, length: number): void {
+  const len = Math.min(count, length);
+  for (let i = 0; i < len; i++) {
+    evaluated.add(i);
+  }
+}
+
+/** The compiled `patternProperties` regexes of a node (patterns that fail to compile are skipped); `undefined` when it has none. */
+function compilePatternRegexes(patternProperties: unknown): RegExp[] | undefined {
+  if (!isObject(patternProperties)) {
+    return undefined;
+  }
+  const patternRegexes: RegExp[] = [];
+  const patterns = Object.keys(patternProperties);
+  for (let pi = 0; pi < patterns.length; pi++) {
+    const result = compileSchemaRegex(patterns[pi]);
+    if (result.ok) {
+      patternRegexes.push(result.value);
+    }
+  }
+  return patternRegexes;
+}
+
+/**
+ * Adds the property names that the `properties`, `patternProperties` and `additionalProperties` of one node evaluate.
+ * `schemaProps` is the node's `properties` when it is an object, and `propKeys` its keys.
+ */
+function addEvaluatedProperties(
+  evaluated: Set<number | string>,
+  data: Record<string, unknown>,
+  dataKeys: readonly string[],
+  schemaProps: Record<string, unknown> | undefined,
+  propKeys: readonly string[],
+  patternRegexes: RegExp[] | undefined,
+  hasAdditional: boolean
+): void {
+  // properties
+  for (let i = 0; i < propKeys.length; i++) {
+    const key = propKeys[i];
+    if (Object.hasOwn(data, key)) {
+      evaluated.add(key);
+    }
+  }
+
+  // patternProperties
+  if (patternRegexes !== undefined) {
+    for (let pi = 0; pi < patternRegexes.length; pi++) {
+      const regex = patternRegexes[pi];
+      for (let i = 0; i < dataKeys.length; i++) {
+        if (regex.test(dataKeys[i])) {
+          evaluated.add(dataKeys[i]);
+        }
+      }
+    }
+  }
+
+  // additionalProperties - evaluates all non-properties/non-patternProperties keys
+  if (hasAdditional) {
+    const hasProps = schemaProps !== undefined;
+    for (let i = 0; i < dataKeys.length; i++) {
+      const key = dataKeys[i];
+      if (hasProps && Object.hasOwn(schemaProps, key)) {
+        continue;
+      }
+      let matchedPattern = false;
+      if (patternRegexes !== undefined) {
+        for (let pi = 0; pi < patternRegexes.length; pi++) {
+          if (patternRegexes[pi].test(key)) {
+            matchedPattern = true;
+            break;
+          }
+        }
+      }
+      if (matchedPattern) {
+        continue;
+      }
+      evaluated.add(key);
+    }
+  }
+}
+
 /**
  * Collects the evaluated indices (items mode, `dataKeys === undefined`, `json` is the array) or property names
  * (properties mode, `dataKeys === Object.keys(json)`) of `currentSchema` and every applicator reachable from it into
  * `evaluated`. Returns `true` when everything counts as evaluated (the contents of `evaluated` are then irrelevant).
+ *
+ * This has a compiled twin (`collectorFor` and the functions it calls, further down); any change here must be
+ * mirrored there.
  */
 function collectEvaluated(
   ctx: ZSchemaBase,
@@ -31,7 +119,7 @@ function collectEvaluated(
     return false;
   }
 
-  if (depth > (ctx.options.maxRecursionDepth ?? 100)) {
+  if (depth > (ctx.options.maxRecursionDepth ?? DEFAULT_MAX_RECURSION_DEPTH)) {
     report.addError('COLLECT_EVALUATED_DEPTH_EXCEEDED', [depth]);
     return false;
   }
@@ -42,19 +130,13 @@ function collectEvaluated(
 
     // prefixItems (2020-12 tuple)
     if (Array.isArray(currentSchema.prefixItems)) {
-      const len = Math.min(currentSchema.prefixItems.length, jsonArr.length);
-      for (let i = 0; i < len; i++) {
-        evaluated.add(i);
-      }
+      addLeadingIndices(evaluated, currentSchema.prefixItems.length, jsonArr.length);
     }
 
     // items - can be array (2019-09 tuple) or schema (evaluates all)
     if (currentSchema.items !== undefined) {
       if (Array.isArray(currentSchema.items)) {
-        const len = Math.min(currentSchema.items.length, jsonArr.length);
-        for (let i = 0; i < len; i++) {
-          evaluated.add(i);
-        }
+        addLeadingIndices(evaluated, currentSchema.items.length, jsonArr.length);
       } else if (currentSchema.items !== false) {
         return true;
       }
@@ -93,64 +175,19 @@ function collectEvaluated(
   } else {
     // properties mode
     const jsonData = json as Record<string, unknown>;
-    const schemaProps = currentSchema.properties;
+    const schemaProps: unknown = currentSchema.properties;
+    const propsRecord = isObject(schemaProps) ? (schemaProps as Record<string, unknown>) : undefined;
 
-    // properties
-    if (isObject(schemaProps)) {
-      const propKeys = Object.keys(schemaProps);
-      for (let i = 0; i < propKeys.length; i++) {
-        const key = propKeys[i];
-        if (Object.hasOwn(jsonData, key)) {
-          evaluated.add(key);
-        }
-      }
-    }
-
-    // patternProperties - patterns are compiled once per node and shared with the additionalProperties pass
-    let patternRegexes: RegExp[] | undefined;
-    const schemaPatterns = currentSchema.patternProperties;
-    if (isObject(schemaPatterns)) {
-      patternRegexes = [];
-      const patterns = Object.keys(schemaPatterns);
-      for (let pi = 0; pi < patterns.length; pi++) {
-        const result = compileSchemaRegex(patterns[pi]);
-        if (result.ok) {
-          patternRegexes.push(result.value);
-        }
-      }
-      for (let pi = 0; pi < patternRegexes.length; pi++) {
-        const regex = patternRegexes[pi];
-        for (let i = 0; i < dataKeys.length; i++) {
-          if (regex.test(dataKeys[i])) {
-            evaluated.add(dataKeys[i]);
-          }
-        }
-      }
-    }
-
-    // additionalProperties - evaluates all non-properties/non-patternProperties keys
-    if (currentSchema.additionalProperties !== undefined) {
-      const hasProps = isObject(schemaProps);
-      for (let i = 0; i < dataKeys.length; i++) {
-        const key = dataKeys[i];
-        if (hasProps && Object.hasOwn(schemaProps, key)) {
-          continue;
-        }
-        let matchedPattern = false;
-        if (patternRegexes !== undefined) {
-          for (let pi = 0; pi < patternRegexes.length; pi++) {
-            if (patternRegexes[pi].test(key)) {
-              matchedPattern = true;
-              break;
-            }
-          }
-        }
-        if (matchedPattern) {
-          continue;
-        }
-        evaluated.add(key);
-      }
-    }
+    // properties, patternProperties (patterns are compiled once per node) and additionalProperties
+    addEvaluatedProperties(
+      evaluated,
+      jsonData,
+      dataKeys,
+      propsRecord,
+      propsRecord === undefined ? NO_KEYS : Object.keys(propsRecord),
+      compilePatternRegexes(currentSchema.patternProperties),
+      currentSchema.additionalProperties !== undefined
+    );
 
     // dependentSchemas - only applies when the dependency key is present in the data
     const { dependentSchemas } = currentSchema;
@@ -459,32 +496,19 @@ export function unevaluatedPropertiesValidator(
 
 type EvaluatedMode = 'items' | 'properties';
 
-/** Build-time twin of one `collectEvaluated` visit; `true` means everything counts as evaluated. */
-type Collector = (
-  json: unknown,
-  dataKeys: string[] | undefined,
-  evaluated: Set<number | string>,
-  depth: number
-) => boolean;
-
-interface CollectorMemo {
-  readonly items: Map<object, Collector>;
-  readonly properties: Map<object, Collector>;
-}
-
 /**
- * Thrown by a collector past the recursion limit. The interpreter reports an error there, so the fast validator
- * must not decide that instance: `_fastAccepts` catches the throw and hands the instance to the interpreter.
+ * Build-time twin of one `collectEvaluated` visit; `true` means everything counts as evaluated. `keys` are the data's
+ * property names in properties mode and are never read in items mode (`NO_KEYS` is passed there).
  */
-const COLLECT_DEPTH_EXCEEDED = new Error('collectEvaluated depth exceeded');
+type Collector = (json: unknown, keys: readonly string[], evaluated: Set<number | string>, depth: number) => boolean;
 
 /** A boolean or missing sub-schema: contributes nothing. */
 const NOTHING: Collector = () => false;
 
 // Collectors are memoised per build and mode. A WeakMap keyed by the build state keeps the memo private to this module.
-const collectorMemos = new WeakMap<BuildState, CollectorMemo>();
+const collectorMemos = new WeakMap<BuildState, Record<EvaluatedMode, Map<object, Collector>>>();
 
-function memoFor(state: BuildState): CollectorMemo {
+function memoFor(state: BuildState): Record<EvaluatedMode, Map<object, Collector>> {
   let memo = collectorMemos.get(state);
   if (memo === undefined) {
     memo = { items: new Map<object, Collector>(), properties: new Map<object, Collector>() };
@@ -501,20 +525,20 @@ function collectorFor(state: BuildState, node: unknown, mode: EvaluatedMode): Co
     return unsupported();
   }
   const schema = node as JsonSchemaInternal;
-  const memo = mode === 'items' ? memoFor(state).items : memoFor(state).properties;
+  // The interpreter follows these through dynamic scope stacks, which the fast validator does not model.
+  if (schema.$recursiveRef !== undefined || schema.$dynamicRef !== undefined) {
+    return unsupported();
+  }
+  const memo = memoFor(state)[mode];
   const known = memo.get(schema);
   if (known !== undefined) {
     return known;
   }
   // Registered before descending so a $ref cycle terminates.
   const slot = { fn: NOTHING };
-  memo.set(schema, (json, dataKeys, evaluated, depth) => slot.fn(json, dataKeys, evaluated, depth));
+  memo.set(schema, (json, keys, evaluated, depth) => slot.fn(json, keys, evaluated, depth));
 
-  // The interpreter follows these through dynamic scope stacks, which the fast validator does not model.
-  if (schema.$recursiveRef !== undefined || schema.$dynamicRef !== undefined) {
-    return unsupported();
-  }
-  const maxDepth = state.ctx.options.maxRecursionDepth ?? 100;
+  const maxDepth = state.ctx.options.maxRecursionDepth ?? DEFAULT_MAX_RECURSION_DEPTH;
   const tail = compileTail(state, schema, mode);
   const built =
     mode === 'items'
@@ -523,99 +547,6 @@ function collectorFor(state: BuildState, node: unknown, mode: EvaluatedMode): Co
   slot.fn = built;
   memo.set(schema, built);
   return built;
-}
-
-/** The combinator and `$ref` traversal shared by both modes; `undefined` when the node has none. */
-function compileTail(state: BuildState, node: JsonSchemaInternal, mode: EvaluatedMode): Collector | undefined {
-  const allOf: Collector[] = [];
-  if (Array.isArray(node.allOf)) {
-    for (let i = 0; i < node.allOf.length; i++) {
-      const collect = collectorFor(state, node.allOf[i], mode);
-      if (collect !== NOTHING) {
-        allOf.push(collect);
-      }
-    }
-  }
-
-  // anyOf / oneOf: only members that pass contribute; a member that contributes nothing needs no pass check at run time
-  const anyOfChecks: FastValidator[] = [];
-  const anyOfCollectors: Collector[] = [];
-  const oneOfChecks: FastValidator[] = [];
-  const oneOfCollectors: Collector[] = [];
-  const groups: Array<[unknown, FastValidator[], Collector[]]> = [
-    [node.anyOf, anyOfChecks, anyOfCollectors],
-    [node.oneOf, oneOfChecks, oneOfCollectors],
-  ];
-  for (let g = 0; g < groups.length; g++) {
-    const [members, checks, collectors] = groups[g];
-    if (!Array.isArray(members)) {
-      continue;
-    }
-    for (let i = 0; i < members.length; i++) {
-      const check = state.compileChild(members[i]);
-      const collect = collectorFor(state, members[i], mode);
-      if (collect !== NOTHING) {
-        checks.push(check);
-        collectors.push(collect);
-      }
-    }
-  }
-
-  let ifCheck: FastValidator | undefined;
-  let ifCollector: Collector = NOTHING;
-  let thenCollector: Collector | undefined;
-  let elseCollector: Collector | undefined;
-  if (node.if !== undefined) {
-    ifCheck = state.compileChild(node.if);
-    ifCollector = collectorFor(state, node.if, mode);
-    thenCollector = node.then === undefined ? undefined : collectorFor(state, node.then, mode);
-    elseCollector = node.else === undefined ? undefined : collectorFor(state, node.else, mode);
-  }
-
-  const resolved = node.__$refResolved as unknown;
-  const refCollector = resolved && resolved !== node ? collectorFor(state, resolved, mode) : undefined;
-
-  if (
-    allOf.length === 0 &&
-    anyOfChecks.length === 0 &&
-    oneOfChecks.length === 0 &&
-    ifCheck === undefined &&
-    refCollector === undefined
-  ) {
-    return undefined;
-  }
-
-  return (json, dataKeys, evaluated, depth) => {
-    const next = depth + 1;
-    for (let i = 0; i < allOf.length; i++) {
-      if (allOf[i](json, dataKeys, evaluated, next)) {
-        return true;
-      }
-    }
-    for (let i = 0; i < anyOfChecks.length; i++) {
-      if (anyOfChecks[i](json) && anyOfCollectors[i](json, dataKeys, evaluated, next)) {
-        return true;
-      }
-    }
-    for (let i = 0; i < oneOfChecks.length; i++) {
-      if (oneOfChecks[i](json) && oneOfCollectors[i](json, dataKeys, evaluated, next)) {
-        return true;
-      }
-    }
-    if (ifCheck !== undefined) {
-      if (ifCheck(json)) {
-        if (ifCollector(json, dataKeys, evaluated, next)) {
-          return true;
-        }
-        if (thenCollector !== undefined && thenCollector(json, dataKeys, evaluated, next)) {
-          return true;
-        }
-      } else if (elseCollector !== undefined && elseCollector(json, dataKeys, evaluated, next)) {
-        return true;
-      }
-    }
-    return refCollector !== undefined && refCollector(json, dataKeys, evaluated, next);
-  };
 }
 
 function compileItemsCollector(
@@ -642,27 +573,28 @@ function compileItemsCollector(
     all = true;
   }
   if (all) {
-    // the interpreter returns before it reaches the contains pass and the combinators
-    return (_json, _dataKeys, _evaluated, depth) => {
+    // Everything is evaluated: the contains pass (which the interpreter may still run first for
+    // `unevaluatedItems: true`, without effect on the result) and the combinators cannot change that.
+    return (_json, _keys, _evaluated, depth) => {
       if (depth > maxDepth) {
-        throw COLLECT_DEPTH_EXCEEDED;
+        deferToInterpreter();
       }
       return true;
     };
   }
   const leading = prefixCount > tupleCount ? prefixCount : tupleCount;
   const containsCheck = node.contains === undefined ? undefined : state.compileChild(node.contains);
+  if (containsCheck !== undefined) {
+    state.notes.rechecks = true;
+  }
 
-  return (json, _dataKeys, evaluated, depth) => {
+  return (json, keys, evaluated, depth) => {
     if (depth > maxDepth) {
-      throw COLLECT_DEPTH_EXCEEDED;
+      deferToInterpreter();
     }
     const arr = json as unknown[];
     const { length } = arr;
-    const lead = leading < length ? leading : length;
-    for (let i = 0; i < lead; i++) {
-      evaluated.add(i);
-    }
+    addLeadingIndices(evaluated, leading, length);
     if (containsCheck !== undefined) {
       for (let i = 0; i < length; i++) {
         if (containsCheck(arr[i])) {
@@ -670,7 +602,7 @@ function compileItemsCollector(
         }
       }
     }
-    return tail !== undefined && tail(json, undefined, evaluated, depth);
+    return tail !== undefined && tail(json, keys, evaluated, depth);
   };
 }
 
@@ -680,28 +612,17 @@ function compilePropertiesCollector(
   maxDepth: number,
   tail: Collector | undefined
 ): Collector {
-  const schemaProps = node.properties as Record<string, unknown> | undefined;
-  const hasProps = isObject(schemaProps);
-  const propKeys = hasProps ? Object.keys(schemaProps) : [];
-
-  let patternRegexes: RegExp[] | undefined;
-  if (isObject(node.patternProperties)) {
-    patternRegexes = [];
-    const patterns = Object.keys(node.patternProperties);
-    for (let i = 0; i < patterns.length; i++) {
-      const result = compileSchemaRegex(patterns[i]);
-      if (result.ok) {
-        patternRegexes.push(result.value);
-      }
-    }
-  }
-
+  const rawProps: unknown = node.properties;
+  const schemaProps = isObject(rawProps) ? (rawProps as Record<string, unknown>) : undefined;
+  const propKeys = schemaProps === undefined ? NO_KEYS : Object.keys(schemaProps);
+  const patternRegexes = compilePatternRegexes(node.patternProperties);
   const hasAdditional = node.additionalProperties !== undefined;
 
   const depKeys: string[] = [];
   const depCollectors: Collector[] = [];
-  if (isObject(node.dependentSchemas)) {
-    const schemas = node.dependentSchemas as Record<string, unknown>;
+  const rawDependents: unknown = node.dependentSchemas;
+  if (isObject(rawDependents)) {
+    const schemas = rawDependents as Record<string, unknown>;
     const names = Object.keys(schemas);
     for (let i = 0; i < names.length; i++) {
       const collect = collectorFor(state, schemas[names[i]], 'properties');
@@ -713,53 +634,16 @@ function compilePropertiesCollector(
   }
   const unevaluatedTrue = node.unevaluatedProperties === true;
 
-  return (json, dataKeys, evaluated, depth) => {
+  return (json, keys, evaluated, depth) => {
     if (depth > maxDepth) {
-      throw COLLECT_DEPTH_EXCEEDED;
+      deferToInterpreter();
     }
     const data = json as Record<string, unknown>;
-    const keys = dataKeys!;
 
-    for (let i = 0; i < propKeys.length; i++) {
-      if (Object.hasOwn(data, propKeys[i])) {
-        evaluated.add(propKeys[i]);
-      }
-    }
-
-    if (patternRegexes !== undefined) {
-      for (let pi = 0; pi < patternRegexes.length; pi++) {
-        const regex = patternRegexes[pi];
-        for (let i = 0; i < keys.length; i++) {
-          if (regex.test(keys[i])) {
-            evaluated.add(keys[i]);
-          }
-        }
-      }
-    }
-
-    if (hasAdditional) {
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        if (hasProps && Object.hasOwn(schemaProps, key)) {
-          continue;
-        }
-        let matchedPattern = false;
-        if (patternRegexes !== undefined) {
-          for (let pi = 0; pi < patternRegexes.length; pi++) {
-            if (patternRegexes[pi].test(key)) {
-              matchedPattern = true;
-              break;
-            }
-          }
-        }
-        if (!matchedPattern) {
-          evaluated.add(key);
-        }
-      }
-    }
+    addEvaluatedProperties(evaluated, data, keys, schemaProps, propKeys, patternRegexes, hasAdditional);
 
     for (let i = 0; i < depKeys.length; i++) {
-      if (Object.hasOwn(data, depKeys[i]) && depCollectors[i](json, dataKeys, evaluated, depth + 1)) {
+      if (Object.hasOwn(data, depKeys[i]) && depCollectors[i](json, keys, evaluated, depth + 1)) {
         return true;
       }
     }
@@ -767,13 +651,105 @@ function compilePropertiesCollector(
     if (unevaluatedTrue) {
       return true;
     }
-    return tail !== undefined && tail(json, dataKeys, evaluated, depth);
+    return tail !== undefined && tail(json, keys, evaluated, depth);
+  };
+}
+
+/** Collects the members of an `anyOf` / `oneOf` list that can contribute: each with its pass check and collector. */
+function addBranches(
+  state: BuildState,
+  members: unknown,
+  mode: EvaluatedMode,
+  checks: FastValidator[],
+  collectors: Collector[]
+): void {
+  if (!Array.isArray(members)) {
+    return;
+  }
+  for (let i = 0; i < members.length; i++) {
+    // compiled even when dropped below, so an unsupported member rejects the build
+    const check = state.compileChild(members[i]);
+    const collect = collectorFor(state, members[i], mode);
+    if (collect !== NOTHING) {
+      checks.push(check);
+      collectors.push(collect);
+    }
+  }
+}
+
+/** The combinator and `$ref` traversal shared by both modes; `undefined` when the node has none. */
+function compileTail(state: BuildState, node: JsonSchemaInternal, mode: EvaluatedMode): Collector | undefined {
+  const allOf: Collector[] = [];
+  if (Array.isArray(node.allOf)) {
+    for (let i = 0; i < node.allOf.length; i++) {
+      const collect = collectorFor(state, node.allOf[i], mode);
+      if (collect !== NOTHING) {
+        allOf.push(collect);
+      }
+    }
+  }
+
+  // anyOf, then oneOf: only members that pass contribute; a member whose collector is NOTHING (a boolean schema)
+  // needs no pass check at run time
+  const branchChecks: FastValidator[] = [];
+  const branchCollectors: Collector[] = [];
+  addBranches(state, node.anyOf, mode, branchChecks, branchCollectors);
+  addBranches(state, node.oneOf, mode, branchChecks, branchCollectors);
+  if (branchChecks.length > 0) {
+    state.notes.rechecks = true;
+  }
+
+  let ifCheck: FastValidator | undefined;
+  let ifCollector = NOTHING;
+  let thenCollector = NOTHING;
+  let elseCollector = NOTHING;
+  if (node.if !== undefined) {
+    // compiled even when dropped below, so an unsupported `if` rejects the build
+    const check = state.compileChild(node.if);
+    ifCollector = collectorFor(state, node.if, mode);
+    thenCollector = collectorFor(state, node.then, mode);
+    elseCollector = collectorFor(state, node.else, mode);
+    if (ifCollector !== NOTHING || thenCollector !== NOTHING || elseCollector !== NOTHING) {
+      ifCheck = check;
+      state.notes.rechecks = true;
+    }
+  }
+
+  const resolved: unknown = node.__$refResolved;
+  const refCollector = resolved && resolved !== node ? collectorFor(state, resolved, mode) : NOTHING;
+
+  if (allOf.length === 0 && branchChecks.length === 0 && ifCheck === undefined && refCollector === NOTHING) {
+    return undefined;
+  }
+
+  return (json, keys, evaluated, depth) => {
+    const next = depth + 1;
+    for (let i = 0; i < allOf.length; i++) {
+      if (allOf[i](json, keys, evaluated, next)) {
+        return true;
+      }
+    }
+    for (let i = 0; i < branchChecks.length; i++) {
+      if (branchChecks[i](json) && branchCollectors[i](json, keys, evaluated, next)) {
+        return true;
+      }
+    }
+    if (ifCheck !== undefined) {
+      if (ifCheck(json)) {
+        if (ifCollector(json, keys, evaluated, next) || thenCollector(json, keys, evaluated, next)) {
+          return true;
+        }
+      } else if (elseCollector(json, keys, evaluated, next)) {
+        return true;
+      }
+    }
+    return refCollector !== NOTHING && refCollector(json, keys, evaluated, next);
   };
 }
 
 /** Twin of {@link unevaluatedItemsValidator}. */
 export function compileUnevaluatedItems(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const keyword = node.unevaluatedItems as unknown;
+  const keyword: unknown = node.unevaluatedItems;
   if (keyword === undefined || keyword === true) {
     return;
   }
@@ -789,7 +765,7 @@ export function compileUnevaluatedItems(state: BuildState, node: JsonSchemaInter
       return true;
     }
     const evaluated = new Set<number | string>();
-    if (collect(json, undefined, evaluated, 0)) {
+    if (collect(json, NO_KEYS, evaluated, 0)) {
       return true;
     }
     for (let i = 0; i < length; i++) {
@@ -806,7 +782,7 @@ export function compileUnevaluatedItems(state: BuildState, node: JsonSchemaInter
 
 /** Twin of {@link unevaluatedPropertiesValidator}. */
 export function compileUnevaluatedProperties(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
-  const keyword = node.unevaluatedProperties as unknown;
+  const keyword: unknown = node.unevaluatedProperties;
   if (keyword === undefined || keyword === true) {
     return;
   }

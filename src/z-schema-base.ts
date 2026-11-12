@@ -8,7 +8,7 @@ import type { ZSchemaOptions } from './z-schema-options.js';
 import { deferToTimer } from './async-tasks.js';
 import { CompiledSchemaCache, hasUnresolvedRef } from './compiled-schema-cache.js';
 import { getValidateError, toValidateError, ValidateError } from './errors.js';
-import { buildFastValidator } from './fast-validator.js';
+import { buildFastValidator, isFastValidatorDisabled } from './fast-validator.js';
 import { getSupportedFormats } from './format-validators.js';
 import { VERSION_SCHEMA_URL_MAPPING } from './json-schema-versions.js';
 import { isInternalKey } from './json-schema.js';
@@ -22,7 +22,6 @@ import { get, sortedKeys } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
 import { getRemotePath } from './utils/uri.js';
 import { isObject, whatIs } from './utils/what-is.js';
-import { FAST_VALIDATOR_DISABLED } from './validation/fast-shared.js';
 import { defaultOptions, normalizeOptions } from './z-schema-options.js';
 
 export interface ValidateOptions {
@@ -341,7 +340,8 @@ export class ZSchemaBase {
   /**
    * Runs the fast validator of a verified compiled-schema cache entry, building it on first use.
    * Returns `true` only when it exists and accepts `json`; `false` means "run the interpreter"
-   * (unsupported schema, invalid data, or the fast validator threw).
+   * (unsupported schema, invalid data, or the fast validator threw). A `disableFastValidator()` throw retires the
+   * validator for the entry; any other throw (including `deferToInterpreter()`) only defers this call.
    */
   private _fastAccepts(entry: CompiledSchemaEntry, json: unknown): boolean {
     let { fast } = entry;
@@ -355,7 +355,7 @@ export class ZSchemaBase {
     try {
       return fast(json);
     } catch (error) {
-      if (error === FAST_VALIDATOR_DISABLED) {
+      if (isFastValidatorDisabled(error)) {
         entry.fast = null;
       }
       // the interpreter decides, and reproduces the throw if it is a real one
