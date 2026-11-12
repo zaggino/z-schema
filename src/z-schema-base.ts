@@ -5,6 +5,7 @@ import type { JsonSchema, JsonSchemaInternal, JsonSchemaVersion } from './json-s
 import type { SchemaErrorDetail } from './report.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
+import { deferToTimer } from './async-tasks.js';
 import { CompiledSchemaCache, hasUnresolvedRef } from './compiled-schema-cache.js';
 import { getValidateError, toValidateError, ValidateError } from './errors.js';
 import { buildFastValidator } from './fast-validator.js';
@@ -154,13 +155,22 @@ export class ZSchemaBase {
       cacheKey = this.compiledSchemaCache.keyOf(schema);
       const entry = cacheKey === undefined ? undefined : this.compiledSchemaCache.getEntry(cacheKey, this.options);
       if (entry !== undefined) {
-        // schemaPath validates against a sub-schema, which the root's fast validator says nothing about
-        if (!options.schemaPath && this._fastAccepts(entry, json)) {
+        // schemaPath validates against a sub-schema, which the root's fast validator says nothing about.
+        // An error filter changes which branches of oneOf/not count as failed, so filtered validity
+        // is not the validity the fast validator computes.
+        if (
+          !options.schemaPath &&
+          !options.includeErrors?.length &&
+          !options.excludeErrors?.length &&
+          this._fastAccepts(entry, json)
+        ) {
           if (callback === undefined) {
             return true;
           }
-          // same completion path, and so the same callback timing, as a validation without errors
-          new Report(this.options, options).processAsyncTasks(this.options.asyncTimeout, callback);
+          // a timer, like the completion of a validation without errors or async tasks
+          deferToTimer(() => {
+            callback(undefined, true);
+          });
           return;
         }
         cached = entry.schema;
