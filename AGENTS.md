@@ -38,6 +38,7 @@ src/                  # Library source (TypeScript, ESM)
   json-validation.ts  # JSON validation orchestration (validate, recurse*)
   schema-cache.ts     # Schema caching by URI/id
   compiled-schema-cache.ts # Per-instance cache of compiled object schemas (keyed by JSON.stringify)
+  fast-validator.ts   # Boolean-only closure validator for compile() fast path (valid data, supported schemas only)
   errors.ts           # Error codes (Errors enum) and ValidateError class
   format-validators.ts# Built-in & custom format validators
   report.ts           # Validation report (error accumulation, SchemaErrorDetail)

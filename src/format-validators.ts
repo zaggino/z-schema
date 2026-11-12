@@ -370,6 +370,13 @@ const inbuiltValidators: Record<string, FormatValidatorFn> = {
   uuid: uuidValidator,
 } as const;
 
+const inbuiltValidatorFns = new Set<FormatValidatorFn>(Object.values(inbuiltValidators));
+
+/** Returns true if `fn` is one of the built-in (synchronous) format validators. */
+export function isInbuiltFormatValidator(fn: FormatValidatorFn): boolean {
+  return inbuiltValidatorFns.has(fn);
+}
+
 const customValidators: Record<string, FormatValidatorFn> = {};
 
 export function getFormatValidators(options?: FormatValidatorsOptions): Record<string, FormatValidatorFn> {

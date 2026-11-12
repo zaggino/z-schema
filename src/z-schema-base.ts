@@ -6,6 +6,7 @@ import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { CompiledSchemaCache, hasUnresolvedRef } from './compiled-schema-cache.js';
 import { getValidateError, toValidateError, ValidateError } from './errors.js';
+import { buildFastValidator } from './fast-validator.js';
 import { getSupportedFormats } from './format-validators.js';
 import { VERSION_SCHEMA_URL_MAPPING } from './json-schema-versions.js';
 import { isInternalKey } from './json-schema.js';
@@ -50,6 +51,12 @@ export class ZSchemaBase {
   validateOptions: ValidateOptions = {};
   compiledSchemaCache = new CompiledSchemaCache();
   options: ZSchemaOptions;
+  /**
+   * One-shot hand-off from `_fastValidate` to the `_runValidate` call that follows it: the compiled schema
+   * whose cache entry was just verified for `handoffTarget`, so the interpreter run does not look it up again.
+   */
+  private handoffTarget: JsonSchema | undefined;
+  private handoffCompiled: JsonSchemaInternal | undefined;
 
   constructor(options: ZSchemaOptions | undefined, token: symbol) {
     if (token !== FACTORY_TOKEN) {
@@ -124,6 +131,11 @@ export class ZSchemaBase {
     callback?: ValidateCallback
   ): true | void {
     this.validateOptions = options;
+    // Consumed (and always cleared) here, so a hand-off never outlives the validation it was made for.
+    const verified =
+      this.handoffTarget !== undefined && this.handoffTarget === schema ? this.handoffCompiled : undefined;
+    this.handoffTarget = undefined;
+    this.handoffCompiled = undefined;
 
     if (typeof schema !== 'string' && typeof schema !== 'boolean' && !isObject(schema)) {
       const e = new ValidateError(
@@ -163,10 +175,13 @@ export class ZSchemaBase {
     } else {
       // A customValidator receives the compiled schema and may mutate it; the uncached path hands
       // every call a fresh clone, so a shared cached clone would leak mutations. Bypass the cache.
-      if (typeof this.options.customValidator !== 'function') {
-        cacheKey = this.compiledSchemaCache.keyOf(schema);
+      let cached = verified;
+      if (cached === undefined) {
+        if (typeof this.options.customValidator !== 'function') {
+          cacheKey = this.compiledSchemaCache.keyOf(schema);
+        }
+        cached = cacheKey === undefined ? undefined : this.compiledSchemaCache.get(cacheKey, this.options);
       }
-      const cached = cacheKey === undefined ? undefined : this.compiledSchemaCache.get(cacheKey, this.options);
       if (cached) {
         _schema = cached;
         validated = true;
@@ -305,6 +320,44 @@ export class ZSchemaBase {
     } catch (error) {
       throw toValidateError(error);
     }
+  }
+
+  /**
+   * Boolean fast path behind the variants' `compile()`. Returns `true` only when the compiled fast
+   * validator for `target` exists and accepts `json`; `false` means "run the interpreter" (no cache
+   * entry, unsupported schema, invalid data, or the fast validator threw). The caller must then call
+   * `validate(json, target, …)` straight away: when the cache entry was found it is handed to that call.
+   */
+  _fastValidate(target: JsonSchema, json: unknown): boolean {
+    // _compileTarget hands boolean schemas through as-is, cast to JsonSchema
+    if (typeof (target as unknown) === 'boolean') {
+      return false;
+    }
+    const key = this.compiledSchemaCache.keyOf(target);
+    if (key === undefined) {
+      return false;
+    }
+    const entry = this.compiledSchemaCache.getEntry(key, this.options);
+    if (entry === undefined) {
+      return false;
+    }
+    let { fast } = entry;
+    if (fast === undefined) {
+      fast = buildFastValidator(entry.schema, this) ?? null;
+      entry.fast = fast;
+    }
+    if (fast !== null) {
+      try {
+        if (fast(json)) {
+          return true;
+        }
+      } catch {
+        // the interpreter decides, and reproduces the throw if it is a real one
+      }
+    }
+    this.handoffTarget = target;
+    this.handoffCompiled = entry.schema;
+    return false;
   }
 
   private _compileSnapshot(schema: JsonSchema): JsonSchema {

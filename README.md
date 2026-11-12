@@ -159,7 +159,7 @@ const validateUser = validator.compile({ type: 'object', required: ['name'] });
 validateUser({ name: 'Alice' }); // true, or throws ValidateError
 ```
 
-See [features](docs/features.md#compile-a-schema-to-a-reusable-function) for details.
+Valid data on supported schemas takes a fast path; results are identical to `validate()`. See [features](docs/features.md#compile-a-schema-to-a-reusable-function) for details.
 
 ### Custom Format Validators
 

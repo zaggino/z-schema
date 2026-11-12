@@ -11,6 +11,31 @@ import { shouldSkipValidate } from './shared.js';
 // A divisor with at most 20 binary digits after the point is an integer once scaled by this.
 const BINARY_FRACTION_SCALE = 2 ** 20;
 
+/** Pure decision behind `multipleOf`: whether the number `json` is a multiple of `multipleOf`. */
+export function isMultipleOf(json: number, multipleOf: number): boolean {
+  // Beyond the safe integers the quotient can't be trusted: it has no bits left for
+  // a fraction (1e20 / 3 is an integer), and it can overflow. The remainder of two
+  // doubles is exact at any magnitude, but costs more than the division, so only
+  // these values take it.
+  if (json > Number.MAX_SAFE_INTEGER || json < -Number.MAX_SAFE_INTEGER) {
+    if (json % multipleOf === 0) {
+      return true;
+    }
+    // A non-zero remainder settles it when the double is the divisor that was
+    // written: an integer, or a short binary fraction such as 1.5 or 0.25.
+    if (Number.isInteger(multipleOf) || Number.isInteger(multipleOf * BINARY_FRACTION_SCALE)) {
+      return false;
+    }
+    // Any other decimal (0.1, 0.01) is only approximated by its double, and at this
+    // magnitude that error exceeds the divisor, so neither the remainder nor the
+    // quotient can tell. It keeps the outcome of the quotient check below, as before:
+    // accepted, unless the quotient overflows.
+  }
+
+  const result = json / multipleOf;
+  return Number.isFinite(result) && Math.abs(result - Math.round(result)) < 1e-10;
+}
+
 export function multipleOfValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.1.1.2
   if (shouldSkipValidate(ctx.validateOptions, ['MULTIPLE_OF'])) {
@@ -21,28 +46,7 @@ export function multipleOfValidator(ctx: ZSchemaBase, report: Report, schema: Js
   }
 
   const multipleOf = schema.multipleOf!;
-  // Beyond the safe integers the quotient can't be trusted: it has no bits left for
-  // a fraction (1e20 / 3 is an integer), and it can overflow. The remainder of two
-  // doubles is exact at any magnitude, but costs more than the division, so only
-  // these values take it.
-  if (json > Number.MAX_SAFE_INTEGER || json < -Number.MAX_SAFE_INTEGER) {
-    if (json % multipleOf === 0) {
-      return;
-    }
-    // A non-zero remainder settles it when the double is the divisor that was
-    // written: an integer, or a short binary fraction such as 1.5 or 0.25.
-    if (Number.isInteger(multipleOf) || Number.isInteger(multipleOf * BINARY_FRACTION_SCALE)) {
-      report.addError('MULTIPLE_OF', [json, multipleOf], undefined, schema, 'multipleOf');
-      return;
-    }
-    // Any other decimal (0.1, 0.01) is only approximated by its double, and at this
-    // magnitude that error exceeds the divisor, so neither the remainder nor the
-    // quotient can tell. It keeps the outcome of the quotient check below, as before:
-    // accepted, unless the quotient overflows.
-  }
-
-  const result = json / multipleOf;
-  if (!Number.isFinite(result) || Math.abs(result - Math.round(result)) >= 1e-10) {
+  if (!isMultipleOf(json, multipleOf)) {
     report.addError('MULTIPLE_OF', [json, multipleOf], undefined, schema, 'multipleOf');
   }
 }

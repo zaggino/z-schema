@@ -277,4 +277,10 @@ export const cases: BenchCase[] = [
     expectErrors: 5,
   },
   { name: 'schema-object-validate', mode: 'schema-object', schema: flatSchema, data: flatValid },
+  {
+    // unevaluatedProperties has no fast-path support, so compile() keeps the interpreter for this schema.
+    name: 'fast-path-fallback-flat',
+    schema: { ...flatSchema, unevaluatedProperties: false },
+    data: flatValid,
+  },
 ];
