@@ -901,6 +901,16 @@ describe('fast validator', () => {
       expect(spy).not.toHaveBeenCalled();
     });
 
+    it('undefined data gives the same result on a cold and a warm cache', () => {
+      const schema: JsonSchema = { anyOf: [{}, { enum: [1] }] };
+      const v = ZSchema.create({ safe: true });
+      expect(v.validate(undefined, schema).valid).toBe(true);
+      expect(v.validate(undefined, schema).valid).toBe(true);
+      const alone = ZSchema.create({ safe: true }).validate(undefined, { enum: [1] });
+      expect(alone.valid).toBe(false);
+      expect(alone.err?.details?.[0]?.code).toBe('ENUM_MISMATCH');
+    });
+
     it('a filtered call on a cached schema returns what an uncached validator returns', () => {
       const schema: JsonSchema = { oneOf: [{ type: 'string' }, { type: 'number' }] };
       const filters: ValidateOptions[] = [{ excludeErrors: ['INVALID_TYPE'] }, { includeErrors: ['MINIMUM'] }];
