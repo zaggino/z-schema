@@ -46,13 +46,12 @@ import {
   propertyNamesValidator,
   requiredValidator,
 } from './validation/object.js';
-import { resolveDynamicRef, resolveRecursiveRef } from './validation/ref.js';
+import { resolveDynamicRef, resolveRecursiveRef, walkLegacyRef } from './validation/ref.js';
 import {
   deferUntilAsyncTasksComplete,
   runAfterPending,
   isModernDraft,
   isValidationVocabularyEnabled,
-  MAX_LEGACY_REF_HOPS,
   honouredPrefixItems,
   VALIDATION_VOCAB_KEYWORDS,
 } from './validation/shared.js';
@@ -601,22 +600,16 @@ export function validate(
         report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
       }
     } else {
-      // avoid infinite loop with maxRefs
-      let maxRefs = MAX_LEGACY_REF_HOPS;
-      while (schema.$ref && maxRefs > 0) {
-        if (!schema.__$refResolved) {
-          report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
-          break;
-        } else if (schema.__$refResolved === schema) {
-          break;
-        } else {
-          schema = schema.__$refResolved;
-          plan = planFor(ctx, schema);
-        }
-        maxRefs--;
-      }
-      if (maxRefs === 0) {
+      const target = walkLegacyRef(schema);
+      if (target === undefined) {
         throw new Error('Circular dependency by $ref references!');
+      }
+      if (target !== schema) {
+        schema = target as JsonSchemaInternal;
+        plan = planFor(ctx, schema);
+      }
+      if (schema.$ref && !schema.__$refResolved) {
+        report.addError('REF_UNRESOLVED', [schema.$ref], undefined, schema);
       }
       // Reset schema path for referenced schema - paths are relative to the referenced schema
       savedSchemaPath = report.schemaPath;

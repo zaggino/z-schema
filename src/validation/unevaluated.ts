@@ -715,7 +715,7 @@ function compileTail(state: BuildState, node: JsonSchemaInternal, mode: Evaluate
     }
   }
 
-  const resolved: unknown = node.__$refResolved;
+  const resolved = node.__$refResolved;
   const refCollector = resolved && resolved !== node ? collectorFor(state, resolved, mode) : NOTHING;
 
   if (allOf.length === 0 && branchChecks.length === 0 && ifCheck === undefined && refCollector === NOTHING) {

@@ -7,6 +7,8 @@
 // - a compiled check may be evaluated more than once per validation by a collector, so it must be pure: anything
 //   that is not must be recorded in `BuildState.notes`;
 // - the returned closures run on the validation hot path: indexed loops, no per-call allocation.
+// - field types of `JsonSchemaInternal` are nominal: keyword values are not guaranteed to have them, so compilers read
+//   them only through `expect*` helpers or a runtime guard, and those guards must not be removed as "redundant".
 
 import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
@@ -17,8 +19,6 @@ import { isObject } from '../utils/what-is.js';
 export type FastValidator = (json: unknown) => boolean;
 
 export type Check = FastValidator;
-
-export type RawNode = Record<string, unknown>;
 
 export const ALWAYS_TRUE: FastValidator = () => true;
 export const ALWAYS_FALSE: FastValidator = () => false;

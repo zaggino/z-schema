@@ -82,3 +82,38 @@ export const resolveDynamicRef = (
   }
   return target;
 };
+
+// ---------------------------------------------------------------------------
+// Legacy-draft $ref chain
+// ---------------------------------------------------------------------------
+
+/** Maximum number of `$ref` hops followed on legacy drafts before the chain is rejected. */
+const MAX_LEGACY_REF_HOPS = 99;
+
+/**
+ * Follows a legacy-draft `$ref` chain from `schema`. Returns the node where it stops: one without `$ref`, one whose
+ * reference is unresolved, or one that references itself. `undefined` when the chain takes MAX_LEGACY_REF_HOPS hops.
+ * The returned value can be a non-object (a boolean schema target).
+ */
+export function walkLegacyRef(schema: JsonSchemaInternal): JsonSchemaInternal | boolean | undefined {
+  let current: JsonSchemaInternal | boolean = schema;
+  for (let hops = 0; hops < MAX_LEGACY_REF_HOPS; hops++) {
+    if (typeof current !== 'object' || !current.$ref) {
+      return current;
+    }
+    const next: JsonSchemaInternal | boolean | undefined = current.__$refResolved;
+    if (!next || next === current) {
+      return current;
+    }
+    current = next;
+  }
+  return undefined;
+}
+
+/**
+ * True when a legacy `$ref` walk ended on a schema object whose keywords apply (not a hop-limit, unresolved,
+ * self-referencing or boolean stop).
+ */
+export const isResolvedLegacyTarget = (
+  target: JsonSchemaInternal | boolean | undefined
+): target is JsonSchemaInternal => typeof target === 'object' && !target.$ref;

@@ -503,9 +503,12 @@ export class ZSchemaBase {
         const to = schemaNode;
         delete schemaNode.$ref;
         delete schemaNode.__$refResolved;
-        for (const key in from) {
-          if (Object.hasOwn(from, key)) {
-            copyProp(from, to, key);
+        // a boolean target has no properties to copy (for...in over `true` is a no-op), so the guard is type-only
+        if (typeof from === 'object') {
+          for (const key in from) {
+            if (Object.hasOwn(from, key)) {
+              copyProp(from, to, key);
+            }
           }
         }
       }

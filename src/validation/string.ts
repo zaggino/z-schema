@@ -1,3 +1,4 @@
+import type { FormatValidatorFn } from '../format-validators.js';
 import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
@@ -9,7 +10,7 @@ import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { unicodeLength } from '../utils/unicode.js';
 import { whatIs } from '../utils/what-is.js';
 import { ALWAYS_FALSE, disableFastValidator, expectNumber, unsupported } from './fast-shared.js';
-import { assertsContent, isFormatAsserted, shouldSkipValidate, unknownFormatFails } from './shared.js';
+import { assertsContent, isFormatAssertionVocabEnabled, isModernDraft, shouldSkipValidate } from './shared.js';
 
 // ---------------------------------------------------------------------------
 // minLength
@@ -100,56 +101,87 @@ function toFalse(): unknown {
   return false;
 }
 
-export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+/** Marker returned by `decideFormat`: the format is asserted, unknown, and that is an error. */
+const UNKNOWN_FORMAT_FAILS = Symbol('unknownFormatFails');
+
+/**
+ * The format decision shared by the interpreter and the fast validator: the validator function to run,
+ * `UNKNOWN_FORMAT_FAILS` when the format is unknown and that is an error, or `undefined` when nothing is
+ * checked (not asserted, or unknown and ignored).
+ */
+function decideFormat(
+  format: string,
+  schema: JsonSchemaInternal,
+  rootSchema: JsonSchemaInternal | boolean | undefined,
+  options: ZSchemaBase['options']
+): FormatValidatorFn | typeof UNKNOWN_FORMAT_FAILS | undefined {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.2
   // formatAssertions false: never asserted. formatAssertions true: respect the meta-schema
   // vocabulary (for draft 2019-09/2020-12, format is annotation-only unless the
   // format-assertion vocabulary is enabled in the meta-schema).
-  if (!isFormatAsserted(schema, report.rootSchema, ctx.options)) {
+  if (
+    options.formatAssertions === false ||
+    (options.formatAssertions === true && !isFormatAssertionVocabEnabled(schema, rootSchema, options.version))
+  ) {
+    return undefined;
+  }
+  const fn = resolveFormatValidator(format, options);
+  if (typeof fn === 'function') {
+    return fn;
+  }
+  if (options.ignoreUnknownFormats === true) {
+    return undefined;
+  }
+  // From 2019-09 on an unknown format is ignored, unless format asserts because the
+  // meta-schema says so: past the check above, formatAssertions true means it does.
+  return options.formatAssertions === true || !isModernDraft(options.version) ? UNKNOWN_FORMAT_FAILS : undefined;
+}
+
+export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
+  const formatValidatorFn = decideFormat(schema.format!, schema, report.rootSchema, ctx.options);
+  if (formatValidatorFn === undefined) {
     return;
   }
-
-  const formatValidatorFn = resolveFormatValidator(schema.format!, ctx.options);
-  if (typeof formatValidatorFn === 'function') {
-    if (shouldSkipValidate(ctx.validateOptions, ['INVALID_FORMAT'])) {
-      return;
-    }
-    if (report.hasError('INVALID_TYPE', [schema.type, whatIs(json)])) {
-      return;
-    }
-    if (formatValidatorFn.length === 2) {
-      // callback-based async
-      report.addAsyncTaskWithPath(formatValidatorFn, [json], (result) => {
-        if (result !== true) {
-          report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
-        }
-      });
-    } else {
-      const result = formatValidatorFn.call(ctx, json);
-      if (result instanceof Promise) {
-        // Promise-based async
-        // Attach the rejection handler now: if the task never runs (early finish), a rejected
-        // promise must not surface as an unhandled rejection.
-        const settled = result.catch(toFalse);
-        report.addAsyncTaskWithPath(
-          (callback: (result: unknown) => void) => {
-            // settled never rejects; void marks it as intentionally not awaited
-            void settled.then(callback);
-          },
-          [],
-          (resolvedResult) => {
-            if (resolvedResult !== true) {
-              report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
-            }
-          }
-        );
-      } else if (!result) {
-        // sync
+  if (formatValidatorFn === UNKNOWN_FORMAT_FAILS) {
+    report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
+    return;
+  }
+  if (shouldSkipValidate(ctx.validateOptions, ['INVALID_FORMAT'])) {
+    return;
+  }
+  if (report.hasError('INVALID_TYPE', [schema.type, whatIs(json)])) {
+    return;
+  }
+  if (formatValidatorFn.length === 2) {
+    // callback-based async
+    report.addAsyncTaskWithPath(formatValidatorFn, [json], (result) => {
+      if (result !== true) {
         report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
       }
+    });
+  } else {
+    const result = formatValidatorFn.call(ctx, json);
+    if (result instanceof Promise) {
+      // Promise-based async
+      // Attach the rejection handler now: if the task never runs (early finish), a rejected
+      // promise must not surface as an unhandled rejection.
+      const settled = result.catch(toFalse);
+      report.addAsyncTaskWithPath(
+        (callback: (result: unknown) => void) => {
+          // settled never rejects; void marks it as intentionally not awaited
+          void settled.then(callback);
+        },
+        [],
+        (resolvedResult) => {
+          if (resolvedResult !== true) {
+            report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
+          }
+        }
+      );
+    } else if (!result) {
+      // sync
+      report.addError('INVALID_FORMAT', [schema.format!, JSON.stringify(json)], undefined, schema, 'format');
     }
-  } else if (unknownFormatFails(ctx.options)) {
-    report.addError('UNKNOWN_FORMAT', [schema.format!], undefined, schema, 'format');
   }
 }
 
@@ -160,39 +192,37 @@ export function compileFormat(state: BuildState, node: JsonSchemaInternal, check
   if (typeof format !== 'string') {
     unsupported();
   }
-  if (!isFormatAsserted(node, root, options)) {
+  const fn = decideFormat(format, node, root, options);
+  if (fn === undefined) {
     return;
   }
-  const fn = resolveFormatValidator(format, options);
-  if (typeof fn === 'function') {
-    if (isSyncBuiltInFormatValidator(fn)) {
-      checks.push((json) => !!fn.call(ctx, json));
-      return;
-    }
-    // callback-based validators are async by construction
-    if (fn.length === 2) {
-      unsupported();
-    }
-    // an async function is known to return a promise: never invoke it an extra time
-    if (fn.constructor.name === 'AsyncFunction') {
-      unsupported();
-    }
-    state.notes.customFormat = true;
-    // A plain function may still return a promise: that is only known per call, and then the
-    // interpreter has to decide (it also owns the async task bookkeeping).
-    checks.push((json) => {
-      const result: unknown = fn.call(ctx, json);
-      if (result instanceof Promise) {
-        void result.catch(toFalse);
-        return disableFastValidator();
-      }
-      return !!result;
-    });
-    return;
-  }
-  if (unknownFormatFails(options)) {
+  if (fn === UNKNOWN_FORMAT_FAILS) {
     checks.push(ALWAYS_FALSE);
+    return;
   }
+  if (isSyncBuiltInFormatValidator(fn)) {
+    checks.push((json) => !!fn.call(ctx, json));
+    return;
+  }
+  // callback-based validators are async by construction
+  if (fn.length === 2) {
+    unsupported();
+  }
+  // an async function is known to return a promise: never invoke it an extra time
+  if (fn.constructor.name === 'AsyncFunction') {
+    unsupported();
+  }
+  state.notes.customFormat = true;
+  // A plain function may still return a promise: that is only known per call, and then the
+  // interpreter has to decide (it also owns the async task bookkeeping).
+  checks.push((json) => {
+    const result: unknown = fn.call(ctx, json);
+    if (result instanceof Promise) {
+      void result.catch(toFalse);
+      return disableFastValidator();
+    }
+    return !!result;
+  });
 }
 
 // ---------------------------------------------------------------------------
