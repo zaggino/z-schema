@@ -88,14 +88,17 @@ export interface ZSchemaInternalProperties {
   __$validationOptions?: ZSchemaOptions;
 }
 
+/**
+ * The schema's id, or `undefined` when it has none or it is not a string. Callers also pass keyword
+ * maps such as `properties`, where a property named `id` or `$id` holds a sub-schema, not an id.
+ */
 export const getId = (schema: JsonSchemaInternal): string | undefined => {
-  // Draft-04 uses `id` exclusively — never return `$id` for a draft-04 schema
-  if (typeof schema.$schema === 'string' && schema.$schema.includes('draft-04')) {
-    return schema.id;
-  }
+  // Draft-04 uses `id` exclusively — never return `$id` for a draft-04 schema.
   // Draft-06+ uses `$id`; fall back to `id` for backward compatibility
   // with schemas that haven't migrated to `$id` yet.
-  return schema.$id ?? schema.id;
+  const id: unknown =
+    typeof schema.$schema === 'string' && schema.$schema.includes('draft-04') ? schema.id : (schema.$id ?? schema.id);
+  return typeof id === 'string' ? id : undefined;
 };
 
 export const findId = (
