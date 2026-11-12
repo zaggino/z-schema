@@ -114,10 +114,10 @@ src/
 
 1. Add validation logic in the appropriate `src/validation/*.ts` module (e.g., `array.ts` for array keywords, `object.ts` for object keywords, `combinators.ts` for applicators) or `src/schema-validator.ts` (for schema-level validation). The orchestration layer in `src/json-validation.ts` calls into these modules.
 2. Guard with a draft version check if the keyword is draft-specific.
-3. Remove relevant entries from `excludedFiles`/`excludedTests` in `test/spec/json-schema-test-suite.common.ts`.
+3. Remove relevant entries from `EXCLUSIONS` in `test/lib/json-schema-test-suite.ts`.
 4. Run the JSON Schema Test Suite to confirm compliance:
    ```bash
-   npx vitest run --silent=false --project node -t "draft2020-12/newKeyword"
+   npx vitest run --silent=false --project node -t "draft2020-12/newKeyword.json"
    ```
 5. Export any new types through `src/index.ts`.
 
@@ -172,7 +172,7 @@ describe('Feature Name', () => {
 
 ### JSON Schema Test Suite
 
-Official test cases loaded via `test/spec/json-schema-test-suite.common.ts`. To enable tests for a newly implemented feature, remove entries from `excludedFiles` / `excludedTests` and confirm they pass.
+Official test cases loaded via `test/spec/json-schema-test-suite.common.ts`. To enable tests for a newly implemented feature, remove its entries from `EXCLUSIONS` in `test/lib/json-schema-test-suite.ts` and confirm they pass.
 
 ## Code conventions
 

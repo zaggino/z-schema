@@ -1,4 +1,4 @@
-import { readdir, writeFile } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -23,15 +23,8 @@ const getJsonFiles = async (directory: string, base: string): Promise<string[]> 
   return nestedFiles.flat();
 };
 
-export const createManifest = async () => {
-  const files = await getJsonFiles(baseDir, baseDir);
-
-  // Remove 'manifest.json' if present
-  const manifestIndex = files.indexOf('/manifest.json');
-  if (manifestIndex !== -1) {
-    files.splice(manifestIndex, 1);
-  }
-
-  await writeFile(join(baseDir, 'manifest.json'), JSON.stringify(files, null, 2));
-  // console.log(`Wrote manifest.json with ${files.length} entries.`);
-};
+/**
+ * The `.json` files under `test/public`, as the paths the browser fetches them by
+ * (`/json-schema-test-suite/...`).
+ */
+export const createManifest = async (): Promise<string[]> => await getJsonFiles(baseDir, baseDir);

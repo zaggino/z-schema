@@ -8,5 +8,5 @@
     "typeRoots": ["../node_modules", "../node_modules/@types", "../node_modules/@types/node"]
   },
   "include": ["./**/*"],
-  "exclude": ["./public/json-schema-test-suite/bin/annotation-tests.ts"]
+  "exclude": ["./public/json-schema-test-suite"]
 }
