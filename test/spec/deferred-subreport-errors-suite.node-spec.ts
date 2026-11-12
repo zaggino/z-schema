@@ -1,21 +1,18 @@
-import type { JsonSchemaVersion } from '../../src/json-schema-versions.ts';
-
 import { expectSameThrown, settle, shapeOf, withEagerSubReports } from '../lib/deferred-errors.ts';
 import {
   createCaseValidator,
   loadSuiteFiles,
   selectCases,
   suiteFileLabel,
+  TESTED_VERSIONS,
   withDialect,
 } from '../lib/json-schema-test-suite.ts';
 import { readPublicJson } from '../lib/read-public-json.ts';
 
-const versions: JsonSchemaVersion[] = ['draft2019-09', 'draft2020-12', 'draft-07', 'draft-04'];
-
 const suiteFiles = await loadSuiteFiles(readPublicJson);
 
 describe('deferred sub-report errors: JSON-Schema-Test-Suite differential', () => {
-  for (const version of versions) {
+  for (const version of TESTED_VERSIONS) {
     it(`${version}: every case yields identical error details`, () => {
       let compared = 0;
       let invalidCompared = 0;
