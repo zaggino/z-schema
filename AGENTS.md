@@ -18,6 +18,7 @@ Default schema version: **draft2020-12**. Configurable via `ZSchemaOptions.versi
 | Test (single)       | `npx vitest run --silent=false --project node -t "draft4/type.json"` |
 | Test (coverage)     | `npm run test:coverage`                                              |
 | Check (lint+format) | `npm run check`                                                      |
+| Benchmark           | `npm run build && npm run bench`                                     |
 | Fix (lint+format)   | `npm run fix`                                                        |
 | Type-check tests    | `npm run build:tests`                                                |
 
@@ -80,6 +81,7 @@ oxfmt.config.ts      # oxfmt config — extends the ultracite preset, overridden
 lefthook.yml          # Git hooks (pre-commit lint/format, pre-push build) — replaces husky + lint-staged
 tsdown.config.ts      # tsdown build configuration (ESM + CJS + UMD)
 scripts/              # Build scripts (copy-schemas.mts)
+bench/                # Benchmark harness on tinybench (cases.mts, run.mts, compare.mts); imports the built dist/
 bin/                  # CLI entry point (z-schema command)
 ```
 
@@ -111,7 +113,7 @@ Concrete rules:
   - Avoid closures allocated per element (e.g. `.some()` / `.filter()` / `.reduce()` callbacks) in hot loops; use an indexed loop with a flag/accumulator.
 - **Lint rules that would push code toward the slower form are intentionally kept `off`** in [oxlint.config.ts](oxlint.config.ts) under the "Intentionally kept off for performance" block (currently `unicorn/prefer-spread`, `typescript/prefer-for-of`, `unicorn/prefer-code-point`). Do not re-enable them, and do not silence the resulting wins by hand-applying their fixes. **If a performance change trips a different enabled rule, the rule yields to performance** — move it into that block (with a one-line rationale comment, following the existing pattern) rather than reverting the faster code. Pure-style rules with no runtime cost (e.g. `curly`) should simply be satisfied.
 - **Behavior preservation is mandatory.** A faster path must produce identical results — same values, order, short-circuit/early-exit semantics, and error paths — for all inputs (including edge cases such as lone surrogates, duplicate ids, empty collections). The full test suite is the gate.
-- If a change might affect performance, benchmark it and call out the result in the PR. When in doubt, favor the faster construct.
+- If a change might affect performance, benchmark it (`npm run build && npm run bench`) and call out the result in the PR. When in doubt, favor the faster construct.
 
 See [docs/conventions.md](docs/conventions.md#performance) for worked before/after examples.
 

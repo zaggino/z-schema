@@ -60,7 +60,7 @@ Append `!` after the type/scope for breaking changes, or include a `BREAKING CHA
    npm run build:tests
    npm test
    ```
-4. Push and open a PR against the `main` branch.
+4. Push and open a PR against the `main` branch. For performance-affecting changes, include `npm run bench` numbers (before and after) in the PR description; see [Benchmarks](testing.md#benchmarks).
 
 ## Making Changes
 
@@ -100,16 +100,17 @@ Append `!` after the type/scope for breaking changes, or include a `BREAKING CHA
 
 ## Code Quality Checks
 
-| Check           | Command                 | Notes                                                      |
-| --------------- | ----------------------- | ---------------------------------------------------------- |
-| Check           | `npm run check`         | ultracite check — oxlint (type-aware) + oxfmt format check |
-| Fix             | `npm run fix`           | ultracite fix — oxlint `--fix` + oxfmt `--write`           |
-| Build           | `npm run build`         | tsdown bundling (ESM + CJS + UMD + types)                  |
-| Test type-check | `npm run build:tests`   | Type-check test files without running them                 |
-| Tests (all)     | `npm test`              | Vitest — node + browser projects                           |
-| Tests (node)    | `npm run test:node`     | Node-only tests with output                                |
-| Tests (browser) | `npm run test:browser`  | Browser tests (Chromium, Firefox, WebKit)                  |
-| Coverage        | `npm run test:coverage` | Istanbul coverage for `src/`                               |
+| Check           | Command                 | Notes                                                                |
+| --------------- | ----------------------- | -------------------------------------------------------------------- |
+| Check           | `npm run check`         | ultracite check — oxlint (type-aware) + oxfmt format check           |
+| Fix             | `npm run fix`           | ultracite fix — oxlint `--fix` + oxfmt `--write`                     |
+| Build           | `npm run build`         | tsdown bundling (ESM + CJS + UMD + types)                            |
+| Test type-check | `npm run build:tests`   | Type-check test files without running them                           |
+| Tests (all)     | `npm test`              | Vitest — node + browser projects                                     |
+| Tests (node)    | `npm run test:node`     | Node-only tests with output                                          |
+| Tests (browser) | `npm run test:browser`  | Browser tests (Chromium, Firefox, WebKit)                            |
+| Coverage        | `npm run test:coverage` | Istanbul coverage for `src/`                                         |
+| Benchmark       | `npm run bench`         | tinybench harness over the built `dist/` (run `npm run build` first) |
 
 ## Pre-commit & Pre-push Hooks
 

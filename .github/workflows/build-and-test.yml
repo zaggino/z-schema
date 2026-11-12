@@ -91,3 +91,45 @@ jobs:
           git add docs/test-coverage.md README.md
           git commit --no-verify -m "chore(ci): update coverage artifacts"
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
+
+  benchmark:
+    # Informational only: compares the PR against its base on a shared runner.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      contents: read
+    concurrency:
+      group: benchmark-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout head
+        uses: actions/checkout@v7.0.1
+      - name: Checkout base
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+      - name: Use Node.js
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: 'npm'
+      - name: Build head
+        run: |
+          git submodule update --init
+          npm ci
+          npm run build
+      - name: Build base
+        working-directory: base
+        run: |
+          git submodule update --init
+          npm ci
+          npm run build
+      - name: Benchmark base
+        run: node bench/run.mts --lib base/dist/index.js --json base.json
+      - name: Benchmark head
+        run: node bench/run.mts --json head.json
+      - name: Compare
+        run: node bench/compare.mts base.json head.json >> "$GITHUB_STEP_SUMMARY"
