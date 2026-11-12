@@ -59,7 +59,10 @@ npm install --global z-schema
 z-schema mySchema.json
 z-schema mySchema.json myData.json
 z-schema --strictMode mySchema.json myData.json
+z-schema --draft draft-07 mySchema.json myData.json
 ```
+
+`--draft` accepts `draft-04`, `draft-06`, `draft-07`, `draft2019-09` or `draft2020-12`. A schema without an id is identified by its file location, so relative file `$ref`s resolve next to the schema file; an id the schema declares is kept (a relative one is resolved against the file location). Remote references are https-only and refuse private addresses.
 
 ## Usage
 
