@@ -133,7 +133,9 @@ export const isFormatAssertionVocabEnabled = (
     return true;
   }
 
-  // For draft 2019-09, check if the format vocabulary is enabled (true)
+  // For draft 2019-09, check if the format vocabulary is enabled (true). Here the
+  // boolean does decide: the draft has one format vocabulary for both behaviors, and
+  // its standard meta-schema lists it as `false`, which must stay annotation-only.
   if (Object.hasOwn(vocabulary, VOCAB_FORMAT_2019_09)) {
     return vocabulary[VOCAB_FORMAT_2019_09];
   }

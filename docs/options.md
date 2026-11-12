@@ -354,7 +354,7 @@ const validator = ZSchema.create({
 Controls whether `format` is treated as an assertion during validation.
 
 - `null` (default): legacy behavior — always assert format validation (built-in/custom format validators are enforced and report `INVALID_FORMAT` on mismatch).
-- `true`: respect the meta-schema `$vocabulary` — for draft 2019-09 and draft 2020-12, format is treated as annotation-only unless the meta-schema enables it as an assertion. In draft 2020-12 that is a meta-schema whose `$vocabulary` lists the format-assertion vocabulary, with either value: `false` only tells implementations that do not know the vocabulary that they may process the schema anyway. In draft 2019-09 it is a meta-schema that sets the format vocabulary to `true`. For older drafts (draft-04/06/07), format is always asserted.
+- `true`: respect the meta-schema `$vocabulary` — for draft 2019-09 and draft 2020-12, format is annotation-only unless the meta-schema opts in to assertion. In draft 2020-12 it opts in by listing the format-assertion vocabulary in `$vocabulary`, as `true` or as `false`: the value only tells implementations that do not know the vocabulary whether they may process the schema anyway. In draft 2019-09 it opts in by setting the format vocabulary to `true`; the standard meta-schema sets it to `false`. For older drafts (draft-04/06/07), format is always asserted.
 - `false`: treat `format` as annotation-only (no assertion failures for format checks in any draft).
 
 Default: `null`
