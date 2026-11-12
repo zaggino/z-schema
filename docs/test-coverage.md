@@ -42,10 +42,10 @@ Line coverage status: **high**
 | src/validation/object.ts      |     97% |         97% |       100% |      95% |
 | src/validation/ref.ts         |     98% |         98% |       100% |      95% |
 | src/validation/shared.ts      |     97% |         97% |       100% |      94% |
-| src/validation/string.ts      |     93% |         93% |       100% |      91% |
+| src/validation/string.ts      |     91% |         92% |       100% |      91% |
 | src/validation/type.ts        |     98% |         98% |       100% |      95% |
 | src/validation/unevaluated.ts |     94% |         94% |        96% |      93% |
-| src/z-schema-base.ts          |     98% |         98% |       100% |      94% |
+| src/z-schema-base.ts          |     98% |         98% |       100% |      93% |
 | src/z-schema-options.ts       |    100% |        100% |       100% |      92% |
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
