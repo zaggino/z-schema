@@ -1,11 +1,19 @@
 import { CompiledSchemaCache } from '../../src/compiled-schema-cache.ts';
 import { SchemaCache } from '../../src/schema-cache.ts';
+import { normalizeOptions } from '../../src/z-schema-options.ts';
 import { setSchemaReader } from '../../src/z-schema-reader.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
 const unknownFormatSchema = () => ({ $schema: 'http://json-schema.org/draft-07/schema#', format: 'zcache-fmt' });
 
 const fake = (n: number) => ({ title: String(n) }) as never;
+
+const snapshotKeys = () => {
+  const cache = new CompiledSchemaCache();
+  const options = normalizeOptions();
+  cache.set('k', fake(1), options);
+  return Object.keys(cache.getEntry('k', options)!.options);
+};
 
 const code = (result: { err?: { details?: Array<{ code: string }> } }) => result.err?.details?.[0].code;
 
@@ -305,6 +313,44 @@ describe('compiled schema cache', () => {
       expect(spy).not.toHaveBeenCalled();
       validator.options.customFormats!['zcache-fmt'] = null;
       expect(code(validator.validateSafe('a', unknownFormatSchema()))).toBe('UNKNOWN_FORMAT');
+    });
+
+    // The lookup compares options one by one by name, so this is what keeps that list complete.
+    // The snapshot's own keys are the source: its type forces it to hold every option.
+    it.each(snapshotKeys())('a changed, deleted or restored %s is noticed', (key) => {
+      const options = normalizeOptions() as Record<string, unknown>;
+      const cache = new CompiledSchemaCache();
+      const original = options[key];
+      cache.set('k', fake(1), options);
+      expect(cache.get('k', options)).toBeDefined();
+
+      options[key] = Symbol('changed');
+      expect(cache.get('k', options)).toBeUndefined();
+
+      options[key] = original;
+      cache.set('k', fake(1), options);
+      expect(cache.get('k', options)).toBeDefined();
+      delete options[key];
+      // deleting a key whose value already was undefined changes nothing a reader of it can see
+      expect(cache.get('k', options) === undefined).toBe(original !== undefined);
+    });
+
+    it('notices a replaced options object and a replaced customFormats object with other content', () => {
+      const options = normalizeOptions();
+      options.customFormats = { a: () => true };
+      const cache = new CompiledSchemaCache();
+      cache.set('k', fake(1), options);
+      expect(cache.get('k', { ...options })).toBeDefined();
+      expect(cache.get('k', { ...options, customFormats: { ...options.customFormats } })).toBeDefined();
+      expect(cache.get('k', { ...options, customFormats: { a: () => true } })).toBeUndefined();
+    });
+
+    it('ignores keys that are not options', () => {
+      const options = normalizeOptions() as Record<string, unknown>;
+      const cache = new CompiledSchemaCache();
+      cache.set('k', fake(1), options);
+      options.notAnOption = 1;
+      expect(cache.get('k', options)).toBeDefined();
     });
   });
 

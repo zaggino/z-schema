@@ -7,7 +7,7 @@ Line coverage status: **high**
 | File                          |  Line % | Statement % | Function % | Branch % |
 | ----------------------------- | ------: | ----------: | ---------: | -------: |
 | src/async-tasks.ts            |     95% |         95% |       100% |      92% |
-| src/compiled-schema-cache.ts  |     95% |         95% |        94% |      93% |
+| src/compiled-schema-cache.ts  |     95% |         95% |        94% |      95% |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
 | src/fast-validator.ts         |     96% |         96% |        99% |      95% |
 | src/format-validators.ts      |     95% |         95% |        94% |      93% |
@@ -45,7 +45,7 @@ Line coverage status: **high**
 | src/validation/type.ts        |    100% |        100% |       100% |      96% |
 | src/validation/unevaluated.ts |     90% |         91% |        83% |      90% |
 | src/z-schema-base.ts          |     98% |         98% |       100% |      94% |
-| src/z-schema-options.ts       |     96% |         96% |       100% |      83% |
+| src/z-schema-options.ts       |    100% |        100% |       100% |      92% |
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
 | src/z-schema.ts               |     91% |         92% |        94% |      94% |

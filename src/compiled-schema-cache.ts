@@ -103,23 +103,48 @@ export function hasUnresolvedRef(node: unknown, maxDepth: number, visited = new 
   return false;
 }
 
-type OptionsSnapshot = Record<string, unknown>;
+/**
+ * Every option, required: a new `ZSchemaOptions` key does not compile until {@link snapshotOptions}
+ * lists it. {@link sameOptions} must compare the same keys (a spec iterates the snapshot's keys to check).
+ */
+type OptionsSnapshot = { [K in keyof Required<ZSchemaOptions>]: ZSchemaOptions[K] };
 
-function snapshotOptions(options: ZSchemaOptions): OptionsSnapshot {
-  const snapshot: OptionsSnapshot = {};
-  const source = options as Record<string, unknown>;
-  const keys = Object.keys(source);
-  for (let i = 0; i < keys.length; i++) {
-    snapshot[keys[i]] = source[keys[i]];
-  }
-  const { customFormats } = options;
-  if (customFormats && typeof customFormats === 'object') {
-    snapshot.customFormats = { ...customFormats };
-  }
-  return snapshot;
+function snapshotOptions(o: ZSchemaOptions): OptionsSnapshot {
+  const { customFormats } = o;
+  return {
+    version: o.version,
+    asyncTimeout: o.asyncTimeout,
+    forceAdditional: o.forceAdditional,
+    assumeAdditional: o.assumeAdditional,
+    enumCaseInsensitiveComparison: o.enumCaseInsensitiveComparison,
+    forceItems: o.forceItems,
+    forceMinItems: o.forceMinItems,
+    forceMaxItems: o.forceMaxItems,
+    forceMinLength: o.forceMinLength,
+    forceMaxLength: o.forceMaxLength,
+    forceProperties: o.forceProperties,
+    ignoreUnresolvableReferences: o.ignoreUnresolvableReferences,
+    noExtraKeywords: o.noExtraKeywords,
+    noTypeless: o.noTypeless,
+    noEmptyStrings: o.noEmptyStrings,
+    noEmptyArrays: o.noEmptyArrays,
+    strictUris: o.strictUris,
+    strictMode: o.strictMode,
+    reportPathAsArray: o.reportPathAsArray,
+    breakOnFirstError: o.breakOnFirstError,
+    pedanticCheck: o.pedanticCheck,
+    ignoreUnknownFormats: o.ignoreUnknownFormats,
+    formatAssertions: o.formatAssertions,
+    customValidator: o.customValidator,
+    // copied, so registering a format by writing into the live object is noticed
+    customFormats: customFormats && typeof customFormats === 'object' ? { ...customFormats } : customFormats,
+    maxRecursionDepth: o.maxRecursionDepth,
+  };
 }
 
-function sameShallow(a: Record<string, unknown>, b: Record<string, unknown>): boolean {
+type CustomFormats = NonNullable<ZSchemaOptions['customFormats']>;
+
+function sameShallow(a: CustomFormats, b: CustomFormats): boolean {
   const keys = Object.keys(a);
   if (keys.length !== Object.keys(b).length) {
     return false;
@@ -132,25 +157,47 @@ function sameShallow(a: Record<string, unknown>, b: Record<string, unknown>): bo
   return true;
 }
 
-function sameOptions(snapshot: OptionsSnapshot, snapshotKeyCount: number, options: ZSchemaOptions): boolean {
-  const current = options as Record<string, unknown>;
-  const keys = Object.keys(current);
-  if (keys.length !== snapshotKeyCount) {
-    return false;
+function sameCustomFormats(was: ZSchemaOptions['customFormats'], now: ZSchemaOptions['customFormats']): boolean {
+  if (was && now && typeof was === 'object' && typeof now === 'object') {
+    return sameShallow(was, now);
   }
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    const was = snapshot[key];
-    const now = current[key];
-    if (key === 'customFormats' && was && now && typeof was === 'object' && typeof now === 'object') {
-      if (!sameShallow(was as Record<string, unknown>, now as Record<string, unknown>)) {
-        return false;
-      }
-    } else if (was !== now || !(key in snapshot)) {
-      return false;
-    }
-  }
-  return true;
+  return was === now;
+}
+
+/**
+ * Whether the live options still equal the snapshot. Runs on every cached validation, so each option
+ * is compared by name (monomorphic property loads) instead of looping over `Object.keys`. Keys that
+ * are not options (the constructor rejects them) are not compared: nothing in the library reads them.
+ */
+function sameOptions(s: OptionsSnapshot, o: ZSchemaOptions): boolean {
+  return (
+    s.version === o.version &&
+    s.asyncTimeout === o.asyncTimeout &&
+    s.forceAdditional === o.forceAdditional &&
+    s.assumeAdditional === o.assumeAdditional &&
+    s.enumCaseInsensitiveComparison === o.enumCaseInsensitiveComparison &&
+    s.forceItems === o.forceItems &&
+    s.forceMinItems === o.forceMinItems &&
+    s.forceMaxItems === o.forceMaxItems &&
+    s.forceMinLength === o.forceMinLength &&
+    s.forceMaxLength === o.forceMaxLength &&
+    s.forceProperties === o.forceProperties &&
+    s.ignoreUnresolvableReferences === o.ignoreUnresolvableReferences &&
+    s.noExtraKeywords === o.noExtraKeywords &&
+    s.noTypeless === o.noTypeless &&
+    s.noEmptyStrings === o.noEmptyStrings &&
+    s.noEmptyArrays === o.noEmptyArrays &&
+    s.strictUris === o.strictUris &&
+    s.strictMode === o.strictMode &&
+    s.reportPathAsArray === o.reportPathAsArray &&
+    s.breakOnFirstError === o.breakOnFirstError &&
+    s.pedanticCheck === o.pedanticCheck &&
+    s.ignoreUnknownFormats === o.ignoreUnknownFormats &&
+    s.formatAssertions === o.formatAssertions &&
+    s.customValidator === o.customValidator &&
+    s.maxRecursionDepth === o.maxRecursionDepth &&
+    sameCustomFormats(s.customFormats, o.customFormats)
+  );
 }
 
 /** A compiled schema plus the bookkeeping that decides when it is stale. */
@@ -160,7 +207,6 @@ export interface CompiledSchemaEntry {
   fast?: FastValidator | null;
   generation: number;
   options: OptionsSnapshot;
-  optionsKeyCount: number;
 }
 
 /**
@@ -248,10 +294,7 @@ export class CompiledSchemaCache {
     if (entry === undefined) {
       return undefined;
     }
-    if (
-      entry.generation === globalSchemaStateGeneration &&
-      sameOptions(entry.options, entry.optionsKeyCount, options)
-    ) {
+    if (entry.generation === globalSchemaStateGeneration && sameOptions(entry.options, options)) {
       return entry;
     }
     this.delete(key);
@@ -273,12 +316,10 @@ export class CompiledSchemaCache {
     ) {
       this.delete(this.entries.keys().next().value!);
     }
-    const snapshot = snapshotOptions(options);
     this.entries.set(key, {
       schema,
       generation: globalSchemaStateGeneration,
-      options: snapshot,
-      optionsKeyCount: Object.keys(snapshot).length,
+      options: snapshotOptions(options),
     });
     this.totalKeyLength += key.length;
   }
