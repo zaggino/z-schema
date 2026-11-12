@@ -375,8 +375,8 @@ z-schema --draft draft-07 mySchema.json myData.json
 ```
 
 - `--draft <version>` sets the `version` option (default: `draft2020-12`).
-- The schema's id is only set from the file path when it has neither `$id` nor `id` (`id` for draft-04, `$id` otherwise).
-- Relative file `$ref`s are resolved against the schema file's location.
+- A schema that declares no id is identified by the `file:` URL of its path (`id` for draft-04, `$id` otherwise), so relative file `$ref`s resolve next to the schema file, from any working directory.
+- An id the schema declares is kept. A relative one is resolved against the file's location; an absolute one (for example `https://example.com/schema.json`) becomes the base for the schema's relative `$ref`s, which are then fetched from there and not read from disk.
 - Remote references are https-only, redirects are not followed, and private/internal addresses are refused.
 
 ## TypeScript Types

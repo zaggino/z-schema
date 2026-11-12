@@ -7,6 +7,7 @@ import fs from 'fs';
 import net from 'net';
 import path from 'path';
 import { request } from 'https';
+import { fileURLToPath, pathToFileURL } from 'url';
 import pkg from '../package.json' with { type: 'json' };
 import ZSchema from '../dist/index.js';
 
@@ -36,13 +37,27 @@ var blockedAddresses = new net.BlockList();
   ['169.254.0.0', 16],
   ['0.0.0.0', 8],
   ['100.64.0.0', 10],
+  ['192.0.0.0', 24],
+  ['198.18.0.0', 15],
+  ['224.0.0.0', 4],
+  ['240.0.0.0', 4],
 ].forEach(function (entry) {
   blockedAddresses.addSubnet(entry[0], entry[1], 'ipv4');
 });
 blockedAddresses.addAddress('::1', 'ipv6');
 blockedAddresses.addAddress('::', 'ipv6');
-blockedAddresses.addSubnet('fc00::', 7, 'ipv6');
-blockedAddresses.addSubnet('fe80::', 10, 'ipv6');
+[
+  ['fc00::', 7],
+  ['fe80::', 10],
+  ['fec0::', 10],
+  ['ff00::', 8],
+  // ranges that embed an IPv4 address and can therefore reach the blocked IPv4 ranges: NAT64, 6to4, Teredo
+  ['64:ff9b::', 96],
+  ['2002::', 16],
+  ['2001::', 32],
+].forEach(function (entry) {
+  blockedAddresses.addSubnet(entry[0], entry[1], 'ipv6');
+});
 
 function isBlockedAddress(address, family) {
   var type = family === 6 || family === 'IPv6' ? 'ipv6' : 'ipv4';
@@ -145,11 +160,25 @@ function readJson(fileName) {
 var validator = ZSchema.create(options);
 var schemaFilePath = program.args.shift();
 var schema = readJson(schemaFilePath);
-// Anchor relative file $refs to the schema file, unless the schema declares its own id
+// The schema's retrieval location as a file: URL. Unlike the path as typed, it is a valid URI on every platform
+// (backslashes, spaces), so it can be the id that relative $refs resolve against.
+var schemaFileUrl = pathToFileURL(path.resolve(schemaFilePath)).href;
 if (schema !== null && typeof schema === 'object' && !Array.isArray(schema)) {
-  if (typeof schema.$id !== 'string' && typeof schema.id !== 'string') {
-    var effectiveVersion = options.version || defaultOptions.version;
-    schema[effectiveVersion === 'draft-04' ? 'id' : '$id'] = schemaFilePath;
+  // The keyword the validator reads the id from: "id" alone under draft-04 (selected, or declared by the schema),
+  // otherwise "$id" with "id" as a fallback.
+  var isDraft4 =
+    (options.version || defaultOptions.version) === 'draft-04' ||
+    (typeof schema.$schema === 'string' && schema.$schema.includes('draft-04'));
+  var idKey = isDraft4 || (typeof schema.$id !== 'string' && typeof schema.id === 'string') ? 'id' : '$id';
+  if (typeof schema[idKey] === 'string') {
+    // An id the schema declares is kept; a relative one is resolved against the file's location.
+    try {
+      schema[idKey] = new URL(schema[idKey], schemaFileUrl).href;
+    } catch (_e) {
+      // not resolvable as a URI reference: leave it for schema validation to report
+    }
+  } else {
+    schema[idKey] = schemaFileUrl;
   }
 }
 
@@ -227,8 +256,15 @@ function validateWithAutomaticDownloads(filePath, data, schema, callback) {
             process.exit(1);
           });
         } else {
-          // url is already resolved against the schema id (the schema's path), so do not join its dirname again
-          var referencePath = path.resolve(process.cwd(), url);
+          // url is already resolved against the schema id, normally the schema's file: URL, so the schema's
+          // directory must not be joined again. Anything else is a path relative to the working directory.
+          var referencePath;
+          try {
+            referencePath = url.startsWith('file:') ? fileURLToPath(url) : path.resolve(process.cwd(), url);
+          } catch (_e) {
+            console.error('Cannot resolve the reference to a file: ' + url);
+            process.exit(1);
+          }
           var reference = readJson(referencePath);
           validator.setRemoteReference(url, reference);
           finished++;
