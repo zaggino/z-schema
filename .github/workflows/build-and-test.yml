@@ -25,9 +25,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v7.1.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
@@ -45,9 +45,10 @@ jobs:
         run: npm run check
       - name: Build
         run: npm run build
+      # Browser projects run on the 22.x leg only: they are independent of the Node version.
       - if: matrix.node-version != '22.x'
-        name: Tests
-        run: npm test
+        name: Tests (node project)
+        run: npx vitest run --project node
       - if: matrix.node-version == '22.x'
         name: Tests with coverage
         run: npm run test:coverage
@@ -56,13 +57,18 @@ jobs:
         run: npm run coverage:artifacts
       - if: matrix.node-version == '22.x' && github.event_name == 'pull_request'
         name: Commit coverage artifacts to PR branch
+        env:
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REPO: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           # Skip for fork PRs (no push permission) and bot actors (avoid loops)
-          if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+          if [ "$HEAD_REPO" != "$BASE_REPO" ]; then
             echo "Fork PR — skipping coverage commit."
             exit 0
           fi
-          if [ "${{ github.actor }}" = "github-actions[bot]" ]; then
+          if [ "$ACTOR" = "github-actions[bot]" ]; then
             echo "Bot actor — skipping coverage commit."
             exit 0
           fi
@@ -72,8 +78,8 @@ jobs:
           cp README.md /tmp/README.md
 
           # Switch to the actual PR branch (force to discard dirty working tree)
-          git fetch origin ${{ github.event.pull_request.head.ref }}
-          git checkout -f ${{ github.event.pull_request.head.ref }}
+          git fetch origin "$HEAD_REF"
+          git checkout -f "$HEAD_REF"
 
           # Restore and format (same as pre-commit hook would)
           cp /tmp/test-coverage.md docs/test-coverage.md
@@ -90,4 +96,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/test-coverage.md README.md
           git commit --no-verify -m "chore(ci): update coverage artifacts"
-          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          git push origin "HEAD:$HEAD_REF"
