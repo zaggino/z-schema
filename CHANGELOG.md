@@ -1,5 +1,31 @@
 # Changelog
 
+## [12.6.0](https://github.com/zaggino/z-schema/compare/v12.5.1...v12.6.0) (2026-11-13)
+
+
+### Bug Fixes
+
+* **cli:** keep schema ids, add --draft and harden remote fetching ([#549](https://github.com/zaggino/z-schema/issues/549)) ([c9e245c](https://github.com/zaggino/z-schema/commit/c9e245cbb918f5cf02f6ad4f7273d6a5b3a84328))
+* **format:** honor the format-assertion vocabulary when listed as false and for unknown formats ([#541](https://github.com/zaggino/z-schema/issues/541)) ([41ed390](https://github.com/zaggino/z-schema/commit/41ed39065444cfa9494021532b637596690f2bbf))
+* **numeric:** make multipleOf exact for integers above 2^53 ([#540](https://github.com/zaggino/z-schema/issues/540)) ([277ab76](https://github.com/zaggino/z-schema/commit/277ab760eead2691f3287206929326f74955f179))
+* **report:** correct schemaPath and schemaId in validation errors ([#546](https://github.com/zaggino/z-schema/issues/546)) ([a86beed](https://github.com/zaggino/z-schema/commit/a86beedf47182d808718ed916d495b7fcff72d61))
+* **report:** format undefined message params instead of throwing ([#555](https://github.com/zaggino/z-schema/issues/555)) ([5acad38](https://github.com/zaggino/z-schema/commit/5acad386e214d691c228827850fcc1f2d03618d4))
+* **schema:** ignore non-string ids so a property named id is not taken for a schema id ([#556](https://github.com/zaggino/z-schema/issues/556)) ([156f00f](https://github.com/zaggino/z-schema/commit/156f00fd45e6d63ecd6bdcde7dcd40e677f18a7a))
+* **validate:** run the interpreter for filtered calls on cached schemas ([#551](https://github.com/zaggino/z-schema/issues/551)) ([8804905](https://github.com/zaggino/z-schema/commit/880490585d91fb17a279b311055c04e42e2219bd))
+
+
+### Performance Improvements
+
+* add compiled boolean fast path ahead of the interpreter ([#550](https://github.com/zaggino/z-schema/issues/550)) ([312ec21](https://github.com/zaggino/z-schema/commit/312ec215920c38007b9fb82d9088ed4b5c64680f))
+* **cache:** compare options with a fixed-shape snapshot ([#552](https://github.com/zaggino/z-schema/issues/552)) ([4ebba85](https://github.com/zaggino/z-schema/commit/4ebba8529b9621647f3a5a097b635cf4b9f3ad31))
+* **fast-validator:** cover unevaluated keywords, draft-07 content and sync custom formats ([#554](https://github.com/zaggino/z-schema/issues/554)) ([fd0e6aa](https://github.com/zaggino/z-schema/commit/fd0e6aadbeeb692da3f10e1cea9a5c53ae1569e4))
+* **validation:** cut per-key work in recurseObject ([#547](https://github.com/zaggino/z-schema/issues/547)) ([0c3d9f8](https://github.com/zaggino/z-schema/commit/0c3d9f86e0f3778cf08fb7cf505a39182bfb7c8c))
+
+
+### Miscellaneous Chores
+
+* release 12.6.0 ([#559](https://github.com/zaggino/z-schema/issues/559)) ([f0a35a5](https://github.com/zaggino/z-schema/commit/f0a35a5d3bee48d7a81fde36032a0e9964dba3ab))
+
 ## [12.5.1](https://github.com/zaggino/z-schema/compare/v12.5.0...v12.5.1) (2026-10-31)
 
 
