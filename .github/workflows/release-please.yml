@@ -5,6 +5,20 @@ on:
   push:
     branches:
       - main
+  # Manual recovery: with `publish` set, skip release-please and publish `ref`
+  # to npm, for a release whose GitHub release/tag exists but whose publish
+  # failed (a re-run would see the release as already created and skip it).
+  # Without `publish`, it runs release-please as a push to main would.
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Skip release-please and publish to npm'
+        type: boolean
+        default: false
+      ref:
+        description: 'Tag or commit to publish (e.g. v12.6.0); defaults to the dispatched branch'
+        type: string
+        required: false
 
 permissions:
   id-token: write # Required for OIDC
@@ -15,40 +29,48 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     environment: main
+    # Same image as build-and-test: ships the browsers for the locked Playwright
+    # version, so the job doesn't depend on Playwright supporting the runner OS.
+    container:
+      image: mcr.microsoft.com/playwright:v1.60.0-noble
+      options: --user 1001
     steps:
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
+        if: ${{ !inputs.publish }}
         with:
           release-type: node
           token: ${{ secrets.GH_TOKEN }}
 
+      - id: gate
+        run: echo "publish=${{ (steps.release.outputs.release_created == 'true' || inputs.publish) && 'true' || 'false' }}" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
+        with:
+          ref: ${{ inputs.ref }}
 
       - run: git submodule update --init
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
         with:
           node-version-file: .nvmrc
           registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
-        if: ${{ steps.release.outputs.release_created }}
-
-      - run: npx playwright install --with-deps
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
 
       # Generates src/schemas/*.json from the json-schema-spec submodule.
       # Required before `check`: the type-aware lint resolves the JSON imports
       # in z-schema-versions.ts, which are absent on a fresh checkout until the
       # build's copy:schemas step runs.
       - run: npm run copy:schemas
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
 
       - run: npm run check
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
 
       - run: npm publish --verbose # runs both build & tests in prepublishOnly script
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
