@@ -5,20 +5,19 @@ on:
   push:
     branches:
       - main
-  # Manual recovery: with `publish` set, skip release-please and publish `ref`
-  # to npm, for a release whose GitHub release/tag exists but whose publish
-  # failed (a re-run would see the release as already created and skip it).
-  # Without `publish`, it runs release-please as a push to main would.
+  # Manual recovery for a release whose GitHub release/tag exists but whose npm
+  # publish failed (a re-run sees the release as already created and skips it).
+  # With `publish`, dispatch from main: release-please is skipped and main is
+  # published, provided its package.json version is tagged and main matches that
+  # tag outside .github/. Publishing main itself keeps npm provenance (which
+  # records the run's ref and sha) truthful. Without `publish`, it runs
+  # release-please as a push to main would.
   workflow_dispatch:
     inputs:
       publish:
-        description: 'Skip release-please and publish to npm'
+        description: 'Skip release-please and publish main to npm (its version must already be tagged)'
         type: boolean
         default: false
-      ref:
-        description: 'Tag or commit to publish (e.g. v12.6.0); defaults to the dispatched branch'
-        type: string
-        required: false
 
 permissions:
   id-token: write # Required for OIDC
@@ -29,8 +28,10 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     environment: main
-    # Same image as build-and-test: ships the browsers for the locked Playwright
-    # version, so the job doesn't depend on Playwright supporting the runner OS.
+    # Same image as build-and-test.yml: ships the browsers for the locked
+    # Playwright version, so the job doesn't depend on Playwright supporting the
+    # runner OS. Keep the tag in sync with build-and-test.yml and the playwright
+    # version in package-lock.json.
     container:
       image: mcr.microsoft.com/playwright:v1.60.0-noble
       options: --user 1001
@@ -48,7 +49,25 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: ${{ steps.gate.outputs.publish == 'true' }}
         with:
-          ref: ${{ inputs.ref }}
+          fetch-depth: 0 # the manual-publish guard below compares HEAD with the release tag
+
+      - name: Guard manual publish
+        if: ${{ inputs.publish }}
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::Manual publish must be dispatched from main, not $GITHUB_REF"
+            exit 1
+          fi
+          tag="v$(node -p "require('./package.json').version")"
+          if ! git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
+            echo "::error::Tag $tag does not exist; manual publish only recovers an existing release"
+            exit 1
+          fi
+          if ! git diff --quiet "$tag" HEAD -- . ':(exclude).github'; then
+            echo "::error::main differs from $tag outside .github/; refusing to publish it as ${tag#v}"
+            git diff --stat "$tag" HEAD -- . ':(exclude).github'
+            exit 1
+          fi
 
       - run: git submodule update --init
         if: ${{ steps.gate.outputs.publish == 'true' }}
