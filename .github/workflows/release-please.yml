@@ -5,6 +5,19 @@ on:
   push:
     branches:
       - main
+  # Manual recovery for a release whose GitHub release/tag exists but whose npm
+  # publish failed (a re-run sees the release as already created and skips it).
+  # With `publish`, dispatch from main: release-please is skipped and main is
+  # published, provided its package.json version is tagged and main matches that
+  # tag outside .github/. Publishing main itself keeps npm provenance (which
+  # records the run's ref and sha) truthful. Without `publish`, it runs
+  # release-please as a push to main would.
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Skip release-please and publish main to npm (its version must already be tagged)'
+        type: boolean
+        default: false
 
 permissions:
   id-token: write # Required for OIDC
@@ -15,40 +28,68 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     environment: main
+    # Same image as build-and-test.yml: ships the browsers for the locked
+    # Playwright version, so the job doesn't depend on Playwright supporting the
+    # runner OS. Keep the tag in sync with build-and-test.yml and the playwright
+    # version in package-lock.json.
+    container:
+      image: mcr.microsoft.com/playwright:v1.60.0-noble
+      options: --user 1001
     steps:
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
+        if: ${{ !inputs.publish }}
         with:
           release-type: node
           token: ${{ secrets.GH_TOKEN }}
 
+      - id: gate
+        run: echo "publish=${{ (steps.release.outputs.release_created == 'true' || inputs.publish) && 'true' || 'false' }}" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
+        with:
+          fetch-depth: 0 # the manual-publish guard below compares HEAD with the release tag
+
+      - name: Guard manual publish
+        if: ${{ inputs.publish }}
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::Manual publish must be dispatched from main, not $GITHUB_REF"
+            exit 1
+          fi
+          tag="v$(node -p "require('./package.json').version")"
+          if ! git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
+            echo "::error::Tag $tag does not exist; manual publish only recovers an existing release"
+            exit 1
+          fi
+          if ! git diff --quiet "$tag" HEAD -- . ':(exclude).github'; then
+            echo "::error::main differs from $tag outside .github/; refusing to publish it as ${tag#v}"
+            git diff --stat "$tag" HEAD -- . ':(exclude).github'
+            exit 1
+          fi
 
       - run: git submodule update --init
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
         with:
           node-version-file: .nvmrc
           registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
-        if: ${{ steps.release.outputs.release_created }}
-
-      - run: npx playwright install --with-deps
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
 
       # Generates src/schemas/*.json from the json-schema-spec submodule.
       # Required before `check`: the type-aware lint resolves the JSON imports
       # in z-schema-versions.ts, which are absent on a fresh checkout until the
       # build's copy:schemas step runs.
       - run: npm run copy:schemas
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
 
       - run: npm run check
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
 
       - run: npm publish --verbose # runs both build & tests in prepublishOnly script
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.publish == 'true' }}
