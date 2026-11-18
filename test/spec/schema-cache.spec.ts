@@ -1,5 +1,6 @@
 import { SchemaCache } from '../../src/schema-cache.ts';
 import { ZSchema } from '../../src/z-schema.ts';
+import { guardBuiltinPrototypes } from '../lib/prototype-guard.ts';
 
 describe('SchemaCache remote $ref', () => {
   const remoteSchemaUrl = 'http://localhost:1234/integer.json';
@@ -39,5 +40,99 @@ describe('SchemaCache remote $ref', () => {
     expect(result.valid).toBe(false);
     expect(result.err).toBeDefined();
     expect(result.err!.details?.[0].code).toBe('INVALID_TYPE');
+  });
+});
+
+const isValid = (data: unknown, schema: object) => ZSchema.create().validateSafe(data, schema).valid;
+
+const codesOf = (schema: object) =>
+  (ZSchema.create().validateSafe({ a: 1 }, schema).err?.details ?? []).map((detail) => detail.code);
+
+/** Result of `run`, or the message of the error it threw. */
+const outcomeOf = (run: () => unknown) => {
+  try {
+    return run();
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error);
+  }
+};
+
+const validateOutcome = (schema: object) => outcomeOf(() => ZSchema.create().validate({ a: 1 }, schema));
+
+const schemaOutcome = (schema: object) => outcomeOf(() => ZSchema.create().validateSchema(schema));
+
+const expectKeywordsEnforced = () => {
+  expect(isValid({ a: 1, z: 2 }, { type: 'object', properties: { a: {} }, additionalProperties: false })).toBe(false);
+  expect(isValid({}, { type: 'object', required: ['a'] })).toBe(false);
+  expect(isValid(1, { type: 'number', minimum: 5 })).toBe(false);
+  expect(isValid('q', { enum: ['a', 'b'] })).toBe(false);
+  expect(isValid('abc', { type: 'string', pattern: '^z' })).toBe(false);
+};
+
+describe('SchemaCache $ref fragment resolution', () => {
+  const remoteUrl = 'http://localhost:1234/fragment-own-properties.json';
+  const expectCleanPrototypes = guardBuiltinPrototypes();
+
+  beforeAll(() => {
+    ZSchema.setRemoteReference(remoteUrl, { type: 'object' });
+  });
+
+  // Each schema is reported exactly like its twin, whose fragment names a missing own property.
+  const unresolvableFragments: Array<[string, object, object]> = [
+    ['#/__proto__', { $ref: '#/__proto__' }, { $ref: '#/nope' }],
+    ['#/constructor/prototype', { $ref: '#/constructor/prototype' }, { $ref: '#/nope/nope' }],
+    ['#/$defs/__proto__', { $defs: { a: {} }, $ref: '#/$defs/__proto__' }, { $defs: { a: {} }, $ref: '#/$defs/nope' }],
+    ['#/toString', { $ref: '#/toString' }, { $ref: '#/nope' }],
+    ['percent-encoded #/__proto__', { $ref: '#/%5F%5Fproto%5F%5F' }, { $ref: '#/nope' }],
+    [
+      '#/prefixItems/__proto__ (an array)',
+      { prefixItems: [{}], $ref: '#/prefixItems/__proto__' },
+      { prefixItems: [{}], $ref: '#/prefixItems/nope' },
+    ],
+    // only reachable with a live object as the schema: JSON cannot hold a function
+    ["a function's own prototype", { x: Object, $ref: '#/x/prototype' }, { x: Object, $ref: '#/x/nope' }],
+    ['#/title/length (a string)', { title: 'abc', $ref: '#/title/length' }, { title: 'abc', $ref: '#/title/nope' }],
+    ['a remote document with #/__proto__', { $ref: `${remoteUrl}#/__proto__` }, { $ref: `${remoteUrl}#/nope` }],
+  ];
+
+  describe.each(unresolvableFragments)('with a fragment that leaves the schema data: %s', (_name, schema, missing) => {
+    it('does not resolve it in validateSafe', () => {
+      const codes = codesOf(schema);
+      expect(codes.length).toBeGreaterThan(0);
+      expect(codes).toEqual(codesOf(missing));
+      expectCleanPrototypes();
+      expectKeywordsEnforced();
+    });
+
+    it('does not resolve it in validate', () => {
+      const outcome = validateOutcome(schema);
+      expect(outcome).not.toBe(true);
+      expect(outcome).toEqual(validateOutcome(missing));
+      expectCleanPrototypes();
+      expectKeywordsEnforced();
+    });
+
+    it('does not resolve it in validateSchema', () => {
+      expect(schemaOutcome(schema)).toEqual(schemaOutcome(missing));
+      expectCleanPrototypes();
+      expectKeywordsEnforced();
+    });
+  });
+
+  it('still resolves fragments through own properties', () => {
+    expect(isValid(1, { $defs: { a: { type: 'integer' } }, $ref: '#/$defs/a' })).toBe(true);
+    expect(isValid('x', { $defs: { a: { type: 'integer' } }, $ref: '#/$defs/a' })).toBe(false);
+    expect(isValid('x', { prefixItems: [{ type: 'integer' }], $ref: '#/prefixItems/0' })).toBe(false);
+    expectCleanPrototypes();
+  });
+
+  it('still resolves an own property named like an inherited one', () => {
+    const schema = JSON.parse(
+      '{"$defs":{"constructor":{"type":"integer"},"__proto__":{"type":"string"}},"properties":{"a":{"$ref":"#/$defs/constructor"},"b":{"$ref":"#/$defs/__proto__"}}}'
+    ) as object;
+    expect(isValid({ a: 1, b: 'x' }, schema)).toBe(true);
+    expect(isValid({ a: 'x' }, schema)).toBe(false);
+    expect(isValid({ b: 1 }, schema)).toBe(false);
+    expectCleanPrototypes();
   });
 });

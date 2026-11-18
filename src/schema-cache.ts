@@ -6,7 +6,7 @@ import { bumpGlobalSchemaStateGeneration } from './compiled-schema-cache.js';
 import { findId, getId } from './json-schema.js';
 import { Report } from './report.js';
 import { deepClone } from './utils/clone.js';
-import { decodeJSONPointer } from './utils/json.js';
+import { decodeJSONPointer, getOwn } from './utils/json.js';
 import { getQueryPath, getRemotePath, getSafeRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { normalizeOptions } from './z-schema-options.js';
 
@@ -227,16 +227,17 @@ export class SchemaCache {
 
     if (result && queryPath) {
       const parts = queryPath.split('/');
-      for (let idx = 0, lim = parts.length; result && idx < lim; idx++) {
-        const key = decodeJSONPointer(parts[idx]);
-        // oxlint-disable-next-line unicorn/prefer-ternary
-        if (idx === 0) {
-          // it's an id
-          result = findId(result, key, remotePath, remotePath, this.validator.options.maxRecursionDepth);
-        } else {
-          // it's a path behind id
-          result = result[key as keyof typeof result] as JsonSchemaInternal | undefined;
-        }
+      // the first segment is an id or anchor (empty for a plain JSON pointer, which means the root)
+      result = findId(
+        result,
+        decodeJSONPointer(parts[0]),
+        remotePath,
+        remotePath,
+        this.validator.options.maxRecursionDepth
+      );
+      // the rest is a path behind it
+      for (let idx = 1, lim = parts.length; result && idx < lim; idx++) {
+        result = getOwn(result, decodeJSONPointer(parts[idx])) as JsonSchemaInternal | undefined;
       }
     }
 

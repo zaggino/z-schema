@@ -35,7 +35,7 @@ z-schema provides full support for JSON Schema **draft-04**, **draft-06**, **dra
 
 ## Validate against subschema
 
-You can validate against a specific part of a schema using the `schemaPath` option:
+You can validate against a specific part of a schema using the `schemaPath` option. The path is dot-separated and follows own properties only; a segment that is missing or inherited (for example `__proto__`) is reported as not found:
 
 ```javascript
 try {

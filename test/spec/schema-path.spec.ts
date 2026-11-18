@@ -2,6 +2,7 @@ import type { JsonSchema } from '../../src/json-schema-versions.ts';
 import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 
 import { ZSchema } from '../../src/z-schema.ts';
+import { guardBuiltinPrototypes } from '../lib/prototype-guard.ts';
 
 const schema = {
   type: ['object'],
@@ -68,6 +69,8 @@ const schema = {
 };
 
 describe('Using path to schema as a third argument', () => {
+  const expectCleanPrototypes = guardBuiltinPrototypes();
+
   it('Should pass the test', () => {
     const validator = ZSchema.create();
     const cars = [
@@ -79,6 +82,24 @@ describe('Using path to schema as a third argument', () => {
     const result = validator.validateSafe(cars, schema, { schemaPath: 'definitions.car.definitions.cars' });
     expect(result.valid).toBe(true);
     expect(result.err).toBeUndefined();
+  });
+
+  it.each(['__proto__', 'constructor.prototype', 'definitions.__proto__', 'links.__proto__', 'toString'])(
+    'does not follow the inherited property in schema path %s',
+    (schemaPath) => {
+      expect(() => ZSchema.create().validate({}, schema, { schemaPath })).toThrow(
+        `Schema path '${schemaPath}' wasn't found in the schema!`
+      );
+      expectCleanPrototypes();
+      expect(ZSchema.create().validateSafe({}, { type: 'object', required: ['a'] }).valid).toBe(false);
+    }
+  );
+
+  it('still follows array indices in a schema path', () => {
+    const validator = ZSchema.create();
+    const arraySchema = { allOf: [{ type: 'integer' }] };
+    expect(validator.validateSafe(1, arraySchema, { schemaPath: 'allOf.0' }).valid).toBe(true);
+    expect(validator.validateSafe('x', arraySchema, { schemaPath: 'allOf.0' }).valid).toBe(false);
   });
 });
 
