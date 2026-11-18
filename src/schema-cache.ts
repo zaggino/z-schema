@@ -48,8 +48,10 @@ export function prepareRemoteSchema(
 }
 
 export class SchemaCache {
-  static global_cache: SchemaCacheStorage = Object.create(null) as SchemaCacheStorage;
-  cache: SchemaCacheStorage = Object.create(null) as SchemaCacheStorage;
+  // Both caches are keyed by schema-supplied URIs and must stay null-prototype objects: that is what makes a key
+  // such as `__proto__` or `constructor` an ordinary entry instead of a lookup on Object.prototype.
+  static readonly global_cache: SchemaCacheStorage = Object.create(null) as SchemaCacheStorage;
+  readonly cache: SchemaCacheStorage = Object.create(null) as SchemaCacheStorage;
   private readonly validator: ZSchemaBase;
 
   constructor(validator: ZSchemaBase) {
@@ -139,7 +141,7 @@ export class SchemaCache {
       }
     }
 
-    const remotePath = getRemotePath(uri) || undefined;
+    const remotePath = getRemotePath(uri);
     const queryPath = getQueryPath(uri);
     let result: JsonSchemaInternal | undefined;
     let resolvedFromAncestor = false;

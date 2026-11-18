@@ -291,13 +291,13 @@ describe('collectReferences', () => {
 describe('compileSchema with a built-in prototype as the schema', () => {
   const expectCleanPrototypes = guardBuiltinPrototypes();
 
+  // Array.prototype is an array, so it compiles as an empty list of schemas and never reaches the check.
   it.each([
     ['Object.prototype', Object.prototype],
     ['Function.prototype', Function.prototype],
-    ['Array.prototype', Array.prototype],
-  ])('writes nothing to %s', (_name, proto) => {
+  ])('compiles %s as a no-op and writes nothing to it', (_name, proto) => {
     const validator = ZSchema.create();
-    validator.sc.compileSchema(new Report(validator.options), proto);
+    expect(validator.sc.compileSchema(new Report(validator.options), proto)).toBe(true);
     expectCleanPrototypes();
   });
 });

@@ -140,6 +140,7 @@ describe('SchemaCache $ref fragment resolution', () => {
 describe.each(['constructor', 'prototype', '__proto__', 'toString'])('SchemaCache with a schema named %s', (name) => {
   const expectCleanPrototypes = guardBuiltinPrototypes();
 
+  // there is no public way to unregister a remote reference
   afterAll(() => {
     delete SchemaCache.global_cache[name];
   });

@@ -8,19 +8,24 @@ import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { getSchemaReader } from './z-schema-reader.js';
 
 /**
- * True if `obj` is a built-in prototype, which the compiler must never write its internal state to (CWE-1321).
+ * True if `obj` is a built-in prototype, which the compiler never writes its internal state to (CWE-1321).
  *
- * Defence in depth: schema walks step through `getOwn()` (utils/json), so a schema- or caller-supplied key cannot
- * lead to one of these. This check only matters when a caller passes a built-in prototype as the schema itself.
+ * Defence in depth, not the rule that keeps schemas off the prototypes: that is `getOwn()` (utils/json), which
+ * every walk driven by a schema- or caller-supplied key steps through. No schema can make this return true. It can
+ * only do so when calling code hands the compiler a built-in prototype as a schema, and the three-member set is the
+ * shape CodeQL's `js/prototype-polluting-assignment` recognises.
  */
 function isBuiltinPrototype(obj: unknown): boolean {
   return obj === Object.prototype || obj === Function.prototype || obj === Array.prototype;
 }
 
-/** Stores the schema a reference resolved to on the node that holds the reference. */
+/**
+ * Stores the schema a reference resolved to on the node that holds the reference.
+ * This is the compiler's only write under a computed key, so it carries the prototype check itself.
+ */
 function setResolved(refObj: Reference, response: JsonSchemaInternal | undefined): void {
   if (!isBuiltinPrototype(refObj.obj)) {
-    (refObj.obj as Record<string, unknown>)[`__${refObj.key}Resolved`] = response;
+    refObj.obj[`__${refObj.key}Resolved` as const] = response;
   }
 }
 
@@ -340,15 +345,13 @@ export class SchemaCompiler {
       this.collectAndCacheIds(schema);
     }
 
-    const canMutateSchemaObject = !isBuiltinPrototype(schema);
+    // a built-in prototype has nothing to compile and is never written to
+    if (isBuiltinPrototype(schema)) {
+      return report.isValid();
+    }
 
     // if we have an id than it should be cached already (if this instance has compiled it)
-    if (
-      canMutateSchemaObject &&
-      schema.__$compiled &&
-      schema.id &&
-      !this.validator.scache.checkCacheForUri(schema.id)
-    ) {
+    if (schema.__$compiled && schema.id && !this.validator.scache.checkCacheForUri(schema.id)) {
       schema.__$compiled = undefined;
     }
 
@@ -358,7 +361,7 @@ export class SchemaCompiler {
     }
 
     // v8 - if $schema is not present, set $schema to default
-    if (canMutateSchemaObject && !schema.$schema && this.validator.options.version !== 'none') {
+    if (!schema.$schema && this.validator.options.version !== 'none') {
       schema.$schema = this.validator.getDefaultSchemaId();
     }
 
@@ -376,9 +379,7 @@ export class SchemaCompiler {
 
     // delete all __$missingReferences from previous compilation attempts
     const isValidExceptReferences = report.isValid();
-    if (canMutateSchemaObject) {
-      delete schema.__$missingReferences;
-    }
+    delete schema.__$missingReferences;
 
     // collect all references that need to be resolved - $ref and $schema
     const useRefObjectScope =
@@ -448,7 +449,7 @@ export class SchemaCompiler {
           report.path.length -= pathLen;
 
           // publish unresolved references out
-          if (isValidExceptReferences && canMutateSchemaObject) {
+          if (isValidExceptReferences) {
             schema.__$missingReferences ||= [];
             schema.__$missingReferences.push(refObj);
           }
@@ -459,7 +460,7 @@ export class SchemaCompiler {
     }
 
     const isValid = report.isValid();
-    if (isValid && canMutateSchemaObject) {
+    if (isValid) {
       schema.__$compiled = true;
     }
     // else {
@@ -520,7 +521,7 @@ export class SchemaCompiler {
               sch.__$missingReferences.splice(idx2, 1);
             }
           }
-          if (sch.__$missingReferences.length === 0 && !isBuiltinPrototype(sch)) {
+          if (sch.__$missingReferences.length === 0) {
             delete sch.__$missingReferences;
           }
         }
