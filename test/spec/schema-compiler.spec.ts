@@ -1,8 +1,10 @@
 import type { JsonSchema } from '../../src/json-schema-versions.ts';
 
 import { ValidateError } from '../../src/errors.ts';
+import { Report } from '../../src/report.ts';
 import { collectIds, collectReferences } from '../../src/schema-compiler.js';
 import { ZSchema } from '../../src/z-schema.ts';
+import { guardBuiltinPrototypes } from '../lib/prototype-guard.ts';
 
 describe('collectReferences', () => {
   it('should collect $ref with id scope', () => {
@@ -283,5 +285,19 @@ describe('collectReferences', () => {
     expect(calledWith).toBe('http://example.com/schema.json');
 
     ZSchema.setSchemaReader(undefined);
+  });
+});
+
+describe('compileSchema with a built-in prototype as the schema', () => {
+  const expectCleanPrototypes = guardBuiltinPrototypes();
+
+  // Array.prototype is an array, so it compiles as an empty list of schemas and never reaches the check.
+  it.each([
+    ['Object.prototype', Object.prototype],
+    ['Function.prototype', Function.prototype],
+  ])('compiles %s as a no-op and writes nothing to it', (_name, proto) => {
+    const validator = ZSchema.create();
+    expect(validator.sc.compileSchema(new Report(validator.options), proto)).toBe(true);
+    expectCleanPrototypes();
   });
 });

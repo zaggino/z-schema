@@ -7,7 +7,7 @@ import { findId, getId } from './json-schema.js';
 import { Report } from './report.js';
 import { deepClone } from './utils/clone.js';
 import { decodeJSONPointer, getOwn } from './utils/json.js';
-import { getQueryPath, getRemotePath, getSafeRemotePath, isAbsoluteUri } from './utils/uri.js';
+import { getQueryPath, getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { normalizeOptions } from './z-schema-options.js';
 
 export type SchemaCacheStorage = Record<string, JsonSchemaInternal>;
@@ -48,8 +48,10 @@ export function prepareRemoteSchema(
 }
 
 export class SchemaCache {
-  static global_cache: SchemaCacheStorage = Object.create(null) as SchemaCacheStorage;
-  cache: SchemaCacheStorage = Object.create(null) as SchemaCacheStorage;
+  // Both caches are keyed by schema-supplied URIs and must stay null-prototype objects: that is what makes a key
+  // such as `__proto__` or `constructor` an ordinary entry instead of a lookup on Object.prototype.
+  static readonly global_cache: SchemaCacheStorage = Object.create(null) as SchemaCacheStorage;
+  readonly cache: SchemaCacheStorage = Object.create(null) as SchemaCacheStorage;
   private readonly validator: ZSchemaBase;
 
   constructor(validator: ZSchemaBase) {
@@ -58,14 +60,14 @@ export class SchemaCache {
 
   static cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
     bumpGlobalSchemaStateGeneration();
-    const remotePath = getSafeRemotePath(uri);
+    const remotePath = getRemotePath(uri);
     if (remotePath) {
       this.global_cache[remotePath] = schema;
     }
   }
 
   cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
-    const remotePath = getSafeRemotePath(uri);
+    const remotePath = getRemotePath(uri);
     if (remotePath) {
       const prev = this.cache[remotePath];
       this.cache[remotePath] = schema;
@@ -74,7 +76,7 @@ export class SchemaCache {
   }
 
   removeFromCacheByUri(uri: string) {
-    const remotePath = getSafeRemotePath(uri);
+    const remotePath = getRemotePath(uri);
     if (remotePath) {
       if (this.cache[remotePath] !== undefined) {
         // a removed mapping can change how cached schemas resolve `$ref`
@@ -85,7 +87,7 @@ export class SchemaCache {
   }
 
   checkCacheForUri(uri: string) {
-    const remotePath = getSafeRemotePath(uri);
+    const remotePath = getRemotePath(uri);
     return remotePath ? this.cache[remotePath] != null : false;
   }
 
@@ -105,9 +107,6 @@ export class SchemaCache {
   }
 
   fromCache(path: string): JsonSchemaInternal | undefined {
-    if (path === '__proto__' || path === 'constructor' || path === 'prototype') {
-      return undefined;
-    }
     let found = this.cache[path];
     if (found) {
       return found;
@@ -142,7 +141,7 @@ export class SchemaCache {
       }
     }
 
-    const remotePath = getSafeRemotePath(uri);
+    const remotePath = getRemotePath(uri);
     const queryPath = getQueryPath(uri);
     let result: JsonSchemaInternal | undefined;
     let resolvedFromAncestor = false;
