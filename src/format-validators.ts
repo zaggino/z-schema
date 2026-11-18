@@ -6,6 +6,7 @@ import { bumpGlobalSchemaStateGeneration } from './compiled-schema-cache.js';
 import { isValidRfc3339Date } from './utils/date.js';
 import { isValidHostname, isValidIdnHostname } from './utils/hostname.js';
 import { sortedKeys } from './utils/json.js';
+import { createDict } from './utils/properties.js';
 import { isValidUri, isValidUriReference } from './utils/rfc-3986.js';
 import { isValidIri, isValidIriReference } from './utils/rfc-3987.js';
 import { isValidUriTemplate } from './utils/rfc-6570.js';
@@ -346,11 +347,9 @@ export interface FormatValidatorsOptions {
   customFormats?: Record<string, FormatValidatorFn | null>;
 }
 
-// The format registries are keyed by the schema's `format` string, so they have no prototype: a name such as
-// `constructor` or `toString` must be unknown unless it was registered, not found on Object.prototype.
-const inbuiltValidators: Record<string, FormatValidatorFn> = {
-  // @ts-expect-error -- `__proto__: null` in a literal sets the prototype; it is not a format entry
-  __proto__: null,
+// The built-in and the globally registered formats are looked up by the schema's `format` string, so both are
+// dictionaries without a prototype: a name such as `constructor` is unknown unless it is an entry.
+const inbuiltValidators = createDict<FormatValidatorFn>({
   date: dateValidator,
   'date-time': dateTimeValidator,
   email: emailValidator,
@@ -372,7 +371,7 @@ const inbuiltValidators: Record<string, FormatValidatorFn> = {
   'iri-reference': iriReferenceValidator,
   duration: durationValidator,
   uuid: uuidValidator,
-} as const;
+});
 
 const inbuiltValidatorFns = new Set<FormatValidatorFn>(Object.values(inbuiltValidators));
 
@@ -381,29 +380,47 @@ export function isSyncBuiltInFormatValidator(fn: FormatValidatorFn): boolean {
   return inbuiltValidatorFns.has(fn);
 }
 
-const customValidators = Object.create(null) as Record<string, FormatValidatorFn>;
+const customValidators = createDict<FormatValidatorFn>();
 
+/**
+ * Every format validator in effect for `options`, keyed by format name. The result has no prototype, so reading a
+ * name that is not a format gives `undefined`.
+ */
 export function getFormatValidators(options?: FormatValidatorsOptions): Record<string, FormatValidatorFn> {
-  return {
+  return createDict({
     ...inbuiltValidators,
     ...(options?.strictUris ? { uri: strictUriValidator } : {}),
     ...customValidators,
     ...options?.customFormats,
-  };
+  });
 }
 
-export function resolveFormatValidator(name: string, options?: FormatValidatorsOptions): FormatValidatorFn | undefined {
-  const custom = options?.customFormats;
-  if (custom && Object.hasOwn(custom, name)) {
-    return custom[name] as FormatValidatorFn | undefined;
+/**
+ * The entry in effect for a format name: the instance's own entry if it has one (a function, or `null` when the
+ * format was unregistered on the instance), else the globally registered format, else the built-in one.
+ * This is the only place that decides whether a format name is known.
+ */
+function lookupFormat(
+  name: string,
+  customFormats: FormatValidatorsOptions['customFormats'],
+  strictUris: boolean | undefined
+): FormatValidatorFn | null | undefined {
+  // the instance map belongs to the caller and may have a prototype, so only its own entries count
+  if (customFormats && Object.hasOwn(customFormats, name)) {
+    return customFormats[name];
   }
-  if (Object.hasOwn(customValidators, name)) {
-    return customValidators[name];
+  const registered: FormatValidatorFn | undefined = customValidators[name];
+  if (registered !== undefined) {
+    return registered;
   }
-  if (options?.strictUris && name === 'uri') {
+  if (strictUris && name === 'uri') {
     return strictUriValidator;
   }
   return inbuiltValidators[name];
+}
+
+export function resolveFormatValidator(name: string, options?: FormatValidatorsOptions): FormatValidatorFn | undefined {
+  return lookupFormat(name, options?.customFormats, options?.strictUris) ?? undefined;
 }
 
 export function registerFormat(name: string, validatorFunction: FormatValidatorFn) {
@@ -427,21 +444,7 @@ export function getSupportedFormats(customFormats?: Record<string, FormatValidat
 }
 
 export function isFormatSupported(name: string, customFormats?: Record<string, FormatValidatorFn | null>): boolean {
-  // the caller's object may have a prototype, so only its own entries count
-  if (customFormats && Object.hasOwn(customFormats, name)) {
-    const custom = customFormats[name];
-    // Explicitly null means unregistered at instance level
-    if (custom === null) {
-      return false;
-    }
-    if (custom != null) {
-      return true;
-    }
-  }
-  if (name in customValidators) {
-    return customValidators[name] != null;
-  }
-  return name in inbuiltValidators;
+  return typeof lookupFormat(name, customFormats, false) === 'function';
 }
 
 export function getRegisteredFormats() {
