@@ -7,6 +7,7 @@ import { findId, getId } from './json-schema.js';
 import { Report } from './report.js';
 import { deepClone } from './utils/clone.js';
 import { decodeJSONPointer, getOwn } from './utils/json.js';
+import { createDict } from './utils/properties.js';
 import { getQueryPath, getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { normalizeOptions } from './z-schema-options.js';
 
@@ -48,10 +49,10 @@ export function prepareRemoteSchema(
 }
 
 export class SchemaCache {
-  // Both caches are keyed by schema-supplied URIs and must stay null-prototype objects: that is what makes a key
-  // such as `__proto__` or `constructor` an ordinary entry instead of a lookup on Object.prototype.
-  static readonly global_cache: SchemaCacheStorage = Object.create(null) as SchemaCacheStorage;
-  readonly cache: SchemaCacheStorage = Object.create(null) as SchemaCacheStorage;
+  // Both caches are keyed by schema-supplied URIs and must stay dictionaries without a prototype: that is what
+  // makes a key such as `__proto__` or `constructor` an ordinary entry instead of a lookup on Object.prototype.
+  static readonly global_cache: SchemaCacheStorage = createDict<JsonSchemaInternal>();
+  readonly cache: SchemaCacheStorage = createDict<JsonSchemaInternal>();
   private readonly validator: ZSchemaBase;
 
   constructor(validator: ZSchemaBase) {

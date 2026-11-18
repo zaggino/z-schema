@@ -382,11 +382,7 @@ export class ZSchemaBase {
    * @param validatorFunction - A sync or async function `(value: unknown) => boolean | Promise<boolean>`.
    */
   public registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
-    if (!this.options.customFormats) {
-      this.options.customFormats = {};
-    }
-    this.options.customFormats[name] = validatorFunction;
-    this.compiledSchemaCache.clear();
+    this.setInstanceFormat(name, validatorFunction);
   }
 
   /**
@@ -394,10 +390,20 @@ export class ZSchemaBase {
    * @param name - The format name to unregister.
    */
   public unregisterFormat(name: string): void {
-    if (!this.options.customFormats) {
-      this.options.customFormats = {};
-    }
-    this.options.customFormats[name] = null;
+    this.setInstanceFormat(name, null);
+  }
+
+  /** Writes an instance-scoped format entry; `null` marks the format as unregistered on this instance. */
+  private setInstanceFormat(name: string, value: FormatValidatorFn | null): void {
+    this.options.customFormats ||= {};
+    // An own data property: the map may be the caller's object, where `formats[name] = value` would run the
+    // `__proto__` setter for that name instead of adding an entry.
+    Object.defineProperty(this.options.customFormats, name, {
+      value,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
     this.compiledSchemaCache.clear();
   }
 
