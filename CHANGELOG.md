@@ -1,5 +1,14 @@
 # Changelog
 
+## [12.6.1](https://github.com/zaggino/z-schema/compare/v12.6.0...v12.6.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* **format:** treat names inherited from Object.prototype as unknown formats ([#563](https://github.com/zaggino/z-schema/issues/563)) ([3b5e3e6](https://github.com/zaggino/z-schema/commit/3b5e3e6a7cd5b2e6a7d125df0810c42ab95fe965))
+* **options:** accept the customFormats constructor option ([#564](https://github.com/zaggino/z-schema/issues/564)) ([fc35d29](https://github.com/zaggino/z-schema/commit/fc35d29e3b4fdff14365d8fce8e5233b1171be48))
+* **schema-cache:** resolve $ref fragments through own properties only ([613af23](https://github.com/zaggino/z-schema/commit/613af234ca83b2a0081a77f035cb228086f9358e))
+
 ## [12.6.0](https://github.com/zaggino/z-schema/compare/v12.5.1...v12.6.0) (2026-11-13)
 
 
