@@ -1,6 +1,6 @@
-import type { ValidateError } from '../../src/errors.ts';
 import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 
+import { ValidateError } from '../../src/errors.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
 const isPostalCode = (value: unknown) => typeof value === 'string' && /^\d{5}(?:-\d{4})?$/.test(value);
@@ -10,13 +10,16 @@ const emailSchema = { type: 'string', format: 'email' };
 
 const codesOf = (err: ValidateError | undefined): string[] => (err?.details ?? []).map((detail) => detail.code);
 
-/** Error codes of whatever `run` throws, or `[]` when it does not throw. */
+/** Error codes of the `ValidateError` that `run` throws, or `[]` when it does not throw. */
 const thrownCodes = (run: () => unknown): string[] => {
   try {
     run();
     return [];
   } catch (error) {
-    return codesOf(error as ValidateError);
+    if (!(error instanceof ValidateError)) {
+      throw error;
+    }
+    return codesOf(error);
   }
 };
 
@@ -81,6 +84,34 @@ describe('customFormats constructor option', () => {
     expect(thrownCodes(() => other.validate('12345', postalSchema))).toEqual(['UNKNOWN_FORMAT']);
   });
 
+  it('copies the passed map, so instances created from one map do not share formats', () => {
+    const shared: NonNullable<ZSchemaOptions['customFormats']> = { 'postal-code': isPostalCode };
+    const first = ZSchema.create(withFormats(shared));
+    const second = ZSchema.create(withFormats(shared));
+
+    first.registerFormat('email', () => true);
+    first.unregisterFormat('postal-code');
+
+    // the caller's map is untouched
+    expect(Object.keys(shared)).toEqual(['postal-code']);
+    expect(shared['postal-code']).toBe(isPostalCode);
+    // the second instance still has what was passed, and nothing the first one registered
+    expect(second.getRegisteredFormats()).toEqual(['postal-code']);
+    expect(second.validate('12345', postalSchema)).toBe(true);
+    expect(thrownCodes(() => second.validate('nope', emailSchema))).toEqual(['INVALID_FORMAT']);
+    // the first instance has its own changes
+    expect(first.validate('nope', emailSchema)).toBe(true);
+    expect(thrownCodes(() => first.validate('12345', postalSchema))).toEqual(['UNKNOWN_FORMAT']);
+  });
+
+  it('ignores changes made to the passed map after creation', () => {
+    const passed: NonNullable<ZSchemaOptions['customFormats']> = {};
+    const validator = ZSchema.create(withFormats(passed));
+    passed['postal-code'] = isPostalCode;
+    expect(validator.getRegisteredFormats()).toEqual([]);
+    expect(thrownCodes(() => validator.validate('12345', postalSchema))).toEqual(['UNKNOWN_FORMAT']);
+  });
+
   it('lets registerFormat and unregisterFormat work on top of the passed formats', () => {
     const validator = ZSchema.create(withFormats({ 'postal-code': isPostalCode }));
     validator.registerFormat('even', (value) => typeof value === 'number' && value % 2 === 0);
@@ -93,27 +124,9 @@ describe('customFormats constructor option', () => {
     expect(thrownCodes(() => validator.validate('12345', postalSchema))).toEqual(['UNKNOWN_FORMAT']);
   });
 
-  it('has no default', () => {
-    expect(Object.hasOwn(ZSchema.getDefaultOptions(), 'customFormats')).toBe(false);
+  it('is undefined unless passed', () => {
+    expect(ZSchema.getDefaultOptions().customFormats).toBeUndefined();
     expect(ZSchema.create().options.customFormats).toBeUndefined();
     expect(ZSchema.create({}).options.customFormats).toBeUndefined();
-  });
-});
-
-describe('constructor option names', () => {
-  // each of these is a member of Object.prototype, so a plain-object lookup of the defaults finds it
-  it.each(['constructor', 'toString', 'valueOf', 'hasOwnProperty', '__proto__'])(
-    'rejects an option named %s',
-    (name) => {
-      const options = JSON.parse(`{"${name}": 1}`) as ZSchemaOptions;
-      expect(Object.hasOwn(options, name)).toBe(true);
-      expect(() => ZSchema.create(options)).toThrow(`Unexpected option passed to constructor: ${name}`);
-    }
-  );
-
-  it('accepts every documented option that has no default', () => {
-    expect(() => ZSchema.create({ customFormats: {} })).not.toThrow();
-    expect(() => ZSchema.create({ async: true })).not.toThrow();
-    expect(() => ZSchema.create({ safe: true })).not.toThrow();
   });
 });

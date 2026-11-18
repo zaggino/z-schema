@@ -8,6 +8,7 @@ import { shallowClone } from './utils/clone.js';
 // and also re-exported as public API, so this cannot collapse to a bare re-export.
 // oxlint-disable-next-line unicorn/prefer-export-from
 import { DEFAULT_MAX_RECURSION_DEPTH, MAX_ASYNC_TIMEOUT } from './utils/constants.js';
+import { createDict } from './utils/properties.js';
 
 export { DEFAULT_MAX_RECURSION_DEPTH, MAX_ASYNC_TIMEOUT };
 
@@ -40,6 +41,13 @@ export interface ZSchemaOptions {
   maxRecursionDepth?: number;
 }
 
+/**
+ * Every option as a required key, so `defaultOptions` cannot compile without listing a newly added option.
+ * An option without a default is listed with the value `undefined`.
+ */
+type EveryOption = { [K in keyof Required<ZSchemaOptions>]: ZSchemaOptions[K] };
+
+/** The default of every option. Its own keys are the list of known options (see `normalizeOptions`). */
 export const defaultOptions: ZSchemaOptions = {
   // default version to validate against
   version: CURRENT_DEFAULT_SCHEMA_VERSION,
@@ -93,20 +101,17 @@ export const defaultOptions: ZSchemaOptions = {
   formatAssertions: null,
   // function to be called on every schema
   customValidator: null as unknown as undefined,
+  // format validators for this instance only; no default
+  customFormats: undefined,
   // maximum recursion depth for deeply nested schema/data traversal (prevents stack overflow)
   maxRecursionDepth: DEFAULT_MAX_RECURSION_DEPTH,
-};
+} satisfies EveryOption;
 
 /**
- * Accepted options that have no entry in `defaultOptions`:
- * - `async` and `safe` are `ZSchema.create` dispatch flags. Accepting them means the caller's options object
- *   (which the validator stores as-is) never has to be stripped of them.
- * - `customFormats` is `undefined` unless the caller passes it.
+ * `ZSchema.create` dispatch flags. They have no default but are accepted, so the caller's options
+ * object (which the validator stores as-is) never has to be stripped of them.
  */
-const OPTIONS_WITHOUT_DEFAULT = new Set<string>(['async', 'safe', 'customFormats']);
-
-/** True if `key` is an option. Only own keys of the defaults count, so `constructor` or `toString` is not one. */
-const isKnownOption = (key: string): boolean => Object.hasOwn(defaultOptions, key) || OPTIONS_WITHOUT_DEFAULT.has(key);
+const FACTORY_DISPATCH_KEYS = new Set<string>(['async', 'safe']);
 
 export const normalizeOptions = (options?: ZSchemaOptions) => {
   let normalized;
@@ -116,18 +121,26 @@ export const normalizeOptions = (options?: ZSchemaOptions) => {
     let keys = Object.keys(options) as Array<keyof ZSchemaOptions>;
 
     // check that the options are correctly configured
+    // (own keys of the defaults only, so a key such as `constructor` or `__proto__` is not an option)
     for (const key of keys) {
-      if (!isKnownOption(key)) {
+      if (!Object.hasOwn(defaultOptions, key) && !FACTORY_DISPATCH_KEYS.has(key)) {
         throw new Error(`Unexpected option passed to constructor: ${key}`);
       }
     }
 
-    // copy the default options into passed options
+    // copy the default options into passed options (an option without a default is left as it is)
     keys = Object.keys(defaultOptions) as Array<keyof ZSchemaOptions>;
     for (const key of keys) {
-      if (options[key] === undefined) {
-        (options as Record<string, unknown>)[key] = shallowClone(defaultOptions[key]);
+      const defaultValue = defaultOptions[key];
+      if (defaultValue !== undefined && options[key] === undefined) {
+        (options as Record<string, unknown>)[key] = shallowClone(defaultValue);
       }
+    }
+
+    // The instance writes into this map (registerFormat / unregisterFormat), so it gets a copy of its own:
+    // the caller's map is left alone and instances created from the same map do not share formats.
+    if (typeof options.customFormats === 'object' && options.customFormats !== null) {
+      options.customFormats = createDict(options.customFormats);
     }
 
     normalized = options;

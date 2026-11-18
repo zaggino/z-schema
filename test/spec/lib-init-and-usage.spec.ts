@@ -102,5 +102,16 @@ describe('Initialization and usage', () => {
       const options = { safe: true, bogus: 1 } as ZSchemaOptions & { safe: true };
       expect(() => ZSchema.create(options)).toThrow(/Unexpected option passed to constructor: bogus/);
     });
+
+    // each of these is a member of Object.prototype, so a plain-object lookup of the known options finds it
+    it.each(['constructor', 'toString', 'valueOf', 'hasOwnProperty', '__proto__'])(
+      'rejects an option named %s',
+      (name) => {
+        // JSON.parse, so that `__proto__` is an own key like the others
+        const options = JSON.parse(`{"${name}": 1}`) as ZSchemaOptions;
+        expect(Object.hasOwn(options, name)).toBe(true);
+        expect(() => ZSchema.create(options)).toThrow(`Unexpected option passed to constructor: ${name}`);
+      }
+    );
   });
 });
