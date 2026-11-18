@@ -346,7 +346,11 @@ export interface FormatValidatorsOptions {
   customFormats?: Record<string, FormatValidatorFn | null>;
 }
 
+// The format registries are keyed by the schema's `format` string, so they have no prototype: a name such as
+// `constructor` or `toString` must be unknown unless it was registered, not found on Object.prototype.
 const inbuiltValidators: Record<string, FormatValidatorFn> = {
+  // @ts-expect-error -- `__proto__: null` in a literal sets the prototype; it is not a format entry
+  __proto__: null,
   date: dateValidator,
   'date-time': dateTimeValidator,
   email: emailValidator,
@@ -377,7 +381,7 @@ export function isSyncBuiltInFormatValidator(fn: FormatValidatorFn): boolean {
   return inbuiltValidatorFns.has(fn);
 }
 
-const customValidators: Record<string, FormatValidatorFn> = {};
+const customValidators = Object.create(null) as Record<string, FormatValidatorFn>;
 
 export function getFormatValidators(options?: FormatValidatorsOptions): Record<string, FormatValidatorFn> {
   return {
@@ -423,7 +427,8 @@ export function getSupportedFormats(customFormats?: Record<string, FormatValidat
 }
 
 export function isFormatSupported(name: string, customFormats?: Record<string, FormatValidatorFn | null>): boolean {
-  if (customFormats) {
+  // the caller's object may have a prototype, so only its own entries count
+  if (customFormats && Object.hasOwn(customFormats, name)) {
     const custom = customFormats[name];
     // Explicitly null means unregistered at instance level
     if (custom === null) {

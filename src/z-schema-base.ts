@@ -383,7 +383,8 @@ export class ZSchemaBase {
    */
   public registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
     if (!this.options.customFormats) {
-      this.options.customFormats = {};
+      // no prototype, so any name (even `__proto__`) is an ordinary entry
+      this.options.customFormats = Object.create(null) as NonNullable<ZSchemaOptions['customFormats']>;
     }
     this.options.customFormats[name] = validatorFunction;
     this.compiledSchemaCache.clear();
@@ -395,7 +396,8 @@ export class ZSchemaBase {
    */
   public unregisterFormat(name: string): void {
     if (!this.options.customFormats) {
-      this.options.customFormats = {};
+      // no prototype, so any name (even `__proto__`) is an ordinary entry
+      this.options.customFormats = Object.create(null) as NonNullable<ZSchemaOptions['customFormats']>;
     }
     this.options.customFormats[name] = null;
     this.compiledSchemaCache.clear();

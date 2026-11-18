@@ -1,5 +1,8 @@
+import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
+
 import { describe, expect, it } from 'vitest';
 
+import { isFormatSupported } from '../../src/format-validators.ts';
 import { buildUriPredicates, UNRESERVED_CHARS_SRC } from '../../src/utils/rfc-3986.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
@@ -791,5 +794,78 @@ describe('Format Validators', () => {
       const data = `${'{a}'.repeat(50_000)}{a,a,a`;
       expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(false);
     });
+  });
+});
+
+// Names every plain object inherits from Object.prototype. A format lookup must not find them there.
+const INHERITED_NAMES = ['constructor', 'toString', '__proto__', 'hasOwnProperty', 'valueOf'];
+
+const unknownName = 'no-such-format';
+const schemaFor = (format: string) => ({ $schema: 'http://json-schema.org/draft-07/schema#', format });
+
+const validateOutcome = (options: ZSchemaOptions, format: string, data: unknown) => {
+  const result = ZSchema.create(options).validateSafe(data, schemaFor(format));
+  return { valid: result.valid, codes: (result.err?.details ?? []).map((detail) => detail.code) };
+};
+
+const compileOutcome = (options: ZSchemaOptions, format: string, data: unknown) => {
+  try {
+    const result = ZSchema.create({ ...options, safe: true }).compile(schemaFor(format))(data);
+    return { valid: result.valid, codes: (result.err?.details ?? []).map((detail) => detail.code) };
+  } catch (error) {
+    return { valid: false, codes: [error instanceof Error ? error.message : String(error)] };
+  }
+};
+
+describe.each(INHERITED_NAMES)('Format named %s (inherited from Object.prototype)', (name) => {
+  it('is not a supported format', () => {
+    expect(isFormatSupported(name)).toBe(false);
+    expect(isFormatSupported(name, {})).toBe(false);
+    expect(ZSchema.create().getSupportedFormats()).not.toContain(name);
+    expect(ZSchema.getRegisteredFormats()).not.toContain(name);
+  });
+
+  it('is reported as an unknown format where formats are asserted', () => {
+    const outcome = validateOutcome({ version: 'draft-07' }, name, 'x');
+    expect(outcome.valid).toBe(false);
+    expect(outcome.codes).toContain('UNKNOWN_FORMAT');
+    expect(outcome).toEqual(validateOutcome({ version: 'draft-07' }, unknownName, 'x'));
+    expect(compileOutcome({ version: 'draft-07' }, name, 'x')).toEqual(
+      compileOutcome({ version: 'draft-07' }, unknownName, 'x')
+    );
+  });
+
+  it('is ignored like any unknown format with ignoreUnknownFormats', () => {
+    const options: ZSchemaOptions = { version: 'draft-07', ignoreUnknownFormats: true };
+    expect(validateOutcome(options, name, 'x')).toEqual({ valid: true, codes: [] });
+    expect(compileOutcome(options, name, 'x')).toEqual({ valid: true, codes: [] });
+  });
+
+  it('can be registered globally as a real format', () => {
+    ZSchema.registerFormat(name, (value) => value === 'ok');
+    try {
+      expect(isFormatSupported(name)).toBe(true);
+      expect(ZSchema.getRegisteredFormats()).toContain(name);
+      expect(validateOutcome({ version: 'draft-07' }, name, 'ok')).toEqual({ valid: true, codes: [] });
+      expect(validateOutcome({ version: 'draft-07' }, name, 'x').codes).toEqual(['INVALID_FORMAT']);
+      expect(compileOutcome({ version: 'draft-07' }, name, 'x').codes).toEqual(['INVALID_FORMAT']);
+    } finally {
+      ZSchema.unregisterFormat(name);
+    }
+    expect(isFormatSupported(name)).toBe(false);
+    expect(validateOutcome({ version: 'draft-07' }, name, 'ok').codes).toContain('UNKNOWN_FORMAT');
+  });
+
+  it('can be registered on one instance as a real format', () => {
+    const validator = ZSchema.create({ version: 'draft-07' });
+    validator.registerFormat(name, (value) => value === 'ok');
+    expect(validator.getRegisteredFormats()).toContain(name);
+    expect(validator.getSupportedFormats()).toContain(name);
+    expect(validator.validateSafe('ok', schemaFor(name)).valid).toBe(true);
+    expect(validator.validateSafe('x', schemaFor(name)).err?.details?.[0].code).toBe('INVALID_FORMAT');
+    validator.unregisterFormat(name);
+    expect(validator.getSupportedFormats()).not.toContain(name);
+    expect(validator.validateSafe('ok', schemaFor(name)).valid).toBe(false);
+    expect(validateOutcome({ version: 'draft-07' }, name, 'ok').codes).toContain('UNKNOWN_FORMAT');
   });
 });
