@@ -136,3 +136,32 @@ describe('SchemaCache $ref fragment resolution', () => {
     expectCleanPrototypes();
   });
 });
+
+describe.each(['constructor', 'prototype', '__proto__', 'toString'])('SchemaCache with a schema named %s', (name) => {
+  const expectCleanPrototypes = guardBuiltinPrototypes();
+
+  afterAll(() => {
+    delete SchemaCache.global_cache[name];
+  });
+
+  it('stores it as an ordinary key of the instance cache', () => {
+    const validator = ZSchema.create();
+    const cached = { type: 'integer' };
+    expect(validator.scache.checkCacheForUri(name)).toBe(false);
+    validator.scache.cacheSchemaByUri(name, cached);
+    expect(Object.hasOwn(validator.scache.cache, name)).toBe(true);
+    expect(validator.scache.checkCacheForUri(name)).toBe(true);
+    expect(validator.scache.fromCache(name)).toBe(cached);
+    validator.scache.removeFromCacheByUri(name);
+    expect(validator.scache.checkCacheForUri(name)).toBe(false);
+    expectCleanPrototypes();
+  });
+
+  it('resolves a $ref to it once registered as a remote reference', () => {
+    ZSchema.setRemoteReference(name, { type: 'integer' });
+    expect(Object.hasOwn(SchemaCache.global_cache, name)).toBe(true);
+    expect(isValid(1, { $ref: name })).toBe(true);
+    expect(isValid('x', { $ref: name })).toBe(false);
+    expectCleanPrototypes();
+  });
+});

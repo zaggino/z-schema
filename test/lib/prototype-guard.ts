@@ -1,11 +1,11 @@
-const GUARDED: object[] = [Object.prototype, Array.prototype];
+const GUARDED: object[] = [Object.prototype, Array.prototype, Function.prototype];
 
 /**
  * Guards the built-in prototypes for the tests of the enclosing `describe`.
  *
- * Registers an `afterEach` that deletes every key a test left on `Object.prototype` or `Array.prototype`, so a
- * failing test cannot leave them polluted for the rest of the worker. Returns an assertion that no key was added
- * since the guard was created.
+ * Registers an `afterEach` that deletes every key a test left on `Object.prototype`, `Array.prototype` or
+ * `Function.prototype`, so a failing test cannot leave them polluted for the rest of the worker. Returns an
+ * assertion that no key was added since the guard was created.
  */
 export function guardBuiltinPrototypes(): () => void {
   const before = GUARDED.map((proto) => Reflect.ownKeys(proto));

@@ -7,35 +7,20 @@ import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { getSchemaReader } from './z-schema-reader.js';
 
-const UNSAFE_TARGETS = new Set<Record<string, unknown>>([
-  Object.prototype as unknown as Record<string, unknown>,
-  Function.prototype as unknown as Record<string, unknown>,
-  Array.prototype as unknown as Record<string, unknown>,
-]);
-
-/** Returns true if `obj` is a built-in prototype that must not be mutated. */
-function isUnsafeTarget(obj: Record<string, unknown>): boolean {
-  return UNSAFE_TARGETS.has(obj);
+/**
+ * True if `obj` is a built-in prototype, which the compiler must never write its internal state to (CWE-1321).
+ *
+ * Defence in depth: schema walks step through `getOwn()` (utils/json), so a schema- or caller-supplied key cannot
+ * lead to one of these. This check only matters when a caller passes a built-in prototype as the schema itself.
+ */
+function isBuiltinPrototype(obj: unknown): boolean {
+  return obj === Object.prototype || obj === Function.prototype || obj === Array.prototype;
 }
 
-/** Safely assign a property on `obj`, refusing prototype-polluting keys. */
-function safeSetProperty(obj: Record<string, unknown>, key: string, value: unknown): void {
-  if (isUnsafeTarget(obj)) {
-    return;
-  }
-  /** Reject property names that could pollute Object.prototype (CWE-1321). */
-  if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
-    obj[key] = value;
-  }
-}
-
-/** Safely delete a property from `obj`, refusing to mutate built-in prototypes (CWE-1321). */
-function safeDeleteProperty(obj: Record<string, unknown>, key: string): void {
-  if (isUnsafeTarget(obj)) {
-    return;
-  }
-  if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
-    delete obj[key];
+/** Stores the schema a reference resolved to on the node that holds the reference. */
+function setResolved(refObj: Reference, response: JsonSchemaInternal | undefined): void {
+  if (!isBuiltinPrototype(refObj.obj)) {
+    (refObj.obj as Record<string, unknown>)[`__${refObj.key}Resolved`] = response;
   }
 }
 
@@ -355,10 +340,7 @@ export class SchemaCompiler {
       this.collectAndCacheIds(schema);
     }
 
-    const canMutateSchemaObject =
-      schema !== (Object.prototype as unknown as JsonSchemaInternal) &&
-      schema !== (Function.prototype as unknown as JsonSchemaInternal) &&
-      schema !== (Array.prototype as unknown as JsonSchemaInternal);
+    const canMutateSchemaObject = !isBuiltinPrototype(schema);
 
     // if we have an id than it should be cached already (if this instance has compiled it)
     if (
@@ -395,7 +377,7 @@ export class SchemaCompiler {
     // delete all __$missingReferences from previous compilation attempts
     const isValidExceptReferences = report.isValid();
     if (canMutateSchemaObject) {
-      safeDeleteProperty(schema as unknown as Record<string, unknown>, '__$missingReferences');
+      delete schema.__$missingReferences;
     }
 
     // collect all references that need to be resolved - $ref and $schema
@@ -466,18 +448,14 @@ export class SchemaCompiler {
           report.path.length -= pathLen;
 
           // publish unresolved references out
-          if (
-            isValidExceptReferences &&
-            canMutateSchemaObject &&
-            !isUnsafeTarget(schema as unknown as Record<string, unknown>)
-          ) {
+          if (isValidExceptReferences && canMutateSchemaObject) {
             schema.__$missingReferences ||= [];
             schema.__$missingReferences.push(refObj);
           }
         }
       }
       // this might create circular references
-      safeSetProperty(refObj.obj as unknown as Record<string, unknown>, `__${refObj.key}Resolved`, response);
+      setResolved(refObj, response);
     }
 
     const isValid = report.isValid();
@@ -537,13 +515,13 @@ export class SchemaCompiler {
             const response = idMap.get(refObj.ref);
             if (response) {
               // this might create circular references
-              safeSetProperty(refObj.obj as unknown as Record<string, unknown>, `__${refObj.key}Resolved`, response);
+              setResolved(refObj, response);
               // it's resolved now so delete it
               sch.__$missingReferences.splice(idx2, 1);
             }
           }
-          if (sch.__$missingReferences.length === 0) {
-            safeDeleteProperty(sch as unknown as Record<string, unknown>, '__$missingReferences');
+          if (sch.__$missingReferences.length === 0 && !isBuiltinPrototype(sch)) {
+            delete sch.__$missingReferences;
           }
         }
       }
