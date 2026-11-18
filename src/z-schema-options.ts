@@ -98,10 +98,15 @@ export const defaultOptions: ZSchemaOptions = {
 };
 
 /**
- * `ZSchema.create` dispatch flags. They have no default but are accepted, so the caller's options
- * object (which the validator stores as-is) never has to be stripped of them.
+ * Accepted options that have no entry in `defaultOptions`:
+ * - `async` and `safe` are `ZSchema.create` dispatch flags. Accepting them means the caller's options object
+ *   (which the validator stores as-is) never has to be stripped of them.
+ * - `customFormats` is `undefined` unless the caller passes it.
  */
-const FACTORY_DISPATCH_KEYS = new Set<string>(['async', 'safe']);
+const OPTIONS_WITHOUT_DEFAULT = new Set<string>(['async', 'safe', 'customFormats']);
+
+/** True if `key` is an option. Only own keys of the defaults count, so `constructor` or `toString` is not one. */
+const isKnownOption = (key: string): boolean => Object.hasOwn(defaultOptions, key) || OPTIONS_WITHOUT_DEFAULT.has(key);
 
 export const normalizeOptions = (options?: ZSchemaOptions) => {
   let normalized;
@@ -112,7 +117,7 @@ export const normalizeOptions = (options?: ZSchemaOptions) => {
 
     // check that the options are correctly configured
     for (const key of keys) {
-      if (defaultOptions[key] === undefined && !FACTORY_DISPATCH_KEYS.has(key)) {
+      if (!isKnownOption(key)) {
         throw new Error(`Unexpected option passed to constructor: ${key}`);
       }
     }
