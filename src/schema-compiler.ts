@@ -2,7 +2,7 @@ import type { JsonSchemaInternal } from './json-schema-versions.js';
 import type { SchemaPosition } from './json-schema.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
-import { AT_DATA, AT_SCHEMA, childPosition, cloneInputSchema, getId, isInternalKey } from './json-schema.js';
+import { AT_DATA, AT_SCHEMA, cloneInputSchema, getId, walkPosition } from './json-schema.js';
 import { Report } from './report.js';
 import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
@@ -165,11 +165,8 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
       }
     } else {
       for (const key of Object.keys(schemaNode)) {
-        if (position === AT_SCHEMA && isInternalKey(key)) {
-          continue;
-        }
         const value = (schemaNode as Record<string, unknown>)[key];
-        const child = childPosition(position, key, value);
+        const child = walkPosition(position, key, value);
         if (child === AT_DATA) {
           continue;
         }
@@ -277,12 +274,9 @@ export const collectReferences = (
   } else {
     const keys = Object.keys(obj);
     for (const key of keys) {
-      // do not recurse through resolved references and other z-schema props
-      if (isSchema && isInternalKey(key)) {
-        continue;
-      }
+      // do not recurse through resolved references, other z-schema props, or keyword data
       const value = (obj as Record<string, JsonSchemaInternal>)[key];
-      const child = childPosition(position, key, value);
+      const child = walkPosition(position, key, value);
       if (child === AT_DATA) {
         continue;
       }

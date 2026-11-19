@@ -58,6 +58,13 @@ export const childPosition = (position: SchemaPosition, key: string, value: unkn
 };
 
 /**
+ * {@link childPosition} for walkers that visit schemas only: the answer is `AT_DATA` for everything such a
+ * walker does not enter, which is keyword data and, at a schema position, a key reserved for the library.
+ */
+export const walkPosition = (position: SchemaPosition, key: string, value: unknown): SchemaPosition =>
+  position === AT_SCHEMA && isInternalKey(key) ? AT_DATA : childPosition(position, key, value);
+
+/**
  * Turns a schema supplied by a caller into the library's own copy of it. It clones like `deepClone` (sorted
  * keys, shared objects cloned once, cycles kept, the same error past `maxDepth`), except that keys with the
  * reserved `__$` prefix are not copied from objects that can be schemas: z-schema keeps its own state on
@@ -285,10 +292,7 @@ export const findId = (
     // intermediate resources - pointer reference across resource boundary".
     for (let i = keys.length - 1; i >= 0; i--) {
       const k = keys[i];
-      if (isSchema && isInternalKey(k)) {
-        continue;
-      }
-      const child = childPosition(position, k, schema[k]);
+      const child = walkPosition(position, k, schema[k]);
       if (child === AT_DATA) {
         continue;
       }

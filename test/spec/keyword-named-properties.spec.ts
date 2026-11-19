@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { hasUnresolvedRef } from '../../src/compiled-schema-cache.ts';
 import { ZSchema } from '../../src/z-schema.ts';
 
 type Schema = Record<string, unknown>;
@@ -41,6 +42,48 @@ describe('a property named like a data keyword', () => {
       const bad = v.validate({ [name]: 1 }, schema);
       expect(bad.valid).toBe(false);
       expect(firstCode(bad)).toBe('INVALID_TYPE');
+    });
+
+    it('resolves a $ref under a patternProperties key spelled like it', () => {
+      const v = ZSchema.create({ safe: true });
+      const schema: Schema = {
+        $defs: { n: { type: 'string' } },
+        patternProperties: { [name]: { $ref: '#/$defs/n' } },
+      };
+      expect(v.validate({ [name]: 'x' }, schema).valid).toBe(true);
+      const bad = v.validate({ [name]: 1 }, schema);
+      expect(bad.valid).toBe(false);
+      expect(firstCode(bad)).toBe('INVALID_TYPE');
+    });
+
+    it('finds an $anchor declared inside its schema', () => {
+      const v = ZSchema.create({ safe: true });
+      const schema: Schema = {
+        properties: {
+          [name]: { $anchor: 'inner', type: 'string' },
+          b: { $ref: '#inner' },
+        },
+      };
+      const bad = v.validate({ b: 1 }, schema);
+      expect(bad.valid).toBe(false);
+      expect(firstCode(bad)).toBe('INVALID_TYPE');
+      expect(v.validate({ b: 'x' }, schema).valid).toBe(true);
+    });
+
+    it('picks up a reference target that is registered after a first call', () => {
+      const v = ZSchema.create({ safe: true });
+      const schema: Schema = { properties: { [name]: { $ref: 'http://example.com/later.json' } } };
+      expect(v.validate({ [name]: 1 }, schema).valid).toBe(false);
+      v.setRemoteReference('http://example.com/later.json', { type: 'string' });
+      expect(v.validate({ [name]: 'x' }, schema).valid).toBe(true);
+      const bad = v.validate({ [name]: 1 }, schema);
+      expect(bad.valid).toBe(false);
+      expect(firstCode(bad)).toBe('INVALID_TYPE');
+    });
+
+    it('reports an unresolved reference inside its schema to the compiled-schema cache', () => {
+      expect(hasUnresolvedRef({ properties: { [name]: { $ref: '#/nowhere' } } }, 100)).toBe(true);
+      expect(hasUnresolvedRef({ [name]: { $ref: '#/nowhere' } }, 100)).toBe(false);
     });
 
     it('resolves a reference to a definition with that name', () => {
@@ -100,6 +143,28 @@ describe('a property named like a data keyword', () => {
     });
   });
 
+  describe('the names in a keyword map are not keywords', () => {
+    it('resolves references inside properties named $ref and $id', () => {
+      const v = ZSchema.create({ safe: true });
+      const schema: Schema = {
+        $defs: { n: { type: 'string' } },
+        properties: { $ref: { $ref: '#/$defs/n' }, $id: { $ref: '#/$defs/n' } },
+      };
+      expect(v.validate({ $ref: 'x', $id: 'y' }, schema).valid).toBe(true);
+      const bad = v.validate({ $ref: 1 }, schema);
+      expect(bad.valid).toBe(false);
+      expect(firstCode(bad)).toBe('INVALID_TYPE');
+    });
+
+    it('inspects an object once as a keyword map and once as a schema', () => {
+      const shared = { $ref: '#/nowhere' };
+      // under $defs the key $ref is a name with a string value; under allOf the same object is a schema
+      expect(hasUnresolvedRef({ $defs: shared, allOf: [shared] }, 100)).toBe(true);
+      expect(hasUnresolvedRef({ $defs: shared }, 100)).toBe(false);
+    });
+  });
+
+  // These pass with and without position tracking: they guard what must not change.
   describe('keyword values stay data', () => {
     it('does not resolve a reference-like value of default', () => {
       const v = ZSchema.create({ safe: true });
@@ -139,7 +204,7 @@ describe('a property named like a data keyword', () => {
     });
   });
 
-  it('resolves a $ref inside a property named __$compiled', () => {
+  it('resolves a $ref inside a property whose name starts with the reserved prefix', () => {
     const v = ZSchema.create({ safe: true });
     const schema: Schema = { $defs: { n: { type: 'string' } }, properties: { __$compiled: { $ref: '#/$defs/n' } } };
     const bad = v.validate({ __$compiled: 1 }, schema);
