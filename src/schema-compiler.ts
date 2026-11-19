@@ -300,23 +300,31 @@ export class SchemaCompiler {
     this.validator = validator;
   }
 
-  collectAndCacheIds(schema: JsonSchemaInternal) {
+  collectAndCacheIds(schema: JsonSchemaInternal, owner: JsonSchemaInternal | undefined) {
     const ids = collectIds(schema, this.validator.options.maxRecursionDepth);
     for (const item of ids) {
       if (item.absoluteUri) {
-        this.validator.scache.cacheSchemaByUri(item.absoluteUri, item.obj);
+        this.validator.scache.declareId(item.absoluteUri, item.obj, owner);
 
         if (item.type === 'relative' && item.absoluteParent && isSimpleIdentifier(item.id)) {
           const parentUri = item.absoluteParent.absoluteUri || item.absoluteParent.id;
           const altAbsoluteUri = resolveReference(parentUri, item.id);
-          this.validator.scache.cacheSchemaByUri(altAbsoluteUri, item.obj);
+          this.validator.scache.declareId(altAbsoluteUri, item.obj, owner);
         }
       } else if (item.type === 'root') {
-        this.validator.scache.cacheSchemaByUri(item.id, item.obj);
+        this.validator.scache.declareId(item.id, item.obj, owner);
       }
     }
   }
 
+  /**
+   * Compiles `schema`: enters the ids it declares and resolves its references.
+   *
+   * @param report - The report that collects compilation errors.
+   * @param schema - The schema, or an array of schemas, to compile.
+   * @param options - `noCache` skips entering declared ids. The ids of a registered root are protected and belong
+   * to it; otherwise a declaration of a protected URI is skipped.
+   */
   compileSchema(report: Report, schema: JsonSchemaInternal | JsonSchemaInternal[], options?: { noCache?: boolean }) {
     report.commonErrorMessage = 'SCHEMA_COMPILATION_FAILED';
 
@@ -334,15 +342,17 @@ export class SchemaCompiler {
     if (Array.isArray(schema)) {
       if (!options?.noCache) {
         for (let i = 0; i < schema.length; i++) {
-          this.collectAndCacheIds(schema[i]);
+          const element = schema[i];
+          this.collectAndCacheIds(element, this.validator.scache.isRegisteredRoot(element) ? element : undefined);
         }
       }
       return this.compileArrayOfSchemas(report, schema);
     } else if (typeof schema === 'boolean') {
       return true;
     }
+    const owner = this.validator.scache.isRegisteredRoot(schema) ? schema : undefined;
     if (!options?.noCache) {
-      this.collectAndCacheIds(schema);
+      this.collectAndCacheIds(schema, owner);
     }
 
     // a built-in prototype has nothing to compile and is never written to
@@ -367,7 +377,7 @@ export class SchemaCompiler {
 
     if (schema.id && typeof schema.id === 'string' && !options?.noCache) {
       // add this to our schemaCache (before compilation in case we have references including id)
-      this.validator.scache.cacheSchemaByUri(schema.id, schema);
+      this.validator.scache.declareId(schema.id, schema, owner);
     }
 
     // this method can be called recursively, so we need to remember our root
@@ -407,6 +417,7 @@ export class SchemaCompiler {
             // The reader's object belongs to the caller: compile a clone of it. The clone needs the id.
             const remoteSchema = cloneInputSchema(loaded, this.validator.options.maxRecursionDepth);
             remoteSchema.id = remotePath;
+            this.validator.scache.registerLoaded(remoteSchema);
             // try to compile the schema
             // Eager on purpose: these errors are read by content (copied/filtered), so do not use Report.createSubReport.
             const subreport = new Report(report);
