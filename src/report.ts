@@ -61,10 +61,6 @@ export interface SchemaErrorDetail {
   keyword?: keyof JsonSchemaAll;
 }
 
-export interface ReportOptions {
-  maxErrors?: number;
-}
-
 function pathToString(path: Array<string | number>): string {
   // Sanitize the path segments (http://tools.ietf.org/html/rfc6901#section-4)
   return `#/${path
@@ -131,6 +127,8 @@ class PendingError implements SchemaErrorDetail {
   // null = no `inner` key; an empty array = `inner: undefined` (mirrors the eager shape)
   private readonly innerEntries: SchemaErrorDetail[] | null;
   private detail?: SchemaErrorDetail;
+  /** 1 plus the sizes of the inner entries: the number of details this error stands for. */
+  readonly size: number;
 
   constructor(
     report: Report,
@@ -141,7 +139,8 @@ class PendingError implements SchemaErrorDetail {
     snapshotSchemaPath: Array<string | number>,
     schema: JsonSchema | boolean | undefined,
     keyword: keyof JsonSchemaAll | undefined,
-    innerEntries: SchemaErrorDetail[] | null
+    innerEntries: SchemaErrorDetail[] | null,
+    size: number
   ) {
     this.code = code;
     this.params = params;
@@ -154,6 +153,7 @@ class PendingError implements SchemaErrorDetail {
     this.report = report;
     this.schema = schema;
     this.innerEntries = innerEntries;
+    this.size = size;
   }
 
   get message(): string {
@@ -236,6 +236,23 @@ class PendingError implements SchemaErrorDetail {
 }
 
 /**
+ * The number of details `entry` stands for: itself plus everything nested under it through `inner`.
+ */
+function sizeOf(entry: SchemaErrorDetail): number {
+  if (entry instanceof PendingError) {
+    return entry.size;
+  }
+  let size = 1;
+  const { inner } = entry;
+  if (inner !== undefined) {
+    for (let i = 0; i < inner.length; i++) {
+      size += sizeOf(inner[i]);
+    }
+  }
+  return size;
+}
+
+/**
  * Replaces any {@link PendingError} entries with their materialized details. Returns the input
  * array itself when nothing needs materializing. The `instanceof` check is what keeps public
  * `inner`/`details` lists made of plain own-key objects rather than getter-backed records.
@@ -297,7 +314,6 @@ export class Report {
 
   parentReport?: Report;
   options: ZSchemaOptions;
-  reportOptions: ReportOptions;
   validateOptions: ValidateOptions = {};
   /**
    * When set, `addCustomError` records a cheap {@link PendingError} instead of building the full
@@ -306,6 +322,24 @@ export class Report {
    * @internal
    */
   deferErrors = false;
+  /**
+   * The most details this report may hold, counted through `inner`. `Infinity` means no limit.
+   *
+   * @internal
+   */
+  errorLimit = Infinity;
+  /**
+   * Details held so far: the entries of `errors` plus everything nested under them.
+   *
+   * @internal
+   */
+  errorCount = 0;
+  /**
+   * `true` once a detail was left out because of `errorLimit`.
+   *
+   * @internal
+   */
+  errorsTruncated = false;
 
   /**
    * Creates a sub-report whose errors are materialized lazily. Safe because the errors of such
@@ -337,27 +371,23 @@ export class Report {
     this.parentReport?.materializeErrors();
   }
 
-  constructor(parentOrOptions: ZSchemaOptions | Report, validateOptions?: ValidateOptions); // primary | subreport
-  constructor(parentReport: Report, reportOptions: ReportOptions, validateOptions?: ValidateOptions); // subreport with options
-  constructor(
-    parentOrOptions: ZSchemaOptions | Report,
-    reportOptionsOrValidate?: ReportOptions | ValidateOptions,
-    validateOptions?: ValidateOptions
-  ) {
+  constructor(parentOrOptions: ZSchemaOptions | Report, validateOptions?: ValidateOptions) {
     this.parentReport = parentOrOptions instanceof Report ? parentOrOptions : undefined;
     this.options = parentOrOptions instanceof Report ? parentOrOptions.options : parentOrOptions || {};
     if (parentOrOptions instanceof Report) {
       // subreport
-      this.reportOptions = (reportOptionsOrValidate as ReportOptions) || {};
       this.validateOptions = validateOptions || parentOrOptions.validateOptions;
+      if (parentOrOptions.errorLimit !== Infinity) {
+        // the room the parent has left after the one error that would adopt this report's errors
+        this.errorLimit = Math.max(1, parentOrOptions.errorLimit - parentOrOptions.errorCount - 1);
+      }
       this.__$recursiveAnchorStack = parentOrOptions.__$recursiveAnchorStack.slice();
       this.__$dynamicScopeStack = parentOrOptions.__$dynamicScopeStack.slice();
       this.__$unevaluatedInstance = parentOrOptions.__$unevaluatedInstance;
       this.__validationResultCache = parentOrOptions.__validationResultCache;
     } else {
       // primary
-      this.reportOptions = {};
-      this.validateOptions = (reportOptionsOrValidate as ValidateOptions) || {};
+      this.validateOptions = validateOptions || {};
       this.__$recursiveAnchorStack = [];
       this.__$dynamicScopeStack = [];
       this.__validationResultCache = new Map();
@@ -451,7 +481,7 @@ export class Report {
           this.errors.length = 1;
         }
         const valid = this.errors.length === 0;
-        const err = valid ? undefined : getValidateError({ details: this.errors });
+        const err = valid ? undefined : getValidateError({ details: this.errors, truncated: this.errorsTruncated });
         callback(err, valid);
       },
       onAbort: (error) => {
@@ -548,10 +578,6 @@ export class Report {
     schema?: JsonSchema | boolean,
     keyword?: keyof JsonSchemaAll
   ) {
-    if (typeof this.reportOptions.maxErrors === 'number' && this.errors.length >= this.reportOptions.maxErrors) {
-      return;
-    }
-
     if (!errorMessage) {
       throw new Error(`No errorMessage known for code ${errorCode}`);
     }
@@ -567,6 +593,11 @@ export class Report {
     if (safeParams && excluded) {
       return;
     }
+    // The first error is always recorded, so the verdict never depends on the limit.
+    if (safeParams && this.errors.length > 0 && this.errorCount >= this.errorLimit) {
+      this.errorsTruncated = true;
+      return;
+    }
 
     // snapshot: path arrays keep mutating as traversal continues
     const path = this.parentReport ? this.parentReport.path.concat(this.path) : this.path.slice();
@@ -575,23 +606,56 @@ export class Report {
       : this.schemaPath.slice();
 
     let inner: SchemaErrorDetail[] | null = null;
+    let size = 1;
     if (subReports != null) {
       if (!Array.isArray(subReports)) {
         subReports = [subReports];
       }
       inner = [];
+      // room left for adopted entries after this error itself; entries are adopted whole, in order,
+      // until one does not fit
+      let room = this.errorLimit - this.errorCount - 1;
+      let full = false;
       for (let si = 0; si < subReports.length; si++) {
-        const errs = subReports[si].errors;
+        const sub = subReports[si];
+        if (sub.errorsTruncated) {
+          this.errorsTruncated = true;
+        }
+        if (full) {
+          continue;
+        }
+        const errs = sub.errors;
         for (let ei = 0; ei < errs.length; ei++) {
-          inner.push(errs[ei]);
+          const entry = errs[ei];
+          const entrySize = sizeOf(entry);
+          if (entrySize > room) {
+            this.errorsTruncated = true;
+            full = true;
+            break;
+          }
+          inner.push(entry);
+          room -= entrySize;
+          size += entrySize;
         }
       }
     }
 
-    const pending = new PendingError(this, errorCode, errorMessage, params, path, schemaPath, schema, keyword, inner);
+    const pending = new PendingError(
+      this,
+      errorCode,
+      errorMessage,
+      params,
+      path,
+      schemaPath,
+      schema,
+      keyword,
+      inner,
+      size
+    );
 
     if (safeParams) {
       this.errors.push(this.deferErrors ? pending : pending.materialize());
+      this.errorCount += size;
       return;
     }
 
@@ -600,6 +664,11 @@ export class Report {
     if (excluded) {
       return;
     }
+    if (this.errors.length > 0 && this.errorCount >= this.errorLimit) {
+      this.errorsTruncated = true;
+      return;
+    }
     this.errors.push(detail);
+    this.errorCount += size;
   }
 }

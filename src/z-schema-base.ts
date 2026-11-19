@@ -22,7 +22,7 @@ import { get, sortedKeys } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
 import { getRemotePath } from './utils/uri.js';
 import { isObject, whatIs } from './utils/what-is.js';
-import { defaultOptions, normalizeOptions } from './z-schema-options.js';
+import { defaultOptions, normalizeOptions, resolveMaxErrors } from './z-schema-options.js';
 
 export interface ValidateOptions {
   schemaPath?: string;
@@ -225,6 +225,8 @@ export class ZSchemaBase {
     }
 
     if (!foundError) {
+      // Schema compilation and schema validation above are not limited; the data validation is.
+      report.errorLimit = resolveMaxErrors(this.options.maxErrors);
       validateJson(this, report, _schema, json);
     }
 
@@ -241,6 +243,7 @@ export class ZSchemaBase {
       throw getValidateError({
         message: report.commonErrorMessage!,
         details: report.errors,
+        truncated: report.errorsTruncated,
       });
     }
     return true;

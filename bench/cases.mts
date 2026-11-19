@@ -285,6 +285,21 @@ export const cases: BenchCase[] = [
     expectValid: false,
     expectErrors: 5,
   },
+  {
+    name: 'invalid-many-errors',
+    options: { breakOnFirstError: false },
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: { id: { type: 'integer' }, name: { type: 'string' } },
+        required: ['id', 'name'],
+      },
+    },
+    data: range(500).map(() => ({ id: 'x' })),
+    expectValid: false,
+    expectErrors: 1000,
+  },
   { name: 'schema-object-validate', mode: 'schema-object', schema: flatSchema, data: flatValid },
   {
     // $dynamicRef has no fast-path support, so compile() keeps the interpreter for this schema.
