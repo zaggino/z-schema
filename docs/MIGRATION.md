@@ -92,6 +92,10 @@ The `JsonSchemaVersion` union type now includes `'draft2019-09'` and `'draft2020
 
 ### Changes in 12.x releases
 
+#### CLI: file references outside the schema's directory
+
+A schema whose `$ref` names a file outside its own directory (for example `../common/defs.json`) needs `--refRoot <dir>`, where `<dir>` is a directory that contains both the schema and the referenced file. The error message names the option.
+
 #### maxErrors: at most 1000 error details by default
 
 A failed validation reports at most 1000 error details (counted through `inner`). Validity is unchanged. `err.truncated` is `true` when the limit left out at least one detail while the data was validated. Set `maxErrors: Infinity` to get every detail:
