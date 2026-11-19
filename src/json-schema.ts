@@ -218,7 +218,8 @@ export const findId = (
   targetBaseUri?: string,
   currentBaseUri?: string,
   maxDepth = DEFAULT_MAX_RECURSION_DEPTH,
-  _depth = 0
+  _depth = 0,
+  position: SchemaPosition = AT_SCHEMA
 ): JsonSchemaInternal | undefined => {
   // process only arrays and objects
   if (typeof schema !== 'object' || schema === null) {
@@ -239,7 +240,9 @@ export const findId = (
 
   const baseUri = currentBaseUri ?? targetBaseUri;
 
-  const schemaId = getId(schema);
+  // a map of names to schemas has no keywords of its own
+  const isSchema = position === AT_SCHEMA;
+  const schemaId = isSchema ? getId(schema) : undefined;
   let nextBaseUri = baseUri;
 
   if (schemaId) {
@@ -256,7 +259,7 @@ export const findId = (
 
   const inTargetBase = !targetBaseUri || nextBaseUri === targetBaseUri;
 
-  if (inTargetBase) {
+  if (inTargetBase && isSchema) {
     if (schemaId && (schemaId === id || (schemaId.startsWith('#') && schemaId.slice(1) === id))) {
       return schema;
     }
@@ -268,7 +271,7 @@ export const findId = (
   let result;
   if (Array.isArray(schema)) {
     for (let i = 0; i < schema.length; i++) {
-      result = findId(schema[i] as JsonSchemaInternal, id, targetBaseUri, nextBaseUri, maxDepth, _depth + 1);
+      result = findId(schema[i] as JsonSchemaInternal, id, targetBaseUri, nextBaseUri, maxDepth, _depth + 1, position);
       if (result) {
         return result;
       }
@@ -282,10 +285,14 @@ export const findId = (
     // intermediate resources - pointer reference across resource boundary".
     for (let i = keys.length - 1; i >= 0; i--) {
       const k = keys[i];
-      if (isInternalKey(k) || NON_SCHEMA_KEYWORDS_SET.has(k)) {
+      if (isSchema && isInternalKey(k)) {
         continue;
       }
-      result = findId(schema[k] as JsonSchemaInternal, id, targetBaseUri, nextBaseUri, maxDepth, _depth + 1);
+      const child = childPosition(position, k, schema[k]);
+      if (child === AT_DATA) {
+        continue;
+      }
+      result = findId(schema[k] as JsonSchemaInternal, id, targetBaseUri, nextBaseUri, maxDepth, _depth + 1, child);
       if (result) {
         return result;
       }

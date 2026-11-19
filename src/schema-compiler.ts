@@ -1,7 +1,8 @@
 import type { JsonSchemaInternal } from './json-schema-versions.js';
+import type { SchemaPosition } from './json-schema.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
-import { cloneInputSchema, getId, isInternalKey, NON_SCHEMA_KEYWORDS_SET } from './json-schema.js';
+import { AT_DATA, AT_SCHEMA, childPosition, cloneInputSchema, getId, isInternalKey } from './json-schema.js';
 import { Report } from './report.js';
 import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
@@ -102,7 +103,7 @@ const resolveSchemaScopeId = (base: string | undefined, schema: JsonSchemaIntern
 
 export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECURSION_DEPTH) => {
   const ids: Id[] = [];
-  function walk(node: any, scope: Id[], _depth = 0) {
+  function walk(node: any, scope: Id[], position: SchemaPosition, _depth = 0) {
     if (typeof node !== 'object' || node == null) {
       return;
     }
@@ -118,7 +119,7 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
 
     let addedScope = false;
 
-    const nodeId = getId(schemaNode);
+    const nodeId = position === AT_SCHEMA ? getId(schemaNode) : undefined;
     if (typeof nodeId === 'string') {
       let type: Id['type'] = isAbsoluteUri(nodeId) ? 'absolute' : 'relative';
       if (scope.length === 0) {
@@ -160,14 +161,19 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
 
     if (Array.isArray(node)) {
       for (const item of node) {
-        walk(item, scope, _depth + 1);
+        walk(item, scope, position, _depth + 1);
       }
     } else {
       for (const key of Object.keys(schemaNode)) {
-        if (isInternalKey(key) || NON_SCHEMA_KEYWORDS_SET.has(key)) {
+        if (position === AT_SCHEMA && isInternalKey(key)) {
           continue;
         }
-        walk((schemaNode as Record<string, unknown>)[key], scope, _depth + 1);
+        const value = (schemaNode as Record<string, unknown>)[key];
+        const child = childPosition(position, key, value);
+        if (child === AT_DATA) {
+          continue;
+        }
+        walk(value, scope, child, _depth + 1);
       }
     }
 
@@ -175,7 +181,7 @@ export const collectIds = (obj: JsonSchemaInternal, maxDepth = DEFAULT_MAX_RECUR
       scope.pop();
     }
   }
-  walk(obj, []);
+  walk(obj, [], AT_SCHEMA);
   return ids;
 };
 
@@ -193,7 +199,8 @@ export const collectReferences = (
   path?: Reference['path'],
   options?: { useRefObjectScope?: boolean },
   maxDepth = DEFAULT_MAX_RECURSION_DEPTH,
-  _depth = 0
+  _depth = 0,
+  position: SchemaPosition = AT_SCHEMA
 ) => {
   results ||= [];
   scope ||= [];
@@ -211,12 +218,14 @@ export const collectReferences = (
     );
   }
 
-  const hasRef = typeof obj.$ref === 'string' && obj.__$refResolved === undefined;
+  // a map of names to schemas has no keywords of its own
+  const isSchema = position === AT_SCHEMA;
+  const hasRef = isSchema && typeof obj.$ref === 'string' && obj.__$refResolved === undefined;
   let addedScope = false;
   const isRootScope = scope.length === 0;
-  const objId = getId(obj);
+  const objId = isSchema ? getId(obj) : undefined;
   let scopeId = objId;
-  if (typeof obj.id === 'string' && isAbsoluteUri(obj.id) && (!scopeId || !isAbsoluteUri(scopeId))) {
+  if (isSchema && typeof obj.id === 'string' && isAbsoluteUri(obj.id) && (!scopeId || !isAbsoluteUri(scopeId))) {
     scopeId = obj.id;
   }
 
@@ -234,7 +243,7 @@ export const collectReferences = (
       path: path.slice(0),
     });
   }
-  if (typeof obj.$recursiveRef === 'string' && obj.__$recursiveRefResolved === undefined) {
+  if (isSchema && typeof obj.$recursiveRef === 'string' && obj.__$recursiveRefResolved === undefined) {
     results.push({
       ref: resolveReference(scope.at(-1), obj.$recursiveRef),
       key: '$recursiveRef',
@@ -242,7 +251,7 @@ export const collectReferences = (
       path: path.slice(0),
     });
   }
-  if (typeof obj.$dynamicRef === 'string' && obj.__$dynamicRefResolved === undefined) {
+  if (isSchema && typeof obj.$dynamicRef === 'string' && obj.__$dynamicRefResolved === undefined) {
     results.push({
       ref: resolveReference(scope.at(-1), obj.$dynamicRef),
       key: '$dynamicRef',
@@ -250,7 +259,7 @@ export const collectReferences = (
       path: path.slice(0),
     });
   }
-  if (typeof obj.$schema === 'string' && obj.__$schemaResolved === undefined) {
+  if (isSchema && typeof obj.$schema === 'string' && obj.__$schemaResolved === undefined) {
     results.push({
       ref: resolveReference(scope.at(-1), obj.$schema),
       key: '$schema',
@@ -262,26 +271,23 @@ export const collectReferences = (
   if (Array.isArray(obj)) {
     for (let i = 0; i < obj.length; i++) {
       path.push(i);
-      collectReferences(obj[i] as JsonSchemaInternal, results, scope, path, options, maxDepth, _depth + 1);
+      collectReferences(obj[i] as JsonSchemaInternal, results, scope, path, options, maxDepth, _depth + 1, position);
       path.pop();
     }
   } else {
     const keys = Object.keys(obj);
     for (const key of keys) {
       // do not recurse through resolved references and other z-schema props
-      if (isInternalKey(key) || NON_SCHEMA_KEYWORDS_SET.has(key)) {
+      if (isSchema && isInternalKey(key)) {
+        continue;
+      }
+      const value = (obj as Record<string, JsonSchemaInternal>)[key];
+      const child = childPosition(position, key, value);
+      if (child === AT_DATA) {
         continue;
       }
       path.push(key);
-      collectReferences(
-        (obj as Record<string, JsonSchemaInternal>)[key],
-        results,
-        scope,
-        path,
-        options,
-        maxDepth,
-        _depth + 1
-      );
+      collectReferences(value, results, scope, path, options, maxDepth, _depth + 1, child);
       path.pop();
     }
   }

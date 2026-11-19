@@ -1,8 +1,9 @@
 import type { FastValidator } from './fast-validator.js';
 import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
+import type { SchemaPosition } from './json-schema.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
-import { isInternalKey, NON_SCHEMA_KEYWORDS_SET } from './json-schema.js';
+import { AT_DATA, AT_SCHEMA, childPosition, isInternalKey } from './json-schema.js';
 import { MAX_COMPILED_SCHEMA_CACHE_KEY_LENGTH, MAX_COMPILED_SCHEMA_CACHE_SIZE } from './utils/constants.js';
 
 let globalSchemaStateGeneration = 0;
@@ -74,7 +75,13 @@ const REF_KEYS: Array<[string, string]> = [
  * (compiler leaves `__$xxxResolved` undefined), or is too deep to inspect. Such a schema must
  * not be cached: a target registered later would be missed.
  */
-export function hasUnresolvedRef(node: unknown, maxDepth: number, visited = new Set<unknown>(), depth = 0): boolean {
+export function hasUnresolvedRef(
+  node: unknown,
+  maxDepth: number,
+  visited = new Set<unknown>(),
+  depth = 0,
+  position: SchemaPosition = AT_SCHEMA
+): boolean {
   if (node === null || typeof node !== 'object' || visited.has(node)) {
     return false;
   }
@@ -83,7 +90,7 @@ export function hasUnresolvedRef(node: unknown, maxDepth: number, visited = new 
   }
   visited.add(node);
   const record = node as Record<string, unknown>;
-  if (!Array.isArray(node)) {
+  if (position === AT_SCHEMA && !Array.isArray(node)) {
     for (let i = 0; i < REF_KEYS.length; i++) {
       if (typeof record[REF_KEYS[i][0]] === 'string' && record[REF_KEYS[i][1]] === undefined) {
         return true;
@@ -93,10 +100,14 @@ export function hasUnresolvedRef(node: unknown, maxDepth: number, visited = new 
   const keys = Object.keys(record);
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    if (isInternalKey(key) || NON_SCHEMA_KEYWORDS_SET.has(key)) {
+    if (position === AT_SCHEMA && isInternalKey(key)) {
       continue;
     }
-    if (hasUnresolvedRef(record[key], maxDepth, visited, depth + 1)) {
+    const child = childPosition(position, key, record[key]);
+    if (child === AT_DATA) {
+      continue;
+    }
+    if (hasUnresolvedRef(record[key], maxDepth, visited, depth + 1, child)) {
       return true;
     }
   }
