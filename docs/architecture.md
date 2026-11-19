@@ -34,6 +34,7 @@ index.ts (public API)
             └─ utils/
                  ├─ array.ts (isUniqueArray: pairwise loop and per-item keys; difference)
                  ├─ clone.ts (deep/shallow clone)
+                 ├─ equality.ts (equality of JSON values: areEqual and the per-value key writer that mirrors it)
                  ├─ json.ts (JSON path traversal, sortedKeys)
                  ├─ properties.ts (object property copy)
                  ├─ rfc-3986.ts (RFC 3986 URI/URI-reference ABNF grammar)

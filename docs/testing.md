@@ -130,7 +130,7 @@ interface SchemaErrorDetail {
 
 `test/lib/unique-array-cases.ts` builds a fixed, seeded set of arrays (`generateCases(seed, count)`) and holds the pairwise loop (`referencePairwise`) that defines the expected result, reported index pair and error for an array that holds an object or array. `test/spec/utils.array.spec.ts` runs `isUniqueArray` and `isUniqueByKey` over those arrays and compares every outcome with the loop's.
 
-`areEqual` (`src/utils/json.ts`) and the key writer (`src/utils/array.ts`) have to agree on every value. When you change either, add the kind of value concerned to the generator (a leaf in `LEAF_VALUES` or `LEAF_FACTORIES`, or a new entry in `CASE_KINDS`), so that a disagreement shows up as a failing case number. The sizes the cases rely on (`LONG_MIN_ITEMS`, `LONG_ITEM_MIN_VALUES`, …) are named in the library and checked against `PAIRWISE_MAX_ITEMS` and `PREFIX_MAX_VALUES` by a test.
+`areEqual` and the key writer (both in `src/utils/equality.ts`) have to agree on every value. When you change either, add the kind of value concerned to the generator (a leaf in `LEAF_VALUES` or `LEAF_FACTORIES`, or a new entry in `CASE_KINDS`), so that a disagreement shows up as a failing case number. The sizes the cases rely on (`LONG_MIN_ITEMS`, `LONG_ITEM_MIN_VALUES`, …) are named in the library and checked against `PAIRWISE_MAX_ITEMS` and `PREFIX_MAX_VALUES` by a test.
 
 ## Benchmarks
 

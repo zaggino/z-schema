@@ -1,14 +1,8 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import {
-  firstPairByKey,
-  isUniqueArray,
-  isUniqueByKey,
-  PAIRWISE_MAX_ITEMS,
-  PREFIX_MAX_VALUES,
-} from '../../src/utils/array.ts';
+import { isUniqueArray, isUniqueByKey, PAIRWISE_MAX_ITEMS } from '../../src/utils/array.ts';
 import { DEFAULT_MAX_RECURSION_DEPTH } from '../../src/utils/constants.ts';
-import { areEqual } from '../../src/utils/json.ts';
+import { areEqual, firstPairByKey, PREFIX_MAX_VALUES } from '../../src/utils/equality.ts';
 import {
   generateCases,
   holdsReference,

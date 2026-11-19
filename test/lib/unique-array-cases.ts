@@ -1,4 +1,4 @@
-import { areEqual } from '../../src/utils/json.ts';
+import { areEqual } from '../../src/utils/equality.ts';
 
 /** Result of running an `isUniqueArray`-shaped function on one input. */
 export type UniqueOutcome =

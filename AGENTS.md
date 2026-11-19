@@ -60,6 +60,7 @@ src/                  # Library source (TypeScript, ESM)
   utils/              # Pure utility functions
     array.ts          # Array helpers: isUniqueArray (pairwise loop and per-item keys), difference
     clone.ts          # Deep/shallow clone
+    equality.ts       # Equality of JSON values (areEqual) and the per-value key writer that mirrors it
     json.ts           # JSON path traversal, sorted keys
     properties.ts     # Object property copy
     rfc-3986.ts       # RFC 3986 URI/URI-reference grammar
