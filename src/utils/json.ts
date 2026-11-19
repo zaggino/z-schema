@@ -8,8 +8,15 @@ interface AreEqualOptions {
 
 export const sortedKeys = (obj: Record<string, unknown>): string[] => Object.keys(obj).sort();
 
-// `writeKey` in ./array.ts writes values in the order this function compares them and repeats its depth checks.
-// Change the two together.
+// `writeKey` in ./array.ts writes values in the order this function compares them, so that `uniqueItems` can
+// compare one key per item instead of every pair. It repeats, and has to keep repeating:
+// - the identity check coming before the depth check (identical values never throw);
+// - the order: an array's length, then its items; an object's key count and sorted keys, then its values;
+// - the depths: items at depth + 1, the two key lists at depth + 1, each key at depth + 2, values at depth + 1;
+// - what an object is: anything `isObject` accepts, compared by its own enumerable keys.
+// `caseInsensitiveComparison` is not repeated there: unique items never use it.
+// If the two drift apart, a pair the keys report wrongly is caught by the `areEqual` call that confirms it. A
+// pair they miss is caught only by the generated cases in test/spec/utils.array.spec.ts.
 export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptions, _depth = 0): boolean => {
   const caseInsensitiveComparison = options?.caseInsensitiveComparison || false;
   const maxDepth = options?.maxDepth ?? DEFAULT_MAX_RECURSION_DEPTH;

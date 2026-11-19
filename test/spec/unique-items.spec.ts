@@ -1,7 +1,10 @@
 import type { JsonSchema } from '../../src/json-schema-versions.ts';
 
+import { describe, expect, it } from 'vitest';
+
 import { ZSchema } from '../../src/z-schema.ts';
 import { codesOf, interpreterOutcome, outcome } from '../lib/fast-validator.ts';
+import { idItems, PADDED_ITEMS, stringFillers } from '../lib/unique-array-cases.ts';
 
 const schema: JsonSchema = { type: 'array', uniqueItems: true };
 
@@ -13,24 +16,8 @@ const depth = (n: number, leaf: unknown): unknown => {
   return node;
 };
 
-const objects = (count: number): Array<Record<string, unknown>> => {
-  const items: Array<Record<string, unknown>> = [];
-  for (let i = 0; i < count; i++) {
-    items.push({ id: i });
-  }
-  return items;
-};
-
-const fillers = (count: number): string[] => {
-  const items: string[] = [];
-  for (let i = 0; i < count; i++) {
-    items.push(`filler-${i}`);
-  }
-  return items;
-};
-
 const withCopies = (copies: Record<number, number>): unknown[] => {
-  const items = objects(100);
+  const items = idItems(100);
   for (const key of Object.keys(copies)) {
     const target = Number(key);
     items[target] = { ...items[copies[target]] };
@@ -65,7 +52,7 @@ describe('uniqueItems', () => {
       nested.push({ id: 1, meta: { tags: ['x', { n: i }] } });
     }
     const rows: Array<[string, unknown[]]> = [
-      ['100 distinct objects', objects(100)],
+      ['100 distinct objects', idItems(100)],
       ['100 objects differing in a nested value', nested],
       ['mixed numbers, strings and objects', [1, 2, '1', '2', { a: 1 }, { a: 2 }, [1], [2], null, true]],
     ];
@@ -83,7 +70,7 @@ describe('uniqueItems', () => {
       ['strings', ['a', 'b', 'b', 'a']],
       ['one duplicated object among 100', withCopies({ 70: 10 })],
       ['two duplicated groups among 100', withCopies({ 30: 5, 60: 5, 90: 2 })],
-      ['100 distinct objects', objects(100)],
+      ['100 distinct objects', idItems(100)],
     ];
 
     for (const [name, data] of rows) {
@@ -105,8 +92,7 @@ describe('uniqueItems', () => {
     const options = { maxRecursionDepth: 10 };
 
     const compiledOutcome = (data: unknown) => {
-      const v = ZSchema.create({ safe: true, ...options });
-      const fn = v.compile(schema);
+      const fn = ZSchema.create({ safe: true, ...options }).compile(schema);
       return [outcome(() => fn(data)), outcome(() => fn(data))];
     };
 
@@ -119,33 +105,26 @@ describe('uniqueItems', () => {
       expect(fn(data).err?.message).toContain(message);
     };
 
-    it('two over-deep items followed by fillers match the interpreter and are not valid', () => {
-      const data = [depth(12, 1), depth(12, 1), ...fillers(60)];
-      const expected = interpreterOutcome(options, schema, data);
-      const [first, second] = compiledOutcome(data);
-      expect(first).toEqual(expected);
-      expect(second).toEqual(expected);
-      expect(expected).toEqual({ valid: false, codes: [] });
-      expectDepthMessage(data);
-    });
+    const rows: Array<{ name: string; head: unknown[]; valid: boolean }> = [
+      { name: 'two over-deep equal items are not valid', head: [depth(12, 1), depth(12, 1)], valid: false },
+      { name: 'an over-deep item next to a number is valid', head: [depth(12, 1), 5], valid: true },
+      { name: 'over-deep items with different leaves are not valid', head: [depth(12, 1), depth(12, 2)], valid: false },
+    ];
 
-    it('an over-deep item next to a number followed by fillers is valid on both paths', () => {
-      const data = [depth(12, 1), 5, ...fillers(60)];
-      const expected = interpreterOutcome(options, schema, data);
-      const [first, second] = compiledOutcome(data);
-      expect(first).toEqual(expected);
-      expect(second).toEqual(expected);
-      expect(expected).toMatchObject({ valid: true });
-    });
-
-    it('over-deep items with different leaves followed by fillers agree on both paths', () => {
-      const data = [depth(12, 1), depth(12, 2), ...fillers(60)];
-      const expected = interpreterOutcome(options, schema, data);
-      const [first, second] = compiledOutcome(data);
-      expect(first).toEqual(expected);
-      expect(second).toEqual(expected);
-      expect(expected).toEqual({ valid: false, codes: [] });
-      expectDepthMessage(data);
-    });
+    for (const { name, head, valid } of rows) {
+      it(`${name}, on both paths`, () => {
+        const data = head.concat(stringFillers(PADDED_ITEMS));
+        const expected = interpreterOutcome(options, schema, data);
+        const [first, second] = compiledOutcome(data);
+        expect(first).toEqual(expected);
+        expect(second).toEqual(expected);
+        if (valid) {
+          expect(expected).toMatchObject({ valid: true });
+        } else {
+          expect(expected).toEqual({ valid: false, codes: [] });
+          expectDepthMessage(data);
+        }
+      });
+    }
   });
 });

@@ -58,7 +58,7 @@ src/                  # Library source (TypeScript, ESM)
     unevaluated.ts    # unevaluatedItems/unevaluatedProperties validators and evaluated-annotation collection (collectEvaluated)
     ref.ts            # $dynamicRef/$recursiveRef resolution helpers, legacy $ref chain walker (walkLegacyRef)
   utils/              # Pure utility functions
-    array.ts          # Array helpers
+    array.ts          # Array helpers: isUniqueArray (pairwise loop and per-item keys), difference
     clone.ts          # Deep/shallow clone
     json.ts           # JSON path traversal, sorted keys
     properties.ts     # Object property copy
@@ -74,7 +74,7 @@ src/                  # Library source (TypeScript, ESM)
 test/
   spec/               # Test files (*.spec.ts, *.node-spec.ts, *.browser-spec.ts)
   fixtures/           # Test fixture data (sample schemas and JSON)
-  lib/                # Test helpers (create-manifest.ts, deferred-errors.ts, json-schema-test-suite.ts, prototype-guard.ts, read-public-json.ts, unique-array-reference.ts)
+  lib/                # Test helpers (create-manifest.ts, deferred-errors.ts, json-schema-test-suite.ts, prototype-guard.ts, read-public-json.ts, unique-array-cases.ts)
   public/             # Browser test assets (served by Vitest browser)
   ZSchemaTestSuite/   # Legacy z-schema-specific test suite (JS files)
 json-schema-spec/     # Git submodule — official JSON Schema specifications

@@ -32,7 +32,7 @@ index.ts (public API)
             ├─ json-schema-versions.ts (draft-specific interfaces with layered inheritance + JsonSchemaAll superset)
             ├─ z-schema-options.ts (options type + defaults)
             └─ utils/
-                 ├─ array.ts (array helpers)
+                 ├─ array.ts (isUniqueArray: pairwise loop and per-item keys; difference)
                  ├─ clone.ts (deep/shallow clone)
                  ├─ json.ts (JSON path traversal, sortedKeys)
                  ├─ properties.ts (object property copy)
