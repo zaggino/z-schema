@@ -90,6 +90,12 @@ Two new draft-specific schema interfaces are exported:
 
 The `JsonSchemaVersion` union type now includes `'draft2019-09'` and `'draft2020-12'`.
 
+### Changes in 12.x releases
+
+#### CLI: file references outside the schema's directory
+
+A schema whose `$ref` names a file outside its own directory (for example `../common/defs.json`) needs `--refRoot <dir>`, where `<dir>` is a directory that contains both the schema and the referenced file. The error message names the option.
+
 ---
 
 ## Upgrading to v11
