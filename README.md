@@ -60,9 +60,12 @@ z-schema mySchema.json
 z-schema mySchema.json myData.json
 z-schema --strictMode mySchema.json myData.json
 z-schema --draft draft-07 mySchema.json myData.json
+z-schema --refRoot ./schemas ./schemas/api/root.json data.json
 ```
 
-`--draft` accepts `draft-04`, `draft-06`, `draft-07`, `draft2019-09` or `draft2020-12`. A schema without an id is identified by its file location, so relative file `$ref`s resolve next to the schema file; an id the schema declares is kept (a relative one is resolved against the file location). Remote references are https-only and refuse private addresses.
+`--draft` accepts `draft-04`, `draft-06`, `draft-07`, `draft2019-09` or `draft2020-12`. A schema without an id is identified by its file location, so relative file `$ref`s resolve next to the schema file; an id the schema declares is kept (a relative one is resolved against the file location).
+
+References: file `$ref`s are read only from inside the schema file's directory unless `--refRoot <dir>` names another directory; `https` references are downloaded with limits. See [References](docs/usage.md#references) for the details.
 
 ## Usage
 
