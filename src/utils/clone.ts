@@ -20,6 +20,23 @@ export const shallowClone = <T>(src: T): T => {
   return res as T;
 };
 
+/** The error both deep clones throw when a value is nested deeper than `maxDepth`. */
+export const cloneDepthError = (maxDepth: number): Error =>
+  new Error(
+    `Maximum recursion depth (${maxDepth}) exceeded in deepClone. ` +
+      'If your schema or data is deeply nested and valid, increase the maxRecursionDepth option.'
+  );
+
+/**
+ * Deep clone with sorted keys. An object reached more than once is cloned once, so shared subtrees and cycles
+ * keep their shape. Every own enumerable key is copied, z-schema's own `__$` state included: use it for objects
+ * the library already owns. A schema that comes from a caller goes through `cloneInputSchema` instead.
+ *
+ * @param src - The value to clone. It is not modified.
+ * @param maxDepth - Nesting allowed below `src`.
+ * @returns The clone.
+ * @throws {@link Error} when `src` is nested deeper than `maxDepth`.
+ */
 export const deepClone = <T>(src: T, maxDepth = DEFAULT_MAX_RECURSION_DEPTH): T => {
   let vidx = 0;
   const visited = new Map<unknown, number>();
@@ -30,10 +47,7 @@ export const deepClone = <T>(src: T, maxDepth = DEFAULT_MAX_RECURSION_DEPTH): T 
     }
 
     if (_depth >= maxDepth) {
-      throw new Error(
-        `Maximum recursion depth (${maxDepth}) exceeded in deepClone. ` +
-          'If your schema or data is deeply nested and valid, increase the maxRecursionDepth option.'
-      );
+      throw cloneDepthError(maxDepth);
     }
 
     const cidx = visited.get(node);

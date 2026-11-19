@@ -32,8 +32,9 @@ index.ts (public API)
             ├─ json-schema-versions.ts (draft-specific interfaces with layered inheritance + JsonSchemaAll superset)
             ├─ z-schema-options.ts (options type + defaults)
             └─ utils/
-                 ├─ array.ts (array helpers)
+                 ├─ array.ts (isUniqueArray: pairwise loop and per-item keys; difference)
                  ├─ clone.ts (deep/shallow clone)
+                 ├─ equality.ts (equality of JSON values: areEqual and the per-value key writer that mirrors it)
                  ├─ json.ts (JSON path traversal, sortedKeys)
                  ├─ properties.ts (object property copy)
                  ├─ rfc-3986.ts (RFC 3986 URI/URI-reference ABNF grammar)
@@ -82,7 +83,7 @@ Static methods on `ZSchema`:
 
 ## Validation Pipeline
 
-1. **Schema compilation** (`schema-compiler.ts`): resolves `$ref`, collects `id`/`$id`, validates schema structure.
+1. **Schema compilation** (`schema-compiler.ts`): resolves `$ref`, collects `id`/`$id`, validates schema structure. A schema that comes from a caller (the ways are listed under [Reserved Keys](usage.md#reserved-keys)) is cloned first with `cloneInputSchema()` (`json-schema.ts`), so the caller's object is never modified. The clone has sorted keys and leaves out keys with the reserved `__$` prefix wherever a keyword can appear; the names inside keyword maps such as `properties` and the values of `enum`, `const`, `default` and `examples` are copied as they are. When a JSON pointer (a `$ref` fragment or the `schemaPath` option) ends inside such data or on such a map, the schema used is a clone of the target made the same way (`SchemaCache.getAtPath()`). Schemas the library already owns (cache entries) are cloned with `deepClone()`, which keeps those keys.
 2. **Schema validation** (`schema-validator.ts`): validates the schema against its meta-schema (draft-04, draft-06, draft-07, draft-2019-09, or draft-2020-12).
 3. **JSON validation** (`json-validation.ts` + `validation/*.ts`): validates a JSON instance against the compiled schema. Keyword validators are split into category modules under `validation/` (type, numeric, string, array, object, combinators, ref, unevaluated). The orchestration layer in `json-validation.ts` handles the `JsonValidators` dispatch table, `validate()`, `recurseArray()`, and `recurseObject()`; `unevaluatedItems`/`unevaluatedProperties` and `collectEvaluated()` live in `validation/unevaluated.ts`. `validate()` dispatches from a per-node keyword plan (`getKeywordPlan()`): the ordered list of keys that have a non-no-op validator, built lazily and cached on the schema node under a module-private Symbol (invisible to `Object.keys`, `for...in`, `JSON.stringify` and `deepClone`; not stored on frozen schemas). The plan is read-only and assumes keyword-adding schema mutations (`assumeAdditional`, `noEmptyStrings`, `noTypeless`, ...) happen during schema validation, before the node is used to validate data. Because a `customValidator` may mutate compiled nodes, each plan records a module-level epoch that is bumped after every `customValidator` call (stale plans are rebuilt), and while a `customValidator` is configured `validate()` uses a fresh uncached plan per visit. When `breakOnFirstError` is set and errors already exist at keyword-loop entry (e.g. from a `$ref` sibling), a cold path reproduces the exact stop point of the pre-plan loop: only the first validator-bearing key (a no-op key runs nothing) is evaluated. Validator modules that need recursive validation (combinators, contains, dependencies, propertyNames, unevaluated) call back into `validate()` through `ZSchemaBase._jsonValidate()`, so they never import `json-validation.ts` and no circular import exists.
 4. **Report** (`report.ts`): errors accumulate in a `Report` object, then get converted into a `ValidateError`.
@@ -128,7 +129,18 @@ Meta-schemas are bundled in `src/schemas/` (copied from `json-schema-spec/` at b
 - **Global cache** (`SchemaCache.global_cache`) — a static object shared across all `ZSchema` instances in the process. Populated by `ZSchema.setRemoteReference()` and by bundled draft meta-schemas registered at import time. This is intentional: common references (meta-schemas, shared definitions) are registered once and available to every instance.
 - **Instance cache** (`this.cache`) — per-instance, populated by `validator.setRemoteReference()` and by schemas cloned from the global cache on first access. Instance cache entries take precedence over global ones.
 
-When a schema is looked up by URI, the instance cache is checked first. If not found, the global cache entry is deep-cloned into the instance cache (so compilation metadata doesn't leak between instances) and returned. Subsequent lookups for the same URI on the same instance hit the instance cache directly without re-cloning.
+When a schema is looked up by URI (`fromCache()`), a registered instance entry is returned as is. Otherwise a global entry is deep-cloned into the instance cache (so compilation metadata doesn't leak between instances), takes the place of a declared id at that URI if there is one, and is returned. Subsequent lookups for the same URI on the same instance hit the instance cache directly without re-cloning. Without a global entry, the declared entry is returned.
+
+**Declared ids.** The rules, all in `SchemaCache`:
+
+- `registeredRoots` (a `WeakSet`) holds the schemas entered by `cacheSchemaByUri()`, cloned from the global cache, or marked by `registerLoaded()` after a schema reader returned them. `SchemaCompiler.compileSchema()` asks `isRegisteredRoot()` and passes the schema as `owner` when it is one, otherwise `undefined`.
+- `protectedPaths` maps each protected URI to the registered root that owns the entry: the root itself for its own path, the root that declares the id for a nested one. `isProtected()` is true for those paths and for anything in the global cache.
+- `declareId(uri, schema, owner)` is the only write the compiler makes. It skips a protected URI; it enters any other, protecting it when `owner` is set. Among ids nested in different registered roots the first one entered stays; among ids declared by schemas passed to `validate()`, `compile()` or `validateSchema()` the last one wins.
+- `cacheSchemaByUri()` is the registration write and the only one that replaces a protected entry. It first releases the entries the replaced root owned, then enters the new root. `removeFromCacheByUri()` releases them too.
+- Every write goes through one private `store()`, which sets the entry and its owner and reports a replaced entry to the compiled-schema cache.
+- A schema being compiled is recognised by object identity (`Report.isCompiling()`), not by its id.
+
+The user-facing rules are in [usage.md](usage.md#schema-ids-and-precedence).
 
 ### Compiled-schema cache
 
@@ -167,7 +179,7 @@ The package is ESM-first (`"type": "module"`), so all outputs are produced by [t
 - `JsonSchemaDraft202012` — extends `JsonSchemaDraft201909`, adds `$dynamicAnchor`/`$dynamicRef`, `prefixItems`
 - `JsonSchema` — union of all draft interfaces (public API type)
 - `JsonSchemaAll` — manually defined superset interface with all draft-specific properties and `boolean | number` for `exclusiveMinimum`/`exclusiveMaximum`
-- `JsonSchemaInternal` — `JsonSchemaAll & ZSchemaInternalProperties` — internal schema type with compiler metadata (`__$compiled`, `__$validationOptions`, etc.)
+- `JsonSchemaInternal` — `JsonSchemaAll & ZSchemaInternalProperties` — internal schema type with compiler metadata (`__$compiled`, `__$validationOptions`, etc.). The `__$` prefix is reserved: z-schema sets these keys on its own clone of a schema and leaves them out when it clones a caller's schema (Validation Pipeline, step 1).
 - `ValidateError` — error class thrown/returned on validation failure, contains `.details` array of `SchemaErrorDetail`
 - `SchemaErrorDetail` — individual error with `message`, `code`, `params`, `path`, `schemaPath`, `inner` (sub-errors for combiners)
 - `ValidateResponse` — `{ valid: boolean; err?: ValidateError }` (returned by safe variants)

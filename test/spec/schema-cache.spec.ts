@@ -166,3 +166,41 @@ describe.each(['constructor', 'prototype', '__proto__', 'toString'])('SchemaCach
     expectCleanPrototypes();
   });
 });
+
+const cache = () => ZSchema.create().scache;
+
+describe('SchemaCache getAtPath', () => {
+  it('returns the very object when the path ends on a schema', () => {
+    const a = { type: 'string' };
+    const member = { type: 'number' };
+    const named = { type: 'integer' };
+    const schema = { properties: { a, default: named }, allOf: [member] };
+    expect(cache().getAtPath(schema, ['properties', 'a'])).toBe(a);
+    expect(cache().getAtPath(schema, ['allOf', 0])).toBe(member);
+    expect(cache().getAtPath(schema, ['properties', 'default'])).toBe(named);
+  });
+
+  const defaultTarget = { type: 'string', __$validated: true };
+  const enumTarget = { type: 'string' };
+  const defsTarget = { __$x: { type: 'string' }, s: { type: 'string', __$validated: true } };
+
+  it.each([
+    ['default', { default: defaultTarget }, ['default'], defaultTarget, { type: 'string' }],
+    ['enum', { enum: [enumTarget] }, ['enum', 0], enumTarget, { type: 'string' }],
+    ['$defs', { $defs: defsTarget }, ['$defs'], defsTarget, { s: { type: 'string' } }],
+  ])('returns a clone when the path ends in %s', (_name, schema, keys, target, expected) => {
+    const scache = cache();
+    const found = scache.getAtPath(schema, keys);
+    expect(found).not.toBe(target);
+    expect(found).toEqual(expected);
+    expect(scache.getAtPath(schema, keys)).toBe(found);
+  });
+
+  it('returns undefined for a missing key', () => {
+    expect(cache().getAtPath({ properties: {} }, ['properties', 'a'])).toBeUndefined();
+  });
+
+  it('returns a string as it is', () => {
+    expect(cache().getAtPath({ default: 'text' }, ['default'])).toBe('text');
+  });
+});

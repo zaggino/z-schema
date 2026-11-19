@@ -431,6 +431,16 @@ export class Report {
   }
 
   /**
+   * Whether `schema` is the root of a compilation in progress on this report or on one of its ancestors.
+   *
+   * @param schema - The schema object to look for.
+   * @returns `true` when it is being compiled.
+   */
+  isCompiling(schema: JsonSchemaInternal): boolean {
+    return this.rootSchema === schema || (this.parentReport !== undefined && this.parentReport.isCompiling(schema));
+  }
+
+  /**
    * Drains pending async tasks and reports the result through `callback`.
    * This is the top-level entry point and owns the only timer. The callback is invoked from a
    * `setTimeout` (completion and abort alike). On abort, the thrown value is converted to a

@@ -48,6 +48,7 @@ export class ZSchema extends ZSchemaBase {
 
   /**
    * Register a remote schema in the global cache so any instance can resolve `$ref` to it.
+   * It takes precedence over ids declared by schemas passed to `validate()`; an instance registration for the same URI takes precedence over it.
    * @param uri - The URI the schema will be known by.
    * @param schema - The schema object or JSON string.
    * @param validationOptions - Optional options used for schema preparation.
@@ -230,6 +231,7 @@ export class ZSchema extends ZSchemaBase {
 
   /**
    * Validate one or more JSON Schemas, compiling and caching them for later use with `validate()`.
+   * The ids the schemas declare are entered on this validator so later calls can reference them; an id that is already registered is not replaced.
    * @param schemaOrArr - A single schema or an array of schemas (for cross-referencing).
    * @returns `true` if all schemas are valid.
    * @throws {@link ValidateError} if any schema is invalid, or with the thrown value as `cause` if compilation throws.
