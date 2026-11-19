@@ -103,10 +103,34 @@ export function compilePattern(_state: BuildState, node: JsonSchemaInternal, che
 // format
 // ---------------------------------------------------------------------------
 
-// A rejected validator promise is treated as an invalid result (false).
+type ThenMethod = (onFulfilled: (value: unknown) => void, onRejected: (reason: unknown) => void) => unknown;
+
+/**
+ * The `then` method of a promise-like `value` (an object or function with a callable `then`), or
+ * `undefined` for any other value. `then` is read exactly once, so a getter cannot answer differently
+ * between the check and the call; whatever the getter throws propagates.
+ */
+const thenMethodOf = (value: unknown): ThenMethod | undefined => {
+  if (value === null || (typeof value !== 'object' && typeof value !== 'function')) {
+    return undefined;
+  }
+  const { then }: { then?: unknown } = value;
+  return typeof then === 'function' ? (then as ThenMethod) : undefined;
+};
+
+// A rejected validator promise or thenable is treated as an invalid result (false).
 function toFalse(): unknown {
   return false;
 }
+
+/**
+ * Subscribes to a promise-like format result through its `then` method. The returned promise never
+ * rejects: a rejection, or a `then` that throws, settles it with `false`.
+ */
+const settleFormatResult = (result: unknown, then: ThenMethod): Promise<unknown> =>
+  new Promise<unknown>((resolve, reject) => {
+    then.call(result, resolve, reject);
+  }).catch(toFalse);
 
 /** Marker returned by `decideFormat`: the format is asserted, unknown, and that is an error. */
 const UNKNOWN_FORMAT_FAILS = Symbol('unknownFormatFails');
@@ -189,11 +213,11 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
     });
   } else {
     const result = formatValidatorFn.call(ctx, json);
-    if (result instanceof Promise) {
-      // Promise-based async
-      // Attach the rejection handler now: if the task never runs (early finish), a rejected
-      // promise must not surface as an unhandled rejection.
-      const settled = result.catch(toFalse);
+    const then = thenMethodOf(result);
+    if (then !== undefined) {
+      // Subscribe now: if the task never runs (early finish), a rejected promise or thenable
+      // must not surface as an unhandled rejection.
+      const settled = settleFormatResult(result, then);
       report.addAsyncTaskWithPath(
         (callback: (result: unknown) => void) => {
           // settled never rejects; void marks it as intentionally not awaited
@@ -241,12 +265,16 @@ export function compileFormat(state: BuildState, node: JsonSchemaInternal, check
     unsupported();
   }
   state.notes.customFormat = true;
-  // A plain function may still return a promise: that is only known per call, and then the
-  // interpreter has to decide (it also owns the async task bookkeeping).
+  // A plain function may still return a promise or other thenable: that is only known per call,
+  // and then the interpreter has to decide (it also owns the async task bookkeeping). This result
+  // is dropped: a native promise gets a rejection handler so it cannot surface as unhandled, and
+  // any other thenable is left alone, because calling its `then` could start its work a second time.
   checks.push((json) => {
     const result: unknown = fn.call(ctx, json);
-    if (result instanceof Promise) {
-      void result.catch(toFalse);
+    if (thenMethodOf(result) !== undefined) {
+      if (result instanceof Promise) {
+        void result.catch(toFalse);
+      }
       return disableFastValidator();
     }
     return !!result;
