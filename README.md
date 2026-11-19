@@ -65,7 +65,7 @@ z-schema --refRoot ./schemas ./schemas/api/root.json data.json
 
 `--draft` accepts `draft-04`, `draft-06`, `draft-07`, `draft2019-09` or `draft2020-12`. A schema without an id is identified by its file location, so relative file `$ref`s resolve next to the schema file; an id the schema declares is kept (a relative one is resolved against the file location).
 
-References: file `$ref`s are read only from inside the schema file's directory, unless `--refRoot <dir>` names another directory. Links are resolved before the check, and references to another host are not read. `https` references are downloaded with a 10 MB limit and a 30 second deadline; redirects are not followed and non-public addresses are not contacted.
+References: file `$ref`s are read only from inside the schema file's directory unless `--refRoot <dir>` names another directory; `https` references are downloaded with limits. See [References](docs/usage.md#references) for the details.
 
 ## Usage
 

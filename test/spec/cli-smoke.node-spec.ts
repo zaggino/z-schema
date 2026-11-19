@@ -4,7 +4,8 @@ import os from 'os';
 import path from 'path';
 import { pathToFileURL } from 'url';
 
-const fixture = (name: string) => `test/fixtures/cli/${name}`;
+const FIXTURE_DIR = 'test/fixtures/cli';
+const fixture = (name: string) => `${FIXTURE_DIR}/${name}`;
 // A hung CLI (for example one that tried to reach the network) must fail the test, not stall the suite.
 const SPAWN_TIMEOUT_MS = 30_000;
 const run = (...args: string[]) =>
@@ -113,7 +114,7 @@ describe('CLI smoke', () => {
   it('resolves a relative file $ref when run from the schema directory', () => {
     const res = child.spawnSync(process.execPath, [path.resolve('bin/z-schema'), 'ref-a.json', 'string-valid.json'], {
       encoding: 'utf-8',
-      cwd: path.resolve('test/fixtures/cli'),
+      cwd: path.resolve(FIXTURE_DIR),
       timeout: SPAWN_TIMEOUT_MS,
     });
     expect(res.status).toBe(0);
@@ -128,28 +129,28 @@ describe('CLI smoke', () => {
       expect(res.stderr).toMatch(/--refRoot/);
     });
 
-    it('reads it when --refRoot contains it', () => {
-      const pass = run('--refRoot', 'test/fixtures/cli', fixture('nested/ref-up.json'), fixture('string-valid.json'));
+    it('reads a reference outside the schema directory when --refRoot contains it', () => {
+      const pass = run('--refRoot', FIXTURE_DIR, fixture('nested/ref-up.json'), fixture('string-valid.json'));
       expect(pass.status).toBe(0);
       expect(pass.stdout).toMatch(/string-valid\.json validation passed/);
 
-      const fail = run('--refRoot', 'test/fixtures/cli', fixture('nested/ref-up.json'), fixture('string-invalid.json'));
+      const fail = run('--refRoot', FIXTURE_DIR, fixture('nested/ref-up.json'), fixture('string-invalid.json'));
       expect(fail.status).toBe(1);
       expect(fail.stdout).toMatch(/validation failed/);
     });
 
     it('rejects a --refRoot that is not a directory', () => {
-      const res = run('--refRoot', 'test/fixtures/cli/ref-a.json', fixture('ref-a.json'), fixture('string-valid.json'));
+      const res = run('--refRoot', fixture('ref-a.json'), fixture('ref-a.json'), fixture('string-valid.json'));
       expect(res.status).toBe(1);
       expect(res.stderr).toMatch(/--refRoot is not a directory/);
     });
 
     it.each(['host-ref.schema.json', 'network-path-ref.schema.json'])(
-      'refuses a file reference on another host in %s',
+      'refuses a file reference to a network or device path in %s',
       (name) => {
         const res = run(fixture(name), fixture('string-valid.json'));
         expect(res.status).toBe(1);
-        expect(res.stderr).toMatch(/another host/);
+        expect(res.stderr).toMatch(/network or device path/);
       }
     );
 
@@ -175,7 +176,7 @@ describe('CLI smoke', () => {
         try {
           fs.symlinkSync(outsideDir, path.join(rootDir, 'link'), 'junction');
         } catch (error) {
-          if ((error as NodeJS.ErrnoException).code === 'EPERM') {
+          if (error instanceof Error && 'code' in error && error.code === 'EPERM') {
             ctx.skip();
           }
           throw error;
@@ -191,12 +192,82 @@ describe('CLI smoke', () => {
       });
     });
 
+    it('refuses a file link that leads outside the root', (ctx) => {
+      withTempDir((dir) => {
+        const outsideDir = path.join(dir, 'outside');
+        const rootDir = path.join(dir, 'root');
+        fs.mkdirSync(outsideDir);
+        fs.mkdirSync(rootDir);
+        const targetPath = path.join(outsideDir, 'target.json');
+        fs.writeFileSync(targetPath, JSON.stringify({ type: 'string' }));
+        const schemaPath = path.join(rootDir, 'schema.json');
+        fs.writeFileSync(schemaPath, JSON.stringify({ $ref: 'link.json' }));
+        try {
+          fs.symlinkSync(targetPath, path.join(rootDir, 'link.json'), 'file');
+        } catch (error) {
+          if (error instanceof Error && 'code' in error && error.code === 'EPERM') {
+            ctx.skip();
+          }
+          throw error;
+        }
+
+        const refused = run(schemaPath, fixture('string-valid.json'));
+        expect(refused.status).toBe(1);
+        expect(refused.stderr).toMatch(/outside the reference root/);
+
+        const allowed = run('--refRoot', dir, schemaPath, fixture('string-valid.json'));
+        expect(allowed.status).toBe(0);
+        expect(allowed.stdout).toMatch(/string-valid\.json validation passed/);
+      });
+    });
+
+    it('refuses a reference with another scheme', () => {
+      const res = run(fixture('scheme-ref.schema.json'), fixture('string-valid.json'));
+      expect(res.status).toBe(1);
+      expect(res.stderr).toMatch(/Only file and https references are read/);
+    });
+
+    it.each(['missing-ref.schema.json', 'directory-ref.schema.json'])(
+      'reports a missing file and a directory as unreadable (%s)',
+      (name) => {
+        const res = run(fixture(name), fixture('string-valid.json'));
+        expect(res.status).toBe(1);
+        expect(res.stderr).toMatch(/Cannot read the referenced file/);
+      }
+    );
+
+    it('reads a file whose name starts with two dots', () => {
+      const pass = run(fixture('dots-ref.schema.json'), fixture('string-valid.json'));
+      expect(pass.status).toBe(0);
+      expect(pass.stdout).toMatch(/string-valid\.json validation passed/);
+
+      const fail = run(fixture('dots-ref.schema.json'), fixture('string-invalid.json'));
+      expect(fail.status).toBe(1);
+      expect(fail.stdout).toMatch(/string-invalid\.json validation failed/);
+    });
+
+    it.runIf(process.platform === 'win32')(
+      'does not follow a name that the system would normalise to the parent directory',
+      () => {
+        withTempDir((dir) => {
+          const rootDir = path.join(dir, 'root');
+          fs.mkdirSync(rootDir);
+          fs.writeFileSync(path.join(dir, 'target.json'), JSON.stringify({ type: 'string' }));
+          const schemaPath = path.join(rootDir, 'schema.json');
+          fs.writeFileSync(schemaPath, JSON.stringify({ $ref: '.. /target.json' }));
+          const res = run(schemaPath, fixture('string-valid.json'));
+          expect(res.status).toBe(1);
+          expect(res.stderr).toMatch(/outside the reference root|Cannot read the referenced file/);
+        });
+      }
+    );
+
     it('prints a fixed message for a referenced file that is not JSON', () => {
       const res = run(fixture('not-json-ref.schema.json'), fixture('string-valid.json'));
       expect(res.status).toBe(1);
       expect(res.stderr).toMatch(/not valid JSON/);
-      expect(res.stdout).not.toContain('marker-content-line');
-      expect(res.stderr).not.toContain('marker-content-line');
+      expect(res.stdout).not.toContain('zq-marker');
+      expect(res.stderr).not.toContain('zq-marker');
     });
 
     it('prints no description for a reference that ends on a string', () => {
@@ -213,18 +284,17 @@ describe('CLI smoke', () => {
     expect(absolute.status).toBe(0);
     expect(absolute.stdout).toMatch(/string-valid\.json validation passed/);
 
-    const spaced = run('--refRoot', fixture(''), fixture('with space/ref-space.json'), fixture('string-valid.json'));
+    const spaced = run(fixture('with space/ref in dir.json'), fixture('string-valid.json'));
     expect(spaced.status).toBe(0);
     expect(spaced.stdout).toMatch(/string-valid\.json validation passed/);
 
-    const spacedFail = run(
-      '--refRoot',
-      fixture(''),
-      fixture('with space/ref-space.json'),
-      fixture('string-invalid.json')
-    );
+    const spacedFail = run(fixture('with space/ref in dir.json'), fixture('string-invalid.json'));
     expect(spacedFail.status).toBe(1);
     expect(spacedFail.stdout).toMatch(/string-invalid\.json validation failed/);
+
+    const climbing = run('--refRoot', FIXTURE_DIR, fixture('with space/ref-space.json'), fixture('string-valid.json'));
+    expect(climbing.status).toBe(0);
+    expect(climbing.stdout).toMatch(/string-valid\.json validation passed/);
   });
 
   it.runIf(process.platform === 'win32')('accepts a schema path written with backslashes', () => {

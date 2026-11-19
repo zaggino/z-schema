@@ -90,7 +90,7 @@ Two new draft-specific schema interfaces are exported:
 
 The `JsonSchemaVersion` union type now includes `'draft2019-09'` and `'draft2020-12'`.
 
-### Minor releases
+### Changes in 12.x releases
 
 #### CLI: file references outside the schema's directory
 

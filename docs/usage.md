@@ -386,14 +386,18 @@ z-schema --refRoot ./schemas ./schemas/api/root.json data.json
 
 ### References
 
-File `$ref`s are read only from inside the reference root: the schema file's directory, or the directory given with `--refRoot <dir>`. Links are resolved before the check, and a `file:` reference that names a host is not read. A reference outside the root prints:
+#### File references
+
+A file `$ref` is read only from inside the reference root: the schema file's directory, or the directory given with `--refRoot <dir>`. Links are resolved first, and the file they lead to must be inside the root. A reference to a network or device path, or a `file:` reference that names a host, is not read. Schemes other than `file:` and `https:` are not read. A scheme-less reference that is not resolved against a `file:` id is resolved against the working directory. `--refRoot` applies to file references only: not to `https` references, and not to the files named on the command line. A reference outside the root prints:
 
 ```
 The reference is outside the reference root and is not read: <url>
 Use --refRoot <dir> to allow references inside another directory.
 ```
 
-`https` references are downloaded with a 10 MB limit and a 30 second deadline. Redirects are not followed, and addresses that are not public (loopback, private, link-local and the IPv6 ranges that embed an IPv4 address) are not contacted. A downloaded reference that is not valid JSON is reported and stops the run.
+#### Remote references
+
+`https` references are downloaded; `http:` is refused. A download is limited to 10 MB and 30 seconds, and redirects are not followed. The CLI does not contact `localhost`, hosts ending in `.local`, or addresses in the loopback, private, link-local, shared (`100.64.0.0/10`), benchmarking, multicast and other reserved ranges it lists, including the IPv6 ranges that embed an IPv4 address (NAT64, 6to4, Teredo). A downloaded reference that is not valid JSON is reported and stops the run.
 
 ## TypeScript Types
 
