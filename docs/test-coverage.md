@@ -7,16 +7,16 @@ Line coverage status: **high**
 | File                          |  Line % | Statement % | Function % | Branch % |
 | ----------------------------- | ------: | ----------: | ---------: | -------: |
 | src/async-tasks.ts            |     95% |         95% |       100% |      92% |
-| src/compiled-schema-cache.ts  |     96% |         96% |        94% |      95% |
+| src/compiled-schema-cache.ts  |     95% |         95% |        94% |      95% |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
 | src/fast-validator.ts         |     97% |         97% |        89% |      96% |
 | src/format-validators.ts      |     96% |         96% |       100% |      93% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
 | src/json-validation.ts        |     95% |         95% |        82% |      93% |
-| src/report.ts                 |     88% |         88% |        71% |      88% |
-| src/schema-cache.ts           |     95% |         95% |       100% |      91% |
-| src/schema-compiler.ts        |     95% |         94% |       100% |      91% |
+| src/report.ts                 |     87% |         87% |        71% |      87% |
+| src/schema-cache.ts           |     96% |         96% |       100% |      92% |
+| src/schema-compiler.ts        |     95% |         94% |       100% |      90% |
 | src/schema-validator.ts       |     80% |         80% |       100% |      78% |
 | src/utils/array.ts            |    100% |        100% |       100% |     100% |
 | src/utils/base64.ts           |     61% |         61% |       100% |      63% |
