@@ -92,13 +92,13 @@ describe('maxErrors applied to data validation', () => {
     const result = run({}, itemsAreStrings, numbers(1000));
     expect(result.err?.details).toHaveLength(1000);
     expect(result.err).toBeDefined();
-    expect('truncated' in result.err!).toBe(false);
+    expect(result.err).not.toHaveProperty('truncated');
   });
 
   it('Infinity turns the limit off', () => {
     const result = run({ maxErrors: Infinity }, itemsAreStrings, numbers(1500));
     expect(result.err?.details).toHaveLength(1500);
-    expect('truncated' in result.err!).toBe(false);
+    expect(result.err).not.toHaveProperty('truncated');
   });
 
   it('counts nested details', () => {
@@ -177,9 +177,13 @@ describe('maxErrors applied to data validation', () => {
 
     it.each(corpus)('%s', (_name, schema, data) => {
       for (const breakOnFirstError of [false, true]) {
-        const expected = run({ maxErrors: Infinity, breakOnFirstError }, schema, data).valid;
+        const unlimited = run({ maxErrors: Infinity, breakOnFirstError }, schema, data);
+        const expectedDetails = project(unlimited.err?.details);
         for (const maxErrors of [1, 2, 3]) {
-          expect(run({ maxErrors, breakOnFirstError }, schema, data).valid).toBe(expected);
+          const limited = run({ maxErrors, breakOnFirstError }, schema, data);
+          expect(limited.valid).toBe(unlimited.valid);
+          const kept = project(limited.err?.details);
+          expect(kept).toEqual(expectedDetails.slice(0, kept.length));
         }
       }
     });
@@ -205,6 +209,70 @@ describe('maxErrors applied to data validation', () => {
     expect(result.err?.truncated).toBe(true);
   });
 
+  it('a custom format is not called with a value its type keyword rejects, at any limit', () => {
+    const argumentTypes: string[] = [];
+    const schema = { items: { type: 'string', format: 'f' } };
+    const data = [...numbers(1000).map(() => 1), null];
+    const create = (options: Record<string, unknown>) =>
+      ZSchema.create({
+        safe: true,
+        breakOnFirstError: false,
+        customFormats: {
+          f: (value: unknown) => {
+            argumentTypes.push(typeof value);
+            return (value as string).startsWith('a');
+          },
+        },
+        ...options,
+      });
+
+    const unlimited = create({ maxErrors: Infinity }).validate(data, schema);
+    const limited = create({}).validate(data, schema);
+    expect(unlimited.valid).toBe(false);
+    expect(unlimited.err?.details).toHaveLength(1001);
+    expect(limited.valid).toBe(false);
+    expect(limited.err?.details).toHaveLength(1000);
+    expect(limited.err?.truncated).toBe(true);
+    expect(project(limited.err?.details)).toEqual(project(unlimited.err?.details).slice(0, 1000));
+    expect(argumentTypes.filter((type) => type !== 'string')).toEqual([]);
+  });
+
+  it('an async custom format is not called with a value its type keyword rejects, at a small limit', async () => {
+    const argumentTypes: string[] = [];
+    const validator = ZSchema.create({
+      async: true,
+      safe: true,
+      maxErrors: 5,
+      breakOnFirstError: false,
+      customFormats: {
+        f: (value: unknown) => {
+          argumentTypes.push(typeof value);
+          return Promise.resolve(typeof value === 'string' && value.startsWith('a'));
+        },
+      },
+    });
+    const result = await validator.validate([...numbers(20), null], { items: { type: 'string', format: 'f' } });
+    expect(result.valid).toBe(false);
+    expect(result.err?.details?.length).toBeLessThanOrEqual(5);
+    expect(argumentTypes.filter((type) => type !== 'string')).toEqual([]);
+  });
+
+  it('an async format is not started for a value its type keyword rejects', () => {
+    const validator = ZSchema.create({
+      safe: true,
+      maxErrors: 1,
+      breakOnFirstError: false,
+      customFormats: { slow: () => Promise.resolve(true) },
+    });
+    const result = validator.validate([false, 1], { type: 'array', items: { type: 'string', format: 'slow' } });
+    expect(result.valid).toBe(false);
+    expect(result.err?.details).toHaveLength(1);
+    expect(result.err?.details?.[0].code).toBe('INVALID_TYPE');
+    expect(result.err?.details?.[0].path).toBe('#/0');
+    expect(result.err?.truncated).toBe(true);
+    expect(result.err?.message).not.toMatch(/async/i);
+  });
+
   it('breakOnFirstError is independent of the limit', async () => {
     // The synchronous path does not cut to one error; the limit applies on top of it.
     const limited = run({ maxErrors: 3, breakOnFirstError: true }, itemsAreStrings, numbers(20));
@@ -212,13 +280,13 @@ describe('maxErrors applied to data validation', () => {
     expect(limited.err?.details).toHaveLength(3);
     expect(limited.err?.truncated).toBe(true);
     expect(project(limited.err?.details)).toEqual(project(unlimited.err?.details).slice(0, 3));
-    expect('truncated' in unlimited.err!).toBe(false);
+    expect(unlimited.err).not.toHaveProperty('truncated');
 
     // The asynchronous path reports one error. Cutting to it is not a truncation; errors the limit
     // dropped before the cut still are.
     const roomy = await runAsyncFormat({ maxErrors: 100, breakOnFirstError: true }, strings(20));
     expect(roomy.err?.details).toHaveLength(1);
-    expect('truncated' in roomy.err!).toBe(false);
+    expect(roomy.err).not.toHaveProperty('truncated');
     const tight = await runAsyncFormat({ maxErrors: 3, breakOnFirstError: true }, strings(20));
     expect(tight.err?.details).toHaveLength(1);
     expect(tight.err?.truncated).toBe(true);
@@ -232,7 +300,7 @@ describe('maxErrors applied to data validation', () => {
       { excludeErrors: ['INVALID_TYPE'] }
     );
     expect(result.err?.details?.map((d) => d.code).toSorted()).toEqual(['ARRAY_LENGTH_LONG', 'ARRAY_LENGTH_SHORT']);
-    expect('truncated' in result.err!).toBe(false);
+    expect(result.err).not.toHaveProperty('truncated');
   });
 
   it('schema validation is not limited', () => {
@@ -244,7 +312,7 @@ describe('maxErrors applied to data validation', () => {
     expect(limited.valid).toBe(false);
     expect(limited.err?.details?.length).toBeGreaterThan(1);
     expect(projectDeep(limited.err?.details)).toEqual(projectDeep(unlimited.err?.details));
-    expect('truncated' in limited.err!).toBe(false);
+    expect(limited.err).not.toHaveProperty('truncated');
   });
 
   it('a changed option is picked up', () => {
@@ -255,11 +323,27 @@ describe('maxErrors applied to data validation', () => {
     expect(result.err?.truncated).toBe(true);
   });
 
+  it('a changed option is picked up on a validator that has already validated', () => {
+    const validator = ZSchema.create({ safe: true, breakOnFirstError: false });
+    const data = numbers(1500);
+    expect(validator.validate(data, itemsAreStrings).err?.details).toHaveLength(1000);
+
+    validator.options.maxErrors = 5;
+    const limited = validator.validate(data, itemsAreStrings);
+    expect(limited.err?.details).toHaveLength(5);
+    expect(limited.err?.truncated).toBe(true);
+
+    validator.options.maxErrors = Infinity;
+    const unlimited = validator.validate(data, itemsAreStrings);
+    expect(unlimited.err?.details).toHaveLength(1500);
+    expect(unlimited.err).not.toHaveProperty('truncated');
+  });
+
   it('keeps a large invalid instance bounded', () => {
     const result = run(
       {},
       anyOfItems,
-      Array.from({ length: 200_000 }, () => 'x')
+      Array.from({ length: 20_000 }, () => 'x')
     );
     expect(result.valid).toBe(false);
     expect(countDetails(result.err?.details)).toBeLessThanOrEqual(1000);

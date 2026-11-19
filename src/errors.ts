@@ -80,6 +80,8 @@ export class ValidateError extends Error {
   details?: SchemaErrorDetail[];
   /**
    * Set when `maxErrors` left out at least one error detail; absent otherwise.
+   * The property is left off entirely when nothing was left out, so existing code that compares or
+   * serialises errors sees no new key.
    */
   declare truncated?: true;
 

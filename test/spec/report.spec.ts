@@ -147,9 +147,28 @@ describe('Report error limit', () => {
     const full = new Report({});
     full.errorLimit = 3;
     addPlain(full, 3);
-    expect(new Report(full).errorLimit).toBe(1);
+    expect(new Report(full).errorLimit).toBe(-1);
 
     expect(new Report(new Report({})).errorLimit).toBe(Infinity);
+  });
+
+  it('sizes a nested entry so that it fits when adopted', () => {
+    const root = new Report({});
+    root.errorLimit = 10;
+    const sub = new Report(root);
+    expect(sub.errorLimit).toBe(9);
+
+    sub.addError('ANY_OF_MISSING', undefined, makeSub(sub, 20));
+    expect(sub.errorCount).toBe(9);
+    expect(sub.errors[0].inner).toHaveLength(8);
+    expect(sub.errorsTruncated).toBe(true);
+
+    root.addError('ANY_OF_MISSING', undefined, sub);
+    expect(root.errorCount).toBe(10);
+    expect(root.errors).toHaveLength(1);
+    expect(root.errors[0].inner).toHaveLength(1);
+    expect(root.errors[0].inner![0].inner).toHaveLength(8);
+    expect(root.errorsTruncated).toBe(true);
   });
 
   it.each([false, true])(

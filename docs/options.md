@@ -476,7 +476,7 @@ const validator = ZSchema.create({
 
 Maximum number of error details one `validate()` call reports, counting every detail, including those nested in `inner`. Keeps the error list small for large invalid inputs.
 
-The result's validity never depends on this option. The reported details are the first ones an unlimited run would report: `details` is a prefix of the unlimited list and each `inner` list is a prefix of the unlimited one (a detail can be kept while its `inner` list is cut short or empty). When the limit left out at least one detail, `err.truncated` is `true`; otherwise the property is absent.
+The result's validity never depends on this option. The reported details are the first ones an unlimited run would report: `details` is a prefix of the unlimited list and each `inner` list is a prefix of the unlimited one (a detail can be kept while its `inner` list is cut short or empty). `err.truncated` is `true` when the limit left out at least one detail while the data was validated; otherwise the property is absent. In async mode with `breakOnFirstError`, the result is cut to its first error after validation, so `truncated` can be `true` on a result with a single, complete detail.
 
 `Infinity` turns the limit off. Values below `1` become `1`, fractions are rounded down, and non-numbers fall back to the default. The limit applies to data validation; schema validation (`validateSchema`, `compile`) reports all schema errors. It is independent of `breakOnFirstError`, and `includeErrors` / `excludeErrors` filter before details are counted.
 
@@ -491,7 +491,7 @@ try {
   validator.validate(data, schema);
 } catch (err) {
   console.log(err.details.length); // at most 100
-  console.log(err.truncated); // true when the limit left out at least one detail
+  console.log(err.truncated); // true when the limit left out at least one detail while the data was validated
 }
 ```
 

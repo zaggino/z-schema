@@ -329,7 +329,8 @@ export class Report {
    */
   errorLimit = Infinity;
   /**
-   * Details held so far: the entries of `errors` plus everything nested under them.
+   * Details held so far: the entries of `errors` plus everything nested under them. It is exact for
+   * every report whose errors were added only through `addCustomError`.
    *
    * @internal
    */
@@ -377,10 +378,10 @@ export class Report {
     if (parentOrOptions instanceof Report) {
       // subreport
       this.validateOptions = validateOptions || parentOrOptions.validateOptions;
-      if (parentOrOptions.errorLimit !== Infinity) {
-        // the room the parent has left after the one error that would adopt this report's errors
-        this.errorLimit = Math.max(1, parentOrOptions.errorLimit - parentOrOptions.errorCount - 1);
-      }
+      // A sub-report is sized to the room its parent has left after the one error that would adopt it, so that
+      // an entry it builds can fit when it is adopted; adoption checks the room again, because the parent may
+      // have recorded more errors by then.
+      this.errorLimit = parentOrOptions.errorLimit - parentOrOptions.errorCount - 1;
       this.__$recursiveAnchorStack = parentOrOptions.__$recursiveAnchorStack.slice();
       this.__$dynamicScopeStack = parentOrOptions.__$dynamicScopeStack.slice();
       this.__$unevaluatedInstance = parentOrOptions.__$unevaluatedInstance;
@@ -570,6 +571,13 @@ export class Report {
     return undefined;
   }
 
+  /**
+   * The first error is always recorded, so validity never depends on the limit.
+   */
+  private isFull(): boolean {
+    return this.errors.length > 0 && this.errorCount >= this.errorLimit;
+  }
+
   addCustomError(
     errorCode: ErrorCode,
     errorMessage: string,
@@ -593,8 +601,7 @@ export class Report {
     if (safeParams && excluded) {
       return;
     }
-    // The first error is always recorded, so the verdict never depends on the limit.
-    if (safeParams && this.errors.length > 0 && this.errorCount >= this.errorLimit) {
+    if (safeParams && this.isFull()) {
       this.errorsTruncated = true;
       return;
     }
@@ -625,6 +632,14 @@ export class Report {
           continue;
         }
         const errs = sub.errors;
+        if (sub.errorCount <= room) {
+          for (let ei = 0; ei < errs.length; ei++) {
+            inner.push(errs[ei]);
+          }
+          room -= sub.errorCount;
+          size += sub.errorCount;
+          continue;
+        }
         for (let ei = 0; ei < errs.length; ei++) {
           const entry = errs[ei];
           const entrySize = sizeOf(entry);
@@ -664,7 +679,7 @@ export class Report {
     if (excluded) {
       return;
     }
-    if (this.errors.length > 0 && this.errorCount >= this.errorLimit) {
+    if (this.isFull()) {
       this.errorsTruncated = true;
       return;
     }

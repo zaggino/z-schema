@@ -226,6 +226,9 @@ export class ZSchemaBase {
 
     if (!foundError) {
       // Schema compilation and schema validation above are not limited; the data validation is.
+      // The option is read again on every call because options can be changed on a live validator, and an
+      // unresolved value (`undefined`, `NaN`) would mean no limit. The root report holds no errors at this
+      // point (data validation runs only when the schema phase found none), which is what `errorCount` relies on.
       report.errorLimit = resolveMaxErrors(this.options.maxErrors);
       validateJson(this, report, _schema, json);
     }

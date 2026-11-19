@@ -296,9 +296,25 @@ export const cases: BenchCase[] = [
         required: ['id', 'name'],
       },
     },
-    data: range(500).map(() => ({ id: 'x' })),
+    data: range(250).map(() => ({ id: 'x' })),
     expectValid: false,
-    expectErrors: 1000,
+    expectErrors: 500,
+  },
+  {
+    // 4,000 errors are produced, more than the default maxErrors (1000). No expectErrors: the reported
+    // count depends on whether the measured build has the option.
+    name: 'invalid-many-errors-capped',
+    options: { breakOnFirstError: false },
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: { id: { type: 'integer' }, name: { type: 'string' } },
+        required: ['id', 'name'],
+      },
+    },
+    data: range(2000).map(() => ({ id: 'x' })),
+    expectValid: false,
   },
   { name: 'schema-object-validate', mode: 'schema-object', schema: flatSchema, data: flatValid },
   {

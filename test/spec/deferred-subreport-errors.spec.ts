@@ -450,7 +450,7 @@ const errorLimitRun = (defer: boolean) => {
 };
 
 describe('deferred sub-report errors: error limit (S5)', () => {
-  it('honors the error limit on a deferred sub-report (nothing arms it yet; direct Report)', () => {
+  it('gives a deferred sub-report the same result under an error limit as an eager one (direct Report)', () => {
     const deferred = errorLimitRun(true);
     expect(deferred).toStrictEqual(errorLimitRun(false));
     expect((deferred as Array<{ values: { inner: unknown[] } }>)[0].values.inner).toHaveLength(2);

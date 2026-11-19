@@ -36,6 +36,10 @@ export interface ZSchemaOptions {
   pedanticCheck?: boolean;
   ignoreUnknownFormats?: boolean;
   formatAssertions?: boolean | null;
+  /**
+   * Called for every schema node that is validated. A custom validator reports through `report.addError` /
+   * `report.addCustomError`; errors written to `report.errors` directly are not counted towards `maxErrors`.
+   */
   customValidator?: (report: Report, schema: unknown, json: unknown) => void;
   customFormats?: Record<string, FormatValidatorFn | null>;
   maxRecursionDepth?: number;
@@ -43,6 +47,8 @@ export interface ZSchemaOptions {
    * The most error details a `validate()` call reports, counting every detail including those
    * nested in `inner`. Default 1000. When details were left out, the error has `truncated: true`;
    * the validity of the result never depends on this limit. `Infinity` turns the limit off.
+   * `0`, negative numbers and fractions below 1 mean 1 (the first error is always reported); a number of
+   * 1 or more is rounded down; a value that is not a number (or is `NaN`) means the default.
    * Applies to data validation, not to schema validation.
    */
   maxErrors?: number;
@@ -117,8 +123,9 @@ export const defaultOptions: ZSchemaOptions = {
 } satisfies EveryOption;
 
 /**
- * The limit to use for a `maxErrors` value: a number of at least 1 is rounded down (`Infinity` stays),
- * a smaller number becomes 1, and anything that is not a number (or is `NaN`) becomes the default.
+ * The limit to use for a `maxErrors` value: a number of at least 1 is rounded down (`Infinity` stays);
+ * `0`, a negative number and a fraction below 1 become 1, because the first error is always reported;
+ * anything that is not a number (or is `NaN`) becomes the default.
  */
 export const resolveMaxErrors = (value: unknown): number => {
   if (typeof value !== 'number' || Number.isNaN(value)) {
