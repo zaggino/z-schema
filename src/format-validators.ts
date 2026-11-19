@@ -91,6 +91,27 @@ const hasLineTerminator = (value: string, start: number, end: number): boolean =
 
 // An address-literal domain starts with this tag (RFC 5321, section 4.1.3); its letters may be in either case.
 const IPV6_LITERAL_PREFIX = '[ipv6:';
+const UPPERCASE_A_CHAR_CODE = 0x41;
+const UPPERCASE_Z_CHAR_CODE = 0x5a;
+const ASCII_CASE_OFFSET = 0x20;
+
+/**
+ * Whether `value` holds `lowerPrefix` at `start`, comparing ASCII letters without regard to case.
+ * `lowerPrefix` must be lowercase ASCII. Compares in place, without building a substring.
+ */
+const hasPrefixIgnoringAsciiCase = (value: string, start: number, lowerPrefix: string): boolean => {
+  for (let i = 0; i < lowerPrefix.length; i++) {
+    // Past the end of `value` this is NaN, which matches nothing.
+    let code = value.charCodeAt(start + i);
+    if (code >= UPPERCASE_A_CHAR_CODE && code <= UPPERCASE_Z_CHAR_CODE) {
+      code += ASCII_CASE_OFFSET;
+    }
+    if (code !== lowerPrefix.charCodeAt(i)) {
+      return false;
+    }
+  }
+  return true;
+};
 
 const emailValidator: FormatValidatorFn = (email: unknown) => {
   if (typeof email !== 'string') {
@@ -117,7 +138,7 @@ const emailValidator: FormatValidatorFn = (email: unknown) => {
   if (
     at < 1 ||
     email.charCodeAt(last) !== RIGHT_SQUARE_BRACKET_CHAR_CODE ||
-    email.slice(at + 1, at + 1 + IPV6_LITERAL_PREFIX.length).toLowerCase() !== IPV6_LITERAL_PREFIX
+    !hasPrefixIgnoringAsciiCase(email, at + 1, IPV6_LITERAL_PREFIX)
   ) {
     return false;
   }
