@@ -1,3 +1,5 @@
+import isEmailModule from 'validator/lib/isEmail.js';
+import isIPModule from 'validator/lib/isIP.js';
 import { describe, expect, it } from 'vitest';
 
 import { buildUriPredicates, UNRESERVED_CHARS_SRC } from '../../src/utils/rfc-3986.ts';
@@ -52,6 +54,44 @@ const timeAdversarialSplit = (size: number): number => {
     }
   }
   return performance.now() - started;
+};
+
+const referenceEmail = (email: string): boolean => {
+  if (isEmailModule.default(email, { require_tld: false, allow_ip_domain: true })) {
+    return true;
+  }
+  const match = /^(?<localPart>.+)@\[IPv6:(?<address>[^\]]+)\]$/i.exec(email);
+  if (!match) {
+    return false;
+  }
+  if (!isIPModule.default(match[2], 6)) {
+    return false;
+  }
+  return isEmailModule.default(`${match[1]}@example.com`, { require_tld: false });
+};
+
+// Deterministic linear congruential generator returning values in [0, 1).
+const seededRandom = (seed: number): (() => number) => {
+  const modulus = 4_294_967_296;
+  let state = seed;
+  return (): number => {
+    state = (state * 1_664_525 + 1_013_904_223) % modulus;
+    return state / modulus;
+  };
+};
+
+const generate = (tokens: string[], seed: number, count: number): string[] => {
+  const next = seededRandom(seed);
+  const out: string[] = [];
+  for (let n = 0; n < count; n++) {
+    const length = 1 + Math.floor(next() * 8);
+    let s = '';
+    for (let i = 0; i < length; i++) {
+      s += tokens[Math.floor(next() * tokens.length)];
+    }
+    out.push(s);
+  }
+  return out;
 };
 
 const slowValidator = async (): Promise<boolean> => {
@@ -610,6 +650,112 @@ describe('Format Validators', () => {
     });
   });
 
+  describe('Email and Relative JSON Pointer decisions', () => {
+    const validator = ZSchema.create();
+
+    const referenceRelativeJsonPointer = (pointer: string): boolean => {
+      const match = /^(?<int>0|[1-9]\d*)(?<suffix>.*)$/.exec(pointer);
+      if (!match) {
+        return false;
+      }
+      const suffix = match[2];
+      if (suffix === '' || suffix === '#') {
+        return true;
+      }
+      return validator.validateSafe(suffix, { type: 'string', format: 'json-pointer' }).valid;
+    };
+
+    const LF = String.fromCharCode(0x0a);
+    const CR = String.fromCharCode(0x0d);
+    const LS = String.fromCharCode(0x20_28);
+    const PS = String.fromCharCode(0x20_29);
+
+    const emailTokens = [
+      'a',
+      'b',
+      '"',
+      '.',
+      '@',
+      '[',
+      ']',
+      ':',
+      '1',
+      LF,
+      CR,
+      '@[IPv6:',
+      '@[ipv6:',
+      '@[IPV6:',
+      '::1',
+      '1::',
+      'example.com',
+      '@[',
+      'IPv6:',
+      '%eth0',
+    ];
+    const pointerTokens = ['0', '1', '9', '12', '/', '#', '~', '~0', '~1', 'a', '-', '+', LF, CR, LS, PS];
+
+    const emailTable = [
+      '@[IPv6:::1]',
+      'a@[IPv6:]',
+      'a@[IPv6:::1]]',
+      `a${LF}b@[IPv6:::1]`,
+      `a${CR}b@[IPv6:::1]`,
+      'a@[IPv6:::1]@[IPv6:::1]',
+      'a@[IPv6:1::]@[IPv6:::1]',
+      'a@[IPv6:::1]',
+      'a@[ipv6:::1]',
+      'a@[IPV6:::1]',
+      'a@[iPv6:::1]',
+      'a@[IPv6:fe80::1%eth0]',
+      '"a b"@[IPv6:::1]',
+      'a.b@[IPv6:2001:db8::1]',
+      'a@[IPv6:::1',
+    ];
+    const pointerTable = [
+      '',
+      '0',
+      '0#',
+      '01/a',
+      '0123',
+      '10/a~0b',
+      `1${LF}`,
+      `0/a${LF}b`,
+      `0/a${LS}`,
+      `0/a${PS}`,
+      `0/a${CR}`,
+      '/a',
+      '1#',
+      '1/',
+      '1//',
+      '0/~',
+      '0/~2',
+    ];
+
+    it('matches the previous regex-based email decision', () => {
+      const corpus = emailTable.concat(generate(emailTokens, 12_345, 3000));
+      const mismatches: string[] = [];
+      for (let i = 0; i < corpus.length; i++) {
+        const actual = validator.validateSafe(corpus[i], { type: 'string', format: 'email' }).valid;
+        if (actual !== referenceEmail(corpus[i])) {
+          mismatches.push(JSON.stringify(corpus[i]));
+        }
+      }
+      expect(mismatches).toEqual([]);
+    });
+
+    it('matches the previous regex-based relative-json-pointer decision', () => {
+      const corpus = pointerTable.concat(generate(pointerTokens, 54_321, 3000));
+      const mismatches: string[] = [];
+      for (let i = 0; i < corpus.length; i++) {
+        const actual = validator.validateSafe(corpus[i], { type: 'string', format: 'relative-json-pointer' }).valid;
+        if (actual !== referenceRelativeJsonPointer(corpus[i])) {
+          mismatches.push(JSON.stringify(corpus[i]));
+        }
+      }
+      expect(mismatches).toEqual([]);
+    });
+  });
+
   describe('Hostname Format Validator', () => {
     const hostnameSchema = { type: 'string', format: 'hostname' };
 
@@ -790,6 +936,32 @@ describe('Format Validators', () => {
       const validator = ZSchema.create();
       const data = `${'{a}'.repeat(50_000)}{a,a,a`;
       expect(validator.validateSafe(data, uriTemplateSchema).valid).toBe(false);
+    });
+  });
+
+  describe('Email and Relative JSON Pointer long inputs', () => {
+    it('rejects an email with a long run of address-literal tags', () => {
+      const validator = ZSchema.create();
+      const data = `a${'@[IPv6:'.repeat(60_000)}`;
+      expect(validator.validateSafe(data, { type: 'string', format: 'email' }).valid).toBe(false);
+    });
+
+    it('rejects an email with a long address literal', () => {
+      const validator = ZSchema.create();
+      const data = `a@[IPv6:${'1:'.repeat(200_000)}]`;
+      expect(validator.validateSafe(data, { type: 'string', format: 'email' }).valid).toBe(false);
+    });
+
+    it('rejects a relative-json-pointer with a long integer prefix followed by a line feed', () => {
+      const validator = ZSchema.create();
+      const data = `${'1'.repeat(400_000)}${String.fromCharCode(0x0a)}`;
+      expect(validator.validateSafe(data, { type: 'string', format: 'relative-json-pointer' }).valid).toBe(false);
+    });
+
+    it('accepts a relative-json-pointer with a long integer prefix followed by a pointer', () => {
+      const validator = ZSchema.create();
+      const data = `${'1'.repeat(400_000)}/a`;
+      expect(validator.validateSafe(data, { type: 'string', format: 'relative-json-pointer' }).valid).toBe(true);
     });
   });
 });

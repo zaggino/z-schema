@@ -62,6 +62,30 @@ const dateTimeValidator: FormatValidatorFn = (dateTime: unknown) => {
 // eslint-disable-next-line no-control-regex
 const NON_ASCII_REGEX = /[^\u0000-\u007F]/;
 
+const IPV6_TAG_LENGTH = 7; // "@[IPv6:"
+
+/** Index of the last `@[IPv6:` in `email` (tag letters in either case), or -1. */
+const lastIpv6TagIndex = (email: string): number => {
+  for (let i = email.length - IPV6_TAG_LENGTH; i >= 0; i--) {
+    if (email.charCodeAt(i) !== 0x40 || email.charCodeAt(i + 1) !== 0x5b) {
+      continue;
+    }
+    const c2 = email.charCodeAt(i + 2);
+    const c3 = email.charCodeAt(i + 3);
+    const c4 = email.charCodeAt(i + 4);
+    if (
+      (c2 === 0x49 || c2 === 0x69) &&
+      (c3 === 0x50 || c3 === 0x70) &&
+      (c4 === 0x56 || c4 === 0x76) &&
+      email.charCodeAt(i + 5) === 0x36 &&
+      email.charCodeAt(i + 6) === 0x3a
+    ) {
+      return i;
+    }
+  }
+  return -1;
+};
+
 const emailValidator: FormatValidatorFn = (email: unknown) => {
   if (typeof email !== 'string') {
     return true;
@@ -80,13 +104,33 @@ const emailValidator: FormatValidatorFn = (email: unknown) => {
     return true;
   }
 
-  const ipv6Literal = /^(?<localPart>.+)@\[IPv6:(?<address>[^\]]+)\]$/i.exec(email);
-  if (!ipv6Literal) {
+  // Address literal `<local>@[IPv6:<address>]`: decided by a single scan.
+  const last = email.length - 1;
+  if (last < 0 || email.charCodeAt(last) !== 0x5d) {
     return false;
   }
+  const tagIndex = lastIpv6TagIndex(email);
+  if (tagIndex < 1) {
+    return false;
+  }
+  for (let i = 0; i < tagIndex; i++) {
+    const c = email.charCodeAt(i);
+    if (c === 0x0a || c === 0x0d) {
+      return false;
+    }
+  }
+  const addressStart = tagIndex + IPV6_TAG_LENGTH;
+  if (addressStart >= last) {
+    return false;
+  }
+  for (let i = addressStart; i < last; i++) {
+    if (email.charCodeAt(i) === 0x5d) {
+      return false;
+    }
+  }
 
-  const localPart = ipv6Literal[1];
-  const addressPart = ipv6Literal[2];
+  const localPart = email.slice(0, tagIndex);
+  const addressPart = email.slice(addressStart, last);
   if (!isIPModule.default(addressPart, 6)) {
     return false;
   }
@@ -266,11 +310,30 @@ const relativeJsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   }
   // Relative JSON Pointer: non-negative integer prefix (no leading zeros unless zero),
   // followed by either '#', a JSON Pointer, or nothing.
-  const match = /^(?<int>0|[1-9]\d*)(?<suffix>.*)$/.exec(pointer);
-  if (!match) {
+  const { length } = pointer;
+  if (length === 0) {
     return false;
   }
-  const suffix = match[2];
+  const first = pointer.charCodeAt(0);
+  let prefixEnd = 1;
+  if (first >= 0x31 && first <= 0x39) {
+    while (prefixEnd < length) {
+      const c = pointer.charCodeAt(prefixEnd);
+      if (c < 0x30 || c > 0x39) {
+        break;
+      }
+      prefixEnd++;
+    }
+  } else if (first !== 0x30) {
+    return false;
+  }
+  for (let i = prefixEnd; i < length; i++) {
+    const c = pointer.charCodeAt(i);
+    if (c === 0x0a || c === 0x0d || c === 0x20_28 || c === 0x20_29) {
+      return false;
+    }
+  }
+  const suffix = prefixEnd === length ? '' : pointer.slice(prefixEnd);
   if (suffix === '' || suffix === '#') {
     return true;
   }
