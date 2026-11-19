@@ -47,6 +47,7 @@ const validator = ZSchema.create({
   formatAssertions: null, // null=always assert, true=respect vocabulary (2019-09/2020-12 assert only if the meta-schema opts in), false=annotation-only (default: null)
   ignoreUnresolvableReferences: false, // skip unresolvable $ref (default: false)
   maxRecursionDepth: 100, // max depth for internal traversal (prevents stack overflow on deep schemas/data)
+  maxErrors: 1000, // max error details reported per validate() call, counting nested `inner` details; Infinity = no limit (default: 1000)
 });
 ```
 
@@ -192,6 +193,15 @@ interface SchemaErrorDetail {
 ```
 
 `schemaPath` tracks the `properties`, `patternProperties`, `additionalProperties`, `items`, `prefixItems` and `additionalItems` segments (with the property name, pattern or index), and a trailing `type` for type errors. In draft-04, draft-06 and draft-07, errors inside a `$ref` target carry a `schemaPath` relative to that target. `schemaId` is looked up by applying the failing data path to the root schema and taking the `$id` (or `id`) of the closest object found there, falling back to the root schema's; it is reliable for the root id, not for ids of nested subschemas.
+
+A failed validation reports at most `maxErrors` details (default 1000, counted through `inner`), and `err.truncated` is `true` when the limit left out at least one detail. Validity is not affected; see [options.md#maxerrors](options.md#maxerrors).
+
+```typescript
+const { valid, err } = validator.validateSafe(data, schema);
+if (!valid && err?.truncated) {
+  console.log(`showing the first ${err.details?.length} errors`);
+}
+```
 
 ### Error Codes
 
@@ -401,12 +411,30 @@ z-schema --strictMode mySchema.json myData.json
 
 # Pick the draft (draft-04, draft-06, draft-07, draft2019-09, draft2020-12)
 z-schema --draft draft-07 mySchema.json myData.json
+
+# Allow file $refs from a directory other than the schema's own
+z-schema --refRoot ./schemas ./schemas/api/root.json data.json
 ```
 
 - `--draft <version>` sets the `version` option (default: `draft2020-12`).
+- `--refRoot <dir>` sets the reference root (default: the directory of the schema file). `<dir>` must be a directory.
 - A schema that declares no id is identified by the `file:` URL of its path (`id` for draft-04, `$id` otherwise), so relative file `$ref`s resolve next to the schema file, from any working directory.
 - An id the schema declares is kept. A relative one is resolved against the file's location; an absolute one (for example `https://example.com/schema.json`) becomes the base for the schema's relative `$ref`s, which are then fetched from there and not read from disk.
-- Remote references are https-only, redirects are not followed, and private/internal addresses are refused.
+
+### References
+
+#### File references
+
+A file `$ref` is read only from inside the reference root: the schema file's directory, or the directory given with `--refRoot <dir>`. Links are resolved first, and the file they lead to must be inside the root. A reference to a network or device path, or a `file:` reference that names a host, is not read. Schemes other than `file:` and `https:` are not read. A scheme-less reference that is not resolved against a `file:` id is resolved against the working directory. `--refRoot` applies to file references only: not to `https` references, and not to the files named on the command line. A reference outside the root prints:
+
+```
+The reference is outside the reference root and is not read: <url>
+Use --refRoot <dir> to allow references inside another directory.
+```
+
+#### Remote references
+
+`https` references are downloaded; `http:` is refused. A download is limited to 10 MB and 30 seconds, and redirects are not followed. The CLI does not contact `localhost`, hosts ending in `.local`, or addresses in the loopback, private, link-local, shared (`100.64.0.0/10`), benchmarking, multicast and other reserved ranges it lists, including the IPv6 ranges that embed an IPv4 address (NAT64, 6to4, Teredo). A downloaded reference that is not valid JSON is reported and stops the run.
 
 ## TypeScript Types
 

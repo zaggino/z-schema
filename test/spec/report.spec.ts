@@ -1,3 +1,5 @@
+import type { SchemaErrorDetail } from '../../src/report.ts';
+
 import { Report } from '../../src/report.ts';
 import { jsonSymbol } from '../../src/utils/symbols.ts';
 import { ZSchema } from '../../src/z-schema.ts';
@@ -87,5 +89,190 @@ describe('Report schema path tracking', () => {
     childReport.addError('INVALID_TYPE', ['string', 'number']);
 
     expect(childReport.errors[0].schemaPath).toEqual(['allOf', 0, 'properties', 'name']);
+  });
+});
+
+const addPlain = (report: Report, count: number) => {
+  for (let i = 0; i < count; i++) {
+    report.path = [i];
+    report.addError('INVALID_TYPE', ['string', 'number']);
+  }
+};
+
+const makeSub = (parent: Report, count: number, deferred = false) => {
+  const sub = new Report(parent);
+  sub.errorLimit = Infinity;
+  sub.deferErrors = deferred;
+  addPlain(sub, count);
+  return sub;
+};
+
+describe('Report error limit', () => {
+  it('counts every detail, nested ones included', () => {
+    const root = new Report({});
+    root.addError('INVALID_TYPE', ['string', 'number']);
+    root.addError('ANY_OF_MISSING', undefined, makeSub(root, 3));
+    expect(root.errors).toHaveLength(2);
+    expect(root.errorCount).toBe(5);
+  });
+
+  it.each([0, 1])('records the first error at limit %i', (limit) => {
+    const report = new Report({});
+    report.errorLimit = limit;
+    addPlain(report, 3);
+    expect(report.errors).toHaveLength(1);
+    expect(report.errorsTruncated).toBe(true);
+  });
+
+  it.each([false, true])('stops at the limit (deferred: %j)', (deferred) => {
+    const limited = new Report({});
+    limited.deferErrors = deferred;
+    limited.errorLimit = 3;
+    addPlain(limited, 5);
+    expect(limited.errors).toHaveLength(3);
+    expect(limited.errorsTruncated).toBe(true);
+
+    const roomy = new Report({});
+    roomy.deferErrors = deferred;
+    roomy.errorLimit = 5;
+    addPlain(roomy, 5);
+    expect(roomy.errors).toHaveLength(5);
+    expect(roomy.errorsTruncated).toBe(false);
+  });
+
+  it('gives a sub-report the room its parent has left', () => {
+    const parent = new Report({});
+    parent.errorLimit = 10;
+    addPlain(parent, 4);
+    expect(new Report(parent).errorLimit).toBe(5);
+
+    const full = new Report({});
+    full.errorLimit = 3;
+    addPlain(full, 3);
+    expect(new Report(full).errorLimit).toBe(-1);
+
+    expect(new Report(new Report({})).errorLimit).toBe(Infinity);
+  });
+
+  it('sizes a nested entry so that it fits when adopted', () => {
+    const root = new Report({});
+    root.errorLimit = 10;
+    const sub = new Report(root);
+    expect(sub.errorLimit).toBe(9);
+
+    sub.addError('ANY_OF_MISSING', undefined, makeSub(sub, 20));
+    expect(sub.errorCount).toBe(9);
+    expect(sub.errors[0].inner).toHaveLength(8);
+    expect(sub.errorsTruncated).toBe(true);
+
+    root.addError('ANY_OF_MISSING', undefined, sub);
+    expect(root.errorCount).toBe(10);
+    expect(root.errors).toHaveLength(1);
+    expect(root.errors[0].inner).toHaveLength(1);
+    expect(root.errors[0].inner![0].inner).toHaveLength(8);
+    expect(root.errorsTruncated).toBe(true);
+  });
+
+  it.each([false, true])(
+    'adopts sub-report errors whole, in order, until one does not fit (deferred: %j)',
+    (deferred) => {
+      const fits = new Report({});
+      fits.errorLimit = 4;
+      fits.addError('ANY_OF_MISSING', undefined, makeSub(fits, 3, deferred));
+      expect(fits.errors[0].inner).toHaveLength(3);
+      expect(fits.errorCount).toBe(4);
+      expect(fits.errorsTruncated).toBe(false);
+
+      const tight = new Report({});
+      tight.errorLimit = 3;
+      tight.addError('ANY_OF_MISSING', undefined, makeSub(tight, 3, deferred));
+      expect(tight.errors[0].inner).toHaveLength(2);
+      expect(tight.errorCount).toBe(3);
+      expect(tight.errorsTruncated).toBe(true);
+
+      const misfit = new Report({});
+      misfit.errorLimit = 3;
+      const sub = makeSub(misfit, 0, deferred);
+      sub.addError('ANY_OF_MISSING', undefined, makeSub(sub, 2, deferred));
+      sub.addError('INVALID_TYPE', ['string', 'number']);
+      misfit.addError('ANY_OF_MISSING', undefined, sub);
+      expect(misfit.errors[0].inner).toBeUndefined();
+      expect(misfit.errorCount).toBe(1);
+      expect(misfit.errorsTruncated).toBe(true);
+    }
+  );
+
+  it('passes the flag up only when errors are adopted', () => {
+    const parent = new Report({});
+    const discarded = makeSub(parent, 1);
+    discarded.errorsTruncated = true;
+    expect(parent.errorsTruncated).toBe(false);
+
+    const adopted = makeSub(parent, 1);
+    adopted.errorsTruncated = true;
+    parent.addError('ANY_OF_MISSING', undefined, adopted);
+    expect(parent.errorsTruncated).toBe(true);
+  });
+
+  it('does not count or flag an excluded error', () => {
+    const report = new Report({}, { excludeErrors: ['INVALID_TYPE'] });
+    report.errorLimit = 1;
+    report.addError('INVALID_TYPE', ['string', 'number']);
+    report.addError('INVALID_TYPE', ['string', 'number']);
+    report.addError('ENUM_MISMATCH', ['x']);
+    expect(report.errors.map((e) => e.code)).toStrictEqual(['ENUM_MISMATCH']);
+    expect(report.errorsTruncated).toBe(false);
+  });
+});
+
+function findDetail(details: SchemaErrorDetail[] | undefined, code: string): SchemaErrorDetail | undefined {
+  if (!details) {
+    return undefined;
+  }
+  for (let idx = 0; idx < details.length; idx++) {
+    const detail = details[idx];
+    if (detail.code === code) {
+      return detail;
+    }
+    const nested = findDetail(detail.inner, code);
+    if (nested) {
+      return nested;
+    }
+  }
+  return undefined;
+}
+
+function validateRef(node: unknown) {
+  const validator = ZSchema.create({ safe: true });
+  const schema = { $ref: '#/extra/node', extra: { node } };
+  return validator.validate(1, schema);
+}
+
+describe('error details for a reference that ends on a value that is not a schema', () => {
+  it('reports the type of a string node without copying the text', () => {
+    const result = validateRef('some text');
+    expect(result.valid).toBe(false);
+    const details = result.err?.details;
+    const detail = findDetail(details, 'SCHEMA_NOT_AN_OBJECT');
+    expect(detail?.params).toEqual(['string']);
+    expect(detail?.description).toBeUndefined();
+    expect(JSON.stringify(details)).not.toContain('some text');
+  });
+
+  it('reports the type of a number node without a description', () => {
+    const result = validateRef(5.5);
+    expect(result.valid).toBe(false);
+    const detail = findDetail(result.err?.details, 'SCHEMA_NOT_AN_OBJECT');
+    expect(detail?.params).toEqual(['number']);
+    expect(detail?.description).toBeUndefined();
+  });
+
+  it('an object schema still reports its title and description', () => {
+    const validator = ZSchema.create({ safe: true });
+    const result = validator.validate(1, { type: 'string', title: 'T', description: 'D' });
+    expect(result.valid).toBe(false);
+    const detail = findDetail(result.err?.details, 'INVALID_TYPE');
+    expect(detail?.title).toBe('T');
+    expect(detail?.description).toBe('D');
   });
 });

@@ -10,7 +10,14 @@ import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { unicodeLength } from '../utils/unicode.js';
 import { whatIs } from '../utils/what-is.js';
 import { ALWAYS_FALSE, disableFastValidator, expectNumber, unsupported } from './fast-shared.js';
-import { assertsContent, isFormatAssertionVocabEnabled, isModernDraft, shouldSkipValidate } from './shared.js';
+import {
+  assertsContent,
+  isFormatAssertionVocabEnabled,
+  isModernDraft,
+  isValidationVocabularyEnabled,
+  shouldSkipValidate,
+} from './shared.js';
+import { isTypeMismatch } from './type.js';
 
 // ---------------------------------------------------------------------------
 // minLength
@@ -161,6 +168,23 @@ function decideFormat(
   return options.formatAssertions === true || !isModernDraft(options.version) ? UNKNOWN_FORMAT_FAILS : undefined;
 }
 
+/**
+ * True when the `type` keyword of `schema` reports a mismatch as an `INVALID_TYPE` error on this report:
+ * the validation vocabulary is on, and the error code is neither filtered out by `includeErrors` nor
+ * dropped by `excludeErrors`. The format check is skipped for such a value; the decision depends on the
+ * value and the options only, never on which errors the report has kept.
+ */
+function typeErrorIsReported(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal): boolean {
+  const { excludeErrors } = report.validateOptions;
+  if (Array.isArray(excludeErrors) && excludeErrors.includes('INVALID_TYPE')) {
+    return false;
+  }
+  return (
+    !shouldSkipValidate(ctx.validateOptions, ['INVALID_TYPE']) &&
+    isValidationVocabularyEnabled(schema, report.rootSchema, ctx.options.version)
+  );
+}
+
 export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   const formatValidatorFn = decideFormat(schema.format!, schema, report.rootSchema, ctx.options);
   if (formatValidatorFn === undefined) {
@@ -173,7 +197,11 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
   if (shouldSkipValidate(ctx.validateOptions, ['INVALID_FORMAT'])) {
     return;
   }
-  if (report.hasError('INVALID_TYPE', [schema.type, whatIs(json)])) {
+  if (
+    typeof schema.type === 'string' &&
+    isTypeMismatch(schema.type, whatIs(json)) &&
+    typeErrorIsReported(ctx, report, schema)
+  ) {
     return;
   }
   if (formatValidatorFn.length === 2) {
