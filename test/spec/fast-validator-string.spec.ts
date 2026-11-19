@@ -22,6 +22,14 @@ const makeAsyncFormat = (impl: (value: unknown) => Promise<boolean>) => {
   return { v, fn };
 };
 const isOkAsync = (value: unknown) => Promise.resolve(value === 'ok');
+// a promise-like object that is not a native Promise
+const isOkThenable = (value: unknown): PromiseLike<boolean> => ({
+  then(onFulfilled, onRejected) {
+    return Promise.resolve(value === 'ok')
+      .then(onFulfilled)
+      .catch(onRejected);
+  },
+});
 // the inputs are ASCII, so btoa agrees with a Buffer-based encoding
 const b64 = (text: string) => btoa(text);
 const registerThrowingMine = (z: ZSchemaSafe) => {
@@ -191,6 +199,20 @@ describe('fast validator', () => {
           unsubscribe();
         }
         expect(unhandled).not.toHaveBeenCalled();
+      });
+
+      it('a thenable result retires the fast validator and three calls agree with the interpreter', async () => {
+        const v = ZSchema.create({ async: true, safe: true, formatAssertions: null });
+        v.registerFormat('mine', isOkThenable as unknown as (value: unknown) => boolean);
+        const first = await v.validate('ok', schema);
+        expect(buildFastFor(v, schema)).toBeDefined();
+        const second = await v.validate('no', schema);
+        const third = await v.validate('ok', schema);
+        const freshOk = await makeAsyncFormat(isOkAsync).v.validate('ok', schema);
+        const freshNo = await makeAsyncFormat(isOkAsync).v.validate('no', schema);
+        expect([first.valid, second.valid, third.valid]).toEqual([freshOk.valid, freshNo.valid, freshOk.valid]);
+        expect([first.valid, second.valid, third.valid]).toEqual([true, false, true]);
+        expect(entryOf(v, schema)?.fast).toBeNull();
       });
     });
 

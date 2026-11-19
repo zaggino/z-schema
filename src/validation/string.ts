@@ -96,6 +96,15 @@ export function compilePattern(_state: BuildState, node: JsonSchemaInternal, che
 // format
 // ---------------------------------------------------------------------------
 
+/**
+ * Whether `value` is promise-like: an object or function with a callable `then`.
+ * Reading `then` can run a getter; whatever it throws propagates to the caller.
+ */
+const isThenable = (value: unknown): value is PromiseLike<unknown> =>
+  value !== null &&
+  (typeof value === 'object' || typeof value === 'function') &&
+  typeof (value as { then?: unknown }).then === 'function';
+
 // A rejected validator promise is treated as an invalid result (false).
 function toFalse(): unknown {
   return false;
@@ -161,11 +170,11 @@ export function formatValidator(ctx: ZSchemaBase, report: Report, schema: JsonSc
     });
   } else {
     const result = formatValidatorFn.call(ctx, json);
-    if (result instanceof Promise) {
-      // Promise-based async
+    if (isThenable(result)) {
+      // Async: a promise or other thenable
       // Attach the rejection handler now: if the task never runs (early finish), a rejected
-      // promise must not surface as an unhandled rejection.
-      const settled = result.catch(toFalse);
+      // promise or thenable must not surface as an unhandled rejection.
+      const settled = Promise.resolve(result).catch(toFalse);
       report.addAsyncTaskWithPath(
         (callback: (result: unknown) => void) => {
           // settled never rejects; void marks it as intentionally not awaited
@@ -213,12 +222,12 @@ export function compileFormat(state: BuildState, node: JsonSchemaInternal, check
     unsupported();
   }
   state.notes.customFormat = true;
-  // A plain function may still return a promise: that is only known per call, and then the
-  // interpreter has to decide (it also owns the async task bookkeeping).
+  // A plain function may still return a promise or other thenable: that is only known per call,
+  // and then the interpreter has to decide (it also owns the async task bookkeeping).
   checks.push((json) => {
     const result: unknown = fn.call(ctx, json);
-    if (result instanceof Promise) {
-      void result.catch(toFalse);
+    if (isThenable(result)) {
+      void Promise.resolve(result).catch(toFalse);
       return disableFastValidator();
     }
     return !!result;
