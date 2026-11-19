@@ -1,52 +1,44 @@
 # Security considerations
 
+General guidance for applications that validate input from sources they do not control. To report a suspected vulnerability, see [SECURITY.md](../SECURITY.md).
+
 ## Data and schemas are different kinds of input
 
-The validator is built to check data from any source against a schema you chose. A schema is closer to code: it selects
-patterns to run, references to load and formats to call. Treat a schema from a source you do not control the way you
-would treat code from that source: review it, or restrict what it can use.
-
-## Limits the library enforces
-
-| Limit                | Default                         | What it bounds                                              |
-| -------------------- | ------------------------------- | ----------------------------------------------------------- |
-| `maxRecursionDepth`  | `100`                           | Nesting depth of the schemas and data the library traverses |
-| `asyncTimeout`       | `2000` ms (clamped to `60 000`) | Total time for all async work in one validation             |
-| `maxErrors`          | `1000`                          | Most error details one `validate()` call reports            |
-| Pattern length limit | `10 000` characters             | Length of a `pattern` value (a constant, not an option)     |
-
-- When `maxRecursionDepth` is reached, validation fails with a "Maximum recursion depth exceeded" error.
-- When `asyncTimeout` is reached, validation fails with an `ASYNC_TIMEOUT` error.
-- When `maxErrors` is reached, further details are left out and the error has `truncated: true`. `Infinity` turns the
-  limit off. See [options.md](options.md#maxerrors).
-- A `pattern` longer than the limit is reported as invalid.
-
-See [options.md](options.md) for the full description of each option.
-
-## Patterns
-
-The library checks `pattern` values with a heuristic. It rejects some expressions that are slow to match and does not
-recognise every one. If schemas come from a source you do not control, also bound the length of the strings you
-validate: use `maxLength` in a schema you control, or a size check before validation.
-
-```javascript
-if (typeof input.name === 'string' && input.name.length > 256) {
-  throw new Error('name too long');
-}
-validator.validate(input, schema);
-```
+The validator is built to check data from any source against a schema you chose. A schema is closer to code: it selects patterns to run, references to load and formats to call. Treat a schema from a source you do not control the way you would treat code from that source: review it, or restrict what it can use (see [Schema readers and remote references](#schema-readers-and-remote-references) and [Custom formats](#custom-formats)).
 
 ## Bound the input before validating
 
-Validation time and memory grow with the size of the data. Check the request body size, array lengths and nesting at the
-boundary of your application (for example a body-size limit in the HTTP layer) before calling `validate()`.
+Validation time and memory grow with the size of the data, and validation recurses as deep as the data is nested. Check the size of the input at the boundary of your application, before calling `validate()`: a body-size limit in the HTTP layer, and limits on string length, array length and nesting where your parser offers them.
+
+```javascript
+const MAX_BODY_BYTES = 100_000;
+
+if (rawBody.length > MAX_BODY_BYTES) {
+  throw new Error('request body too large');
+}
+validator.validate(JSON.parse(rawBody), schema);
+```
+
+A `maxLength` or `maxItems` keyword in the schema reports oversized values, but other keywords of the same schema are still evaluated on them, so it does not replace a check before validation.
+
+## Limits the library enforces
+
+| Limit                                               | Default             | What it bounds                                                                                                      | When it is reached                                               |
+| --------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| [`maxRecursionDepth`](options.md#maxrecursiondepth) | `100`               | Depth of the library's internal traversals of schemas and values (cloning, comparison, id and reference collection) | Validation fails with an error that names the recursion depth    |
+| [`asyncTimeout`](options.md#asynctimeout)           | `2000` ms           | How long a validation waits for pending async tasks (async formats); it does not interrupt synchronous work         | Validation fails with an `ASYNC_TIMEOUT` error                   |
+| [`maxErrors`](options.md#maxerrors)                 | `1000`              | Number of error details one `validate()` call reports                                                               | Further details are left out and the error has `truncated: true` |
+| Pattern length (a constant, not an option)          | `10 000` characters | Length of a `pattern` value or a `patternProperties` key                                                            | Schema validation fails                                          |
+
+`maxRecursionDepth` is not a limit on how deeply the validated data may be nested; bound that before validating.
+
+## Patterns
+
+`pattern` values and `patternProperties` keys run on the JavaScript regular-expression engine, and how long an expression takes depends on the expression and on the string. The library checks patterns before compiling them, but no such check can judge every expression. Review the patterns in schemas you do not control, and bound the length of the strings you validate.
 
 ## One validator instance per schema source
 
-A validator instance keeps one registry of schema ids. Schemas registered with `setRemoteReference` or loaded by a schema
-reader take precedence over ids that validated schemas declare, and ids declared by validated schemas share the
-instance's registry. Use a separate instance for each independent source of schemas, and register shared schemas before
-first use.
+Use a separate instance for each independent source of schemas, and register the schemas they share when you create the instance:
 
 ```javascript
 const tenantA = ZSchema.create();
@@ -59,10 +51,11 @@ tenantA.validate(dataA, schemaFromA);
 tenantB.validate(dataB, schemaFromB);
 ```
 
+The static `ZSchema.setRemoteReference`, `ZSchema.registerFormat` and `ZSchema.setSchemaReader` are shared by every instance in the process. Use the instance methods for anything that belongs to one source. See [Remote References](usage.md#remote-references).
+
 ## Schema readers and remote references
 
-A `SchemaReader` decides what a `$ref` to an unknown URI loads. Return only schemas you intend to serve, for example from
-an allow-list keyed by URI. Do not pass the URI to the filesystem or the network unchecked.
+A schema reader decides what a `$ref` to an unknown URI loads, and there is one reader per process. Return only schemas you intend to serve, for example from an allow-list keyed by URI. Do not turn the URI into a file path or a network request without checking it first.
 
 ```javascript
 const allowed = new Map([
@@ -73,29 +66,21 @@ const allowed = new Map([
 ZSchema.setSchemaReader((uri) => allowed.get(uri));
 ```
 
-See [usage.md](usage.md#remote-references) for the reader API.
-
 ## Custom formats
 
-A format function receives the value as is, and its result decides validity. Check the value's type before using it,
-resolve `false` for values you reject, and handle your own errors. A rejection counts as an invalid format, which makes
-a schema under `not` pass. Keep the function free of effects that are unsafe to repeat.
+A format function receives the value as it is in the data, whatever its type, and may be called more than once for the same value, so keep it free of side effects. Decide explicitly what it returns for values of another type, return a boolean, and handle errors inside the function.
 
 ```javascript
 validator.registerFormat('postal-code', (value) => {
-  if (typeof value !== 'string') return false;
+  if (typeof value !== 'string') {
+    return true; // not a string: left to the `type` keyword
+  }
   return /^\d{5}$/.test(value);
 });
 ```
 
-See [features.md](features.md#register-a-custom-format) for the custom format reference.
+A format function decides validity only when formats are asserted; see [`formatAssertions`](options.md#formatassertions). See [features.md](features.md#register-a-custom-format) for the custom format reference.
 
 ## Command-line tool
 
-A file `$ref` is read only inside the schema file's directory, unless `--refRoot <dir>` names a wider directory.
-`https:` references are downloaded with a size limit and a deadline. Other schemes are not read. See
-[usage.md](usage.md#references).
-
-## Reporting
-
-To report a suspected vulnerability, see [SECURITY.md](../SECURITY.md).
+The `z-schema` command loads the schemas that a schema references. Run it on schemas you trust, or in an environment where the files and hosts it can reach are the ones you intend. See [CLI](usage.md#cli).
