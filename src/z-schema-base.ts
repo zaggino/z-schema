@@ -419,6 +419,7 @@ export class ZSchemaBase {
 
   /**
    * Register a remote schema in this instance's cache so `$ref` can resolve to it.
+   * It replaces whatever is registered at `uri` on this instance and takes precedence over ids declared by schemas passed to `validate()`.
    * @param uri - The URI the schema will be known by.
    * @param schema - The schema object or JSON string.
    * @param validationOptions - Optional options used for schema preparation.

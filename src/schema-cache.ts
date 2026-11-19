@@ -54,6 +54,8 @@ export class SchemaCache {
   static readonly global_cache: SchemaCacheStorage = createDict<JsonSchemaInternal>();
   readonly cache: SchemaCacheStorage = createDict<JsonSchemaInternal>();
   private readonly validator: ZSchemaBase;
+  // URIs whose entry was registered, loaded by a schema reader, or declared inside such a schema.
+  private readonly protectedPaths = new Set<string>();
 
   constructor(validator: ZSchemaBase) {
     this.validator = validator;
@@ -67,18 +69,60 @@ export class SchemaCache {
     }
   }
 
+  /**
+   * Registers `schema` at `uri` on this instance. An explicit registration replaces whatever is there.
+   */
   cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
     const remotePath = getRemotePath(uri);
     if (remotePath) {
       const prev = this.cache[remotePath];
       this.cache[remotePath] = schema;
+      this.protectedPaths.add(remotePath);
       this.validator.compiledSchemaCache.onScacheWrite(remotePath, prev, schema);
     }
+  }
+
+  /**
+   * Whether the entry at `remotePath` is one that an id declared by a schema passed to `validate()`, `compile()`
+   * or `validateSchema()` must not create, replace or hide: a registered or reader-loaded schema, an id declared
+   * inside one, or anything in the global cache.
+   */
+  isProtected(remotePath: string): boolean {
+    return this.protectedPaths.has(remotePath) || SchemaCache.global_cache[remotePath] !== undefined;
+  }
+
+  /**
+   * Enters an id that a schema declares for itself or for one of its sub-schemas.
+   *
+   * @param uri - The declared id, already resolved to an absolute or root-relative URI.
+   * @param schema - The schema node that carries the id.
+   * @param trusted - `true` when the declaring schema is registered, was loaded by a schema reader, or is
+   * reached through a protected entry. Its ids are then protected too. Otherwise the declaration is skipped
+   * when the URI is protected.
+   */
+  declareId(uri: string, schema: JsonSchemaInternal, trusted: boolean): void {
+    const remotePath = getRemotePath(uri);
+    if (!remotePath) {
+      return;
+    }
+    const prev = this.cache[remotePath];
+    if (prev === schema) {
+      return;
+    }
+    if (!trusted && this.isProtected(remotePath)) {
+      return;
+    }
+    this.cache[remotePath] = schema;
+    if (trusted) {
+      this.protectedPaths.add(remotePath);
+    }
+    this.validator.compiledSchemaCache.onScacheWrite(remotePath, prev, schema);
   }
 
   removeFromCacheByUri(uri: string) {
     const remotePath = getRemotePath(uri);
     if (remotePath) {
+      this.protectedPaths.delete(remotePath);
       if (this.cache[remotePath] !== undefined) {
         // a removed mapping can change how cached schemas resolve `$ref`
         this.validator.compiledSchemaCache.clear();
@@ -108,21 +152,26 @@ export class SchemaCache {
   }
 
   fromCache(path: string): JsonSchemaInternal | undefined {
-    let found = this.cache[path];
-    if (found) {
+    const found = this.cache[path];
+    if (found && (this.protectedPaths.has(path) || SchemaCache.global_cache[path] === undefined)) {
       return found;
     }
-    found = SchemaCache.global_cache[path];
-    if (found) {
+    const registered = SchemaCache.global_cache[path];
+    if (registered) {
       // Clone once from global cache into instance cache so subsequent lookups
       // never deep-clone again for the same path on this instance.
-      const clone = deepClone(found, this.validator.options.maxRecursionDepth);
+      const clone = deepClone(registered, this.validator.options.maxRecursionDepth);
       if (!clone.id || (!isAbsoluteUri(clone.id) && isAbsoluteUri(path))) {
         clone.id = path;
       }
-      // New mapping (nothing was at `path`), so no cached schema can have resolved through it:
-      // schemas with unresolved refs are never cached. No compiled-schema-cache notification needed.
+      // When nothing was at `path` this is a new mapping, so no cached schema can have resolved through it:
+      // schemas with unresolved refs are never cached. No compiled-schema-cache notification is needed.
       this.cache[path] = clone;
+      this.protectedPaths.add(path);
+      if (found) {
+        // A declared id was in the way: schemas compiled against it are stale.
+        this.validator.compiledSchemaCache.onScacheWrite(path, found, clone);
+      }
       return clone;
     }
     return undefined;
@@ -145,17 +194,8 @@ export class SchemaCache {
     const remotePath = getRemotePath(uri);
     const queryPath = getQueryPath(uri);
     let result: JsonSchemaInternal | undefined;
-    let resolvedFromAncestor = false;
 
-    if (remotePath) {
-      const ancestorReport = report.getAncestor(remotePath);
-      if (ancestorReport?.rootSchema) {
-        result = ancestorReport.rootSchema;
-        resolvedFromAncestor = true;
-      }
-    }
-
-    if (!result && root && remotePath) {
+    if (root && remotePath) {
       const rootId = getEffectiveId(root);
       const rootRemotePath = rootId ? getRemotePath(rootId) : undefined;
       if (rootRemotePath && rootRemotePath === remotePath) {
@@ -172,45 +212,37 @@ export class SchemaCache {
     }
 
     if (result && remotePath) {
-      // we need to avoid compiling schemas in a recursive loop
-      const compileRemote = result !== root && !resolvedFromAncestor;
+      // A schema that is already being compiled further up is not compiled again. It is recognised by identity:
+      // an id is only a name, and several schemas can carry the same one.
+      const compileRemote = result !== root && !report.isCompiling(result);
       // now we need to compile and validate resolved schema (in case it's not already)
       if (compileRemote) {
         report.path.push(remotePath);
 
-        let remoteReport;
-        let usesAncestorReport = false;
+        // Eager on purpose: these errors are read by content (copied/filtered), so do not use Report.createSubReport.
+        const remoteReport = new Report(report);
+        const noCache = !(result.id && isAbsoluteUri(result.id));
+        if (this.validator.sc.compileSchema(remoteReport, result, { noCache, trusted: this.isProtected(remotePath) })) {
+          const savedOptions = this.validator.options;
+          try {
+            // If custom validationOptions were provided to setRemoteReference(),
+            // use them instead of the default options
+            this.validator.options = result.__$validationOptions || this.validator.options;
+            const parentSchemaUri = typeof result.$schema === 'string' ? getRemotePath(result.$schema) : undefined;
+            const currentSchemaUri = report.getSchemaId();
+            const parentSchemaIsCompiling =
+              !!parentSchemaUri &&
+              parentSchemaUri.length > 0 &&
+              (currentSchemaUri === parentSchemaUri || !!report.getAncestor(parentSchemaUri));
 
-        const anscestorReport = result.id ? report.getAncestor(result.id) : undefined;
-        if (anscestorReport) {
-          remoteReport = anscestorReport;
-          usesAncestorReport = true;
-        } else {
-          // Eager on purpose: these errors are read by content (copied/filtered), so do not use Report.createSubReport.
-          remoteReport = new Report(report);
-          const noCache = !(result.id && isAbsoluteUri(result.id));
-          if (this.validator.sc.compileSchema(remoteReport, result, { noCache })) {
-            const savedOptions = this.validator.options;
-            try {
-              // If custom validationOptions were provided to setRemoteReference(),
-              // use them instead of the default options
-              this.validator.options = result.__$validationOptions || this.validator.options;
-              const parentSchemaUri = typeof result.$schema === 'string' ? getRemotePath(result.$schema) : undefined;
-              const currentSchemaUri = report.getSchemaId();
-              const parentSchemaIsCompiling =
-                !!parentSchemaUri &&
-                parentSchemaUri.length > 0 &&
-                (currentSchemaUri === parentSchemaUri || !!report.getAncestor(parentSchemaUri));
-
-              if (!parentSchemaIsCompiling) {
-                this.validator.sv.validateSchema(remoteReport, result);
-              }
-            } finally {
-              this.validator.options = savedOptions;
+            if (!parentSchemaIsCompiling) {
+              this.validator.sv.validateSchema(remoteReport, result);
             }
+          } finally {
+            this.validator.options = savedOptions;
           }
         }
-        const remoteReportIsValid = usesAncestorReport ? true : remoteReport.isValid();
+        const remoteReportIsValid = remoteReport.isValid();
         if (!remoteReportIsValid) {
           report.addError('REMOTE_NOT_VALID', [uri], remoteReport);
         }
