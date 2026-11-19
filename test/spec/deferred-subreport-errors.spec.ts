@@ -436,9 +436,10 @@ describe('deferred sub-report errors: message construction exceptions (C3)', () 
   });
 });
 
-const maxErrorsRun = (defer: boolean) => {
+const errorLimitRun = (defer: boolean) => {
   const parent = new Report({});
-  const sub = new Report(parent, { maxErrors: 2 });
+  const sub = new Report(parent);
+  sub.errorLimit = 2;
   sub.deferErrors = defer;
   for (let i = 0; i < 5; i++) {
     sub.path = [i];
@@ -448,10 +449,10 @@ const maxErrorsRun = (defer: boolean) => {
   return shapeOf(parent.errors);
 };
 
-describe('deferred sub-report errors: maxErrors (S5)', () => {
-  it('honors reportOptions.maxErrors on a deferred sub-report (no public path sets it; direct Report)', () => {
-    const deferred = maxErrorsRun(true);
-    expect(deferred).toStrictEqual(maxErrorsRun(false));
+describe('deferred sub-report errors: error limit (S5)', () => {
+  it('gives a deferred sub-report the same result under an error limit as an eager one (direct Report)', () => {
+    const deferred = errorLimitRun(true);
+    expect(deferred).toStrictEqual(errorLimitRun(false));
     expect((deferred as Array<{ values: { inner: unknown[] } }>)[0].values.inner).toHaveLength(2);
   });
 });

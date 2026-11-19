@@ -7,7 +7,7 @@ import { shallowClone } from './utils/clone.js';
 // These constants are consumed locally (default options + async-timeout clamping)
 // and also re-exported as public API, so this cannot collapse to a bare re-export.
 // oxlint-disable-next-line unicorn/prefer-export-from
-import { DEFAULT_MAX_RECURSION_DEPTH, MAX_ASYNC_TIMEOUT } from './utils/constants.js';
+import { DEFAULT_MAX_ERRORS, DEFAULT_MAX_RECURSION_DEPTH, MAX_ASYNC_TIMEOUT } from './utils/constants.js';
 import { createDict } from './utils/properties.js';
 
 export { DEFAULT_MAX_RECURSION_DEPTH, MAX_ASYNC_TIMEOUT };
@@ -36,9 +36,22 @@ export interface ZSchemaOptions {
   pedanticCheck?: boolean;
   ignoreUnknownFormats?: boolean;
   formatAssertions?: boolean | null;
+  /**
+   * Called for every schema node that is validated. A custom validator reports through `report.addError` /
+   * `report.addCustomError`; errors written to `report.errors` directly are not counted towards `maxErrors`.
+   */
   customValidator?: (report: Report, schema: unknown, json: unknown) => void;
   customFormats?: Record<string, FormatValidatorFn | null>;
   maxRecursionDepth?: number;
+  /**
+   * The most error details a `validate()` call reports, counting every detail including those
+   * nested in `inner`. Default 1000. When details were left out, the error has `truncated: true`;
+   * the validity of the result never depends on this limit. `Infinity` turns the limit off.
+   * `0`, negative numbers and fractions below 1 mean 1 (the first error is always reported); a number of
+   * 1 or more is rounded down; a value that is not a number (or is `NaN`) means the default.
+   * Applies to data validation, not to schema validation.
+   */
+  maxErrors?: number;
 }
 
 /**
@@ -105,7 +118,21 @@ export const defaultOptions: ZSchemaOptions = {
   customFormats: undefined,
   // maximum recursion depth for deeply nested schema/data traversal (prevents stack overflow)
   maxRecursionDepth: DEFAULT_MAX_RECURSION_DEPTH,
+  // maximum number of error details one validation reports (counted through inner)
+  maxErrors: DEFAULT_MAX_ERRORS,
 } satisfies EveryOption;
+
+/**
+ * The limit to use for a `maxErrors` value: a number of at least 1 is rounded down (`Infinity` stays);
+ * `0`, a negative number and a fraction below 1 become 1, because the first error is always reported;
+ * anything that is not a number (or is `NaN`) becomes the default.
+ */
+export const resolveMaxErrors = (value: unknown): number => {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return DEFAULT_MAX_ERRORS;
+  }
+  return value >= 1 ? Math.floor(value) : 1;
+};
 
 /**
  * `ZSchema.create` dispatch flags. They have no default but are accepted, so the caller's options
@@ -152,6 +179,8 @@ export const normalizeOptions = (options?: ZSchemaOptions) => {
   if (normalized.asyncTimeout != null) {
     normalized.asyncTimeout = Math.min(Math.max(normalized.asyncTimeout, 0), MAX_ASYNC_TIMEOUT);
   }
+
+  normalized.maxErrors = resolveMaxErrors(normalized.maxErrors);
 
   if (normalized.strictMode === true) {
     normalized.forceAdditional = true;

@@ -159,6 +159,7 @@ function snapshotOptions(o: ZSchemaOptions): OptionsSnapshot {
     // copied, so registering a format by writing into the live object is noticed
     customFormats: customFormats && typeof customFormats === 'object' ? { ...customFormats } : customFormats,
     maxRecursionDepth: o.maxRecursionDepth,
+    maxErrors: o.maxErrors,
   };
 }
 
@@ -216,6 +217,7 @@ function sameOptions(s: OptionsSnapshot, o: ZSchemaOptions): boolean {
     s.formatAssertions === o.formatAssertions &&
     s.customValidator === o.customValidator &&
     s.maxRecursionDepth === o.maxRecursionDepth &&
+    s.maxErrors === o.maxErrors &&
     sameCustomFormats(s.customFormats, o.customFormats)
   );
 }
