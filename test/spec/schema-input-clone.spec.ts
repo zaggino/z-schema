@@ -2,7 +2,7 @@ import type { JsonSchema } from '../../src/json-schema-versions.ts';
 
 import { describe, expect, it } from 'vitest';
 
-import { cloneInputSchema } from '../../src/json-schema.ts';
+import { AT_DATA, AT_MAP, AT_SCHEMA, childPosition, cloneInputSchema } from '../../src/json-schema.ts';
 import { deepClone } from '../../src/utils/clone.ts';
 import { deepFreeze, nest } from '../lib/object-helpers.ts';
 
@@ -296,5 +296,20 @@ describe('cloneInputSchema keeps names and data', () => {
     expect(data).not.toBe(result);
     expect(data).not.toBe(source);
     expect(data.default.inner).toBe(data);
+  });
+});
+
+describe('childPosition', () => {
+  const array: unknown[] = [];
+  it.each([
+    [AT_SCHEMA, 'properties', {}, AT_MAP],
+    [AT_SCHEMA, 'properties', array, AT_SCHEMA],
+    [AT_SCHEMA, 'enum', [], AT_DATA],
+    [AT_SCHEMA, 'unknownKeyword', {}, AT_SCHEMA],
+    [AT_MAP, 'default', {}, AT_SCHEMA],
+    [AT_MAP, '__$x', {}, AT_SCHEMA],
+    [AT_DATA, 'properties', {}, AT_DATA],
+  ] as const)('position %s, key %s -> %s', (position, key, value, expected) => {
+    expect(childPosition(position, key, value)).toBe(expected);
   });
 });

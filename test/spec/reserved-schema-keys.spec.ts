@@ -351,3 +351,46 @@ describe('names and data that start with the reserved prefix are kept', () => {
     expect(validator.validate({}, schema).valid).toBe(false);
   });
 });
+
+const runOutcome = (schema: Schema, instance: unknown, options?: { schemaPath: string }): Outcome =>
+  outcomeOf(create().validate(instance, schema, options));
+
+describe('references that end inside data or on a keyword map', () => {
+  const marker = { type: 'number' };
+
+  const rows: Array<[string, (inner: Schema) => Schema, unknown, { schemaPath: string } | undefined]> = [
+    ['#/default', (inner) => ({ $ref: '#/default', default: inner }), 1, undefined],
+    ['#/examples/0', (inner) => ({ $ref: '#/examples/0', examples: [inner] }), 'x', undefined],
+    ['the schemaPath option', (inner) => ({ default: inner }), 1, { schemaPath: 'default' }],
+  ];
+
+  describe.each(rows)('a reference through %s', (_name, build, instance, options) => {
+    it('reports the unresolved reference', () => {
+      const outcome = runOutcome(build({ $ref: '#/nowhere' }), instance, options);
+      expect(outcome.valid).toBe(false);
+      expect(outcome.codes).toContain('REF_UNRESOLVED');
+    });
+
+    it('ignores a reserved key next to the inner reference', () => {
+      const without = runOutcome(build({ $ref: '#/nowhere' }), instance, options);
+      const withKey = runOutcome(build({ $ref: '#/nowhere', __$refResolved: marker }), instance, options);
+      expect(withKey).toEqual(without);
+    });
+  });
+
+  it('uses a schema found under examples', () => {
+    const validator = create();
+    const schema: Schema = { $ref: '#/examples/0', examples: [{ type: 'string' }] };
+    expect(validator.validate('x', schema).valid).toBe(true);
+    expect(validator.validate(1, schema).valid).toBe(false);
+  });
+
+  it('leaves an enum member that is also a reference target as it is', () => {
+    const validator = create();
+    const schema: Schema = {
+      properties: { a: { enum: [{ type: 'string' }] }, b: { $ref: '#/properties/a/enum/0' } },
+    };
+    expect(validator.validate({ a: { type: 'string' } }, schema).valid).toBe(true);
+    expect(validator.validate({ b: 1 }, schema).valid).toBe(false);
+  });
+});

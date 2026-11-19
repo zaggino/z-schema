@@ -32,11 +32,30 @@ const SCHEMA_MAP_KEYWORDS_SET = new Set<string>([
   'properties',
 ]);
 
-/** How `cloneInputSchema` treats an object: as a schema, as a map from names to schemas, or as data. */
-const CLONE_AS_SCHEMA = 0;
-const CLONE_AS_MAP = 1;
-const CLONE_AS_DATA = 2;
-type CloneMode = typeof CLONE_AS_SCHEMA | typeof CLONE_AS_MAP | typeof CLONE_AS_DATA;
+/** Where an object sits in a schema: it is a schema, a map from names to schemas, or data. */
+export const AT_SCHEMA = 0;
+export const AT_MAP = 1;
+export const AT_DATA = 2;
+export type SchemaPosition = typeof AT_SCHEMA | typeof AT_MAP | typeof AT_DATA;
+
+/**
+ * The position of `value`, found under `key` in an object at `position`. Not for array items: an item has the
+ * position of its array.
+ */
+export const childPosition = (position: SchemaPosition, key: string, value: unknown): SchemaPosition => {
+  if (position === AT_MAP) {
+    return AT_SCHEMA;
+  }
+  if (position === AT_SCHEMA) {
+    if (NON_SCHEMA_KEYWORDS_SET.has(key)) {
+      return AT_DATA;
+    }
+    if (SCHEMA_MAP_KEYWORDS_SET.has(key) && isObject(value)) {
+      return AT_MAP;
+    }
+  }
+  return position;
+};
 
 /**
  * Turns a schema supplied by a caller into the library's own copy of it. It clones like `deepClone` (sorted
@@ -64,7 +83,7 @@ type CloneMode = typeof CLONE_AS_SCHEMA | typeof CLONE_AS_MAP | typeof CLONE_AS_
 export const cloneInputSchema = (schema: JsonSchema, maxDepth = DEFAULT_MAX_RECURSION_DEPTH): JsonSchemaInternal => {
   // One table per mode: the clones of the same object differ between modes.
   const visited: [Map<object, unknown>?, Map<object, unknown>?, Map<object, unknown>?] = [];
-  const cloneNode = (node: unknown, mode: CloneMode, depth: number): unknown => {
+  const cloneNode = (node: unknown, mode: SchemaPosition, depth: number): unknown => {
     if (typeof node !== 'object' || node === null) {
       return node;
     }
@@ -95,26 +114,17 @@ export const cloneInputSchema = (schema: JsonSchema, maxDepth = DEFAULT_MAX_RECU
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       // Checked before the value is read: nothing under a reserved key is looked at.
-      if (mode === CLONE_AS_SCHEMA && isInternalKey(key)) {
+      if (mode === AT_SCHEMA && isInternalKey(key)) {
         continue;
       }
       const value = obj[key];
-      let childMode: CloneMode = mode;
-      if (mode === CLONE_AS_MAP) {
-        childMode = CLONE_AS_SCHEMA;
-      } else if (mode === CLONE_AS_SCHEMA) {
-        if (NON_SCHEMA_KEYWORDS_SET.has(key)) {
-          childMode = CLONE_AS_DATA;
-        } else if (SCHEMA_MAP_KEYWORDS_SET.has(key) && isObject(value)) {
-          childMode = CLONE_AS_MAP;
-        }
-      }
+      const childMode = childPosition(mode, key, value);
       // An own `__proto__` key stays an own key.
       defineOwn(res, key, cloneNode(value, childMode, depth + 1));
     }
     return res;
   };
-  return cloneNode(schema, CLONE_AS_SCHEMA, 0) as JsonSchemaInternal;
+  return cloneNode(schema, AT_SCHEMA, 0) as JsonSchemaInternal;
 };
 
 /**

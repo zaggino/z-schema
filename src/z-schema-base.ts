@@ -18,7 +18,7 @@ import { prepareRemoteSchema, SchemaCache } from './schema-cache.js';
 import { SchemaCompiler } from './schema-compiler.js';
 import { SchemaValidator } from './schema-validator.js';
 import { deepClone } from './utils/clone.js';
-import { get, sortedKeys } from './utils/json.js';
+import { sortedKeys } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
 import { getRemotePath } from './utils/uri.js';
 import { isObject, whatIs } from './utils/what-is.js';
@@ -211,7 +211,7 @@ export class ZSchemaBase {
 
     if (options.schemaPath) {
       report.rootSchema = _schema;
-      _schema = get(_schema, options.schemaPath) as JsonSchemaInternal;
+      _schema = this.scache.getAtPath(_schema, options.schemaPath.split('.')) as JsonSchemaInternal;
       if (!_schema) {
         const e = new ValidateError(`Schema path '${options.schemaPath}' wasn't found in the schema!`);
         if (callback) {
