@@ -163,6 +163,12 @@ const validateUser = validator.compile({ type: 'object', required: ['name'] }); 
 validateUser({ name: 'Alice' }); // true, or throws ValidateError
 ```
 
+### Reserved Keys
+
+Keys that start with `__$` are reserved for the state z-schema keeps on its own copy of a schema. In a schema you pass in (to `validate()`, `validateSchema()`, `compile()` or `setRemoteReference()`, or from a [schema reader](#automatic-schema-reader)) such keys are ignored wherever a keyword can appear, the values of keywords z-schema does not know (for example `x-meta`) included; a `customValidator` does not see them either. What is kept as it is: the entries of `properties`, `patternProperties`, `$defs`, `definitions`, `dependencies`, `dependentSchemas` and `dependentRequired`, whatever their names, and everything under `enum`, `const`, `default` and `examples`.
+
+A schema you pass in is cloned before it is compiled, so your object is never modified. A schema registered as a JSON string is parsed and then cloned the same way, so the nesting limit (`maxRecursionDepth`) applies to it too.
+
 ## Error Handling
 
 `ValidateError` (thrown or returned) has:
@@ -271,6 +277,27 @@ ZSchema.setSchemaReader((uri) => {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 });
 ```
+
+The object a reader returns is not modified: z-schema compiles a copy of it, so a reader can return the same object on every call.
+
+### Schema Ids and Precedence
+
+A validator resolves a URI against its registered entries: schemas added with `ZSchema.setRemoteReference()` (global, shared by all instances), the bundled meta-schemas, schemas added with `validator.setRemoteReference()` (that instance), and schemas loaded by a schema reader. Ids declared (`$id` / `id`) inside a registered schema are protected like the schema itself.
+
+A schema you pass to `validate()`, `compile()` or `validateSchema()` also enters the ids it declares on that validator, so later calls can reference it by id. A registered schema always takes precedence over an id declared this way: when the URI is already registered, the declaration is skipped, the schema still validates, and references to its own root id resolve to itself.
+
+```typescript
+const validator = ZSchema.create();
+validator.setRemoteReference('http://example.com/schemas/address.json', addressSchema);
+
+// Declares the same $id as the registered schema
+validator.validate(data, { $id: 'http://example.com/schemas/address.json', type: 'object' });
+
+// Still means the registered addressSchema
+validator.validate(address, { $ref: 'http://example.com/schemas/address.json' });
+```
+
+Among ids declared by schemas you pass to `validate()`, `compile()` or `validateSchema()` the last declaration wins, and a validator keeps the ids it has seen for its lifetime. Among ids nested in different registered schemas the first one entered stays, and a registration made with `setRemoteReference()` replaces it. Register shared schemas before the first schema that references them is used, because a schema that is already compiled keeps the targets it resolved. When schemas come from sources that do not know each other, give each source its own validator (`ZSchema.create()` is cheap) and register shared schemas with `setRemoteReference()`.
 
 ### Diagnosing Missing References
 

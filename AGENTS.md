@@ -43,7 +43,7 @@ src/                  # Library source (TypeScript, ESM)
   format-validators.ts# Built-in & custom format validators
   report.ts           # Validation report (error accumulation, SchemaErrorDetail)
   async-tasks.ts      # Async task scheduler (drainTasks) used by Report
-  json-schema.ts      # Shared/common JSON Schema definitions + helpers
+  json-schema.ts      # Shared/common JSON Schema definitions + helpers, cloneInputSchema (the clone taken of a caller's schema)
   json-schema-versions.ts # Draft-specific schema unions and version mappings
   z-schema-versions.ts # Registers bundled draft meta-schemas into global cache
   validation/         # Keyword validators and their fast-validator compilers, split by category
@@ -58,8 +58,9 @@ src/                  # Library source (TypeScript, ESM)
     unevaluated.ts    # unevaluatedItems/unevaluatedProperties validators and evaluated-annotation collection (collectEvaluated)
     ref.ts            # $dynamicRef/$recursiveRef resolution helpers, legacy $ref chain walker (walkLegacyRef)
   utils/              # Pure utility functions
-    array.ts          # Array helpers
+    array.ts          # Array helpers: isUniqueArray (pairwise loop and per-item keys), difference
     clone.ts          # Deep/shallow clone
+    equality.ts       # Equality of JSON values (areEqual) and the per-value key writer that mirrors it
     json.ts           # JSON path traversal, sorted keys
     properties.ts     # Object property copy
     rfc-3986.ts       # RFC 3986 URI/URI-reference grammar
@@ -74,7 +75,7 @@ src/                  # Library source (TypeScript, ESM)
 test/
   spec/               # Test files (*.spec.ts, *.node-spec.ts, *.browser-spec.ts)
   fixtures/           # Test fixture data (sample schemas and JSON)
-  lib/                # Test helpers (create-manifest.ts, deferred-errors.ts, json-schema-test-suite.ts, prototype-guard.ts, read-public-json.ts)
+  lib/                # Test helpers (create-manifest.ts, deferred-errors.ts, json-schema-test-suite.ts, object-helpers.ts, prototype-guard.ts, read-public-json.ts, unique-array-cases.ts, validate-results.ts)
   public/             # Browser test assets (served by Vitest browser)
   ZSchemaTestSuite/   # Legacy z-schema-specific test suite (JS files)
 json-schema-spec/     # Git submodule — official JSON Schema specifications

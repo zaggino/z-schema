@@ -2,7 +2,9 @@ import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { Reference } from './schema-compiler.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
+import { cloneDepthError } from './utils/clone.js';
 import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
+import { defineOwn } from './utils/properties.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { isObject } from './utils/what-is.js';
 
@@ -15,6 +17,115 @@ export const NON_SCHEMA_KEYWORDS_SET = new Set<string>(NON_SCHEMA_KEYWORDS);
 
 /** Returns true if the key is an internal z-schema property (prefixed with `__$`). */
 export const isInternalKey = (key: string): boolean => key.startsWith('__$');
+
+/**
+ * Keywords whose value maps names to sub-schemas (or, for the two dependency keywords, to name lists). The
+ * names in such a map are chosen by the schema author and are not keywords.
+ */
+const SCHEMA_MAP_KEYWORDS_SET = new Set<string>([
+  '$defs',
+  'definitions',
+  'dependencies',
+  'dependentRequired',
+  'dependentSchemas',
+  'patternProperties',
+  'properties',
+]);
+
+/** Where an object sits in a schema: it is a schema, a map from names to schemas, or data. */
+export const AT_SCHEMA = 0;
+export const AT_MAP = 1;
+export const AT_DATA = 2;
+export type SchemaPosition = typeof AT_SCHEMA | typeof AT_MAP | typeof AT_DATA;
+
+/**
+ * The position of `value`, found under `key` in an object at `position`. Not for array items: an item has the
+ * position of its array.
+ */
+export const childPosition = (position: SchemaPosition, key: string, value: unknown): SchemaPosition => {
+  if (position === AT_MAP) {
+    return AT_SCHEMA;
+  }
+  if (position === AT_SCHEMA) {
+    if (NON_SCHEMA_KEYWORDS_SET.has(key)) {
+      return AT_DATA;
+    }
+    if (SCHEMA_MAP_KEYWORDS_SET.has(key) && isObject(value)) {
+      return AT_MAP;
+    }
+  }
+  return position;
+};
+
+/**
+ * Turns a schema supplied by a caller into the library's own copy of it. It clones like `deepClone` (sorted
+ * keys, shared objects cloned once, cycles kept, the same error past `maxDepth`), except that keys with the
+ * reserved `__$` prefix are not copied from objects that can be schemas: z-schema keeps its own state on
+ * schema objects under such keys.
+ *
+ * What is dropped and what is kept:
+ *
+ * - `__$` keys are dropped from every object that can be a schema, the values of unknown keywords included.
+ *   Their values are not read.
+ * - The names inside `properties`, `patternProperties`, `$defs`, `definitions`, `dependencies`,
+ *   `dependentSchemas` and `dependentRequired` are kept whatever they are: a property may be called
+ *   `__$compiled`. The value under such a name is a schema again.
+ * - Everything under `enum`, `const`, `default` and `examples` is data and is copied as it is.
+ *
+ * An object reached in more than one of these three ways (as a schema, as such a map, as data) gets one clone
+ * for each.
+ *
+ * @param schema - The schema as the caller supplied it. It is not modified.
+ * @param maxDepth - Nesting allowed below `schema`.
+ * @returns The clone.
+ * @throws {@link Error} when the schema is nested deeper than `maxDepth`. Values under dropped keys do not count.
+ */
+export const cloneInputSchema = (schema: JsonSchema, maxDepth = DEFAULT_MAX_RECURSION_DEPTH): JsonSchemaInternal => {
+  // One table per mode: the clones of the same object differ between modes.
+  const visited: [Map<object, unknown>?, Map<object, unknown>?, Map<object, unknown>?] = [];
+  const cloneNode = (node: unknown, mode: SchemaPosition, depth: number): unknown => {
+    if (typeof node !== 'object' || node === null) {
+      return node;
+    }
+    if (depth >= maxDepth) {
+      throw cloneDepthError(maxDepth);
+    }
+    let seen = visited[mode];
+    if (seen === undefined) {
+      seen = new Map();
+      visited[mode] = seen;
+    }
+    const known = seen.get(node);
+    if (known !== undefined) {
+      return known;
+    }
+    if (Array.isArray(node)) {
+      const res: unknown[] = [];
+      seen.set(node, res);
+      for (let i = 0; i < node.length; i++) {
+        res[i] = cloneNode(node[i], mode, depth + 1);
+      }
+      return res;
+    }
+    const res: Record<string, unknown> = {};
+    seen.set(node, res);
+    const obj = node as Record<string, unknown>;
+    const keys = Object.keys(obj).sort();
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      // Checked before the value is read: nothing under a reserved key is looked at.
+      if (mode === AT_SCHEMA && isInternalKey(key)) {
+        continue;
+      }
+      const value = obj[key];
+      const childMode = childPosition(mode, key, value);
+      // An own `__proto__` key stays an own key.
+      defineOwn(res, key, cloneNode(value, childMode, depth + 1));
+    }
+    return res;
+  };
+  return cloneNode(schema, AT_SCHEMA, 0) as JsonSchemaInternal;
+};
 
 /**
  * Properties present in ALL JSON Schema drafts (04 through 2020-12) with
