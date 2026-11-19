@@ -168,6 +168,11 @@ const shapes = [{ kind: 'circle', r: 2 }, { kind: 'square', side: 3 }, { kind: '
 const values = ['text', 7, [1, 2, 3]];
 const oneOfAnyOfData = range(50).map((i) => ({ shape: shapes[i % 4], value: values[i % 3] }));
 
+const uniqueItemsSchema = { type: 'array', uniqueItems: true };
+
+const uniqueRecords = (count: number): Array<Record<string, unknown>> =>
+  range(count).map((i) => ({ id: i, name: `item-${i}`, tags: ['a', 'b'], meta: { on: true, n: i % 7 } }));
+
 export const cases: BenchCase[] = [
   { name: 'flat-properties', schema: flatSchema, data: flatValid },
   {
@@ -218,6 +223,15 @@ export const cases: BenchCase[] = [
       },
     },
     data: orders,
+  },
+  { name: 'unique-items-objects-small', schema: uniqueItemsSchema, data: uniqueRecords(16) },
+  { name: 'unique-items-objects-medium', schema: uniqueItemsSchema, data: uniqueRecords(40) },
+  { name: 'unique-items-objects-large', schema: uniqueItemsSchema, data: uniqueRecords(1000) },
+  { name: 'unique-items-primitives-large', schema: uniqueItemsSchema, data: range(10_000) },
+  {
+    name: 'unique-items-records-payload',
+    schema: uniqueItemsSchema,
+    data: range(64).map((i) => ({ id: i, payload: range(500) })),
   },
   {
     name: 'ref-heavy',
