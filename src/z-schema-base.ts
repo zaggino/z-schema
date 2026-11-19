@@ -22,7 +22,7 @@ import { sortedKeys } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
 import { getRemotePath } from './utils/uri.js';
 import { isObject, whatIs } from './utils/what-is.js';
-import { defaultOptions, normalizeOptions } from './z-schema-options.js';
+import { defaultOptions, normalizeOptions, resolveMaxErrors } from './z-schema-options.js';
 
 export interface ValidateOptions {
   schemaPath?: string;
@@ -225,6 +225,11 @@ export class ZSchemaBase {
     }
 
     if (!foundError) {
+      // Schema compilation and schema validation above are not limited; the data validation is.
+      // The option is read again on every call because options can be changed on a live validator, and an
+      // unresolved value (`undefined`, `NaN`) would mean no limit. The root report holds no errors at this
+      // point (data validation runs only when the schema phase found none), which is what `errorCount` relies on.
+      report.errorLimit = resolveMaxErrors(this.options.maxErrors);
       validateJson(this, report, _schema, json);
     }
 
@@ -241,6 +246,7 @@ export class ZSchemaBase {
       throw getValidateError({
         message: report.commonErrorMessage!,
         details: report.errors,
+        truncated: report.errorsTruncated,
       });
     }
     return true;
