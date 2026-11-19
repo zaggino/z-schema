@@ -17,6 +17,103 @@ export const NON_SCHEMA_KEYWORDS_SET = new Set<string>(NON_SCHEMA_KEYWORDS);
 export const isInternalKey = (key: string): boolean => key.startsWith('__$');
 
 /**
+ * Keywords whose value maps names to sub-schemas (or, for the two dependency keywords, to name lists). The
+ * names in such a map are chosen by the schema author and are not keywords.
+ */
+const SCHEMA_MAP_KEYWORDS_SET = new Set<string>([
+  '$defs',
+  'definitions',
+  'dependencies',
+  'dependentRequired',
+  'dependentSchemas',
+  'patternProperties',
+  'properties',
+]);
+
+const CLONE_AS_SCHEMA = 0;
+const CLONE_AS_MAP = 1;
+const CLONE_AS_DATA = 2;
+
+/**
+ * Deep clone of a schema supplied by a caller. It clones like `deepClone` (sorted keys, shared objects cloned
+ * once, cycles kept, the same error past `maxDepth`), except that keys with the reserved `__$` prefix are not
+ * copied: z-schema keeps its own state on schema objects under such keys, and that state is never taken from
+ * the input.
+ *
+ * What is dropped and what is kept:
+ *
+ * - `__$` keys are dropped from every object that can be a schema, the values of unknown keywords included.
+ * - The names inside `properties`, `patternProperties`, `$defs`, `definitions`, `dependencies`,
+ *   `dependentSchemas` and `dependentRequired` are kept whatever they are: a property may be called
+ *   `__$compiled`. The value under such a name is a schema again.
+ * - Everything under `enum`, `const`, `default` and `examples` is data and is copied as it is.
+ *
+ * An object reached both as a schema and as data gets one clone for each.
+ */
+export const cloneInputSchema = <T>(src: T, maxDepth = DEFAULT_MAX_RECURSION_DEPTH): T => {
+  // One table per mode: the clones of the same object differ between modes.
+  const visited: Array<Map<object, unknown> | undefined> = [undefined, undefined, undefined];
+  const cloneNode = (node: unknown, mode: number, depth: number): unknown => {
+    if (typeof node !== 'object' || node === null) {
+      return node;
+    }
+    if (depth >= maxDepth) {
+      // The same text as deepClone: callers and tests know this error by its message.
+      throw new Error(
+        `Maximum recursion depth (${maxDepth}) exceeded in deepClone. ` +
+          'If your schema or data is deeply nested and valid, increase the maxRecursionDepth option.'
+      );
+    }
+    let seen = visited[mode];
+    if (seen === undefined) {
+      seen = new Map();
+      visited[mode] = seen;
+    }
+    const known = seen.get(node);
+    if (known !== undefined) {
+      return known;
+    }
+    if (Array.isArray(node)) {
+      const res: unknown[] = [];
+      seen.set(node, res);
+      for (let i = 0; i < node.length; i++) {
+        res[i] = cloneNode(node[i], mode, depth + 1);
+      }
+      return res;
+    }
+    const res: Record<string, unknown> = {};
+    seen.set(node, res);
+    const keys = Object.keys(node).sort();
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const value = (node as Record<string, unknown>)[key];
+      let childMode = mode;
+      if (mode === CLONE_AS_MAP) {
+        childMode = CLONE_AS_SCHEMA;
+      } else if (mode === CLONE_AS_SCHEMA) {
+        if (isInternalKey(key)) {
+          continue;
+        }
+        if (NON_SCHEMA_KEYWORDS_SET.has(key)) {
+          childMode = CLONE_AS_DATA;
+        } else if (SCHEMA_MAP_KEYWORDS_SET.has(key) && isObject(value)) {
+          childMode = CLONE_AS_MAP;
+        }
+      }
+      // defineProperty, as deepClone does through copyProp: an own `__proto__` key stays an own key.
+      Object.defineProperty(res, key, {
+        value: cloneNode(value, childMode, depth + 1),
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    }
+    return res;
+  };
+  return cloneNode(src, CLONE_AS_SCHEMA, 0) as T;
+};
+
+/**
  * Properties present in ALL JSON Schema drafts (04 through 2020-12) with
  * identical types.  Draft-specific additions live on the individual draft
  * interfaces in `json-schema-versions.ts`.

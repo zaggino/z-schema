@@ -3,7 +3,7 @@ import type { ZSchemaBase } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { bumpGlobalSchemaStateGeneration } from './compiled-schema-cache.js';
-import { findId, getId } from './json-schema.js';
+import { cloneInputSchema, findId, getId } from './json-schema.js';
 import { Report } from './report.js';
 import { deepClone } from './utils/clone.js';
 import { decodeJSONPointer, getOwn } from './utils/json.js';
@@ -33,8 +33,9 @@ export function prepareRemoteSchema(
   validationOptions?: ZSchemaOptions,
   maxCloneDepth?: number
 ): JsonSchemaInternal {
-  const _schema = (
-    typeof schema === 'string' ? JSON.parse(schema) : deepClone(schema, maxCloneDepth)
+  const _schema = cloneInputSchema(
+    typeof schema === 'string' ? (JSON.parse(schema) as JsonSchema) : schema,
+    maxCloneDepth
   ) as JsonSchemaInternal;
 
   if (!_schema.id) {
@@ -103,8 +104,8 @@ export class SchemaCache {
       // ref input
       return this.getSchemaByUri(report, refOrSchema);
     }
-    // no caching done on this, but we need to return a clone so we can mutate it
-    return deepClone(refOrSchema, this.validator.options.maxRecursionDepth);
+    // no caching done on this: return a clone of the caller's schema (without reserved keys) that the library may mutate
+    return cloneInputSchema(refOrSchema, this.validator.options.maxRecursionDepth);
   }
 
   fromCache(path: string): JsonSchemaInternal | undefined {

@@ -262,6 +262,12 @@ ZSchema.setSchemaReader((uri) => {
 });
 ```
 
+The object a reader returns is not modified: z-schema compiles a copy of it, so a reader can return the same object on every call.
+
+### Reserved Keys
+
+Keys that start with `__$` are reserved for the state z-schema keeps on its own copy of a schema. In a schema you pass in (to `validate()`, `validateSchema()`, `compile()` or `setRemoteReference()`, or from a schema reader) such keys are ignored wherever a keyword can appear. Names can still start with `__$`: the entries of `properties`, `patternProperties`, `$defs`, `definitions`, `dependencies`, `dependentSchemas` and `dependentRequired` are kept, and so is everything under `enum`, `const`, `default` and `examples`.
+
 ### Diagnosing Missing References
 
 ```typescript
