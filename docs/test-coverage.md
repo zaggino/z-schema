@@ -14,7 +14,7 @@ Line coverage status: **high**
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     98% |         98% |       100% |      98% |
 | src/json-validation.ts        |     95% |         95% |        82% |      93% |
-| src/report.ts                 |     89% |         89% |        71% |      88% |
+| src/report.ts                 |     88% |         89% |        72% |      87% |
 | src/schema-cache.ts           |     95% |         95% |       100% |      91% |
 | src/schema-compiler.ts        |     95% |         94% |       100% |      91% |
 | src/schema-validator.ts       |     81% |         81% |       100% |      78% |
@@ -42,7 +42,7 @@ Line coverage status: **high**
 | src/validation/object.ts      |     97% |         97% |       100% |      95% |
 | src/validation/ref.ts         |     98% |         98% |       100% |      95% |
 | src/validation/shared.ts      |     97% |         97% |       100% |      94% |
-| src/validation/string.ts      |     91% |         92% |       100% |      91% |
+| src/validation/string.ts      |     91% |         91% |       100% |      90% |
 | src/validation/type.ts        |     98% |         98% |       100% |      95% |
 | src/validation/unevaluated.ts |     94% |         94% |        96% |      93% |
 | src/z-schema-base.ts          |     98% |         98% |       100% |      93% |
