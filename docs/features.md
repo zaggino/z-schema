@@ -29,7 +29,7 @@ z-schema provides full support for JSON Schema **draft-04**, **draft-06**, **dra
 - [Format assertion toggle](options.md#formatassertions)
 - [Stop on first error](options.md#breakonfirsterror)
 - [Report paths as arrays](options.md#reportpathasarray)
-- [Unicode Property Escapes Support](#unicode-property-escapes-support)
+- [Unicode Patterns](#unicode-patterns)
 - [Keyword field](#keyword-field)
 - [unevaluatedProperties / unevaluatedItems](#unevaluatedproperties--unevaluateditems)
 
@@ -208,7 +208,7 @@ validator.validate(data, schema);
 
 On a cached schema (a function returned by `compile()`, or a schema object validated before), a custom format validator may be called before other keywords of the same schema are checked, and is called again when the data turns out to be invalid. Validators should therefore not have effects that other keywords of the schema depend on, and their effects should be safe to repeat. Callback-style validators are not affected.
 
-## Unicode Property Escapes Support
+## Unicode Patterns
 
 Fully supports [Unicode property escapes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions/Unicode_property_escapes) in JSON Schema `pattern` values (e.g., `\p{L}`). This allows patterns that match Unicode character properties such as letters, numbers, or scripts, in any JavaScript environment that supports them (Node.js >= 10, all modern browsers).
 
@@ -220,6 +220,17 @@ Fully supports [Unicode property escapes](https://developer.mozilla.org/en-US/do
 ```
 
 z-schema automatically uses the `u` (Unicode) flag for patterns containing Unicode property escapes. If your environment does not support them, such patterns are reported as invalid.
+
+A `pattern` that contains a code point escape is compiled with the `u` flag as a whole, like one with a property escape:
+
+```json
+{
+  "type": "string",
+  "pattern": "^[\\u{1F600}]$"
+}
+```
+
+The pattern must therefore be valid in unicode mode. A pattern that mixes a code point escape with syntax only legacy mode accepts is reported as an invalid pattern. A backslash, `u` and braces that hold only hex digits (decimal digits included, as in `\u{2}`) always name a code point and are never a repetition of the letter `u`; with a comma inside the braces (`\u{2,}`) the pattern stays in legacy mode. A code point above `10FFFF` is an invalid pattern.
 
 ## Keyword field
 
