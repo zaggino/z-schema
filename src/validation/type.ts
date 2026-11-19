@@ -3,7 +3,7 @@ import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 import type { BuildState, Check } from './fast-shared.js';
 
-import { areEqual } from '../utils/json.js';
+import { areEqual } from '../utils/equality.js';
 import { whatIs } from '../utils/what-is.js';
 import { expectArray, unsupported } from './fast-shared.js';
 import { shouldSkipValidate } from './shared.js';
