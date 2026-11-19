@@ -23,6 +23,7 @@ Line coverage status: **high**
 | src/utils/clone.ts            |     97% |         98% |       100% |      94% |
 | src/utils/constants.ts        |    100% |        100% |       100% |     100% |
 | src/utils/date.ts             |    100% |        100% |       100% |     100% |
+| src/utils/equality.ts         |    100% |        100% |       100% |     100% |
 | src/utils/hostname.ts         |     97% |         98% |       100% |      99% |
 | src/utils/json.ts             |    100% |        100% |       100% |     100% |
 | src/utils/properties.ts       |    100% |        100% |       100% |      75% |
