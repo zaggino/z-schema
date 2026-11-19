@@ -166,11 +166,13 @@ ZSchema.registerFormat('xstring', async (str) => {
 });
 ```
 
-Any promise-like value (an object with a `then` method) returned by a format validator is awaited, not only a native `Promise`.
+Any promise-like value (an object or function with a `then` method) returned by a format validator is awaited, not only a native `Promise`. An asynchronous result is valid only when it settles with exactly `true`; a synchronous result is valid when it is truthy.
 
 Applicators wait for asynchronous formats before deciding whether their subschemas match. For example, `not` negates the completed result, and `if` selects `then` or `else` after its condition completes. Validation also waits for asynchronous formats in the selected branch. In drafts with `unevaluatedProperties` or `unevaluatedItems`, the corresponding annotation checks run after those results are available, so those schemas also wait for async formats.
 
-An exception thrown during validation (for example from a `customValidator`) is thrown by the sync variant, rejects the async promise, or becomes the safe variants' `err`. In every variant, whatever was thrown is converted to a `ValidateError` (same message, no `details`) with the original value as `cause`. The same holds for `validateSchema()` and `compile()`. Usage errors such as an unknown schema id or a missing `schemaPath` are `ValidateError`s too. This applies to the validation APIs (`validate`, `validateSchema`, `compile` and their safe/async forms); constructor misuse (`new ZSchema()`, an unknown option) and helpers such as `setRemoteReference()` may throw a plain `Error`. A rejected format promise counts as an invalid format. Under `not` (or in a failing `if` condition), an invalid format makes the negated schema pass, so a format function should resolve `false` for values it rejects and handle its own errors, and not reject.
+A rejected format promise counts as an invalid format, so under `not` it makes the data valid. Catch operational errors inside the format function if that is not intended.
+
+An exception thrown during validation (for example from a `customValidator`) is thrown by the sync variant, rejects the async promise, or becomes the safe variants' `err`. In every variant, whatever was thrown is converted to a `ValidateError` (same message, no `details`) with the original value as `cause`. The same holds for `validateSchema()` and `compile()`. Usage errors such as an unknown schema id or a missing `schemaPath` are `ValidateError`s too. This applies to the validation APIs (`validate`, `validateSchema`, `compile` and their safe/async forms); constructor misuse (`new ZSchema()`, an unknown option) and helpers such as `setRemoteReference()` may throw a plain `Error`.
 
 Error order: in async mode, errors from delayed decisions (including `unevaluatedProperties` keys validated by an async schema) are added after later sibling errors, so the order of `details` can differ from sync mode.
 

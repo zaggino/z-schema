@@ -12,7 +12,7 @@ import { isValidIri, isValidIriReference } from './utils/rfc-3987.js';
 import { isValidUriTemplate } from './utils/rfc-6570.js';
 import { parseRfc3339Time } from './utils/time.js';
 
-export type FormatValidatorFn = (input: unknown) => boolean | Promise<boolean>;
+export type FormatValidatorFn = (input: unknown) => boolean | PromiseLike<boolean>;
 
 const dateValidator: FormatValidatorFn = (date: unknown) => {
   if (typeof date !== 'string') {

@@ -15,9 +15,9 @@ import {
   SAMPLES,
 } from '../lib/fast-validator.ts';
 
-const makeAsyncFormat = (impl: (value: unknown) => Promise<boolean>) => {
+const makeAsyncFormat = (impl: (value: unknown) => PromiseLike<boolean>) => {
   const v = ZSchema.create({ async: true, safe: true, formatAssertions: null });
-  const fn = vi.fn<(value: unknown) => Promise<boolean>>(impl);
+  const fn = vi.fn<(value: unknown) => PromiseLike<boolean>>(impl);
   v.registerFormat('mine', fn);
   return { v, fn };
 };
@@ -202,8 +202,7 @@ describe('fast validator', () => {
       });
 
       it('a thenable result retires the fast validator and three calls agree with the interpreter', async () => {
-        const v = ZSchema.create({ async: true, safe: true, formatAssertions: null });
-        v.registerFormat('mine', isOkThenable as unknown as (value: unknown) => boolean);
+        const { v, fn } = makeAsyncFormat(isOkThenable);
         const first = await v.validate('ok', schema);
         expect(buildFastFor(v, schema)).toBeDefined();
         const second = await v.validate('no', schema);
@@ -213,6 +212,52 @@ describe('fast validator', () => {
         expect([first.valid, second.valid, third.valid]).toEqual([freshOk.valid, freshNo.valid, freshOk.valid]);
         expect([first.valid, second.valid, third.valid]).toEqual([true, false, true]);
         expect(entryOf(v, schema)?.fast).toBeNull();
+        // the second call runs the format in the fast validator and again in the interpreter
+        expect(fn).toHaveBeenCalledTimes(4);
+      });
+
+      it('does not call then on a thenable the fast validator drops', async () => {
+        let subscriptions = 0;
+        const { v, fn } = makeAsyncFormat((value) => ({
+          then(onFulfilled, onRejected) {
+            subscriptions++;
+            return Promise.resolve(value === 'ok')
+              .then(onFulfilled)
+              .catch(onRejected);
+          },
+        }));
+        await v.validate('ok', schema);
+        await v.validate('ok', schema);
+        await v.validate('ok', schema);
+        expect(fn).toHaveBeenCalledTimes(4);
+        // one subscription per validate call: the result the fast validator saw is not subscribed to
+        expect(subscriptions).toBe(3);
+      });
+
+      it('a rejecting thenable is invalid on every call without an unhandled rejection', async () => {
+        const { v } = makeAsyncFormat(() => ({
+          then(onFulfilled, onRejected) {
+            return Promise.reject(new Error('nope')).then(onFulfilled).catch(onRejected);
+          },
+        }));
+        const unhandled = vi.fn<(reason: unknown) => void>();
+        const unsubscribe = listenForUnhandledRejections(unhandled);
+        try {
+          const first = await v.validate('ok', schema);
+          const second = await v.validate('ok', schema);
+          const third = await v.validate('ok', schema);
+          expect([first.valid, second.valid, third.valid]).toEqual([false, false, false]);
+          // an unhandled rejection is reported after a macrotask turn, so wait for two
+          await new Promise<void>((resolve) => {
+            setTimeout(resolve, 0);
+          });
+          await new Promise<void>((resolve) => {
+            setTimeout(resolve, 0);
+          });
+        } finally {
+          unsubscribe();
+        }
+        expect(unhandled).not.toHaveBeenCalled();
       });
     });
 
