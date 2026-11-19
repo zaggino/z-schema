@@ -1,5 +1,28 @@
 # Changelog
 
+## [12.7.0](https://github.com/zaggino/z-schema/compare/v12.6.1...v12.7.0) (2026-11-19)
+
+
+### Features
+
+* **options:** add maxErrors to cap the error list (default 1000) ([#573](https://github.com/zaggino/z-schema/issues/573)) ([12d261d](https://github.com/zaggino/z-schema/commit/12d261dcd268b6e02801bf2a65b46463509fccd9))
+
+
+### Bug Fixes
+
+* **cli:** resolve file $refs inside the schema directory by default ([#572](https://github.com/zaggino/z-schema/issues/572)) ([f98e5e9](https://github.com/zaggino/z-schema/commit/f98e5e99f6d182df14e75417b753c1c572207eb1))
+* **compiler:** resolve references in properties named like data keywords ([#577](https://github.com/zaggino/z-schema/issues/577)) ([8d0ecac](https://github.com/zaggino/z-schema/commit/8d0ecac858fc15f28cdf07ded9617d1fe2ba8ee9))
+* **format:** await thenables returned by custom formats ([#575](https://github.com/zaggino/z-schema/issues/575)) ([37e99bb](https://github.com/zaggino/z-schema/commit/37e99bb2c9dd78d198ac6c5a4ca0bf292aa7e497))
+* **pattern:** compile code point escapes in unicode mode ([#574](https://github.com/zaggino/z-schema/issues/574)) ([8bc6629](https://github.com/zaggino/z-schema/commit/8bc66293566acb1c64f3c888428405591a2e8d42))
+* **schema-cache:** give registered schemas precedence over declared ids ([#571](https://github.com/zaggino/z-schema/issues/571)) ([7e1025b](https://github.com/zaggino/z-schema/commit/7e1025b50c3594f81ff14495e6cc25895260129a))
+* **schema:** ignore reserved __$ keys in input schemas ([#570](https://github.com/zaggino/z-schema/issues/570)) ([a174431](https://github.com/zaggino/z-schema/commit/a1744317d86c8339ae18fa5b8ae02f936ca6f6a0))
+
+
+### Performance Improvements
+
+* **format:** split email address literals and relative-json-pointer by index scan ([#568](https://github.com/zaggino/z-schema/issues/568)) ([36fe053](https://github.com/zaggino/z-schema/commit/36fe053bd885462330f565bee37a7a00ed4b7b54))
+* **validation:** speed up uniqueItems on large arrays of objects ([#569](https://github.com/zaggino/z-schema/issues/569)) ([fedf376](https://github.com/zaggino/z-schema/commit/fedf37623c8750ecbe00efbd03c4ae55f4caa78e))
+
 ## [12.6.1](https://github.com/zaggino/z-schema/compare/v12.6.0...v12.6.1) (2026-11-18)
 
 
