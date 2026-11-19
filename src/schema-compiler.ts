@@ -1,7 +1,7 @@
 import type { JsonSchemaInternal } from './json-schema-versions.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
-import { getId, isInternalKey, NON_SCHEMA_KEYWORDS_SET } from './json-schema.js';
+import { cloneInputSchema, getId, isInternalKey, NON_SCHEMA_KEYWORDS_SET } from './json-schema.js';
 import { Report } from './report.js';
 import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
@@ -402,15 +402,15 @@ export class SchemaCompiler {
         if (schemaReader) {
           const remotePath = getRemotePath(refObj.ref);
           // it's supposed to return a valid schema
-          const s = schemaReader(remotePath);
-          if (s) {
-            // it needs to have the id (cast: schemaReader returns JsonSchema, but
-            // at this pre-compilation stage we treat it as an internal object)
-            (s as JsonSchemaInternal).id = remotePath;
+          const loaded = schemaReader(remotePath);
+          if (loaded) {
+            // The reader's object belongs to the caller: compile a clone of it. The clone needs the id.
+            const remoteSchema = cloneInputSchema(loaded, this.validator.options.maxRecursionDepth);
+            remoteSchema.id = remotePath;
             // try to compile the schema
             // Eager on purpose: these errors are read by content (copied/filtered), so do not use Report.createSubReport.
             const subreport = new Report(report);
-            if (this.compileSchema(subreport, s)) {
+            if (this.compileSchema(subreport, remoteSchema)) {
               response = this.validator.scache.getSchemaByUri(report, refObj.ref, schema);
             } else {
               // copy errors to report
