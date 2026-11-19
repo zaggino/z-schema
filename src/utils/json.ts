@@ -8,6 +8,8 @@ interface AreEqualOptions {
 
 export const sortedKeys = (obj: Record<string, unknown>): string[] => Object.keys(obj).sort();
 
+// `writeKey` in ./array.ts writes values in the order this function compares them and repeats its depth checks.
+// Change the two together.
 export const areEqual = (json1: unknown, json2: unknown, options?: AreEqualOptions, _depth = 0): boolean => {
   const caseInsensitiveComparison = options?.caseInsensitiveComparison || false;
   const maxDepth = options?.maxDepth ?? DEFAULT_MAX_RECURSION_DEPTH;
