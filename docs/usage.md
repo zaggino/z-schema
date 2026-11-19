@@ -401,12 +401,30 @@ z-schema --strictMode mySchema.json myData.json
 
 # Pick the draft (draft-04, draft-06, draft-07, draft2019-09, draft2020-12)
 z-schema --draft draft-07 mySchema.json myData.json
+
+# Allow file $refs from a directory other than the schema's own
+z-schema --refRoot ./schemas ./schemas/api/root.json data.json
 ```
 
 - `--draft <version>` sets the `version` option (default: `draft2020-12`).
+- `--refRoot <dir>` sets the reference root (default: the directory of the schema file). `<dir>` must be a directory.
 - A schema that declares no id is identified by the `file:` URL of its path (`id` for draft-04, `$id` otherwise), so relative file `$ref`s resolve next to the schema file, from any working directory.
 - An id the schema declares is kept. A relative one is resolved against the file's location; an absolute one (for example `https://example.com/schema.json`) becomes the base for the schema's relative `$ref`s, which are then fetched from there and not read from disk.
-- Remote references are https-only, redirects are not followed, and private/internal addresses are refused.
+
+### References
+
+#### File references
+
+A file `$ref` is read only from inside the reference root: the schema file's directory, or the directory given with `--refRoot <dir>`. Links are resolved first, and the file they lead to must be inside the root. A reference to a network or device path, or a `file:` reference that names a host, is not read. Schemes other than `file:` and `https:` are not read. A scheme-less reference that is not resolved against a `file:` id is resolved against the working directory. `--refRoot` applies to file references only: not to `https` references, and not to the files named on the command line. A reference outside the root prints:
+
+```
+The reference is outside the reference root and is not read: <url>
+Use --refRoot <dir> to allow references inside another directory.
+```
+
+#### Remote references
+
+`https` references are downloaded; `http:` is refused. A download is limited to 10 MB and 30 seconds, and redirects are not followed. The CLI does not contact `localhost`, hosts ending in `.local`, or addresses in the loopback, private, link-local, shared (`100.64.0.0/10`), benchmarking, multicast and other reserved ranges it lists, including the IPv6 ranges that embed an IPv4 address (NAT64, 6to4, Teredo). A downloaded reference that is not valid JSON is reported and stops the run.
 
 ## TypeScript Types
 
