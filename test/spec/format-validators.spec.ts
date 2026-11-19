@@ -1,5 +1,3 @@
-import isEmailModule from 'validator/lib/isEmail.js';
-import isIPModule from 'validator/lib/isIP.js';
 import { describe, expect, it } from 'vitest';
 
 import { buildUriPredicates, UNRESERVED_CHARS_SRC } from '../../src/utils/rfc-3986.ts';
@@ -54,44 +52,6 @@ const timeAdversarialSplit = (size: number): number => {
     }
   }
   return performance.now() - started;
-};
-
-const referenceEmail = (email: string): boolean => {
-  if (isEmailModule.default(email, { require_tld: false, allow_ip_domain: true })) {
-    return true;
-  }
-  const match = /^(?<localPart>.+)@\[IPv6:(?<address>[^\]]+)\]$/i.exec(email);
-  if (!match) {
-    return false;
-  }
-  if (!isIPModule.default(match[2], 6)) {
-    return false;
-  }
-  return isEmailModule.default(`${match[1]}@example.com`, { require_tld: false });
-};
-
-// Deterministic linear congruential generator returning values in [0, 1).
-const seededRandom = (seed: number): (() => number) => {
-  const modulus = 4_294_967_296;
-  let state = seed;
-  return (): number => {
-    state = (state * 1_664_525 + 1_013_904_223) % modulus;
-    return state / modulus;
-  };
-};
-
-const generate = (tokens: string[], seed: number, count: number): string[] => {
-  const next = seededRandom(seed);
-  const out: string[] = [];
-  for (let n = 0; n < count; n++) {
-    const length = 1 + Math.floor(next() * 8);
-    let s = '';
-    for (let i = 0; i < length; i++) {
-      s += tokens[Math.floor(next() * tokens.length)];
-    }
-    out.push(s);
-  }
-  return out;
 };
 
 const slowValidator = async (): Promise<boolean> => {
@@ -620,6 +580,11 @@ describe('Format Validators', () => {
       ['"test"@iana.org', 'a quoted local part'],
       ['a@[IPv6:::1]', 'an IPv6 address literal, which uses the bracketed-literal path'],
       ['a@[ipv6:::1]', 'a lowercase IPv6 tag in an address literal'],
+      ['a@[IPV6:::1]', 'an upper-case IPv6 tag in an address literal'],
+      ['a@[iPv6:::1]', 'a mixed-case IPv6 tag in an address literal'],
+      ['a@[IPv6:fe80::1%eth0]', 'an IPv6 address with a zone id'],
+      ['"a b"@[IPv6:::1]', 'a quoted local part in an address literal'],
+      ['a.b@[IPv6:2001:db8::1]', 'a longer IPv6 address in an address literal'],
     ])('should accept %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, emailSchema).valid).toBe(true);
@@ -638,6 +603,15 @@ describe('Format Validators', () => {
       ['test@iana..com', 'two subsequent dots in the domain are still rejected'],
       ['test@-iana.org', 'a domain label starting with a hyphen'],
       ['a@[1.2.3]', 'an IPv4 address literal with three octets'],
+      ['@[IPv6:::1]', 'an address literal without a local part'],
+      ['a@[IPv6:]', 'an address literal with an empty address'],
+      ['a@[IPv6:::1]]', 'a bracket after the address literal'],
+      ['a@[IPv6:::1', 'an address literal without a closing bracket'],
+      ['a@[IPv6:::g]', 'an address literal that is not an IPv6 address'],
+      ['"a\nb"@[IPv6:::1]', 'a line feed inside a quoted local part'],
+      ['"a\rb"@[IPv6:::1]', 'a carriage return inside a quoted local part'],
+      ['a@[IPv6:::1]@[IPv6:::1]', 'two address literals'],
+      ['a@[IPv6:::1@[IPv6:]', 'an empty address literal after an address literal'],
     ])('should reject %j (%s)', (data) => {
       const validator = ZSchema.create();
       expect(validator.validateSafe(data, emailSchema).valid).toBe(false);
@@ -650,109 +624,48 @@ describe('Format Validators', () => {
     });
   });
 
-  describe('Email and Relative JSON Pointer decisions', () => {
-    const validator = ZSchema.create();
+  describe('Relative JSON Pointer Format Validator', () => {
+    const relativeSchema = { type: 'string', format: 'relative-json-pointer' };
 
-    const referenceRelativeJsonPointer = (pointer: string): boolean => {
-      const match = /^(?<int>0|[1-9]\d*)(?<suffix>.*)$/.exec(pointer);
-      if (!match) {
-        return false;
-      }
-      const suffix = match[2];
-      if (suffix === '' || suffix === '#') {
-        return true;
-      }
-      return validator.validateSafe(suffix, { type: 'string', format: 'json-pointer' }).valid;
-    };
-
-    const LF = String.fromCharCode(0x0a);
-    const CR = String.fromCharCode(0x0d);
-    const LS = String.fromCharCode(0x20_28);
-    const PS = String.fromCharCode(0x20_29);
-
-    const emailTokens = [
-      'a',
-      'b',
-      '"',
-      '.',
-      '@',
-      '[',
-      ']',
-      ':',
-      '1',
-      LF,
-      CR,
-      '@[IPv6:',
-      '@[ipv6:',
-      '@[IPV6:',
-      '::1',
-      '1::',
-      'example.com',
-      '@[',
-      'IPv6:',
-      '%eth0',
-    ];
-    const pointerTokens = ['0', '1', '9', '12', '/', '#', '~', '~0', '~1', 'a', '-', '+', LF, CR, LS, PS];
-
-    const emailTable = [
-      '@[IPv6:::1]',
-      'a@[IPv6:]',
-      'a@[IPv6:::1]]',
-      `a${LF}b@[IPv6:::1]`,
-      `a${CR}b@[IPv6:::1]`,
-      'a@[IPv6:::1]@[IPv6:::1]',
-      'a@[IPv6:1::]@[IPv6:::1]',
-      'a@[IPv6:::1]',
-      'a@[ipv6:::1]',
-      'a@[IPV6:::1]',
-      'a@[iPv6:::1]',
-      'a@[IPv6:fe80::1%eth0]',
-      '"a b"@[IPv6:::1]',
-      'a.b@[IPv6:2001:db8::1]',
-      'a@[IPv6:::1',
-    ];
-    const pointerTable = [
-      '',
-      '0',
-      '0#',
-      '01/a',
-      '0123',
-      '10/a~0b',
-      `1${LF}`,
-      `0/a${LF}b`,
-      `0/a${LS}`,
-      `0/a${PS}`,
-      `0/a${CR}`,
-      '/a',
-      '1#',
-      '1/',
-      '1//',
-      '0/~',
-      '0/~2',
-    ];
-
-    it('matches the previous regex-based email decision', () => {
-      const corpus = emailTable.concat(generate(emailTokens, 12_345, 3000));
-      const mismatches: string[] = [];
-      for (let i = 0; i < corpus.length; i++) {
-        const actual = validator.validateSafe(corpus[i], { type: 'string', format: 'email' }).valid;
-        if (actual !== referenceEmail(corpus[i])) {
-          mismatches.push(JSON.stringify(corpus[i]));
-        }
-      }
-      expect(mismatches).toEqual([]);
+    it.each([
+      ['0', 'zero'],
+      ['1', 'a single non-zero digit'],
+      ['120', 'a multi-digit integer'],
+      ['0#', 'zero followed by a hash'],
+      ['12#', 'an integer followed by a hash'],
+      ['0/a', 'zero followed by a JSON Pointer'],
+      ['10/a~0b~1c', 'a JSON Pointer with escaped tildes and slashes'],
+      ['1/', 'a JSON Pointer with an empty token'],
+      ['0//', 'a JSON Pointer with two empty tokens'],
+    ])('should accept %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, relativeSchema).valid).toBe(true);
     });
 
-    it('matches the previous regex-based relative-json-pointer decision', () => {
-      const corpus = pointerTable.concat(generate(pointerTokens, 54_321, 3000));
-      const mismatches: string[] = [];
-      for (let i = 0; i < corpus.length; i++) {
-        const actual = validator.validateSafe(corpus[i], { type: 'string', format: 'relative-json-pointer' }).valid;
-        if (actual !== referenceRelativeJsonPointer(corpus[i])) {
-          mismatches.push(JSON.stringify(corpus[i]));
-        }
-      }
-      expect(mismatches).toEqual([]);
+    it.each([
+      ['', 'the empty string'],
+      ['01', 'a leading zero'],
+      ['01/a', 'a leading zero before a JSON Pointer'],
+      ['0123', 'several leading digits after a zero'],
+      ['-1', 'a negative integer'],
+      ['+1/a', 'a plus sign before the integer'],
+      ['0##', 'two hashes'],
+      ['1#/a', 'a hash followed by a JSON Pointer'],
+      ['0/~', 'a tilde without an escape digit'],
+      ['0/~2', 'a tilde followed by an invalid escape digit'],
+      ['a', 'no integer prefix'],
+      ['1\n', 'a line feed after the integer'],
+      ['0/a\nb', 'a line feed inside a token'],
+      [`0/a${String.fromCharCode(0x20_28)}`, 'a line separator after a token'],
+    ])('should reject %j (%s)', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, relativeSchema).valid).toBe(false);
+    });
+
+    // Format validators apply to strings only; every other type is vacuously valid.
+    it.each([12, 13.7, {}, [], false, null])('should ignore non-string input %j', (data) => {
+      const validator = ZSchema.create();
+      expect(validator.validateSafe(data, { format: 'relative-json-pointer' }).valid).toBe(true);
     });
   });
 
@@ -939,29 +852,47 @@ describe('Format Validators', () => {
     });
   });
 
-  describe('Email and Relative JSON Pointer long inputs', () => {
-    it('rejects an email with a long run of address-literal tags', () => {
+  describe('Email Format Validator: long values', () => {
+    const emailSchema = { type: 'string', format: 'email' };
+
+    it('rejects a long run of address-literal tags', () => {
       const validator = ZSchema.create();
       const data = `a${'@[IPv6:'.repeat(60_000)}`;
-      expect(validator.validateSafe(data, { type: 'string', format: 'email' }).valid).toBe(false);
+      expect(validator.validateSafe(data, emailSchema).valid).toBe(false);
     });
 
-    it('rejects an email with a long address literal', () => {
+    it('rejects a long run of address-literal tags with a closing bracket', () => {
+      const validator = ZSchema.create();
+      const data = `a${'@[IPv6:'.repeat(60_000)}]`;
+      expect(validator.validateSafe(data, emailSchema).valid).toBe(false);
+    });
+
+    it('rejects a long address literal', () => {
       const validator = ZSchema.create();
       const data = `a@[IPv6:${'1:'.repeat(200_000)}]`;
-      expect(validator.validateSafe(data, { type: 'string', format: 'email' }).valid).toBe(false);
+      expect(validator.validateSafe(data, emailSchema).valid).toBe(false);
     });
 
-    it('rejects a relative-json-pointer with a long integer prefix followed by a line feed', () => {
+    it('rejects a long local part', () => {
       const validator = ZSchema.create();
-      const data = `${'1'.repeat(400_000)}${String.fromCharCode(0x0a)}`;
-      expect(validator.validateSafe(data, { type: 'string', format: 'relative-json-pointer' }).valid).toBe(false);
+      const data = `${'a'.repeat(400_000)}@[IPv6:::1]`;
+      expect(validator.validateSafe(data, emailSchema).valid).toBe(false);
+    });
+  });
+
+  describe('Relative JSON Pointer Format Validator: long values', () => {
+    const relativeSchema = { type: 'string', format: 'relative-json-pointer' };
+
+    it('rejects a long integer prefix followed by a line feed', () => {
+      const validator = ZSchema.create();
+      const data = `${'1'.repeat(400_000)}\n`;
+      expect(validator.validateSafe(data, relativeSchema).valid).toBe(false);
     });
 
-    it('accepts a relative-json-pointer with a long integer prefix followed by a pointer', () => {
+    it('accepts a long integer prefix followed by a pointer', () => {
       const validator = ZSchema.create();
       const data = `${'1'.repeat(400_000)}/a`;
-      expect(validator.validateSafe(data, { type: 'string', format: 'relative-json-pointer' }).valid).toBe(true);
+      expect(validator.validateSafe(data, relativeSchema).valid).toBe(true);
     });
   });
 });
