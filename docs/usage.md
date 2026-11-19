@@ -266,19 +266,20 @@ validator.setRemoteReference('http://example.com/schemas/person.json', personSch
 
 ### Automatic (Schema Reader)
 
-Set a sync function that loads schemas on demand when a `$ref` is encountered:
+Set a sync function that loads schemas on demand when a `$ref` is encountered. The reader is shared by every instance in the process. Serve the schemas you intend to serve, for example from a map keyed by URI:
 
 ```typescript
-import fs from 'node:fs';
-import path from 'node:path';
+const schemas = new Map<string, JsonSchema>([
+  ['http://example.com/schemas/address.json', addressSchema],
+  ['http://example.com/schemas/person.json', personSchema],
+]);
 
-ZSchema.setSchemaReader((uri) => {
-  const filePath = path.resolve(__dirname, 'schemas', uri + '.json');
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-});
+ZSchema.setSchemaReader((uri) => schemas.get(uri));
 ```
 
 The object a reader returns is not modified: z-schema compiles a copy of it, so a reader can return the same object on every call.
+
+See [security.md](security.md#schema-readers-and-remote-references) for guidance on readers.
 
 ### Schema Ids and Precedence
 
@@ -457,7 +458,7 @@ import type {
   SchemaErrorDetail, // Individual error detail
   ErrorCode, // keyof typeof Errors
   FormatValidatorFn, // (input: unknown) => boolean | PromiseLike<boolean>
-  SchemaReader, // (uri: string) => JsonSchema
+  SchemaReader, // (uri: string) => JsonSchema | undefined
 } from 'z-schema';
 
 import { ValidateError } from 'z-schema';

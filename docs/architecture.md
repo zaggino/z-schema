@@ -184,7 +184,7 @@ The package is ESM-first (`"type": "module"`), so all outputs are produced by [t
 - `SchemaErrorDetail` — individual error with `message`, `code`, `params`, `path`, `schemaPath`, `inner` (sub-errors for combiners)
 - `ValidateResponse` — `{ valid: boolean; err?: ValidateError }` (returned by safe variants)
 - `ZSchemaOptions` — all validator configuration options
-- `SchemaReader` — `(uri: string) => JsonSchema` sync function for loading schemas on demand
+- `SchemaReader` — `(uri: string) => JsonSchema | undefined` sync function for loading schemas on demand
 - `FormatValidatorFn` — `(input: unknown) => boolean | PromiseLike<boolean>` format validator signature
 
 ## Public Exports (from `src/index.ts`)

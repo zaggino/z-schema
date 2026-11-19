@@ -142,6 +142,7 @@ When making changes to the repository, **always update the relevant documentatio
 - **New or changed error code** → update `docs/features.md` if it lists error codes, and ensure tests cover the new code.
 - **New public export** → update `docs/usage.md` (import examples) and `docs/architecture.md` (public API section) as needed.
 - **New or changed format validator** → update `docs/features.md` (built-in formats list).
+- **New or changed limit, schema reader or reference-loading behaviour (library or CLI)** → update `docs/security.md`.
 - **Structural changes** → update `AGENTS.md` project structure and `docs/architecture.md`.
 
 Failing to update documentation alongside code changes leads to drift that is expensive to fix later. Treat docs updates as part of the definition of done for any PR.

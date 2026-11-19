@@ -228,6 +228,7 @@ See [docs/options.md](docs/options.md) for all constructor and per-call options.
 | [docs/usage.md](docs/usage.md)               | Detailed usage guide with all validation modes, error handling, and advanced features |
 | [docs/options.md](docs/options.md)           | Constructor options and per-call validation options                                   |
 | [docs/features.md](docs/features.md)         | Feature catalog with examples                                                         |
+| [docs/security.md](docs/security.md)         | Guidance for validating input and schemas from sources you do not control             |
 | [docs/MIGRATION.md](docs/MIGRATION.md)       | Migration guide for upgrading between major versions                                  |
 | [docs/architecture.md](docs/architecture.md) | Internal architecture, module structure, and public API reference                     |
 | [docs/conventions.md](docs/conventions.md)   | Code style, naming, and formatting conventions                                        |
