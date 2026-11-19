@@ -1,9 +1,10 @@
 import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
+import type { SchemaPosition } from './json-schema.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { bumpGlobalSchemaStateGeneration } from './compiled-schema-cache.js';
-import { findId, getId } from './json-schema.js';
+import { AT_SCHEMA, childPosition, cloneInputSchema, findId, getId } from './json-schema.js';
 import { Report } from './report.js';
 import { deepClone } from './utils/clone.js';
 import { decodeJSONPointer, getOwn } from './utils/json.js';
@@ -33,9 +34,10 @@ export function prepareRemoteSchema(
   validationOptions?: ZSchemaOptions,
   maxCloneDepth?: number
 ): JsonSchemaInternal {
-  const _schema = (
-    typeof schema === 'string' ? JSON.parse(schema) : deepClone(schema, maxCloneDepth)
-  ) as JsonSchemaInternal;
+  const _schema = cloneInputSchema(
+    typeof schema === 'string' ? (JSON.parse(schema) as JsonSchema) : schema,
+    maxCloneDepth
+  );
 
   if (!_schema.id) {
     _schema.id = uri;
@@ -59,6 +61,8 @@ export class SchemaCache {
   // Protected paths, each with the registered root that owns the entry (the root itself for its own path,
   // the root that declares the id for a nested one).
   private readonly protectedPaths = new Map<string, JsonSchemaInternal>();
+  // Clones handed out for pointer targets outside a schema position, one per target object.
+  private readonly targetClones = new WeakMap<object, JsonSchemaInternal>();
 
   constructor(validator: ZSchemaBase) {
     this.validator = validator;
@@ -207,8 +211,8 @@ export class SchemaCache {
       // ref input
       return this.getSchemaByUri(report, refOrSchema);
     }
-    // no caching done on this, but we need to return a clone so we can mutate it
-    return deepClone(refOrSchema, this.validator.options.maxRecursionDepth);
+    // no caching done on this: return a clone of the caller's schema (without reserved keys) that the library may mutate
+    return cloneInputSchema(refOrSchema, this.validator.options.maxRecursionDepth);
   }
 
   fromCache(path: string): JsonSchemaInternal | undefined {
@@ -233,6 +237,42 @@ export class SchemaCache {
     // schemas with unresolved refs are never cached. When a declared id was in the way, schemas compiled
     // against it are stale and the compiled-schema cache is notified.
     this.store(path, clone, clone, displaced !== undefined);
+    return clone;
+  }
+
+  /**
+   * Follows `keys` (own keys or array indexes, already decoded) from the schema `start`. When the walk ends
+   * outside a schema position (inside `enum`, `const`, `default` or `examples`, or on a keyword map such as
+   * `$defs`), the node found there is not a schema of the library's own: the result is then a clone of it made
+   * with `cloneInputSchema`, the same one on every call for that node.
+   *
+   * @param start - The schema the path starts from.
+   * @param keys - The path.
+   * @param from - Index of the first key to follow.
+   * @returns What the path leads to, or `undefined` when a key is missing.
+   */
+  getAtPath(start: unknown, keys: ReadonlyArray<string | number>, from = 0): unknown {
+    let node = start;
+    let position: SchemaPosition = AT_SCHEMA;
+    for (let i = from; i < keys.length; i++) {
+      const key = keys[i];
+      const child = getOwn(node, key);
+      if (child === undefined) {
+        return undefined;
+      }
+      if (!Array.isArray(node)) {
+        position = childPosition(position, String(key), child);
+      }
+      node = child;
+    }
+    if (position === AT_SCHEMA || typeof node !== 'object' || node === null) {
+      return node;
+    }
+    let clone = this.targetClones.get(node);
+    if (clone === undefined) {
+      clone = cloneInputSchema(node, this.validator.options.maxRecursionDepth);
+      this.targetClones.set(node, clone);
+    }
     return clone;
   }
 
@@ -327,8 +367,12 @@ export class SchemaCache {
         this.validator.options.maxRecursionDepth
       );
       // the rest is a path behind it
-      for (let idx = 1, lim = parts.length; result && idx < lim; idx++) {
-        result = getOwn(result, decodeJSONPointer(parts[idx])) as JsonSchemaInternal | undefined;
+      if (result && parts.length > 1) {
+        const keys: string[] = [];
+        for (let idx = 1, lim = parts.length; idx < lim; idx++) {
+          keys.push(decodeJSONPointer(parts[idx]));
+        }
+        result = this.getAtPath(result, keys) as JsonSchemaInternal | undefined;
       }
     }
 
