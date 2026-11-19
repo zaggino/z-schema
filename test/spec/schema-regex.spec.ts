@@ -129,6 +129,7 @@ describe('compileSchemaRegex', () => {
   });
 });
 
+// One backslash. The patterns below are assembled from it so that this file holds no literal escape.
 const BS = String.fromCharCode(92);
 
 describe('code point escapes', () => {
@@ -183,6 +184,50 @@ describe('code point escapes', () => {
       expect(afterEscape.value.flags).toContain('u');
       expect(afterEscape.value.test('5A')).toBe(true);
     }
+  });
+
+  // [name, pattern, whether it is compiled with the u flag]
+  const boundaries: Array<[string, string, boolean]> = [
+    ['three backslashes before u{61}', `^${BS}${BS}${BS}u{61}$`, true],
+    ['uppercase hex digits', `^${BS}u{1F}$`, true],
+    ['decimal digits only', `^${BS}u{2}$`, true],
+    ['a range of repetitions', `^${BS}u{2,3}$`, false],
+    ['a character that is not a hex digit', `^${BS}u{6g}$`, false],
+    ['an uppercase U', `^${BS}U{61}$`, false],
+  ];
+  it.each(boundaries)('decides the u flag for %s', (_name, pattern, unicode) => {
+    const result = compileSchemaRegex(pattern);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.flags.includes('u')).toBe(unicode);
+    }
+  });
+
+  it('reads decimal digits in braces as a code point, not as a repetition', () => {
+    const result = compileSchemaRegex(`^${BS}u{2}$`);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.test(String.fromCodePoint(2))).toBe(true);
+      expect(result.value.test('uu')).toBe(false);
+    }
+  });
+
+  it('reports a code point above 10FFFF as an invalid pattern', () => {
+    expect(compileSchemaRegex(`^${BS}u{110000}$`).ok).toBe(false);
+  });
+
+  it('accepts a repeated group around a code point escape', () => {
+    const result = compileSchemaRegex(`^(${BS}u{61})+$`);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.test('aa')).toBe(true);
+      expect(result.value.test('ab')).toBe(false);
+    }
+  });
+
+  it('still rejects nested repetition next to a code point escape', () => {
+    const result = compileSchemaRegex(`^(${BS}u{61}+)+$`);
+    expect(result.ok).toBe(false);
   });
 
   it('reports a pattern that mixes a code point escape with legacy-only syntax', () => {

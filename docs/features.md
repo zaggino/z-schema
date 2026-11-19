@@ -29,7 +29,7 @@ z-schema provides full support for JSON Schema **draft-04**, **draft-06**, **dra
 - [Format assertion toggle](options.md#formatassertions)
 - [Stop on first error](options.md#breakonfirsterror)
 - [Report paths as arrays](options.md#reportpathasarray)
-- [Unicode Property Escapes Support](#unicode-property-escapes-support)
+- [Unicode Patterns](#unicode-patterns)
 - [Keyword field](#keyword-field)
 - [unevaluatedProperties / unevaluatedItems](#unevaluatedproperties--unevaluateditems)
 
@@ -230,7 +230,7 @@ A `pattern` that contains a code point escape is compiled with the `u` flag as a
 }
 ```
 
-The pattern must therefore be valid in unicode mode. A pattern that mixes a code point escape with syntax only legacy mode accepts is reported as an invalid pattern.
+The pattern must therefore be valid in unicode mode. A pattern that mixes a code point escape with syntax only legacy mode accepts is reported as an invalid pattern. A backslash, `u` and braces that hold only hex digits (decimal digits included, as in `\u{2}`) always name a code point and are never a repetition of the letter `u`; with a comma inside the braces (`\u{2,}`) the pattern stays in legacy mode. A code point above `10FFFF` is an invalid pattern.
 
 ## Keyword field
 

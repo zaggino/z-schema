@@ -59,7 +59,15 @@ describe('Code point escapes in pattern keyword', () => {
     const validator = ZSchema.create();
     const schema = { type: 'string', pattern: `^[^${BS}u{1F600}]$` };
     expect(validator.validateSafe('x', schema).valid).toBe(true);
+    expect(validator.validateSafe('u', schema).valid).toBe(true);
     expect(validator.validateSafe(String.fromCodePoint(0x1_f6_00), schema).valid).toBe(false);
+  });
+
+  it('should apply a code point escape in a patternProperties key', () => {
+    const validator = ZSchema.create();
+    const schema = { patternProperties: { [`^${BS}u{61}$`]: { type: 'string' } }, additionalProperties: false };
+    expect(validator.validateSafe({ a: 'x' }, schema).valid).toBe(true);
+    expect(validator.validateSafe({ ['u'.repeat(61)]: 'x' }, schema).valid).toBe(false);
   });
 
   it('should accept the named character in a positive class', () => {

@@ -22,28 +22,48 @@ const isHexDigit = (code: number): boolean =>
   (code >= 0x30 && code <= 0x39) || (code >= 0x41 && code <= 0x46) || (code >= 0x61 && code <= 0x66);
 
 /**
- * Whether `pattern` holds a code point escape: an unescaped backslash, `u`, `{`, one or more hex digits, `}`.
- * Escaped pairs are skipped, so an escaped backslash followed by `u{61}` is not one.
+ * Index just past the code point escape that starts at the backslash at `start` (a backslash, `u`, `{`,
+ * one or more hex digits, `}`), or -1 when none starts there.
  */
-const hasCodePointEscape = (pattern: string): boolean => {
+const codePointEscapeEnd = (pattern: string, start: number): number => {
+  if (pattern.charCodeAt(start + 1) !== LOWERCASE_U || pattern.charCodeAt(start + 2) !== LEFT_BRACE) {
+    return -1;
+  }
+  let end = start + 3;
+  // charCodeAt past the end is NaN, which is neither a hex digit nor a brace
+  while (isHexDigit(pattern.charCodeAt(end))) {
+    end++;
+  }
+  return end > start + 3 && pattern.charCodeAt(end) === RIGHT_BRACE ? end + 1 : -1;
+};
+
+/**
+ * `pattern` with every code point escape replaced by one literal character, or `pattern` itself when it
+ * contains none. Escaped pairs are skipped, so an escaped backslash followed by `u{61}` is left alone.
+ *
+ * This is a scan and not a regex because it serves two purposes at once: a result that differs from the
+ * input says the pattern needs the `u` flag, and the result is what the backtracking check reads (that
+ * check parses legacy syntax, where the braces of a code point escape would count as a repetition).
+ */
+const replaceCodePointEscapes = (pattern: string): string => {
   const last = pattern.length - 1;
+  let out = '';
+  let copied = 0;
   for (let i = 0; i < last; i++) {
     if (pattern.charCodeAt(i) !== BACKSLASH) {
       continue;
     }
-    if (pattern.charCodeAt(i + 1) === LOWERCASE_U && pattern.charCodeAt(i + 2) === LEFT_BRACE) {
-      let j = i + 3;
-      while (isHexDigit(pattern.charCodeAt(j))) {
-        j++;
-      }
-      if (j > i + 3 && pattern.charCodeAt(j) === RIGHT_BRACE) {
-        return true;
-      }
+    const end = codePointEscapeEnd(pattern, i);
+    if (end === -1) {
+      // skip the escaped character
+      i++;
+      continue;
     }
-    // skip the escaped character
-    i++;
+    out += `${pattern.slice(copied, i)}a`;
+    copied = end;
+    i = end - 1;
   }
-  return false;
+  return copied === 0 ? pattern : out + pattern.slice(copied);
 };
 
 // Patterns are compiled on every validation of `pattern` / `patternProperties` /
@@ -100,8 +120,11 @@ function compileSchemaRegexUncached(pattern: string): CompileSchemaRegexResult {
     };
   }
 
+  // A code point escape is one character once the pattern is compiled with the `u` flag, so the
+  // backtracking check reads it as one.
+  const plain = replaceCodePointEscapes(pattern);
   // Reject patterns vulnerable to catastrophic backtracking (ReDoS) before compiling
-  if (!isSafeRegex(pattern)) {
+  if (!isSafeRegex(plain)) {
     return {
       ok: false,
       error: {
@@ -111,38 +134,21 @@ function compileSchemaRegexUncached(pattern: string): CompileSchemaRegexResult {
     };
   }
 
+  // The `u` flag applies to the whole pattern, so one that needs it must be valid in unicode mode.
   const needsUnicode =
+    plain !== pattern ||
     unicodePropertyEscape.test(pattern) ||
     nonBmpCharacter.test(pattern) ||
-    surrogatePairEscape.test(pattern) ||
-    hasCodePointEscape(pattern);
-  // Try compiling without 'u' flag if not needed
-  if (needsUnicode) {
-    // Try compiling with 'u' flag only
-    try {
-      const re = new RegExp(pattern, 'u');
-      return { ok: true, value: re };
-    } catch (error: unknown) {
-      return {
-        ok: false,
-        error: {
-          pattern,
-          message: error instanceof Error ? error.message : 'Invalid regular expression',
-        },
-      };
-    }
-  } else {
-    try {
-      const re = new RegExp(pattern);
-      return { ok: true, value: re };
-    } catch (error: unknown) {
-      return {
-        ok: false,
-        error: {
-          pattern,
-          message: error instanceof Error ? error.message : 'Invalid regular expression',
-        },
-      };
-    }
+    surrogatePairEscape.test(pattern);
+  try {
+    return { ok: true, value: new RegExp(pattern, needsUnicode ? 'u' : '') };
+  } catch (error: unknown) {
+    return {
+      ok: false,
+      error: {
+        pattern,
+        message: error instanceof Error ? error.message : 'Invalid regular expression',
+      },
+    };
   }
 }
