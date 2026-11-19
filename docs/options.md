@@ -446,7 +446,7 @@ try {
 
 ## customFormats
 
-Register custom format validators at creation time. Each key is a format name and each value is a function `(input: unknown) => boolean | Promise<boolean>`, or `null` to disable a format.
+Register custom format validators at creation time. Each key is a format name and each value is a function `(input: unknown) => boolean | PromiseLike<boolean>`, or `null` to disable a format.
 
 The formats apply to the created instance only. The object is copied at creation: later changes to it have no effect, and `registerFormat()` / `unregisterFormat()` on the instance do not modify it.
 

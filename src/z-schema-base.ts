@@ -387,7 +387,7 @@ export class ZSchemaBase {
   /**
    * Register a format validator on this instance only (does not affect other instances or the global registry).
    * @param name - The format name.
-   * @param validatorFunction - A sync or async function `(value: unknown) => boolean | Promise<boolean>`.
+   * @param validatorFunction - A sync or async function `(value: unknown) => boolean | PromiseLike<boolean>`.
    */
   public registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
     this.setInstanceFormat(name, validatorFunction);

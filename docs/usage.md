@@ -457,7 +457,7 @@ import type {
   ValidateResponse, // { valid: boolean, err?: ValidateError }
   SchemaErrorDetail, // Individual error detail
   ErrorCode, // keyof typeof Errors
-  FormatValidatorFn, // (input: unknown) => boolean | Promise<boolean>
+  FormatValidatorFn, // (input: unknown) => boolean | PromiseLike<boolean>
   SchemaReader, // (uri: string) => JsonSchema | undefined
 } from 'z-schema';
 

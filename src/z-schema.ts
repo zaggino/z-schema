@@ -22,7 +22,7 @@ export class ZSchema extends ZSchemaBase {
   /**
    * Register a global format validator available to all instances.
    * @param name - The format name (e.g. `'email'`, `'date'`).
-   * @param validatorFunction - A sync or async function `(value: unknown) => boolean | Promise<boolean>`.
+   * @param validatorFunction - A sync or async function `(value: unknown) => boolean | PromiseLike<boolean>`.
    */
   public static registerFormat(name: string, validatorFunction: FormatValidatorFn): void {
     registerFormat(name, validatorFunction);
