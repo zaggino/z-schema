@@ -1,26 +1,11 @@
-import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
-
+// Pins flows of id registration that work the same with and without the precedence rules.
+// They guard against regressions in how ids are entered, resolved and reused across schemas.
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { ZSchema } from '../../src/z-schema.ts';
+import { codesOf, createSafe as create, expectInvalidType, expectValid } from '../lib/validate-results.ts';
 
 const BASE = 'http://id-registration.test/';
-
-const create = (options: ZSchemaOptions = {}) => ZSchema.create({ ...options, safe: true });
-
-type Result = ReturnType<ReturnType<typeof create>['validate']>;
-
-// The error codes of a result, for assertions on why something is invalid.
-const codesOf = (res: Result) => (res.err?.details ?? []).map((d) => d.code);
-
-const expectValid = (res: Result) => {
-  expect(res.valid).toBe(true);
-};
-
-const expectInvalidType = (res: Result) => {
-  expect(res.valid).toBe(false);
-  expect(codesOf(res)).toEqual(['INVALID_TYPE']);
-};
 
 const personSchema = (folder: string) => ({
   $id: `${BASE}${folder}/person.json`,

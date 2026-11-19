@@ -128,9 +128,18 @@ Meta-schemas are bundled in `src/schemas/` (copied from `json-schema-spec/` at b
 - **Global cache** (`SchemaCache.global_cache`) — a static object shared across all `ZSchema` instances in the process. Populated by `ZSchema.setRemoteReference()` and by bundled draft meta-schemas registered at import time. This is intentional: common references (meta-schemas, shared definitions) are registered once and available to every instance.
 - **Instance cache** (`this.cache`) — per-instance, populated by `validator.setRemoteReference()` and by schemas cloned from the global cache on first access. Instance cache entries take precedence over global ones.
 
-When a schema is looked up by URI, the instance cache is checked first. If not found, the global cache entry is deep-cloned into the instance cache (so compilation metadata doesn't leak between instances) and returned. Subsequent lookups for the same URI on the same instance hit the instance cache directly without re-cloning.
+When a schema is looked up by URI (`fromCache()`), a registered instance entry is returned as is. Otherwise a global entry is deep-cloned into the instance cache (so compilation metadata doesn't leak between instances), takes the place of a declared id at that URI if there is one, and is returned. Subsequent lookups for the same URI on the same instance hit the instance cache directly without re-cloning. Without a global entry, the declared entry is returned.
 
-**Declared ids.** Registered entries are those added by `setRemoteReference()` (static or instance), the bundled meta-schemas and schema-reader results; ids declared (`$id`/`id`) inside a registered schema are entered when it is first compiled and are protected like it. A schema passed to `validate()`, `compile()` or `validateSchema()` also enters the ids it declares through `SchemaCache.declareId()`, so later schemas on the same validator can reference it by id. `declareId()` skips the declaration when `isProtected()` reports the URI as registered or declared inside a registered schema; the schema still validates and references to its own root id resolve to itself. Among declared ids the last declaration wins, and an instance keeps the ids it has seen for its lifetime. Explicit registration always wins: instance `setRemoteReference()` replaces whatever is at the URI, and a URI registered globally later takes precedence over an id declared earlier. A schema being compiled is recognised by object identity (`Report.isCompiling()`), not by its id.
+**Declared ids.** The rules, all in `SchemaCache`:
+
+- `registeredRoots` (a `WeakSet`) holds the schemas entered by `cacheSchemaByUri()`, cloned from the global cache, or marked by `registerLoaded()` after a schema reader returned them. `SchemaCompiler.compileSchema()` asks `isRegisteredRoot()` and passes the schema as `owner` when it is one, otherwise `undefined`.
+- `protectedPaths` maps each protected URI to the registered root that owns the entry: the root itself for its own path, the root that declares the id for a nested one. `isProtected()` is true for those paths and for anything in the global cache.
+- `declareId(uri, schema, owner)` is the only write the compiler makes. It skips a protected URI; it enters any other, protecting it when `owner` is set. Among ids nested in different registered roots the first one entered stays; among ids declared by schemas passed to `validate()`, `compile()` or `validateSchema()` the last one wins.
+- `cacheSchemaByUri()` is the registration write and the only one that replaces a protected entry. It first releases the entries the replaced root owned, then enters the new root. `removeFromCacheByUri()` releases them too.
+- Every write goes through one private `store()`, which sets the entry and its owner and reports a replaced entry to the compiled-schema cache.
+- A schema being compiled is recognised by object identity (`Report.isCompiling()`), not by its id.
+
+The user-facing rules are in [usage.md](usage.md#schema-ids-and-precedence).
 
 ### Compiled-schema cache
 

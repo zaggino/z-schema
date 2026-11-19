@@ -54,8 +54,11 @@ export class SchemaCache {
   static readonly global_cache: SchemaCacheStorage = createDict<JsonSchemaInternal>();
   readonly cache: SchemaCacheStorage = createDict<JsonSchemaInternal>();
   private readonly validator: ZSchemaBase;
-  // URIs whose entry was registered, loaded by a schema reader, or declared inside such a schema.
-  private readonly protectedPaths = new Set<string>();
+  // Registered roots: schemas entered by setRemoteReference(), cloned from the global cache, or loaded by a schema reader.
+  private readonly registeredRoots = new WeakSet<JsonSchemaInternal>();
+  // Protected paths, each with the registered root that owns the entry (the root itself for its own path,
+  // the root that declares the id for a nested one).
+  private readonly protectedPaths = new Map<string, JsonSchemaInternal>();
 
   constructor(validator: ZSchemaBase) {
     this.validator = validator;
@@ -70,16 +73,36 @@ export class SchemaCache {
   }
 
   /**
-   * Registers `schema` at `uri` on this instance. An explicit registration replaces whatever is there.
+   * Registers `schema` at `uri` on this instance. This is the registration write and the only one that replaces a
+   * protected entry; the compiler enters declared ids through {@link SchemaCache.declareId}.
    */
   cacheSchemaByUri(uri: string, schema: JsonSchemaInternal) {
     const remotePath = getRemotePath(uri);
     if (remotePath) {
       const prev = this.cache[remotePath];
-      this.cache[remotePath] = schema;
-      this.protectedPaths.add(remotePath);
-      this.validator.compiledSchemaCache.onScacheWrite(remotePath, prev, schema);
+      if (prev !== undefined && this.registeredRoots.has(prev)) {
+        this.release(prev, remotePath);
+      }
+      this.registeredRoots.add(schema);
+      this.store(remotePath, schema, schema, true);
     }
+  }
+
+  /**
+   * Whether `schema` is a registered root: it was registered on this instance, cloned from the global cache,
+   * or marked with {@link SchemaCache.registerLoaded}.
+   */
+  isRegisteredRoot(schema: JsonSchemaInternal): boolean {
+    return this.registeredRoots.has(schema);
+  }
+
+  /**
+   * Marks a schema that a schema reader returned as a registered root.
+   *
+   * @param schema - The schema the schema reader returned.
+   */
+  registerLoaded(schema: JsonSchemaInternal): void {
+    this.registeredRoots.add(schema);
   }
 
   /**
@@ -96,38 +119,75 @@ export class SchemaCache {
    *
    * @param uri - The declared id, already resolved to an absolute or root-relative URI.
    * @param schema - The schema node that carries the id.
-   * @param trusted - `true` when the declaring schema is registered, was loaded by a schema reader, or is
-   * reached through a protected entry. Its ids are then protected too. Otherwise the declaration is skipped
-   * when the URI is protected.
+   * @param owner - The registered root whose compilation declares the id, or `undefined` for a schema passed to
+   * `validate()`, `compile()` or `validateSchema()`. An entry declared by a registered root is protected and
+   * belongs to it. A declaration of a protected URI is skipped.
    */
-  declareId(uri: string, schema: JsonSchemaInternal, trusted: boolean): void {
+  declareId(uri: string, schema: JsonSchemaInternal, owner: JsonSchemaInternal | undefined): void {
     const remotePath = getRemotePath(uri);
     if (!remotePath) {
       return;
     }
     const prev = this.cache[remotePath];
     if (prev === schema) {
+      // Already entered. A registered root declaring it makes the entry its own when nobody owns it yet.
+      if (owner !== undefined && !this.isProtected(remotePath)) {
+        this.protectedPaths.set(remotePath, owner);
+      }
       return;
     }
-    if (!trusted && this.isProtected(remotePath)) {
+    if (this.isProtected(remotePath)) {
       return;
     }
-    this.cache[remotePath] = schema;
-    if (trusted) {
-      this.protectedPaths.add(remotePath);
-    }
-    this.validator.compiledSchemaCache.onScacheWrite(remotePath, prev, schema);
+    this.store(remotePath, schema, owner, true);
   }
 
   removeFromCacheByUri(uri: string) {
     const remotePath = getRemotePath(uri);
     if (remotePath) {
+      const prev = this.cache[remotePath];
+      if (prev !== undefined && this.registeredRoots.has(prev)) {
+        this.release(prev, remotePath);
+      }
       this.protectedPaths.delete(remotePath);
-      if (this.cache[remotePath] !== undefined) {
+      if (prev !== undefined) {
         // a removed mapping can change how cached schemas resolve `$ref`
         this.validator.compiledSchemaCache.clear();
       }
       delete this.cache[remotePath];
+    }
+  }
+
+  // The one place that writes an entry: `owner` protects it; a replaced entry is reported to the compiled-schema cache.
+  private store(
+    remotePath: string,
+    schema: JsonSchemaInternal,
+    owner: JsonSchemaInternal | undefined,
+    notify: boolean
+  ) {
+    const prev = this.cache[remotePath];
+    this.cache[remotePath] = schema;
+    if (owner !== undefined) {
+      this.protectedPaths.set(remotePath, owner);
+    }
+    if (notify) {
+      this.validator.compiledSchemaCache.onScacheWrite(remotePath, prev, schema);
+    }
+  }
+
+  // Removes the entries that `root` owns, except the one at `keep`, which the caller is about to write.
+  private release(root: JsonSchemaInternal, keep: string): void {
+    let removed = false;
+    for (const [path, owner] of this.protectedPaths) {
+      if (owner === root && path !== keep) {
+        this.protectedPaths.delete(path);
+        delete this.cache[path];
+        removed = true;
+      }
+    }
+    if (removed) {
+      // a removed mapping can change how cached schemas resolve `$ref`
+      this.validator.compiledSchemaCache.clear();
     }
   }
 
@@ -153,28 +213,27 @@ export class SchemaCache {
 
   fromCache(path: string): JsonSchemaInternal | undefined {
     const found = this.cache[path];
-    if (found && (this.protectedPaths.has(path) || SchemaCache.global_cache[path] === undefined)) {
+    if (found !== undefined && (this.protectedPaths.has(path) || SchemaCache.global_cache[path] === undefined)) {
       return found;
     }
     const registered = SchemaCache.global_cache[path];
-    if (registered) {
-      // Clone once from global cache into instance cache so subsequent lookups
-      // never deep-clone again for the same path on this instance.
-      const clone = deepClone(registered, this.validator.options.maxRecursionDepth);
-      if (!clone.id || (!isAbsoluteUri(clone.id) && isAbsoluteUri(path))) {
-        clone.id = path;
-      }
-      // When nothing was at `path` this is a new mapping, so no cached schema can have resolved through it:
-      // schemas with unresolved refs are never cached. No compiled-schema-cache notification is needed.
-      this.cache[path] = clone;
-      this.protectedPaths.add(path);
-      if (found) {
-        // A declared id was in the way: schemas compiled against it are stale.
-        this.validator.compiledSchemaCache.onScacheWrite(path, found, clone);
-      }
-      return clone;
+    return registered === undefined ? undefined : this.adoptGlobal(path, registered, found);
+  }
+
+  // Clones a global-cache entry into the instance cache; `displaced` is the declared entry it takes the place of.
+  private adoptGlobal(path: string, registered: JsonSchemaInternal, displaced: JsonSchemaInternal | undefined) {
+    // Clone once from global cache into instance cache so subsequent lookups
+    // never deep-clone again for the same path on this instance.
+    const clone = deepClone(registered, this.validator.options.maxRecursionDepth);
+    if (!clone.id || (!isAbsoluteUri(clone.id) && isAbsoluteUri(path))) {
+      clone.id = path;
     }
-    return undefined;
+    this.registeredRoots.add(clone);
+    // When nothing was at `path` this is a new mapping, so no cached schema can have resolved through it:
+    // schemas with unresolved refs are never cached. When a declared id was in the way, schemas compiled
+    // against it are stale and the compiled-schema cache is notified.
+    this.store(path, clone, clone, displaced !== undefined);
+    return clone;
   }
 
   getSchemaByUri(report: Report, uri: string, root?: JsonSchemaInternal) {
@@ -222,7 +281,7 @@ export class SchemaCache {
         // Eager on purpose: these errors are read by content (copied/filtered), so do not use Report.createSubReport.
         const remoteReport = new Report(report);
         const noCache = !(result.id && isAbsoluteUri(result.id));
-        if (this.validator.sc.compileSchema(remoteReport, result, { noCache, trusted: this.isProtected(remotePath) })) {
+        if (this.validator.sc.compileSchema(remoteReport, result, { noCache })) {
           const savedOptions = this.validator.options;
           try {
             // If custom validationOptions were provided to setRemoteReference(),

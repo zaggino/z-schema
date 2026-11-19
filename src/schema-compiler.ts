@@ -300,19 +300,19 @@ export class SchemaCompiler {
     this.validator = validator;
   }
 
-  collectAndCacheIds(schema: JsonSchemaInternal, trusted = false) {
+  collectAndCacheIds(schema: JsonSchemaInternal, owner: JsonSchemaInternal | undefined) {
     const ids = collectIds(schema, this.validator.options.maxRecursionDepth);
     for (const item of ids) {
       if (item.absoluteUri) {
-        this.validator.scache.declareId(item.absoluteUri, item.obj, trusted);
+        this.validator.scache.declareId(item.absoluteUri, item.obj, owner);
 
         if (item.type === 'relative' && item.absoluteParent && isSimpleIdentifier(item.id)) {
           const parentUri = item.absoluteParent.absoluteUri || item.absoluteParent.id;
           const altAbsoluteUri = resolveReference(parentUri, item.id);
-          this.validator.scache.declareId(altAbsoluteUri, item.obj, trusted);
+          this.validator.scache.declareId(altAbsoluteUri, item.obj, owner);
         }
       } else if (item.type === 'root') {
-        this.validator.scache.declareId(item.id, item.obj, trusted);
+        this.validator.scache.declareId(item.id, item.obj, owner);
       }
     }
   }
@@ -322,17 +322,11 @@ export class SchemaCompiler {
    *
    * @param report - The report that collects compilation errors.
    * @param schema - The schema, or an array of schemas, to compile.
-   * @param options - `noCache` skips entering declared ids. `trusted` is `true` when the schema is registered,
-   * was loaded by a schema reader, or is reached through a protected entry; its ids are then protected too,
-   * otherwise a declaration of a protected URI is skipped.
+   * @param options - `noCache` skips entering declared ids. The ids of a registered root are protected and belong
+   * to it; otherwise a declaration of a protected URI is skipped.
    */
-  compileSchema(
-    report: Report,
-    schema: JsonSchemaInternal | JsonSchemaInternal[],
-    options?: { noCache?: boolean; trusted?: boolean }
-  ) {
+  compileSchema(report: Report, schema: JsonSchemaInternal | JsonSchemaInternal[], options?: { noCache?: boolean }) {
     report.commonErrorMessage = 'SCHEMA_COMPILATION_FAILED';
-    const trusted = options?.trusted === true;
 
     // if schema is a string, assume it's a uri
     if (typeof schema === 'string') {
@@ -348,15 +342,17 @@ export class SchemaCompiler {
     if (Array.isArray(schema)) {
       if (!options?.noCache) {
         for (let i = 0; i < schema.length; i++) {
-          this.collectAndCacheIds(schema[i], trusted);
+          const element = schema[i];
+          this.collectAndCacheIds(element, this.validator.scache.isRegisteredRoot(element) ? element : undefined);
         }
       }
-      return this.compileArrayOfSchemas(report, schema, trusted);
+      return this.compileArrayOfSchemas(report, schema);
     } else if (typeof schema === 'boolean') {
       return true;
     }
+    const owner = this.validator.scache.isRegisteredRoot(schema) ? schema : undefined;
     if (!options?.noCache) {
-      this.collectAndCacheIds(schema, trusted);
+      this.collectAndCacheIds(schema, owner);
     }
 
     // a built-in prototype has nothing to compile and is never written to
@@ -381,7 +377,7 @@ export class SchemaCompiler {
 
     if (schema.id && typeof schema.id === 'string' && !options?.noCache) {
       // add this to our schemaCache (before compilation in case we have references including id)
-      this.validator.scache.declareId(schema.id, schema, trusted);
+      this.validator.scache.declareId(schema.id, schema, owner);
     }
 
     // this method can be called recursively, so we need to remember our root
@@ -421,10 +417,11 @@ export class SchemaCompiler {
             // it needs to have the id (cast: schemaReader returns JsonSchema, but
             // at this pre-compilation stage we treat it as an internal object)
             (s as JsonSchemaInternal).id = remotePath;
+            this.validator.scache.registerLoaded(s);
             // try to compile the schema
             // Eager on purpose: these errors are read by content (copied/filtered), so do not use Report.createSubReport.
             const subreport = new Report(report);
-            if (this.compileSchema(subreport, s, { trusted: true })) {
+            if (this.compileSchema(subreport, s)) {
               response = this.validator.scache.getSchemaByUri(report, refObj.ref, schema);
             } else {
               // copy errors to report
@@ -493,7 +490,7 @@ export class SchemaCompiler {
     return isValid;
   }
 
-  compileArrayOfSchemas(report: Report, arr: JsonSchemaInternal[], trusted = false) {
+  compileArrayOfSchemas(report: Report, arr: JsonSchemaInternal[]) {
     let compiled = 0;
     let lastLoopCompiled;
 
@@ -511,7 +508,7 @@ export class SchemaCompiler {
       lastLoopCompiled = compiled;
 
       // count how many are compiled now
-      compiled = this.compileArrayOfSchemasLoop(report, arr, trusted);
+      compiled = this.compileArrayOfSchemasLoop(report, arr);
 
       // fix __$missingReferences if possible
       // Keep the FIRST schema per id to match the prior `arr.find(x => x.id === ref)`
@@ -547,14 +544,14 @@ export class SchemaCompiler {
     return report.isValid();
   }
 
-  compileArrayOfSchemasLoop(mainReport: Report, arr: JsonSchemaInternal[], trusted = false) {
+  compileArrayOfSchemasLoop(mainReport: Report, arr: JsonSchemaInternal[]) {
     let compiledCount = 0;
 
     for (const schema of arr) {
       // try to compile each schema separately
       // Eager on purpose: these errors are read by content (copied/filtered), so do not use Report.createSubReport.
       const report = new Report(mainReport);
-      const isValid = this.compileSchema(report, schema, { trusted });
+      const isValid = this.compileSchema(report, schema);
       if (isValid) {
         compiledCount++;
       }

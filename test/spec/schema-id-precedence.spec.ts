@@ -1,29 +1,12 @@
-import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
-
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { ZSchema } from '../../src/z-schema.ts';
+import { codesOf, createSafe as create, expectInvalidType, expectValid } from '../lib/validate-results.ts';
 
 const BASE = 'http://id-precedence.test/';
 
 let counter = 0;
 const nextUri = (name: string) => `${BASE}${name}-${counter++}.json`;
-
-const create = (options: ZSchemaOptions = {}) => ZSchema.create({ ...options, safe: true });
-
-type Result = ReturnType<ReturnType<typeof create>['validate']>;
-
-// The error codes of a result, for assertions on why something is invalid.
-const codesOf = (res: Result) => (res.err?.details ?? []).map((d) => d.code);
-
-const expectValid = (res: Result) => {
-  expect(res.valid).toBe(true);
-};
-
-const expectInvalidType = (res: Result) => {
-  expect(res.valid).toBe(false);
-  expect(codesOf(res)).toEqual(['INVALID_TYPE']);
-};
 
 const DRAFT_2020_12 = 'https://json-schema.org/draft/2020-12/schema';
 const DRAFT_07 = 'http://json-schema.org/draft-07/schema';
@@ -200,6 +183,104 @@ describe('explicit registration', () => {
     validator.setRemoteReference(uri, { type: 'string' });
     ZSchema.setRemoteReference(uri, { type: 'number' });
 
+    expectInvalidType(validator.validate(1, { $ref: uri }));
+  });
+});
+
+describe('ids nested in registered or loaded schemas', () => {
+  it('keeps a registered schema when another registered schema nests its URI', () => {
+    const a = nextUri('a');
+    const b = nextUri('b');
+    const validator = create();
+    validator.setRemoteReference(a, { type: 'string' });
+    validator.setRemoteReference(b, { $defs: { x: { $id: a, type: 'number' } } });
+
+    expectValid(validator.validate(1, { $ref: b }));
+    expectInvalidType(validator.validate(1, { $ref: a }));
+    expectValid(validator.validate('x', { $ref: a }));
+  });
+
+  it('keeps the bundled meta-schema when a loaded schema nests its URI', () => {
+    const uri = nextUri('loaded');
+    ZSchema.setSchemaReader((requested) => {
+      if (requested === uri) {
+        return { type: 'string', $defs: { m: { $id: DRAFT_2020_12 } } };
+      }
+      throw new Error(`unexpected read of ${requested}`);
+    });
+    const fresh = create().validateSchema({ type: 'strnig' });
+    const validator = create();
+
+    expectValid(validator.validate('x', { $ref: uri }));
+    expect(codesOf(validator.validateSchema({ type: 'strnig' }))).toEqual(codesOf(fresh));
+  });
+
+  it('protects ids nested in a schema registered under a plain name', () => {
+    const inner = nextUri('inner');
+    const validator = create();
+    validator.setRemoteReference('lib', { $defs: { n: { $id: inner, type: 'number' } } });
+
+    expectValid(validator.validate(1, 'lib'));
+    expectValid(validator.validate('x', { $id: inner, type: 'string' }));
+    expectInvalidType(validator.validate('x', { $ref: inner }));
+    expectValid(validator.validate(1, { $ref: inner }));
+  });
+
+  it('replaces nested ids when their schema is registered again', () => {
+    const lib = nextUri('lib');
+    const nested = nextUri('nested');
+    const validator = create();
+    validator.setRemoteReference(lib, { $defs: { n: { $id: nested, type: 'number' } } });
+    expectValid(validator.validate(1, { $ref: lib }));
+    expectValid(validator.validate(1, { $ref: nested }));
+
+    validator.setRemoteReference(lib, { $defs: { n: { $id: nested, type: 'string' } } });
+    expectValid(validator.validate(1, { $ref: lib }));
+
+    expectValid(validator.validate('x', { $ref: nested }));
+    expectInvalidType(validator.validate(1, { $ref: nested }));
+  });
+
+  it('keeps a registered schema when validateSchema gets an array that declares its URI', () => {
+    const uri = nextUri('array');
+    const other = nextUri('other');
+    const validator = create();
+    validator.setRemoteReference(uri, { type: 'string' });
+
+    expectValid(
+      validator.validateSchema([
+        { $id: uri, type: 'number' },
+        { $id: other, $ref: uri },
+      ])
+    );
+    expectInvalidType(validator.validate(1, { $ref: uri }));
+  });
+
+  it('keeps the first of two registered schemas that nest the same id', () => {
+    const a = nextUri('first');
+    const b = nextUri('second');
+    const nested = nextUri('shared');
+    const validator = create();
+    validator.setRemoteReference(a, { $defs: { n: { $id: nested, type: 'number' } } });
+    validator.setRemoteReference(b, { $defs: { n: { $id: nested, type: 'string' } } });
+    expectValid(validator.validate(1, { $ref: a }));
+    expectValid(validator.validate('x', { $ref: b }));
+
+    expectValid(validator.validate(1, { $ref: nested }));
+    expectInvalidType(validator.validate('x', { $ref: nested }));
+  });
+
+  it('keeps an explicit registration at a URI that a registered schema nests', () => {
+    const lib = nextUri('lib');
+    const uri = nextUri('nested');
+    const validator = create();
+    validator.setRemoteReference(lib, { $defs: { n: { $id: uri, type: 'number' } } });
+    expectValid(validator.validate(1, { $ref: lib }));
+
+    validator.setRemoteReference(uri, { type: 'string' });
+    expectValid(validator.validate(1, { $ref: lib }));
+
+    expectValid(validator.validate('x', { $ref: uri }));
     expectInvalidType(validator.validate(1, { $ref: uri }));
   });
 });

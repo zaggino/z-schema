@@ -279,7 +279,7 @@ validator.validate(data, { $id: 'http://example.com/schemas/address.json', type:
 validator.validate(address, { $ref: 'http://example.com/schemas/address.json' });
 ```
 
-Among declared ids the last declaration wins, and a validator keeps the ids it has seen for its lifetime. When schemas come from sources that do not know each other, give each source its own validator (`ZSchema.create()` is cheap) and register shared schemas with `setRemoteReference()`.
+Among ids declared by schemas you pass to `validate()`, `compile()` or `validateSchema()` the last declaration wins, and a validator keeps the ids it has seen for its lifetime. Among ids nested in different registered schemas the first one entered stays, and a registration made with `setRemoteReference()` replaces it. Register shared schemas before the first schema that references them is used, because a schema that is already compiled keeps the targets it resolved. When schemas come from sources that do not know each other, give each source its own validator (`ZSchema.create()` is cheap) and register shared schemas with `setRemoteReference()`.
 
 ### Diagnosing Missing References
 
