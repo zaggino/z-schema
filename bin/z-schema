@@ -23,6 +23,9 @@ try {
   throw e;
 }
 
+var MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024;
+var DOWNLOAD_TIMEOUT_MS = 30000;
+
 var DRAFT_CHOICES = ['draft-04', 'draft-06', 'draft-07', 'draft2019-09', 'draft2020-12'];
 
 // Addresses that remote $ref downloads must never connect to (CWE-918).
@@ -51,8 +54,9 @@ blockedAddresses.addAddress('::', 'ipv6');
   ['fe80::', 10],
   ['fec0::', 10],
   ['ff00::', 8],
-  // ranges that embed an IPv4 address and can therefore reach the blocked IPv4 ranges: NAT64, 6to4, Teredo
+  // ranges that embed an IPv4 address and can therefore reach the blocked IPv4 ranges: NAT64, local-use NAT64, 6to4, Teredo
   ['64:ff9b::', 96],
+  ['64:ff9b:1::', 48],
   ['2002::', 16],
   ['2001::', 32],
 ].forEach(function (entry) {
@@ -119,6 +123,7 @@ program
   .option('--breakOnFirstError', 'stops validation as soon as an error is found, true by default but can be turned off')
   .option('--pedanticCheck', 'check if schema follow best practices and common sence')
   .option('--ignoreUnknownFormats', 'ignore unknown formats (do not report them as an error)')
+  .option('--refRoot <dir>', 'directory that file $refs must stay inside (default: the directory of the schema file)')
   .addOption(new Option('--draft <version>', 'JSON Schema draft to validate against').choices(DRAFT_CHOICES))
   .allowExcessArguments()
   .parse(process.argv);
@@ -140,7 +145,8 @@ if (!program.args.length) {
   program.help();
 }
 
-function readJson(fileName) {
+// Reads the files named on the command line; it is not used for references.
+function readArgumentFile(fileName) {
   var ret;
   try {
     ret = fs.readFileSync(fileName, { encoding: 'utf8' });
@@ -157,9 +163,223 @@ function readJson(fileName) {
   return ret;
 }
 
+function fail(message) {
+  console.error(message);
+  process.exit(1);
+}
+
+// Lexical check: is target below root, judged on the path as written.
+function isInside(root, target) {
+  var rel = path.relative(root, target);
+  return rel !== '..' && !rel.startsWith('..' + path.sep) && !path.isAbsolute(rel);
+}
+
+// Exact check on two paths that both come from fs.realpathSync.native, so their spelling and case are the system's.
+function isInsideReal(realPrefix, realPath) {
+  return realPath.startsWith(realPrefix);
+}
+
 var validator = ZSchema.create(options);
 var schemaFilePath = program.args.shift();
-var schema = readJson(schemaFilePath);
+
+// File references are read only from inside this directory: --refRoot, or the directory of the schema file.
+function resolveRefRoot() {
+  var given = path.resolve(
+    programOptions.refRoot != null ? programOptions.refRoot : path.dirname(path.resolve(schemaFilePath))
+  );
+  var real = null;
+  var isDirectory = false;
+  try {
+    real = fs.realpathSync.native(given);
+    isDirectory = fs.statSync(real).isDirectory();
+  } catch (_e) {
+    isDirectory = false;
+  }
+  if (!isDirectory) {
+    if (programOptions.refRoot != null) {
+      fail('--refRoot is not a directory: ' + programOptions.refRoot);
+    }
+    fail('Cannot resolve the directory of the schema file: ' + schemaFilePath);
+  }
+  return { given: given, real: real, realPrefix: real.endsWith(path.sep) ? real : real + path.sep };
+}
+
+var refRoot = resolveRefRoot();
+
+function outsideRootMessage(url) {
+  return (
+    'The reference is outside the reference root and is not read: ' +
+    url +
+    '\nUse --refRoot <dir> to allow references inside another directory.'
+  );
+}
+
+// The only decision point for file references: the real path of a regular file inside the reference root.
+function confinedRealPath(referencePath, url) {
+  // Refused before the filesystem is touched: a path that is outside the root as written
+  // (against the root as given and as resolved).
+  if (!isInside(refRoot.given, referencePath) && !isInside(refRoot.real, referencePath)) {
+    fail(outsideRootMessage(url));
+  }
+  var realPath = null;
+  var inside = true;
+  var isFile = false;
+  try {
+    realPath = fs.realpathSync.native(referencePath);
+    inside = isInsideReal(refRoot.realPrefix, realPath);
+    isFile = inside && fs.statSync(realPath).isFile();
+  } catch (_e) {
+    realPath = null;
+  }
+  if (!inside) {
+    fail(outsideRootMessage(url));
+  }
+  if (realPath === null || !isFile) {
+    fail('Cannot read the referenced file: ' + url);
+  }
+  return realPath;
+}
+
+// File references are read only from inside the reference root; links are resolved first.
+function readReference(url) {
+  var networkPathMessage = 'File references to a network or device path are not read: ' + url;
+  var referencePath;
+  if (/^file:/i.test(url)) {
+    var fileUrl = null;
+    try {
+      fileUrl = new URL(url);
+    } catch (_e) {
+      fileUrl = null;
+    }
+    if (fileUrl === null) {
+      fail('Cannot resolve the reference to a file: ' + url);
+    }
+    // Checked before the conversion to a path, which treats a host differently on each platform.
+    if (fileUrl.hostname !== '') {
+      fail(networkPathMessage);
+    }
+    referencePath = null;
+    try {
+      referencePath = fileURLToPath(fileUrl);
+    } catch (_e) {
+      referencePath = null;
+    }
+    if (referencePath === null) {
+      fail('Cannot resolve the reference to a file: ' + url);
+    }
+  } else if (/^[a-zA-Z][a-zA-Z0-9+.-]+:/.test(url)) {
+    fail('Only file and https references are read: ' + url);
+  } else {
+    // Checked on the reference as written too: resolving collapses a leading double slash on some platforms.
+    var BACKSLASH = 92;
+    if (url.startsWith('//') || (url.charCodeAt(0) === BACKSLASH && url.charCodeAt(1) === BACKSLASH)) {
+      fail(networkPathMessage);
+    }
+    referencePath = path.resolve(process.cwd(), url);
+  }
+  if (referencePath.startsWith('\\\\') || referencePath.startsWith('//')) {
+    fail(networkPathMessage);
+  }
+  var realPath = confinedRealPath(referencePath, url);
+  var text = null;
+  try {
+    text = fs.readFileSync(realPath, 'utf8');
+  } catch (_e) {
+    text = null;
+  }
+  if (text === null) {
+    fail('Cannot read the referenced file: ' + url);
+  }
+  var parsed;
+  var parsedOk = true;
+  try {
+    parsed = JSON.parse(text);
+  } catch (_e) {
+    parsedOk = false;
+  }
+  if (!parsedOk) {
+    fail('The referenced file is not valid JSON: ' + url);
+  }
+  return parsed;
+}
+
+function downloadReference(url, onLoaded) {
+  var urlString = 'request: ' + url + ' - ';
+  var parsedUrl = null;
+  try {
+    parsedUrl = new URL(url);
+  } catch (_e) {
+    parsedUrl = null;
+  }
+  if (parsedUrl === null) {
+    fail('Invalid URL: ' + url);
+  }
+  // Guard against SSRF: only allow https and reject private/internal hostnames (CWE-918)
+  if (parsedUrl.protocol !== 'https:') {
+    fail('Only HTTPS URLs are allowed for remote references: ' + url);
+  }
+  var hostname = parsedUrl.hostname;
+  var literalHost = hostname.charAt(0) === '[' ? hostname.slice(1, -1) : hostname;
+  var literalFamily = net.isIP(literalHost);
+  if (
+    hostname === 'localhost' ||
+    hostname.endsWith('.local') ||
+    (literalFamily !== 0 && isBlockedAddress(literalHost, literalFamily))
+  ) {
+    fail('Requests to private/internal addresses are not allowed: ' + url);
+  }
+  var tooLarge = 'The remote reference is larger than ' + MAX_DOWNLOAD_BYTES / (1024 * 1024) + ' MB: ' + url;
+  var timer;
+  var downloadRequest = request(parsedUrl, { lookup: guardedLookup }, function (response) {
+    // Reject redirects to prevent SSRF via open redirect (CWE-918)
+    if (response.statusCode >= 300 && response.statusCode < 400) {
+      fail('Redirects are not followed for security reasons: ' + url);
+    }
+    var declaredLength = Number(response.headers['content-length']);
+    if (declaredLength > MAX_DOWNLOAD_BYTES) {
+      fail(tooLarge);
+    }
+    var chunks = [];
+    var received = 0;
+    response.on('data', function (chunk) {
+      received += chunk.length;
+      if (received > MAX_DOWNLOAD_BYTES) {
+        fail(tooLarge);
+      }
+      chunks.push(chunk);
+    });
+    response.on('end', function () {
+      clearTimeout(timer);
+      console.log(urlString + response.statusCode);
+
+      var remoteSchema;
+      var parsedOk = true;
+      try {
+        remoteSchema = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+      } catch (_e) {
+        parsedOk = false;
+      }
+      if (!parsedOk) {
+        fail('The remote reference is not valid JSON: ' + url);
+      }
+      onLoaded(url, remoteSchema);
+    });
+  });
+  // The download must finish within the deadline
+  timer = setTimeout(function () {
+    downloadRequest.destroy();
+    fail(
+      'The remote reference did not finish downloading in ' + DOWNLOAD_TIMEOUT_MS / 1000 + ' seconds: ' + url
+    );
+  }, DOWNLOAD_TIMEOUT_MS);
+  downloadRequest.on('error', function (error) {
+    clearTimeout(timer);
+    fail(urlString + error.message);
+  });
+  downloadRequest.end();
+}
+
+var schema = readArgumentFile(schemaFilePath);
 // The schema's retrieval location as a file: URL. Unlike the path as typed, it is a valid URI on every platform
 // (backslashes, spaces), so it can be the id that relative $refs resolve against.
 var schemaFileUrl = pathToFileURL(path.resolve(schemaFilePath)).href;
@@ -204,73 +424,22 @@ function validateWithAutomaticDownloads(filePath, data, schema, callback) {
     var missingReferences = validator.getMissingRemoteReferences(result.err);
     if (missingReferences.length > 0) {
       var finished = 0;
+
+      function loaded(url, reference) {
+        validator.setRemoteReference(url, reference);
+        finished++;
+        if (finished === missingReferences.length) {
+          validate();
+        }
+      }
+
+      // A reference that is not http(s) is already resolved against the schema id, normally the schema's file: URL,
+      // so the schema's directory must not be joined again. Anything else is a path relative to the working directory.
       missingReferences.forEach(function (url) {
-        var urlString = 'request: ' + url + ' - ';
-
-        if (url.match(/^https?:/)) {
-          var parsedUrl;
-          try {
-            parsedUrl = new URL(url);
-          } catch (_e) {
-            console.error('Invalid URL: ' + url);
-            process.exit(1);
-          }
-          // Guard against SSRF: only allow https and reject private/internal hostnames (CWE-918)
-          if (parsedUrl.protocol !== 'https:') {
-            console.error('Only HTTPS URLs are allowed for remote references: ' + url);
-            process.exit(1);
-          }
-          var hostname = parsedUrl.hostname;
-          var literalHost = hostname.charAt(0) === '[' ? hostname.slice(1, -1) : hostname;
-          var literalFamily = net.isIP(literalHost);
-          if (
-            hostname === 'localhost' ||
-            hostname.endsWith('.local') ||
-            (literalFamily !== 0 && isBlockedAddress(literalHost, literalFamily))
-          ) {
-            console.error('Requests to private/internal addresses are not allowed: ' + url);
-            process.exit(1);
-          }
-          request(parsedUrl, { lookup: guardedLookup }, function (response) {
-            // Reject redirects to prevent SSRF via open redirect (CWE-918)
-            if (response.statusCode >= 300 && response.statusCode < 400) {
-              console.error('Redirects are not followed for security reasons: ' + url);
-              process.exit(1);
-            }
-            var body = '';
-            response.on('data', function (chunk) {
-              body += chunk;
-            });
-            response.on('end', function () {
-              console.log(urlString + response.statusCode);
-
-              validator.setRemoteReference(url, JSON.parse(body));
-              finished++;
-              if (finished === missingReferences.length) {
-                validate();
-              }
-            });
-          }).on('error', function (error) {
-            console.error(urlString);
-            console.error(error);
-            process.exit(1);
-          });
+        if (/^https?:/.test(url)) {
+          downloadReference(url, loaded);
         } else {
-          // url is already resolved against the schema id, normally the schema's file: URL, so the schema's
-          // directory must not be joined again. Anything else is a path relative to the working directory.
-          var referencePath;
-          try {
-            referencePath = url.startsWith('file:') ? fileURLToPath(url) : path.resolve(process.cwd(), url);
-          } catch (_e) {
-            console.error('Cannot resolve the reference to a file: ' + url);
-            process.exit(1);
-          }
-          var reference = readJson(referencePath);
-          validator.setRemoteReference(url, reference);
-          finished++;
-          if (finished === missingReferences.length) {
-            validate();
-          }
+          loaded(url, readReference(url));
         }
       });
     } else {
@@ -289,7 +458,7 @@ function validateJsons() {
 
   var filePath = program.args.shift();
   var displayPath = path.relative(process.cwd(), path.resolve(filePath));
-  var json = readJson(filePath);
+  var json = readArgumentFile(filePath);
   validateWithAutomaticDownloads(filePath, json, schema, function (errs, isValid) {
     if (!isValid) {
       console.log(JSON.stringify(errs, null, 4));

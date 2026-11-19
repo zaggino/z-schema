@@ -11,18 +11,18 @@ import { getValidateError, toValidateError, ValidateError } from './errors.js';
 import { buildFastValidator, isFastValidatorDisabled } from './fast-validator.js';
 import { getSupportedFormats } from './format-validators.js';
 import { VERSION_SCHEMA_URL_MAPPING } from './json-schema-versions.js';
-import { isInternalKey } from './json-schema.js';
+import { cloneInputSchema, isInternalKey } from './json-schema.js';
 import { validate as validateJson } from './json-validation.js';
 import { Report } from './report.js';
 import { prepareRemoteSchema, SchemaCache } from './schema-cache.js';
 import { SchemaCompiler } from './schema-compiler.js';
 import { SchemaValidator } from './schema-validator.js';
 import { deepClone } from './utils/clone.js';
-import { get, sortedKeys } from './utils/json.js';
+import { sortedKeys } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
 import { getRemotePath } from './utils/uri.js';
 import { isObject, whatIs } from './utils/what-is.js';
-import { defaultOptions, normalizeOptions } from './z-schema-options.js';
+import { defaultOptions, normalizeOptions, resolveMaxErrors } from './z-schema-options.js';
 
 export interface ValidateOptions {
   schemaPath?: string;
@@ -211,7 +211,7 @@ export class ZSchemaBase {
 
     if (options.schemaPath) {
       report.rootSchema = _schema;
-      _schema = get(_schema, options.schemaPath) as JsonSchemaInternal;
+      _schema = this.scache.getAtPath(_schema, options.schemaPath.split('.')) as JsonSchemaInternal;
       if (!_schema) {
         const e = new ValidateError(`Schema path '${options.schemaPath}' wasn't found in the schema!`);
         if (callback) {
@@ -225,6 +225,11 @@ export class ZSchemaBase {
     }
 
     if (!foundError) {
+      // Schema compilation and schema validation above are not limited; the data validation is.
+      // The option is read again on every call because options can be changed on a live validator, and an
+      // unresolved value (`undefined`, `NaN`) would mean no limit. The root report holds no errors at this
+      // point (data validation runs only when the schema phase found none), which is what `errorCount` relies on.
+      report.errorLimit = resolveMaxErrors(this.options.maxErrors);
       validateJson(this, report, _schema, json);
     }
 
@@ -241,6 +246,7 @@ export class ZSchemaBase {
       throw getValidateError({
         message: report.commonErrorMessage!,
         details: report.errors,
+        truncated: report.errorsTruncated,
       });
     }
     return true;
@@ -318,8 +324,9 @@ export class ZSchemaBase {
    * to `validate()`.
    *
    * Boolean schemas are returned as-is (`_validate` handles them natively). An object schema is
-   * snapshotted into a private deep clone whose structural cache key is pinned, then compiled and
-   * meta-validated eagerly (throwing on an invalid schema) and stored in the compiled-schema cache.
+   * snapshotted into a private deep clone (without reserved keys) whose structural cache key is
+   * pinned, then compiled and meta-validated eagerly (throwing on an invalid schema) and stored in the
+   * compiled-schema cache.
    * Validating against the snapshot therefore takes exactly the `validate(data, schemaObject)` path —
    * same cache invalidation, `customValidator` bypass and `$ref` resolution — minus the per-call
    * `JSON.stringify` of the schema. Anything thrown while compiling surfaces as a `ValidateError`
@@ -364,7 +371,8 @@ export class ZSchemaBase {
   }
 
   private _compileSnapshot(schema: JsonSchema): JsonSchema {
-    const snapshot = deepClone(schema, this.options.maxRecursionDepth);
+    // The snapshot is the caller's schema as the library reads it: reserved keys are left out.
+    const snapshot = cloneInputSchema(schema, this.options.maxRecursionDepth);
     const pinnedKey = this.compiledSchemaCache.pinKey(snapshot);
     const report = new Report(this.options);
     // Mirrors _validate: with a customValidator the cache is bypassed, so nothing is primed.
@@ -419,6 +427,7 @@ export class ZSchemaBase {
 
   /**
    * Register a remote schema in this instance's cache so `$ref` can resolve to it.
+   * It replaces whatever is registered at `uri` on this instance and takes precedence over ids declared by schemas passed to `validate()`.
    * @param uri - The URI the schema will be known by.
    * @param schema - The schema object or JSON string.
    * @param validationOptions - Optional options used for schema preparation.

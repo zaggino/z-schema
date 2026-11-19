@@ -47,6 +47,7 @@ const validator = ZSchema.create({
   formatAssertions: null, // null=always assert, true=respect vocabulary (2019-09/2020-12 assert only if the meta-schema opts in), false=annotation-only (default: null)
   ignoreUnresolvableReferences: false, // skip unresolvable $ref (default: false)
   maxRecursionDepth: 100, // max depth for internal traversal (prevents stack overflow on deep schemas/data)
+  maxErrors: 1000, // max error details reported per validate() call, counting nested `inner` details; Infinity = no limit (default: 1000)
 });
 ```
 
@@ -162,6 +163,12 @@ const validateUser = validator.compile({ type: 'object', required: ['name'] }); 
 validateUser({ name: 'Alice' }); // true, or throws ValidateError
 ```
 
+### Reserved Keys
+
+Keys that start with `__$` are reserved for the state z-schema keeps on its own copy of a schema. In a schema you pass in (to `validate()`, `validateSchema()`, `compile()` or `setRemoteReference()`, or from a [schema reader](#automatic-schema-reader)) such keys are ignored wherever a keyword can appear, the values of keywords z-schema does not know (for example `x-meta`) included; a `customValidator` does not see them either. What is kept as it is: the entries of `properties`, `patternProperties`, `$defs`, `definitions`, `dependencies`, `dependentSchemas` and `dependentRequired`, whatever their names, and everything under `enum`, `const`, `default` and `examples`.
+
+A schema you pass in is cloned before it is compiled, so your object is never modified. A schema registered as a JSON string is parsed and then cloned the same way, so the nesting limit (`maxRecursionDepth`) applies to it too.
+
 ## Error Handling
 
 `ValidateError` (thrown or returned) has:
@@ -186,6 +193,15 @@ interface SchemaErrorDetail {
 ```
 
 `schemaPath` tracks the `properties`, `patternProperties`, `additionalProperties`, `items`, `prefixItems` and `additionalItems` segments (with the property name, pattern or index), and a trailing `type` for type errors. In draft-04, draft-06 and draft-07, errors inside a `$ref` target carry a `schemaPath` relative to that target. `schemaId` is looked up by applying the failing data path to the root schema and taking the `$id` (or `id`) of the closest object found there, falling back to the root schema's; it is reliable for the root id, not for ids of nested subschemas.
+
+A failed validation reports at most `maxErrors` details (default 1000, counted through `inner`), and `err.truncated` is `true` when the limit left out at least one detail. Validity is not affected; see [options.md#maxerrors](options.md#maxerrors).
+
+```typescript
+const { valid, err } = validator.validateSafe(data, schema);
+if (!valid && err?.truncated) {
+  console.log(`showing the first ${err.details?.length} errors`);
+}
+```
 
 ### Error Codes
 
@@ -261,7 +277,28 @@ const schemas = new Map<string, JsonSchema>([
 ZSchema.setSchemaReader((uri) => schemas.get(uri));
 ```
 
+The object a reader returns is not modified: z-schema compiles a copy of it, so a reader can return the same object on every call.
+
 See [security.md](security.md#schema-readers-and-remote-references) for guidance on readers.
+
+### Schema Ids and Precedence
+
+A validator resolves a URI against its registered entries: schemas added with `ZSchema.setRemoteReference()` (global, shared by all instances), the bundled meta-schemas, schemas added with `validator.setRemoteReference()` (that instance), and schemas loaded by a schema reader. Ids declared (`$id` / `id`) inside a registered schema are protected like the schema itself.
+
+A schema you pass to `validate()`, `compile()` or `validateSchema()` also enters the ids it declares on that validator, so later calls can reference it by id. A registered schema always takes precedence over an id declared this way: when the URI is already registered, the declaration is skipped, the schema still validates, and references to its own root id resolve to itself.
+
+```typescript
+const validator = ZSchema.create();
+validator.setRemoteReference('http://example.com/schemas/address.json', addressSchema);
+
+// Declares the same $id as the registered schema
+validator.validate(data, { $id: 'http://example.com/schemas/address.json', type: 'object' });
+
+// Still means the registered addressSchema
+validator.validate(address, { $ref: 'http://example.com/schemas/address.json' });
+```
+
+Among ids declared by schemas you pass to `validate()`, `compile()` or `validateSchema()` the last declaration wins, and a validator keeps the ids it has seen for its lifetime. Among ids nested in different registered schemas the first one entered stays, and a registration made with `setRemoteReference()` replaces it. Register shared schemas before the first schema that references them is used, because a schema that is already compiled keeps the targets it resolved. When schemas come from sources that do not know each other, give each source its own validator (`ZSchema.create()` is cheap) and register shared schemas with `setRemoteReference()`.
 
 ### Diagnosing Missing References
 
@@ -375,12 +412,30 @@ z-schema --strictMode mySchema.json myData.json
 
 # Pick the draft (draft-04, draft-06, draft-07, draft2019-09, draft2020-12)
 z-schema --draft draft-07 mySchema.json myData.json
+
+# Allow file $refs from a directory other than the schema's own
+z-schema --refRoot ./schemas ./schemas/api/root.json data.json
 ```
 
 - `--draft <version>` sets the `version` option (default: `draft2020-12`).
+- `--refRoot <dir>` sets the reference root (default: the directory of the schema file). `<dir>` must be a directory.
 - A schema that declares no id is identified by the `file:` URL of its path (`id` for draft-04, `$id` otherwise), so relative file `$ref`s resolve next to the schema file, from any working directory.
 - An id the schema declares is kept. A relative one is resolved against the file's location; an absolute one (for example `https://example.com/schema.json`) becomes the base for the schema's relative `$ref`s, which are then fetched from there and not read from disk.
-- Remote references are https-only, redirects are not followed, and private/internal addresses are refused.
+
+### References
+
+#### File references
+
+A file `$ref` is read only from inside the reference root: the schema file's directory, or the directory given with `--refRoot <dir>`. Links are resolved first, and the file they lead to must be inside the root. A reference to a network or device path, or a `file:` reference that names a host, is not read. Schemes other than `file:` and `https:` are not read. A scheme-less reference that is not resolved against a `file:` id is resolved against the working directory. `--refRoot` applies to file references only: not to `https` references, and not to the files named on the command line. A reference outside the root prints:
+
+```
+The reference is outside the reference root and is not read: <url>
+Use --refRoot <dir> to allow references inside another directory.
+```
+
+#### Remote references
+
+`https` references are downloaded; `http:` is refused. A download is limited to 10 MB and 30 seconds, and redirects are not followed. The CLI does not contact `localhost`, hosts ending in `.local`, or addresses in the loopback, private, link-local, shared (`100.64.0.0/10`), benchmarking, multicast and other reserved ranges it lists, including the IPv6 ranges that embed an IPv4 address (NAT64, 6to4, Teredo). A downloaded reference that is not valid JSON is reported and stops the run.
 
 ## TypeScript Types
 

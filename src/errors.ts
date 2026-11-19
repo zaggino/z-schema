@@ -78,6 +78,12 @@ export const Errors = {
 export class ValidateError extends Error {
   override readonly name: string = 'ValidateError';
   details?: SchemaErrorDetail[];
+  /**
+   * Set when `maxErrors` left out at least one error detail; absent otherwise.
+   * The property is left off entirely when nothing was left out, so existing code that compares or
+   * serialises errors sees no new key.
+   */
+  declare truncated?: true;
 
   constructor(message: string, details?: SchemaErrorDetail[], options?: ErrorOptions) {
     super(message, options);
@@ -85,8 +91,20 @@ export class ValidateError extends Error {
   }
 }
 
-export function getValidateError({ message, details }: { message?: string; details: SchemaErrorDetail[] }) {
-  return new ValidateError(message || '', details);
+export function getValidateError({
+  message,
+  details,
+  truncated,
+}: {
+  message?: string;
+  details: SchemaErrorDetail[];
+  truncated?: boolean;
+}) {
+  const err = new ValidateError(message || '', details);
+  if (truncated === true) {
+    err.truncated = true;
+  }
+  return err;
 }
 
 /**

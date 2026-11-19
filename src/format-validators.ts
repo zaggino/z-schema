@@ -62,6 +62,57 @@ const dateTimeValidator: FormatValidatorFn = (dateTime: unknown) => {
 // eslint-disable-next-line no-control-regex
 const NON_ASCII_REGEX = /[^\u0000-\u007F]/;
 
+const LINE_FEED_CHAR_CODE = 0x0a;
+const CARRIAGE_RETURN_CHAR_CODE = 0x0d;
+const LINE_SEPARATOR_CHAR_CODE = 0x20_28;
+const PARAGRAPH_SEPARATOR_CHAR_CODE = 0x20_29;
+const RIGHT_SQUARE_BRACKET_CHAR_CODE = 0x5d;
+const DIGIT_ZERO_CHAR_CODE = 0x30;
+const DIGIT_NINE_CHAR_CODE = 0x39;
+
+/**
+ * Whether `value` holds a line terminator (LF, CR, U+2028 or U+2029) between `start` and `end`.
+ * These are the characters `.` in a regular expression does not match.
+ */
+const hasLineTerminator = (value: string, start: number, end: number): boolean => {
+  for (let i = start; i < end; i++) {
+    const code = value.charCodeAt(i);
+    if (
+      code === LINE_FEED_CHAR_CODE ||
+      code === CARRIAGE_RETURN_CHAR_CODE ||
+      code === LINE_SEPARATOR_CHAR_CODE ||
+      code === PARAGRAPH_SEPARATOR_CHAR_CODE
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
+// An address-literal domain starts with this tag (RFC 5321, section 4.1.3); its letters may be in either case.
+const IPV6_LITERAL_PREFIX = '[ipv6:';
+const UPPERCASE_A_CHAR_CODE = 0x41;
+const UPPERCASE_Z_CHAR_CODE = 0x5a;
+const ASCII_CASE_OFFSET = 0x20;
+
+/**
+ * Whether `value` holds `lowerPrefix` at `start`, comparing ASCII letters without regard to case.
+ * `lowerPrefix` must be lowercase ASCII. Compares in place, without building a substring.
+ */
+const hasPrefixIgnoringAsciiCase = (value: string, start: number, lowerPrefix: string): boolean => {
+  for (let i = 0; i < lowerPrefix.length; i++) {
+    // Past the end of `value` this is NaN, which matches nothing.
+    let code = value.charCodeAt(start + i);
+    if (code >= UPPERCASE_A_CHAR_CODE && code <= UPPERCASE_Z_CHAR_CODE) {
+      code += ASCII_CASE_OFFSET;
+    }
+    if (code !== lowerPrefix.charCodeAt(i)) {
+      return false;
+    }
+  }
+  return true;
+};
+
 const emailValidator: FormatValidatorFn = (email: unknown) => {
   if (typeof email !== 'string') {
     return true;
@@ -80,18 +131,25 @@ const emailValidator: FormatValidatorFn = (email: unknown) => {
     return true;
   }
 
-  const ipv6Literal = /^(?<localPart>.+)@\[IPv6:(?<address>[^\]]+)\]$/i.exec(email);
-  if (!ipv6Literal) {
+  // Address literal `<local-part>@[IPv6:<address>]`. An IPv6 address holds no '@', so the literal's '@' is
+  // the last one in the string. isIP rejects an empty address and one containing ']'.
+  const last = email.length - 1;
+  const at = email.lastIndexOf('@');
+  if (
+    at < 1 ||
+    email.charCodeAt(last) !== RIGHT_SQUARE_BRACKET_CHAR_CODE ||
+    !hasPrefixIgnoringAsciiCase(email, at + 1, IPV6_LITERAL_PREFIX)
+  ) {
     return false;
   }
-
-  const localPart = ipv6Literal[1];
-  const addressPart = ipv6Literal[2];
-  if (!isIPModule.default(addressPart, 6)) {
+  // A line break is never part of the local part of an address literal.
+  if (hasLineTerminator(email, 0, at)) {
     return false;
   }
-
-  return isEmailModule.default(`${localPart}@example.com`, { require_tld: false });
+  if (!isIPModule.default(email.slice(at + 1 + IPV6_LITERAL_PREFIX.length, last), 6)) {
+    return false;
+  }
+  return isEmailModule.default(`${email.slice(0, at)}@example.com`, { require_tld: false });
 };
 
 const hostnameValidator: FormatValidatorFn = (hostname: unknown) => {
@@ -239,16 +297,14 @@ const hasValidTildeEscapes = (segment: string): boolean => {
   return true;
 };
 
-const jsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
-  if (typeof pointer !== 'string') {
-    return true;
-  }
-  // JSON Pointer: empty, or a sequence of '/'-prefixed reference tokens.
-  // In each token, '~' must be escaped as '~0' or '~1'.
+const JSON_POINTER_REGEX = /^(?:\/[^/]*)+$/;
+
+/** JSON Pointer: empty, or a sequence of '/'-prefixed reference tokens in which '~' is escaped as '~0' or '~1'. */
+const isJsonPointer = (pointer: string): boolean => {
   if (pointer === '') {
     return true;
   }
-  if (!/^(?:\/[^/]*)+$/.test(pointer)) {
+  if (!JSON_POINTER_REGEX.test(pointer)) {
     return false;
   }
   const tokens = pointer.split('/');
@@ -260,33 +316,49 @@ const jsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   return true;
 };
 
+const jsonPointerValidator: FormatValidatorFn = (pointer: unknown) =>
+  typeof pointer !== 'string' || isJsonPointer(pointer);
+
+/**
+ * End index of the integer prefix of a Relative JSON Pointer: `0`, or a non-zero digit followed by
+ * any number of digits. 0 when the string does not start with one.
+ */
+const integerPrefixEnd = (pointer: string): number => {
+  const first = pointer.charCodeAt(0);
+  if (first === DIGIT_ZERO_CHAR_CODE) {
+    return 1;
+  }
+  // also false for the empty string, whose first char code is NaN
+  if (!(first > DIGIT_ZERO_CHAR_CODE && first <= DIGIT_NINE_CHAR_CODE)) {
+    return 0;
+  }
+  let end = 1;
+  while (end < pointer.length) {
+    const code = pointer.charCodeAt(end);
+    if (code < DIGIT_ZERO_CHAR_CODE || code > DIGIT_NINE_CHAR_CODE) {
+      break;
+    }
+    end++;
+  }
+  return end;
+};
+
 const relativeJsonPointerValidator: FormatValidatorFn = (pointer: unknown) => {
   if (typeof pointer !== 'string') {
     return true;
   }
   // Relative JSON Pointer: non-negative integer prefix (no leading zeros unless zero),
   // followed by either '#', a JSON Pointer, or nothing.
-  const match = /^(?<int>0|[1-9]\d*)(?<suffix>.*)$/.exec(pointer);
-  if (!match) {
+  const prefixEnd = integerPrefixEnd(pointer);
+  if (prefixEnd === 0) {
     return false;
   }
-  const suffix = match[2];
-  if (suffix === '' || suffix === '#') {
-    return true;
-  }
-  if (!suffix.startsWith('/')) {
+  // Unlike `json-pointer`, a line terminator anywhere after the prefix makes the value invalid.
+  if (hasLineTerminator(pointer, prefixEnd, pointer.length)) {
     return false;
   }
-  if (!/^(?:\/[^/]*)+$/.test(suffix)) {
-    return false;
-  }
-  const tokens = suffix.split('/');
-  for (let i = 1; i < tokens.length; i++) {
-    if (!hasValidTildeEscapes(tokens[i])) {
-      return false;
-    }
-  }
-  return true;
+  const suffix = pointer.slice(prefixEnd);
+  return suffix === '#' || isJsonPointer(suffix);
 };
 
 const timeValidator: FormatValidatorFn = (time: unknown) => {

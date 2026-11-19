@@ -6,6 +6,12 @@
 export const DEFAULT_MAX_RECURSION_DEPTH = 100;
 
 /**
+ * Default maximum number of error details one validation reports, counted through `inner`.
+ * Used as the default for {@link ZSchemaOptions.maxErrors}.
+ */
+export const DEFAULT_MAX_ERRORS = 1000;
+
+/**
  * Maximum allowed value for {@link ZSchemaOptions.asyncTimeout} in milliseconds.
  * Values exceeding this limit are clamped during option normalization to
  * prevent resource exhaustion (CWE-400).

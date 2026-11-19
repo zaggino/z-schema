@@ -2,7 +2,11 @@ import type { JsonSchema } from './json-schema-versions.js';
 
 import { bumpGlobalSchemaStateGeneration } from './compiled-schema-cache.js';
 
-// a sync function that returns the schema for a URI, or undefined when it has none
+/**
+ * A sync function that loads a schema by URI, for example from a schemas directory, or returns `undefined` when
+ * it has none. It is called when a `$ref` names a URI that is not registered. z-schema compiles a copy of the
+ * returned object and does not modify it.
+ */
 export type SchemaReader = (uri: string) => JsonSchema | undefined;
 
 let _schemaReader: SchemaReader | undefined;

@@ -168,6 +168,11 @@ const shapes = [{ kind: 'circle', r: 2 }, { kind: 'square', side: 3 }, { kind: '
 const values = ['text', 7, [1, 2, 3]];
 const oneOfAnyOfData = range(50).map((i) => ({ shape: shapes[i % 4], value: values[i % 3] }));
 
+const uniqueItemsSchema = { type: 'array', uniqueItems: true };
+
+const uniqueRecords = (count: number): Array<Record<string, unknown>> =>
+  range(count).map((i) => ({ id: i, name: `item-${i}`, tags: ['a', 'b'], meta: { on: true, n: i % 7 } }));
+
 export const cases: BenchCase[] = [
   { name: 'flat-properties', schema: flatSchema, data: flatValid },
   {
@@ -218,6 +223,15 @@ export const cases: BenchCase[] = [
       },
     },
     data: orders,
+  },
+  { name: 'unique-items-objects-small', schema: uniqueItemsSchema, data: uniqueRecords(16) },
+  { name: 'unique-items-objects-medium', schema: uniqueItemsSchema, data: uniqueRecords(40) },
+  { name: 'unique-items-objects-large', schema: uniqueItemsSchema, data: uniqueRecords(1000) },
+  { name: 'unique-items-primitives-large', schema: uniqueItemsSchema, data: range(10_000) },
+  {
+    name: 'unique-items-records-payload',
+    schema: uniqueItemsSchema,
+    data: range(64).map((i) => ({ id: i, payload: range(500) })),
   },
   {
     name: 'ref-heavy',
@@ -284,6 +298,37 @@ export const cases: BenchCase[] = [
     data: flatInvalid,
     expectValid: false,
     expectErrors: 5,
+  },
+  {
+    name: 'invalid-many-errors',
+    options: { breakOnFirstError: false },
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: { id: { type: 'integer' }, name: { type: 'string' } },
+        required: ['id', 'name'],
+      },
+    },
+    data: range(250).map(() => ({ id: 'x' })),
+    expectValid: false,
+    expectErrors: 500,
+  },
+  {
+    // 4,000 errors are produced, more than the default maxErrors (1000). No expectErrors: the reported
+    // count depends on whether the measured build has the option.
+    name: 'invalid-many-errors-capped',
+    options: { breakOnFirstError: false },
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: { id: { type: 'integer' }, name: { type: 'string' } },
+        required: ['id', 'name'],
+      },
+    },
+    data: range(2000).map(() => ({ id: 'x' })),
+    expectValid: false,
   },
   { name: 'schema-object-validate', mode: 'schema-object', schema: flatSchema, data: flatValid },
   {

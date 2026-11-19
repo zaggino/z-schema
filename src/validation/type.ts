@@ -3,7 +3,7 @@ import type { Report } from '../report.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 import type { BuildState, Check } from './fast-shared.js';
 
-import { areEqual } from '../utils/json.js';
+import { areEqual } from '../utils/equality.js';
 import { whatIs } from '../utils/what-is.js';
 import { expectArray, unsupported } from './fast-shared.js';
 import { shouldSkipValidate } from './shared.js';
@@ -12,6 +12,14 @@ import { shouldSkipValidate } from './shared.js';
 // type
 // ---------------------------------------------------------------------------
 
+/**
+ * True when a value of type `jsonType` is rejected by a string-valued `type` keyword
+ * (an integer is accepted by `number`).
+ */
+export function isTypeMismatch(type: string, jsonType: string): boolean {
+  return jsonType !== type && (jsonType !== 'integer' || type !== 'number');
+}
+
 export function typeValidator(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.5.5.2.2
   if (shouldSkipValidate(ctx.validateOptions, ['INVALID_TYPE'])) {
@@ -19,7 +27,7 @@ export function typeValidator(ctx: ZSchemaBase, report: Report, schema: JsonSche
   }
   const jsonType = whatIs(json);
   if (typeof schema.type === 'string') {
-    if (jsonType !== schema.type && (jsonType !== 'integer' || schema.type !== 'number')) {
+    if (isTypeMismatch(schema.type, jsonType)) {
       report.addError('INVALID_TYPE', [schema.type, jsonType], undefined, schema, 'type');
     }
   } else if (!schema.type!.includes(jsonType) && (jsonType !== 'integer' || !schema.type!.includes('number'))) {

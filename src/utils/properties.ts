@@ -1,11 +1,12 @@
+/** Sets `key` on `to` as an own enumerable data property. Unlike an assignment, an own `__proto__` key stays a key. */
+export function defineOwn(to: object, key: PropertyKey, value: unknown): void {
+  Object.defineProperty(to, key, { value, enumerable: true, writable: true, configurable: true });
+}
+
 export function copyProp(from: object, to: object, key: string | number | symbol, fn?: (value: unknown) => unknown) {
   if (Object.hasOwn(from, key)) {
-    Object.defineProperty(to, key, {
-      value: fn ? fn((from as Record<PropertyKey, unknown>)[key]) : (from as Record<PropertyKey, unknown>)[key],
-      enumerable: true,
-      writable: true,
-      configurable: true,
-    });
+    const value = (from as Record<PropertyKey, unknown>)[key];
+    defineOwn(to, key, fn ? fn(value) : value);
   }
 }
 
