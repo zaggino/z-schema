@@ -29,7 +29,7 @@ Line coverage status: **high**
 | src/utils/rfc-3986.ts         |    100% |        100% |       100% |     100% |
 | src/utils/rfc-3987.ts         |    100% |        100% |       100% |     100% |
 | src/utils/rfc-6570.ts         |    100% |        100% |       100% |     100% |
-| src/utils/schema-regex.ts     |     98% |         98% |       100% |      92% |
+| src/utils/schema-regex.ts     |    100% |        100% |       100% |      97% |
 | src/utils/symbols.ts          |    100% |        100% |       100% |     100% |
 | src/utils/time.ts             |     97% |         97% |       100% |      95% |
 | src/utils/unicode.ts          |    100% |        100% |       100% |     100% |
