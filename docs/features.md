@@ -208,7 +208,7 @@ validator.validate(data, schema);
 
 On a cached schema (a function returned by `compile()`, or a schema object validated before), a custom format validator may be called before other keywords of the same schema are checked, and is called again when the data turns out to be invalid. Validators should therefore not have effects that other keywords of the schema depend on, and their effects should be safe to repeat. Callback-style validators are not affected.
 
-## Unicode Property Escapes Support
+## Unicode Patterns
 
 Fully supports [Unicode property escapes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions/Unicode_property_escapes) in JSON Schema `pattern` values (e.g., `\p{L}`). This allows patterns that match Unicode character properties such as letters, numbers, or scripts, in any JavaScript environment that supports them (Node.js >= 10, all modern browsers).
 
@@ -220,6 +220,17 @@ Fully supports [Unicode property escapes](https://developer.mozilla.org/en-US/do
 ```
 
 z-schema automatically uses the `u` (Unicode) flag for patterns containing Unicode property escapes. If your environment does not support them, such patterns are reported as invalid.
+
+A `pattern` that contains a code point escape is compiled with the `u` flag as a whole, like one with a property escape:
+
+```json
+{
+  "type": "string",
+  "pattern": "^[\\u{1F600}]$"
+}
+```
+
+The pattern must therefore be valid in unicode mode. A pattern that mixes a code point escape with syntax only legacy mode accepts is reported as an invalid pattern.
 
 ## Keyword field
 

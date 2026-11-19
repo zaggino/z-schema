@@ -45,6 +45,31 @@ describe('Unicode property escapes in pattern keyword', () => {
   });
 });
 
+const BS = String.fromCharCode(92);
+
+describe('Code point escapes in pattern keyword', () => {
+  it('should match the character named by a code point escape', () => {
+    const validator = ZSchema.create();
+    const schema = { type: 'string', pattern: `^${BS}u{61}$` };
+    expect(validator.validateSafe('a', schema).valid).toBe(true);
+    expect(validator.validateSafe('u'.repeat(61), schema).valid).toBe(false);
+  });
+
+  it('should reject the named character in a negated class', () => {
+    const validator = ZSchema.create();
+    const schema = { type: 'string', pattern: `^[^${BS}u{1F600}]$` };
+    expect(validator.validateSafe('x', schema).valid).toBe(true);
+    expect(validator.validateSafe(String.fromCodePoint(0x1_f6_00), schema).valid).toBe(false);
+  });
+
+  it('should accept the named character in a positive class', () => {
+    const validator = ZSchema.create();
+    const schema = { type: 'string', pattern: `^[${BS}u{1F600}]$` };
+    expect(validator.validateSafe(String.fromCodePoint(0x1_f6_00), schema).valid).toBe(true);
+    expect(validator.validateSafe('x', schema).valid).toBe(false);
+  });
+});
+
 describe('unicodeLength', () => {
   it('should count lone low surrogate as one character', () => {
     expect(unicodeLength('\uDC00')).toBe(1);

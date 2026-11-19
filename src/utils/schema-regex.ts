@@ -9,6 +9,43 @@ type CompileSchemaRegexResult =
   | { ok: true; value: RegExp }
   | { ok: false; error: { pattern: string; message: string } };
 
+const unicodePropertyEscape = /\\[pP]{/;
+const nonBmpCharacter = /[\u{10000}-\u{10FFFF}]/u;
+const surrogatePairEscape = /\\uD[89AB][0-9A-Fa-f]{2}\\uD[CDEF][0-9A-Fa-f]{2}/;
+
+const BACKSLASH = 0x5c;
+const LOWERCASE_U = 0x75;
+const LEFT_BRACE = 0x7b;
+const RIGHT_BRACE = 0x7d;
+
+const isHexDigit = (code: number): boolean =>
+  (code >= 0x30 && code <= 0x39) || (code >= 0x41 && code <= 0x46) || (code >= 0x61 && code <= 0x66);
+
+/**
+ * Whether `pattern` holds a code point escape: an unescaped backslash, `u`, `{`, one or more hex digits, `}`.
+ * Escaped pairs are skipped, so an escaped backslash followed by `u{61}` is not one.
+ */
+const hasCodePointEscape = (pattern: string): boolean => {
+  const last = pattern.length - 1;
+  for (let i = 0; i < last; i++) {
+    if (pattern.charCodeAt(i) !== BACKSLASH) {
+      continue;
+    }
+    if (pattern.charCodeAt(i + 1) === LOWERCASE_U && pattern.charCodeAt(i + 2) === LEFT_BRACE) {
+      let j = i + 3;
+      while (isHexDigit(pattern.charCodeAt(j))) {
+        j++;
+      }
+      if (j > i + 3 && pattern.charCodeAt(j) === RIGHT_BRACE) {
+        return true;
+      }
+    }
+    // skip the escaped character
+    i++;
+  }
+  return false;
+};
+
 // Patterns are compiled on every validation of `pattern` / `patternProperties` /
 // `additionalProperties`, and the ReDoS check (safe-regex2) is expensive, so results
 // are memoized per pattern string. Sharing a RegExp across callers is safe because
@@ -74,11 +111,11 @@ function compileSchemaRegexUncached(pattern: string): CompileSchemaRegexResult {
     };
   }
 
-  const unicodePropertyEscape = /\\[pP]{/;
-  const nonBmpCharacter = /[\u{10000}-\u{10FFFF}]/u;
-  const surrogatePairEscape = /\\uD[89AB][0-9A-Fa-f]{2}\\uD[CDEF][0-9A-Fa-f]{2}/;
   const needsUnicode =
-    unicodePropertyEscape.test(pattern) || nonBmpCharacter.test(pattern) || surrogatePairEscape.test(pattern);
+    unicodePropertyEscape.test(pattern) ||
+    nonBmpCharacter.test(pattern) ||
+    surrogatePairEscape.test(pattern) ||
+    hasCodePointEscape(pattern);
   // Try compiling without 'u' flag if not needed
   if (needsUnicode) {
     // Try compiling with 'u' flag only
