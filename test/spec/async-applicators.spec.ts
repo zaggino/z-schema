@@ -382,10 +382,7 @@ describe('async hardening', () => {
     const error = new TypeError('boom');
     const { validator, g, f } = createRejecting(error);
     const pending = validator.validate('x', throwingSchema);
-    const outcome = pending.then(
-      () => null,
-      (error_: unknown) => error_
-    );
+    const outcome = pending.then(() => null).catch((error_: unknown) => error_);
     await nextTurn();
     g.resolve(false);
     await nextTurn();
