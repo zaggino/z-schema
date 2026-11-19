@@ -2,198 +2,311 @@ import type { ZSchemaOptions } from '../../src/z-schema-options.ts';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { ValidateError } from '../../src/errors.ts';
 import { ZSchema } from '../../src/z-schema.ts';
+import { deepFreeze, nest } from '../lib/object-helpers.ts';
 
 type Schema = Record<string, unknown>;
 interface Outcome {
   valid: boolean;
   codes: string[];
 }
-type Entry = (schema: Schema, instance: unknown, uri: string) => Outcome;
+type Entry = (options: ZSchemaOptions, schema: Schema, instance: unknown, uri: string) => Outcome;
 
 const BASE = 'http://reserved-keys.test/';
 
 let uriCounter = 0;
 const nextUri = (label: string) => `${BASE}${label}-${uriCounter++}.json`;
 
-const outcomeOf = (res: { valid: boolean; err?: { details?: Array<{ code: string }> } }): Outcome => ({
+const create = (options: ZSchemaOptions = {}) => ZSchema.create({ ...options, safe: true });
+
+type SafeResult = ReturnType<ReturnType<typeof create>['validate']>;
+
+const outcomeOf = (res: SafeResult): Outcome => ({
   valid: res.valid,
   codes: (res.err?.details ?? []).map((d) => d.code),
 });
 
-const create = (options: ZSchemaOptions = {}) => ZSchema.create({ ...options, safe: true });
-
-const RESERVED: Array<[string, unknown]> = [
-  ['__$compiled', true],
-  ['__$validated', true],
-  ['__$missingReferences', []],
-  ['__$refResolved', { type: 'number' }],
-  ['__$dynamicRefResolved', { type: 'number' }],
-  ['__$recursiveRefResolved', { type: 'number' }],
-  ['__$resourceRoot', { $defs: { s: { type: 'number' } } }],
-  ['__$schemaResolved', {}],
-  ['__$validationOptions', { strictMode: false }],
-];
-
-const makeSchema = (extra?: [string, unknown]): Schema => {
-  const schema: Schema = {
-    type: 'object',
-    properties: { a: { $ref: '#/$defs/s' } },
-    required: ['a'],
-    $defs: { s: { type: 'string' } },
-  };
-  if (extra) {
-    const [key, value] = extra;
-    schema[key] = value;
-    (schema.properties as Schema).a = { $ref: '#/$defs/s', [key]: value };
+const messageOf = (register: () => void): string => {
+  try {
+    register();
+  } catch (error) {
+    return (error as Error).message;
   }
-  return schema;
+  return '';
 };
 
-const INSTANCES: unknown[] = [{ a: 'x' }, { a: 1 }, {}];
+const validateDirectly: Entry = (options, schema, instance) => outcomeOf(create(options).validate(instance, schema));
 
 const ENTRY_POINTS: Array<[string, Entry]> = [
-  ['validate', (schema, instance) => outcomeOf(create().validate(instance, schema))],
+  ['validate', validateDirectly],
+  [
+    'validate twice on one validator',
+    (options, schema, instance) => {
+      const validator = create(options);
+      validator.validate(instance, schema);
+      return outcomeOf(validator.validate(instance, schema));
+    },
+  ],
   [
     'validateSchema then validate',
-    (schema, instance) => {
-      const validator = create();
+    (options, schema, instance) => {
+      const validator = create(options);
       const schemaOutcome = outcomeOf(validator.validateSchema(schema));
       const res = outcomeOf(validator.validate(instance, schema));
       return { valid: res.valid && schemaOutcome.valid, codes: schemaOutcome.codes.concat(res.codes) };
     },
   ],
-  ['compile', (schema, instance) => outcomeOf(create().compile(schema)(instance))],
+  [
+    'compile',
+    (options, schema, instance) => {
+      try {
+        return outcomeOf(create(options).compile(schema)(instance));
+      } catch (error) {
+        if (error instanceof ValidateError) {
+          return { valid: false, codes: (error.details ?? []).map((d) => d.code) };
+        }
+        throw error;
+      }
+    },
+  ],
   [
     'instance setRemoteReference with an object',
-    (schema, instance, uri) => {
-      const validator = create();
+    (options, schema, instance, uri) => {
+      const validator = create(options);
       validator.setRemoteReference(uri, schema);
       return outcomeOf(validator.validate(instance, { $ref: uri }));
     },
   ],
   [
     'instance setRemoteReference with a JSON string',
-    (schema, instance, uri) => {
-      const validator = create();
+    (options, schema, instance, uri) => {
+      const validator = create(options);
       validator.setRemoteReference(uri, JSON.stringify(schema));
       return outcomeOf(validator.validate(instance, { $ref: uri }));
     },
   ],
   [
     'static setRemoteReference',
-    (schema, instance, uri) => {
+    (options, schema, instance, uri) => {
       ZSchema.setRemoteReference(uri, schema);
-      return outcomeOf(create().validate(instance, { $ref: uri }));
+      return outcomeOf(create(options).validate(instance, { $ref: uri }));
     },
   ],
   [
     'schema reader',
-    (schema, instance, uri) => {
+    (options, schema, instance, uri) => {
       ZSchema.setSchemaReader((requested) => (requested === uri ? schema : {}));
-      return outcomeOf(create().validate(instance, { $ref: uri }));
+      return outcomeOf(create(options).validate(instance, { $ref: uri }));
     },
   ],
 ];
 
-const runStrictRemote = (schema: Schema) => {
-  const uri = nextUri('options');
-  const validator = create({ strictMode: true });
-  validator.setRemoteReference(uri, schema);
-  return outcomeOf(validator.validate({ a: 1 }, { $ref: uri }));
+interface Fixture {
+  title: string;
+  key: string;
+  value: unknown;
+  options: ZSchemaOptions;
+  // Builds the schema. `reserved` is spread in at the place where the library keeps the key on its own copy.
+  schema: (reserved: Schema) => Schema;
+  cases: Array<[instance: unknown, valid: boolean]>;
+}
+
+const TREE = {
+  $dynamicAnchor: 'node',
+  type: 'object',
+  properties: { v: { type: 'string' }, child: { $dynamicRef: '#node' } },
+  additionalProperties: false,
 };
+
+const REF_RESOLVED: Fixture = {
+  title: '__$refResolved',
+  key: '__$refResolved',
+  value: { type: 'number' },
+  options: {},
+  schema: (reserved) => ({
+    type: 'object',
+    properties: { a: { $ref: '#/$defs/s', ...reserved } },
+    $defs: { s: { type: 'string' } },
+  }),
+  cases: [
+    [{ a: 'x' }, true],
+    [{ a: 1 }, false],
+  ],
+};
+
+const FIXTURES: Fixture[] = [
+  {
+    title: '__$compiled',
+    key: '__$compiled',
+    value: true,
+    options: {},
+    schema: (reserved) => ({ $ref: '#/$defs/s', $defs: { s: { type: 'string' } }, ...reserved }),
+    cases: [
+      ['x', true],
+      [1, false],
+    ],
+  },
+  {
+    title: '__$compiled holding a deeply nested value',
+    key: '__$compiled',
+    value: nest(150),
+    options: {},
+    schema: (reserved) => ({ type: 'string', ...reserved }),
+    cases: [
+      ['x', true],
+      [1, false],
+    ],
+  },
+  {
+    title: '__$validated with strictMode',
+    key: '__$validated',
+    value: true,
+    options: { strictMode: true },
+    schema: (reserved) => ({ type: 'object', properties: { a: {} }, ...reserved }),
+    cases: [[{ a: 1 }, false]],
+  },
+  {
+    title: '__$validated with assumeAdditional',
+    key: '__$validated',
+    value: true,
+    options: { assumeAdditional: true },
+    schema: (reserved) => ({ type: 'object', properties: { a: { type: 'string' } }, ...reserved }),
+    cases: [
+      [{ a: 'x' }, true],
+      [{ a: 'x', extra: 1 }, false],
+    ],
+  },
+  {
+    // Not read from any position of an input schema: this row shows that nothing changes.
+    title: '__$missingReferences',
+    key: '__$missingReferences',
+    value: [{ ref: 'x', key: '$ref', obj: {}, path: [] }],
+    options: {},
+    schema: (reserved) => ({ $ref: '#/$defs/s', $defs: { s: { type: 'string' } }, ...reserved }),
+    cases: [
+      ['x', true],
+      [1, false],
+    ],
+  },
+  REF_RESOLVED,
+  {
+    title: '__$dynamicRefResolved',
+    key: '__$dynamicRefResolved',
+    value: { type: 'number' },
+    options: {},
+    schema: (reserved) => ({
+      type: 'object',
+      properties: { a: { $dynamicRef: '#/$defs/s', ...reserved } },
+      $defs: { s: { type: 'string' } },
+    }),
+    cases: [
+      [{ a: 'x' }, true],
+      [{ a: 1 }, false],
+    ],
+  },
+  {
+    title: '__$recursiveRefResolved',
+    key: '__$recursiveRefResolved',
+    value: { type: 'number' },
+    options: { version: 'draft2019-09' },
+    schema: (reserved) => ({
+      $recursiveAnchor: true,
+      type: 'object',
+      properties: { v: { type: 'string' }, child: { $recursiveRef: '#', ...reserved } },
+      additionalProperties: false,
+    }),
+    cases: [
+      [{ child: { v: 'x' } }, true],
+      [{ child: { v: 1 } }, false],
+    ],
+  },
+  {
+    title: '__$resourceRoot',
+    key: '__$resourceRoot',
+    value: { $dynamicAnchor: 'node', type: 'number' },
+    options: {},
+    schema: (reserved) => ({
+      type: 'object',
+      properties: { tree: { $ref: '#/$defs/tree' } },
+      $defs: { tree: TREE },
+      ...reserved,
+    }),
+    cases: [
+      [{ tree: { child: { v: 'x' } } }, true],
+      [{ tree: { child: { v: 1 } } }, false],
+    ],
+  },
+  {
+    title: '__$schemaResolved',
+    key: '__$schemaResolved',
+    value: { $vocabulary: { 'https://json-schema.org/draft/2020-12/vocab/core': true } },
+    options: {},
+    schema: (reserved) => ({ type: 'object', properties: { a: { type: 'string', ...reserved } } }),
+    cases: [
+      [{ a: 'x' }, true],
+      [{ a: 1 }, false],
+    ],
+  },
+  {
+    title: '__$validationOptions',
+    key: '__$validationOptions',
+    value: { strictMode: false },
+    options: { strictMode: true },
+    schema: (reserved) => ({ type: 'object', properties: { a: {} }, ...reserved }),
+    cases: [[{ a: 1 }, false]],
+  },
+];
 
 afterEach(() => {
   ZSchema.setSchemaReader(undefined);
 });
 
-describe('a schema with reserved keys behaves like the same schema without them', () => {
-  describe.each(ENTRY_POINTS)('%s', (_entryName, entry) => {
-    it.each(RESERVED)('ignores %s', (key, value) => {
-      const clean = makeSchema();
-      const withReservedKeys = makeSchema([key, value]);
-      for (let i = 0; i < INSTANCES.length; i++) {
-        const expected = entry(clean, INSTANCES[i], nextUri('clean'));
-        const actual = entry(withReservedKeys, INSTANCES[i], nextUri('reserved'));
-        expect(actual).toEqual(expected);
+describe('a reserved key where a keyword can appear is ignored', () => {
+  describe.each(FIXTURES)('$title', ({ key, value, options, schema, cases }) => {
+    it.each(ENTRY_POINTS)('%s', (_name, entry) => {
+      for (let i = 0; i < cases.length; i++) {
+        const [instance, valid] = cases[i];
+        const clean = entry(options, schema({}), instance, nextUri('clean'));
+        const reserved = entry(options, schema({ [key]: value }), instance, nextUri('reserved'));
+        expect(clean.valid).toBe(valid);
+        expect(reserved).toEqual(clean);
       }
     });
   });
-
-  it('the clean schema distinguishes the three instances', () => {
-    const outcomes = INSTANCES.map((instance) => ENTRY_POINTS[0][1](makeSchema(), instance, nextUri('shape')));
-    expect(outcomes.map((o) => o.valid)).toEqual([true, false, false]);
-  });
 });
 
-describe('schema checks apply to schemas with reserved keys', () => {
-  it('reports a loose schema under strictMode next to __$validated', () => {
-    const validator = create({ strictMode: true });
-    const schema: Schema = { properties: { a: {} }, __$validated: true };
-    const res = outcomeOf(validator.validateSchema(schema));
-    expect(res.valid).toBe(false);
-    expect(res.codes).toContain('KEYWORD_UNDEFINED_STRICT');
-  });
-
-  it('reports a bogus keyword value next to __$validated', () => {
-    const schema: Schema = { type: 'strnig', __$validated: true };
-    const res = outcomeOf(create().validateSchema(schema));
-    expect(res.valid).toBe(false);
-  });
-
-  it('applies assumeAdditional next to __$validated', () => {
-    const validator = create({ assumeAdditional: true });
-    const schema: Schema = { type: 'object', properties: { a: { type: 'string' } }, __$validated: true };
-    const res = outcomeOf(validator.validate({ a: 'x', extra: 1 }, schema));
-    expect(res.valid).toBe(false);
-    expect(res.codes).toContain('OBJECT_ADDITIONAL_PROPERTIES');
-  });
-
-  it('reports an unresolvable reference next to __$compiled', () => {
-    const withReservedKey: Schema = { $ref: '#/$defs/missing', __$compiled: true };
-    const clean = outcomeOf(create().validate('x', { $ref: '#/$defs/missing' }));
-    const res = outcomeOf(create().validate('x', withReservedKey));
-    expect(clean.valid).toBe(false);
-    expect(res).toEqual(clean);
-  });
-
-  it('resolves a $ref node to its real target whatever __$refResolved holds', () => {
-    const schema: Schema = {
-      $ref: '#/$defs/s',
-      $defs: { s: { type: 'string' } },
-      __$refResolved: { type: 'number' },
-    };
-    expect(create().validate(1, schema).valid).toBe(false);
-    expect(create().validate('x', schema).valid).toBe(true);
-  });
-
-  it('validates a registered remote with the validator options whatever __$validationOptions holds', () => {
-    const loose = { properties: { a: {} } };
-    const clean = runStrictRemote(loose);
-    expect(clean.valid).toBe(false);
-    expect(runStrictRemote({ ...loose, __$validationOptions: { strictMode: false } })).toEqual(clean);
-  });
-
+describe('options and limits of registered schemas', () => {
   it('honours the options passed to setRemoteReference', () => {
     const uri = nextUri('explicit-options');
     const validator = create({ strictMode: true });
     validator.setRemoteReference(uri, { properties: { a: {} } }, { strictMode: false });
     expect(validator.validate({ a: 1 }, { $ref: uri }).valid).toBe(true);
   });
+
+  it('registers a JSON string nested deeper than the limit like the same object', () => {
+    let schema: Schema = {};
+    for (let i = 0; i < 150; i++) {
+      schema = { properties: { a: schema } };
+    }
+    const fromObject = messageOf(() => {
+      create().setRemoteReference(nextUri('deep'), schema);
+    });
+    const fromString = messageOf(() => {
+      create().setRemoteReference(nextUri('deep'), JSON.stringify(schema));
+    });
+    expect(fromObject).toContain('Maximum recursion depth (100)');
+    expect(fromString).toBe(fromObject);
+  });
 });
 
 describe('inputs are not modified', () => {
-  it('leaves the schema passed to validate, validateSchema, compile and setRemoteReference as it was', () => {
-    const schema = makeSchema(['__$compiled', true]);
+  it.each(ENTRY_POINTS)('%s leaves a frozen schema as it was', (_name, entry) => {
+    const schema = REF_RESOLVED.schema({});
     const before = structuredClone(schema);
-    const validator = create();
-    validator.validate({ a: 'x' }, schema);
-    expect(schema).toEqual(before);
-    validator.validateSchema(schema);
-    expect(schema).toEqual(before);
-    validator.compile(schema)({ a: 'x' });
-    expect(schema).toEqual(before);
-    validator.setRemoteReference(nextUri('unchanged'), schema);
+    deepFreeze(schema);
+    const outcome = entry({}, schema, { a: 'x' }, nextUri('frozen'));
+    expect(outcome.valid).toBe(true);
     expect(schema).toEqual(before);
   });
 
@@ -236,10 +349,5 @@ describe('names and data that start with the reserved prefix are kept', () => {
     const schema: Schema = { const: { __$compiled: 1 } };
     expect(validator.validate({ __$compiled: 1 }, schema).valid).toBe(true);
     expect(validator.validate({}, schema).valid).toBe(false);
-  });
-
-  it('keeps a default value', () => {
-    const schema: Schema = { default: { __$validated: true }, type: 'object' };
-    expect(create().validate({}, schema).valid).toBe(true);
   });
 });

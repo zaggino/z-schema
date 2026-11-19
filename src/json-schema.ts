@@ -2,7 +2,9 @@ import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { Reference } from './schema-compiler.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
+import { cloneDepthError } from './utils/clone.js';
 import { DEFAULT_MAX_RECURSION_DEPTH } from './utils/constants.js';
+import { defineOwn } from './utils/properties.js';
 import { getRemotePath, isAbsoluteUri } from './utils/uri.js';
 import { isObject } from './utils/what-is.js';
 
@@ -30,39 +32,44 @@ const SCHEMA_MAP_KEYWORDS_SET = new Set<string>([
   'properties',
 ]);
 
+/** How `cloneInputSchema` treats an object: as a schema, as a map from names to schemas, or as data. */
 const CLONE_AS_SCHEMA = 0;
 const CLONE_AS_MAP = 1;
 const CLONE_AS_DATA = 2;
+type CloneMode = typeof CLONE_AS_SCHEMA | typeof CLONE_AS_MAP | typeof CLONE_AS_DATA;
 
 /**
- * Deep clone of a schema supplied by a caller. It clones like `deepClone` (sorted keys, shared objects cloned
- * once, cycles kept, the same error past `maxDepth`), except that keys with the reserved `__$` prefix are not
- * copied: z-schema keeps its own state on schema objects under such keys, and that state is never taken from
- * the input.
+ * Turns a schema supplied by a caller into the library's own copy of it. It clones like `deepClone` (sorted
+ * keys, shared objects cloned once, cycles kept, the same error past `maxDepth`), except that keys with the
+ * reserved `__$` prefix are not copied from objects that can be schemas: z-schema keeps its own state on
+ * schema objects under such keys.
  *
  * What is dropped and what is kept:
  *
  * - `__$` keys are dropped from every object that can be a schema, the values of unknown keywords included.
+ *   Their values are not read.
  * - The names inside `properties`, `patternProperties`, `$defs`, `definitions`, `dependencies`,
  *   `dependentSchemas` and `dependentRequired` are kept whatever they are: a property may be called
  *   `__$compiled`. The value under such a name is a schema again.
  * - Everything under `enum`, `const`, `default` and `examples` is data and is copied as it is.
  *
- * An object reached both as a schema and as data gets one clone for each.
+ * An object reached in more than one of these three ways (as a schema, as such a map, as data) gets one clone
+ * for each.
+ *
+ * @param schema - The schema as the caller supplied it. It is not modified.
+ * @param maxDepth - Nesting allowed below `schema`.
+ * @returns The clone.
+ * @throws {@link Error} when the schema is nested deeper than `maxDepth`. Values under dropped keys do not count.
  */
-export const cloneInputSchema = <T>(src: T, maxDepth = DEFAULT_MAX_RECURSION_DEPTH): T => {
+export const cloneInputSchema = (schema: JsonSchema, maxDepth = DEFAULT_MAX_RECURSION_DEPTH): JsonSchemaInternal => {
   // One table per mode: the clones of the same object differ between modes.
-  const visited: Array<Map<object, unknown> | undefined> = [undefined, undefined, undefined];
-  const cloneNode = (node: unknown, mode: number, depth: number): unknown => {
+  const visited: [Map<object, unknown>?, Map<object, unknown>?, Map<object, unknown>?] = [];
+  const cloneNode = (node: unknown, mode: CloneMode, depth: number): unknown => {
     if (typeof node !== 'object' || node === null) {
       return node;
     }
     if (depth >= maxDepth) {
-      // The same text as deepClone: callers and tests know this error by its message.
-      throw new Error(
-        `Maximum recursion depth (${maxDepth}) exceeded in deepClone. ` +
-          'If your schema or data is deeply nested and valid, increase the maxRecursionDepth option.'
-      );
+      throw cloneDepthError(maxDepth);
     }
     let seen = visited[mode];
     if (seen === undefined) {
@@ -83,34 +90,31 @@ export const cloneInputSchema = <T>(src: T, maxDepth = DEFAULT_MAX_RECURSION_DEP
     }
     const res: Record<string, unknown> = {};
     seen.set(node, res);
-    const keys = Object.keys(node).sort();
+    const obj = node as Record<string, unknown>;
+    const keys = Object.keys(obj).sort();
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      const value = (node as Record<string, unknown>)[key];
-      let childMode = mode;
+      // Checked before the value is read: nothing under a reserved key is looked at.
+      if (mode === CLONE_AS_SCHEMA && isInternalKey(key)) {
+        continue;
+      }
+      const value = obj[key];
+      let childMode: CloneMode = mode;
       if (mode === CLONE_AS_MAP) {
         childMode = CLONE_AS_SCHEMA;
       } else if (mode === CLONE_AS_SCHEMA) {
-        if (isInternalKey(key)) {
-          continue;
-        }
         if (NON_SCHEMA_KEYWORDS_SET.has(key)) {
           childMode = CLONE_AS_DATA;
         } else if (SCHEMA_MAP_KEYWORDS_SET.has(key) && isObject(value)) {
           childMode = CLONE_AS_MAP;
         }
       }
-      // defineProperty, as deepClone does through copyProp: an own `__proto__` key stays an own key.
-      Object.defineProperty(res, key, {
-        value: cloneNode(value, childMode, depth + 1),
-        enumerable: true,
-        writable: true,
-        configurable: true,
-      });
+      // An own `__proto__` key stays an own key.
+      defineOwn(res, key, cloneNode(value, childMode, depth + 1));
     }
     return res;
   };
-  return cloneNode(src, CLONE_AS_SCHEMA, 0) as T;
+  return cloneNode(schema, CLONE_AS_SCHEMA, 0) as JsonSchemaInternal;
 };
 
 /**

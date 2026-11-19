@@ -162,6 +162,12 @@ const validateUser = validator.compile({ type: 'object', required: ['name'] }); 
 validateUser({ name: 'Alice' }); // true, or throws ValidateError
 ```
 
+### Reserved Keys
+
+Keys that start with `__$` are reserved for the state z-schema keeps on its own copy of a schema. In a schema you pass in (to `validate()`, `validateSchema()`, `compile()` or `setRemoteReference()`, or from a [schema reader](#automatic-schema-reader)) such keys are ignored wherever a keyword can appear, the values of keywords z-schema does not know (for example `x-meta`) included; a `customValidator` does not see them either. What is kept as it is: the entries of `properties`, `patternProperties`, `$defs`, `definitions`, `dependencies`, `dependentSchemas` and `dependentRequired`, whatever their names, and everything under `enum`, `const`, `default` and `examples`.
+
+A schema you pass in is cloned before it is compiled, so your object is never modified. A schema registered as a JSON string is parsed and then cloned the same way, so the nesting limit (`maxRecursionDepth`) applies to it too.
+
 ## Error Handling
 
 `ValidateError` (thrown or returned) has:
@@ -263,10 +269,6 @@ ZSchema.setSchemaReader((uri) => {
 ```
 
 The object a reader returns is not modified: z-schema compiles a copy of it, so a reader can return the same object on every call.
-
-### Reserved Keys
-
-Keys that start with `__$` are reserved for the state z-schema keeps on its own copy of a schema. In a schema you pass in (to `validate()`, `validateSchema()`, `compile()` or `setRemoteReference()`, or from a schema reader) such keys are ignored wherever a keyword can appear. Names can still start with `__$`: the entries of `properties`, `patternProperties`, `$defs`, `definitions`, `dependencies`, `dependentSchemas` and `dependentRequired` are kept, and so is everything under `enum`, `const`, `default` and `examples`.
 
 ### Diagnosing Missing References
 

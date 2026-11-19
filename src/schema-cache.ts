@@ -36,7 +36,7 @@ export function prepareRemoteSchema(
   const _schema = cloneInputSchema(
     typeof schema === 'string' ? (JSON.parse(schema) as JsonSchema) : schema,
     maxCloneDepth
-  ) as JsonSchemaInternal;
+  );
 
   if (!_schema.id) {
     _schema.id = uri;

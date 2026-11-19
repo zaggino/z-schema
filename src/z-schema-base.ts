@@ -11,7 +11,7 @@ import { getValidateError, toValidateError, ValidateError } from './errors.js';
 import { buildFastValidator, isFastValidatorDisabled } from './fast-validator.js';
 import { getSupportedFormats } from './format-validators.js';
 import { VERSION_SCHEMA_URL_MAPPING } from './json-schema-versions.js';
-import { isInternalKey } from './json-schema.js';
+import { cloneInputSchema, isInternalKey } from './json-schema.js';
 import { validate as validateJson } from './json-validation.js';
 import { Report } from './report.js';
 import { prepareRemoteSchema, SchemaCache } from './schema-cache.js';
@@ -318,8 +318,9 @@ export class ZSchemaBase {
    * to `validate()`.
    *
    * Boolean schemas are returned as-is (`_validate` handles them natively). An object schema is
-   * snapshotted into a private deep clone whose structural cache key is pinned, then compiled and
-   * meta-validated eagerly (throwing on an invalid schema) and stored in the compiled-schema cache.
+   * snapshotted into a private deep clone (without reserved keys) whose structural cache key is
+   * pinned, then compiled and meta-validated eagerly (throwing on an invalid schema) and stored in the
+   * compiled-schema cache.
    * Validating against the snapshot therefore takes exactly the `validate(data, schemaObject)` path —
    * same cache invalidation, `customValidator` bypass and `$ref` resolution — minus the per-call
    * `JSON.stringify` of the schema. Anything thrown while compiling surfaces as a `ValidateError`
@@ -364,7 +365,8 @@ export class ZSchemaBase {
   }
 
   private _compileSnapshot(schema: JsonSchema): JsonSchema {
-    const snapshot = deepClone(schema, this.options.maxRecursionDepth);
+    // The snapshot is the caller's schema as the library reads it: reserved keys are left out.
+    const snapshot = cloneInputSchema(schema, this.options.maxRecursionDepth);
     const pinnedKey = this.compiledSchemaCache.pinKey(snapshot);
     const report = new Report(this.options);
     // Mirrors _validate: with a customValidator the cache is bypassed, so nothing is primed.

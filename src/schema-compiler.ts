@@ -405,12 +405,12 @@ export class SchemaCompiler {
           const loaded = schemaReader(remotePath);
           if (loaded) {
             // The reader's object belongs to the caller: compile a clone of it. The clone needs the id.
-            const s = cloneInputSchema(loaded, this.validator.options.maxRecursionDepth) as JsonSchemaInternal;
-            s.id = remotePath;
+            const remoteSchema = cloneInputSchema(loaded, this.validator.options.maxRecursionDepth);
+            remoteSchema.id = remotePath;
             // try to compile the schema
             // Eager on purpose: these errors are read by content (copied/filtered), so do not use Report.createSubReport.
             const subreport = new Report(report);
-            if (this.compileSchema(subreport, s)) {
+            if (this.compileSchema(subreport, remoteSchema)) {
               response = this.validator.scache.getSchemaByUri(report, refObj.ref, schema);
             } else {
               // copy errors to report

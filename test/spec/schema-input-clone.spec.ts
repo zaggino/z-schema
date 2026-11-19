@@ -1,24 +1,15 @@
+import type { JsonSchema } from '../../src/json-schema-versions.ts';
+
 import { describe, expect, it } from 'vitest';
 
 import { cloneInputSchema } from '../../src/json-schema.ts';
 import { deepClone } from '../../src/utils/clone.ts';
+import { deepFreeze, nest } from '../lib/object-helpers.ts';
 
-const clones = [
-  ['deepClone', deepClone],
-  ['cloneInputSchema', cloneInputSchema],
-] as const;
+type Schema = Record<string, unknown>;
 
-const RESERVED_NAMES = [
-  '__$compiled',
-  '__$missingReferences',
-  '__$refResolved',
-  '__$dynamicRefResolved',
-  '__$recursiveRefResolved',
-  '__$resourceRoot',
-  '__$schemaResolved',
-  '__$validated',
-  '__$validationOptions',
-];
+// Boolean schemas and null reach the clone at run time although the type excludes them.
+const asSchema = (value: unknown) => value as JsonSchema;
 
 const MAP_KEYWORDS = [
   '$defs',
@@ -30,89 +21,65 @@ const MAP_KEYWORDS = [
   'properties',
 ];
 
-const deepFreeze = <T>(value: T): T => {
-  if (typeof value === 'object' && value !== null) {
-    Object.freeze(value);
-    const children = Object.values(value);
-    for (let i = 0; i < children.length; i++) {
-      deepFreeze(children[i]);
-    }
-  }
-  return value;
-};
-
-// An object with `count` nested levels: the innermost one sits at depth count - 1.
-const nest = (count: number): Record<string, unknown> => {
-  const root: Record<string, unknown> = {};
-  let current = root;
-  for (let i = 1; i < count; i++) {
-    const next: Record<string, unknown> = {};
-    current.not = next;
-    current = next;
-  }
-  return root;
-};
-
-describe.each(clones)('%s', (_name, clone) => {
-  it('returns primitives, null and undefined as they are', () => {
-    expect(clone(null)).toBe(null);
-    // eslint-disable-next-line unicorn/no-useless-undefined, typescript/no-confusing-void-expression -- explicitly testing the undefined input value
-    expect(clone(undefined)).toBe(undefined);
-    expect(clone(42)).toBe(42);
-    expect(clone('text')).toBe('text');
-    expect(clone(true)).toBe(true);
+describe('cloneInputSchema clones like deepClone', () => {
+  it.each([true, false, null])('returns a value that is not an object as it is: %s', (value) => {
+    expect(cloneInputSchema(asSchema(value))).toBe(value);
   });
 
   it('creates a different object at every level, arrays included', () => {
-    const source = { a: { b: { c: 1 } }, list: [{ d: 1 }, [2]] };
-    const result = clone(source);
+    const source: Schema = {
+      properties: { a: { not: { type: 'string' } } },
+      allOf: [{ minimum: 1 }, { items: [{ type: 'string' }] }],
+    };
+    const result = cloneInputSchema(source);
 
     expect(result).toEqual(source);
     expect(result).not.toBe(source);
-    expect(result.a).not.toBe(source.a);
-    expect(result.a.b).not.toBe(source.a.b);
-    expect(result.list).not.toBe(source.list);
-    expect(result.list[0]).not.toBe(source.list[0]);
-    expect(result.list[1]).not.toBe(source.list[1]);
+    expect(result.properties).not.toBe(source.properties);
+    expect(result.properties?.a).not.toBe((source.properties as Schema).a);
+    expect(result.allOf).not.toBe(source.allOf);
+    expect(result.allOf?.[0]).not.toBe((source.allOf as unknown[])[0]);
+    expect(result.allOf?.[1]).not.toBe((source.allOf as unknown[])[1]);
   });
 
   it('sorts keys at every level', () => {
-    const result = clone({
-      z: { c: 3, a: 1, b: 2 },
-      a: 1,
-      m: [{ z: 1, a: 2 }],
+    const result = cloneInputSchema({
+      properties: { z: { minimum: 1, type: 'integer' }, a: { type: 'string' } },
+      type: 'object',
+      allOf: [{ type: 'object', minProperties: 1 }],
     });
 
-    expect(Object.keys(result)).toEqual(['a', 'm', 'z']);
-    expect(Object.keys(result.z)).toEqual(['a', 'b', 'c']);
-    expect(Object.keys(result.m[0])).toEqual(['a', 'z']);
+    expect(Object.keys(result)).toEqual(['allOf', 'properties', 'type']);
+    expect(Object.keys(result.properties ?? {})).toEqual(['a', 'z']);
+    expect(Object.keys(result.properties?.z ?? {})).toEqual(['minimum', 'type']);
+    expect(Object.keys(result.allOf?.[0] ?? {})).toEqual(['minProperties', 'type']);
   });
 
   it('clones an object reached twice once', () => {
-    const shared = { type: 'string' };
-    const result = clone({ allOf: [shared, shared] });
+    const shared: Schema = { type: 'string' };
+    const result = cloneInputSchema({ allOf: [shared, shared] });
 
-    expect(result.allOf[0]).toBe(result.allOf[1]);
-    expect(result.allOf[0]).not.toBe(shared);
-    expect(result.allOf[0]).toEqual(shared);
+    expect(result.allOf?.[0]).toBe(result.allOf?.[1]);
+    expect(result.allOf?.[0]).not.toBe(shared);
+    expect(result.allOf?.[0]).toEqual(shared);
   });
 
   it('keeps a cycle', () => {
-    const source: Record<string, unknown> = { type: 'object' };
+    const source: Schema = { type: 'object' };
     source.not = source;
-    const result = clone(source);
+    const result = cloneInputSchema(source);
 
     expect(result).not.toBe(source);
     expect(result.not).toBe(result);
   });
 
   it('keeps an own __proto__ key as an own key', () => {
-    const source = JSON.parse('{"__proto__": {"x": 1}}') as Record<string, unknown>;
-    const result = clone(source);
+    const source = JSON.parse('{"__proto__": {"x": 1}}') as Schema;
+    const result = cloneInputSchema(source);
 
     expect(Object.hasOwn(result, '__proto__')).toBe(true);
     expect(Object.getPrototypeOf(result)).toBe(Object.prototype);
-    expect(result.x).toBeUndefined();
+    expect((result as Schema).x).toBeUndefined();
   });
 
   it('throws past maxDepth and accepts nesting up to it', () => {
@@ -120,12 +87,12 @@ describe.each(clones)('%s', (_name, clone) => {
       'Maximum recursion depth (5) exceeded in deepClone. ' +
       'If your schema or data is deeply nested and valid, increase the maxRecursionDepth option.';
 
-    expect(() => clone(nest(6), 5)).toThrow(message);
-    expect(() => clone(nest(5), 5)).not.toThrow();
+    expect(() => cloneInputSchema(nest(6), 5)).toThrow(message);
+    expect(() => cloneInputSchema(nest(5), 5)).not.toThrow();
   });
 
   it('does not modify the source', () => {
-    const source = {
+    const source: Schema = {
       type: 'object',
       properties: { a: { enum: [{ b: 1 }], items: [{ c: 2 }] } },
       required: ['a'],
@@ -133,14 +100,14 @@ describe.each(clones)('%s', (_name, clone) => {
     const before = structuredClone(source);
     deepFreeze(source);
 
-    clone(source);
+    cloneInputSchema(source);
 
     expect(source).toEqual(before);
   });
 });
 
 describe('cloneInputSchema and deepClone agree on schemas without reserved keys', () => {
-  const schemas: Array<[string, unknown]> = [
+  const schemas: Array<[string, Schema]> = [
     [
       'nested properties, items and allOf',
       {
@@ -181,119 +148,153 @@ describe('cloneInputSchema and deepClone agree on schemas without reserved keys'
 });
 
 describe('cloneInputSchema drops reserved keys from schemas', () => {
-  it.each(RESERVED_NAMES)('drops %s at the root and keeps the other keys', (name) => {
-    const result = cloneInputSchema({ type: 'string', minLength: 1, [name]: { x: 1 } });
+  it('drops every name with the prefix, including the bare prefix', () => {
+    const source: Schema = { __$compiled: true, __$validated: true, __$anything: 1, __$: 2, type: 'string' };
 
-    expect(result).toEqual({ type: 'string', minLength: 1 });
-    expect(Object.hasOwn(result, name)).toBe(false);
-  });
-
-  it('drops any name with the prefix, including the bare prefix', () => {
-    const result = cloneInputSchema({ __$anything: 1, __$: 2, type: 'string' });
-
-    expect(result).toEqual({ type: 'string' });
+    expect(cloneInputSchema(source)).toEqual({ type: 'string' });
   });
 
   it('keeps names that only look similar to the prefix', () => {
-    const source = { __x: 1, _$x: 2, $__x: 3 };
+    const source: Schema = { __x: 1, _$x: 2, $__x: 3 };
 
     expect(cloneInputSchema(source)).toEqual(source);
   });
 
-  it.each([
-    ['properties.a', () => ({ properties: { a: { __$validated: true, type: 'string' } } })],
-    ['items', () => ({ items: { __$validated: true, type: 'string' } })],
-    ['an items array element', () => ({ items: [{ __$validated: true, type: 'string' }] })],
-    ['allOf[0]', () => ({ allOf: [{ __$validated: true, type: 'string' }] })],
-    ['not', () => ({ not: { __$validated: true, type: 'string' } })],
-    ['additionalProperties', () => ({ additionalProperties: { __$validated: true, type: 'string' } })],
-    ['a value inside $defs', () => ({ $defs: { d: { __$validated: true, type: 'string' } } })],
-    ['the value of an unknown keyword', () => ({ 'x-meta': { __$validated: true, type: 'string' } })],
+  it.each<[string, Schema, Schema]>([
+    [
+      'properties.a',
+      { properties: { a: { __$validated: true, type: 'string' } } },
+      { properties: { a: { type: 'string' } } },
+    ],
+    ['items', { items: { __$validated: true, type: 'string' } }, { items: { type: 'string' } }],
+    ['an items array element', { items: [{ __$validated: true, type: 'string' }] }, { items: [{ type: 'string' }] }],
+    ['allOf[0]', { allOf: [{ __$validated: true, type: 'string' }] }, { allOf: [{ type: 'string' }] }],
+    ['not', { not: { __$validated: true, type: 'string' } }, { not: { type: 'string' } }],
+    [
+      'additionalProperties',
+      { additionalProperties: { __$validated: true, type: 'string' } },
+      { additionalProperties: { type: 'string' } },
+    ],
+    [
+      'a value inside $defs',
+      { $defs: { d: { __$validated: true, type: 'string' } } },
+      { $defs: { d: { type: 'string' } } },
+    ],
+    [
+      'the value of an unknown keyword',
+      { 'x-meta': { __$validated: true, type: 'string' } },
+      { 'x-meta': { type: 'string' } },
+    ],
     [
       'an object nested two levels inside an unknown keyword',
-      () => ({ 'x-meta': { a: { b: { __$validated: true } } } }),
+      { 'x-meta': { a: { b: { __$validated: true } } } },
+      { 'x-meta': { a: { b: {} } } },
     ],
-    ['an array nested in an array under anyOf', () => ({ anyOf: [[{ __$validated: true, type: 'string' }]] })],
-  ])('drops reserved keys at %s', (_label, make) => {
-    const source = make();
+    [
+      'an array nested in an array under anyOf',
+      { anyOf: [[{ __$validated: true, type: 'string' }]] },
+      { anyOf: [[{ type: 'string' }]] },
+    ],
+  ])('drops reserved keys at %s', (_label, source, expected) => {
     const before = structuredClone(source);
-    // The source without the reserved key, everything else in place.
-    const expected: unknown = JSON.parse(
-      JSON.stringify(source, (key, value: unknown) => (key === '__$validated' ? undefined : value))
-    );
-    const result = cloneInputSchema(source);
 
-    expect(result).toEqual(expected);
-    expect(JSON.stringify(result)).not.toContain('__$validated');
+    expect(cloneInputSchema(source)).toEqual(expected);
     expect(source).toEqual(before);
+  });
+
+  it('does not read the value of a reserved key', () => {
+    const schema: Schema = { type: 'string' };
+    Object.defineProperty(schema, '__$validated', {
+      enumerable: true,
+      get() {
+        throw new Error('read');
+      },
+    });
+
+    expect(cloneInputSchema(schema)).toEqual({ type: 'string' });
+  });
+
+  it('does not count nesting under a reserved key', () => {
+    const schema: Schema = { type: 'string', __$compiled: nest(20) };
+
+    expect(cloneInputSchema(schema, 5)).toEqual({ type: 'string' });
   });
 });
 
 describe('cloneInputSchema keeps names and data', () => {
   it.each(MAP_KEYWORDS)('keeps a prefixed name inside %s and drops reserved keys under it', (keyword) => {
-    const result = cloneInputSchema({
-      [keyword]: { __$compiled: { type: 'string', __$validated: true } },
-    }) as Record<string, Record<string, unknown>>;
+    const source: Schema = { [keyword]: { __$compiled: { type: 'string', __$validated: true } } };
 
-    expect(result[keyword]).toEqual({ __$compiled: { type: 'string' } });
+    expect(cloneInputSchema(source)).toEqual({ [keyword]: { __$compiled: { type: 'string' } } });
   });
 
   it('clones dependencies and dependentRequired with array values intact', () => {
-    const source = { dependencies: { a: ['b', 'c'] }, dependentRequired: { d: ['e'] } };
+    const list = ['b', 'c'];
+    const source: Schema = { dependencies: { a: list }, dependentRequired: { d: ['e'] } };
     const result = cloneInputSchema(source);
 
     expect(result).toEqual(source);
-    expect(result.dependencies.a).not.toBe(source.dependencies.a);
+    expect(result.dependencies?.a).not.toBe(list);
   });
 
   it('does not throw when a map keyword holds an array or a string', () => {
-    const withArray = cloneInputSchema({ properties: [{ __$validated: true, type: 'string' }] });
-    const withString = cloneInputSchema({ properties: 'text' });
+    const withArray: Schema = { properties: [{ __$validated: true, type: 'string' }] };
+    const withString: Schema = { properties: 'text' };
 
-    expect(withArray).toEqual({ properties: [{ type: 'string' }] });
-    expect(withString).toEqual({ properties: 'text' });
+    expect(cloneInputSchema(withArray)).toEqual({ properties: [{ type: 'string' }] });
+    expect(cloneInputSchema(withString)).toEqual({ properties: 'text' });
   });
 
   it('treats a property named enum or default as a schema', () => {
-    const result = cloneInputSchema({
+    const source: Schema = {
       properties: {
         enum: { __$validated: true, type: 'string' },
         default: { __$compiled: 1, type: 'string' },
       },
-    });
+    };
 
-    expect(result).toEqual({ properties: { enum: { type: 'string' }, default: { type: 'string' } } });
+    expect(cloneInputSchema(source)).toEqual({
+      properties: { enum: { type: 'string' }, default: { type: 'string' } },
+    });
   });
 
   it.each(['enum', 'const', 'default', 'examples'])('copies %s as it is at any depth', (keyword) => {
     const value = [{ __$validated: true, nested: { __$compiled: 1, list: [{ __$resourceRoot: 2 }] } }];
-    const source = { [keyword]: value };
-    const result = cloneInputSchema(source) as Record<string, unknown>;
+    const source: Schema = { [keyword]: value };
+    const result = cloneInputSchema(source);
 
     expect(result).toEqual(source);
-    expect(result[keyword]).not.toBe(value);
+    expect(Object.values(result)[0]).not.toBe(value);
   });
 
   it('gives an object used as default and as a property one clone for each', () => {
-    const shared = { __$validated: true, type: 'string' };
-    const result = cloneInputSchema({ default: shared, properties: { a: shared } }) as {
-      default: Record<string, unknown>;
-      properties: { a: Record<string, unknown> };
-    };
+    const shared: Schema = { __$validated: true, type: 'string' };
+    const result = cloneInputSchema({ default: shared, properties: { a: shared } });
 
-    expect(result.default).not.toBe(result.properties.a);
-    expect(result.default).toEqual({ __$validated: true, type: 'string' });
-    expect(result.properties.a).toEqual({ type: 'string' });
+    expect(result).toEqual({
+      default: { __$validated: true, type: 'string' },
+      properties: { a: { type: 'string' } },
+    });
+    expect(result.default).not.toBe(result.properties?.a);
+  });
+
+  it('gives an object used as a map and as a schema one clone for each', () => {
+    const shared: Schema = { __$compiled: { type: 'string' } };
+    const source: Schema = { properties: shared, not: shared };
+    const result = cloneInputSchema(source);
+
+    expect(result).toEqual({ properties: { __$compiled: { type: 'string' } }, not: {} });
+    expect(result.properties).not.toBe(result.not);
   });
 
   it('terminates on a cycle through default and keeps the cycle', () => {
-    const source: Record<string, unknown> = { type: 'object' };
+    const source: Schema = { type: 'object' };
     source.default = { inner: source };
-    const result = cloneInputSchema(source) as { default: { inner: unknown } };
+    const result = cloneInputSchema(source);
+    const data = (result.default as { inner: { default: { inner: unknown } } }).inner;
 
-    expect(result.default.inner).toBeDefined();
-    expect(result.default.inner).not.toBe(source);
-    const data = result.default.inner as { default: { inner: unknown } };
+    expect(data).not.toBe(result);
+    expect(data).not.toBe(source);
     expect(data.default.inner).toBe(data);
   });
 });
