@@ -216,9 +216,7 @@ class PendingError implements SchemaErrorDetail {
       [jsonSymbol]: this.report.getJson(),
     } as SchemaErrorDetail;
 
-    if (schema && typeof schema === 'string') {
-      err.description = schema;
-    } else if (schema && typeof schema === 'object') {
+    if (schema && typeof schema === 'object') {
       if (schema.title) {
         err.title = schema.title;
       }

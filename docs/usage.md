@@ -374,12 +374,26 @@ z-schema --strictMode mySchema.json myData.json
 
 # Pick the draft (draft-04, draft-06, draft-07, draft2019-09, draft2020-12)
 z-schema --draft draft-07 mySchema.json myData.json
+
+# Allow file $refs from a directory other than the schema's own
+z-schema --refRoot ./schemas ./schemas/api/root.json data.json
 ```
 
 - `--draft <version>` sets the `version` option (default: `draft2020-12`).
+- `--refRoot <dir>` sets the reference root (default: the directory of the schema file). `<dir>` must be a directory.
 - A schema that declares no id is identified by the `file:` URL of its path (`id` for draft-04, `$id` otherwise), so relative file `$ref`s resolve next to the schema file, from any working directory.
 - An id the schema declares is kept. A relative one is resolved against the file's location; an absolute one (for example `https://example.com/schema.json`) becomes the base for the schema's relative `$ref`s, which are then fetched from there and not read from disk.
-- Remote references are https-only, redirects are not followed, and private/internal addresses are refused.
+
+### References
+
+File `$ref`s are read only from inside the reference root: the schema file's directory, or the directory given with `--refRoot <dir>`. Links are resolved before the check, and a `file:` reference that names a host is not read. A reference outside the root prints:
+
+```
+The reference is outside the reference root and is not read: <url>
+Use --refRoot <dir> to allow references inside another directory.
+```
+
+`https` references are downloaded with a 10 MB limit and a 30 second deadline. Redirects are not followed, and addresses that are not public (loopback, private, link-local and the IPv6 ranges that embed an IPv4 address) are not contacted. A downloaded reference that is not valid JSON is reported and stops the run.
 
 ## TypeScript Types
 
