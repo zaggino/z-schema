@@ -26,11 +26,12 @@ A `maxLength` or `maxItems` keyword in the schema reports oversized values, but 
 | Limit                                               | Default             | What it bounds                                                                                                      | When it is reached                                               |
 | --------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | [`maxRecursionDepth`](options.md#maxrecursiondepth) | `100`               | Depth of the library's internal traversals of schemas and values (cloning, comparison, id and reference collection) | Validation fails with an error that names the recursion depth    |
+| [`maxDataDepth`](options.md#maxdatadepth)           | `500`               | How deeply the validated data may be nested                                                                         | Validation fails with a `MAX_DATA_DEPTH_EXCEEDED` error          |
 | [`asyncTimeout`](options.md#asynctimeout)           | `2000` ms           | How long a validation waits for pending async tasks (async formats); it does not interrupt synchronous work         | Validation fails with an `ASYNC_TIMEOUT` error                   |
 | [`maxErrors`](options.md#maxerrors)                 | `1000`              | Number of error details one `validate()` call reports                                                               | Further details are left out and the error has `truncated: true` |
 | Pattern length (a constant, not an option)          | `10 000` characters | Length of a `pattern` value or a `patternProperties` key                                                            | Schema validation fails                                          |
 
-`maxRecursionDepth` is not a limit on how deeply the validated data may be nested; bound that before validating.
+`maxRecursionDepth` is not a limit on how deeply the validated data may be nested; `maxDataDepth` is. It counts data levels, not stack frames: a schema with many nested applicators or `$ref` hops per level uses more of the call stack per level and may need a lower value than the default. With `maxDataDepth: Infinity`, very deep data is bounded only by the engine's call stack, so bound the nesting before validating.
 
 ## Patterns
 

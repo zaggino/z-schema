@@ -13,6 +13,7 @@
 import type { JsonSchemaInternal } from '../json-schema-versions.js';
 import type { ZSchemaBase } from '../z-schema-base.js';
 
+import { NO_DATA_DEPTH_LIMIT } from '../utils/constants.js';
 import { isObject } from '../utils/what-is.js';
 
 /** A specialised validity check for one compiled schema. Returns `true` only when `json` is valid. */
@@ -23,10 +24,54 @@ export type Check = FastValidator;
 export const ALWAYS_TRUE: FastValidator = () => true;
 export const ALWAYS_FALSE: FastValidator = () => false;
 
+/**
+ * Run state of the `maxDataDepth` limit, shared by every closure of one build. `left` is the number of data levels
+ * the running validation may still descend. The caller of the built validator sets it to `limit` before a call and
+ * puts the previous value back afterwards, whichever way the call ends (see `_fastAccepts`). When the limit is off,
+ * `limit` is `NO_DATA_DEPTH_LIMIT`, so `left` never reaches 0 and the same closures serve both cases.
+ */
+export interface DataDepthRun {
+  left: number;
+  readonly limit: number;
+}
+
+/** What `buildFastValidator` returns: the check and the run state its closures share. */
+export interface BuiltFastValidator {
+  readonly check: FastValidator;
+  readonly depth: DataDepthRun;
+}
+
+/** Whether the limit is finite, i.e. whether elided traversals need a guard. */
+export function isLimited(run: DataDepthRun): boolean {
+  return run.limit !== NO_DATA_DEPTH_LIMIT;
+}
+
+/**
+ * Pushes a guard for an array traversal the builder elided, only under a finite limit: the interpreter still enters
+ * the level below a non-empty array there.
+ */
+export function pushArrayLevelGuard(run: DataDepthRun, checks: Check[]): void {
+  if (!isLimited(run)) {
+    return;
+  }
+  checks.push((json) => {
+    if (run.left === 0 && Array.isArray(json) && json.length > 0) {
+      deferToInterpreter();
+    }
+    return true;
+  });
+}
+
 /** Everything a keyword compiler needs. */
 export interface BuildState {
   readonly ctx: ZSchemaBase;
   readonly root: JsonSchemaInternal;
+  /**
+   * The `maxDataDepth` run state. A traversing closure checks `left` once per non-empty container whose children it
+   * visits; under a finite limit, a traversal the builder elides gets a guard instead ({@link pushArrayLevelGuard}
+   * for arrays, an inline one in the object and collector compilers).
+   */
+  readonly depth: DataDepthRun;
   /** Compiles a child schema; a child that cannot be compiled makes the whole build unsupported. */
   readonly compileChild: (child: unknown) => FastValidator;
   /** Facts about the whole build that decide whether it is safe: impure checks are compiled, and collectors re-run checks. */

@@ -5,6 +5,12 @@
  */
 export const DEFAULT_MAX_RECURSION_DEPTH = 100;
 
+/** Default for {@link ZSchemaOptions.maxDataDepth}: how deeply the validated data may be nested. */
+export const DEFAULT_MAX_DATA_DEPTH = 500;
+
+/** The data-depth counter value that stands for "no limit" (`Infinity`); a small integer. */
+export const NO_DATA_DEPTH_LIMIT = 2 ** 30 - 1;
+
 /**
  * Default maximum number of error details one validation reports, counted through `inner`.
  * Used as the default for {@link ZSchemaOptions.maxErrors}.

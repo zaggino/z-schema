@@ -341,8 +341,18 @@ function getVocabDisabledKeys(plan: KeywordPlan): ReadonlyArray<keyof JsonSchema
 function recurseArray(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: unknown[]) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.2
 
+  if (json.length === 0) {
+    return;
+  }
+
   const prefixItems = honouredPrefixItems(schema, ctx.options.version);
 
+  // The count goes down for the loops below whether or not an item is validated; the limit is reached only when
+  // one is. With nothing to validate it can be -1 for the length of the loops, where nothing reads it.
+  if (report.dataDepthLeft === 0 && arrayDescends(schema, prefixItems)) {
+    report.throwDataDepthExceeded();
+  }
+  report.dataDepthLeft--;
   if (prefixItems) {
     for (let idx = 0; idx < json.length; idx++) {
       if (idx < prefixItems.length) {
@@ -360,14 +370,11 @@ function recurseArray(ctx: ZSchemaBase, report: Report, schema: JsonSchemaIntern
         report.path.pop();
       }
     }
-    return;
-  }
-
-  // If "items" is an array, this situation, the schema depends on the index:
-  // if the index is less than, or equal to, the size of "items",
-  // the child instance must be valid against the corresponding schema in the "items" array;
-  // otherwise, it must be valid against the schema defined by "additionalItems".
-  if (Array.isArray(schema.items)) {
+  } else if (Array.isArray(schema.items)) {
+    // If "items" is an array, this situation, the schema depends on the index:
+    // if the index is less than, or equal to, the size of "items",
+    // the child instance must be valid against the corresponding schema in the "items" array;
+    // otherwise, it must be valid against the schema defined by "additionalItems".
     for (let idx = 0; idx < json.length; idx++) {
       // equal to doesn't make sense here
       if (idx < schema.items.length) {
@@ -398,6 +405,7 @@ function recurseArray(ctx: ZSchemaBase, report: Report, schema: JsonSchemaIntern
       report.path.pop();
     }
   }
+  report.dataDepthLeft++;
 }
 
 // ---------------------------------------------------------------------------
@@ -444,6 +452,13 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
     }
   }
   const ppCount = ppCompiled === undefined ? 0 : ppCompiled.length;
+
+  // The limit is reached only when a child would be validated: an additionalProperties schema, or a key that
+  // "properties" names or a pattern matches. As in recurseArray, the count goes down for the loop either way.
+  if (report.dataDepthLeft === 0 && keys.length > 0 && (checkAdditional || anyKeyHasSchema(keys, p, ppCompiled))) {
+    report.throwDataDepthExceeded();
+  }
+  report.dataDepthLeft--;
 
   for (let k = 0; k < keys.length; k++) {
     const m = keys[k];
@@ -504,6 +519,40 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
       }
     }
   }
+
+  report.dataDepthLeft++;
+}
+
+/** Whether a schema applies to some item of a non-empty array, so a child of it is validated. Cold path. */
+function arrayDescends(schema: JsonSchemaInternal, prefixItems: ReturnType<typeof honouredPrefixItems>): boolean {
+  if (prefixItems) {
+    return prefixItems.length > 0 || (schema.items !== undefined && !Array.isArray(schema.items));
+  }
+  if (Array.isArray(schema.items)) {
+    return schema.items.length > 0 || typeof schema.additionalItems === 'object';
+  }
+  return typeof schema.items === 'object' || typeof schema.items === 'boolean';
+}
+
+/** Whether some key is named in `properties` or matches a pattern, so a child of it is validated. Cold path. */
+function anyKeyHasSchema(
+  keys: string[],
+  p: string[] | undefined,
+  ppCompiled: Array<{ re: RegExp }> | undefined
+): boolean {
+  for (let k = 0; k < keys.length; k++) {
+    if (p !== undefined && p.includes(keys[k])) {
+      return true;
+    }
+    if (ppCompiled !== undefined) {
+      for (let i = 0; i < ppCompiled.length; i++) {
+        if (ppCompiled[i].re.test(keys[k])) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
 
 function runCustomValidator(

@@ -7,10 +7,16 @@ import { shallowClone } from './utils/clone.js';
 // These constants are consumed locally (default options + async-timeout clamping)
 // and also re-exported as public API, so this cannot collapse to a bare re-export.
 // oxlint-disable-next-line unicorn/prefer-export-from
-import { DEFAULT_MAX_ERRORS, DEFAULT_MAX_RECURSION_DEPTH, MAX_ASYNC_TIMEOUT } from './utils/constants.js';
+import {
+  DEFAULT_MAX_DATA_DEPTH,
+  DEFAULT_MAX_ERRORS,
+  DEFAULT_MAX_RECURSION_DEPTH,
+  MAX_ASYNC_TIMEOUT,
+  NO_DATA_DEPTH_LIMIT,
+} from './utils/constants.js';
 import { createDict } from './utils/properties.js';
 
-export { DEFAULT_MAX_RECURSION_DEPTH, MAX_ASYNC_TIMEOUT };
+export { DEFAULT_MAX_DATA_DEPTH, DEFAULT_MAX_RECURSION_DEPTH, MAX_ASYNC_TIMEOUT };
 
 export interface ZSchemaOptions {
   version?: JsonSchemaVersion | 'none';
@@ -52,6 +58,17 @@ export interface ZSchemaOptions {
    * Applies to data validation, not to schema validation.
    */
   maxErrors?: number;
+  /**
+   * How deeply the validated data may be nested. Default 500. The root value is at depth 0; a subschema may be
+   * applied to a value at depth `maxDataDepth` or less. Validation stops when it is about to validate the children
+   * of an array or object that is itself at depth `maxDataDepth`: it throws a `ValidateError` with exactly one
+   * detail, code `MAX_DATA_DEPTH_EXCEEDED` and `params: [limit]`. Data the schema never descends into is not
+   * measured. `Infinity` turns the limit off. `0` validates the root value only; a negative number means 0,
+   * a fraction is rounded down, and a value that is not a number (or is `NaN`) means the default.
+   * Applies to data validation only, not to schema compilation or schema validation, and is separate from
+   * `maxRecursionDepth`.
+   */
+  maxDataDepth?: number;
 }
 
 /**
@@ -120,6 +137,8 @@ export const defaultOptions: ZSchemaOptions = {
   maxRecursionDepth: DEFAULT_MAX_RECURSION_DEPTH,
   // maximum number of error details one validation reports (counted through inner)
   maxErrors: DEFAULT_MAX_ERRORS,
+  // maximum nesting depth of the validated data
+  maxDataDepth: DEFAULT_MAX_DATA_DEPTH,
 } satisfies EveryOption;
 
 /**
@@ -133,6 +152,21 @@ export const resolveMaxErrors = (value: unknown): number => {
   }
   return value >= 1 ? Math.floor(value) : 1;
 };
+
+/**
+ * The data-depth counter start value for a `maxDataDepth` value: a number is rounded down and a negative one
+ * becomes 0; `Infinity` (and anything from `NO_DATA_DEPTH_LIMIT` up) becomes `NO_DATA_DEPTH_LIMIT`;
+ * anything that is not a number (or is `NaN`) becomes the default.
+ */
+export function resolveMaxDataDepth(value: unknown): number {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return DEFAULT_MAX_DATA_DEPTH;
+  }
+  if (value >= NO_DATA_DEPTH_LIMIT) {
+    return NO_DATA_DEPTH_LIMIT;
+  }
+  return value < 0 ? 0 : Math.floor(value);
+}
 
 /**
  * `ZSchema.create` dispatch flags. They have no default but are accepted, so the caller's options
@@ -181,6 +215,10 @@ export const normalizeOptions = (options?: ZSchemaOptions) => {
   }
 
   normalized.maxErrors = resolveMaxErrors(normalized.maxErrors);
+
+  // The reported limit is the resolved one; `Infinity` stays `Infinity`.
+  const dataDepth = resolveMaxDataDepth(normalized.maxDataDepth);
+  normalized.maxDataDepth = dataDepth === NO_DATA_DEPTH_LIMIT ? Infinity : dataDepth;
 
   if (normalized.strictMode === true) {
     normalized.forceAdditional = true;

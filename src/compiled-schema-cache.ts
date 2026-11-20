@@ -1,4 +1,4 @@
-import type { FastValidator } from './fast-validator.js';
+import type { BuiltFastValidator } from './fast-validator.js';
 import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { SchemaPosition } from './json-schema.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
@@ -160,6 +160,7 @@ function snapshotOptions(o: ZSchemaOptions): OptionsSnapshot {
     customFormats: customFormats && typeof customFormats === 'object' ? { ...customFormats } : customFormats,
     maxRecursionDepth: o.maxRecursionDepth,
     maxErrors: o.maxErrors,
+    maxDataDepth: o.maxDataDepth,
   };
 }
 
@@ -218,6 +219,7 @@ function sameOptions(s: OptionsSnapshot, o: ZSchemaOptions): boolean {
     s.customValidator === o.customValidator &&
     s.maxRecursionDepth === o.maxRecursionDepth &&
     s.maxErrors === o.maxErrors &&
+    s.maxDataDepth === o.maxDataDepth &&
     sameCustomFormats(s.customFormats, o.customFormats)
   );
 }
@@ -226,7 +228,7 @@ function sameOptions(s: OptionsSnapshot, o: ZSchemaOptions): boolean {
 export interface CompiledSchemaEntry {
   schema: JsonSchemaInternal;
   /** Boolean fast validator: `undefined` = not built yet, `null` = the schema is not supported. */
-  fast?: FastValidator | null;
+  fast?: BuiltFastValidator | null;
   generation: number;
   options: OptionsSnapshot;
 }

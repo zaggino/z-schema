@@ -195,6 +195,7 @@ const friendlyMessages: Record<string, (detail: SchemaErrorDetail) => string> = 
   OBJECT_UNEVALUATED_PROPERTIES: (d) => `${d.params[0]} is not allowed by the schema`,
   COLLECT_EVALUATED_DEPTH_EXCEEDED: (d) => `Schema nesting too deep (max ${d.params[0]})`,
   MAX_RECURSION_DEPTH_EXCEEDED: (d) => `Recursion depth exceeded (max ${d.params[0]})`,
+  MAX_DATA_DEPTH_EXCEEDED: (d) => `Data nested too deeply (max ${d.params[0]})`,
 };
 
 function toFriendlyMessage(detail: SchemaErrorDetail): string {

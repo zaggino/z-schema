@@ -131,6 +131,7 @@ These are reported during `validateSchema()`, not during data validation.
 
 ## Runtime safeguard errors
 
-| Code                           | Message template                                                                                                                  | Trigger                                                                                     |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `MAX_RECURSION_DEPTH_EXCEEDED` | Maximum recursion depth ({0}) exceeded. If your schema or data is deeply nested and valid, increase the maxRecursionDepth option. | General recursion depth exceeded (configurable via `maxRecursionDepth` option, default 100) |
+| Code                           | Message template                                                                                                                  | Trigger                                                                                             |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `MAX_RECURSION_DEPTH_EXCEEDED` | Maximum recursion depth ({0}) exceeded. If your schema or data is deeply nested and valid, increase the maxRecursionDepth option. | General recursion depth exceeded (configurable via `maxRecursionDepth` option, default 100)         |
+| `MAX_DATA_DEPTH_EXCEEDED`      | Data is nested deeper than the maxDataDepth limit ({0}).                                                                          | Validated data nested deeper than the `maxDataDepth` option (default 500); the only detail reported |

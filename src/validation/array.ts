@@ -4,7 +4,7 @@ import type { BuildState, Check } from './fast-shared.js';
 
 import { Report } from '../report.js';
 import { isUniqueArray } from '../utils/array.js';
-import { ALWAYS_TRUE, expectNumber } from './fast-shared.js';
+import { ALWAYS_TRUE, deferToInterpreter, expectNumber, pushArrayLevelGuard } from './fast-shared.js';
 import {
   cacheValidationResult,
   deferOrRunSync,
@@ -141,10 +141,18 @@ export function containsValidator(ctx: ZSchemaBase, report: Report, schema: Json
   }
 
   const subReports: Report[] = [];
-  for (let idx = 0; idx < json.length; idx++) {
-    const subReport = Report.createSubReport(report);
-    subReports.push(subReport);
-    ctx._jsonValidate(subReport, containsSchema, json[idx]);
+  if (json.length > 0) {
+    // Sub-reports inherit the depth left when they are created, so the level is entered first.
+    if (report.dataDepthLeft === 0) {
+      report.throwDataDepthExceeded();
+    }
+    report.dataDepthLeft--;
+    for (let idx = 0; idx < json.length; idx++) {
+      const subReport = Report.createSubReport(report);
+      subReports.push(subReport);
+      ctx._jsonValidate(subReport, containsSchema, json[idx]);
+    }
+    report.dataDepthLeft++;
   }
 
   const addContainsErrorIfNeeded = () => {
@@ -179,23 +187,33 @@ export function compileContains(state: BuildState, node: JsonSchemaInternal, che
   const { version } = state.ctx.options;
   const min = minContainsOf(node, version);
   const max = maxContainsOf(node, version);
+  const run = state.depth;
 
   if (max === undefined) {
     if (min <= 0) {
       // always satisfied; the sub-schema was still compiled so an unsupported one rejects the build
+      pushArrayLevelGuard(run, checks);
       return;
     }
     checks.push((json) => {
       if (!Array.isArray(json)) {
         return true;
       }
+      const { length } = json;
       let matches = 0;
-      for (let i = 0; i < json.length; i++) {
-        if (each(json[i]) && ++matches >= min) {
-          return true;
+      if (length > 0) {
+        if (run.left === 0) {
+          deferToInterpreter();
         }
+        run.left--;
+        for (let i = 0; i < length && matches < min; i++) {
+          if (each(json[i])) {
+            matches++;
+          }
+        }
+        run.left++;
       }
-      return false;
+      return matches >= min;
     });
     return;
   }
@@ -203,16 +221,21 @@ export function compileContains(state: BuildState, node: JsonSchemaInternal, che
     if (!Array.isArray(json)) {
       return true;
     }
+    const { length } = json;
     let matches = 0;
-    for (let i = 0; i < json.length; i++) {
-      if (each(json[i])) {
-        matches++;
-        if (matches > max) {
-          return false;
+    if (length > 0) {
+      if (run.left === 0) {
+        deferToInterpreter();
+      }
+      run.left--;
+      for (let i = 0; i < length && matches <= max; i++) {
+        if (each(json[i])) {
+          matches++;
         }
       }
+      run.left++;
     }
-    return matches >= min;
+    return matches <= max && matches >= min;
   });
 }
 
@@ -273,8 +296,13 @@ export function compileItemKeywords(state: BuildState, node: JsonSchemaInternal,
   }
 
   const headCount = headChecks.length;
+  const run = state.depth;
   if (headCount === 0) {
     if (tailCheck === undefined) {
+      // a schema applies to every item (`tail !== undefined`) but its check was dropped
+      if (tail !== undefined) {
+        pushArrayLevelGuard(run, checks);
+      }
       return;
     }
     const each = tailCheck;
@@ -282,11 +310,21 @@ export function compileItemKeywords(state: BuildState, node: JsonSchemaInternal,
       if (!Array.isArray(json)) {
         return true;
       }
-      for (let i = 0; i < json.length; i++) {
+      const { length } = json;
+      if (length === 0) {
+        return true;
+      }
+      if (run.left === 0) {
+        deferToInterpreter();
+      }
+      run.left--;
+      for (let i = 0; i < length; i++) {
         if (!each(json[i])) {
+          run.left++;
           return false;
         }
       }
+      run.left++;
       return true;
     });
     return;
@@ -297,19 +335,29 @@ export function compileItemKeywords(state: BuildState, node: JsonSchemaInternal,
       return true;
     }
     const { length } = json;
+    if (length === 0) {
+      return true;
+    }
+    if (run.left === 0) {
+      deferToInterpreter();
+    }
+    run.left--;
     const headEnd = length < headCount ? length : headCount;
     for (let i = 0; i < headEnd; i++) {
       if (!headChecks[i](json[i])) {
+        run.left++;
         return false;
       }
     }
     if (rest !== undefined) {
       for (let i = headEnd; i < length; i++) {
         if (!rest(json[i])) {
+          run.left++;
           return false;
         }
       }
     }
+    run.left++;
     return true;
   });
 }

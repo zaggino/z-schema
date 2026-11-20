@@ -10,7 +10,7 @@ import { ZSchema } from '../../src/z-schema.ts';
 /**
  * Builds the fast validator for the compiled clone that `validator` cached for `schema`. The schema must
  * already have been validated or compiled on `validator`; `undefined` when it is not cached or the builder
- * rejects it.
+ * rejects it. The returned function starts the data-depth count over on every call, as the library's own caller does.
  */
 export const buildFastFor = (validator: ZSchemaBase, schema: JsonSchema): FastValidator | undefined => {
   const key = validator.compiledSchemaCache.keyOf(schema);
@@ -18,7 +18,15 @@ export const buildFastFor = (validator: ZSchemaBase, schema: JsonSchema): FastVa
     return undefined;
   }
   const compiled = validator.compiledSchemaCache.get(key, validator.options);
-  return compiled ? buildFastValidator(compiled, validator) : undefined;
+  const built = compiled ? buildFastValidator(compiled, validator) : undefined;
+  if (built === undefined) {
+    return undefined;
+  }
+  const { check, depth } = built;
+  return (json) => {
+    depth.left = depth.limit;
+    return check(json);
+  };
 };
 
 const lone = String.fromCharCode(0xd8_3d);

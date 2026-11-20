@@ -49,6 +49,7 @@ Values: `'draft-04'` · `'draft-06'` · `'draft-07'` · `'draft2019-09'` · `'dr
 | `strictUris`                    | `boolean`             | `false` | All `uri` format strings must be absolute URIs                                                                                                                                                        |
 | `asyncTimeout`                  | `number`              | `2000`  | Milliseconds before async format validators time out                                                                                                                                                  |
 | `maxRecursionDepth`             | `number`              | `100`   | Maximum recursion depth for schema traversal, deep clone, and equality checks. Increase for deeply nested schemas/data                                                                                |
+| `maxDataDepth`                  | `number`              | `500`   | Deepest nesting of the validated data (root is depth 0). Beyond it validation ends with a single `MAX_DATA_DEPTH_EXCEEDED` error; `Infinity` = no limit                                               |
 | `maxErrors`                     | `number`              | `1000`  | Most error details one validation reports, counting nested `inner` details. `err.truncated` is `true` when the limit left out at least one detail while the data was validated; `Infinity` = no limit |
 
 ## Schema strictness
