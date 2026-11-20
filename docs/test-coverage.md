@@ -9,11 +9,11 @@ Line coverage status: **high**
 | src/async-tasks.ts            |     95% |         95% |       100% |      92% |
 | src/compiled-schema-cache.ts  |     94% |         94% |        95% |      94% |
 | src/errors.ts                 |    100% |        100% |       100% |     100% |
-| src/fast-validator.ts         |     97% |         98% |        89% |      94% |
+| src/fast-validator.ts         |     97% |         97% |        90% |      96% |
 | src/format-validators.ts      |     97% |         97% |       100% |      95% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     99% |         99% |       100% |      99% |
-| src/json-validation.ts        |     96% |         95% |        86% |      93% |
+| src/json-validation.ts        |     96% |         96% |        85% |      93% |
 | src/report.ts                 |     89% |         89% |        74% |      87% |
 | src/schema-cache.ts           |     96% |         96% |       100% |      93% |
 | src/schema-compiler.ts        |     95% |         95% |       100% |      92% |
@@ -42,7 +42,8 @@ Line coverage status: **high**
 | src/validation/numeric.ts     |     94% |         94% |       100% |      95% |
 | src/validation/object.ts      |     97% |         97% |       100% |      95% |
 | src/validation/ref.ts         |     98% |         98% |       100% |      95% |
-| src/validation/shared.ts      |     97% |         98% |       100% |      94% |
+| src/validation/shared.ts      |     98% |         98% |       100% |      95% |
+| src/validation/size-limits.ts |    100% |        100% |       100% |     100% |
 | src/validation/string.ts      |     92% |         92% |       100% |      91% |
 | src/validation/type.ts        |     98% |         98% |       100% |      95% |
 | src/validation/unevaluated.ts |     93% |         93% |        92% |      90% |
@@ -51,4 +52,4 @@ Line coverage status: **high**
 | src/z-schema-reader.ts        |    100% |        100% |       100% |     100% |
 | src/z-schema-versions.ts      |    100% |        100% |       100% |      75% |
 | src/z-schema.ts               |     93% |         93% |        97% |      94% |
-| **Total**                     | **94%** |     **94%** |    **96%** |  **92%** |
+| **Total**                     | **94%** |     **95%** |    **96%** |  **92%** |
