@@ -188,14 +188,17 @@ validator.setRemoteReference('http://example.com/schemas/person.json', personSch
 
 ### Automatic loading via schema reader
 
-```typescript
-import fs from 'node:fs';
-import path from 'node:path';
+The reader is shared by every instance in the process. Return only schemas you intend to serve, for example from a map keyed by URI, and return `undefined` for any other URI. Do not turn the URI into a file path or a network request without checking it first.
 
-ZSchema.setSchemaReader((uri) => {
-  const filePath = path.resolve(__dirname, 'schemas', uri + '.json');
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-});
+```typescript
+import type { JsonSchema } from 'z-schema';
+
+const schemas = new Map<string, JsonSchema>([
+  ['http://example.com/schemas/address.json', addressSchema],
+  ['http://example.com/schemas/person.json', personSchema],
+]);
+
+ZSchema.setSchemaReader((uri) => schemas.get(uri));
 ```
 
 ### Diagnosing missing references
@@ -317,7 +320,7 @@ import type {
   SchemaErrorDetail, // Individual error detail
   ErrorCode, // Error code string literal type
   FormatValidatorFn, // (input: unknown) => boolean | Promise<boolean>
-  SchemaReader, // (uri: string) => JsonSchema
+  SchemaReader, // (uri: string) => JsonSchema | undefined
 } from 'z-schema';
 
 import { ValidateError } from 'z-schema';

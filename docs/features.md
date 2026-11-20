@@ -191,7 +191,7 @@ const registeredFormats = ZSchema.getRegisteredFormats();
 
 ## Automatic downloading of remote schemas
 
-Automatic downloading of remote schemas was removed from version `3.x` but is still possible with `ZSchema.setSchemaReader`. See the [usage guide](usage.md#remote-references) for details.
+Automatic downloading of remote schemas was removed from version `3.x` but is still possible with `ZSchema.setSchemaReader`. See the [usage guide](usage.md#remote-references) for details and [security.md](security.md#schema-readers-and-remote-references) for guidance on readers.
 
 ## Prefill default values to object using format
 

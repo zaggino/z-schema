@@ -16,6 +16,10 @@ If already cloned without `--recursive`:
 git submodule update --init --recursive
 ```
 
+## Reporting Security Issues
+
+Do not open a public issue or pull request for a suspected security issue. Report it privately as described in [SECURITY.md](../SECURITY.md).
+
 ## Commit Messages
 
 All commits must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification).
