@@ -144,6 +144,8 @@ const KEYWORD_COMPILERS: Record<keyof JsonSchemaAll, KeywordCompiler> = {
   contentMediaType: compileContent,
 };
 
+const SIZE_LIMIT_KEYS = ['maxLength', 'maxItems', 'maxProperties'] as const;
+
 function combine(checks: Check[]): FastValidator {
   const count = checks.length;
   if (count === 0) {
@@ -206,6 +208,17 @@ function compileNode(state: DriverState, node: unknown): FastValidator {
 
   const checks: Check[] = [];
   const compiled: KeywordCompiler[] = [];
+  // size limits are compiled first, so a value over a limit fails before the costlier checks run
+  for (let i = 0; i < SIZE_LIMIT_KEYS.length; i++) {
+    const limit = SIZE_LIMIT_KEYS[i];
+    if (schema[limit] !== undefined) {
+      const compile = KEYWORD_COMPILERS[limit];
+      if (!compiled.includes(compile)) {
+        compiled.push(compile);
+        compile(state, schema, checks);
+      }
+    }
+  }
   const keys = Object.keys(schema);
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
