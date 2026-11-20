@@ -26,8 +26,11 @@ permissions: {}
 jobs:
   # release-please itself runs for main only, and not on a manual dispatch with `publish`. In those cases the
   # step is skipped and the job still succeeds, so `build` can evaluate its own condition.
+  # GH_TOKEN is a secret of the `main` environment, so the job has to name that environment to read it. The
+  # environment accepts runs from main only: a dispatch from another branch stops here.
   release-please:
     runs-on: ubuntu-latest
+    environment: main
     permissions:
       contents: write
       pull-requests: write
