@@ -19,12 +19,18 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
+      # Dependabot does not update this ref. To bump it, set it to a newer commit of the repository's main branch
+      # and check that this job still passes.
       - name: Checkout agentskills repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: agentskills/agentskills
+          ref: 83021e2be457a9b6679148719c1f6074f0ad975e
           path: agentskills
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
