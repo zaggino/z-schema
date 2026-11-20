@@ -15,7 +15,7 @@ permissions:
 
 env:
   # Dependabot does not update this version. To bump it, change it here and check that both jobs still pass.
-  SKILLS_CLI_VERSION: 1.9.0
+  SKILLS_CLI_VERSION: '1.9.0'
 
 jobs:
   test:

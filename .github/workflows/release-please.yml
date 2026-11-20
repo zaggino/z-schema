@@ -24,9 +24,9 @@ on:
 permissions: {}
 
 jobs:
-  # Runs for main only: a manual dispatch from another branch does nothing.
+  # release-please itself runs for main only, and not on a manual dispatch with `publish`. In those cases the
+  # step is skipped and the job still succeeds, so `build` can evaluate its own condition.
   release-please:
-    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
-        if: ${{ !inputs.publish }}
+        if: ${{ !inputs.publish && github.ref == 'refs/heads/main' }}
         with:
           release-type: node
           token: ${{ secrets.GH_TOKEN }}
@@ -106,7 +106,7 @@ jobs:
           name: npm-tarball
           path: z-schema-*.tgz
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 7 # long enough to re-run a failed publish job on its own
           overwrite: true # a re-run of this job replaces the artifact of the earlier attempt
 
   # Publishes the tarball the build job packed. No checkout, no install, no lifecycle scripts.

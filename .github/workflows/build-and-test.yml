@@ -78,9 +78,10 @@ jobs:
           overwrite: true # a re-run of this job replaces the artifact of the earlier attempt
 
   # Commits the coverage artifacts from the build job to the PR branch. It is the only job with write access:
-  # it installs nothing and runs no script from the repository. Skipped for fork and Dependabot PRs (their token
-  # cannot push), for the bot's own commits, and for a branch name starting with "-", which is never handed to
-  # checkout or git.
+  # it installs nothing and runs no script from the repository, and it must stay that way, because the checkout
+  # keeps the write token. Skipped for fork PRs and runs triggered by Dependabot (their token cannot push), for
+  # the bot's own commits, and for a branch name starting with "-", so that such a name never reaches checkout
+  # or git.
   coverage-commit:
     needs: build
     if: >-
@@ -100,7 +101,7 @@ jobs:
       - name: Checkout PR branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: refs/heads/${{ github.event.pull_request.head.ref }}
       - name: Download coverage artifacts
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
