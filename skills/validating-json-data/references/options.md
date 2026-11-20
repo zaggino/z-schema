@@ -106,6 +106,8 @@ noExtraKeywords, noTypeless, noEmptyStrings, noEmptyArrays
 | `customFormats`   | `Record<string, FormatValidatorFn \| null>` | `undefined` | Register format validators at creation time                               |
 | `customValidator` | `(report, schema, json) => void`            | `undefined` | Called on every sub-schema during validation for custom cross-field logic |
 
+A custom validator may change the value it is given (through the object or array that holds it, for example to trim strings). It is only guaranteed to have run when the validation finished without errors; when a validation ends with errors it may or may not have run for a given value.
+
 ### customValidator example
 
 ```typescript

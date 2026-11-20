@@ -45,6 +45,9 @@ export interface ZSchemaOptions {
   /**
    * Called for every schema node that is validated. A custom validator reports through `report.addError` /
    * `report.addCustomError`; errors written to `report.errors` directly are not counted towards `maxErrors`.
+   * It may change the value it is given (through the object or array that holds it). It is only guaranteed to
+   * have run when the validation finished without errors: when a validation ends with errors, it may or may
+   * not have run for a given value.
    */
   customValidator?: (report: Report, schema: unknown, json: unknown) => void;
   customFormats?: Record<string, FormatValidatorFn | null>;

@@ -417,6 +417,41 @@ const validator = ZSchema.create({
 });
 ```
 
+### Changing the value
+
+A custom validator may change the value it is given, for example to trim strings. A string or a number cannot be changed in place, so change it through the object or array that holds it:
+
+```javascript
+function trimStrings(report, schema, json) {
+  if (Array.isArray(schema.trim)) {
+    schema.trim.forEach((name) => {
+      if (typeof json[name] === 'string') {
+        json[name] = json[name].trim();
+      }
+    });
+  }
+}
+
+const validator = ZSchema.create({ customValidator: trimStrings });
+
+const schema = {
+  type: 'object',
+  properties: { name: { type: 'string', maxLength: 10 } },
+  trim: ['name'],
+};
+
+const user = { name: '  Ada  ' };
+validator.validate(user, schema);
+console.log(user); // { name: 'Ada' }
+```
+
+What to rely on:
+
+- **Custom validators are only guaranteed to have run when the validation finished without errors.** When a validation ends with errors, a custom validator may or may not have run for a given value, and a change it already made stays. Use the changed value only after a successful validation.
+- A custom validator runs after the keywords of its schema and after the items and properties of the value have been validated. A change is not validated again: in the example, `maxLength` is checked against the string as it was passed in.
+- It is called for every sub-schema that is applied to a value, including the branches of `anyOf`, `oneOf`, `not` and `if` that turn out not to match.
+- It is also called while the schema itself is validated: `schema` is then a node of the meta-schema and `json` a part of your schema. Key the change on a keyword of your own (`trim` in the example), so that it only applies to your data.
+
 Testing it:
 
 ```javascript
