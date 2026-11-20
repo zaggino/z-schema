@@ -48,6 +48,7 @@ const validator = ZSchema.create({
   ignoreUnresolvableReferences: false, // skip unresolvable $ref (default: false)
   maxRecursionDepth: 100, // max depth for internal traversal (prevents stack overflow on deep schemas/data)
   maxDataDepth: 500, // max nesting depth of the validated data; Infinity = no limit (default: 500)
+  sizeLimitsFirst: true, // a value over maxLength / maxItems / maxProperties skips the other content checks of that schema node (default: true)
   maxErrors: 1000, // max error details reported per validate() call, counting nested `inner` details; Infinity = no limit (default: 1000)
 });
 ```

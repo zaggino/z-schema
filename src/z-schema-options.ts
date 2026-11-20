@@ -45,6 +45,9 @@ export interface ZSchemaOptions {
   /**
    * Called for every schema node that is validated. A custom validator reports through `report.addError` /
    * `report.addCustomError`; errors written to `report.errors` directly are not counted towards `maxErrors`.
+   * It may change the value it is given (through the object or array that holds it). It is only guaranteed to
+   * have run when the validation finished without errors: when a validation ends with errors, it may or may
+   * not have run for a given value.
    */
   customValidator?: (report: Report, schema: unknown, json: unknown) => void;
   customFormats?: Record<string, FormatValidatorFn | null>;
@@ -69,6 +72,20 @@ export interface ZSchemaOptions {
    * `maxRecursionDepth`.
    */
   maxDataDepth?: number;
+  /**
+   * Whether a value that exceeds a size limit of a schema node skips the content checks of that node. Default `true`.
+   * A string longer than `maxLength` skips `pattern`, `format`, `contentEncoding` and `contentMediaType`; an array
+   * longer than `maxItems` skips `uniqueItems`, `contains`, `unevaluatedItems` and the validation of its items; an
+   * object with more than `maxProperties` properties skips `properties`, `patternProperties`, `additionalProperties`,
+   * `propertyNames`, `unevaluatedProperties` and the validation of its property values. The limit's own error is
+   * reported, and every other keyword of the node (`type`, `enum`, `const`, `required`, the lower limits, `$ref`,
+   * `allOf`, `anyOf`, `oneOf`, `not`, `if`, `dependencies`, `dependentRequired`, `dependentSchemas`) still runs.
+   * A limit that is not evaluated (its error code in `excludeErrors` or missing from a non-empty `includeErrors`,
+   * or the validation vocabulary disabled for the node) skips nothing, and nothing is skipped while a
+   * `customValidator` is configured. The validity of the result is the same either way; only the error details of
+   * such a value are fewer. `false` runs every keyword.
+   */
+  sizeLimitsFirst?: boolean;
 }
 
 /**
@@ -139,6 +156,8 @@ export const defaultOptions: ZSchemaOptions = {
   maxErrors: DEFAULT_MAX_ERRORS,
   // maximum nesting depth of the validated data
   maxDataDepth: DEFAULT_MAX_DATA_DEPTH,
+  // size limits of a node skip the content checks of an over-limit value
+  sizeLimitsFirst: true,
 } satisfies EveryOption;
 
 /**

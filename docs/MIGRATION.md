@@ -106,6 +106,16 @@ const validator = ZSchema.create({ maxDataDepth: Infinity });
 
 See [options.md#maxdatadepth](options.md#maxdatadepth) for details.
 
+#### sizeLimitsFirst: fewer error details for a value over a size limit
+
+With default options, a value that exceeds `maxLength`, `maxItems` or `maxProperties` reports that error without the errors of the keywords of the same schema object that depend on its content (`pattern`, `format`, `contentEncoding`, `contentMediaType`, `uniqueItems`, `contains`, `unevaluatedItems`, `properties`, `patternProperties`, `additionalProperties`, `propertyNames`, `unevaluatedProperties`) and without the errors of its items and property values. Validity is unchanged. An array or object over its size limit is not entered, so where it is also nested past [`maxDataDepth`](options.md#maxdatadepth) the result is the size error and not `MAX_DATA_DEPTH_EXCEEDED`. Validators with a `customValidator` are not affected. Set `sizeLimitsFirst: false` to report all of them:
+
+```typescript
+const validator = ZSchema.create({ sizeLimitsFirst: false });
+```
+
+See [options.md#sizelimitsfirst](options.md#sizelimitsfirst) for details.
+
 #### maxErrors: at most 1000 error details by default
 
 A failed validation reports at most 1000 error details (counted through `inner`). Validity is unchanged. `err.truncated` is `true` when the limit left out at least one detail while the data was validated. Set `maxErrors: Infinity` to get every detail:

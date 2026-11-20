@@ -49,6 +49,7 @@ src/                  # Library source (TypeScript, ESM)
   validation/         # Keyword validators and their fast-validator compilers, split by category
     shared.ts         # Shared types (JsonValidatorFn), vocab helpers, policy predicates shared by the interpreter and the fast validator, caching utilities
     fast-shared.ts    # Types and helpers shared by the fast-validator keyword compilers (BuildState, ALWAYS_TRUE, unsupported())
+    size-limits.ts    # Size limits (maxLength, maxItems, maxProperties) and the keywords each stops for a value over the limit (sizeLimitsFirst)
     type.ts           # type, enum, const validators
     numeric.ts        # multipleOf, minimum, maximum, exclusiveMin/Max validators
     string.ts         # minLength, maxLength, pattern, format, content* validators
