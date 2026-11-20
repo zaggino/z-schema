@@ -1,5 +1,12 @@
 # Changelog
 
+## [12.8.0](https://github.com/zaggino/z-schema/compare/v12.7.0...v12.8.0) (2026-11-20)
+
+
+### Features
+
+* **options:** add maxDataDepth to limit the nesting depth of validated data ([#582](https://github.com/zaggino/z-schema/issues/582)) ([034016a](https://github.com/zaggino/z-schema/commit/034016afdc669445e57a8676ce1074262996aa5f))
+
 ## [12.7.0](https://github.com/zaggino/z-schema/compare/v12.6.1...v12.7.0) (2026-11-19)
 
 
