@@ -500,6 +500,51 @@ try {
 }
 ```
 
+## sizeLimitsFirst
+
+Whether a value that exceeds a size limit of a schema node skips the content checks of that node. When a value exceeds a limit, that node runs no further checks on the value's content and does not validate its children:
+
+| Value  | Limit exceeded  | Not run on this node for this value                                                                                                            |
+| ------ | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| string | `maxLength`     | `pattern`, `format`, `contentEncoding`, `contentMediaType`                                                                                     |
+| array  | `maxItems`      | `uniqueItems`, `contains`, `unevaluatedItems`, and the validation of its items (`items` / `prefixItems` / `additionalItems`)                   |
+| object | `maxProperties` | `properties`, `patternProperties`, `additionalProperties`, `propertyNames`, `unevaluatedProperties`, and the validation of its property values |
+
+The validity of the result is the same with the option on or off: the value is invalid either way. Only `err.details` differs. With the option on, such a value gets the limit's error (`MAX_LENGTH`, `ARRAY_LENGTH_LONG`, `OBJECT_PROPERTIES_MAXIMUM`) and the errors of the keywords that still run, but not the errors of the skipped keywords or of the value's items and properties.
+
+These keywords still run on the node: `type`, `enum`, `const`, `required`, the minimum keywords, `dependentRequired`, and the applicators that stay on the same value (`$ref`, `allOf`, `anyOf`, `oneOf`, `not`, `if`, `dependencies`, `dependentSchemas`). A `customValidator` still runs for the node.
+
+The rule works per schema node. A size limit and an expensive keyword in different subschemas of the same value do not affect each other: in `{ maxItems: 10, allOf: [{ items: … }] }` the items are still validated. Put the limit in the same schema object as the keywords it should stop.
+
+A limit that is not evaluated stops nothing: its error code filtered by `excludeErrors` / `includeErrors`, or the validation vocabulary disabled for the schema. With `breakOnFirstError: true`, the limit's error is the one reported for such a value. A custom format function is not called for a string that exceeds `maxLength` of the same schema node. With [`maxDataDepth`](#maxdatadepth), an array or object that exceeds its size limit is not entered, so it reports the size error and not `MAX_DATA_DEPTH_EXCEEDED`. On the cached fast path the size limits are checked before the node's other keywords regardless of the option; the fast path reports no errors, so the order cannot be observed in results.
+
+`false` runs every keyword on every value and reports all errors, as in 12.8.0 and earlier.
+
+Default: `true`
+
+```javascript
+const schema = { type: 'string', maxLength: 5, pattern: '^a+$' };
+
+const validator = ZSchema.create({ sizeLimitsFirst: true });
+try {
+  validator.validate('abcdefgh', schema);
+} catch (err) {
+  console.log(err.details);
+  // [{ code: 'MAX_LENGTH',
+  //    params: [8, 5],
+  //    message: 'String is too long (8 chars), maximum 5',
+  //    path: '#/' }]
+}
+
+const all = ZSchema.create({ sizeLimitsFirst: false });
+try {
+  all.validate('abcdefgh', schema);
+} catch (err) {
+  console.log(err.details.map((d) => d.code));
+  // [ 'MAX_LENGTH', 'PATTERN' ]
+}
+```
+
 ## maxErrors
 
 Maximum number of error details one `validate()` call reports, counting every detail, including those nested in `inner`. Keeps the error list small for large invalid inputs.
