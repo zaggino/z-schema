@@ -1,8 +1,5 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Report a security issue
-    url: https://github.com/zaggino/z-schema/security/advisories/new
-    about: Report a suspected security issue privately. Please do not open a public issue for it; see SECURITY.md.
   - name: Documentation
     url: https://github.com/zaggino/z-schema/tree/main/docs
     about: Check the docs for usage guides, options reference, and architecture overview.
