@@ -4,7 +4,7 @@ import type { BuildState, Check } from './fast-shared.js';
 
 import { Report } from '../report.js';
 import { isUniqueArray } from '../utils/array.js';
-import { ALWAYS_TRUE, expectNumber } from './fast-shared.js';
+import { ALWAYS_TRUE, deferToInterpreter, expectNumber, pushArrayLevelGuard, useDepth } from './fast-shared.js';
 import {
   cacheValidationResult,
   deferOrRunSync,
@@ -187,40 +187,57 @@ export function compileContains(state: BuildState, node: JsonSchemaInternal, che
   const { version } = state.ctx.options;
   const min = minContainsOf(node, version);
   const max = maxContainsOf(node, version);
+  const run = state.depth;
 
   if (max === undefined) {
     if (min <= 0) {
       // always satisfied; the sub-schema was still compiled so an unsupported one rejects the build
+      pushArrayLevelGuard(run, checks);
       return;
     }
+    useDepth(run);
     checks.push((json) => {
       if (!Array.isArray(json)) {
         return true;
       }
+      const { length } = json;
       let matches = 0;
-      for (let i = 0; i < json.length; i++) {
-        if (each(json[i]) && ++matches >= min) {
-          return true;
+      if (length > 0) {
+        if (run.left === 0) {
+          deferToInterpreter();
         }
+        run.left--;
+        for (let i = 0; i < length && matches < min; i++) {
+          if (each(json[i])) {
+            matches++;
+          }
+        }
+        run.left++;
       }
-      return false;
+      return matches >= min;
     });
     return;
   }
+  useDepth(run);
   checks.push((json) => {
     if (!Array.isArray(json)) {
       return true;
     }
+    const { length } = json;
     let matches = 0;
-    for (let i = 0; i < json.length; i++) {
-      if (each(json[i])) {
-        matches++;
-        if (matches > max) {
-          return false;
+    if (length > 0) {
+      if (run.left === 0) {
+        deferToInterpreter();
+      }
+      run.left--;
+      for (let i = 0; i < length && matches <= max; i++) {
+        if (each(json[i])) {
+          matches++;
         }
       }
+      run.left++;
     }
-    return matches >= min;
+    return matches <= max && matches >= min;
   });
 }
 
@@ -281,43 +298,72 @@ export function compileItemKeywords(state: BuildState, node: JsonSchemaInternal,
   }
 
   const headCount = headChecks.length;
+  const run = state.depth;
   if (headCount === 0) {
     if (tailCheck === undefined) {
+      // a schema applies to every item (`tail !== undefined`) but its check was dropped
+      if (tail !== undefined) {
+        pushArrayLevelGuard(run, checks);
+      }
       return;
     }
     const each = tailCheck;
+    useDepth(run);
     checks.push((json) => {
       if (!Array.isArray(json)) {
         return true;
       }
-      for (let i = 0; i < json.length; i++) {
+      const { length } = json;
+      if (length === 0) {
+        return true;
+      }
+      if (run.left === 0) {
+        deferToInterpreter();
+      }
+      run.left--;
+      let ok = true;
+      for (let i = 0; i < length; i++) {
         if (!each(json[i])) {
-          return false;
+          ok = false;
+          break;
         }
       }
-      return true;
+      run.left++;
+      return ok;
     });
     return;
   }
   const rest = tailCheck;
+  useDepth(run);
   checks.push((json) => {
     if (!Array.isArray(json)) {
       return true;
     }
     const { length } = json;
+    if (length === 0) {
+      return true;
+    }
+    if (run.left === 0) {
+      deferToInterpreter();
+    }
+    run.left--;
     const headEnd = length < headCount ? length : headCount;
+    let ok = true;
     for (let i = 0; i < headEnd; i++) {
       if (!headChecks[i](json[i])) {
-        return false;
+        ok = false;
+        break;
       }
     }
-    if (rest !== undefined) {
+    if (ok && rest !== undefined) {
       for (let i = headEnd; i < length; i++) {
         if (!rest(json[i])) {
-          return false;
+          ok = false;
+          break;
         }
       }
     }
-    return true;
+    run.left++;
+    return ok;
   });
 }

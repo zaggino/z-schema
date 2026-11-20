@@ -1,8 +1,10 @@
 import type { JsonSchema } from '../../src/json-schema-versions.ts';
+import type { ZSchemaSafe } from '../../src/z-schema.ts';
 
 import { ValidateError } from '../../src/errors.ts';
 import { resolveMaxDataDepth } from '../../src/z-schema-options.ts';
 import { ZSchema } from '../../src/z-schema.ts';
+import { buildFastFor, fastFor, outcome } from '../lib/fast-validator.ts';
 
 const CODE = 'MAX_DATA_DEPTH_EXCEEDED';
 
@@ -313,6 +315,191 @@ describe('maxDataDepth option', () => {
       const validator = ZSchema.create({ safe: true, maxDataDepth: 2 });
       expect(validator.validateSchema(schema).valid).toBe(true);
       expect(validator.validate({ p: { p: 1 } }, schema).valid).toBe(true);
+    });
+  });
+});
+
+/** What the cached fast validator answers; a deferral or any other throw means "the interpreter decides". */
+const fastVerdict = (fast: (json: unknown) => boolean, data: unknown): boolean => {
+  try {
+    return fast(data);
+  } catch {
+    return false;
+  }
+};
+
+const fastEntryOf = (v: ZSchemaSafe, schema: JsonSchema) =>
+  v.compiledSchemaCache.getEntry(v.compiledSchemaCache.keyOf(schema)!, v.options);
+
+describe('maxDataDepth option on the compiled-schema cache path', () => {
+  type Opts = Record<string, unknown>;
+
+  const fresh = (options: Opts, schema: JsonSchema, data: unknown) =>
+    outcome(() => ZSchema.create({ safe: true, ...options }).validate(data, schema));
+
+  const mixed: Shape = {
+    name: 'mixed tree',
+    schema: { properties: { children: { items: { $ref: '#' } } } },
+    build: (n) => tree(n),
+  };
+
+  describe.each([5, 500])('repeated calls with the limit at %i', (limit) => {
+    for (const { name, schema, build } of shapes.concat(mixed)) {
+      for (const n of [limit, limit + 1]) {
+        it(`${name}: data nested ${n} levels gives the same result on every call of one validator`, () => {
+          const data = build(n);
+          const expected = fresh({ maxDataDepth: limit }, schema, data);
+          const v = ZSchema.create({ safe: true, maxDataDepth: limit });
+          for (let i = 0; i < 3; i++) {
+            expect(outcome(() => v.validate(data, schema))).toEqual(expected);
+          }
+        });
+
+        it(`${name}: data nested ${n} levels gives the same result on every call of a compiled function`, () => {
+          const data = build(n);
+          const expected = fresh({ maxDataDepth: limit }, schema, data);
+          const v = ZSchema.create({ safe: true, maxDataDepth: limit });
+          const fn = v.compile(schema);
+          for (let i = 0; i < 3; i++) {
+            expect(outcome(() => fn(data))).toEqual(expected);
+          }
+        });
+      }
+    }
+  });
+
+  describe('children whose check is trivially true', () => {
+    const limit = 4;
+    const tables: Array<[string, JsonSchema, (n: number) => unknown]> = [
+      ['items: {}', { items: {} }, (n) => arrays(n, 1)],
+      ['items: true', { items: true }, (n) => arrays(n, 1)],
+      ['properties: { c: {} }', { properties: { c: {} } }, (n) => objects(n, 1)],
+      ['properties: { c: true }', { properties: { c: true } }, (n) => objects(n, 1)],
+      ['additionalProperties: {}', { additionalProperties: {} }, (n) => objects(n, 1)],
+      ['patternProperties: { ^c$: {} }', { patternProperties: { '^c$': {} } }, (n) => objects(n, 1)],
+      ['contains: {} with minContains: 0', { contains: {}, minContains: 0 }, (n) => arrays(n, 1)],
+      ['unevaluatedItems: {}', { unevaluatedItems: {} }, (n) => arrays(n, 1)],
+      ['unevaluatedProperties: {}', { unevaluatedProperties: {} }, (n) => objects(n, 1)],
+      [
+        'trivial contains beside a recursive items',
+        { items: { $ref: '#' }, contains: {}, minContains: 0 },
+        (n) => arrays(n, 1),
+      ],
+      [
+        'additionalProperties: {} beside a recursive property',
+        { properties: { c: { $ref: '#' } }, additionalProperties: {} },
+        (n) => objects(n, 1),
+      ],
+      [
+        'trivial items under a recursive $ref',
+        { $defs: { r: { items: { $ref: '#/$defs/r' }, contains: {}, minContains: 0 } }, $ref: '#/$defs/r' },
+        (n) => arrays(n, 1),
+      ],
+      [
+        'trivial properties under a recursive $ref',
+        { $defs: { r: { properties: { c: { $ref: '#/$defs/r' }, d: {} } } }, $ref: '#/$defs/r' },
+        (n) => objects(n, 1),
+      ],
+    ];
+    it.each(tables)('%s agrees with the interpreter at the limit', (_name, schema, build) => {
+      const { v, fast, reference } = fastFor(schema, { maxDataDepth: limit });
+      expect(fast).toBeDefined();
+      for (const n of [limit - 1, limit, limit + 1]) {
+        const data = build(n);
+        expect(fastVerdict(fast!, data), `nested ${n} levels`).toBe(reference(data));
+        // the same through the validator, three times
+        const expected = fresh({ maxDataDepth: limit }, schema, data);
+        for (let i = 0; i < 3; i++) {
+          expect(outcome(() => v.validate(data, schema))).toEqual(expected);
+        }
+      }
+    });
+  });
+
+  describe('over the limit', () => {
+    it('defers the call and keeps the fast validator', () => {
+      const schema: JsonSchema = { items: { $ref: '#' } };
+      const { v, fast } = fastFor(schema, { maxDataDepth: 3 });
+      expect(() => fast!(arrays(4, 1))).toThrow('deferred');
+      expect(fast!(arrays(3, 1))).toBe(true);
+      const fn = v.compile(schema);
+      for (let i = 0; i < 3; i++) {
+        expectExceeded(fn(arrays(4, 1)), 3);
+        expect(fn(arrays(3, 1)).valid).toBe(true);
+      }
+      expect(typeof fastEntryOf(v, schema)?.fast).toBe('function');
+    });
+
+    it('keeps the counter correct for a branch that continues after a rejection', () => {
+      const schema: JsonSchema = { anyOf: [{ items: { type: 'string' } }, { type: 'array' }] };
+      const v = ZSchema.create({ safe: true, maxDataDepth: 1 });
+      for (let i = 0; i < 4; i++) {
+        expect(v.validate([1], schema).valid).toBe(true);
+        expect(v.validate(['a'], schema).valid).toBe(true);
+      }
+    });
+
+    it('rejects over-deep data under not on every call', () => {
+      const schema: JsonSchema = { not: { items: { $ref: '#' } } };
+      const data = arrays(6, 1);
+      const expected = fresh({ maxDataDepth: 3 }, schema, data);
+      expect(expected).toEqual({ valid: false, codes: [CODE] });
+      const v = ZSchema.create({ safe: true, maxDataDepth: 3 });
+      for (let i = 0; i < 3; i++) {
+        expect(outcome(() => v.validate(data, schema))).toEqual(expected);
+      }
+    });
+  });
+
+  describe('maxDataDepth: Infinity', () => {
+    it('accepts 2000 levels on cached calls and builds a validator', () => {
+      const schema: JsonSchema = { items: { $ref: '#' } };
+      const v = ZSchema.create({ safe: true, maxDataDepth: Infinity });
+      const data = arrays(2000, 1);
+      // a shallow call primes the cache entry, so the deep calls below are answered by the fast validator
+      expect(v.validate(arrays(3, 1), schema).valid).toBe(true);
+      for (let i = 0; i < 3; i++) {
+        expect(v.validate(data, schema).valid).toBe(true);
+      }
+      expect(typeof buildFastFor(v, schema)).toBe('function');
+      expect(typeof fastEntryOf(v, schema)?.fast).toBe('function');
+    });
+  });
+
+  describe('a custom format function that validates against the same schema', () => {
+    it('does not change the outer result', () => {
+      const schema: JsonSchema = { type: ['array', 'string'], items: { $ref: '#' }, format: 'reenter' };
+      for (const n of [4, 5]) {
+        const data = arrays(n, 'x');
+        const expected = fresh({ maxDataDepth: 4, formatAssertions: null }, schema, data);
+        const v = ZSchema.create({ safe: true, maxDataDepth: 4, formatAssertions: null });
+        let inner = 0;
+        let reentered = false;
+        v.registerFormat('reenter', () => {
+          if (!reentered) {
+            reentered = true;
+            inner++;
+            expect(v.validate(['y'], schema).valid).toBe(true);
+            reentered = false;
+          }
+          return true;
+        });
+        for (let i = 0; i < 3; i++) {
+          expect(outcome(() => v.validate(data, schema))).toEqual(expected);
+        }
+        expect(inner).toBeGreaterThan(0);
+      }
+    });
+  });
+
+  describe('branches', () => {
+    it('a branch that accepts without descending decides the cached result', () => {
+      const schema: JsonSchema = { anyOf: [{ type: 'array' }, { items: { $ref: '#' } }] };
+      const data = arrays(6, 1);
+      const v = ZSchema.create({ safe: true, maxDataDepth: 3 });
+      expectExceeded(v.validate(data, schema), 3);
+      expect(v.validate(data, schema).valid).toBe(true);
+      expect(v.validate(data, schema).valid).toBe(true);
     });
   });
 });

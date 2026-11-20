@@ -6,7 +6,15 @@ import { Report } from '../report.js';
 import { difference } from '../utils/array.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { isObject } from '../utils/what-is.js';
-import { ALWAYS_TRUE, expectNumber, expectRecord, expectStringArray } from './fast-shared.js';
+import {
+  ALWAYS_TRUE,
+  deferToInterpreter,
+  expectNumber,
+  expectRecord,
+  expectStringArray,
+  isLimited,
+  useDepth,
+} from './fast-shared.js';
 import { deferOrRunSync, shouldSkipValidate, supportsDependentKeywords } from './shared.js';
 
 // ---------------------------------------------------------------------------
@@ -383,11 +391,14 @@ function compilePropertyCounts(node: JsonSchemaInternal, withKeys: KeysCheck[]):
 function compilePropertyTraversal(state: BuildState, node: JsonSchemaInternal, withKeys: KeysCheck[]): void {
   const { properties, patternProperties, additionalProperties } = node;
   const forbidAdditional = additionalProperties === false;
+  // set when a child schema that applies to some value is dropped because its check is trivially true
+  let elided = false;
   let additional: Check | undefined;
   if (additionalProperties !== undefined && additionalProperties !== true && additionalProperties !== false) {
     additional = state.compileChild(additionalProperties);
     if (additional === ALWAYS_TRUE) {
       additional = undefined;
+      elided = true;
     }
   }
   // a key matched by nothing only matters when something reacts to it
@@ -402,6 +413,8 @@ function compilePropertyTraversal(state: BuildState, node: JsonSchemaInternal, w
       if (built !== ALWAYS_TRUE || needsUnmatched) {
         propertyChecks ??= new Map<string, Check>();
         propertyChecks.set(names[i], built);
+      } else {
+        elided = true;
       }
     }
   }
@@ -420,6 +433,8 @@ function compilePropertyTraversal(state: BuildState, node: JsonSchemaInternal, w
       if (built !== ALWAYS_TRUE || needsUnmatched) {
         patterns.push(compiled.value);
         patternChecks.push(built);
+      } else {
+        elided = true;
       }
     }
   }
@@ -427,11 +442,31 @@ function compilePropertyTraversal(state: BuildState, node: JsonSchemaInternal, w
   // The options object is read at call time, like the interpreter does, so in-place edits of the array are honoured.
   const { options } = state.ctx;
   const patternCount = patterns.length;
+  const run = state.depth;
   if (propertyChecks === undefined && patternCount === 0 && !needsUnmatched) {
+    if (elided && isLimited(run)) {
+      // the level below a non-empty object is still entered by the interpreter
+      useDepth(run);
+      withKeys.push((_json, keys) => {
+        if (run.left === 0 && keys.length > 0) {
+          deferToInterpreter();
+        }
+        return true;
+      });
+    }
     return;
   }
+  useDepth(run);
   withKeys.push((json, keys) => {
-    for (let k = 0; k < keys.length; k++) {
+    if (keys.length === 0) {
+      return true;
+    }
+    if (run.left === 0) {
+      deferToInterpreter();
+    }
+    run.left--;
+    let ok = true;
+    for (let k = 0; ok && k < keys.length; k++) {
       const key = keys[k];
       const value = json[key];
       let matched = false;
@@ -440,32 +475,33 @@ function compilePropertyTraversal(state: BuildState, node: JsonSchemaInternal, w
         if (check !== undefined) {
           matched = true;
           if (!check(value)) {
-            return false;
+            ok = false;
           }
         }
       }
-      for (let i = 0; i < patternCount; i++) {
+      for (let i = 0; ok && i < patternCount; i++) {
         if (patterns[i].test(key)) {
           matched = true;
           if (!patternChecks[i](value)) {
-            return false;
+            ok = false;
           }
         }
       }
-      if (!matched) {
+      if (ok && !matched) {
         if (additional !== undefined) {
           if (!additional(value)) {
-            return false;
+            ok = false;
           }
         } else if (forbidAdditional) {
           const assumed = options.assumeAdditional;
           if (!Array.isArray(assumed) || !assumed.includes(key)) {
-            return false;
+            ok = false;
           }
         }
       }
     }
-    return true;
+    run.left++;
+    return ok;
   });
 }
 

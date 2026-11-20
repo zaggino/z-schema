@@ -6,7 +6,7 @@ import { Report } from '../report.js';
 import { DEFAULT_MAX_RECURSION_DEPTH } from '../utils/constants.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { isObject } from '../utils/what-is.js';
-import { deferToInterpreter, unsupported } from './fast-shared.js';
+import { deferToInterpreter, isLimited, unsupported, useDepth } from './fast-shared.js';
 import { resolveDynamicRef, resolveRecursiveRef } from './ref.js';
 import { deferOrRunSync, getCachedValidationResult } from './shared.js';
 
@@ -609,9 +609,20 @@ function compileItemsCollector(
   if (node.unevaluatedItems === true) {
     all = true;
   }
+  const run = state.depth;
   if (all) {
     // Everything is evaluated: the contains pass (which the interpreter may still run first for
     // `unevaluatedItems: true`, without effect on the result) and the combinators cannot change that.
+    if (node.contains !== undefined && isLimited(run)) {
+      // that contains pass still enters the level below the array
+      useDepth(run);
+      return (json, _keys, _evaluated, depth) => {
+        if (depth > maxDepth || (run.left === 0 && (json as unknown[]).length > 0)) {
+          deferToInterpreter();
+        }
+        return true;
+      };
+    }
     return (_json, _keys, _evaluated, depth) => {
       if (depth > maxDepth) {
         deferToInterpreter();
@@ -623,6 +634,7 @@ function compileItemsCollector(
   const containsCheck = node.contains === undefined ? undefined : state.compileChild(node.contains);
   if (containsCheck !== undefined) {
     state.notes.rechecks = true;
+    useDepth(run);
   }
 
   return (json, keys, evaluated, depth) => {
@@ -632,12 +644,17 @@ function compileItemsCollector(
     const arr = json as unknown[];
     const { length } = arr;
     addLeadingIndices(evaluated, leading, length);
-    if (containsCheck !== undefined) {
+    if (containsCheck !== undefined && length > 0) {
+      if (run.left === 0) {
+        deferToInterpreter();
+      }
+      run.left--;
       for (let i = 0; i < length; i++) {
         if (containsCheck(arr[i])) {
           evaluated.add(i);
         }
       }
+      run.left++;
     }
     return tail !== undefined && tail(json, keys, evaluated, depth);
   };
@@ -792,6 +809,10 @@ export function compileUnevaluatedItems(state: BuildState, node: JsonSchemaInter
   }
   const unevaluated = keyword === false ? undefined : state.compileChild(keyword);
   const collect = collectorFor(state, node, 'items');
+  const run = state.depth;
+  if (unevaluated !== undefined) {
+    useDepth(run);
+  }
 
   checks.push((json) => {
     if (!Array.isArray(json)) {
@@ -805,13 +826,29 @@ export function compileUnevaluatedItems(state: BuildState, node: JsonSchemaInter
     if (collect(json, NO_KEYS, evaluated, 0)) {
       return true;
     }
+    // the level below the array is entered at the first item that is validated
+    let entered = false;
     for (let i = 0; i < length; i++) {
       if (evaluated.has(i)) {
         continue;
       }
-      if (unevaluated === undefined || !unevaluated(json[i])) {
+      if (unevaluated === undefined) {
         return false;
       }
+      if (!entered) {
+        if (run.left === 0) {
+          deferToInterpreter();
+        }
+        run.left--;
+        entered = true;
+      }
+      if (!unevaluated(json[i])) {
+        run.left++;
+        return false;
+      }
+    }
+    if (entered) {
+      run.left++;
     }
     return true;
   });
@@ -825,6 +862,10 @@ export function compileUnevaluatedProperties(state: BuildState, node: JsonSchema
   }
   const unevaluated = keyword === false ? undefined : state.compileChild(keyword);
   const collect = collectorFor(state, node, 'properties');
+  const run = state.depth;
+  if (unevaluated !== undefined) {
+    useDepth(run);
+  }
 
   checks.push((json) => {
     if (!isObject(json)) {
@@ -838,13 +879,29 @@ export function compileUnevaluatedProperties(state: BuildState, node: JsonSchema
     if (collect(json, keys, evaluated, 0)) {
       return true;
     }
+    // the level below the object is entered at the first key that is validated
+    let entered = false;
     for (let i = 0; i < keys.length; i++) {
       if (evaluated.has(keys[i])) {
         continue;
       }
-      if (unevaluated === undefined || !unevaluated((json as Record<string, unknown>)[keys[i]])) {
+      if (unevaluated === undefined) {
         return false;
       }
+      if (!entered) {
+        if (run.left === 0) {
+          deferToInterpreter();
+        }
+        run.left--;
+        entered = true;
+      }
+      if (!unevaluated((json as Record<string, unknown>)[keys[i]])) {
+        run.left++;
+        return false;
+      }
+    }
+    if (entered) {
+      run.left++;
     }
     return true;
   });
