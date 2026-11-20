@@ -16,6 +16,10 @@ If already cloned without `--recursive`:
 git submodule update --init --recursive
 ```
 
+## Reporting Security Issues
+
+Do not open a public issue or pull request for a suspected security issue. Report it through the repository's [private reporting form](https://github.com/zaggino/z-schema/security/advisories/new); see [SECURITY.md](../SECURITY.md) for what to include.
+
 ## Commit Messages
 
 All commits must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification).

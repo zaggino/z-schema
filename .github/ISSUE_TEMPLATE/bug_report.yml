@@ -8,6 +8,8 @@ body:
       value: |
         Thanks for taking the time to report a bug! Please fill in the details below so we can reproduce and fix the issue.
 
+        For a suspected security issue, do not use this form: report it privately as described in [SECURITY.md](https://github.com/zaggino/z-schema/blob/main/SECURITY.md).
+
   - type: input
     id: version
     attributes:

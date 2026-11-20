@@ -188,14 +188,15 @@ validator.setRemoteReference('http://example.com/schemas/person.json', personSch
 
 ### Automatic loading via schema reader
 
-```typescript
-import fs from 'node:fs';
-import path from 'node:path';
+The reader is shared by every instance in the process. Serve the schemas you intend to serve, for example from a map keyed by URI:
 
-ZSchema.setSchemaReader((uri) => {
-  const filePath = path.resolve(__dirname, 'schemas', uri + '.json');
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-});
+```typescript
+const schemas = new Map<string, JsonSchema>([
+  ['http://example.com/schemas/address.json', addressSchema],
+  ['http://example.com/schemas/person.json', personSchema],
+]);
+
+ZSchema.setSchemaReader((uri) => schemas.get(uri));
 ```
 
 ### Diagnosing missing references

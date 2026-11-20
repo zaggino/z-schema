@@ -194,12 +194,16 @@ const validator = ZSchema.create();
 // Register a remote schema manually
 validator.setRemoteReference('http://example.com/person.json', personSchema);
 
-// Or set a schema reader to load them automatically
-ZSchema.setSchemaReader((uri: string) => {
-  const filePath = path.resolve(__dirname, 'schemas', uri + '.json');
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-});
+// Or set a schema reader to load them on demand, for example from a map keyed by URI
+const schemas = new Map<string, JsonSchema>([
+  ['http://example.com/person.json', personSchema],
+  ['http://example.com/address.json', addressSchema],
+]);
+
+ZSchema.setSchemaReader((uri) => schemas.get(uri));
 ```
+
+See [docs/security.md](docs/security.md#schema-readers-and-remote-references) for guidance on readers.
 
 ## Version History
 
