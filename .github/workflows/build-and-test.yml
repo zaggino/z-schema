@@ -6,11 +6,14 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     concurrency:
       group: build-and-test-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref }}-${{ matrix.node-version }}
       cancel-in-progress: true
@@ -24,8 +27,11 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
+      # persist-credentials: false — this job runs the repository's scripts and never pushes.
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -56,43 +62,63 @@ jobs:
       - if: matrix.node-version == '22.x'
         name: Generate coverage artifacts
         run: npm run coverage:artifacts
+      # The coverage-commit job below commits these two files to the PR branch.
       - if: matrix.node-version == '22.x' && github.event_name == 'pull_request'
-        name: Commit coverage artifacts to PR branch
+        name: Format coverage artifacts
+        run: npx oxfmt -c oxfmt.config.ts --write docs/test-coverage.md README.md
+      - if: matrix.node-version == '22.x' && github.event_name == 'pull_request'
+        name: Upload coverage artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-artifacts
+          path: |
+            docs/test-coverage.md
+            README.md
+          if-no-files-found: error
+          retention-days: 1
+
+  coverage-commit:
+    # Commits the coverage artifacts from the build job to the PR branch. It is the only job with write access:
+    # it installs nothing and runs no script from the repository. Skipped for fork PRs (no push permission), for
+    # the bot's own commits (avoids loops) and for a branch name starting with "-" (git would read it as an option).
+    needs: build
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'github-actions[bot]' &&
+      !startsWith(github.event.pull_request.head.ref, '-')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: coverage-commit-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: coverage-artifacts
+          path: ${{ runner.temp }}/coverage-artifacts
+      - name: Commit coverage artifacts to PR branch
         env:
-          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
-          BASE_REPO: ${{ github.repository }}
-          ACTOR: ${{ github.actor }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          ARTIFACTS: ${{ runner.temp }}/coverage-artifacts
         run: |
-          # Skip for fork PRs (no push permission) and bot actors (avoid loops)
-          if [ "$HEAD_REPO" != "$BASE_REPO" ]; then
-            echo "Fork PR — skipping coverage commit."
+          # The artifacts were generated for HEAD_SHA. If the branch has moved since, leave it to the run for
+          # the newer commit.
+          if [ "$(git rev-parse HEAD)" != "$HEAD_SHA" ]; then
+            echo "Branch moved since this run started. Skipping commit."
             exit 0
           fi
-          if [ "$ACTOR" = "github-actions[bot]" ]; then
-            echo "Bot actor — skipping coverage commit."
-            exit 0
-          fi
-          # git would read a branch name starting with "-" as an option
-          case "$HEAD_REF" in
-            -*)
-              echo "Branch name starts with '-' — skipping coverage commit."
-              exit 0
-              ;;
-          esac
 
-          # Save artifacts generated on the merge commit
-          cp docs/test-coverage.md /tmp/test-coverage.md
-          cp README.md /tmp/README.md
-
-          # Switch to the actual PR branch (force to discard dirty working tree)
-          git fetch origin "$HEAD_REF"
-          git checkout -f "$HEAD_REF"
-
-          # Restore and format (same as pre-commit hook would)
-          cp /tmp/test-coverage.md docs/test-coverage.md
-          cp /tmp/README.md README.md
-          npx oxfmt -c oxfmt.config.ts --write docs/test-coverage.md README.md
+          cp "$ARTIFACTS/docs/test-coverage.md" docs/test-coverage.md
+          cp "$ARTIFACTS/README.md" README.md
 
           # Only commit if there are real changes against the branch HEAD
           if git diff --quiet HEAD -- docs/test-coverage.md README.md; then

@@ -146,4 +146,6 @@ For pull requests, CI may auto-commit coverage artifacts (`docs/test-coverage.md
 - Auto-commit is skipped for fork pull requests.
 - Auto-commit is skipped when the actor is `github-actions[bot]`.
 - Only coverage artifact files are staged for this CI-authored commit.
-- Coverage artifact update logic is serialized per PR branch with cancel-in-progress behavior to avoid commit races.
+- The commit is made by a separate `coverage-commit` job, the only job in the workflow with write access. It runs after every leg of the `build` matrix has passed and takes the two files from the 22.x leg as a workflow artifact.
+- Auto-commit is skipped when the branch has moved since the run started; the run for the newer commit handles it.
+- Coverage artifact update logic is serialized per pull request with cancel-in-progress behavior to avoid commit races.

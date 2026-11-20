@@ -19,22 +19,18 @@ on:
         type: boolean
         default: false
 
-permissions:
-  id-token: write # Required for OIDC
-  contents: write
-  pull-requests: write
+# Each job gets only what it needs. The token that can publish to npm (id-token) is held by the publish job
+# alone, which installs nothing and runs no script from the repository or its dependencies.
+permissions: {}
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    environment: main
-    # Same image as build-and-test.yml: ships the browsers for the locked
-    # Playwright version, so the job doesn't depend on Playwright supporting the
-    # runner OS. Keep the tag in sync with build-and-test.yml and the playwright
-    # version in package-lock.json.
-    container:
-      image: mcr.microsoft.com/playwright:v1.60.0-noble
-      options: --user 1001
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      publish: ${{ steps.gate.outputs.publish }}
     steps:
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
@@ -46,10 +42,25 @@ jobs:
       - id: gate
         run: echo "publish=${{ (steps.release.outputs.release_created == 'true' || inputs.publish) && 'true' || 'false' }}" >> "$GITHUB_OUTPUT"
 
+  # Checks, builds, tests and packs the release. The tarball is handed to the publish job as an artifact.
+  build:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.publish == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    # Same image as build-and-test.yml: ships the browsers for the locked
+    # Playwright version, so the job doesn't depend on Playwright supporting the
+    # runner OS. Keep the tag in sync with build-and-test.yml and the playwright
+    # version in package-lock.json.
+    container:
+      image: mcr.microsoft.com/playwright:v1.60.0-noble
+      options: --user 1001
+    steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: ${{ steps.gate.outputs.publish == 'true' }}
         with:
           fetch-depth: 0 # the manual-publish guard below compares HEAD with the release tag
+          persist-credentials: false
 
       - name: Guard manual publish
         if: ${{ inputs.publish }}
@@ -70,26 +81,49 @@ jobs:
           fi
 
       - run: git submodule update --init
-        if: ${{ steps.gate.outputs.publish == 'true' }}
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        if: ${{ steps.gate.outputs.publish == 'true' }}
         with:
           node-version-file: .nvmrc
-          registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
-        if: ${{ steps.gate.outputs.publish == 'true' }}
 
       # Generates src/schemas/*.json from the json-schema-spec submodule.
       # Required before `check`: the type-aware lint resolves the JSON imports
       # in z-schema-versions.ts, which are absent on a fresh checkout until the
       # build's copy:schemas step runs.
       - run: npm run copy:schemas
-        if: ${{ steps.gate.outputs.publish == 'true' }}
 
       - run: npm run check
-        if: ${{ steps.gate.outputs.publish == 'true' }}
 
-      - run: npm publish --verbose # runs both build & tests in prepublishOnly script
-        if: ${{ steps.gate.outputs.publish == 'true' }}
+      # Clean, build and test: what `npm publish` would run before packing. The publish job skips scripts.
+      - run: npm run prepublishOnly
+
+      - run: npm pack --ignore-scripts
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: package
+          path: z-schema-*.tgz
+          if-no-files-found: error
+          retention-days: 1
+
+  # Publishes the tarball the build job packed. No checkout, no install, no lifecycle scripts.
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: main
+    permissions:
+      id-token: write # Required for OIDC
+    steps:
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: lts/*
+          registry-url: 'https://registry.npmjs.org'
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: package
+          path: package
+
+      - run: npm publish ./package/z-schema-*.tgz --ignore-scripts --verbose
