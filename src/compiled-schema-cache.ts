@@ -160,6 +160,7 @@ function snapshotOptions(o: ZSchemaOptions): OptionsSnapshot {
     customFormats: customFormats && typeof customFormats === 'object' ? { ...customFormats } : customFormats,
     maxRecursionDepth: o.maxRecursionDepth,
     maxErrors: o.maxErrors,
+    maxDataDepth: o.maxDataDepth,
   };
 }
 
@@ -218,6 +219,7 @@ function sameOptions(s: OptionsSnapshot, o: ZSchemaOptions): boolean {
     s.customValidator === o.customValidator &&
     s.maxRecursionDepth === o.maxRecursionDepth &&
     s.maxErrors === o.maxErrors &&
+    s.maxDataDepth === o.maxDataDepth &&
     sameCustomFormats(s.customFormats, o.customFormats)
   );
 }

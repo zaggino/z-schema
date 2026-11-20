@@ -8,6 +8,7 @@ import { deferToTimer, drainTasks } from './async-tasks.js';
 import { Errors, getValidateError, toValidateError } from './errors.js';
 import { getId } from './json-schema.js';
 import { shallowClone } from './utils/clone.js';
+import { NO_DATA_DEPTH_LIMIT } from './utils/constants.js';
 import { get } from './utils/json.js';
 import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
 import { isAbsoluteUri } from './utils/uri.js';
@@ -339,6 +340,31 @@ export class Report {
    * @internal
    */
   errorsTruncated = false;
+  /**
+   * Levels of data nesting validation may still descend.
+   *
+   * @internal
+   */
+  dataDepthLeft = NO_DATA_DEPTH_LIMIT;
+
+  /**
+   * Ends the validation: the data is nested deeper than `maxDataDepth`. Throws a `ValidateError` with one detail.
+   *
+   * @param limit - The `maxDataDepth` value, reported as the detail's only param.
+   * @internal
+   */
+  throwDataDepthExceeded(limit: number): never {
+    const params = [limit];
+    const detail = {
+      code: 'MAX_DATA_DEPTH_EXCEEDED',
+      params,
+      message: Errors.MAX_DATA_DEPTH_EXCEEDED.replace('{0}', String(limit)),
+      path: this.getPath(this.options.reportPathAsArray === true),
+      schemaPath: this.getSchemaPath(),
+      [jsonSymbol]: this.getJson(),
+    } as SchemaErrorDetail;
+    throw getValidateError({ message: 'JSON_OBJECT_VALIDATION_FAILED', details: [detail] });
+  }
 
   /**
    * Creates a sub-report whose errors are materialized lazily. Safe because the errors of such
@@ -380,6 +406,7 @@ export class Report {
       // an entry it builds can fit when it is adopted; adoption checks the room again, because the parent may
       // have recorded more errors by then.
       this.errorLimit = parentOrOptions.errorLimit - parentOrOptions.errorCount - 1;
+      this.dataDepthLeft = parentOrOptions.dataDepthLeft;
       this.__$recursiveAnchorStack = parentOrOptions.__$recursiveAnchorStack.slice();
       this.__$dynamicScopeStack = parentOrOptions.__$dynamicScopeStack.slice();
       this.__$unevaluatedInstance = parentOrOptions.__$unevaluatedInstance;

@@ -22,7 +22,7 @@ import { sortedKeys } from './utils/json.js';
 import { copyProp } from './utils/properties.js';
 import { getRemotePath } from './utils/uri.js';
 import { isObject, whatIs } from './utils/what-is.js';
-import { defaultOptions, normalizeOptions, resolveMaxErrors } from './z-schema-options.js';
+import { defaultOptions, normalizeOptions, resolveMaxDataDepth, resolveMaxErrors } from './z-schema-options.js';
 
 export interface ValidateOptions {
   schemaPath?: string;
@@ -230,6 +230,7 @@ export class ZSchemaBase {
       // unresolved value (`undefined`, `NaN`) would mean no limit. The root report holds no errors at this
       // point (data validation runs only when the schema phase found none), which is what `errorCount` relies on.
       report.errorLimit = resolveMaxErrors(this.options.maxErrors);
+      report.dataDepthLeft = resolveMaxDataDepth(this.options.maxDataDepth);
       validateJson(this, report, _schema, json);
     }
 

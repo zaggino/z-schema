@@ -153,9 +153,18 @@ function collectEvaluated(
 
     // contains - evaluates specific indices that match the schema
     if (currentSchema.contains !== undefined) {
+      // The data level below the array is entered at the first item that is validated (not served from the cache).
+      let entered = false;
       for (let i = 0; i < jsonArr.length; i++) {
         let passed = getCachedValidationResult(report, currentSchema.contains, jsonArr[i]);
         if (passed === undefined) {
+          if (!entered) {
+            if (report.dataDepthLeft === 0) {
+              report.throwDataDepthExceeded(ctx.options.maxDataDepth!);
+            }
+            report.dataDepthLeft--;
+            entered = true;
+          }
           const subReport = Report.createSubReport(report);
           ctx._jsonValidate(subReport, currentSchema.contains, jsonArr[i]);
           // An unsettled (async-pending) result is not a success. Applicators cache their result before the
@@ -165,6 +174,9 @@ function collectEvaluated(
         if (passed) {
           evaluated.add(i);
         }
+      }
+      if (entered) {
+        report.dataDepthLeft++;
       }
     }
 
@@ -367,13 +379,23 @@ export function unevaluatedItemsValidator(ctx: ZSchemaBase, report: Report, sche
     // A sub-report that already has an error decides immediately, even with its own or earlier async work
     // pending: errors are never removed and only one error is ever emitted, so waiting cannot change the outcome.
     let pendingReports: Report[] | undefined;
+    // The data level below the array is entered at the first item that is validated.
+    let entered = false;
     for (let i = 0; i < length; i++) {
       if (evaluatedItems.has(i)) {
         continue;
       }
+      if (!entered) {
+        if (report.dataDepthLeft === 0) {
+          report.throwDataDepthExceeded(ctx.options.maxDataDepth!);
+        }
+        report.dataDepthLeft--;
+        entered = true;
+      }
       const subReport = Report.createSubReport(report);
       ctx._jsonValidate(subReport, unevalSchema, json[i]);
       if (subReport.errors.length > 0) {
+        report.dataDepthLeft++;
         report.addError('ARRAY_UNEVALUATED_ITEMS', undefined, undefined, schema, 'unevaluatedItems');
         return;
       }
@@ -383,6 +405,9 @@ export function unevaluatedItemsValidator(ctx: ZSchemaBase, report: Report, sche
         }
         pendingReports.push(subReport);
       }
+    }
+    if (entered) {
+      report.dataDepthLeft++;
     }
     if (pendingReports !== undefined) {
       const reports = pendingReports;
@@ -458,10 +483,19 @@ export function unevaluatedPropertiesValidator(
     // async error-order caveat in docs/features.md).
     let pendingReports: Report[] | undefined;
     let pendingKeys: string[] | undefined;
+    // The data level below the object is entered at the first key that is validated.
+    let entered = false;
     for (let i = 0; i < allKeys.length; i++) {
       const key = allKeys[i];
       if (evaluatedProperties.has(key)) {
         continue;
+      }
+      if (!entered) {
+        if (report.dataDepthLeft === 0) {
+          report.throwDataDepthExceeded(ctx.options.maxDataDepth!);
+        }
+        report.dataDepthLeft--;
+        entered = true;
       }
       const subReport = Report.createSubReport(report);
       ctx._jsonValidate(subReport, unevalSchema, (json as Record<string, unknown>)[key]);
@@ -475,6 +509,9 @@ export function unevaluatedPropertiesValidator(
         pendingReports.push(subReport);
         pendingKeys.push(key);
       }
+    }
+    if (entered) {
+      report.dataDepthLeft++;
     }
     if (pendingReports !== undefined && pendingKeys !== undefined) {
       const reports = pendingReports;

@@ -218,12 +218,15 @@ function deferredContext(ctx: ZSchemaBase, report: Report, decisionFn: () => voi
   const recursiveScope = report.__$recursiveAnchorStack.slice();
   const dynamicScope = report.__$dynamicScopeStack.slice();
   const unevaluatedInstance = report.__$unevaluatedInstance;
+  const { dataDepthLeft } = report;
   return () => {
     const oldOptions = ctx.validateOptions;
     const oldRecursiveScope = report.__$recursiveAnchorStack;
     const oldDynamicScope = report.__$dynamicScopeStack;
     const oldUnevaluatedInstance = report.__$unevaluatedInstance;
+    const oldDataDepthLeft = report.dataDepthLeft;
     ctx.validateOptions = report.validateOptions;
+    report.dataDepthLeft = dataDepthLeft;
     report.__$recursiveAnchorStack = recursiveScope;
     report.__$dynamicScopeStack = dynamicScope;
     report.__$unevaluatedInstance = unevaluatedInstance;
@@ -234,6 +237,7 @@ function deferredContext(ctx: ZSchemaBase, report: Report, decisionFn: () => voi
       report.__$recursiveAnchorStack = oldRecursiveScope;
       report.__$dynamicScopeStack = oldDynamicScope;
       report.__$unevaluatedInstance = oldUnevaluatedInstance;
+      report.dataDepthLeft = oldDataDepthLeft;
     }
   };
 }

@@ -141,10 +141,18 @@ export function containsValidator(ctx: ZSchemaBase, report: Report, schema: Json
   }
 
   const subReports: Report[] = [];
-  for (let idx = 0; idx < json.length; idx++) {
-    const subReport = Report.createSubReport(report);
-    subReports.push(subReport);
-    ctx._jsonValidate(subReport, containsSchema, json[idx]);
+  if (json.length > 0) {
+    // Sub-reports inherit the depth left when they are created, so the level is entered first.
+    if (report.dataDepthLeft === 0) {
+      report.throwDataDepthExceeded(ctx.options.maxDataDepth!);
+    }
+    report.dataDepthLeft--;
+    for (let idx = 0; idx < json.length; idx++) {
+      const subReport = Report.createSubReport(report);
+      subReports.push(subReport);
+      ctx._jsonValidate(subReport, containsSchema, json[idx]);
+    }
+    report.dataDepthLeft++;
   }
 
   const addContainsErrorIfNeeded = () => {
