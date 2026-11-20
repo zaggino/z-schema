@@ -47,6 +47,7 @@ const validator = ZSchema.create({
   formatAssertions: null, // null=always assert, true=respect vocabulary (2019-09/2020-12 assert only if the meta-schema opts in), false=annotation-only (default: null)
   ignoreUnresolvableReferences: false, // skip unresolvable $ref (default: false)
   maxRecursionDepth: 100, // max depth for internal traversal (prevents stack overflow on deep schemas/data)
+  maxDataDepth: 500, // max nesting depth of the validated data; Infinity = no limit (default: 500)
   maxErrors: 1000, // max error details reported per validate() call, counting nested `inner` details; Infinity = no limit (default: 1000)
 });
 ```
@@ -229,6 +230,7 @@ Common error codes (defined in `src/errors.ts`):
 | `PROPERTY_NAMES`                   | Property name fails `propertyNames` (draft-06+)   |
 | `ARRAY_UNEVALUATED_ITEMS`          | Unevaluated items not allowed (draft-2019-09+)    |
 | `OBJECT_UNEVALUATED_PROPERTIES`    | Unevaluated property not allowed (draft-2019-09+) |
+| `MAX_DATA_DEPTH_EXCEEDED`          | Data nested deeper than `maxDataDepth`            |
 
 ### Filtering Errors
 

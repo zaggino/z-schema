@@ -96,6 +96,16 @@ The `JsonSchemaVersion` union type now includes `'draft2019-09'` and `'draft2020
 
 A schema whose `$ref` names a file outside its own directory (for example `../common/defs.json`) needs `--refRoot <dir>`, where `<dir>` is a directory that contains both the schema and the referenced file. The error message names the option.
 
+#### maxDataDepth: data nested deeper than 500 levels is invalid by default
+
+With default options, data nested deeper than 500 levels is reported as invalid with `MAX_DATA_DEPTH_EXCEEDED`. Set `maxDataDepth` higher, or to `Infinity`, to change that:
+
+```typescript
+const validator = ZSchema.create({ maxDataDepth: Infinity });
+```
+
+See [options.md#maxdatadepth](options.md#maxdatadepth) for details.
+
 #### maxErrors: at most 1000 error details by default
 
 A failed validation reports at most 1000 error details (counted through `inner`). Validity is unchanged. `err.truncated` is `true` when the limit left out at least one detail while the data was validated. Set `maxErrors: Infinity` to get every detail:
