@@ -10,6 +10,8 @@ jobs:
   contrib-readme-job:
     runs-on: ubuntu-latest
     name: A job to automate contrib in readme
+    # GH_TOKEN is a secret of the `main` environment, so the job has to name that environment to read it.
+    environment: main
     permissions:
       contents: write
       pull-requests: write
