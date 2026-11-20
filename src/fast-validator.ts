@@ -1,5 +1,12 @@
 import type { JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
-import type { BuildState, Check, DataDepthRun, FastValidator, KeywordCompiler } from './validation/fast-shared.js';
+import type {
+  BuildState,
+  BuiltFastValidator,
+  Check,
+  DataDepthRun,
+  FastValidator,
+  KeywordCompiler,
+} from './validation/fast-shared.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
 import { isInternalKey } from './json-schema.js';
@@ -33,7 +40,7 @@ import { compileConst, compileEnum, compileType } from './validation/type.js';
 import { compileUnevaluatedItems, compileUnevaluatedProperties } from './validation/unevaluated.js';
 import { resolveMaxDataDepth } from './z-schema-options.js';
 
-export type { FastValidator } from './validation/fast-shared.js';
+export type { BuiltFastValidator, FastValidator } from './validation/fast-shared.js';
 export { isFastValidatorDisabled } from './validation/fast-shared.js';
 
 // ---------------------------------------------------------------------------
@@ -225,17 +232,18 @@ function compileNode(state: DriverState, node: unknown): FastValidator {
 /**
  * Builds a boolean validator for a compiled, meta-validated schema, or returns `undefined` when the schema
  * uses anything the builder does not implement. For a schema it accepts, the result agrees with the
- * interpreter's validity for every input; it never produces error details.
+ * interpreter's validity for every input; it never produces error details. The caller sets `depth.left` to
+ * `depth.limit` before each call of `check` and restores it afterwards (see `_fastAccepts`).
  * @param schema - The compiled schema root held by the compiled-schema cache.
  * @param ctx - The validator whose options the schema was compiled under. Options are read at build time,
  * except `assumeAdditional`, which is read on every call.
  */
-export function buildFastValidator(schema: JsonSchemaInternal, ctx: ZSchemaBase): FastValidator | undefined {
+export function buildFastValidator(schema: JsonSchemaInternal, ctx: ZSchemaBase): BuiltFastValidator | undefined {
   if (typeof ctx.options.customValidator === 'function') {
     return undefined;
   }
   const limit = resolveMaxDataDepth(ctx.options.maxDataDepth);
-  const run: DataDepthRun = { left: limit, limit, used: false };
+  const run: DataDepthRun = { left: limit, limit };
   const state: DriverState = {
     ctx,
     root: schema,
@@ -247,23 +255,7 @@ export function buildFastValidator(schema: JsonSchemaInternal, ctx: ZSchemaBase)
   try {
     const built = compileNode(state, schema);
     // A collector would evaluate an impure (custom) check twice, where the interpreter reuses its first result.
-    if (state.notes.customFormat && state.notes.rechecks) {
-      return undefined;
-    }
-    if (!run.used) {
-      return built;
-    }
-    // The counter is reset on every call and restored on every exit (a deferral, a disable, any other throw, a
-    // nested call of the same schema from a custom format function).
-    return (json) => {
-      const saved = run.left;
-      run.left = limit;
-      try {
-        return built(json);
-      } finally {
-        run.left = saved;
-      }
-    };
+    return state.notes.customFormat && state.notes.rechecks ? undefined : { check: built, depth: run };
   } catch {
     // The sentinel thrown by unsupported(), or anything unexpected (e.g. a stack overflow on a very deep
     // schema): either way there is no fast validator and the interpreter handles the schema.

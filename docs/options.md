@@ -476,11 +476,11 @@ const validator = ZSchema.create({
 
 How deeply the validated data may be nested. The root value is at depth `0`; a subschema may be applied to a value at depth `maxDataDepth` or less. Validation stops when it is about to validate the children of an array or object that is itself at depth `maxDataDepth`. Data the schema never descends into is not measured.
 
-At the limit the validation ends with a `ValidateError` whose `details` has one entry: code `MAX_DATA_DEPTH_EXCEEDED`, `params: [limit]`, and the path of the container that was not entered. Errors found before the limit was reached are not included. With `safe: true` the result is `{ valid: false, err }`; in async mode it is delivered the same way as other errors. `excludeErrors` does not suppress it.
+At the limit the validation ends with a `ValidateError` whose `details` has one entry: code `MAX_DATA_DEPTH_EXCEEDED`, `params: [limit]`, and the path of the container that was not entered (an item reached through `contains`, `unevaluatedItems` or `unevaluatedProperties` adds no segment to it). Errors found before the limit was reached are not included. With `safe: true` the result is `{ valid: false, err }`; in async mode it is delivered the same way as other errors. `excludeErrors` does not suppress it.
 
 `Infinity` turns the limit off; very deep data is then bounded only by the engine's call stack. A negative number means `0` (only the root value is validated), fractions are rounded down, and non-numbers fall back to the default. The limit applies to data validation only, not to schema compilation or schema validation. It is separate from [`maxRecursionDepth`](#maxrecursiondepth), which bounds schema walks, cloning, equality (`enum` / `const` / `uniqueItems`) and evaluated-annotation collection. A `customValidator` that calls the public `validate()` starts a new count for that call.
 
-The number of stack frames per level depends on the schema: schemas with many nested applicators per level use more. The limit bounds the data for a given schema.
+The limit counts data levels, not stack frames. The number of stack frames per level depends on the schema: schemas with many nested applicators or `$ref` hops per level use more, and may need a lower value to stay inside the engine's call stack. Validation descends only as far as it needs to decide the result, so which data is measured can differ between the first call on a schema and later cached calls; see [compile()](features.md).
 
 Default: `500`
 

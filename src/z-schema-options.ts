@@ -158,7 +158,7 @@ export const resolveMaxErrors = (value: unknown): number => {
  * becomes 0; `Infinity` (and anything from `NO_DATA_DEPTH_LIMIT` up) becomes `NO_DATA_DEPTH_LIMIT`;
  * anything that is not a number (or is `NaN`) becomes the default.
  */
-export function resolveMaxDataDepth(value: number | undefined): number {
+export function resolveMaxDataDepth(value: unknown): number {
   if (typeof value !== 'number' || Number.isNaN(value)) {
     return DEFAULT_MAX_DATA_DEPTH;
   }

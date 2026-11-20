@@ -13,6 +13,7 @@ import { get } from './utils/json.js';
 import { jsonSymbol, schemaSymbol } from './utils/symbols.js';
 import { isAbsoluteUri } from './utils/uri.js';
 import { isObject } from './utils/what-is.js';
+import { resolveMaxDataDepth } from './z-schema-options.js';
 
 export interface SchemaErrorDetail {
   /**
@@ -348,19 +349,25 @@ export class Report {
   dataDepthLeft = NO_DATA_DEPTH_LIMIT;
 
   /**
-   * Ends the validation: the data is nested deeper than `maxDataDepth`. Throws a `ValidateError` with one detail.
+   * Ends the validation: the data is nested deeper than `maxDataDepth`. Throws a `ValidateError` with one detail,
+   * whose param is the limit in force and whose paths include the segments of every enclosing report.
    *
-   * @param limit - The `maxDataDepth` value, reported as the detail's only param.
    * @internal
    */
-  throwDataDepthExceeded(limit: number): never {
-    const params = [limit];
+  throwDataDepthExceeded(): never {
+    const limit = resolveMaxDataDepth(this.options.maxDataDepth);
+    let path = this.path.slice();
+    let schemaPath = this.schemaPath.slice();
+    for (let parent = this.parentReport; parent !== undefined; parent = parent.parentReport) {
+      path = parent.path.concat(path);
+      schemaPath = parent.schemaPath.concat(schemaPath);
+    }
     const detail = {
       code: 'MAX_DATA_DEPTH_EXCEEDED',
-      params,
+      params: [limit],
       message: Errors.MAX_DATA_DEPTH_EXCEEDED.replace('{0}', String(limit)),
-      path: this.getPath(this.options.reportPathAsArray === true),
-      schemaPath: this.getSchemaPath(),
+      path: this.options.reportPathAsArray === true ? path : pathToString(path),
+      schemaPath,
       [jsonSymbol]: this.getJson(),
     } as SchemaErrorDetail;
     throw getValidateError({ message: 'JSON_OBJECT_VALIDATION_FAILED', details: [detail] });

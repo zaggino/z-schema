@@ -4,7 +4,7 @@ import type { BuildState, Check } from './fast-shared.js';
 
 import { Report } from '../report.js';
 import { isUniqueArray } from '../utils/array.js';
-import { ALWAYS_TRUE, deferToInterpreter, expectNumber, pushArrayLevelGuard, useDepth } from './fast-shared.js';
+import { ALWAYS_TRUE, deferToInterpreter, expectNumber, pushArrayLevelGuard } from './fast-shared.js';
 import {
   cacheValidationResult,
   deferOrRunSync,
@@ -144,7 +144,7 @@ export function containsValidator(ctx: ZSchemaBase, report: Report, schema: Json
   if (json.length > 0) {
     // Sub-reports inherit the depth left when they are created, so the level is entered first.
     if (report.dataDepthLeft === 0) {
-      report.throwDataDepthExceeded(ctx.options.maxDataDepth!);
+      report.throwDataDepthExceeded();
     }
     report.dataDepthLeft--;
     for (let idx = 0; idx < json.length; idx++) {
@@ -195,7 +195,6 @@ export function compileContains(state: BuildState, node: JsonSchemaInternal, che
       pushArrayLevelGuard(run, checks);
       return;
     }
-    useDepth(run);
     checks.push((json) => {
       if (!Array.isArray(json)) {
         return true;
@@ -218,7 +217,6 @@ export function compileContains(state: BuildState, node: JsonSchemaInternal, che
     });
     return;
   }
-  useDepth(run);
   checks.push((json) => {
     if (!Array.isArray(json)) {
       return true;
@@ -308,7 +306,6 @@ export function compileItemKeywords(state: BuildState, node: JsonSchemaInternal,
       return;
     }
     const each = tailCheck;
-    useDepth(run);
     checks.push((json) => {
       if (!Array.isArray(json)) {
         return true;
@@ -321,20 +318,18 @@ export function compileItemKeywords(state: BuildState, node: JsonSchemaInternal,
         deferToInterpreter();
       }
       run.left--;
-      let ok = true;
       for (let i = 0; i < length; i++) {
         if (!each(json[i])) {
-          ok = false;
-          break;
+          run.left++;
+          return false;
         }
       }
       run.left++;
-      return ok;
+      return true;
     });
     return;
   }
   const rest = tailCheck;
-  useDepth(run);
   checks.push((json) => {
     if (!Array.isArray(json)) {
       return true;
@@ -348,22 +343,21 @@ export function compileItemKeywords(state: BuildState, node: JsonSchemaInternal,
     }
     run.left--;
     const headEnd = length < headCount ? length : headCount;
-    let ok = true;
     for (let i = 0; i < headEnd; i++) {
       if (!headChecks[i](json[i])) {
-        ok = false;
-        break;
+        run.left++;
+        return false;
       }
     }
-    if (ok && rest !== undefined) {
+    if (rest !== undefined) {
       for (let i = headEnd; i < length; i++) {
         if (!rest(json[i])) {
-          ok = false;
-          break;
+          run.left++;
+          return false;
         }
       }
     }
     run.left++;
-    return ok;
+    return true;
   });
 }

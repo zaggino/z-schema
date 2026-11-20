@@ -138,7 +138,7 @@ describe('fast validator', () => {
         expect([first.valid, second.valid, third.valid]).toEqual([freshOk.valid, freshNo.valid, freshOk.valid]);
         expect([first.valid, second.valid, third.valid]).toEqual([true, false, true]);
         expect(buildFastFor(v, schema)).toBeUndefined();
-        expect(typeof entryOf(v, schema)?.fast).not.toBe('function');
+        expect(typeof entryOf(v, schema)?.fast?.check).not.toBe('function');
         expect(calls).toBe(3);
       });
 

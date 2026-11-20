@@ -26,6 +26,15 @@ const objects = (n: number, leaf: unknown): unknown => {
   return node;
 };
 
+/** `n` two-item arrays `[head, next]` around `1`. */
+const pairs = (n: number, head: unknown): unknown => {
+  let node: unknown = 1;
+  for (let i = 0; i < n; i++) {
+    node = [head, node];
+  }
+  return node;
+};
+
 const run = (options: Record<string, unknown>, schema: JsonSchema, data: unknown) =>
   ZSchema.create({ safe: true, ...options }).validate(data, schema);
 
@@ -107,8 +116,7 @@ describe('maxDataDepth option', () => {
         expectExceeded(run({}, schema, build(501)), 500);
       });
 
-      // Paths inside nested sub-reports (contains, unevaluated*) carry only one parent prefix, so their length
-      // is not the depth.
+      // An item validated by contains or unevaluated* adds no path segment, so there the length is not the depth.
       const inSubReport = /contains|unevaluated/.test(name);
 
       it('reports the path of the container whose children were not validated', () => {
@@ -229,15 +237,22 @@ describe('maxDataDepth option', () => {
       expectExceeded(await validator.validate(arrays(6, 1), schema), 5);
     });
 
-    it('delivers the error in async mode with an async format in the schema', async () => {
+    it('counts levels entered after an async format has settled', async () => {
       const validator = ZSchema.create({
         async: true,
         safe: true,
         maxDataDepth: 5,
         customFormats: { slow: () => Promise.resolve(true) },
       });
-      const withFormat: JsonSchema = { items: { $ref: '#' }, properties: { a: { format: 'slow' } } };
-      expectExceeded(await validator.validate(arrays(6, 1), withFormat), 5);
+      // every level is ['x', next]: `if` waits for the async format of 'x', and `then` descends into next afterwards
+      const withFormat: JsonSchema = {
+        if: { prefixItems: [{ format: 'slow' }] },
+        then: { prefixItems: [{}, { $ref: '#' }] },
+      };
+      const atLimit = await validator.validate(pairs(5, 'x'), withFormat);
+      expect(atLimit.valid).toBe(true);
+      expectExceeded(await validator.validate(pairs(6, 'x'), withFormat), 5);
+      expectExceeded(await validator.validate(pairs(9, 'x'), withFormat), 5);
     });
 
     it('rejects in async throwing mode', async () => {
@@ -427,17 +442,31 @@ describe('maxDataDepth option on the compiled-schema cache path', () => {
         expectExceeded(fn(arrays(4, 1)), 3);
         expect(fn(arrays(3, 1)).valid).toBe(true);
       }
-      expect(typeof fastEntryOf(v, schema)?.fast).toBe('function');
+      expect(typeof fastEntryOf(v, schema)?.fast?.check).toBe('function');
     });
 
-    it('keeps the counter correct for a branch that continues after a rejection', () => {
-      const schema: JsonSchema = { anyOf: [{ items: { type: 'string' } }, { type: 'array' }] };
-      const v = ZSchema.create({ safe: true, maxDataDepth: 1 });
-      for (let i = 0; i < 4; i++) {
-        expect(v.validate([1], schema).valid).toBe(true);
-        expect(v.validate(['a'], schema).valid).toBe(true);
-      }
-    });
+    const rejecting: Array<{ name: string; first: JsonSchema; data: unknown }> = [
+      { name: 'items', first: { items: { type: 'string' } }, data: [[1]] },
+      { name: 'prefixItems', first: { prefixItems: [{ type: 'string' }] }, data: [[1]] },
+      { name: 'prefixItems and items', first: { prefixItems: [{}], items: { type: 'string' } }, data: [[1, 1]] },
+      { name: 'properties', first: { properties: { c: { type: 'string' } } }, data: [{ c: 1 }] },
+      { name: 'patternProperties', first: { patternProperties: { c: { type: 'string' } } }, data: [{ c: 1 }] },
+      { name: 'additionalProperties', first: { additionalProperties: { type: 'string' } }, data: [{ c: 1 }] },
+      { name: 'additionalProperties: false', first: { additionalProperties: false }, data: [{ c: 1 }] },
+      { name: 'contains with maxContains', first: { contains: {}, maxContains: 1 }, data: [[1, 2]] },
+      { name: 'unevaluatedItems', first: { unevaluatedItems: { type: 'string' } }, data: [[1]] },
+      { name: 'unevaluatedProperties', first: { unevaluatedProperties: { type: 'string' } }, data: [{ c: 1 }] },
+    ];
+    for (const { name, first, data } of rejecting) {
+      it(`restores the count when ${name} rejects, so a later branch can use the same level`, () => {
+        // root array (depth 0) -> item (depth 1) -> its children: the first branch rejects below depth 1, and the
+        // second branch needs that level again. With maxDataDepth 2, a count left one short would defer the call.
+        const second: JsonSchema = { items: { type: 'number' }, additionalProperties: { type: 'number' } };
+        const schema: JsonSchema = { items: { anyOf: [first, second] } };
+        const { fast } = fastFor(schema, { maxDataDepth: 2 });
+        expect(fast!(data)).toBe(true);
+      });
+    }
 
     it('rejects over-deep data under not on every call', () => {
       const schema: JsonSchema = { not: { items: { $ref: '#' } } };
@@ -462,7 +491,7 @@ describe('maxDataDepth option on the compiled-schema cache path', () => {
         expect(v.validate(data, schema).valid).toBe(true);
       }
       expect(typeof buildFastFor(v, schema)).toBe('function');
-      expect(typeof fastEntryOf(v, schema)?.fast).toBe('function');
+      expect(typeof fastEntryOf(v, schema)?.fast?.check).toBe('function');
     });
   });
 
@@ -492,14 +521,110 @@ describe('maxDataDepth option on the compiled-schema cache path', () => {
     });
   });
 
-  describe('branches', () => {
-    it('a branch that accepts without descending decides the cached result', () => {
-      const schema: JsonSchema = { anyOf: [{ type: 'array' }, { items: { $ref: '#' } }] };
-      const data = arrays(6, 1);
+  describe('checks that decide the result before the data is descended into', () => {
+    const deciding: Array<{ name: string; schema: JsonSchema; data: unknown }> = [
+      {
+        name: 'an anyOf branch that accepts',
+        schema: { anyOf: [{ type: 'array' }, { items: { $ref: '#' } }] },
+        data: arrays(6, 1),
+      },
+      {
+        name: 'a keyword that fails under not',
+        schema: { not: { required: ['x'], properties: { c: { $ref: '#' } } } },
+        data: objects(6, 1),
+      },
+      {
+        name: 'a keyword that fails in a oneOf branch',
+        schema: { oneOf: [{ required: ['x'], properties: { c: { $ref: '#' } } }, { required: ['c'] }] },
+        data: objects(6, 1),
+      },
+      {
+        name: 'a keyword that fails in if',
+        schema: { if: { required: ['x'], properties: { c: { $ref: '#' } } }, then: false },
+        data: objects(6, 1),
+      },
+    ];
+    for (const { name, schema, data } of deciding) {
+      it(`${name}: the first call reports the limit, cached calls do not descend and accept`, () => {
+        const v = ZSchema.create({ safe: true, maxDataDepth: 3 });
+        expectExceeded(v.validate(data, schema), 3);
+        expect(v.validate(data, schema).valid).toBe(true);
+        expect(v.validate(data, schema).valid).toBe(true);
+      });
+    }
+  });
+
+  describe('error detail', () => {
+    it('has the full path when the limit is reached inside nested combinators', () => {
+      const schema: JsonSchema = { items: { anyOf: [{ items: { allOf: [{ $ref: '#' }] } }] } };
+      const result = run({ maxDataDepth: 6, reportPathAsArray: true }, schema, arrays(8, 1));
+      expectExceeded(result, 6);
+      expect(result.err?.details?.[0].path).toEqual([0, 0, 0, 0, 0, 0]);
+      expect(run({ maxDataDepth: 2 }, schema, arrays(8, 1)).err?.details?.[0].path).toBe('#/0/0');
+    });
+
+    it('reports the limit in force after the option was changed in place', () => {
       const v = ZSchema.create({ safe: true, maxDataDepth: 3 });
-      expectExceeded(v.validate(data, schema), 3);
-      expect(v.validate(data, schema).valid).toBe(true);
-      expect(v.validate(data, schema).valid).toBe(true);
+      const schema: JsonSchema = { items: { $ref: '#' } };
+      v.options.maxDataDepth = 2.7;
+      expectExceeded(v.validate(arrays(4, 1), schema), 2);
+      expect(v.validate(arrays(2, 1), schema).valid).toBe(true);
+    });
+  });
+
+  describe('sites reached only through the evaluated-items collection', () => {
+    const viaCollector: Array<{ name: string; schema: JsonSchema }> = [
+      { name: 'contains', schema: { contains: { $ref: '#' }, unevaluatedItems: false } },
+      { name: 'contains with unevaluatedItems: true', schema: { contains: { $ref: '#' }, unevaluatedItems: true } },
+    ];
+    for (const { name, schema } of viaCollector) {
+      it(`${name}: the same result on the first and on cached calls`, () => {
+        for (const n of [2, 3, 4, 5]) {
+          const data = arrays(n, 1);
+          const first = outcome(() => run({ maxDataDepth: 3 }, schema, data));
+          const v = ZSchema.create({ safe: true, maxDataDepth: 3 });
+          for (let i = 0; i < 3; i++) {
+            expect(outcome(() => v.validate(data, schema))).toEqual(first);
+          }
+        }
+      });
+    }
+  });
+
+  describe('tuple keywords', () => {
+    const tuples: Array<{ name: string; options: Record<string, unknown>; schema: JsonSchema }> = [
+      { name: 'prefixItems', options: {}, schema: { prefixItems: [{ $ref: '#' }] } },
+      { name: 'draft-04 items array', options: { version: 'draft-04' }, schema: { items: [{ $ref: '#' }] } },
+      { name: 'draft2019-09 items array', options: { version: 'draft2019-09' }, schema: { items: [{ $ref: '#' }] } },
+    ];
+    for (const { name, options, schema } of tuples) {
+      it(`${name}: depth N passes and N+1 reports the limit, on every call`, () => {
+        const v = ZSchema.create({ safe: true, maxDataDepth: 3, ...options });
+        for (let i = 0; i < 3; i++) {
+          expect(v.validate(arrays(3, 1), schema).valid).toBe(true);
+          expectExceeded(v.validate(arrays(4, 1), schema), 3);
+        }
+      });
+    }
+
+    it('draft-04 additionalItems: depth N passes and N+1 reports the limit, on every call', () => {
+      const schema: JsonSchema = { items: [{}], additionalItems: { $ref: '#' } };
+      // every level is [0, next]: next is validated by additionalItems
+      const v = ZSchema.create({ safe: true, maxDataDepth: 3, version: 'draft-04' });
+      for (let i = 0; i < 3; i++) {
+        expect(v.validate(pairs(3, 0), schema).valid).toBe(true);
+        expectExceeded(v.validate(pairs(4, 0), schema), 3);
+      }
+    });
+
+    it('with 0 an object is entered only for a key that has a schema', () => {
+      const v = ZSchema.create({ safe: true, maxDataDepth: 0 });
+      const schema: JsonSchema = { properties: { c: {} } };
+      for (let i = 0; i < 3; i++) {
+        expectExceeded(v.validate({ c: 1 }, schema), 0);
+        expect(v.validate({ other: 1 }, schema).valid).toBe(true);
+        expect(v.validate({}, schema).valid).toBe(true);
+      }
     });
   });
 });

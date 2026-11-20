@@ -26,19 +26,19 @@ export const ALWAYS_FALSE: FastValidator = () => false;
 
 /**
  * Run state of the `maxDataDepth` limit, shared by every closure of one build. `left` is the number of data levels
- * the running validation may still descend; `buildFastValidator` resets it to `limit` on every call. When the limit
- * is off, `limit` is `NO_DATA_DEPTH_LIMIT`, so `left` never reaches 0 and the same closures serve both cases.
+ * the running validation may still descend. The caller of the built validator sets it to `limit` before a call and
+ * puts the previous value back afterwards, whichever way the call ends (see `_fastAccepts`). When the limit is off,
+ * `limit` is `NO_DATA_DEPTH_LIMIT`, so `left` never reaches 0 and the same closures serve both cases.
  */
 export interface DataDepthRun {
   left: number;
   readonly limit: number;
-  /** Set when a closure that reads `left` was emitted, which makes the entry wrapper necessary. */
-  used: boolean;
 }
 
-/** Marks that an emitted closure counts data levels. */
-export function useDepth(run: DataDepthRun): void {
-  run.used = true;
+/** What `buildFastValidator` returns: the check and the run state its closures share. */
+export interface BuiltFastValidator {
+  readonly check: FastValidator;
+  readonly depth: DataDepthRun;
 }
 
 /** Whether the limit is finite, i.e. whether elided traversals need a guard. */
@@ -54,7 +54,6 @@ export function pushArrayLevelGuard(run: DataDepthRun, checks: Check[]): void {
   if (!isLimited(run)) {
     return;
   }
-  run.used = true;
   checks.push((json) => {
     if (run.left === 0 && Array.isArray(json) && json.length > 0) {
       deferToInterpreter();
@@ -69,7 +68,8 @@ export interface BuildState {
   readonly root: JsonSchemaInternal;
   /**
    * The `maxDataDepth` run state. A traversing closure checks `left` once per non-empty container whose children it
-   * visits; a traversal the builder elides gets a guard from {@link pushArrayLevelGuard} or its object twin (finite limit only).
+   * visits; under a finite limit, a traversal the builder elides gets a guard instead ({@link pushArrayLevelGuard}
+   * for arrays, an inline one in the object and collector compilers).
    */
   readonly depth: DataDepthRun;
   /** Compiles a child schema; a child that cannot be compiled makes the whole build unsupported. */

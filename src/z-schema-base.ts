@@ -360,14 +360,21 @@ export class ZSchemaBase {
     if (fast === null) {
       return false;
     }
+    // The data-depth count starts over for this call. The previous value is put back on every exit: a call can be
+    // nested in another call of the same validator (a custom format function that validates against the same schema).
+    const { depth } = fast;
+    const saved = depth.left;
+    depth.left = depth.limit;
     try {
-      return fast(json);
+      return fast.check(json);
     } catch (error) {
       if (isFastValidatorDisabled(error)) {
         entry.fast = null;
       }
       // the interpreter decides, and reproduces the throw if it is a real one
       return false;
+    } finally {
+      depth.left = saved;
     }
   }
 

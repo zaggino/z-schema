@@ -347,21 +347,10 @@ function recurseArray(ctx: ZSchemaBase, report: Report, schema: JsonSchemaIntern
 
   const prefixItems = honouredPrefixItems(schema, ctx.options.version);
 
-  // Whether at least one item will be validated: the data level below this array is entered only then.
-  let descends: boolean;
-  if (prefixItems) {
-    descends = prefixItems.length > 0 || (schema.items !== undefined && !Array.isArray(schema.items));
-  } else if (Array.isArray(schema.items)) {
-    descends = schema.items.length > 0 || typeof schema.additionalItems === 'object';
-  } else {
-    descends = typeof schema.items === 'object' || typeof schema.items === 'boolean';
-  }
-  if (!descends) {
-    return;
-  }
-
-  if (report.dataDepthLeft === 0) {
-    report.throwDataDepthExceeded(ctx.options.maxDataDepth!);
+  // The count goes down for the loops below whether or not an item is validated; the limit is reached only when
+  // one is. With nothing to validate it can be -1 for the length of the loops, where nothing reads it.
+  if (report.dataDepthLeft === 0 && arrayDescends(schema, prefixItems)) {
+    report.throwDataDepthExceeded();
   }
   report.dataDepthLeft--;
   if (prefixItems) {
@@ -464,15 +453,12 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
   }
   const ppCount = ppCompiled === undefined ? 0 : ppCompiled.length;
 
-  // The data level below this object is entered only when a child can be validated: a "properties" entry or a
-  // pattern for some key, or an additionalProperties schema. Checked once per object, not per key.
-  const descends = keys.length > 0 && (p !== undefined || ppCount > 0 || checkAdditional);
-  if (descends) {
-    if (report.dataDepthLeft === 0 && (checkAdditional || anyKeyHasSchema(keys, p, ppCompiled))) {
-      report.throwDataDepthExceeded(ctx.options.maxDataDepth!);
-    }
-    report.dataDepthLeft--;
+  // The limit is reached only when a child would be validated: an additionalProperties schema, or a key that
+  // "properties" names or a pattern matches. As in recurseArray, the count goes down for the loop either way.
+  if (report.dataDepthLeft === 0 && keys.length > 0 && (checkAdditional || anyKeyHasSchema(keys, p, ppCompiled))) {
+    report.throwDataDepthExceeded();
   }
+  report.dataDepthLeft--;
 
   for (let k = 0; k < keys.length; k++) {
     const m = keys[k];
@@ -534,9 +520,18 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
     }
   }
 
-  if (descends) {
-    report.dataDepthLeft++;
+  report.dataDepthLeft++;
+}
+
+/** Whether a schema applies to some item of a non-empty array, so a child of it is validated. Cold path. */
+function arrayDescends(schema: JsonSchemaInternal, prefixItems: ReturnType<typeof honouredPrefixItems>): boolean {
+  if (prefixItems) {
+    return prefixItems.length > 0 || (schema.items !== undefined && !Array.isArray(schema.items));
   }
+  if (Array.isArray(schema.items)) {
+    return schema.items.length > 0 || typeof schema.additionalItems === 'object';
+  }
+  return typeof schema.items === 'object' || typeof schema.items === 'boolean';
 }
 
 /** Whether some key is named in `properties` or matches a pattern, so a child of it is validated. Cold path. */

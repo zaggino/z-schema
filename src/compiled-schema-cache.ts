@@ -1,4 +1,4 @@
-import type { FastValidator } from './fast-validator.js';
+import type { BuiltFastValidator } from './fast-validator.js';
 import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { SchemaPosition } from './json-schema.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
@@ -228,7 +228,7 @@ function sameOptions(s: OptionsSnapshot, o: ZSchemaOptions): boolean {
 export interface CompiledSchemaEntry {
   schema: JsonSchemaInternal;
   /** Boolean fast validator: `undefined` = not built yet, `null` = the schema is not supported. */
-  fast?: FastValidator | null;
+  fast?: BuiltFastValidator | null;
   generation: number;
   options: OptionsSnapshot;
 }

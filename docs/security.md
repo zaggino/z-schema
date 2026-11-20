@@ -31,7 +31,7 @@ A `maxLength` or `maxItems` keyword in the schema reports oversized values, but 
 | [`maxErrors`](options.md#maxerrors)                 | `1000`              | Number of error details one `validate()` call reports                                                               | Further details are left out and the error has `truncated: true` |
 | Pattern length (a constant, not an option)          | `10 000` characters | Length of a `pattern` value or a `patternProperties` key                                                            | Schema validation fails                                          |
 
-`maxRecursionDepth` is not a limit on how deeply the validated data may be nested; `maxDataDepth` is. With `maxDataDepth: Infinity`, very deep data is bounded only by the engine's call stack, so bound the nesting before validating.
+`maxRecursionDepth` is not a limit on how deeply the validated data may be nested; `maxDataDepth` is. It counts data levels, not stack frames: a schema with many nested applicators or `$ref` hops per level uses more of the call stack per level and may need a lower value than the default. With `maxDataDepth: Infinity`, very deep data is bounded only by the engine's call stack, so bound the nesting before validating.
 
 ## Patterns
 

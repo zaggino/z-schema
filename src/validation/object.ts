@@ -13,7 +13,6 @@ import {
   expectRecord,
   expectStringArray,
   isLimited,
-  useDepth,
 } from './fast-shared.js';
 import { deferOrRunSync, shouldSkipValidate, supportsDependentKeywords } from './shared.js';
 
@@ -446,7 +445,6 @@ function compilePropertyTraversal(state: BuildState, node: JsonSchemaInternal, w
   if (propertyChecks === undefined && patternCount === 0 && !needsUnmatched) {
     if (elided && isLimited(run)) {
       // the level below a non-empty object is still entered by the interpreter
-      useDepth(run);
       withKeys.push((_json, keys) => {
         if (run.left === 0 && keys.length > 0) {
           deferToInterpreter();
@@ -456,7 +454,6 @@ function compilePropertyTraversal(state: BuildState, node: JsonSchemaInternal, w
     }
     return;
   }
-  useDepth(run);
   withKeys.push((json, keys) => {
     if (keys.length === 0) {
       return true;
@@ -465,8 +462,7 @@ function compilePropertyTraversal(state: BuildState, node: JsonSchemaInternal, w
       deferToInterpreter();
     }
     run.left--;
-    let ok = true;
-    for (let k = 0; ok && k < keys.length; k++) {
+    for (let k = 0; k < keys.length; k++) {
       const key = keys[k];
       const value = json[key];
       let matched = false;
@@ -475,33 +471,37 @@ function compilePropertyTraversal(state: BuildState, node: JsonSchemaInternal, w
         if (check !== undefined) {
           matched = true;
           if (!check(value)) {
-            ok = false;
+            run.left++;
+            return false;
           }
         }
       }
-      for (let i = 0; ok && i < patternCount; i++) {
+      for (let i = 0; i < patternCount; i++) {
         if (patterns[i].test(key)) {
           matched = true;
           if (!patternChecks[i](value)) {
-            ok = false;
+            run.left++;
+            return false;
           }
         }
       }
-      if (ok && !matched) {
+      if (!matched) {
         if (additional !== undefined) {
           if (!additional(value)) {
-            ok = false;
+            run.left++;
+            return false;
           }
         } else if (forbidAdditional) {
           const assumed = options.assumeAdditional;
           if (!Array.isArray(assumed) || !assumed.includes(key)) {
-            ok = false;
+            run.left++;
+            return false;
           }
         }
       }
     }
     run.left++;
-    return ok;
+    return true;
   });
 }
 

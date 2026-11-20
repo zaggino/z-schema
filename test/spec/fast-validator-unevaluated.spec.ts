@@ -330,7 +330,7 @@ describe('fast validator', () => {
         expect(outcome(() => v.validate(data, schema))).toEqual(expected);
       }
       const entry = v.compiledSchemaCache.getEntry(v.compiledSchemaCache.keyOf(schema)!, v.options);
-      expect(typeof entry?.fast).toBe('function');
+      expect(typeof entry?.fast?.check).toBe('function');
     });
   });
 

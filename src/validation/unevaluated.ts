@@ -6,7 +6,7 @@ import { Report } from '../report.js';
 import { DEFAULT_MAX_RECURSION_DEPTH } from '../utils/constants.js';
 import { compileSchemaRegex } from '../utils/schema-regex.js';
 import { isObject } from '../utils/what-is.js';
-import { deferToInterpreter, isLimited, unsupported, useDepth } from './fast-shared.js';
+import { deferToInterpreter, isLimited, unsupported } from './fast-shared.js';
 import { resolveDynamicRef, resolveRecursiveRef } from './ref.js';
 import { deferOrRunSync, getCachedValidationResult } from './shared.js';
 
@@ -160,7 +160,7 @@ function collectEvaluated(
         if (passed === undefined) {
           if (!entered) {
             if (report.dataDepthLeft === 0) {
-              report.throwDataDepthExceeded(ctx.options.maxDataDepth!);
+              report.throwDataDepthExceeded();
             }
             report.dataDepthLeft--;
             entered = true;
@@ -387,7 +387,7 @@ export function unevaluatedItemsValidator(ctx: ZSchemaBase, report: Report, sche
       }
       if (!entered) {
         if (report.dataDepthLeft === 0) {
-          report.throwDataDepthExceeded(ctx.options.maxDataDepth!);
+          report.throwDataDepthExceeded();
         }
         report.dataDepthLeft--;
         entered = true;
@@ -492,7 +492,7 @@ export function unevaluatedPropertiesValidator(
       }
       if (!entered) {
         if (report.dataDepthLeft === 0) {
-          report.throwDataDepthExceeded(ctx.options.maxDataDepth!);
+          report.throwDataDepthExceeded();
         }
         report.dataDepthLeft--;
         entered = true;
@@ -615,7 +615,6 @@ function compileItemsCollector(
     // `unevaluatedItems: true`, without effect on the result) and the combinators cannot change that.
     if (node.contains !== undefined && isLimited(run)) {
       // that contains pass still enters the level below the array
-      useDepth(run);
       return (json, _keys, _evaluated, depth) => {
         if (depth > maxDepth || (run.left === 0 && (json as unknown[]).length > 0)) {
           deferToInterpreter();
@@ -634,7 +633,6 @@ function compileItemsCollector(
   const containsCheck = node.contains === undefined ? undefined : state.compileChild(node.contains);
   if (containsCheck !== undefined) {
     state.notes.rechecks = true;
-    useDepth(run);
   }
 
   return (json, keys, evaluated, depth) => {
@@ -810,9 +808,6 @@ export function compileUnevaluatedItems(state: BuildState, node: JsonSchemaInter
   const unevaluated = keyword === false ? undefined : state.compileChild(keyword);
   const collect = collectorFor(state, node, 'items');
   const run = state.depth;
-  if (unevaluated !== undefined) {
-    useDepth(run);
-  }
 
   checks.push((json) => {
     if (!Array.isArray(json)) {
@@ -863,9 +858,6 @@ export function compileUnevaluatedProperties(state: BuildState, node: JsonSchema
   const unevaluated = keyword === false ? undefined : state.compileChild(keyword);
   const collect = collectorFor(state, node, 'properties');
   const run = state.depth;
-  if (unevaluated !== undefined) {
-    useDepth(run);
-  }
 
   checks.push((json) => {
     if (!isObject(json)) {
