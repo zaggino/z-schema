@@ -24,6 +24,11 @@ export const shouldSkipValidate = (options: ValidateOptions, errors: readonly Er
   options.includeErrors.length > 0 &&
   !errors.some((err) => options.includeErrors!.includes(err));
 
+/** The error `code` is reported under `options`: not left out of a non-empty `includeErrors`, not in `excludeErrors`. */
+export const isErrorReported = (options: ValidateOptions, code: ErrorCode): boolean =>
+  !shouldSkipValidate(options, [code]) &&
+  !(Array.isArray(options?.excludeErrors) && options.excludeErrors.includes(code));
+
 export const isModernDraft = (version: JsonSchemaVersion | 'none' | undefined) =>
   version === 'draft2019-09' || version === 'draft2020-12';
 

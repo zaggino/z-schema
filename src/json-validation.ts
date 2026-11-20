@@ -1,12 +1,12 @@
 import type { JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
 import type { Report } from './report.js';
 import type { JsonValidatorFn } from './validation/shared.js';
+import type { SizeLimit } from './validation/size-limits.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
 import { getId } from './json-schema.js';
 import { compileSchemaRegex } from './utils/schema-regex.js';
-import { unicodeLength } from './utils/unicode.js';
 import { isObject, whatIs } from './utils/what-is.js';
 import {
   additionalItemsValidator,
@@ -54,9 +54,9 @@ import {
   isModernDraft,
   isValidationVocabularyEnabled,
   honouredPrefixItems,
-  shouldSkipValidate,
   VALIDATION_VOCAB_KEYWORDS,
 } from './validation/shared.js';
+import { exceededSizeLimit, hasSizeLimit } from './validation/size-limits.js';
 import {
   contentEncodingValidator,
   contentMediaTypeValidator,
@@ -195,15 +195,14 @@ export interface KeywordPlan {
   readonly keys: ReadonlyArray<keyof JsonSchemaAll>;
   /** `keys` contains `unevaluatedItems` or `unevaluatedProperties` (the only consumers of a lone `if` annotation). */
   readonly unevaluated: boolean;
-  /**
-   * The node has a size limit that can gate other work (`maxItems`, `maxProperties`, or `maxLength` together with
-   * `pattern`, `format`, `contentEncoding` or `contentMediaType`); see {@link exceededSizeLimit}.
-   */
+  /** The node has a size limit that can gate other work (see `hasSizeLimit`). */
   readonly sized: boolean;
   /** Value of {@link planEpoch} when the plan was built; a plan from an older epoch is stale. */
   readonly epoch: number;
   /** Lazily computed `keys` minus `VALIDATION_VOCAB_KEYWORDS`, used when the validation vocabulary is disabled. */
   keysVocabDisabled?: ReadonlyArray<keyof JsonSchemaAll>;
+  /** Lazily computed `keys` minus the gated keywords of a size limit, indexed by `SizeLimit.index`. */
+  keysOverLimit?: Array<ReadonlyArray<keyof JsonSchemaAll> | undefined>;
 }
 
 const keywordPlanSymbol: unique symbol = Symbol('z-schema.keywordPlan');
@@ -233,86 +232,7 @@ function buildKeywordPlan(schema: JsonSchemaInternal): KeywordPlan {
       unevaluated = true;
     }
   }
-  const sized =
-    schema.maxItems !== undefined ||
-    schema.maxProperties !== undefined ||
-    (schema.maxLength !== undefined &&
-      (schema.pattern !== undefined ||
-        schema.format !== undefined ||
-        schema.contentEncoding !== undefined ||
-        schema.contentMediaType !== undefined));
-  return { empty: all.length === 0, keys, unevaluated, sized, epoch: planEpoch };
-}
-
-const SIZE_NONE = 0;
-const SIZE_STRING = 1;
-const SIZE_ARRAY = 2;
-const SIZE_OBJECT = 3;
-
-const MAX_LENGTH_CODES = ['MAX_LENGTH'] as const;
-const ARRAY_LENGTH_LONG_CODES = ['ARRAY_LENGTH_LONG'] as const;
-const OBJECT_PROPERTIES_MAXIMUM_CODES = ['OBJECT_PROPERTIES_MAXIMUM'] as const;
-
-/** Keys a node does not run for a value over its size limit, indexed by the `SIZE_*` kind. */
-const SIZE_GATED_KEYS: ReadonlyArray<ReadonlySet<string>> = [
-  new Set<string>(),
-  new Set(['pattern', 'format', 'contentEncoding', 'contentMediaType']),
-  new Set(['uniqueItems', 'contains', 'unevaluatedItems', 'items', 'prefixItems', 'additionalItems']),
-  new Set(['properties', 'patternProperties', 'additionalProperties', 'propertyNames', 'unevaluatedProperties']),
-];
-
-/** The limit's error is evaluated: its code is neither left out of a non-empty `includeErrors` nor in `excludeErrors`. */
-function limitEvaluated(
-  ctx: ZSchemaBase,
-  codes: ReadonlyArray<'MAX_LENGTH' | 'ARRAY_LENGTH_LONG' | 'OBJECT_PROPERTIES_MAXIMUM'>
-): boolean {
-  const options = ctx.validateOptions;
-  if (shouldSkipValidate(options, codes)) {
-    return false;
-  }
-  const excluded = options && options.excludeErrors;
-  return !(Array.isArray(excluded) && excluded.includes(codes[0]));
-}
-
-/**
- * Cold path: the `SIZE_*` kind of the size limit of `schema` that `json` exceeds, or `SIZE_NONE`.
- * A string only counts when the node has a keyword that would be skipped.
- */
-function exceededSizeLimit(ctx: ZSchemaBase, schema: JsonSchemaInternal, json: unknown): number {
-  if (typeof json === 'string') {
-    const max = schema.maxLength;
-    if (
-      typeof max === 'number' &&
-      json.length > max &&
-      (schema.pattern !== undefined ||
-        schema.format !== undefined ||
-        schema.contentEncoding !== undefined ||
-        schema.contentMediaType !== undefined) &&
-      limitEvaluated(ctx, MAX_LENGTH_CODES) &&
-      unicodeLength(json) > max
-    ) {
-      return SIZE_STRING;
-    }
-    return SIZE_NONE;
-  }
-  if (Array.isArray(json)) {
-    const max = schema.maxItems;
-    if (typeof max === 'number' && json.length > max && limitEvaluated(ctx, ARRAY_LENGTH_LONG_CODES)) {
-      return SIZE_ARRAY;
-    }
-    return SIZE_NONE;
-  }
-  if (isObject(json)) {
-    const max = schema.maxProperties;
-    if (
-      typeof max === 'number' &&
-      Object.keys(json).length > max &&
-      limitEvaluated(ctx, OBJECT_PROPERTIES_MAXIMUM_CODES)
-    ) {
-      return SIZE_OBJECT;
-    }
-  }
-  return SIZE_NONE;
+  return { empty: all.length === 0, keys, unevaluated, sized: hasSizeLimit(schema), epoch: planEpoch };
 }
 
 /**
@@ -356,6 +276,23 @@ export function invalidateKeywordPlan(schema: JsonSchemaInternal): void {
  */
 function planFor(ctx: ZSchemaBase, schema: JsonSchemaInternal): KeywordPlan {
   return typeof ctx.options.customValidator === 'function' ? buildKeywordPlan(schema) : getKeywordPlan(schema);
+}
+
+function getOverLimitKeys(plan: KeywordPlan, limit: SizeLimit): ReadonlyArray<keyof JsonSchemaAll> {
+  const cache = plan.keysOverLimit ?? [];
+  plan.keysOverLimit = cache;
+  let filtered = cache[limit.index];
+  if (filtered === undefined) {
+    const out: Array<keyof JsonSchemaAll> = [];
+    for (let i = 0; i < plan.keys.length; i++) {
+      if (!limit.gated.has(plan.keys[i])) {
+        out.push(plan.keys[i]);
+      }
+    }
+    filtered = out;
+    cache[limit.index] = filtered;
+  }
+  return filtered;
 }
 
 /**
@@ -783,7 +720,7 @@ export function validate(
   }
 
   const validationVocabularyEnabled = isValidationVocabularyEnabled(schema, report.rootSchema, ctx.options.version);
-  const keys = validationVocabularyEnabled ? plan.keys : getVocabDisabledKeys(plan);
+  let keys = validationVocabularyEnabled ? plan.keys : getVocabDisabledKeys(plan);
 
   // type checking first
   if (validationVocabularyEnabled && schema.type) {
@@ -814,33 +751,42 @@ export function validate(
   // Captured once; consumed (set to undefined) when chained after a deferred unevaluated* check.
   let hook = typeof ctx.options.customValidator === 'function' ? ctx.options.customValidator : undefined;
   const exactStop = ctx.options.breakOnFirstError && report.errors.length > 0;
+  // A value over a size limit of the node skips the content checks and the child validation of the node. Not with a
+  // customValidator: it may change the value while the node is validated, so the size comparison made before the
+  // keywords run may no longer hold.
+  let overLimit = false;
+  if (
+    plan.sized &&
+    validationVocabularyEnabled &&
+    !exactStop &&
+    hook === undefined &&
+    ctx.options.sizeLimitsFirst !== false
+  ) {
+    const limit = exceededSizeLimit(ctx.validateOptions, schema, json);
+    if (limit !== undefined) {
+      keys = getOverLimitKeys(plan, limit);
+      overLimit = true;
+    }
+  }
   if (exactStop) {
     runFirstKeyOnly(ctx, report, schema, json, validationVocabularyEnabled);
   }
-  const sizeKind =
-    plan.sized && validationVocabularyEnabled && !exactStop && ctx.options.sizeLimitsFirst !== false
-      ? exceededSizeLimit(ctx, schema, json)
-      : SIZE_NONE;
-  if (sizeKind === SIZE_NONE) {
-    const loopEnd = exactStop ? 0 : keys.length;
-    for (let i = 0; i < loopEnd; i++) {
-      const key = keys[i];
-      if (key === 'unevaluatedItems' || key === 'unevaluatedProperties') {
-        if (deferredUnevaluatedKeys === undefined) {
-          deferredUnevaluatedKeys = [key];
-        } else {
-          deferredUnevaluatedKeys.push(key);
-        }
-        continue;
+  const loopEnd = exactStop ? 0 : keys.length;
+  for (let i = 0; i < loopEnd; i++) {
+    const key = keys[i];
+    if (key === 'unevaluatedItems' || key === 'unevaluatedProperties') {
+      if (deferredUnevaluatedKeys === undefined) {
+        deferredUnevaluatedKeys = [key];
+      } else {
+        deferredUnevaluatedKeys.push(key);
       }
-      // every key in the plan has a non-no-op validator
-      JsonValidators[key](ctx, report, schema, json);
-      if (report.errors.length && ctx.options.breakOnFirstError) {
-        break;
-      }
+      continue;
     }
-  } else {
-    deferredUnevaluatedKeys = runKeysSkippingGated(ctx, report, schema, json, keys, SIZE_GATED_KEYS[sizeKind]);
+    // every key in the plan has a non-no-op validator
+    JsonValidators[key](ctx, report, schema, json);
+    if (report.errors.length && ctx.options.breakOnFirstError) {
+      break;
+    }
   }
 
   // Run unevaluated* validators after all others have cached their combinator results.
@@ -866,7 +812,7 @@ export function validate(
     }
   }
 
-  if (sizeKind === SIZE_NONE && (report.errors.length === 0 || ctx.options.breakOnFirstError === false)) {
+  if (!overLimit && (report.errors.length === 0 || ctx.options.breakOnFirstError === false)) {
     if (Array.isArray(json)) {
       recurseArray(ctx, report, schema, json);
     } else if (isObject(json)) {
@@ -906,41 +852,6 @@ export function validate(
 
   // return valid just to be able to break at some code points
   return report.errors.length === 0;
-}
-
-/**
- * Cold twin of the keyword loop in {@link validate} for a value over a size limit: the same dispatch, except the
- * keys in `gated` are not run and the `unevaluated*` key of the kind is dropped instead of deferred.
- * Returns the deferred `unevaluated*` keys, or `undefined` when there are none.
- */
-function runKeysSkippingGated(
-  ctx: ZSchemaBase,
-  report: Report,
-  schema: JsonSchemaInternal,
-  json: unknown,
-  keys: ReadonlyArray<keyof JsonSchemaAll>,
-  gated: ReadonlySet<string>
-): Array<keyof JsonSchemaAll> | undefined {
-  let deferred: Array<keyof JsonSchemaAll> | undefined;
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    if (gated.has(key)) {
-      continue;
-    }
-    if (key === 'unevaluatedItems' || key === 'unevaluatedProperties') {
-      if (deferred === undefined) {
-        deferred = [key];
-      } else {
-        deferred.push(key);
-      }
-      continue;
-    }
-    JsonValidators[key](ctx, report, schema, json);
-    if (report.errors.length && ctx.options.breakOnFirstError) {
-      break;
-    }
-  }
-  return deferred;
 }
 
 function validateUnevaluated(

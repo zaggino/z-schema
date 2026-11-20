@@ -76,10 +76,11 @@ export interface ZSchemaOptions {
    * object with more than `maxProperties` properties skips `properties`, `patternProperties`, `additionalProperties`,
    * `propertyNames`, `unevaluatedProperties` and the validation of its property values. The limit's own error is
    * reported, and every other keyword of the node (`type`, `enum`, `const`, `required`, the lower limits, `$ref`,
-   * `allOf`, `anyOf`, `oneOf`, `not`, `if`, `dependencies`, `dependentRequired`, `dependentSchemas`) still runs, as
-   * does `customValidator`. A limit that is not evaluated (its error code in `excludeErrors` or missing from a
-   * non-empty `includeErrors`, or the validation vocabulary disabled for the node) skips nothing. The validity of
-   * the result is the same either way; only the error details of such a value are fewer. `false` runs every keyword.
+   * `allOf`, `anyOf`, `oneOf`, `not`, `if`, `dependencies`, `dependentRequired`, `dependentSchemas`) still runs.
+   * A limit that is not evaluated (its error code in `excludeErrors` or missing from a non-empty `includeErrors`,
+   * or the validation vocabulary disabled for the node) skips nothing, and nothing is skipped while a
+   * `customValidator` is configured. The validity of the result is the same either way; only the error details of
+   * such a value are fewer. `false` runs every keyword.
    */
   sizeLimitsFirst?: boolean;
 }

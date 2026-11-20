@@ -42,6 +42,12 @@ const sorted = (codes: string[]): string[] => codes.toSorted();
 
 const longString = 'bbbbbb';
 
+const shrinkOnTitle = (_report: unknown, node: unknown, json: unknown) => {
+  if ((node as { title?: string }).title === 'shrink') {
+    (json as unknown[]).pop();
+  }
+};
+
 describe('sizeLimitsFirst option', () => {
   it('defaults to true', () => {
     expect(ZSchema.getDefaultOptions().sizeLimitsFirst).toBe(true);
@@ -149,39 +155,57 @@ describe('sizeLimitsFirst option', () => {
       expect(spy).not.toHaveBeenCalled();
     });
 
-    it('calls customValidator for the node but not for the items of an over-limit array', () => {
-      const seen: unknown[] = [];
-      const customValidator = (_report: unknown, _schema: unknown, json: unknown) => {
-        seen.push(json);
-      };
-      const data = [7001, 7002, 7003];
-      const result = run({ maxItems: 1, items: { type: 'integer' } }, data, { customValidator });
-      expect(result.valid).toBe(false);
-      expect(seen).toContain(data);
-      expect(seen).not.toContain(7001);
+    it('does not call a format function for the items of an over-limit array', () => {
+      const spy = vi.fn<() => boolean>(() => true);
+      const listSchema: JsonSchema = { maxItems: 1, items: { format: 'spy' } };
+      const validator = ZSchema.create({ safe: true, customFormats: { spy } });
+      expect(validator.validate(['a', 'b'], listSchema).valid).toBe(false);
+      expect(validator.validate(['a', 'b'], listSchema).valid).toBe(false);
+      expect(spy).not.toHaveBeenCalled();
+      expect(run(listSchema, ['a', 'b'], { customFormats: { spy }, sizeLimitsFirst: false }).valid).toBe(false);
+      expect(spy).toHaveBeenCalledTimes(2);
     });
 
-    it('calls customValidator for the node but not for the property values of an over-limit object', () => {
+    it('does not call a format function for the property values of an over-limit object', () => {
+      const spy = vi.fn<() => boolean>(() => true);
+      const mapSchema: JsonSchema = { maxProperties: 1, additionalProperties: { format: 'spy' } };
+      const validator = ZSchema.create({ safe: true, customFormats: { spy } });
+      expect(validator.validate({ a: 'x', b: 'y' }, mapSchema).valid).toBe(false);
+      expect(validator.validate({ a: 'x', b: 'y' }, mapSchema).valid).toBe(false);
+      expect(spy).not.toHaveBeenCalled();
+      expect(run(mapSchema, { a: 'x', b: 'y' }, { customFormats: { spy }, sizeLimitsFirst: false }).valid).toBe(false);
+      expect(spy).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('customValidator', () => {
+    const rows: Array<[string, JsonSchema, unknown, number]> = [
+      ['string', { type: 'string', maxLength: 3, pattern: '^a+$', format: 'ipv4' }, longString, 0],
+      ['array', { maxItems: 1, uniqueItems: true, items: { type: 'integer' } }, [7001, 7001], 7001],
+      ['object', { maxProperties: 1, additionalProperties: { type: 'string' } }, { a: 7001, b: 7002 }, 7001],
+    ];
+
+    it.each(rows)('skips nothing for a %s over its limit', (_name, schema, data, child) => {
       const seen: unknown[] = [];
       const customValidator = (_report: unknown, _schema: unknown, json: unknown) => {
         seen.push(json);
       };
-      const data = { a: 7001, b: 7002 };
-      const result = run({ maxProperties: 1, properties: { a: {}, b: {} } }, data, { customValidator });
-      expect(result.valid).toBe(false);
+      const withHook = codesOf(run(schema, data, { customValidator }));
+      expect(withHook).toEqual(codesOf(run(schema, data, { sizeLimitsFirst: false })));
+      expect(withHook.length).toBeGreaterThan(1);
       expect(seen).toContain(data);
-      expect(seen).not.toContain(7001);
+      if (child !== 0) {
+        expect(seen).toContain(child);
+      }
     });
 
-    it('calls customValidator for the items when the option is false', () => {
-      const seen: unknown[] = [];
-      const customValidator = (_report: unknown, _schema: unknown, json: unknown) => {
-        seen.push(json);
+    it('has the same validity when it changes the value', () => {
+      const schema: JsonSchema = { allOf: [{ title: 'shrink' }], maxItems: 1, items: false };
+      const verdict = (sizeLimitsFirst: boolean) => {
+        const data = [1, 2];
+        return run(schema, data, { customValidator: shrinkOnTitle, sizeLimitsFirst }).valid;
       };
-      const data = [7001, 7002];
-      run({ maxItems: 1, items: { type: 'integer' } }, data, { customValidator, sizeLimitsFirst: false });
-      expect(seen).toContain(data);
-      expect(seen).toContain(7001);
+      expect(verdict(true)).toBe(verdict(false));
     });
   });
 
@@ -304,9 +328,64 @@ describe('sizeLimitsFirst option', () => {
   });
 
   describe('breakOnFirstError', () => {
-    it('reports the limit error as the single error', () => {
-      const res = run({ maxLength: 3, format: 'ipv4' }, longString, { breakOnFirstError: true });
-      expect(codesOf(res)).toEqual(sorted(['MAX_LENGTH']));
+    it('reports the limit error instead of the format error', () => {
+      const schema: JsonSchema = { format: 'ipv4', maxLength: 2 };
+      expect(codesOf(run(schema, longString, { breakOnFirstError: true, sizeLimitsFirst: true }))).toEqual([
+        'MAX_LENGTH',
+      ]);
+      expect(codesOf(run(schema, longString, { breakOnFirstError: true, sizeLimitsFirst: false }))).toEqual([
+        'INVALID_FORMAT',
+      ]);
+    });
+
+    it('reports an earlier keyword that still runs', () => {
+      const schema: JsonSchema = { enum: [[0]], maxItems: 1 };
+      for (const sizeLimitsFirst of [true, false]) {
+        expect(codesOf(run(schema, [1, 2], { breakOnFirstError: true, sizeLimitsFirst }))).toEqual(['ENUM_MISMATCH']);
+      }
+    });
+  });
+
+  describe('maxDataDepth', () => {
+    it('does not descend into an over-limit array', () => {
+      let deep: unknown = 1;
+      for (let i = 0; i < 6; i++) {
+        deep = [deep];
+      }
+      const schema: JsonSchema = { maxItems: 1, items: { $ref: '#' } };
+      const data = [deep, deep];
+      expect(codesOf(run(schema, data, { maxDataDepth: 3, sizeLimitsFirst: true }))).toEqual(['ARRAY_LENGTH_LONG']);
+      const off = ZSchema.create({ safe: true, maxDataDepth: 3, sizeLimitsFirst: false }).validate(data, schema);
+      expect(codesOf(off)).toEqual(['MAX_DATA_DEPTH_EXCEEDED']);
+    });
+  });
+
+  describe('legacy $ref', () => {
+    it('applies the limit of the $ref target', () => {
+      const schema: JsonSchema = {
+        $ref: '#/definitions/list',
+        definitions: { list: { maxItems: 1, items: { type: 'string' } } },
+      };
+      const { on, off } = both(schema, [1, 2], { version: 'draft-07' });
+      expect(on).toEqual(['ARRAY_LENGTH_LONG']);
+      expect(off).toEqual(sorted(['ARRAY_LENGTH_LONG', 'INVALID_TYPE', 'INVALID_TYPE']));
+    });
+  });
+
+  describe('inherited keys', () => {
+    const schema: JsonSchema = { maxProperties: 1, additionalProperties: false };
+
+    it('does not count them against the limit', () => {
+      const atLimit = Object.create({ inherited: 1 }) as Record<string, unknown>;
+      atLimit.a = 1;
+      expect(codesOf(run(schema, atLimit))).toEqual(['OBJECT_ADDITIONAL_PROPERTIES']);
+    });
+
+    it('counts the own keys over the limit', () => {
+      const over = Object.create({ inherited: 1 }) as Record<string, unknown>;
+      over.a = 1;
+      over.b = 2;
+      expect(codesOf(run(schema, over))).toEqual(['OBJECT_PROPERTIES_MAXIMUM']);
     });
   });
 
@@ -438,13 +517,14 @@ describe('sizeLimitsFirst option', () => {
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
-    it('rejects an object over maxProperties before the property values are checked', () => {
+    it('compiles the object group before the other keywords of the node', () => {
       const spy = vi.fn<() => boolean>(() => true);
       const { fast } = fastFor(
-        { required: ['a'], properties: { a: { format: 'spy' } }, maxProperties: 1 },
+        { allOf: [{ properties: { a: { format: 'spy' } } }], maxProperties: 1 },
         { customFormats: { spy } }
       );
       expect(fast).toBeDefined();
+      spy.mockClear();
       expect(fast!({ a: 'x', b: 'y' })).toBe(false);
       expect(spy).not.toHaveBeenCalled();
       expect(fast!({ a: 'x' })).toBe(true);

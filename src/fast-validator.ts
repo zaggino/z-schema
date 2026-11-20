@@ -29,6 +29,7 @@ import {
 import { compileObjectKeywords } from './validation/object.js';
 import { isResolvedLegacyTarget, walkLegacyRef } from './validation/ref.js';
 import { isModernDraft, isValidationVocabularyEnabled } from './validation/shared.js';
+import { SIZE_LIMITS } from './validation/size-limits.js';
 import {
   compileContent,
   compileFormat,
@@ -144,8 +145,6 @@ const KEYWORD_COMPILERS: Record<keyof JsonSchemaAll, KeywordCompiler> = {
   contentMediaType: compileContent,
 };
 
-const SIZE_LIMIT_KEYS = ['maxLength', 'maxItems', 'maxProperties'] as const;
-
 function combine(checks: Check[]): FastValidator {
   const count = checks.length;
   if (count === 0) {
@@ -208,15 +207,18 @@ function compileNode(state: DriverState, node: unknown): FastValidator {
 
   const checks: Check[] = [];
   const compiled: KeywordCompiler[] = [];
-  // size limits are compiled first, so a value over a limit fails before the costlier checks run
-  for (let i = 0; i < SIZE_LIMIT_KEYS.length; i++) {
-    const limit = SIZE_LIMIT_KEYS[i];
-    if (schema[limit] !== undefined) {
-      const compile = KEYWORD_COMPILERS[limit];
-      if (!compiled.includes(compile)) {
-        compiled.push(compile);
-        compile(state, schema, checks);
-      }
+  // keywords of one group share a compiler; checks are ANDed and pure, so each compiler runs once, in any order
+  const compileOnce = (compile: KeywordCompiler): void => {
+    if (compile !== ignored && !compiled.includes(compile)) {
+      compiled.push(compile);
+      compile(state, schema, checks);
+    }
+  };
+  // size limits are compiled before the other keywords of the node, so a value over a limit fails before the
+  // checks that depend on its content
+  for (let i = 0; i < SIZE_LIMITS.length; i++) {
+    if (schema[SIZE_LIMITS[i].keyword] !== undefined) {
+      compileOnce(KEYWORD_COMPILERS[SIZE_LIMITS[i].keyword]);
     }
   }
   const keys = Object.keys(schema);
@@ -229,12 +231,7 @@ function compileNode(state: DriverState, node: unknown): FastValidator {
     if (key === '$schema' && schema.$schema !== state.root.$schema) {
       return unsupported();
     }
-    const compile = KEYWORD_COMPILERS[key as keyof JsonSchemaAll];
-    // keywords of one group share a compiler; checks are ANDed and pure, so each runs once, in any order
-    if (compile !== ignored && !compiled.includes(compile)) {
-      compiled.push(compile);
-      compile(state, schema, checks);
-    }
+    compileOnce(KEYWORD_COMPILERS[key as keyof JsonSchemaAll]);
   }
   const built = combine(checks);
   slot.fn = built;

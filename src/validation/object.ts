@@ -380,7 +380,10 @@ function compilePropertyCounts(node: JsonSchemaInternal, withKeys: KeysCheck[]):
     const min = expectNumber(node.minProperties);
     withKeys.push((_json, keys) => !(keys.length < min));
   }
-  // `maxProperties` is checked by `compileObjectKeywords` before every other check of the group
+  if (node.maxProperties !== undefined) {
+    const max = expectNumber(node.maxProperties);
+    withKeys.push((_json, keys) => !(keys.length > max));
+  }
 }
 
 // properties / patternProperties / additionalProperties: child traversal and the additionalProperties false rule
@@ -573,31 +576,6 @@ export function compileObjectKeywords(state: BuildState, node: JsonSchemaInterna
   compilePropertyNames(state, node, withKeys);
   const plainCount = plain.length;
   const keyedCount = withKeys.length;
-  if (node.maxProperties !== undefined) {
-    // the property count is the first check: an object over the limit fails before any other check runs
-    const max = expectNumber(node.maxProperties);
-    checks.push((json) => {
-      if (!isObject(json)) {
-        return true;
-      }
-      const keys = Object.keys(json);
-      if (keys.length > max) {
-        return false;
-      }
-      for (let i = 0; i < plainCount; i++) {
-        if (!plain[i](json)) {
-          return false;
-        }
-      }
-      for (let i = 0; i < keyedCount; i++) {
-        if (!withKeys[i](json, keys)) {
-          return false;
-        }
-      }
-      return true;
-    });
-    return;
-  }
   if (plainCount === 0 && keyedCount === 0) {
     return;
   }
