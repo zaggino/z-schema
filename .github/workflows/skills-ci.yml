@@ -13,7 +13,9 @@ on:
 permissions:
   contents: read
 
-# The `skills` CLI version below is pinned by hand: Dependabot does not update `npx` commands in workflows.
+env:
+  # Dependabot does not update this version. To bump it, change it here and check that both jobs still pass.
+  SKILLS_CLI_VERSION: 1.9.0
 
 jobs:
   test:
@@ -27,7 +29,7 @@ jobs:
 
       - name: Install all skills (local)
         run: |
-          npx skills@1.9.0 add . --skill '*' --agent github-copilot --yes --copy
+          npx "skills@$SKILLS_CLI_VERSION" add . --skill '*' --agent github-copilot --yes --copy
           echo "✅ Successfully installed all skills locally"
 
       - name: Debug directory structure
@@ -80,7 +82,7 @@ jobs:
     steps:
       - name: Install all skills (remote)
         run: |
-          npx skills@1.9.0 add zaggino/z-schema --skill '*' --agent github-copilot --yes --copy
+          npx "skills@$SKILLS_CLI_VERSION" add zaggino/z-schema --skill '*' --agent github-copilot --yes --copy
           echo "✅ Successfully installed all skills from GitHub"
 
       - name: Debug directory structure

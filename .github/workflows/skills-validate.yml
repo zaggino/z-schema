@@ -22,7 +22,8 @@ jobs:
         with:
           persist-credentials: false
 
-      # Pinned by hand to the main-branch commit of 2026-11-04: Dependabot does not update this ref.
+      # Dependabot does not update this ref. To bump it, set it to a newer commit of the repository's main branch
+      # and check that this job still passes.
       - name: Checkout agentskills repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

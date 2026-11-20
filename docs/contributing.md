@@ -143,7 +143,8 @@ Git hooks are managed by [lefthook](https://lefthook.dev/) (`lefthook.yml`), ins
 For pull requests, CI may auto-commit coverage artifacts (`docs/test-coverage.md` and `README.md`) when they change.
 
 - Auto-commit runs only for **same-repository** pull requests.
-- Auto-commit is skipped for fork pull requests.
+- Auto-commit is skipped for fork pull requests and Dependabot pull requests.
+- Auto-commit is skipped for a branch whose name starts with `-`.
 - Auto-commit is skipped when the actor is `github-actions[bot]`.
 - Only coverage artifact files are staged for this CI-authored commit.
 - The commit is made by a separate `coverage-commit` job, the only job in the workflow with write access. It runs after every leg of the `build` matrix has passed and takes the two files from the 22.x leg as a workflow artifact.
