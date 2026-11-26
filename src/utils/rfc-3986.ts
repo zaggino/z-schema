@@ -89,7 +89,7 @@ const isValidAuthorityIpLiteral = (value: string): boolean => {
 
 // Detects a `\u{...}` code-point escape in a character-class body, which only has its intended
 // meaning when the pattern is compiled with the `u` flag.
-const ASTRAL_ESCAPE_REGEX = /\\u\{/;
+const ASTRAL_ESCAPE = '\\u{';
 
 /** Inputs that distinguish RFC 3987's grammar from RFC 3986's — character classes only. */
 export interface UriGrammarOptions {
@@ -156,7 +156,7 @@ const buildTopLevelRegexes = ({
   // `unicode: false`, which does not throw: outside `u` mode a `\\u{...}` escape is an identity escape,
   // so it would silently compile as the literal characters "u{...}" and yield a narrower grammar.
   // Same approach as `needsUnicode` in src/utils/schema-regex.ts.
-  const flags = ASTRAL_ESCAPE_REGEX.test(unreservedChars) || ASTRAL_ESCAPE_REGEX.test(privateQueryChars) ? 'u' : '';
+  const flags = unreservedChars.includes(ASTRAL_ESCAPE) || privateQueryChars.includes(ASTRAL_ESCAPE) ? 'u' : '';
   return {
     // §3: URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
     // hier-part = "//" authority path-abempty / path-absolute / path-rootless / path-empty
