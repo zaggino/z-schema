@@ -3,7 +3,7 @@ import type { ZSchemaBase } from './z-schema-base.js';
 
 import { isFormatSupported } from './format-validators.js';
 import { getId, isInternalKey } from './json-schema.js';
-import { invalidateKeywordPlan, validate } from './json-validation.js';
+import { invalidateKeywordPlan, JsonValidators, validate } from './json-validation.js';
 import { Report } from './report.js';
 import { isUniqueArray } from './utils/array.js';
 import { shallowClone } from './utils/clone.js';
@@ -690,6 +690,20 @@ const SchemaValidators = {
   },
 } as const;
 
+/**
+ * Keywords `noExtraKeywords` accepts: those checked above, those the data validator handles, and
+ * annotation keywords no validator reads.
+ */
+const KNOWN_KEYWORDS = new Set<string>(
+  Object.keys(SchemaValidators).concat(Object.keys(JsonValidators), [
+    '$comment',
+    'contentSchema',
+    'deprecated',
+    'readOnly',
+    'writeOnly',
+  ])
+);
+
 export class SchemaValidator {
   private readonly validator: ZSchemaBase;
   // The schema the outermost validateSchema call was given, and that call's report.
@@ -801,10 +815,9 @@ export class SchemaValidator {
       }
     }
 
-    // Only a `$schema` the caller wrote hands unknown keywords to the meta-schema; the default one the
-    // compiler fills in does not.
-    const checkExtraKeywords =
-      this.validator.options.noExtraKeywords === true && (!hasParentSchema || schema.__$schemaDefaulted === true);
+    // A `$schema` the caller wrote hands unknown keywords to that meta-schema; the injected default does not.
+    const declaresOwnMetaSchema = hasParentSchema && schema.__$schemaDefaulted !== true;
+    const checkExtraKeywords = this.validator.options.noExtraKeywords === true && !declaresOwnMetaSchema;
     const keys = Object.keys(schema);
     for (const key of keys) {
       if (isInternalKey(key)) {
@@ -812,7 +825,7 @@ export class SchemaValidator {
       }
       if (Object.hasOwn(SchemaValidators, key)) {
         SchemaValidators[key as keyof typeof SchemaValidators].call(this, report, schema);
-      } else if (checkExtraKeywords) {
+      } else if (checkExtraKeywords && !KNOWN_KEYWORDS.has(key)) {
         report.addError('KEYWORD_UNEXPECTED', [key], undefined, schema);
       }
     }
