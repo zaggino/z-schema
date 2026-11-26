@@ -352,6 +352,44 @@ describe('names and data that start with the reserved prefix are kept', () => {
   });
 });
 
+describe('a key with a double underscore but without the reserved prefix is a keyword', () => {
+  it('is reported as unexpected under noExtraKeywords', () => {
+    const schema: Schema = { properties: { a: { type: 'string', __note: 1 } } };
+    const outcome = outcomeOf(create({ noExtraKeywords: true }).validateSchema(schema));
+    expect(outcome).toEqual({ valid: false, codes: ['KEYWORD_UNEXPECTED'] });
+  });
+});
+
+const resolve = (schema: Schema) => {
+  const uri = nextUri('resolved');
+  const validator = create();
+  expect(validator.validateSchema({ $id: uri, ...schema }).valid).toBe(true);
+  return validator.getResolvedSchema(uri) as Schema;
+};
+
+describe('getResolvedSchema keeps names and data that start with the reserved prefix', () => {
+  it('keeps a property name', () => {
+    const resolved = resolve({ type: 'object', properties: { __$compiled: { type: 'string' } } });
+    expect(resolved.properties).toEqual({ __$compiled: { type: 'string' } });
+  });
+
+  it('keeps keys of default data', () => {
+    const resolved = resolve({ properties: { a: { default: { __$validated: true } } } });
+    expect(resolved.properties).toEqual({ a: { default: { __$validated: true } } });
+  });
+
+  it('does not treat properties named $ref and __$refResolved as a resolved reference', () => {
+    const properties = { $ref: { type: 'string' }, __$refResolved: { type: 'number' } };
+    const resolved = resolve({ type: 'object', properties });
+    expect(resolved.properties).toEqual(properties);
+  });
+
+  it('still inlines a reference and drops its bookkeeping', () => {
+    const resolved = resolve({ properties: { a: { $ref: '#/$defs/s' } }, $defs: { s: { type: 'string' } } });
+    expect(resolved.properties).toEqual({ a: { type: 'string' } });
+  });
+});
+
 const runOutcome = (schema: Schema, instance: unknown, options?: { schemaPath: string }): Outcome =>
   outcomeOf(create().validate(instance, schema, options));
 
