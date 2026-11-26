@@ -13,7 +13,7 @@ Line coverage status: **high**
 | src/format-validators.ts      |     97% |         97% |       100% |      95% |
 | src/json-schema-versions.ts   |    100% |        100% |       100% |     100% |
 | src/json-schema.ts            |     99% |         99% |       100% |      99% |
-| src/json-validation.ts        |     96% |         96% |        85% |      93% |
+| src/json-validation.ts        |     96% |         96% |        86% |      94% |
 | src/report.ts                 |     89% |         89% |        74% |      87% |
 | src/schema-cache.ts           |     96% |         96% |       100% |      93% |
 | src/schema-compiler.ts        |     95% |         95% |       100% |      92% |
@@ -43,7 +43,7 @@ Line coverage status: **high**
 | src/validation/object.ts      |     97% |         97% |       100% |      96% |
 | src/validation/ref.ts         |     98% |         98% |       100% |      95% |
 | src/validation/shared.ts      |     98% |         98% |       100% |      95% |
-| src/validation/size-limits.ts |     98% |         98% |       100% |      98% |
+| src/validation/size-limits.ts |    100% |        100% |       100% |     100% |
 | src/validation/string.ts      |     92% |         92% |       100% |      91% |
 | src/validation/type.ts        |     98% |         98% |       100% |      95% |
 | src/validation/unevaluated.ts |     93% |         93% |        92% |      90% |
