@@ -202,6 +202,8 @@ export interface ZSchemaInternalProperties {
   __$recursiveRefResolved?: JsonSchemaInternal;
   __$resourceRoot?: JsonSchemaInternal;
   __$schemaResolved?: unknown;
+  /** `$schema` was filled in with the default by the compiler, not written by the caller. */
+  __$schemaDefaulted?: boolean;
   __$validated?: boolean;
   __$validationOptions?: ZSchemaOptions;
 }

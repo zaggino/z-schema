@@ -373,6 +373,7 @@ export class SchemaCompiler {
     // v8 - if $schema is not present, set $schema to default
     if (!schema.$schema && this.validator.options.version !== 'none') {
       schema.$schema = this.validator.getDefaultSchemaId();
+      schema.__$schemaDefaulted = true;
     }
 
     if (schema.id && typeof schema.id === 'string' && !options?.noCache) {

@@ -801,6 +801,10 @@ export class SchemaValidator {
       }
     }
 
+    // Only a `$schema` the caller wrote hands unknown keywords to the meta-schema; the default one the
+    // compiler fills in does not.
+    const checkExtraKeywords =
+      this.validator.options.noExtraKeywords === true && (!hasParentSchema || schema.__$schemaDefaulted === true);
     const keys = Object.keys(schema);
     for (const key of keys) {
       if (isInternalKey(key)) {
@@ -808,7 +812,7 @@ export class SchemaValidator {
       }
       if (Object.hasOwn(SchemaValidators, key)) {
         SchemaValidators[key as keyof typeof SchemaValidators].call(this, report, schema);
-      } else if (!hasParentSchema && this.validator.options.noExtraKeywords === true) {
+      } else if (checkExtraKeywords) {
         report.addError('KEYWORD_UNEXPECTED', [key], undefined, schema);
       }
     }
