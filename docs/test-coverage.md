@@ -40,10 +40,10 @@ Line coverage status: **high**
 | src/validation/combinators.ts |     96% |         96% |        90% |      96% |
 | src/validation/fast-shared.ts |     83% |         85% |       100% |      67% |
 | src/validation/numeric.ts     |     94% |         94% |       100% |      95% |
-| src/validation/object.ts      |     97% |         97% |       100% |      95% |
+| src/validation/object.ts      |     97% |         97% |       100% |      96% |
 | src/validation/ref.ts         |     98% |         98% |       100% |      95% |
 | src/validation/shared.ts      |     98% |         98% |       100% |      95% |
-| src/validation/size-limits.ts |    100% |        100% |       100% |     100% |
+| src/validation/size-limits.ts |     98% |         98% |       100% |      98% |
 | src/validation/string.ts      |     92% |         92% |       100% |      91% |
 | src/validation/type.ts        |     98% |         98% |       100% |      95% |
 | src/validation/unevaluated.ts |     93% |         93% |        92% |      90% |
