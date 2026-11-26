@@ -1,5 +1,18 @@
 # Changelog
 
+## [12.9.0](https://github.com/zaggino/z-schema/compare/v12.8.0...v12.9.0) (2026-11-26)
+
+
+### Features
+
+* **options:** add sizeLimitsFirst to skip further checks on a value over its size limit ([#584](https://github.com/zaggino/z-schema/issues/584)) ([64609c5](https://github.com/zaggino/z-schema/commit/64609c59a09299c04fca3999f743265e29d1f95b))
+
+
+### Bug Fixes
+
+* **schema:** apply noExtraKeywords to root schemas and accept all supported keywords ([#589](https://github.com/zaggino/z-schema/issues/589)) ([cb92247](https://github.com/zaggino/z-schema/commit/cb9224720d4ede4dfe063e10c9842405b24e7ec2))
+* **schema:** tighten schema validation edge cases ([#588](https://github.com/zaggino/z-schema/issues/588)) ([033ceec](https://github.com/zaggino/z-schema/commit/033ceeca4870de0f043b4b8c2bddb69ae4c773c4))
+
 ## [12.8.0](https://github.com/zaggino/z-schema/compare/v12.7.0...v12.8.0) (2026-11-20)
 
 
