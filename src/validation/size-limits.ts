@@ -48,36 +48,49 @@ const OBJECT_LIMIT: SizeLimit = {
 /** The size limits: string, array, object, in that order. */
 export const SIZE_LIMITS: readonly SizeLimit[] = [STRING_LIMIT, ARRAY_LIMIT, OBJECT_LIMIT];
 
-/**
- * The node has a size limit that can gate other work: `maxItems`, `maxProperties`, or `maxLength` together
- * with a keyword of the string limit's gated set. Used when a keyword plan is built.
- */
-export function hasSizeLimit(schema: JsonSchemaInternal): boolean {
-  if (schema.maxItems !== undefined || schema.maxProperties !== undefined) {
-    return true;
-  }
-  if (schema.maxLength === undefined) {
-    return false;
-  }
-  for (const key of STRING_LIMIT.gated) {
+/** Which size limits of a node can gate other work (see `sizeLimitFlags`). */
+export interface SizeLimitFlags {
+  readonly string: boolean;
+  readonly array: boolean;
+  readonly object: boolean;
+}
+
+const hasGatedKeyword = (schema: JsonSchemaInternal, limit: SizeLimit): boolean => {
+  for (const key of limit.gated) {
     if (schema[key as keyof JsonSchemaInternal] !== undefined) {
       return true;
     }
   }
   return false;
+};
+
+/**
+ * The size limits of the node that can gate other work, or `undefined` for none: `maxItems` always (its value can
+ * also skip the traversal of the items), `maxLength` and `maxProperties` only together with a keyword they stop,
+ * since counting code points or keys is not free. Used when a keyword plan is built.
+ */
+export function sizeLimitFlags(schema: JsonSchemaInternal): SizeLimitFlags | undefined {
+  const string = schema.maxLength !== undefined && hasGatedKeyword(schema, STRING_LIMIT);
+  const array = schema.maxItems !== undefined;
+  const object = schema.maxProperties !== undefined && hasGatedKeyword(schema, OBJECT_LIMIT);
+  return string || array || object ? { string, array, object } : undefined;
 }
 
 /**
- * The size limit of `schema` that `json` exceeds, or `undefined`. Runs on every visit of a node the plan marks as
- * sized; only a result other than `undefined` is rare. A limit whose error is not reported (`isErrorReported`)
- * is never exceeded.
+ * The size limit of `schema` that `json` exceeds, or `undefined`. Only the limits set in `flags`
+ * (from `sizeLimitFlags`) are compared. Runs on every visit of a node that has flags; only a result other than
+ * `undefined` is rare. A limit whose error is not reported (`isErrorReported`) is never exceeded.
  */
 export function exceededSizeLimit(
   options: ValidateOptions,
   schema: JsonSchemaInternal,
-  json: unknown
+  json: unknown,
+  flags: SizeLimitFlags
 ): SizeLimit | undefined {
   if (typeof json === 'string') {
+    if (!flags.string) {
+      return undefined;
+    }
     const max = schema.maxLength;
     // code units never fewer than code points: a string that fits in code units fits in code points
     if (
@@ -91,13 +104,16 @@ export function exceededSizeLimit(
     return undefined;
   }
   if (Array.isArray(json)) {
+    if (!flags.array) {
+      return undefined;
+    }
     const max = schema.maxItems;
     if (typeof max === 'number' && json.length > max && isErrorReported(options, ARRAY_LIMIT.code)) {
       return ARRAY_LIMIT;
     }
     return undefined;
   }
-  if (isObject(json)) {
+  if (flags.object && isObject(json)) {
     const max = schema.maxProperties;
     if (typeof max !== 'number') {
       return undefined;

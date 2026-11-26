@@ -564,22 +564,25 @@ function compilePropertyNames(state: BuildState, node: JsonSchemaInternal, withK
   });
 }
 
-// Every object keyword of a node, folded into one check so `Object.keys(json)` is computed once.
+// Every object keyword of a node, folded into one check so `Object.keys(json)` is computed once. The property
+// counts run first: an object over maxProperties fails before required, the dependencies and the traversal run.
 export function compileObjectKeywords(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const counts: KeysCheck[] = [];
   const plain: ObjectCheck[] = [];
   const withKeys: KeysCheck[] = [];
+  compilePropertyCounts(node, counts);
   compileRequiredCheck(node, plain);
   compileDependencies(state, node, plain);
   compileDependentKeywords(state, node, plain);
-  compilePropertyCounts(node, withKeys);
   compilePropertyTraversal(state, node, withKeys);
   compilePropertyNames(state, node, withKeys);
+  const countCount = counts.length;
   const plainCount = plain.length;
   const keyedCount = withKeys.length;
-  if (plainCount === 0 && keyedCount === 0) {
+  if (countCount === 0 && plainCount === 0 && keyedCount === 0) {
     return;
   }
-  if (keyedCount === 0) {
+  if (countCount === 0 && keyedCount === 0) {
     checks.push((json) => {
       if (!isObject(json)) {
         return true;
@@ -597,12 +600,17 @@ export function compileObjectKeywords(state: BuildState, node: JsonSchemaInterna
     if (!isObject(json)) {
       return true;
     }
+    const keys = Object.keys(json);
+    for (let i = 0; i < countCount; i++) {
+      if (!counts[i](json, keys)) {
+        return false;
+      }
+    }
     for (let i = 0; i < plainCount; i++) {
       if (!plain[i](json)) {
         return false;
       }
     }
-    const keys = Object.keys(json);
     for (let i = 0; i < keyedCount; i++) {
       if (!withKeys[i](json, keys)) {
         return false;

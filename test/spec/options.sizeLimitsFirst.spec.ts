@@ -94,6 +94,27 @@ describe('sizeLimitsFirst option', () => {
       );
     });
 
+    it('string over maxLength skips contentMediaType', () => {
+      const schema: JsonSchema = { maxLength: 3, contentMediaType: 'application/json' };
+      const { on, off } = both(schema, '{{{{{{', { version: 'draft-07' });
+      expect(on).toEqual(sorted(['MAX_LENGTH']));
+      expect(off).toEqual(sorted(['MAX_LENGTH', 'INVALID_FORMAT']));
+    });
+
+    it('array over maxItems skips prefixItems', () => {
+      const schema: JsonSchema = { maxItems: 1, prefixItems: [{ type: 'string' }, { type: 'string' }] };
+      const { on, off } = both(schema, [1, 2]);
+      expect(on).toEqual(sorted(['ARRAY_LENGTH_LONG']));
+      expect(off).toEqual(sorted(['ARRAY_LENGTH_LONG', 'INVALID_TYPE', 'INVALID_TYPE']));
+    });
+
+    it('array over maxItems skips additionalItems false', () => {
+      const schema: JsonSchema = { maxItems: 1, items: [{ type: 'string' }], additionalItems: false };
+      const { on, off } = both(schema, ['a', 'b'], { version: 'draft-07' });
+      expect(on).toEqual(sorted(['ARRAY_LENGTH_LONG']));
+      expect(off).toEqual(sorted(['ARRAY_LENGTH_LONG', 'ARRAY_ADDITIONAL_ITEMS']));
+    });
+
     it('array over maxItems skips unevaluatedItems', () => {
       const schema: JsonSchema = { maxItems: 1, unevaluatedItems: false };
       const { on, off } = both(schema, [1, 2]);
@@ -483,8 +504,7 @@ describe('sizeLimitsFirst option', () => {
       };
       const { on, off } = both(schema, [1, 2, 3], { version: 'draft-04' });
       expect(on).toEqual(sorted(['ARRAY_LENGTH_LONG']));
-      expect(off.length).toBeGreaterThan(1);
-      expect(off[0]).toBe('ARRAY_LENGTH_LONG');
+      expect(off).toEqual(sorted(['ARRAY_LENGTH_LONG', 'INVALID_TYPE', 'INVALID_TYPE', 'INVALID_TYPE']));
     });
 
     it('draft2019-09 items and unevaluatedItems', () => {
@@ -521,6 +541,20 @@ describe('sizeLimitsFirst option', () => {
       const spy = vi.fn<() => boolean>(() => true);
       const { fast } = fastFor(
         { allOf: [{ properties: { a: { format: 'spy' } } }], maxProperties: 1 },
+        { customFormats: { spy } }
+      );
+      expect(fast).toBeDefined();
+      spy.mockClear();
+      expect(fast!({ a: 'x', b: 'y' })).toBe(false);
+      expect(spy).not.toHaveBeenCalled();
+      expect(fast!({ a: 'x' })).toBe(true);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects an object over maxProperties before its dependentSchemas run', () => {
+      const spy = vi.fn<() => boolean>(() => true);
+      const { fast } = fastFor(
+        { dependentSchemas: { a: { properties: { a: { format: 'spy' } } } }, maxProperties: 1 },
         { customFormats: { spy } }
       );
       expect(fast).toBeDefined();

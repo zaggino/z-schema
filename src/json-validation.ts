@@ -1,7 +1,7 @@
 import type { JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
 import type { Report } from './report.js';
 import type { JsonValidatorFn } from './validation/shared.js';
-import type { SizeLimit } from './validation/size-limits.js';
+import type { SizeLimit, SizeLimitFlags } from './validation/size-limits.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
@@ -56,7 +56,7 @@ import {
   honouredPrefixItems,
   VALIDATION_VOCAB_KEYWORDS,
 } from './validation/shared.js';
-import { exceededSizeLimit, hasSizeLimit } from './validation/size-limits.js';
+import { exceededSizeLimit, sizeLimitFlags } from './validation/size-limits.js';
 import {
   contentEncodingValidator,
   contentMediaTypeValidator,
@@ -195,8 +195,8 @@ export interface KeywordPlan {
   readonly keys: ReadonlyArray<keyof JsonSchemaAll>;
   /** `keys` contains `unevaluatedItems` or `unevaluatedProperties` (the only consumers of a lone `if` annotation). */
   readonly unevaluated: boolean;
-  /** The node has a size limit that can gate other work (see `hasSizeLimit`). */
-  readonly sized: boolean;
+  /** The size limits of the node that can gate other work; `undefined` for none (see `sizeLimitFlags`). */
+  readonly sizeLimits: SizeLimitFlags | undefined;
   /** Value of {@link planEpoch} when the plan was built; a plan from an older epoch is stale. */
   readonly epoch: number;
   /** Lazily computed `keys` minus `VALIDATION_VOCAB_KEYWORDS`, used when the validation vocabulary is disabled. */
@@ -232,7 +232,7 @@ function buildKeywordPlan(schema: JsonSchemaInternal): KeywordPlan {
       unevaluated = true;
     }
   }
-  return { empty: all.length === 0, keys, unevaluated, sized: hasSizeLimit(schema), epoch: planEpoch };
+  return { empty: all.length === 0, keys, unevaluated, sizeLimits: sizeLimitFlags(schema), epoch: planEpoch };
 }
 
 /**
@@ -756,13 +756,13 @@ export function validate(
   // keywords run may no longer hold.
   let overLimit = false;
   if (
-    plan.sized &&
+    plan.sizeLimits !== undefined &&
     validationVocabularyEnabled &&
     !exactStop &&
     hook === undefined &&
     ctx.options.sizeLimitsFirst !== false
   ) {
-    const limit = exceededSizeLimit(ctx.validateOptions, schema, json);
+    const limit = exceededSizeLimit(ctx.validateOptions, schema, json, plan.sizeLimits);
     if (limit !== undefined) {
       keys = getOverLimitKeys(plan, limit);
       overLimit = true;

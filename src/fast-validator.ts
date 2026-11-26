@@ -207,7 +207,8 @@ function compileNode(state: DriverState, node: unknown): FastValidator {
 
   const checks: Check[] = [];
   const compiled: KeywordCompiler[] = [];
-  // keywords of one group share a compiler; checks are ANDed and pure, so each compiler runs once, in any order
+  // keywords of one group share a compiler, run once; checks are ANDed and pure, so their order does not change the
+  // result, only how soon a failing value is rejected
   const compileOnce = (compile: KeywordCompiler): void => {
     if (compile !== ignored && !compiled.includes(compile)) {
       compiled.push(compile);
@@ -215,7 +216,7 @@ function compileNode(state: DriverState, node: unknown): FastValidator {
     }
   };
   // size limits are compiled before the other keywords of the node, so a value over a limit fails before the
-  // checks that depend on its content
+  // checks that depend on its content (`maxProperties` compiles the object group, which runs its counts first)
   for (let i = 0; i < SIZE_LIMITS.length; i++) {
     if (schema[SIZE_LIMITS[i].keyword] !== undefined) {
       compileOnce(KEYWORD_COMPILERS[SIZE_LIMITS[i].keyword]);
