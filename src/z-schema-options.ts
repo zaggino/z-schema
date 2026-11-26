@@ -50,6 +50,11 @@ export interface ZSchemaOptions {
    * not have run for a given value.
    */
   customValidator?: (report: Report, schema: unknown, json: unknown) => void;
+  /**
+   * Format validators of this instance, by format name; `null` disables a format. A format function may change the
+   * value it is given, but the change must be safe to repeat (it can be called more than once for a value) and no
+   * other keyword may depend on it (it can run before or after the other keywords of its schema, or not at all).
+   */
   customFormats?: Record<string, FormatValidatorFn | null>;
   maxRecursionDepth?: number;
   /**

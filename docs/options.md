@@ -485,6 +485,13 @@ Register custom format validators at creation time. Each key is a format name an
 
 The formats apply to the created instance only. The object is copied at creation: later changes to it have no effect, and `registerFormat()` / `unregisterFormat()` on the instance do not modify it.
 
+A format function may change the value it is given (an object or array; a string or number cannot be changed in place), within two rules that apply to every custom format, registered globally or on an instance:
+
+- **A change must be safe to repeat.** The function can be called more than once for the same value: on a cached schema it runs on the fast path and again when the data turns out to be invalid. Trimming a string property is fine, since a second trim changes nothing; appending a character to it is not, since a second call appends it twice.
+- **No other keyword may depend on the change.** The function can be called before or after the other keywords of the same schema, or not at all: on the fast path the size limits are checked first, and with [`sizeLimitsFirst`](#sizelimitsfirst) a value over a size limit skips `format`. Adding or removing properties of an object or items of an array that `maxProperties`, `properties`, `required`, `maxItems`, `items` or similar keywords look at breaks this rule, and can make the result depend on that order.
+
+See also [prefilling values with a format](features.md#prefill-default-values-to-object-using-format).
+
 Default: `undefined`
 
 ```javascript
@@ -551,7 +558,7 @@ These keywords still run on the node: `type`, `enum`, `const`, `required`, the m
 
 The rule works per schema node. A size limit and an expensive keyword in different subschemas of the same value do not affect each other: in `{ maxItems: 10, allOf: [{ items: … }] }` the items are still validated, and so are the keywords of a `$ref` target next to the limit. An `unevaluatedItems` or `unevaluatedProperties` of an enclosing schema also still looks at the value. Put the limit in the same schema object as the keywords it should stop.
 
-With a [`customValidator`](#customvalidator) configured nothing is skipped: the function may change the value while a node is validated, so every keyword runs as with `false`.
+With a [`customValidator`](#customvalidator) configured nothing is skipped: the function may change the value while a node is validated, so every keyword runs as with `false`. Custom format functions do not turn skipping off: they must not make changes that other keywords depend on (see [`customFormats`](#customformats)), so a format that adds or removes the keys or items a size limit counts can make a value skip checks it would otherwise fail.
 
 A limit that is not evaluated stops nothing: its error code filtered by `excludeErrors` / `includeErrors`, or the validation vocabulary disabled for the schema. With `breakOnFirstError: true`, the error reported for such a value is never one of a skipped keyword: it is the limit's error, or that of a keyword that still runs and comes first. A custom format function is not called for a string that exceeds `maxLength` of the same schema node. With [`maxDataDepth`](#maxdatadepth), an array or object that exceeds its size limit is not entered, so it reports the size error and not `MAX_DATA_DEPTH_EXCEEDED`; in a branch of `anyOf`, `oneOf`, `not` or `if` that branch fails with the size error, and the validation gives the result the schema defines instead of raising `MAX_DATA_DEPTH_EXCEEDED`. On the cached fast path the size limits are checked before the node's other keywords regardless of the option; the fast path reports no errors, so the order cannot be observed in results.
 

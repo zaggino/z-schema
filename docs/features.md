@@ -211,7 +211,7 @@ validator.validate(data, schema);
 // data.hello === 'world'
 ```
 
-On a cached schema (a function returned by `compile()`, or a schema object validated before), a custom format validator may be called before other keywords of the same schema are checked, and is called again when the data turns out to be invalid. Validators should therefore not have effects that other keywords of the schema depend on, and their effects should be safe to repeat. Callback-style validators are not affected.
+On a cached schema (a function returned by `compile()`, or a schema object validated before), a custom format validator may be called before other keywords of the same schema are checked, and is called again when the data turns out to be invalid. Validators should therefore not have effects that other keywords of the schema depend on, and their effects should be safe to repeat (see [`customFormats`](options.md#customformats) for examples). Callback-style validators are not affected.
 
 ## Unicode Patterns
 
