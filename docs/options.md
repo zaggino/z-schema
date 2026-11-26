@@ -108,7 +108,9 @@ const validator = ZSchema.create({
 
 ## noExtraKeywords
 
-When true, the validator rejects schemas that contain keywords not defined in the JSON Schema specification, unless the schema provides a `$schema` property for validation.
+When true, the validator rejects schemas that contain keywords it does not know (error `KEYWORD_UNEXPECTED`). Known keywords are those of any supported draft, including annotations such as `$comment`, `examples`, `readOnly`, `writeOnly` and `deprecated`.
+
+A schema that declares its own `$schema` is exempt: it is validated against that meta-schema, which decides whether extra keywords are allowed. The default `$schema` the validator applies to a schema without one (see `version`) does not count, so a root schema without its own `$schema` is checked like any subschema. `strictMode` turns this option on.
 
 Default: `false`
 

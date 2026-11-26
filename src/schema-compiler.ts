@@ -370,9 +370,11 @@ export class SchemaCompiler {
       return true;
     }
 
-    // v8 - if $schema is not present, set $schema to default
+    // v8 - if $schema is not present, set $schema to default; the marker keeps it from exempting the
+    // schema from `noExtraKeywords` (schema-validator.ts)
     if (!schema.$schema && this.validator.options.version !== 'none') {
       schema.$schema = this.validator.getDefaultSchemaId();
+      schema.__$schemaDefaulted = true;
     }
 
     if (schema.id && typeof schema.id === 'string' && !options?.noCache) {
