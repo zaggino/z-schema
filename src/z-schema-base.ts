@@ -2,6 +2,7 @@ import type { CompiledSchemaEntry } from './compiled-schema-cache.js';
 import type { Errors } from './errors.js';
 import type { FormatValidatorFn } from './format-validators.js';
 import type { JsonSchema, JsonSchemaInternal, JsonSchemaVersion } from './json-schema-versions.js';
+import type { AT_MAP } from './json-schema.js';
 import type { SchemaErrorDetail } from './report.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
@@ -11,7 +12,7 @@ import { getValidateError, toValidateError, ValidateError } from './errors.js';
 import { buildFastValidator, isFastValidatorDisabled } from './fast-validator.js';
 import { getSupportedFormats } from './format-validators.js';
 import { VERSION_SCHEMA_URL_MAPPING } from './json-schema-versions.js';
-import { cloneInputSchema, isInternalKey } from './json-schema.js';
+import { AT_DATA, AT_SCHEMA, childPosition, cloneInputSchema, isInternalKey } from './json-schema.js';
 import { validate as validateJson } from './json-validation.js';
 import { Report } from './report.js';
 import { prepareRemoteSchema, SchemaCache } from './schema-cache.js';
@@ -492,7 +493,8 @@ export class ZSchemaBase {
 
   /**
    * Resolve a previously compiled schema by its `$id` / `id`, cleaning up internal bookkeeping properties
-   * and inlining resolved `$ref` targets.
+   * and inlining resolved `$ref` targets. Property names and data under `enum`, `const`, `default` and
+   * `examples` are returned as they are, even when they start with the reserved `__$` prefix.
    * @param schemaId - The schema identifier to look up.
    * @returns A clean, resolved copy of the schema, or `undefined` if not found.
    */
@@ -505,23 +507,33 @@ export class ZSchemaBase {
 
     const clonedSchema = deepClone(schema, this.options.maxRecursionDepth);
 
-    const visited = new WeakSet<object>();
+    // Visited schemas and visited keyword maps (indexed by AT_SCHEMA / AT_MAP); data is never entered.
+    const visited: [WeakSet<object>, WeakSet<object>] = [new WeakSet(), new WeakSet()];
 
-    // clean-up the schema and resolve references
-    const cleanup = (node: unknown) => {
-      const typeOf = whatIs(node);
-      if (typeOf !== 'object' && typeOf !== 'array') {
+    // clean-up the schema and resolve references; only schema objects carry internal keys and resolved refs,
+    // so property names inside keyword maps and data under enum / const / default / examples are left alone
+    const cleanup = (node: unknown, position: typeof AT_SCHEMA | typeof AT_MAP) => {
+      if (typeof node !== 'object' || node === null) {
         return;
       }
 
-      if (visited.has(node as object)) {
+      const seen = visited[position];
+      if (seen.has(node)) {
         return;
       }
 
-      visited.add(node as object);
+      seen.add(node);
+
+      // items have the position of their array; a keyword map is always an object, so this is AT_SCHEMA
+      if (Array.isArray(node)) {
+        for (let i = 0; i < node.length; i++) {
+          cleanup(node[i], position);
+        }
+        return;
+      }
 
       const schemaNode = node as JsonSchemaInternal;
-      if (schemaNode.$ref && schemaNode.__$refResolved) {
+      if (position === AT_SCHEMA && schemaNode.$ref && schemaNode.__$refResolved) {
         const from = schemaNode.__$refResolved;
         const to = schemaNode;
         delete schemaNode.$ref;
@@ -538,16 +550,19 @@ export class ZSchemaBase {
       const record = node as Record<string, unknown>;
       for (const key in record) {
         if (Object.hasOwn(record, key)) {
-          if (isInternalKey(key)) {
+          if (position === AT_SCHEMA && isInternalKey(key)) {
             delete record[key];
           } else {
-            cleanup(record[key]);
+            const child = childPosition(position, key, record[key]);
+            if (child !== AT_DATA) {
+              cleanup(record[key], child);
+            }
           }
         }
       }
     };
 
-    cleanup(clonedSchema);
+    cleanup(clonedSchema, AT_SCHEMA);
 
     return clonedSchema;
   }

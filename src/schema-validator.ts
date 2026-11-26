@@ -2,7 +2,7 @@ import type { JsonSchema, JsonSchemaInternal } from './json-schema-versions.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 
 import { isFormatSupported } from './format-validators.js';
-import { getId } from './json-schema.js';
+import { getId, isInternalKey } from './json-schema.js';
 import { invalidateKeywordPlan, validate } from './json-validation.js';
 import { Report } from './report.js';
 import { isUniqueArray } from './utils/array.js';
@@ -803,7 +803,7 @@ export class SchemaValidator {
 
     const keys = Object.keys(schema);
     for (const key of keys) {
-      if (key.startsWith('__')) {
+      if (isInternalKey(key)) {
         continue;
       }
       if (Object.hasOwn(SchemaValidators, key)) {
