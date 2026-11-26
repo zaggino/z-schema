@@ -75,7 +75,8 @@ export interface ZSchemaOptions {
   /**
    * Whether a value that exceeds a size limit of a schema node skips the content checks of that node. Default `true`.
    * A string longer than `maxLength` skips `pattern`, `format`, `contentEncoding` and `contentMediaType`; an array
-   * longer than `maxItems` skips `uniqueItems`, `contains`, `unevaluatedItems` and the validation of its items; an
+   * longer than `maxItems` skips `uniqueItems`, `contains`, `unevaluatedItems` and the validation of its items (`items`, `prefixItems`,
+   * `additionalItems`); an
    * object with more than `maxProperties` properties skips `properties`, `patternProperties`, `additionalProperties`,
    * `propertyNames`, `unevaluatedProperties` and the validation of its property values. The limit's own error is
    * reported, and every other keyword of the node (`type`, `enum`, `const`, `required`, the lower limits, `$ref`,
@@ -83,7 +84,9 @@ export interface ZSchemaOptions {
    * A limit that is not evaluated (its error code in `excludeErrors` or missing from a non-empty `includeErrors`,
    * or the validation vocabulary disabled for the node) skips nothing, and nothing is skipped while a
    * `customValidator` is configured. The validity of the result is the same either way; only the error details of
-   * such a value are fewer. `false` runs every keyword.
+   * such a value are fewer, and with `breakOnFirstError` the one error reported can be a different one. An array or
+   * object over its limit is not entered, so data nested in it past `maxDataDepth` does not raise
+   * `MAX_DATA_DEPTH_EXCEEDED`. `false` runs every keyword.
    */
   sizeLimitsFirst?: boolean;
 }

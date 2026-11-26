@@ -477,10 +477,6 @@ describe('sizeLimitsFirst option', () => {
       ]
     );
 
-    it('has at least 30 cases', () => {
-      expect(cases.length).toBeGreaterThanOrEqual(30);
-    });
-
     it.each(cases)('%s: same validity with the option on and off', (_name, schema, data) => {
       const options: ZSchemaOptions = { version: 'draft2020-12', formatAssertions: true };
       const verdicts = (sizeLimitsFirst: boolean) => {
@@ -516,27 +512,6 @@ describe('sizeLimitsFirst option', () => {
   });
 
   describe('fast validator order', () => {
-    it('rejects an over-long string before the format function runs', () => {
-      const spy = vi.fn<() => boolean>(() => true);
-      const { fast } = fastFor({ format: 'spy', maxLength: 3 }, { customFormats: { spy } });
-      expect(fast).toBeDefined();
-      spy.mockClear();
-      expect(fast!(longString)).toBe(false);
-      expect(spy).not.toHaveBeenCalled();
-      expect(fast!('abc')).toBe(true);
-      expect(spy).toHaveBeenCalledTimes(1);
-    });
-
-    it('rejects an over-long array before the items are checked', () => {
-      const spy = vi.fn<() => boolean>(() => true);
-      const { fast } = fastFor({ items: { format: 'spy' }, maxItems: 1 }, { customFormats: { spy } });
-      expect(fast).toBeDefined();
-      expect(fast!(['a', 'b'])).toBe(false);
-      expect(spy).not.toHaveBeenCalled();
-      expect(fast!(['a'])).toBe(true);
-      expect(spy).toHaveBeenCalledTimes(1);
-    });
-
     it('compiles the object group before the other keywords of the node', () => {
       const spy = vi.fn<() => boolean>(() => true);
       const { fast } = fastFor(

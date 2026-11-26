@@ -3,7 +3,6 @@ import type { JsonSchemaAll, JsonSchemaInternal } from '../json-schema-versions.
 import type { ValidateOptions } from '../z-schema-base.js';
 
 import { unicodeLength } from '../utils/unicode.js';
-import { isObject } from '../utils/what-is.js';
 import { isErrorReported } from './shared.js';
 
 /** An upper size limit of a schema node and the keywords that are not run for a value over it. */
@@ -78,14 +77,16 @@ export function sizeLimitFlags(schema: JsonSchemaInternal): SizeLimitFlags | und
 
 /**
  * The size limit of `schema` that `json` exceeds, or `undefined`. Only the limits set in `flags`
- * (from `sizeLimitFlags`) are compared. Runs on every visit of a node that has flags; only a result other than
+ * (from `sizeLimitFlags`) are compared; for an object, `objectKeys` is its `Object.keys`, passed by the caller when
+ * `flags.object` is set (`validate()` hands the same array to the property traversal). Runs on every visit of a node that has flags; only a result other than
  * `undefined` is rare. A limit whose error is not reported (`isErrorReported`) is never exceeded.
  */
 export function exceededSizeLimit(
   options: ValidateOptions,
   schema: JsonSchemaInternal,
   json: unknown,
-  flags: SizeLimitFlags
+  flags: SizeLimitFlags,
+  objectKeys: readonly string[] | undefined
 ): SizeLimit | undefined {
   if (typeof json === 'string') {
     if (!flags.string) {
@@ -113,22 +114,9 @@ export function exceededSizeLimit(
     }
     return undefined;
   }
-  if (flags.object && isObject(json)) {
+  if (objectKeys !== undefined) {
     const max = schema.maxProperties;
-    if (typeof max !== 'number') {
-      return undefined;
-    }
-    // bounded count of the own enumerable keys: stops at the first one over the limit and allocates nothing
-    let count = 0;
-    for (const key in json) {
-      if (Object.hasOwn(json, key)) {
-        count++;
-        if (count > max) {
-          break;
-        }
-      }
-    }
-    if (count > max && isErrorReported(options, OBJECT_LIMIT.code)) {
+    if (typeof max === 'number' && objectKeys.length > max && isErrorReported(options, OBJECT_LIMIT.code)) {
       return OBJECT_LIMIT;
     }
   }
