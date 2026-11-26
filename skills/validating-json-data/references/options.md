@@ -40,17 +40,18 @@ Values: `'draft-04'` · `'draft-06'` · `'draft-07'` · `'draft2019-09'` · `'dr
 
 ## Data validation behavior
 
-| Option                          | Type                  | Default | Effect                                                                                                                                                                                                |
-| ------------------------------- | --------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `noEmptyStrings`                | `boolean`             | `false` | Empty strings are invalid for type `string` (unless `minLength: 0`)                                                                                                                                   |
-| `noEmptyArrays`                 | `boolean`             | `false` | Empty arrays are invalid for type `array` (unless `minItems: 0`)                                                                                                                                      |
-| `assumeAdditional`              | `boolean \| string[]` | `false` | Treat `additionalProperties`/`additionalItems` as `false`; array form allows listed properties                                                                                                        |
-| `enumCaseInsensitiveComparison` | `boolean`             | `false` | Report `ENUM_CASE_MISMATCH` for case-only differences                                                                                                                                                 |
-| `strictUris`                    | `boolean`             | `false` | All `uri` format strings must be absolute URIs                                                                                                                                                        |
-| `asyncTimeout`                  | `number`              | `2000`  | Milliseconds before async format validators time out                                                                                                                                                  |
-| `maxRecursionDepth`             | `number`              | `100`   | Maximum recursion depth for schema traversal, deep clone, and equality checks. Increase for deeply nested schemas/data                                                                                |
-| `maxDataDepth`                  | `number`              | `500`   | Deepest nesting of the validated data (root is depth 0). Beyond it validation ends with a single `MAX_DATA_DEPTH_EXCEEDED` error; `Infinity` = no limit                                               |
-| `maxErrors`                     | `number`              | `1000`  | Most error details one validation reports, counting nested `inner` details. `err.truncated` is `true` when the limit left out at least one detail while the data was validated; `Infinity` = no limit |
+| Option                          | Type                  | Default | Effect                                                                                                                                                                                                                                                                          |
+| ------------------------------- | --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `noEmptyStrings`                | `boolean`             | `false` | Empty strings are invalid for type `string` (unless `minLength: 0`)                                                                                                                                                                                                             |
+| `noEmptyArrays`                 | `boolean`             | `false` | Empty arrays are invalid for type `array` (unless `minItems: 0`)                                                                                                                                                                                                                |
+| `assumeAdditional`              | `boolean \| string[]` | `false` | Treat `additionalProperties`/`additionalItems` as `false`; array form allows listed properties                                                                                                                                                                                  |
+| `enumCaseInsensitiveComparison` | `boolean`             | `false` | Report `ENUM_CASE_MISMATCH` for case-only differences                                                                                                                                                                                                                           |
+| `strictUris`                    | `boolean`             | `false` | All `uri` format strings must be absolute URIs                                                                                                                                                                                                                                  |
+| `asyncTimeout`                  | `number`              | `2000`  | Milliseconds before async format validators time out                                                                                                                                                                                                                            |
+| `maxRecursionDepth`             | `number`              | `100`   | Maximum recursion depth for schema traversal, deep clone, and equality checks. Increase for deeply nested schemas/data                                                                                                                                                          |
+| `maxDataDepth`                  | `number`              | `500`   | Deepest nesting of the validated data (root is depth 0). Beyond it validation ends with a single `MAX_DATA_DEPTH_EXCEEDED` error; `Infinity` = no limit                                                                                                                         |
+| `sizeLimitsFirst`               | `boolean`             | `true`  | A value over `maxLength` / `maxItems` / `maxProperties` skips the content checks and child validation of that schema node (`pattern`, `format`, `items`, `properties`, ...); same validity, fewer error details. `false`, or a configured `customValidator`, runs every keyword |
+| `maxErrors`                     | `number`              | `1000`  | Most error details one validation reports, counting nested `inner` details. `err.truncated` is `true` when the limit left out at least one detail while the data was validated; `Infinity` = no limit                                                                           |
 
 ## Schema strictness
 
@@ -100,10 +101,12 @@ noExtraKeywords, noTypeless, noEmptyStrings, noEmptyArrays
 
 ## Custom extensions
 
-| Option            | Type                                        | Default     | Effect                                                                    |
-| ----------------- | ------------------------------------------- | ----------- | ------------------------------------------------------------------------- |
-| `customFormats`   | `Record<string, FormatValidatorFn \| null>` | `undefined` | Register format validators at creation time                               |
-| `customValidator` | `(report, schema, json) => void`            | `undefined` | Called on every sub-schema during validation for custom cross-field logic |
+| Option            | Type                                        | Default     | Effect                                                                                                                               |
+| ----------------- | ------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `customFormats`   | `Record<string, FormatValidatorFn \| null>` | `undefined` | Register format validators at creation time; a format may change its value only in a repeatable way that no other keyword depends on |
+| `customValidator` | `(report, schema, json) => void`            | `undefined` | Called on every sub-schema during validation for custom cross-field logic                                                            |
+
+A custom validator may change the value it is given (through the object or array that holds it, for example to trim strings). It is only guaranteed to have run when the validation finished without errors; when a validation ends with errors it may or may not have run for a given value.
 
 ### customValidator example
 

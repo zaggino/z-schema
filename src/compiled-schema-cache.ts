@@ -161,6 +161,7 @@ function snapshotOptions(o: ZSchemaOptions): OptionsSnapshot {
     maxRecursionDepth: o.maxRecursionDepth,
     maxErrors: o.maxErrors,
     maxDataDepth: o.maxDataDepth,
+    sizeLimitsFirst: o.sizeLimitsFirst,
   };
 }
 
@@ -220,6 +221,7 @@ function sameOptions(s: OptionsSnapshot, o: ZSchemaOptions): boolean {
     s.maxRecursionDepth === o.maxRecursionDepth &&
     s.maxErrors === o.maxErrors &&
     s.maxDataDepth === o.maxDataDepth &&
+    s.sizeLimitsFirst === o.sizeLimitsFirst &&
     sameCustomFormats(s.customFormats, o.customFormats)
   );
 }

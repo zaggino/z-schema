@@ -375,17 +375,6 @@ function compileRequiredCheck(node: JsonSchemaInternal, plain: ObjectCheck[]): v
   });
 }
 
-function compilePropertyCounts(node: JsonSchemaInternal, withKeys: KeysCheck[]): void {
-  if (node.minProperties !== undefined) {
-    const min = expectNumber(node.minProperties);
-    withKeys.push((_json, keys) => !(keys.length < min));
-  }
-  if (node.maxProperties !== undefined) {
-    const max = expectNumber(node.maxProperties);
-    withKeys.push((_json, keys) => !(keys.length > max));
-  }
-}
-
 // properties / patternProperties / additionalProperties: child traversal and the additionalProperties false rule
 function compilePropertyTraversal(state: BuildState, node: JsonSchemaInternal, withKeys: KeysCheck[]): void {
   const { properties, patternProperties, additionalProperties } = node;
@@ -564,22 +553,25 @@ function compilePropertyNames(state: BuildState, node: JsonSchemaInternal, withK
   });
 }
 
-// Every object keyword of a node, folded into one check so `Object.keys(json)` is computed once.
+// Every object keyword of a node, folded into one check so `Object.keys(json)` is computed once. The property
+// counts run first: an object over maxProperties fails before required, the dependencies and the traversal run.
 export function compileObjectKeywords(state: BuildState, node: JsonSchemaInternal, checks: Check[]): void {
+  const counted = node.minProperties !== undefined || node.maxProperties !== undefined;
+  const min = node.minProperties === undefined ? 0 : expectNumber(node.minProperties);
+  const max = node.maxProperties === undefined ? Number.POSITIVE_INFINITY : expectNumber(node.maxProperties);
   const plain: ObjectCheck[] = [];
   const withKeys: KeysCheck[] = [];
   compileRequiredCheck(node, plain);
   compileDependencies(state, node, plain);
   compileDependentKeywords(state, node, plain);
-  compilePropertyCounts(node, withKeys);
   compilePropertyTraversal(state, node, withKeys);
   compilePropertyNames(state, node, withKeys);
   const plainCount = plain.length;
   const keyedCount = withKeys.length;
-  if (plainCount === 0 && keyedCount === 0) {
+  if (!counted && plainCount === 0 && keyedCount === 0) {
     return;
   }
-  if (keyedCount === 0) {
+  if (!counted && keyedCount === 0) {
     checks.push((json) => {
       if (!isObject(json)) {
         return true;
@@ -593,16 +585,40 @@ export function compileObjectKeywords(state: BuildState, node: JsonSchemaInterna
     });
     return;
   }
+  if (!counted) {
+    // no counts: the checks that need no keys run before the keys are computed
+    checks.push((json) => {
+      if (!isObject(json)) {
+        return true;
+      }
+      for (let i = 0; i < plainCount; i++) {
+        if (!plain[i](json)) {
+          return false;
+        }
+      }
+      const keys = Object.keys(json);
+      for (let i = 0; i < keyedCount; i++) {
+        if (!withKeys[i](json, keys)) {
+          return false;
+        }
+      }
+      return true;
+    });
+    return;
+  }
   checks.push((json) => {
     if (!isObject(json)) {
       return true;
+    }
+    const keys = Object.keys(json);
+    if (keys.length > max || keys.length < min) {
+      return false;
     }
     for (let i = 0; i < plainCount; i++) {
       if (!plain[i](json)) {
         return false;
       }
     }
-    const keys = Object.keys(json);
     for (let i = 0; i < keyedCount; i++) {
       if (!withKeys[i](json, keys)) {
         return false;

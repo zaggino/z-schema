@@ -19,7 +19,7 @@ if (rawBody.length > MAX_BODY_BYTES) {
 validator.validate(JSON.parse(rawBody), schema);
 ```
 
-A `maxLength` or `maxItems` keyword in the schema reports oversized values, but other keywords of the same schema are still evaluated on them, so it does not replace a check before validation.
+With the default [`sizeLimitsFirst`](options.md#sizelimitsfirst), a value that exceeds `maxLength`, `maxItems` or `maxProperties` is not checked further by the same schema object: a string skips `pattern`, `format` and the `content*` keywords, an array skips `uniqueItems`, `contains`, `unevaluatedItems` and its items (`items`, `prefixItems`, `additionalItems`), and an object skips `properties`, `patternProperties`, `additionalProperties`, `propertyNames`, `unevaluatedProperties` and its property values. The rule works per schema node: keywords in other subschemas of the same value (inside `allOf`, `anyOf`, `oneOf`, `if`, or the target of a `$ref` next to the limit) still run on it, and so do `enum` and `const`, so put the size limit in the same schema object as the keywords it should stop. Nothing is skipped when a `customValidator` is configured. A size keyword does not replace the check of the raw input size before parsing.
 
 ## Limits the library enforces
 

@@ -1,6 +1,7 @@
 import type { JsonSchemaAll, JsonSchemaInternal } from './json-schema-versions.js';
 import type { Report } from './report.js';
 import type { JsonValidatorFn } from './validation/shared.js';
+import type { SizeLimit, SizeLimitFlags } from './validation/size-limits.js';
 import type { ZSchemaBase } from './z-schema-base.js';
 import type { ZSchemaOptions } from './z-schema-options.js';
 
@@ -55,6 +56,7 @@ import {
   honouredPrefixItems,
   VALIDATION_VOCAB_KEYWORDS,
 } from './validation/shared.js';
+import { exceededSizeLimit, sizeLimitFlags } from './validation/size-limits.js';
 import {
   contentEncodingValidator,
   contentMediaTypeValidator,
@@ -193,10 +195,14 @@ export interface KeywordPlan {
   readonly keys: ReadonlyArray<keyof JsonSchemaAll>;
   /** `keys` contains `unevaluatedItems` or `unevaluatedProperties` (the only consumers of a lone `if` annotation). */
   readonly unevaluated: boolean;
+  /** The size limits of the node that can gate other work; `undefined` for none (see `sizeLimitFlags`). */
+  readonly sizeLimits: SizeLimitFlags | undefined;
   /** Value of {@link planEpoch} when the plan was built; a plan from an older epoch is stale. */
   readonly epoch: number;
   /** Lazily computed `keys` minus `VALIDATION_VOCAB_KEYWORDS`, used when the validation vocabulary is disabled. */
   keysVocabDisabled?: ReadonlyArray<keyof JsonSchemaAll>;
+  /** Lazily computed `keys` minus the gated keywords of a size limit, indexed by `SizeLimit.index`. */
+  keysOverLimit?: Array<ReadonlyArray<keyof JsonSchemaAll> | undefined>;
 }
 
 const keywordPlanSymbol: unique symbol = Symbol('z-schema.keywordPlan');
@@ -210,7 +216,8 @@ let planEpoch = 0;
 
 type PlannedSchema = JsonSchemaInternal & { [keywordPlanSymbol]?: KeywordPlan };
 
-function buildKeywordPlan(schema: JsonSchemaInternal): KeywordPlan {
+/** `withSizeLimits` is false for the uncached plans built under a customValidator, which never skips (see `validate()`). */
+function buildKeywordPlan(schema: JsonSchemaInternal, withSizeLimits: boolean): KeywordPlan {
   const all = Object.keys(schema) as Array<keyof JsonSchemaAll>;
   const skipType = !!schema.type;
   const keys: Array<keyof JsonSchemaAll> = [];
@@ -226,7 +233,13 @@ function buildKeywordPlan(schema: JsonSchemaInternal): KeywordPlan {
       unevaluated = true;
     }
   }
-  return { empty: all.length === 0, keys, unevaluated, epoch: planEpoch };
+  return {
+    empty: all.length === 0,
+    keys,
+    unevaluated,
+    sizeLimits: withSizeLimits ? sizeLimitFlags(schema) : undefined,
+    epoch: planEpoch,
+  };
 }
 
 /**
@@ -238,7 +251,7 @@ export function getKeywordPlan(schema: JsonSchemaInternal): KeywordPlan {
   const planned = schema as PlannedSchema;
   let plan = planned[keywordPlanSymbol];
   if (plan === undefined || plan.epoch !== planEpoch) {
-    plan = buildKeywordPlan(schema);
+    plan = buildKeywordPlan(schema, true);
     if (Object.isExtensible(schema)) {
       Object.defineProperty(planned, keywordPlanSymbol, {
         value: plan,
@@ -269,7 +282,32 @@ export function invalidateKeywordPlan(schema: JsonSchemaInternal): void {
  * time, so use a fresh uncached plan (matches main, which re-read `Object.keys` on every visit).
  */
 function planFor(ctx: ZSchemaBase, schema: JsonSchemaInternal): KeywordPlan {
-  return typeof ctx.options.customValidator === 'function' ? buildKeywordPlan(schema) : getKeywordPlan(schema);
+  return typeof ctx.options.customValidator === 'function' ? buildKeywordPlan(schema, false) : getKeywordPlan(schema);
+}
+
+/** `keys` without the members of `excluded`, in order. Builds the lazily cached key lists of a plan. */
+function keysWithout(
+  keys: ReadonlyArray<keyof JsonSchemaAll>,
+  excluded: ReadonlySet<keyof JsonSchemaAll>
+): Array<keyof JsonSchemaAll> {
+  const out: Array<keyof JsonSchemaAll> = [];
+  for (let i = 0; i < keys.length; i++) {
+    if (!excluded.has(keys[i])) {
+      out.push(keys[i]);
+    }
+  }
+  return out;
+}
+
+function getOverLimitKeys(plan: KeywordPlan, limit: SizeLimit): ReadonlyArray<keyof JsonSchemaAll> {
+  const cache = plan.keysOverLimit ?? [];
+  plan.keysOverLimit = cache;
+  let filtered = cache[limit.index];
+  if (filtered === undefined) {
+    filtered = keysWithout(plan.keys, limit.gated);
+    cache[limit.index] = filtered;
+  }
+  return filtered;
 }
 
 /**
@@ -322,13 +360,7 @@ function runFirstKeyOnly(
 function getVocabDisabledKeys(plan: KeywordPlan): ReadonlyArray<keyof JsonSchemaAll> {
   let filtered = plan.keysVocabDisabled;
   if (filtered === undefined) {
-    const out: Array<keyof JsonSchemaAll> = [];
-    for (let i = 0; i < plan.keys.length; i++) {
-      if (!VALIDATION_VOCAB_KEYWORDS.has(plan.keys[i])) {
-        out.push(plan.keys[i]);
-      }
-    }
-    filtered = out;
+    filtered = keysWithout(plan.keys, VALIDATION_VOCAB_KEYWORDS);
     plan.keysVocabDisabled = filtered;
   }
   return filtered;
@@ -412,7 +444,13 @@ function recurseArray(ctx: ZSchemaBase, report: Report, schema: JsonSchemaIntern
 // recurseObject
 // ---------------------------------------------------------------------------
 
-function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInternal, json: Record<string, unknown>) {
+function recurseObject(
+  ctx: ZSchemaBase,
+  report: Report,
+  schema: JsonSchemaInternal,
+  json: Record<string, unknown>,
+  jsonKeys: string[] | undefined
+) {
   // http://json-schema.org/latest/json-schema-validation.html#rfc.section.8.3
 
   // If "additionalProperties" is absent, it is considered present with an empty schema as a value.
@@ -427,8 +465,8 @@ function recurseObject(ctx: ZSchemaBase, report: Report, schema: JsonSchemaInter
   // properties while it is traversed.
   const p = schema.properties ? Object.keys(schema.properties) : undefined;
 
-  // m - The property name of the child.
-  const keys = Object.keys(json);
+  // m - The property name of the child. Computed by validate() when a size limit already needed them.
+  const keys = jsonKeys ?? Object.keys(json);
 
   // pp - The property set from "patternProperties". Elements of this set will be called regexes for convenience.
   // Precompile patternProperties regexes once before the per-key loop. `matches` / `schema` are per-key scratch
@@ -697,7 +735,7 @@ export function validate(
   }
 
   const validationVocabularyEnabled = isValidationVocabularyEnabled(schema, report.rootSchema, ctx.options.version);
-  const keys = validationVocabularyEnabled ? plan.keys : getVocabDisabledKeys(plan);
+  let keys = validationVocabularyEnabled ? plan.keys : getVocabDisabledKeys(plan);
 
   // type checking first
   if (validationVocabularyEnabled && schema.type) {
@@ -728,6 +766,29 @@ export function validate(
   // Captured once; consumed (set to undefined) when chained after a deferred unevaluated* check.
   let hook = typeof ctx.options.customValidator === 'function' ? ctx.options.customValidator : undefined;
   const exactStop = ctx.options.breakOnFirstError && report.errors.length > 0;
+  // A value over a size limit of the node skips the content checks and the child validation of the node. Not with a
+  // customValidator: it may change the value while the node is validated, so the size comparison made before the
+  // keywords run may no longer hold.
+  let overLimit = false;
+  // Object.keys of an object value, computed once for the maxProperties comparison and the property traversal; only
+  // without a customValidator, the one thing that may change the object in between
+  let objectKeys: string[] | undefined;
+  if (
+    plan.sizeLimits !== undefined &&
+    validationVocabularyEnabled &&
+    !exactStop &&
+    hook === undefined &&
+    ctx.options.sizeLimitsFirst !== false
+  ) {
+    if (plan.sizeLimits.object && isObject(json)) {
+      objectKeys = Object.keys(json);
+    }
+    const limit = exceededSizeLimit(ctx.validateOptions, schema, json, plan.sizeLimits, objectKeys);
+    if (limit !== undefined) {
+      keys = getOverLimitKeys(plan, limit);
+      overLimit = true;
+    }
+  }
   if (exactStop) {
     runFirstKeyOnly(ctx, report, schema, json, validationVocabularyEnabled);
   }
@@ -772,11 +833,11 @@ export function validate(
     }
   }
 
-  if (report.errors.length === 0 || ctx.options.breakOnFirstError === false) {
+  if (!overLimit && (report.errors.length === 0 || ctx.options.breakOnFirstError === false)) {
     if (Array.isArray(json)) {
       recurseArray(ctx, report, schema, json);
     } else if (isObject(json)) {
-      recurseObject(ctx, report, schema, json);
+      recurseObject(ctx, report, schema, json, objectKeys);
     }
   }
 

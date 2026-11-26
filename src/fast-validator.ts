@@ -29,6 +29,7 @@ import {
 import { compileObjectKeywords } from './validation/object.js';
 import { isResolvedLegacyTarget, walkLegacyRef } from './validation/ref.js';
 import { isModernDraft, isValidationVocabularyEnabled } from './validation/shared.js';
+import { SIZE_LIMITS } from './validation/size-limits.js';
 import {
   compileContent,
   compileFormat,
@@ -206,6 +207,21 @@ function compileNode(state: DriverState, node: unknown): FastValidator {
 
   const checks: Check[] = [];
   const compiled: KeywordCompiler[] = [];
+  // keywords of one group share a compiler, run once; checks are ANDed and pure, so their order does not change the
+  // result, only how soon a failing value is rejected
+  const compileOnce = (compile: KeywordCompiler): void => {
+    if (compile !== ignored && !compiled.includes(compile)) {
+      compiled.push(compile);
+      compile(state, schema, checks);
+    }
+  };
+  // size limits are compiled before the other keywords of the node, so a value over a limit fails before the
+  // checks that depend on its content (`maxProperties` compiles the object group, which runs its counts first)
+  for (let i = 0; i < SIZE_LIMITS.length; i++) {
+    if (schema[SIZE_LIMITS[i].keyword] !== undefined) {
+      compileOnce(KEYWORD_COMPILERS[SIZE_LIMITS[i].keyword]);
+    }
+  }
   const keys = Object.keys(schema);
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
@@ -216,12 +232,7 @@ function compileNode(state: DriverState, node: unknown): FastValidator {
     if (key === '$schema' && schema.$schema !== state.root.$schema) {
       return unsupported();
     }
-    const compile = KEYWORD_COMPILERS[key as keyof JsonSchemaAll];
-    // keywords of one group share a compiler; checks are ANDed and pure, so each runs once, in any order
-    if (compile !== ignored && !compiled.includes(compile)) {
-      compiled.push(compile);
-      compile(state, schema, checks);
-    }
+    compileOnce(KEYWORD_COMPILERS[key as keyof JsonSchemaAll]);
   }
   const built = combine(checks);
   slot.fn = built;
